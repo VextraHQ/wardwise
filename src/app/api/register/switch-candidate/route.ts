@@ -9,4 +9,3 @@ export async function POST(req: Request) {
   // Mock accept once
   return NextResponse.json({ success: true });
 }
-

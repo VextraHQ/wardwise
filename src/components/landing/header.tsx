@@ -106,7 +106,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
             </Link>
             <Button
               size="lg"
-              className="bg-foreground text-background rounded-full px-6 text-sm font-semibold shadow-[0_14px_30px_rgba(12,39,32,0.2)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(12,39,32,0.24)]"
+              className="bg-secondary-foreground text-background hover:bg-secondary-foreground/90 rounded-full px-6 text-sm font-semibold"
               asChild
             >
               <Link href="/register">Register Supporter</Link>
@@ -153,7 +153,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
             <div className="mt-5 flex flex-col gap-3">
               <Link
                 href="/login"
-                className="border-border text-foreground hover:border-primary rounded-lg border px-4 py-3 text-center text-sm font-semibold transition duration-200"
+                className="border-border text-foreground hover:border-primary hover:bg-foreground/90 rounded-lg border px-4 py-3 text-center text-sm font-semibold transition duration-200"
                 onClick={() => setIsMobileOpen(false)}
               >
                 Candidate Login

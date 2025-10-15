@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Metadata } from "next";
 
-import data from "./data.json";
+import { dashboardData } from "@/lib/mock/dashboard-data";
 
 export const metadata: Metadata = {
   title: "WardWise Candidate Dashboard",
@@ -33,7 +33,7 @@ export default function Page() {
               <div className="px-4 lg:px-6">
                 <ChartAreaInteractive />
               </div>
-              <DataTable data={data} />
+              <DataTable data={dashboardData} />
             </div>
           </div>
         </div>

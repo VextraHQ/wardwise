@@ -9,4 +9,3 @@ export async function POST(req: Request) {
   // Mock send OTP: always 123456
   return NextResponse.json({ success: true, otpLast4: "3456" });
 }
-

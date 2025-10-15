@@ -26,4 +26,3 @@ export async function PUT(req: Request) {
   registrations.set(key, { candidateId });
   return NextResponse.json({ ok: true });
 }
-

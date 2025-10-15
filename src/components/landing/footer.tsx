@@ -107,7 +107,7 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="border-accent-foreground/10 text-accent-foreground/50 mt-12 border-t pt-6 text-xs tracking-[0.25em] uppercase">
-          © {new Date().getFullYear()} WardWise. Built in Nigeria.
+          © {new Date().getFullYear()} WardWise. All rights reserved.
         </div>
       </div>
     </footer>

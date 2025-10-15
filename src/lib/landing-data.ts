@@ -101,6 +101,9 @@ export type FeatureCard = {
   title: string;
   description: string;
   icon: IconType;
+  metricLabel: string;
+  metricValue: string;
+  metricTrend: string;
 };
 
 export const featureCards: FeatureCard[] = [
@@ -109,36 +112,54 @@ export const featureCards: FeatureCard[] = [
     description:
       "We organize every response by State → LGA → Ward → Polling Unit for unmatched clarity.",
     icon: MapPinIcon,
+    metricLabel: "Coverage Accuracy",
+    metricValue: "99.2%",
+    metricTrend: "+4.8%",
   },
   {
     title: "Make Your Voice Heard",
     description:
       "Let candidates know the priorities in your community through concise survey questions.",
     icon: MegaphoneIcon,
+    metricLabel: "Responses Logged",
+    metricValue: "18,420",
+    metricTrend: "+620",
   },
   {
     title: "Support Who You Trust",
     description:
       "Choose the candidate you believe in—your support routes straight to their dashboard.",
     icon: CheckCircleIcon,
+    metricLabel: "Verified Choices",
+    metricValue: "12,305",
+    metricTrend: "+12%",
   },
   {
     title: "Your Data is Protected",
     description:
       "Phone verification and encrypted storage protect voter information from end to end.",
     icon: LockClosedIcon,
+    metricLabel: "Encryption Uptime",
+    metricValue: "100%",
+    metricTrend: "Secure",
   },
   {
     title: "Candidates See Trends",
     description:
       "Dashboards surface demographics, sentiment, and issue trends in real time.",
     icon: ChartBarIcon,
+    metricLabel: "Insights Generated",
+    metricValue: "740",
+    metricTrend: "+38",
   },
   {
     title: "Register Anywhere",
     description:
       "Optimized for mobile, tablet, or desktop so supporters can join from any device.",
     icon: DevicePhoneMobileIcon,
+    metricLabel: "Mobile Sessions",
+    metricValue: "68%",
+    metricTrend: "+9%",
   },
 ];
 
@@ -163,18 +184,39 @@ export const platformPillars = [
     description:
       "Local enumerators, digital forms, and automated lookups ensure voter registrations are verified at the polling-unit level without friction.",
     focus: "Field Operations",
+    signal:
+      "Polling-unit enumerators sync with verification bots to confirm identity records before campaigns go live.",
+    metric: {
+      label: "Verification speed",
+      value: "12m",
+      context: "Avg. per ward",
+    },
   },
   {
     title: "Campaign Intelligence Cloud",
     description:
       "Dashboards, segmentation tools, and exportable dossiers give candidates a command centre for every supporter touchpoint.",
     focus: "Decision Tools",
+    signal:
+      "Custom dashboards surface sentiment trends, issue priorities, and supporter journeys for rapid decision-making.",
+    metric: {
+      label: "Insights refreshed",
+      value: "Hourly",
+      context: "Real-time sync",
+    },
   },
   {
     title: "Nationwide Rollout Ready",
     description:
       "State-by-state onboarding playbooks, language localization, and partner APIs make it simple to scale WardWise across Nigeria.",
     focus: "Scale",
+    signal:
+      "Regional playbooks and partner APIs orchestrate growth from pilot LGAs to national coalitions in weeks, not months.",
+    metric: {
+      label: "States prepared",
+      value: "10",
+      context: "Launch-ready",
+    },
   },
 ];
 
