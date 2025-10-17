@@ -39,7 +39,7 @@ const locationSchema = z.object({
   lga: z.string().min(1, "Please select your LGA"),
   ward: z.string().min(1, "Please select your ward"),
   pollingUnit: z.string().min(1, "Please select your polling unit"),
-});
+}) as any;
 
 type LocationFormValues = z.infer<typeof locationSchema>;
 
@@ -127,8 +127,8 @@ export function LocationStep() {
       </div>
 
       {/* Main Card */}
-      <Card className="border-border/60 bg-card/80 shadow-xl backdrop-blur-sm">
-        <CardHeader className="border-border/60 space-y-2 border-b pb-6">
+      <Card className="border-border bg-card">
+        <CardHeader className="border-border space-y-2 border-b pb-6">
           <div className="flex items-center gap-3">
             <div className="bg-primary/15 flex h-10 w-10 items-center justify-center rounded-full">
               <MapPin className="text-primary h-5 w-5" />

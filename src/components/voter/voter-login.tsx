@@ -12,25 +12,23 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useRegistration } from "@/hooks/use-registration";
 import { cn } from "@/lib/utils";
-import { mockApi, demoPhones, getDemoMessage } from "@/lib/mock/mockApi";
+import { mockApi, getDemoMessage } from "@/lib/mock/mockApi";
+import {
+  isValidNigerianPhone,
+  normalizeNigerianPhoneInput,
+} from "@/lib/registration-schemas";
 
 export function VoterLogin() {
   const router = useRouter();
   const { update } = useRegistration();
   const [rawPhone, setRawPhone] = useState("");
 
-  const formattedPhone = useMemo(() => {
-    const digits = rawPhone.replace(/\D/g, "");
-    if (digits.startsWith("234")) {
-      return "+" + digits;
-    }
-    if (digits.startsWith("0")) {
-      return "+234" + digits.slice(1);
-    }
-    return rawPhone;
-  }, [rawPhone]);
+  const formattedPhone = useMemo(
+    () => normalizeNigerianPhoneInput(rawPhone),
+    [rawPhone],
+  );
 
-  const isValidPhone = /^\+234\d{10}$/.test(formattedPhone);
+  const isValidPhone = isValidNigerianPhone(formattedPhone);
 
   const loginMutation = useMutation({
     mutationFn: async (phone: string) => {
@@ -38,19 +36,19 @@ export function VoterLogin() {
       return await mockApi.checkRegistration(phone, 2024);
     },
     onSuccess: (data) => {
+      // For demo purposes, always redirect to voter profile
+      // In production, you'd check if user exists and handle accordingly
+      update({ phone: formattedPhone });
+
       if (data.exists) {
-        // User exists, redirect to profile
-        update({ phone: formattedPhone });
         toast.success(
           getDemoMessage("Login successful - redirecting to profile"),
         );
-        router.push("/voter/profile");
       } else {
-        // User doesn't exist, redirect to registration
-        update({ phone: formattedPhone });
-        toast.info(getDemoMessage("New user - redirecting to registration"));
-        router.push("/register");
+        toast.info(getDemoMessage("Welcome! Redirecting to profile"));
       }
+
+      router.push("/voter/profile");
     },
     onError: (error) => {
       toast.error("Login failed. Please try again.");
@@ -79,14 +77,14 @@ export function VoterLogin() {
           Welcome Back
         </h1>
         <p className="text-muted-foreground mx-auto max-w-xl text-lg">
-          Enter your phone number to access your profile and registration
+          Enter your phone number to access your voter profile and registration
           details
         </p>
       </div>
 
       {/* Main Card */}
-      <Card className="border-border/60 bg-card/80 shadow-xl backdrop-blur-sm">
-        <CardHeader className="border-border/60 space-y-2 border-b pb-6">
+      <Card className="border-border bg-card">
+        <CardHeader className="border-border space-y-2 border-b pb-6">
           <div className="flex items-center gap-3">
             <div className="bg-primary/15 flex h-10 w-10 items-center justify-center rounded-full">
               <Phone className="text-primary h-5 w-5" />
@@ -126,38 +124,19 @@ export function VoterLogin() {
               </div>
               {rawPhone.length > 0 && !isValidPhone && (
                 <p className="text-destructive text-sm">
-                  Please enter a valid Nigerian phone number
+                  Enter a valid Nigerian mobile number
                 </p>
               )}
               <p className="text-muted-foreground text-xs">
                 Enter the phone number you used to register
               </p>
-
-              {/* Demo phones for testing */}
-              <div className="mt-3 space-y-2">
-                <p className="text-muted-foreground text-xs font-medium">
-                  Demo phones for testing:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {demoPhones.map((phone) => (
-                    <button
-                      key={phone}
-                      type="button"
-                      onClick={() => setRawPhone(phone.replace("+234", "0"))}
-                      className="text-primary hover:text-primary/80 text-xs underline"
-                    >
-                      {phone}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* Submit Button */}
             <Button
               type="submit"
               disabled={!isValidPhone || loginMutation.isPending}
-              className="from-primary to-primary/90 h-12 w-full bg-gradient-to-r text-base font-semibold shadow-lg transition-all hover:shadow-xl"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 w-full text-base font-semibold"
             >
               {loginMutation.isPending ? (
                 <div className="flex items-center gap-2">
@@ -204,7 +183,7 @@ export function VoterLogin() {
         ].map((item) => (
           <div
             key={item.title}
-            className="border-border/60 bg-card/60 rounded-lg border p-4 text-center backdrop-blur-sm"
+            className="border-border bg-card rounded-lg border p-4 text-center"
           >
             <h3 className="text-foreground text-sm font-semibold">
               {item.title}

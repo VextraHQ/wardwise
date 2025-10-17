@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import {
   Form,
   FormControl,
@@ -24,19 +25,20 @@ import {
 import { useRegistration } from "@/hooks/use-registration";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { mockApi, demoPhones, getDemoMessage } from "@/lib/mock/mockApi";
+import { mockApi, getDemoMessage } from "@/lib/mock/mockApi";
+import {
+  phoneSchema,
+  normalizeNigerianPhoneInput,
+} from "@/lib/registration-schemas";
 
-const phoneSchema = z.object({
-  phone: z
-    .string()
-    .trim()
-    .regex(/^\+234\d{10}$/u, "Use Nigerian format e.g. +2348012345678"),
+const phoneFormSchema = z.object({
+  phone: phoneSchema,
   terms: z.boolean().refine((val) => val === true, {
     message: "You must accept the terms and conditions",
   }),
-});
+}) as any;
 
-type PhoneFormValues = z.infer<typeof phoneSchema>;
+type PhoneFormValues = z.infer<typeof phoneFormSchema>;
 
 export function PhoneEntryStep() {
   const router = useRouter();
@@ -44,23 +46,12 @@ export function PhoneEntryStep() {
   const [rawPhone, setRawPhone] = useState("");
 
   const form = useForm<PhoneFormValues>({
-    resolver: zodResolver(phoneSchema) as any,
+    resolver: zodResolver(phoneFormSchema),
     defaultValues: {
       phone: "",
       terms: false,
     },
   });
-
-  const formattedPhone = useMemo(() => {
-    const digits = rawPhone.replace(/\D/g, "");
-    if (digits.startsWith("234")) {
-      return "+" + digits;
-    }
-    if (digits.startsWith("0")) {
-      return "+234" + digits.slice(1);
-    }
-    return rawPhone;
-  }, [rawPhone]);
 
   const sendOtp = useMutation({
     mutationFn: async (data: PhoneFormValues) => {
@@ -83,6 +74,15 @@ export function PhoneEntryStep() {
 
   return (
     <div className="space-y-8">
+      {/* Progress */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-foreground font-medium">Step 1 of 7</span>
+          <span className="text-muted-foreground">14% Complete</span>
+        </div>
+        <Progress value={14} className="h-2" />
+      </div>
+
       {/* Hero Section */}
       <div className="space-y-4 text-center">
         <div className="border-primary/30 bg-primary/10 text-accent inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
@@ -99,8 +99,8 @@ export function PhoneEntryStep() {
       </div>
 
       {/* Main Card */}
-      <Card className="border-border/60 bg-card/80 shadow-xl backdrop-blur-sm">
-        <CardHeader className="border-border/60 space-y-2 border-b pb-6">
+      <Card className="border-border bg-card">
+        <CardHeader className="border-border space-y-2 border-b pb-6">
           <div className="flex items-center gap-3">
             <div className="bg-primary/15 flex h-10 w-10 items-center justify-center rounded-full">
               <Phone className="text-primary h-5 w-5" />
@@ -140,37 +140,15 @@ export function PhoneEntryStep() {
                           )}
                           value={rawPhone}
                           onChange={(e) => {
-                            setRawPhone(e.target.value);
-                            field.onChange(formattedPhone);
+                            const input = e.target.value;
+                            setRawPhone(input);
+                            const normalized =
+                              normalizeNigerianPhoneInput(input);
+                            field.onChange(normalized);
                           }}
                         />
                       </div>
                     </FormControl>
-                    <FormDescription>
-                      Enter your phone number in Nigerian format
-                    </FormDescription>
-
-                    {/* Demo phones for testing */}
-                    <div className="mt-3 space-y-2">
-                      <p className="text-muted-foreground text-xs font-medium">
-                        Demo phones for testing:
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {demoPhones.map((phone) => (
-                          <button
-                            key={phone}
-                            type="button"
-                            onClick={() =>
-                              setRawPhone(phone.replace("+234", "0"))
-                            }
-                            className="text-primary hover:text-primary/80 text-xs underline"
-                          >
-                            {phone}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
                     <FormMessage />
                   </FormItem>
                 )}
@@ -182,16 +160,16 @@ export function PhoneEntryStep() {
                 name="terms"
                 render={({ field }) => (
                   <FormItem>
-                    <div className="border-border/60 bg-muted/50 flex items-start gap-3 rounded-lg border p-4">
+                    <div className="flex items-start gap-3">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          className="mt-0.5"
+                          className="mt-1"
                         />
                       </FormControl>
                       <div className="space-y-1">
-                        <FormLabel className="cursor-pointer text-sm font-medium">
+                        <FormLabel className="cursor-pointer text-sm leading-relaxed font-medium">
                           I agree to the{" "}
                           <Link
                             href="/terms"
@@ -207,7 +185,7 @@ export function PhoneEntryStep() {
                             Privacy Policy
                           </Link>
                         </FormLabel>
-                        <FormDescription className="text-xs">
+                        <FormDescription className="text-muted-foreground text-xs">
                           By continuing, you consent to our data processing
                           practices and agree to receive SMS notifications.
                         </FormDescription>
@@ -222,7 +200,7 @@ export function PhoneEntryStep() {
               <Button
                 type="submit"
                 disabled={sendOtp.isPending}
-                className="from-primary to-primary/90 h-12 w-full bg-gradient-to-r text-base font-semibold shadow-lg transition-all hover:shadow-xl"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 w-full text-base font-semibold"
               >
                 {sendOtp.isPending ? (
                   <div className="flex items-center gap-2">
@@ -270,7 +248,7 @@ export function PhoneEntryStep() {
         ].map((item) => (
           <div
             key={item.title}
-            className="border-border/60 bg-card/60 rounded-lg border p-4 text-center backdrop-blur-sm"
+            className="border-border bg-card rounded-lg border p-4 text-center"
           >
             <h3 className="text-foreground text-sm font-semibold">
               {item.title}

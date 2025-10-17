@@ -31,9 +31,9 @@ const profileSchema = z.object({
     .min(18, "You must be at least 18 years old")
     .max(120, "Please enter a valid age"),
   gender: z.enum(["male", "female", "other"], {
-    required_error: "Please select your gender",
+    message: "Please select your gender",
   }),
-});
+}) as any;
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 

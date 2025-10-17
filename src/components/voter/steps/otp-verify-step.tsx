@@ -7,6 +7,7 @@ import { Shield, ArrowRight, Clock, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import {
   InputOTP,
   InputOTPGroup,
@@ -14,7 +15,7 @@ import {
 } from "@/components/ui/input-otp";
 import { useRegistration } from "@/hooks/use-registration";
 import { cn } from "@/lib/utils";
-import { mockApi, demoOtps, getDemoMessage } from "@/lib/mock/mockApi";
+import { mockApi, getDemoMessage } from "@/lib/mock/mockApi";
 
 export function OtpVerifyStep() {
   const router = useRouter();
@@ -85,6 +86,15 @@ export function OtpVerifyStep() {
 
   return (
     <div className="space-y-8">
+      {/* Progress */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-foreground font-medium">Step 2 of 7</span>
+          <span className="text-muted-foreground">29% Complete</span>
+        </div>
+        <Progress value={29} className="h-2" />
+      </div>
+
       {/* Progress Indicator */}
       <div className="flex items-center justify-center gap-2">
         <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold">
@@ -191,25 +201,6 @@ export function OtpVerifyStep() {
                 Verifying code...
               </div>
             )}
-
-            {/* Demo OTP codes for testing */}
-            <div className="mt-4 space-y-2">
-              <p className="text-muted-foreground text-xs font-medium">
-                Demo OTP codes (any 6 digits work):
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {demoOtps.map((demoOtp) => (
-                  <button
-                    key={demoOtp}
-                    type="button"
-                    onClick={() => setOtp(demoOtp)}
-                    className="text-primary hover:text-primary/80 text-xs underline"
-                  >
-                    {demoOtp}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Resend Section */}
@@ -222,7 +213,10 @@ export function OtpVerifyStep() {
               size="sm"
               onClick={() => resendOtp.mutate()}
               disabled={cooldown > 0 || resendOtp.isPending}
-              className={cn(cooldown > 0 && "cursor-not-allowed opacity-50")}
+              className={cn(
+                cooldown > 0 && "cursor-not-allowed opacity-50",
+                "relative z-10",
+              )}
             >
               {resendOtp.isPending ? (
                 <div className="flex items-center gap-2">
@@ -245,7 +239,7 @@ export function OtpVerifyStep() {
             <Button
               variant="outline"
               onClick={() => router.push("/register")}
-              className="gap-2"
+              className="relative z-10 gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
               Back
@@ -253,7 +247,7 @@ export function OtpVerifyStep() {
             <Button
               onClick={() => verifyOtp.mutate()}
               disabled={otp.length !== 6 || verifyOtp.isPending}
-              className="from-primary to-primary/90 gap-2 bg-gradient-to-r"
+              className="from-primary to-primary/90 relative z-10 gap-2 bg-gradient-to-r"
             >
               {verifyOtp.isPending ? (
                 <>

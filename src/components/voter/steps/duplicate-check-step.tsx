@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { useRegistration } from "@/hooks/use-registration";
 import { mockApi, getDemoMessage } from "@/lib/mock/mockApi";
 
@@ -48,6 +49,15 @@ export function DuplicateCheckStep() {
 
   return (
     <div className="space-y-8">
+      {/* Progress */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-foreground font-medium">Step 3 of 7</span>
+          <span className="text-muted-foreground">43% Complete</span>
+        </div>
+        <Progress value={43} className="h-2" />
+      </div>
+
       <div className="space-y-2 text-center">
         <h1 className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
           Checking Your Registration
