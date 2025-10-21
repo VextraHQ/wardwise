@@ -4,13 +4,27 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { User, ArrowRight, ArrowLeft } from "lucide-react";
+import {
+  User,
+  ArrowRight,
+  ArrowLeft,
+  Phone,
+  Calendar,
+  Info,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Form,
   FormControl,
@@ -21,11 +35,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useRegistration } from "@/hooks/use-registration";
+import { normalizeNigerianPhoneInput } from "@/lib/registration-schemas";
+import { useEffect } from "react";
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  age: z.coerce
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  age: z
     .number()
     .int()
     .min(18, "You must be at least 18 years old")
@@ -33,7 +50,8 @@ const profileSchema = z.object({
   gender: z.enum(["male", "female", "other"], {
     message: "Please select your gender",
   }),
-}) as any;
+  phoneNumber: z.string().optional(),
+});
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
@@ -44,66 +62,124 @@ export function ProfileStep() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      age: undefined,
-      gender: undefined,
+      firstName: payload.basic?.firstName || "",
+      lastName: payload.basic?.lastName || "",
+      dateOfBirth: payload.basic?.dateOfBirth || "",
+      age: payload.basic?.age || undefined,
+      gender: payload.basic?.gender || undefined,
+      phoneNumber: payload.phone ? payload.phone.replace("+234", "0") : "",
     },
   });
+
+  // Auto-fill from NIN verification if available
+  useEffect(() => {
+    if (
+      payload.basic?.firstName &&
+      payload.basic?.lastName &&
+      payload.basic?.dateOfBirth
+    ) {
+      form.setValue("firstName", payload.basic.firstName);
+      form.setValue("lastName", payload.basic.lastName);
+      form.setValue("dateOfBirth", payload.basic.dateOfBirth);
+      if (payload.basic.age) {
+        form.setValue("age", payload.basic.age);
+      }
+    }
+  }, [payload.basic, form]);
 
   const onSubmit = (data: ProfileFormValues) => {
     update({
       basic: {
         firstName: data.firstName,
         lastName: data.lastName,
+        dateOfBirth: data.dateOfBirth,
         age: data.age,
         gender: data.gender,
       },
+      phone: data.phoneNumber
+        ? normalizeNigerianPhoneInput(data.phoneNumber)
+        : undefined,
     });
     toast.success("Profile information saved!");
     router.push("/register/location");
   };
+
+  const calculateAge = (dateOfBirth: string) => {
+    if (!dateOfBirth) return undefined;
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  };
+
+  const handleDateChange = (date: string) => {
+    form.setValue("dateOfBirth", date);
+    const age = calculateAge(date);
+    if (age !== undefined) {
+      form.setValue("age", age);
+    }
+  };
+
+  const isAutoFilled = payload.basic?.firstName && payload.basic?.lastName;
 
   return (
     <div className="space-y-8">
       {/* Progress */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-foreground font-medium">Step 3 of 7</span>
-          <span className="text-muted-foreground">43% Complete</span>
+          <span className="text-foreground font-medium">Step 2 of 6</span>
+          <span className="text-muted-foreground">33% Complete</span>
         </div>
-        <Progress value={43} className="h-2" />
+        <Progress value={33} className="h-2" />
       </div>
 
       {/* Hero Section */}
-      <div className="space-y-2 text-center">
-        <h1 className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
-          Tell Us About Yourself
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          We need some basic information to complete your registration
-        </p>
+      <div className="space-y-4 text-center">
+        <div className="from-primary/20 to-primary/10 mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br">
+          <User className="text-primary h-8 w-8" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
+            Tell Us About Yourself
+          </h1>
+          <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
+            We need some basic information to complete your registration
+          </p>
+        </div>
+        {isAutoFilled && (
+          <Badge variant="secondary" className="mx-auto mt-4">
+            <Info className="mr-1 h-3 w-3" />
+            Some information was auto-filled from NIN verification
+          </Badge>
+        )}
       </div>
 
       {/* Main Card */}
-      <Card className="border-border/60 bg-card/80 shadow-xl backdrop-blur-sm">
-        <CardHeader className="border-border/60 space-y-2 border-b pb-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/15 flex h-10 w-10 items-center justify-center rounded-full">
-              <User className="text-primary h-5 w-5" />
+      <Card className="border-border/40 bg-card/95 backdrop-blur-sm">
+        <CardHeader className="border-border/40 space-y-3 border-b pb-6">
+          <div className="flex items-center gap-4">
+            <div className="from-primary/20 to-primary/10 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br">
+              <User className="text-primary h-6 w-6" />
             </div>
             <div>
               <h2 className="text-foreground text-xl font-semibold">
                 Personal Information
               </h2>
               <p className="text-muted-foreground text-sm">
-                Your details remain confidential
+                Your details remain confidential and secure
               </p>
             </div>
           </div>
         </CardHeader>
 
-        <CardContent className="pt-8">
+        <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Name Fields */}
@@ -113,12 +189,22 @@ export function ProfileStep() {
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>First Name</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        First Name
+                        {isAutoFilled && field.value && (
+                          <Badge variant="outline" className="text-xs">
+                            Auto-filled
+                          </Badge>
+                        )}
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           placeholder="Enter your first name"
-                          className="h-11"
+                          className="border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background h-12 transition-all"
+                          disabled={Boolean(
+                            isAutoFilled && field.value && field.value !== "",
+                          )}
                         />
                       </FormControl>
                       <FormMessage />
@@ -131,12 +217,22 @@ export function ProfileStep() {
                   name="lastName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Last Name</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        Last Name
+                        {isAutoFilled && field.value && (
+                          <Badge variant="outline" className="text-xs">
+                            Auto-filled
+                          </Badge>
+                        )}
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           placeholder="Enter your last name"
                           className="h-11"
+                          disabled={Boolean(
+                            isAutoFilled && field.value && field.value !== "",
+                          )}
                         />
                       </FormControl>
                       <FormMessage />
@@ -145,24 +241,78 @@ export function ProfileStep() {
                 />
               </div>
 
+              {/* Date of Birth Field */}
+              <FormField
+                control={form.control}
+                name="dateOfBirth"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      Date of Birth
+                      {isAutoFilled && field.value && (
+                        <Badge variant="outline" className="text-xs">
+                          Auto-filled
+                        </Badge>
+                      )}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="text-muted-foreground h-4 w-4 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>You must be at least 18 years old to register</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Calendar className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+                        <Input
+                          {...field}
+                          type="date"
+                          placeholder="Select your date of birth"
+                          className="border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background h-12 pl-11 transition-all"
+                          onChange={(e) => handleDateChange(e.target.value)}
+                          disabled={Boolean(
+                            isAutoFilled && field.value && field.value !== "",
+                          )}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {/* Age Field */}
               <FormField
                 control={form.control}
                 name="age"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Age</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      Age
+                      {isAutoFilled && field.value && (
+                        <Badge variant="outline" className="text-xs">
+                          Auto-calculated
+                        </Badge>
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="number"
                         inputMode="numeric"
                         placeholder="Enter your age"
-                        className="h-11"
+                        className="border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background h-12 transition-all"
+                        disabled={Boolean(
+                          isAutoFilled && field.value !== undefined,
+                        )}
                       />
                     </FormControl>
                     <FormDescription>
-                      You must be at least 18 years old to register
+                      Age is automatically calculated from your date of birth
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -192,7 +342,7 @@ export function ProfileStep() {
                               />
                               <label
                                 htmlFor="male"
-                                className="border-muted bg-card hover:bg-accent peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 flex cursor-pointer items-center justify-center rounded-lg border-2 p-4"
+                                className="border-muted bg-card hover:bg-accent peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 flex cursor-pointer items-center justify-center rounded-lg border-2 p-4 transition-colors"
                               >
                                 <span className="text-sm font-medium">
                                   Male
@@ -211,7 +361,7 @@ export function ProfileStep() {
                               />
                               <label
                                 htmlFor="female"
-                                className="border-muted bg-card hover:bg-accent peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 flex cursor-pointer items-center justify-center rounded-lg border-2 p-4"
+                                className="border-muted bg-card hover:bg-accent peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 flex cursor-pointer items-center justify-center rounded-lg border-2 p-4 transition-colors"
                               >
                                 <span className="text-sm font-medium">
                                   Female
@@ -230,7 +380,7 @@ export function ProfileStep() {
                               />
                               <label
                                 htmlFor="other"
-                                className="border-muted bg-card hover:bg-accent peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 flex cursor-pointer items-center justify-center rounded-lg border-2 p-4"
+                                className="border-muted bg-card hover:bg-accent peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 flex cursor-pointer items-center justify-center rounded-lg border-2 p-4 transition-colors"
                               >
                                 <span className="text-sm font-medium">
                                   Other
@@ -249,20 +399,63 @@ export function ProfileStep() {
                 )}
               />
 
+              {/* Phone Number Field (Optional) */}
+              <FormField
+                control={form.control}
+                name="phoneNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      Phone Number (Optional)
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="text-muted-foreground h-4 w-4 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              Add your phone number to receive notifications
+                              about your registration
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Phone className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+                        <Input
+                          {...field}
+                          inputMode="tel"
+                          autoComplete="tel"
+                          placeholder="08012345678 or +2348012345678"
+                          className="border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background h-12 pl-11 transition-all"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Optional: Add your phone number for notifications
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {/* Navigation */}
-              <div className="border-border/60 flex items-center justify-between border-t pt-6">
+              <div className="border-border/40 flex items-center justify-between border-t pt-6">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push("/register/verify")}
+                  onClick={() => router.push("/register")}
                   className="gap-2"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Back
                 </Button>
+
                 <Button
                   type="submit"
-                  className="from-primary to-primary/90 gap-2 bg-gradient-to-r"
+                  className="from-primary to-primary/90 text-primary-foreground hover:from-primary/90 hover:to-primary/80 h-12 gap-2 bg-gradient-to-r px-8 font-semibold transition-all duration-200"
                 >
                   Continue
                   <ArrowRight className="h-4 w-4" />
@@ -272,6 +465,42 @@ export function ProfileStep() {
           </Form>
         </CardContent>
       </Card>
+
+      {/* Trust Indicators */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        {[
+          {
+            title: "Data Privacy",
+            description: "Your information is encrypted and secure",
+            icon: User,
+          },
+          {
+            title: "Age Verification",
+            description: "Must be 18+ to participate",
+            icon: Calendar,
+          },
+          {
+            title: "Optional Contact",
+            description: "Phone number is optional for notifications",
+            icon: Phone,
+          },
+        ].map((item) => (
+          <div
+            key={item.title}
+            className="border-border/40 bg-card/80 hover:bg-card/90 rounded-lg border p-4 text-center transition-all"
+          >
+            <div className="mb-2 flex justify-center">
+              <item.icon className="text-primary h-6 w-6" />
+            </div>
+            <h3 className="text-foreground text-sm font-semibold">
+              {item.title}
+            </h3>
+            <p className="text-muted-foreground mt-1 text-xs">
+              {item.description}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

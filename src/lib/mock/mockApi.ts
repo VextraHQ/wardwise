@@ -3,9 +3,11 @@
 
 export type MockUser = {
   id: string;
-  phone: string;
+  nin: string; // National Identification Number
   firstName: string;
   lastName: string;
+  dateOfBirth: string;
+  phoneNumber?: string; // Optional phone number
   age: number;
   gender: "male" | "female" | "other";
   state: string;
@@ -16,6 +18,7 @@ export type MockUser = {
   surveyAnswers: Record<string, string | string[]>;
   registrationDate: string;
   isVerified: boolean;
+  verifiedAt?: string; // When NIN was verified
 };
 
 export type MockCandidate = {
@@ -29,20 +32,48 @@ export type MockCandidate = {
   photo?: string;
 };
 
-// Mock users database
+export type RegistrationData = {
+  nin: string;
+  phone?: string;
+  basic: {
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+    age: number;
+    gender: "male" | "female" | "other";
+  };
+  location: {
+    state: string;
+    lga: string;
+    ward: string;
+    pollingUnit: string;
+  };
+  candidate: {
+    candidateId: string;
+  };
+  survey: {
+    priorities: string[];
+    comments?: string;
+  };
+  electionYear: number;
+};
+
+// Mock users database - Adamawa focused
 export const mockUsers: MockUser[] = [
   {
     id: "user-1",
-    phone: "+2348012345678",
+    nin: "12345678901",
     firstName: "Aliyu",
     lastName: "Mohammed",
+    dateOfBirth: "1996-03-15",
+    phoneNumber: "+2348012345678",
     age: 28,
     gender: "male",
     state: "Adamawa State",
     lga: "Song",
     ward: "Song Ward 1",
     pollingUnit: "Unit 001 - Community Centre",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-4", // Supporting Hon. Aliyu Wakili Boya
     surveyAnswers: {
       q1: "security",
       q2: "good",
@@ -55,19 +86,22 @@ export const mockUsers: MockUser[] = [
     },
     registrationDate: "2024-10-15",
     isVerified: true,
+    verifiedAt: "2024-10-15T10:30:00Z",
   },
   {
     id: "user-2",
-    phone: "+2348098765432",
-    firstName: "Fatima",
-    lastName: "Ibrahim",
+    nin: "98765432109",
+    firstName: "Hauwa",
+    lastName: "Bello",
+    dateOfBirth: "1992-07-22",
+    phoneNumber: "+2348098765432",
     age: 32,
     gender: "female",
     state: "Adamawa State",
     lga: "Fufore",
-    ward: "Fufore Ward 1",
-    pollingUnit: "Unit 002 - Primary School",
-    candidateId: "cand-pdp-1",
+    ward: "Malabu Ward",
+    pollingUnit: "Unit 002 - Malabu Primary School",
+    candidateId: "cand-apc-4", // Supporting Hon. Aliyu Wakili Boya
     surveyAnswers: {
       q1: "education",
       q2: "fair",
@@ -80,103 +114,227 @@ export const mockUsers: MockUser[] = [
     },
     registrationDate: "2024-10-14",
     isVerified: true,
+    verifiedAt: "2024-10-14T14:20:00Z",
   },
 ];
 
-// Mock candidates
+// Mock candidates database
 export const mockCandidates: MockCandidate[] = [
   {
     id: "cand-apc-1",
-    name: "Hon. Ahmed Suleiman",
+    name: "Dr. Ahmadu Umaru Fintiri",
     party: "APC",
-    position: "House of Representatives",
-    constituency: "Song & Fufore Federal Constituency",
-    description: "Security and job creation focused",
-    supporters: 2847,
+    position: "Governor",
+    constituency: "Adamawa State",
+    description: "Experienced leader focused on development and security",
+    supporters: 1250,
+    photo: "/api/placeholder/150/150",
   },
   {
     id: "cand-pdp-1",
-    name: "Alhaji Bello Ibrahim",
+    name: "Senator Aishatu Dahiru Ahmed",
     party: "PDP",
+    position: "Governor",
+    constituency: "Adamawa State",
+    description: "Progressive leader committed to education and healthcare",
+    supporters: 980,
+    photo: "/api/placeholder/150/150",
+  },
+  {
+    id: "cand-apc-2",
+    name: "Hon. Abdulrazak Namdas",
+    party: "APC",
     position: "House of Representatives",
-    constituency: "Song & Fufore Federal Constituency",
-    description: "Education and infrastructure advocate",
-    supporters: 1923,
+    constituency: "Ganye/Toungo/Mayo Belwa",
+    description: "Youth advocate and infrastructure development champion",
+    supporters: 750,
+    photo: "/api/placeholder/150/150",
+  },
+  {
+    id: "cand-pdp-2",
+    name: "Dr. Maryam Inna Ciroma",
+    party: "PDP",
+    position: "Senator",
+    constituency: "Adamawa Central",
+    description: "Healthcare professional dedicated to women's empowerment",
+    supporters: 650,
+    photo: "/api/placeholder/150/150",
   },
   {
     id: "cand-lp-1",
-    name: "Dr. Fatima Yusuf",
+    name: "Engr. Peter Obi",
     party: "LP",
-    position: "House of Representatives",
-    constituency: "Song & Fufore Federal Constituency",
-    description: "Healthcare and youth empowerment",
-    supporters: 1156,
+    position: "President",
+    constituency: "Nigeria",
+    description: "Business leader focused on economic transformation",
+    supporters: 2500,
+    photo: "/api/placeholder/150/150",
   },
   {
-    id: "cand-undecided",
-    name: "I'm Undecided",
-    party: "",
-    position: "",
-    constituency: "",
-    description: "Select this option if you haven't decided yet",
-    supporters: 0,
+    id: "cand-apc-3",
+    name: "Sen. Bola Ahmed Tinubu",
+    party: "APC",
+    position: "President",
+    constituency: "Nigeria",
+    description: "Experienced administrator and economic reformer",
+    supporters: 2200,
+    photo: "/api/placeholder/150/150",
+  },
+  {
+    id: "cand-pdp-3",
+    name: "Alhaji Atiku Abubakar",
+    party: "PDP",
+    position: "President",
+    constituency: "Nigeria",
+    description: "Former Vice President with extensive governance experience",
+    supporters: 1800,
+    photo: "/api/placeholder/150/150",
+  },
+  {
+    id: "cand-apc-4",
+    name: "Hon. Aliyu Wakili Boya",
+    party: "APC",
+    position: "House of Representatives",
+    constituency: "Fufore/Song Federal Constituency",
+    description:
+      "Former ALGON Chairman and Executive Chairman of Fufore LGA. Currently serving first term in 10th National Assembly",
+    supporters: 850,
+    photo: "/api/placeholder/150/150",
   },
 ];
 
 // Mock API functions
 export const mockApi = {
-  // Simulate OTP sending
-  sendOtp: async (
-    phone: string,
-  ): Promise<{ success: boolean; message: string }> => {
-    console.log(`📱 Mock: Sending OTP to ${phone}`);
-
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Always succeed for demo
-    return {
-      success: true,
-      message: "OTP sent successfully (DEMO MODE)",
+  // Enhanced NIN verification with more realistic data
+  verifyNIN: async (
+    nin: string,
+  ): Promise<{
+    verified: boolean;
+    message: string;
+    data?: {
+      firstName: string;
+      lastName: string;
+      dateOfBirth: string;
+      state: string;
+      lga: string;
     };
-  },
-
-  // Simulate OTP verification
-  verifyOtp: async (
-    phone: string,
-    otp: string,
-  ): Promise<{ verified: boolean; message: string }> => {
-    console.log(`🔐 Mock: Verifying OTP ${otp} for ${phone}`);
+  }> => {
+    console.log(`🆔 Mock: Verifying NIN ${nin}`);
 
     // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // Accept any 6-digit OTP for demo
-    if (otp.length === 6 && /^\d{6}$/.test(otp)) {
+    // Mock NIN verification - accept any 11-digit NIN for demo
+    if (nin.length === 11 && /^\d{11}$/.test(nin)) {
+      // Return mock verification data with Adamawa-focused names
+      const mockNames = [
+        { firstName: "Aisha", lastName: "Mohammed" },
+        { firstName: "Ibrahim", lastName: "Aliyu" },
+        { firstName: "Fatima", lastName: "Usman" },
+        { firstName: "Musa", lastName: "Ahmad" },
+        { firstName: "Zainab", lastName: "Hassan" },
+        { firstName: "Yusuf", lastName: "Ibrahim" },
+        { firstName: "Amina", lastName: "Suleiman" },
+        { firstName: "Mohammed", lastName: "Yakubu" },
+        { firstName: "Hauwa", lastName: "Bello" },
+        { firstName: "Aliyu", lastName: "Wakili" },
+        { firstName: "Maryam", lastName: "Tukur" },
+        { firstName: "Ahmadu", lastName: "Fintiri" },
+        { firstName: "Halima", lastName: "Jibrilla" },
+        { firstName: "Umar", lastName: "Bindow" },
+      ];
+
+      const mockStates = [
+        {
+          state: "Adamawa State",
+          lgas: [
+            "Song",
+            "Fufore",
+            "Yola North",
+            "Yola South",
+            "Mubi North",
+            "Mubi South",
+            "Ganye",
+            "Toungo",
+            "Mayo Belwa",
+            "Jimeta",
+            "Numan",
+            "Demsa",
+            "Girei",
+            "Hong",
+            "Michika",
+            "Maiha",
+            "Shelleng",
+            "Lamurde",
+            "Guyuk",
+            "Madagali",
+          ],
+        },
+        {
+          state: "Lagos State",
+          lgas: [
+            "Ikeja",
+            "Eti-Osa",
+            "Surulere",
+            "Mushin",
+            "Oshodi-Isolo",
+            "Kosofe",
+          ],
+        },
+        {
+          state: "Kano State",
+          lgas: [
+            "Kano Municipal",
+            "Nassarawa",
+            "Gwale",
+            "Tarauni",
+            "Dala",
+            "Fagge",
+          ],
+        },
+      ];
+
+      const randomName =
+        mockNames[Math.floor(Math.random() * mockNames.length)];
+      const randomState =
+        mockStates[Math.floor(Math.random() * mockStates.length)];
+      const randomYear = 1985 + Math.floor(Math.random() * 20); // Ages 18-38
+      const randomMonth = Math.floor(Math.random() * 12) + 1;
+      const randomDay = Math.floor(Math.random() * 28) + 1;
+
       return {
         verified: true,
-        message: "OTP verified successfully (DEMO MODE)",
+        message: "NIN verified successfully",
+        data: {
+          firstName: randomName.firstName,
+          lastName: randomName.lastName,
+          dateOfBirth: `${randomYear}-${randomMonth.toString().padStart(2, "0")}-${randomDay.toString().padStart(2, "0")}`,
+          state: randomState.state,
+          lga: randomState.lgas[
+            Math.floor(Math.random() * randomState.lgas.length)
+          ],
+        },
       };
     }
 
     return {
       verified: false,
-      message: "Invalid OTP (DEMO MODE)",
+      message: "Invalid NIN format",
     };
   },
 
-  // Check if user already exists
+  // Check if user already exists by NIN
   checkRegistration: async (
-    phone: string,
+    nin: string,
     year: number,
   ): Promise<{ exists: boolean; user?: MockUser }> => {
-    console.log(`🔍 Mock: Checking registration for ${phone} in ${year}`);
+    console.log(`🔍 Mock: Checking registration for NIN ${nin} in ${year}`);
 
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 1200));
 
     // Check if user exists in mock data
-    const existingUser = mockUsers.find((user) => user.phone === phone);
+    const existingUser = mockUsers.find((user) => user.nin === nin);
 
     if (existingUser) {
       return {
@@ -190,17 +348,27 @@ export const mockApi = {
     };
   },
 
-  // Get candidates for location
-  getCandidates: async (
-    state: string,
-    lga: string,
-  ): Promise<{ candidates: MockCandidate[] }> => {
-    console.log(`👥 Mock: Getting candidates for ${state}, ${lga}`);
+  // Get user profile by NIN
+  getUserProfile: async (nin: string): Promise<{ user: MockUser | null }> => {
+    console.log(`👤 Mock: Getting profile for NIN ${nin}`);
 
     // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // Return all candidates for demo
+    const user = mockUsers.find((u) => u.nin === nin);
+
+    return {
+      user: user || null,
+    };
+  },
+
+  // Get all candidates
+  getCandidates: async (): Promise<{ candidates: MockCandidate[] }> => {
+    console.log(`🗳️ Mock: Getting candidates`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
     return {
       candidates: mockCandidates,
     };
@@ -208,61 +376,51 @@ export const mockApi = {
 
   // Submit registration
   submitRegistration: async (
-    registrationData: any,
-  ): Promise<{ success: boolean; userId: string }> => {
-    console.log(`📝 Mock: Submitting registration`, registrationData);
+    data: RegistrationData,
+  ): Promise<{ success: boolean; registrationId: string }> => {
+    console.log(`📝 Mock: Submitting registration`, data);
 
     // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    // Generate mock user ID
-    const userId = `user-${Date.now()}`;
+    // Generate a mock registration ID
+    const registrationId = `REG-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
 
     return {
       success: true,
-      userId,
+      registrationId,
     };
   },
 
-  // Get user profile
-  getUserProfile: async (phone: string): Promise<{ user: MockUser | null }> => {
-    console.log(`👤 Mock: Getting profile for ${phone}`);
+  // Switch candidate support
+  switchCandidate: async (
+    nin: string,
+    newCandidateId: string,
+  ): Promise<{ success: boolean }> => {
+    console.log(
+      `🔄 Mock: Switching candidate for NIN ${nin} to ${newCandidateId}`,
+    );
 
     // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const user = mockUsers.find((u) => u.phone === phone);
+    // Find and update user in mock data
+    const userIndex = mockUsers.findIndex((u) => u.nin === nin);
+    if (userIndex !== -1) {
+      mockUsers[userIndex].candidateId = newCandidateId;
+    }
 
     return {
-      user: user || null,
+      success: true,
     };
   },
 };
 
-// Demo phone numbers for testing
-export const demoPhones = [
-  "+2348012345678", // Aliyu Mohammed (existing user)
-  "+2348098765432", // Fatima Ibrahim (existing user)
-  "+2348055555555", // New user
-  "+2348077777777", // New user
+// Demo NINs for testing - Adamawa focused
+export const demoNINs = [
+  "12345678901", // Aliyu Mohammed (existing user)
+  "98765432109", // Hauwa Bello (existing user)
+  "11111111111", // New user
+  "22222222222", // New user
+  "33333333333", // New user
 ];
-
-// Demo OTP codes (any 6 digits work in demo mode)
-export const demoOtps = ["123456", "000000", "111111", "999999"];
-
-// Helper function to get demo user
-export const getDemoUser = (phone: string): MockUser | null => {
-  return mockUsers.find((user) => user.phone === phone) || null;
-};
-
-// Helper function to check if phone is demo
-export const isDemoPhone = (phone: string): boolean => {
-  return demoPhones.includes(phone);
-};
-
-// Helper function to get demo message
-export const getDemoMessage = (action: string): string => {
-  return `🎭 DEMO MODE: ${action} - This is mock data for UI testing`;
-};
-
-export default mockApi;

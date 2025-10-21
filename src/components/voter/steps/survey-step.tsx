@@ -135,7 +135,7 @@ export function SurveyStep() {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6 pt-8">
+        <CardContent className="space-y-6">
           {/* Options */}
           {currentQuestion.type === "single" ? (
             <RadioGroup

@@ -42,7 +42,7 @@ export function AlreadyRegisteredStep() {
           </p>
         </CardHeader>
 
-        <CardContent className="space-y-4 pt-8">
+        <CardContent className="space-y-4">
           {/* View Profile */}
           <Button
             asChild
@@ -101,7 +101,7 @@ export function AlreadyRegisteredStep() {
 
       {/* Info Box */}
       <Card className="border-border/60 bg-card/60 backdrop-blur-sm">
-        <CardContent className="py-4">
+        <CardContent>
           <p className="text-muted-foreground text-center text-sm">
             You can update your information once within 7 days of registration.
             After that, your data is locked to maintain election integrity.

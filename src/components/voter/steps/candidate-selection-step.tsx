@@ -19,7 +19,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useRegistration } from "@/hooks/use-registration";
 import { cn } from "@/lib/utils";
-import { mockApi, getDemoMessage } from "@/lib/mock/mockApi";
+import { mockApi } from "@/lib/mock/mockApi";
 
 type Candidate = {
   id: string;
@@ -43,11 +43,44 @@ export function CandidateSelectionStep() {
     queryKey: ["candidates", state, lga],
     queryFn: async () => {
       // Use mock API for demo
-      return await mockApi.getCandidates(state, lga);
+      return await mockApi.getCandidates();
     },
   });
 
   const candidates: Candidate[] = data?.candidates || [];
+
+  // Filter candidates based on user's location and position
+  const filteredCandidates = candidates.filter((candidate) => {
+    // Show presidential candidates for all users
+    if (candidate.position === "President") {
+      return true;
+    }
+
+    // For House of Representatives, show only if user is in Fufore or Song LGA
+    if (candidate.position === "House of Representatives") {
+      return (
+        (lga === "Fufore" || lga === "Song") &&
+        candidate.constituency.includes("Fufore") &&
+        candidate.constituency.includes("Song")
+      );
+    }
+
+    // For Governor, show only if user is in Adamawa State
+    if (candidate.position === "Governor") {
+      return (
+        state === "Adamawa State" && candidate.constituency === "Adamawa State"
+      );
+    }
+
+    // For Senator, show only if user is in Adamawa State
+    if (candidate.position === "Senator") {
+      return (
+        state === "Adamawa State" && candidate.constituency.includes("Adamawa")
+      );
+    }
+
+    return false;
+  });
 
   const handleSubmit = () => {
     if (!selectedCandidateId) {
@@ -84,7 +117,12 @@ export function CandidateSelectionStep() {
         </h1>
         <p className="text-muted-foreground text-lg">
           House of Representatives - {payload.location?.lga || "Song"} &{" "}
-          {payload.location?.lga === "Song" ? "Fufore" : "Yola"} Constituency
+          {payload.location?.lga === "Song"
+            ? "Fufore"
+            : payload.location?.lga === "Fufore"
+              ? "Song"
+              : "Fufore"}{" "}
+          Constituency
         </p>
       </div>
 
@@ -106,7 +144,7 @@ export function CandidateSelectionStep() {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6 pt-8">
+        <CardContent className="space-y-6">
           {isLoading ? (
             <div className="flex min-h-[300px] items-center justify-center">
               <div className="space-y-3 text-center">
@@ -122,7 +160,7 @@ export function CandidateSelectionStep() {
               onValueChange={setSelectedCandidateId}
               className="space-y-4"
             >
-              {candidates.map((candidate) => {
+              {filteredCandidates.map((candidate) => {
                 const isSelected = selectedCandidateId === candidate.id;
                 const isUndecided = candidate.id === "cand-undecided";
 

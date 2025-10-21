@@ -1,5 +1,6 @@
 "use client";
 
+import { signOut, useSession } from "next-auth/react";
 import {
   IconCreditCard,
   IconDotsVertical,
@@ -25,16 +26,19 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-}) {
+export function NavUser() {
+  const { data: session } = useSession();
   const { isMobile } = useSidebar();
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: "/candidate/login" });
+  };
+
+  const user = {
+    name: session?.user?.name || "Candidate",
+    email: session?.user?.email || "candidate@wardwise.ng",
+    avatar: session?.user?.image || "/avatars/candidate.jpg",
+  };
 
   return (
     <SidebarMenu>
@@ -47,7 +51,9 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {user.name.charAt(0)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -68,7 +74,9 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {user.name.charAt(0)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -94,7 +102,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSignOut}>
               <IconLogout />
               Log out
             </DropdownMenuItem>

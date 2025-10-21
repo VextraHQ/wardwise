@@ -29,7 +29,7 @@ export function CompletionStep() {
 
   useEffect(() => {
     // Show confetti animation
-    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(true), 1000);
     const timer = setTimeout(() => setShowConfetti(false), 3000);
     return () => clearTimeout(timer);
   }, []);
@@ -106,7 +106,7 @@ export function CompletionStep() {
           </p>
         </CardHeader>
 
-        <CardContent className="space-y-6 pt-6">
+        <CardContent className="space-y-6">
           {/* Personal Info */}
           <div className="space-y-3">
             <div className="text-accent flex items-center gap-2 text-sm font-semibold">
@@ -259,7 +259,7 @@ export function CompletionStep() {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4 pt-6">
+        <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <Button
               variant="outline"

@@ -5,18 +5,16 @@ import { persist } from "zustand/middleware";
 import { RegistrationPayload } from "@/lib/registration-schemas";
 
 export type WizardStep =
-  | "otp"
-  | "duplicate"
-  | "basic"
+  | "nin"
+  | "profile"
   | "location"
   | "candidate"
   | "survey"
   | "confirm";
 
 export const orderedSteps: WizardStep[] = [
-  "otp",
-  "duplicate",
-  "basic",
+  "nin",
+  "profile",
   "location",
   "candidate",
   "survey",
@@ -40,7 +38,7 @@ type RegistrationState = {
 export const useRegistration = create<RegistrationState>()(
   persist(
     (set, get) => ({
-      step: "otp",
+      step: "nin",
       payload: { electionYear: new Date().getFullYear() },
       isSwitching: false,
       maxStepIndex: 0,
@@ -69,7 +67,7 @@ export const useRegistration = create<RegistrationState>()(
       },
       reset: () =>
         set({
-          step: "otp",
+          step: "nin",
           payload: { electionYear: new Date().getFullYear() },
           isSwitching: false,
           maxStepIndex: 0,

@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String?   // For credentials provider
+  role          String    @default("candidate") // candidate, admin, etc.
+  candidateId   String?   @unique // Link to candidate data
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+  candidate Candidate? @relation(fields: [candidateId], references: [id])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Candidate {
+  id          String   @id @default(cuid())
+  name        String
+  party       String
+  position    String
+  constituency String
+  description String?
+  supporters  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Link to auth user
+  user User?
+  
+  // Voters who support this candidate
+  voters Voter[]
+}
+
+model Voter {
+  id            String    @id @default(cuid())
+  nin           String    @unique // National Identification Number (11 digits)
+  firstName     String
+  middleName    String?
+  lastName      String
+  dateOfBirth   DateTime
+  email         String?   @unique
+  phoneNumber   String?   // Optional phone number
+  gender        String?   // male, female, other
+  age           Int
+  state         String
+  lga           String
+  ward          String
+  pollingUnit   String
+  candidateId   String
+  surveyAnswers Json?     // Store survey responses as JSON
+  verifiedAt     DateTime? // When NIN was verified
+  registrationDate DateTime @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  candidate Candidate @relation(fields: [candidateId], references: [id])
+}
