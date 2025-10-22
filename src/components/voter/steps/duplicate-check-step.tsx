@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useRegistration } from "@/hooks/use-registration";
-import { mockApi, getDemoMessage } from "@/lib/mock/mockApi";
+import { mockApi } from "@/lib/mock/mockApi";
 
 export function DuplicateCheckStep() {
   const router = useRouter();

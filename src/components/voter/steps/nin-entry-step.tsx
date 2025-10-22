@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -14,7 +14,7 @@ import {
   HiExclamationCircle,
   HiInformationCircle,
 } from "react-icons/hi";
-import { Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,8 +40,13 @@ import { useRegistration } from "@/hooks/use-registration";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { mockApi } from "@/lib/mock/mockApi";
-import { ninSchema, normalizeNINInput } from "@/lib/registration-schemas";
+import {
+  formatNINForDisplay,
+  ninSchema,
+  normalizeNINInput,
+} from "@/lib/registration-schemas";
 
+// Zod schema validation for terms and conditions check
 const ninFormSchema = z.object({
   nin: ninSchema,
   terms: z.boolean().refine((val) => val === true, {
@@ -79,19 +84,17 @@ export function NinEntryStep() {
     },
   });
 
-  // Format NIN input with spaces
-  const formatNINInput = useCallback((value: string) => {
-    const digits = value.replace(/\D/g, "");
-    if (digits.length <= 5) return digits;
-    if (digits.length <= 10) return `${digits.slice(0, 5)} ${digits.slice(5)}`;
-    return `${digits.slice(0, 5)} ${digits.slice(5, 10)} ${digits.slice(10, 11)}`;
-  }, []);
+  // Watch the terms checkbox value for reactivity
+  const termsAccepted = useWatch({
+    control: form.control,
+    name: "terms",
+  });
 
   // Handle NIN input change
   const handleNINChange = useCallback(
     (input: string) => {
       const normalized = normalizeNINInput(input);
-      const formatted = formatNINInput(normalized);
+      const formatted = formatNINForDisplay(normalized);
 
       setRawNin(formatted);
       form.setValue("nin", normalized);
@@ -102,11 +105,13 @@ export function NinEntryStep() {
         setVerificationData(null);
       }
     },
-    [form, verificationStatus, formatNINInput],
+    [form, verificationStatus],
   );
 
+  // Verify NIN mutation for fetching verification data from mock API
   const verifyNin = useMutation({
     mutationFn: async (nin: string) => {
+      // Verify NIN with mock API
       return await mockApi.verifyNIN(nin);
     },
     onSuccess: (data) => {
@@ -143,6 +148,7 @@ export function NinEntryStep() {
     },
   });
 
+  // Handle NIN verification
   const handleVerifyNin = () => {
     const nin = form.getValues("nin");
     if (nin && nin.length === 11) {
@@ -153,6 +159,7 @@ export function NinEntryStep() {
     }
   };
 
+  // Handle reset
   const handleReset = () => {
     setRawNin("");
     form.setValue("nin", "");
@@ -161,21 +168,27 @@ export function NinEntryStep() {
     setVerificationData(null);
   };
 
+  // Handle form submission
   const onSubmit = (data: NinFormValues) => {
     if (verificationStatus !== "verified") {
       toast.error("Please verify your NIN before continuing");
       return;
     }
 
+    // Update registration payload
     update({ nin: data.nin });
+
+    // Redirect to profile step
     router.push("/register/profile");
   };
 
+  // Get character count for NIN input
   const getCharacterCount = () => {
     const digits = rawNin.replace(/\D/g, "");
     return `${digits.length}/11`;
   };
 
+  // Check if NIN is complete
   const isNINComplete = () => {
     const digits = rawNin.replace(/\D/g, "");
     return digits.length === 11;
@@ -407,11 +420,12 @@ export function NinEntryStep() {
                         onClick={handleReset}
                         className="h-10 flex-1"
                       >
+                        <ArrowLeft className="mr-2 h-4 w-4" />
                         Back
                       </Button>
                       <Button
                         type="submit"
-                        disabled={!form.getValues("terms")}
+                        disabled={!termsAccepted}
                         className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-gradient-to-r font-semibold transition-all duration-200"
                       >
                         Continue

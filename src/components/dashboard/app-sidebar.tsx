@@ -125,7 +125,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="data-[slot=sidebar-menu-button]:!p-0"
             >
               <Link href="/">
                 <div className="from-primary flex size-8 items-center justify-center rounded-lg bg-gradient-to-br via-[#2f7f6b] to-[#163a30] text-white">

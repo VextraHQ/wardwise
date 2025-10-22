@@ -125,8 +125,8 @@ export const candidateSchema = z.object({
 });
 
 export const surveySchema = z.object({
-  priorities: z.array(z.string()).min(1),
-  comments: z.string().max(500).optional(),
+  surveyId: z.string().min(1),
+  answers: z.record(z.string(), z.union([z.string(), z.array(z.string())])),
 });
 
 export const registrationSchema = z.object({

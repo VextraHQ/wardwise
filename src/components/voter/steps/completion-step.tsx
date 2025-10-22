@@ -97,7 +97,7 @@ export function CompletionStep() {
 
       {/* Summary Card */}
       <Card className="border-border/60 bg-card/80 shadow-xl backdrop-blur-sm">
-        <CardHeader className="border-border/60 border-b pb-6">
+        <CardHeader className="border-border border-b pb-6">
           <h2 className="text-foreground text-xl font-semibold">
             Your Registration Summary
           </h2>
@@ -225,7 +225,7 @@ export function CompletionStep() {
       </Card>
 
       {/* Actions */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
         <Button
           asChild
           size="lg"
@@ -239,11 +239,23 @@ export function CompletionStep() {
         <Button asChild size="lg" variant="outline" className="h-12">
           <Link href="/">Return to Home</Link>
         </Button>
+        <Button
+          size="lg"
+          variant="outline"
+          className="h-12"
+          onClick={() => {
+            reset();
+            router.push("/register");
+          }}
+        >
+          <User className="mr-2 h-5 w-5" />
+          New Registration
+        </Button>
       </div>
 
       {/* Share Section */}
       <Card className="border-border/60 bg-card/80 shadow-xl backdrop-blur-sm">
-        <CardHeader className="border-border/60 border-b pb-6">
+        <CardHeader className="border-border border-b pb-6">
           <div className="flex items-center gap-3">
             <div className="bg-primary/15 flex h-10 w-10 items-center justify-center rounded-full">
               <Share2 className="text-primary h-5 w-5" />

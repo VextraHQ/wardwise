@@ -607,8 +607,15 @@ function SidebarMenuSkeleton({
   showIcon?: boolean;
 }) {
   // Random width between 50 to 90%.
-  const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`;
+  const [width, setWidth] = React.useState("50%");
+  const hasSetWidth = React.useRef(false);
+
+  React.useEffect(() => {
+    if (!hasSetWidth.current) {
+      const randomWidth = `${Math.floor(Math.random() * 40) + 50}%`;
+      setWidth(randomWidth);
+      hasSetWidth.current = true;
+    }
   }, []);
 
   return (

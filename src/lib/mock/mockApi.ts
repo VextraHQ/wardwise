@@ -1,10 +1,18 @@
 // Mock data for voter registration flow - DEMO ONLY
 // This simulates API responses for UI testing
 
-export type MockUser = {
+import {
+  nigeriaStates,
+  nigeriaLGAs,
+  getStateByCode,
+  getLGAsByState,
+} from "@/lib/data/nigeria-locations";
+
+export type User = {
   id: string;
   nin: string; // National Identification Number
   firstName: string;
+  middleName?: string;
   lastName: string;
   dateOfBirth: string;
   phoneNumber?: string; // Optional phone number
@@ -14,22 +22,53 @@ export type MockUser = {
   lga: string;
   ward: string;
   pollingUnit: string;
-  candidateId: string;
+  candidateId: Candidate["id"];
   surveyAnswers: Record<string, string | string[]>;
   registrationDate: string;
   isVerified: boolean;
   verifiedAt?: string; // When NIN was verified
 };
 
-export type MockCandidate = {
+export type SurveyOption = {
+  id: string;
+  label: string;
+  icon?: string;
+};
+
+export type SurveyQuestion = {
+  id: string;
+  type: "single" | "multiple" | "ranking" | "scale" | "text";
+  question: string;
+  description?: string;
+  icon?: string;
+  options?: SurveyOption[];
+  minLabel?: string; // For scale questions
+  maxLabel?: string;
+};
+
+export type CandidateSurvey = {
+  id: string;
+  candidateId: string;
+  candidateName: string;
+  title: string;
+  description: string;
+  questions: SurveyQuestion[];
+  createdAt: string;
+};
+
+export type Candidate = {
   id: string;
   name: string;
   party: string;
-  position: string;
+  position: "Governor" | "Senator" | "House of Representatives";
+  state: string;
   constituency: string;
   description: string;
   supporters: number;
   photo?: string;
+  surveyId: string; // Link to their survey
+  tagline: string; // e.g., "Fixing Roads, Creating Jobs"
+  vision: string; // Short candidate vision
 };
 
 export type RegistrationData = {
@@ -50,16 +89,17 @@ export type RegistrationData = {
   };
   candidate: {
     candidateId: string;
+    candidateName?: string;
   };
   survey: {
-    priorities: string[];
-    comments?: string;
+    surveyId: string;
+    answers: Record<string, string | string[]>;
   };
   electionYear: number;
 };
 
 // Mock users database - Adamawa focused
-export const mockUsers: MockUser[] = [
+export const users: User[] = [
   {
     id: "user-1",
     nin: "12345678901",
@@ -119,93 +159,377 @@ export const mockUsers: MockUser[] = [
 ];
 
 // Mock candidates database
-export const mockCandidates: MockCandidate[] = [
+export const candidates: Candidate[] = [
   {
     id: "cand-apc-1",
     name: "Dr. Ahmadu Umaru Fintiri",
     party: "APC",
     position: "Governor",
+    state: "Adamawa State",
     constituency: "Adamawa State",
     description: "Experienced leader focused on development and security",
     supporters: 1250,
     photo: "/api/placeholder/150/150",
+    surveyId: "survey-apc-1",
+    tagline: "Security, Development, Progress",
+    vision: "Building a safer and more prosperous Adamawa State",
   },
   {
     id: "cand-pdp-1",
     name: "Senator Aishatu Dahiru Ahmed",
     party: "PDP",
     position: "Governor",
+    state: "Adamawa State",
     constituency: "Adamawa State",
     description: "Progressive leader committed to education and healthcare",
     supporters: 980,
     photo: "/api/placeholder/150/150",
+    surveyId: "survey-pdp-1",
+    tagline: "Education, Healthcare, Women Empowerment",
+    vision:
+      "Creating an Adamawa State where everyone has access to quality education and healthcare",
   },
   {
     id: "cand-apc-2",
     name: "Hon. Abdulrazak Namdas",
     party: "APC",
     position: "House of Representatives",
+    state: "Adamawa State",
     constituency: "Ganye/Toungo/Mayo Belwa",
     description: "Youth advocate and infrastructure development champion",
     supporters: 750,
     photo: "/api/placeholder/150/150",
+    surveyId: "survey-apc-2",
+    tagline: "Youth Empowerment, Infrastructure",
+    vision:
+      "Transforming Ganye/Toungo/Mayo Belwa through youth-driven development",
   },
   {
     id: "cand-pdp-2",
     name: "Dr. Maryam Inna Ciroma",
     party: "PDP",
     position: "Senator",
+    state: "Adamawa State",
     constituency: "Adamawa Central",
     description: "Healthcare professional dedicated to women's empowerment",
     supporters: 650,
     photo: "/api/placeholder/150/150",
-  },
-  {
-    id: "cand-lp-1",
-    name: "Engr. Peter Obi",
-    party: "LP",
-    position: "President",
-    constituency: "Nigeria",
-    description: "Business leader focused on economic transformation",
-    supporters: 2500,
-    photo: "/api/placeholder/150/150",
-  },
-  {
-    id: "cand-apc-3",
-    name: "Sen. Bola Ahmed Tinubu",
-    party: "APC",
-    position: "President",
-    constituency: "Nigeria",
-    description: "Experienced administrator and economic reformer",
-    supporters: 2200,
-    photo: "/api/placeholder/150/150",
-  },
-  {
-    id: "cand-pdp-3",
-    name: "Alhaji Atiku Abubakar",
-    party: "PDP",
-    position: "President",
-    constituency: "Nigeria",
-    description: "Former Vice President with extensive governance experience",
-    supporters: 1800,
-    photo: "/api/placeholder/150/150",
+    surveyId: "survey-pdp-2",
+    tagline: "Healthcare, Women's Rights, Community Welfare",
+    vision:
+      "Ensuring every community in Adamawa Central has access to quality healthcare",
   },
   {
     id: "cand-apc-4",
     name: "Hon. Aliyu Wakili Boya",
     party: "APC",
     position: "House of Representatives",
+    state: "Adamawa State",
     constituency: "Fufore/Song Federal Constituency",
     description:
       "Former ALGON Chairman and Executive Chairman of Fufore LGA. Currently serving first term in 10th National Assembly",
     supporters: 850,
     photo: "/api/placeholder/150/150",
+    surveyId: "survey-apc-4",
+    tagline: "Fixing Roads, Creating Jobs, Building Communities",
+    vision:
+      "Transforming Fufore/Song through infrastructure and economic development",
   },
 ];
 
+// Mock candidate surveys database
+export const candidateSurveys: CandidateSurvey[] = [
+  {
+    id: "survey-apc-4",
+    candidateId: "cand-apc-4",
+    candidateName: "Hon. Aliyu Wakili Boya",
+    title: "Public Opinion on Infrastructure Development",
+    description:
+      "Share your views on infrastructure projects and community development in Song & Fufore LGA. Your input helps shape policy priorities.",
+    questions: [
+      {
+        id: "q1",
+        type: "single",
+        question: "How would you rate the current state of roads in your area?",
+        description:
+          "Your assessment helps prioritize infrastructure investments",
+        icon: "🛣️",
+        options: [
+          {
+            id: "opt-excellent",
+            label: "Excellent - Well maintained",
+            icon: "✅",
+          },
+          { id: "opt-good", label: "Good - Minor issues", icon: "👍" },
+          { id: "opt-fair", label: "Fair - Needs improvement", icon: "⚠️" },
+          { id: "opt-poor", label: "Poor - Major problems", icon: "❌" },
+          { id: "opt-very-poor", label: "Very Poor - Unusable", icon: "🚫" },
+        ],
+      },
+      {
+        id: "q2",
+        type: "multiple",
+        question:
+          "Which infrastructure project is most needed in your community?",
+        description: "Select all that apply to your community's needs",
+        options: [
+          {
+            id: "opt-roads",
+            label: "Road Construction & Maintenance",
+            icon: "🛣️",
+          },
+          { id: "opt-water", label: "Water Supply & Distribution", icon: "💧" },
+          {
+            id: "opt-electricity",
+            label: "Electricity & Power Grid",
+            icon: "⚡",
+          },
+          { id: "opt-healthcare", label: "Healthcare Facilities", icon: "🏥" },
+          { id: "opt-schools", label: "Schools & Education", icon: "📚" },
+          { id: "opt-bridges", label: "Bridges & Culverts", icon: "🌉" },
+          { id: "opt-drainage", label: "Drainage Systems", icon: "🌊" },
+        ],
+      },
+      {
+        id: "q3",
+        type: "scale",
+        question: "How satisfied are you with current government services?",
+        description: "Rate your overall satisfaction with public services",
+        minLabel: "Very Dissatisfied",
+        maxLabel: "Very Satisfied",
+      },
+      {
+        id: "q4",
+        type: "single",
+        question: "What is your primary source of income?",
+        description:
+          "Understanding economic activities helps in policy planning",
+        options: [
+          { id: "opt-farming", label: "Farming & Agriculture", icon: "🌾" },
+          { id: "opt-business", label: "Small Business & Trade", icon: "🏪" },
+          { id: "opt-government", label: "Government Employment", icon: "🏛️" },
+          { id: "opt-private", label: "Private Sector Job", icon: "💼" },
+          { id: "opt-artisan", label: "Artisan & Crafts", icon: "🔨" },
+          { id: "opt-unemployed", label: "Currently Unemployed", icon: "😔" },
+        ],
+      },
+      {
+        id: "q5",
+        type: "text",
+        question:
+          "What specific improvements would you like to see in Song/Fufore?",
+        description:
+          "Share your detailed thoughts on community development (10-500 characters)",
+      },
+    ],
+    createdAt: "2024-10-15T10:00:00Z",
+  },
+  {
+    id: "survey-pdp-2",
+    candidateId: "cand-pdp-2",
+    candidateName: "Dr. Maryam Inna Ciroma",
+    title: "Dr. Maryam's Vision for Adamawa Central",
+    description:
+      "Healthcare & Women's Empowerment - Your priorities shape her agenda",
+    questions: [
+      {
+        id: "q1",
+        type: "single",
+        question: "What's your primary health concern?",
+        icon: "🏥",
+        options: [
+          { id: "opt-access", label: "Hospitals too far away" },
+          { id: "opt-cost", label: "Healthcare too expensive" },
+          { id: "opt-quality", label: "Poor quality care" },
+          { id: "opt-maternal", label: "Maternal health services" },
+        ],
+      },
+      {
+        id: "q2",
+        type: "single",
+        question: "What support do women need most in your area?",
+        options: [
+          { id: "opt-jobs-women", label: "Job opportunities for women" },
+          { id: "opt-training-women", label: "Skills training" },
+          { id: "opt-childcare", label: "Childcare support" },
+          { id: "opt-loans", label: "Microfinance/loans" },
+        ],
+      },
+      {
+        id: "q3",
+        type: "multiple",
+        question: "What should Dr. Maryam prioritize?",
+        options: [
+          { id: "opt-clinics", label: "Build more health clinics" },
+          { id: "opt-training-health", label: "Train more healthcare workers" },
+          { id: "opt-equipment", label: "Better medical equipment" },
+          { id: "opt-awareness", label: "Health awareness programs" },
+        ],
+      },
+    ],
+    createdAt: "2024-10-15T10:00:00Z",
+  },
+  {
+    id: "survey-apc-1",
+    candidateId: "cand-apc-1",
+    candidateName: "Dr. Ahmadu Umaru Fintiri",
+    title: "Building a Safer Adamawa",
+    description:
+      "Help Dr. Fintiri understand what security and development mean to you",
+    questions: [
+      {
+        id: "q1",
+        type: "single",
+        question: "What's your biggest security concern?",
+        options: [
+          { id: "opt-insecurity", label: "General insecurity in the state" },
+          { id: "opt-community", label: "Community safety" },
+          { id: "opt-roads", label: "Safe travel on roads" },
+        ],
+      },
+      {
+        id: "q2",
+        type: "multiple",
+        question: "Which developments matter most?",
+        options: [
+          { id: "opt-security-ops", label: "Enhanced security operations" },
+          { id: "opt-infrastructure", label: "Infrastructure development" },
+          { id: "opt-economy", label: "Economic growth" },
+        ],
+      },
+    ],
+    createdAt: "2024-10-15T10:00:00Z",
+  },
+  {
+    id: "survey-pdp-1",
+    candidateId: "cand-pdp-1",
+    candidateName: "Senator Aishatu Dahiru Ahmed",
+    title: "Investing in Our Future",
+    description: "Education and healthcare are the foundation for progress",
+    questions: [
+      {
+        id: "q1",
+        type: "single",
+        question: "What's your priority for Adamawa?",
+        options: [
+          { id: "opt-education", label: "Quality Education" },
+          { id: "opt-health", label: "Healthcare Services" },
+          { id: "opt-women", label: "Women's Empowerment" },
+        ],
+      },
+    ],
+    createdAt: "2024-10-15T10:00:00Z",
+  },
+  {
+    id: "survey-apc-2",
+    candidateId: "cand-apc-2",
+    candidateName: "Hon. Abdulrazak Namdas",
+    title: "Youth-Led Development",
+    description: "Your voice matters in shaping Ganye/Toungo/Mayo Belwa",
+    questions: [
+      {
+        id: "q1",
+        type: "single",
+        question: "What opportunity do you need most?",
+        options: [
+          { id: "opt-jobs", label: "Job opportunities" },
+          { id: "opt-training", label: "Skills training" },
+          { id: "opt-startup", label: "Business startup support" },
+        ],
+      },
+    ],
+    createdAt: "2024-10-15T10:00:00Z",
+  },
+];
+
+// Location data types for API responses
+export type LocationState = {
+  code: string;
+  name: string;
+};
+
+export type LocationLGA = {
+  code: string;
+  name: string;
+  stateCode: string;
+};
+
+export type LocationWard = {
+  code: string;
+  name: string;
+  lgaCode: string;
+};
+
+export type LocationPollingUnit = {
+  code: string;
+  name: string;
+  wardCode: string;
+};
+
+// Mock ward data - only what we need for demo
+// States and LGAs are now sourced from nigeria-locations.ts
+const mockWards: LocationWard[] = [
+  // Adamawa wards (demo data)
+  { code: "JAMBUTU", name: "Jambutu", lgaCode: "YOLN" },
+  { code: "AJIYA", name: "Ajiya", lgaCode: "YOLN" },
+  { code: "KAREWA", name: "Karewa", lgaCode: "YOLN" },
+  { code: "ALKALAWA", name: "Alkalawa", lgaCode: "YOLN" },
+  { code: "DOUBELI", name: "Doubeli", lgaCode: "YOLN" },
+
+  { code: "BAMOI", name: "Bamoi", lgaCode: "YOLS" },
+  { code: "NGURORE", name: "Ngurore", lgaCode: "YOLS" },
+  { code: "ADARAWO", name: "Adarawo", lgaCode: "YOLS" },
+
+  { code: "SONG-W1", name: "Song Ward 1", lgaCode: "SONG" },
+  { code: "SONG-W2", name: "Song Ward 2", lgaCode: "SONG" },
+  { code: "SONG-W3", name: "Song Central", lgaCode: "SONG" },
+
+  { code: "FUF-W1", name: "Fufore Ward 1", lgaCode: "FUF" },
+  { code: "FUF-W2", name: "Fufore Ward 2", lgaCode: "FUF" },
+  { code: "MALABU", name: "Malabu Ward", lgaCode: "FUF" },
+  { code: "RIBADU", name: "Ribadu Ward", lgaCode: "FUF" },
+];
+
+// Function to generate polling units dynamically
+function generatePollingUnits(
+  wardCode: string,
+  count = 15,
+): LocationPollingUnit[] {
+  const locations = [
+    "Community Centre",
+    "Primary School",
+    "Secondary School",
+    "Town Hall",
+    "Health Centre",
+    "Civic Centre",
+    "Church Hall",
+    "Mosque",
+    "Market Square",
+    "Police Station",
+    "Fire Station",
+    "Youth Centre",
+    "Women Centre",
+    "Sports Complex",
+    "Public Library",
+    "Council Ward Office",
+  ];
+
+  return Array.from({ length: count }).map((_, i) => {
+    const num = String(i + 1).padStart(3, "0");
+    const location = locations[i % locations.length];
+    const prefix = wardCode.slice(0, 3).toUpperCase();
+
+    return {
+      code: `${prefix}-${num}`,
+      name: `Unit ${num} - ${location}`,
+      wardCode,
+    };
+  });
+}
+
 // Mock API functions
 export const mockApi = {
-  // Enhanced NIN verification with more realistic data
+  // Verify NIN with mock API
   verifyNIN: async (
     nin: string,
   ): Promise<{
@@ -224,10 +548,10 @@ export const mockApi = {
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // Mock NIN verification - accept any 11-digit NIN for demo
+    // Verify NIN - accept any 11-digit NIN for demo
     if (nin.length === 11 && /^\d{11}$/.test(nin)) {
-      // Return mock verification data with Adamawa-focused names
-      const mockNames = [
+      // Return verification data with Adamawa-focused names
+      const names = [
         { firstName: "Aisha", lastName: "Mohammed" },
         { firstName: "Ibrahim", lastName: "Aliyu" },
         { firstName: "Fatima", lastName: "Usman" },
@@ -244,7 +568,7 @@ export const mockApi = {
         { firstName: "Umar", lastName: "Bindow" },
       ];
 
-      const mockStates = [
+      const states = [
         {
           state: "Adamawa State",
           lgas: [
@@ -294,10 +618,8 @@ export const mockApi = {
         },
       ];
 
-      const randomName =
-        mockNames[Math.floor(Math.random() * mockNames.length)];
-      const randomState =
-        mockStates[Math.floor(Math.random() * mockStates.length)];
+      const randomName = names[Math.floor(Math.random() * names.length)];
+      const randomState = states[Math.floor(Math.random() * states.length)];
       const randomYear = 1985 + Math.floor(Math.random() * 20); // Ages 18-38
       const randomMonth = Math.floor(Math.random() * 12) + 1;
       const randomDay = Math.floor(Math.random() * 28) + 1;
@@ -323,18 +645,18 @@ export const mockApi = {
     };
   },
 
-  // Check if user already exists by NIN
+  // Check if user already exists by NIN in mock data
   checkRegistration: async (
     nin: string,
     year: number,
-  ): Promise<{ exists: boolean; user?: MockUser }> => {
+  ): Promise<{ exists: boolean; user?: User }> => {
     console.log(`🔍 Mock: Checking registration for NIN ${nin} in ${year}`);
 
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 1200));
 
-    // Check if user exists in mock data
-    const existingUser = mockUsers.find((user) => user.nin === nin);
+    // Check if user exists in data
+    const existingUser = users.find((user) => user.nin === nin);
 
     if (existingUser) {
       return {
@@ -349,13 +671,13 @@ export const mockApi = {
   },
 
   // Get user profile by NIN
-  getUserProfile: async (nin: string): Promise<{ user: MockUser | null }> => {
+  getUserProfile: async (nin: string): Promise<{ user: User | null }> => {
     console.log(`👤 Mock: Getting profile for NIN ${nin}`);
 
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const user = mockUsers.find((u) => u.nin === nin);
+    const user = users.find((u) => u.nin === nin);
 
     return {
       user: user || null,
@@ -363,14 +685,30 @@ export const mockApi = {
   },
 
   // Get all candidates
-  getCandidates: async (): Promise<{ candidates: MockCandidate[] }> => {
+  getCandidates: async (): Promise<{ candidates: Candidate[] }> => {
     console.log(`🗳️ Mock: Getting candidates`);
 
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     return {
-      candidates: mockCandidates,
+      candidates: candidates,
+    };
+  },
+
+  // Get candidate survey by candidate ID
+  getCandidateSurvey: async (
+    candidateId: string,
+  ): Promise<{ survey: CandidateSurvey | null }> => {
+    console.log(`📋 Mock: Getting survey for candidate ${candidateId}`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const survey = candidateSurveys.find((s) => s.candidateId === candidateId);
+
+    return {
+      survey: survey || null,
     };
   },
 
@@ -405,22 +743,161 @@ export const mockApi = {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Find and update user in mock data
-    const userIndex = mockUsers.findIndex((u) => u.nin === nin);
+    const userIndex = users.findIndex((u) => u.nin === nin);
     if (userIndex !== -1) {
-      mockUsers[userIndex].candidateId = newCandidateId;
+      users[userIndex].candidateId = newCandidateId;
     }
 
     return {
       success: true,
     };
   },
-};
 
-// Demo NINs for testing - Adamawa focused
-export const demoNINs = [
-  "12345678901", // Aliyu Mohammed (existing user)
-  "98765432109", // Hauwa Bello (existing user)
-  "11111111111", // New user
-  "22222222222", // New user
-  "33333333333", // New user
-];
+  // Location API endpoints for optimized data fetching
+  getStates: async (): Promise<{ states: LocationState[] }> => {
+    console.log("🌍 Mock: Getting all states");
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    // Use data from nigeria-locations.ts (no redundancy)
+    const states = nigeriaStates.map((state) => ({
+      code: state.code,
+      name: state.name,
+    })) as LocationState[];
+
+    return { states };
+  },
+
+  getLGAsByState: async (
+    stateCode: string,
+  ): Promise<{ lgas: LocationLGA[] }> => {
+    console.log(`🏛️ Mock: Getting LGAs for state ${stateCode}`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    // Use data from nigeria-locations.ts (no redundancy)
+    const lgas = nigeriaLGAs.filter(
+      (lga) => lga.stateCode === stateCode,
+    ) as LocationLGA[];
+
+    return { lgas };
+  },
+
+  getWardsByLGA: async (
+    lgaCode: string,
+  ): Promise<{ wards: LocationWard[] }> => {
+    console.log(`🏘️ Mock: Getting wards for LGA ${lgaCode}`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    // Use mock ward data (limited to demo areas)
+    const wards = mockWards.filter((ward) => ward.lgaCode === lgaCode);
+
+    return { wards };
+  },
+
+  getPollingUnitsByWard: async (
+    wardCode: string,
+  ): Promise<{ pollingUnits: LocationPollingUnit[] }> => {
+    console.log(`🗳️ Mock: Getting polling units for ward ${wardCode}`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Generate polling units dynamically
+    const pollingUnits = generatePollingUnits(wardCode);
+
+    return { pollingUnits };
+  },
+
+  // Enhanced NIN verification that includes state/LGA codes for pre-population
+  verifyNINWithLocation: async (
+    nin: string,
+  ): Promise<{
+    verified: boolean;
+    message: string;
+    data?: {
+      firstName: string;
+      lastName: string;
+      dateOfBirth: string;
+      stateCode: string;
+      stateName: string;
+      lgaCode: string;
+      lgaName: string;
+    };
+  }> => {
+    console.log(`🆔 Mock: Verifying NIN ${nin} with location data`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    // Verify NIN - accept any 11-digit NIN for demo
+    if (nin.length === 11 && /^\d{11}$/.test(nin)) {
+      const names = [
+        { firstName: "Aisha", lastName: "Mohammed" },
+        { firstName: "Ibrahim", lastName: "Aliyu" },
+        { firstName: "Fatima", lastName: "Usman" },
+        { firstName: "Musa", lastName: "Ahmad" },
+        { firstName: "Zainab", lastName: "Hassan" },
+        { firstName: "Yusuf", lastName: "Ibrahim" },
+        { firstName: "Amina", lastName: "Suleiman" },
+        { firstName: "Mohammed", lastName: "Yakubu" },
+        { firstName: "Hauwa", lastName: "Bello" },
+        { firstName: "Aliyu", lastName: "Wakili" },
+      ];
+
+      // Weighted towards Adamawa for demo, but includes other major states
+      const stateOptions = [
+        { weight: 40, stateCode: "AD" }, // Adamawa - demo focus
+        { weight: 20, stateCode: "LA" }, // Lagos - most populous
+        { weight: 15, stateCode: "KN" }, // Kano - northern major state
+        { weight: 10, stateCode: "RI" }, // Rivers - south south
+        { weight: 5, stateCode: "AB" }, // Abia - south east
+        { weight: 5, stateCode: "FC" }, // FCT - capital
+        { weight: 5, stateCode: "KD" }, // Kaduna - north central
+      ];
+
+      // Select state based on weight
+      const random = Math.random() * 100;
+      let cumulative = 0;
+      const selectedStateCode =
+        stateOptions.find((state) => {
+          cumulative += state.weight;
+          return random <= cumulative;
+        })?.stateCode || "AD";
+
+      // Get state and LGA data
+      const selectedState = getStateByCode(selectedStateCode);
+      const availableLGAs = getLGAsByState(selectedStateCode);
+
+      const randomName = names[Math.floor(Math.random() * names.length)];
+      const randomLGA =
+        availableLGAs[Math.floor(Math.random() * availableLGAs.length)];
+      const randomYear = 1985 + Math.floor(Math.random() * 20); // Ages 18-38
+      const randomMonth = Math.floor(Math.random() * 12) + 1;
+      const randomDay = Math.floor(Math.random() * 28) + 1;
+
+      return {
+        verified: true,
+        message: "NIN verified successfully",
+        data: {
+          firstName: randomName.firstName,
+          lastName: randomName.lastName,
+          dateOfBirth: `${randomYear}-${randomMonth.toString().padStart(2, "0")}-${randomDay.toString().padStart(2, "0")}`,
+          stateCode: selectedState?.code || "AD",
+          stateName: selectedState?.name || "Adamawa State",
+          lgaCode: randomLGA.code,
+          lgaName: randomLGA.name,
+        },
+      };
+    }
+
+    return {
+      verified: false,
+      message: "Invalid NIN format",
+    };
+  },
+};
