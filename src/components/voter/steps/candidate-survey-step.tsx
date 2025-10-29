@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2, FileQuestion } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -11,10 +11,10 @@ import { StepProgress } from "@/components/ui/step-progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { useRegistration } from "@/hooks/use-registration";
 import { cn } from "@/lib/utils";
 import { mockApi, CandidateSurvey, SurveyQuestion } from "@/lib/mock/mockApi";
+import { Textarea } from "@/components/ui/textarea";
 
 export function CandidateSurveyStep() {
   const router = useRouter();
@@ -24,7 +24,9 @@ export function CandidateSurveyStep() {
 
   const candidateId = payload.candidate?.candidateId;
 
-  const { data, isLoading } = useQuery({
+  // TODO: Replace with actual API call
+  // Fetch the survey for the candidate
+  const { data, isLoading, isPending } = useQuery({
     queryKey: ["candidate-survey", candidateId],
     queryFn: async () => {
       if (!candidateId) return null;
@@ -33,21 +35,31 @@ export function CandidateSurveyStep() {
     enabled: !!candidateId,
   });
 
+  // TODO: Replace with actual API call
+  // Get the survey for the candidate
   const survey: CandidateSurvey | null = data?.survey || null;
   const currentQuestion: SurveyQuestion | null =
     survey && currentQuestionIndex < survey.questions.length
       ? survey.questions[currentQuestionIndex]
       : null;
 
+  // Check if the current question is the last question
   const isLastQuestion =
     survey && currentQuestionIndex === survey.questions.length - 1;
   const currentAnswer = currentQuestion ? answers[currentQuestion.id] : null;
+
+  // Simple word count utility
+  const wordCount = (text: string) =>
+    text.trim().split(/\s+/).filter(Boolean).length;
+
+  // Check if the current answer has been answered
   const hasAnswer = currentAnswer
     ? Array.isArray(currentAnswer)
       ? currentAnswer.length > 0
       : currentAnswer.length > 0
     : false;
 
+  // Handle single choice
   const handleSingleChoice = (optionId: string) => {
     if (currentQuestion) {
       setAnswers((prev) => ({
@@ -57,6 +69,7 @@ export function CandidateSurveyStep() {
     }
   };
 
+  // Handle multiple choice
   const handleMultipleChoice = (optionId: string, checked: boolean) => {
     if (currentQuestion) {
       setAnswers((prev) => {
@@ -72,6 +85,7 @@ export function CandidateSurveyStep() {
     }
   };
 
+  // Handle scale change
   const handleScaleChange = (value: string) => {
     if (currentQuestion) {
       setAnswers((prev) => ({
@@ -81,6 +95,7 @@ export function CandidateSurveyStep() {
     }
   };
 
+  // Handle text change
   const handleTextChange = (text: string) => {
     if (currentQuestion) {
       setAnswers((prev) => ({
@@ -90,6 +105,7 @@ export function CandidateSurveyStep() {
     }
   };
 
+  // Handle next question
   const handleNext = () => {
     if (!hasAnswer) {
       toast.error("Please answer the question to continue");
@@ -111,6 +127,7 @@ export function CandidateSurveyStep() {
     }
   };
 
+  // Handle back question
   const handleBack = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1);
@@ -119,35 +136,99 @@ export function CandidateSurveyStep() {
     }
   };
 
-  if (isLoading) {
+  // Loading state
+  if (isLoading || isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="space-y-4 text-center">
-          <Loader2 className="text-primary mx-auto h-12 w-12 animate-spin" />
-          <p className="text-muted-foreground text-lg">
-            Loading candidate survey...
+      <div className="space-y-6">
+        <StepProgress currentStep={5} totalSteps={6} stepTitle="Survey" />
+
+        <div className="space-y-2 text-center">
+          <h1 className="text-foreground text-2xl font-semibold tracking-tight">
+            Loading Survey
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Please wait while we load the candidate's survey
           </p>
+        </div>
+
+        <div className="mx-auto w-full max-w-2xl">
+          <Card>
+            <CardContent className="flex min-h-[300px] items-center justify-center">
+              <div className="flex flex-col items-center justify-center gap-3 text-center">
+                <Loader2 className="text-primary h-8 w-8 animate-spin" />
+                <div className="space-y-1">
+                  <p className="text-foreground text-sm font-medium">
+                    Loading candidate survey...
+                  </p>
+                  <p className="text-muted-foreground text-xs">
+                    This may take a few moments
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
   }
 
-  if (!survey || !currentQuestion) {
+  // No survey or current question - only show after loading completes and data exists
+  if (
+    !isLoading &&
+    !isPending &&
+    data !== undefined &&
+    (!survey || !currentQuestion)
+  ) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground">Survey not found</p>
-            <Button
-              onClick={() => router.push("/register/candidate")}
-              className="mt-4"
-            >
-              Go Back
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="space-y-6">
+        <StepProgress currentStep={5} totalSteps={6} stepTitle="Survey" />
+
+        <div className="space-y-2 text-center">
+          <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+            Survey Not Available
+          </h1>
+          <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
+            We couldn't find a survey for this candidate
+          </p>
+        </div>
+
+        <div className="mx-auto w-full max-w-md">
+          <Card>
+            <CardContent className="flex min-h-[300px] flex-col items-center justify-center space-y-6 py-12">
+              <FileQuestion className="text-muted-foreground h-16 w-16" />
+              <div className="space-y-4 text-center">
+                <div className="space-y-2">
+                  <p className="text-foreground text-lg font-semibold">
+                    Survey Not Found
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    This candidate hasn't created a survey yet. Please select a
+                    different candidate or contact support if you believe this
+                    is an error.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3 pt-4 sm:flex-row">
+                  <Button
+                    onClick={() => router.push("/register/candidate")}
+                    variant="outline"
+                    className="h-10 flex-1"
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Select Different Candidate
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
+  }
+
+  // At this point, we should have a survey and current question
+  // This is a safety check for TypeScript
+  if (!survey || !currentQuestion) {
+    return null;
   }
 
   return (
@@ -205,26 +286,28 @@ export function CandidateSurveyStep() {
                       <Label
                         htmlFor={option.id}
                         className={cn(
-                          "group flex cursor-pointer items-center gap-4 rounded-xl border-2 p-4 transition-all duration-200",
+                          "block h-full cursor-pointer rounded-lg border p-4 transition-all duration-200",
                           isSelected
-                            ? "border-primary/60 bg-primary/5 ring-primary/20 ring-2"
-                            : "border-border/60 bg-card hover:border-primary/30",
+                            ? "border-primary bg-primary/5"
+                            : "border-border hover:bg-muted/50",
                         )}
                       >
-                        <div className="flex flex-1 items-center gap-3">
+                        <div className="flex items-center gap-3">
                           {option.icon && (
-                            <span className="text-xl">{option.icon}</span>
+                            <span className="flex-shrink-0 text-xl">
+                              {option.icon}
+                            </span>
                           )}
                           <div
                             className={cn(
-                              "flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200",
+                              "flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors",
                               isSelected
-                                ? "border-primary bg-primary scale-110"
-                                : "border-muted-foreground/40 group-hover:border-primary/50",
+                                ? "border-primary bg-primary"
+                                : "border-muted-foreground/30",
                             )}
                           >
                             {isSelected && (
-                              <div className="bg-primary-foreground h-2 w-2 rounded-full" />
+                              <div className="bg-primary-foreground h-1.5 w-1.5 rounded-full" />
                             )}
                           </div>
                           <span
@@ -232,7 +315,7 @@ export function CandidateSurveyStep() {
                               "flex-1 text-sm font-medium transition-colors",
                               isSelected
                                 ? "text-foreground"
-                                : "text-muted-foreground group-hover:text-foreground",
+                                : "text-muted-foreground",
                             )}
                           >
                             {option.label}
@@ -256,26 +339,31 @@ export function CandidateSurveyStep() {
                     <div key={option.id} className="relative">
                       <div
                         className={cn(
-                          "group flex cursor-pointer items-center gap-4 rounded-xl border-2 p-4 transition-all duration-200",
+                          "block h-full cursor-pointer rounded-lg border p-4 transition-all duration-200",
                           isChecked
-                            ? "border-primary/60 bg-primary/5 ring-primary/20 ring-2"
-                            : "border-border/60 bg-card hover:border-primary/30 hover:bg-accent/50",
+                            ? "border-primary bg-primary/5"
+                            : "border-border hover:bg-muted/50",
                         )}
                         onClick={() =>
                           handleMultipleChoice(option.id, !isChecked)
                         }
                       >
-                        <Checkbox
-                          id={option.id}
-                          checked={isChecked}
-                          onCheckedChange={(checked) =>
-                            handleMultipleChoice(option.id, checked as boolean)
-                          }
-                          className="flex-shrink-0 transition-transform duration-200 data-[state=checked]:scale-110"
-                        />
-                        <div className="flex flex-1 items-center gap-3">
+                        <div className="flex items-center gap-3">
+                          <Checkbox
+                            id={option.id}
+                            checked={isChecked}
+                            onCheckedChange={(checked) =>
+                              handleMultipleChoice(
+                                option.id,
+                                checked as boolean,
+                              )
+                            }
+                            className="flex-shrink-0"
+                          />
                           {option.icon && (
-                            <span className="text-xl">{option.icon}</span>
+                            <span className="flex-shrink-0 text-xl">
+                              {option.icon}
+                            </span>
                           )}
                           <Label
                             htmlFor={option.id}
@@ -283,7 +371,7 @@ export function CandidateSurveyStep() {
                               "flex-1 cursor-pointer text-sm font-medium transition-colors",
                               isChecked
                                 ? "text-foreground"
-                                : "text-muted-foreground group-hover:text-foreground",
+                                : "text-muted-foreground",
                             )}
                           >
                             {option.label}
@@ -313,10 +401,10 @@ export function CandidateSurveyStep() {
                       key={score}
                       onClick={() => handleScaleChange(String(score))}
                       className={cn(
-                        "flex-1 rounded-lg border-2 py-3 font-semibold transition-all",
+                        "flex-1 rounded-lg border py-3 font-semibold transition-all duration-200",
                         currentAnswer === String(score)
                           ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border/60 bg-card hover:border-primary/30",
+                          : "border-border bg-card hover:border-primary/50 hover:bg-muted/50",
                       )}
                     >
                       {score}
@@ -329,15 +417,21 @@ export function CandidateSurveyStep() {
             {/* Text Input */}
             {currentQuestion.type === "text" && (
               <div className="space-y-2">
-                <Input
+                <Textarea
                   placeholder="Share your thoughts..."
                   value={(currentAnswer as string) || ""}
                   onChange={(e) => handleTextChange(e.target.value)}
-                  className="border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background min-h-24 resize-none rounded-lg border p-3 transition-all"
+                  maxLength={500}
+                  className="focus:border-primary min-h-32 resize-y rounded-lg border p-3 transition-all"
                 />
-                <p className="text-muted-foreground text-xs">
-                  {((currentAnswer as string) || "").length}/280 characters
-                </p>
+                <div className="text-muted-foreground flex justify-between text-xs">
+                  <span>
+                    {wordCount((currentAnswer as string) || "")} words
+                  </span>
+                  <span>
+                    {((currentAnswer as string) || "").length}/{500} characters
+                  </span>
+                </div>
               </div>
             )}
 
@@ -355,7 +449,7 @@ export function CandidateSurveyStep() {
               <Button
                 onClick={handleNext}
                 disabled={!hasAnswer}
-                className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-gradient-to-r font-semibold transition-all duration-200"
+                className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-gradient-to-r font-semibold transition-all duration-200 disabled:opacity-50"
               >
                 {isLastQuestion ? "Complete Survey" : "Next Question"}
                 <ArrowRight className="ml-2 h-4 w-4" />

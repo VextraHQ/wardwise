@@ -44,7 +44,7 @@ export function ImpactSection() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-end">
-          <div className="border-border/60 bg-card/90 relative overflow-hidden rounded-2xl border shadow-[0_16px_36px_rgba(12,39,32,0.1)] backdrop-blur-xl sm:rounded-3xl sm:shadow-[0_20px_48px_rgba(12,39,32,0.12)]">
+          <div className="border-border/60 bg-card/90 relative overflow-hidden rounded-2xl border backdrop-blur-xl sm:rounded-3xl">
             <div
               className="bg-primary/15 absolute top-1/2 -left-32 hidden size-[28rem] -translate-y-1/2 rounded-full mix-blend-screen blur-3xl lg:block"
               aria-hidden="true"
@@ -127,7 +127,7 @@ export function ImpactSection() {
             {impactHighlights.map((item) => (
               <article
                 key={item.title}
-                className="group border-border/60 bg-card/80 hover:border-primary/70 relative flex flex-col gap-3 rounded-2xl border p-5 shadow-[0_12px_32px_rgba(12,39,32,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(12,39,32,0.12)] sm:gap-4 sm:rounded-3xl sm:p-6 sm:shadow-[0_16px_40px_rgba(12,39,32,0.1)] lg:hover:shadow-[0_22px_48px_rgba(12,39,32,0.14)]"
+                className="group border-border/60 bg-card/80 hover:border-primary/70 relative flex flex-col gap-3 rounded-2xl border p-5 backdrop-blur-xl transition duration-300 hover:-translate-y-1 sm:gap-4 sm:rounded-3xl sm:p-6"
               >
                 <div className="flex items-center gap-3">
                   <div className="border-primary/30 bg-primary/12 text-accent flex size-10 items-center justify-center rounded-2xl border">

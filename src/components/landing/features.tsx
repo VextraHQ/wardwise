@@ -33,7 +33,7 @@ export function FeaturesSection() {
           {featureCards.map((feature, index) => (
             <article
               key={feature.title}
-              className="group border-border/60 bg-card/80 hover:border-primary/70 relative flex h-full flex-col overflow-hidden rounded-3xl border p-6 shadow-[0_16px_42px_rgba(12,39,32,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_48px_rgba(12,39,32,0.14)] sm:p-8"
+              className="group border-border/60 bg-card/80 hover:border-primary/70 relative flex h-full flex-col overflow-hidden rounded-3xl border p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-1 sm:p-8"
             >
               <div
                 className="absolute inset-0 bg-gradient-to-br from-white/8 via-transparent to-white/12 opacity-0 transition-opacity duration-300 group-hover:opacity-100"

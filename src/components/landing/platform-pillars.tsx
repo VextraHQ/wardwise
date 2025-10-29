@@ -47,7 +47,7 @@ export function PlatformPillarsSection() {
             {platformPillars.map((pillar, index) => (
               <article
                 key={pillar.title}
-                className="group border-border/60 bg-card/80 hover:border-primary/70 relative flex h-full flex-col gap-4 rounded-2xl border p-5 shadow-[0_12px_32px_rgba(12,39,32,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(12,39,32,0.12)] sm:gap-5 sm:p-6 md:gap-6 md:p-8 lg:rounded-3xl lg:p-9"
+                className="group border-border/60 bg-card/80 hover:border-primary/70 relative flex h-full flex-col gap-4 rounded-2xl border p-5 backdrop-blur-xl transition duration-300 hover:-translate-y-1 sm:gap-5 sm:p-6 md:gap-6 md:p-8 lg:rounded-3xl lg:p-9"
               >
                 <span
                   className="bg-primary/20 absolute top-10 -left-10 hidden size-16 rounded-full mix-blend-screen blur-2xl md:block"

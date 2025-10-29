@@ -32,7 +32,7 @@ export function AlreadyRegisteredStep() {
       </div>
 
       {/* Main Card */}
-      <Card className="border-border/60 bg-card/80 shadow-xl backdrop-blur-sm">
+      <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
         <CardHeader className="border-border space-y-2 border-b pb-6">
           <h2 className="text-foreground text-xl font-semibold">
             What would you like to do?

@@ -1,6 +1,5 @@
 // Comprehensive Nigeria location data - States and LGAs
 // Source: Official INEC data and National Bureau of Statistics
-
 export type StateData = {
   code: string;
   name: string;

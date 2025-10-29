@@ -114,7 +114,7 @@ export function HeroSection() {
           <div className="relative flex items-center justify-center lg:justify-end">
             <div className="relative w-full max-w-lg">
               {/* Dashboard card */}
-              <div className="overflow-hidden rounded-2xl border border-[#dcece6] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <div className="overflow-hidden rounded-2xl border border-[#dcece6] bg-white">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-[#dcece6] bg-gradient-to-br from-[#f8fbfa] to-white px-6 py-4">
                   <div>
@@ -206,7 +206,7 @@ export function HeroSection() {
               </div>
 
               {/* Floating accent card */}
-              <div className="absolute -bottom-6 -left-6 rounded-xl border border-[#46C2A7]/20 bg-white p-4 shadow-[0_4px_20px_rgb(0,0,0,0.06)]">
+              <div className="absolute -bottom-6 -left-6 rounded-xl border border-[#46C2A7]/20 bg-white p-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#46C2A7]/10">
                     <svg

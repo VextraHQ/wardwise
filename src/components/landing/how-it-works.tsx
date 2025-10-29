@@ -41,7 +41,7 @@ export function HowItWorksSection() {
                 duration: 0.5,
                 ease: "easeOut",
               }}
-              className="group border-border bg-card/90 hover:border-primary/60 relative flex flex-col gap-5 overflow-hidden rounded-3xl border p-8 shadow-[0_12px_28px_rgba(15,43,36,0.08)] backdrop-blur-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(15,43,36,0.12)]"
+              className="group border-border bg-card/90 hover:border-primary/60 relative flex flex-col gap-5 overflow-hidden rounded-3xl border p-8 backdrop-blur-sm transition duration-300 hover:-translate-y-0.5"
             >
               <div className="from-primary/8 to-accent/8 absolute inset-0 bg-gradient-to-br via-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
               <div className="relative flex items-center gap-4">

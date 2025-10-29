@@ -129,7 +129,7 @@ export function LocationStep() {
       },
     });
     toast.success("Location saved!");
-    router.push("/register/survey");
+    router.push("/register/candidate");
   };
 
   // Helper to determine if dropdown should show loading

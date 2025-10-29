@@ -96,7 +96,7 @@ export function CompletionStep() {
       </div>
 
       {/* Summary Card */}
-      <Card className="border-border/60 bg-card/80 shadow-xl backdrop-blur-sm">
+      <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
         <CardHeader className="border-border border-b pb-6">
           <h2 className="text-foreground text-xl font-semibold">
             Your Registration Summary
@@ -254,7 +254,7 @@ export function CompletionStep() {
       </div>
 
       {/* Share Section */}
-      <Card className="border-border/60 bg-card/80 shadow-xl backdrop-blur-sm">
+      <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
         <CardHeader className="border-border border-b pb-6">
           <div className="flex items-center gap-3">
             <div className="bg-primary/15 flex h-10 w-10 items-center justify-center rounded-full">

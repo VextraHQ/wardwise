@@ -27,7 +27,7 @@ export function CallToActionSection() {
       />
 
       <div className="relative mx-auto max-w-7xl px-6">
-        <div className="relative overflow-hidden rounded-3xl border border-[#dcece6] bg-white shadow-[0_14px_32px_rgba(12,39,32,0.08)] backdrop-blur-3xl">
+        <div className="relative overflow-hidden rounded-3xl border border-[#dcece6] bg-white backdrop-blur-3xl">
           <div className="sm:py-20">
             <div className="mx-auto max-w-3xl space-y-10 text-center">
               {/* Badge */}

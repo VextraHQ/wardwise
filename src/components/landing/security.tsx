@@ -28,7 +28,7 @@ export function SecuritySection() {
           {securityHighlights.map((item) => (
             <article
               key={item.title}
-              className="border-border bg-card/70 hover:border-primary/60 hover:bg-card relative flex h-full flex-col gap-4 rounded-3xl border p-7 shadow-[0_14px_32px_rgba(12,39,32,0.08)] backdrop-blur-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(12,39,32,0.12)]"
+              className="border-border bg-card/70 hover:border-primary/60 hover:bg-card relative flex h-full flex-col gap-4 rounded-3xl border p-7 backdrop-blur-sm transition duration-300 hover:-translate-y-0.5"
             >
               <div className="border-primary/30 bg-primary/12 text-accent flex size-10 items-center justify-center rounded-full border">
                 <item.icon className="size-5" aria-hidden="true" />

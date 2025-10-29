@@ -1,12 +1,11 @@
 // Mock data for voter registration flow - DEMO ONLY
 // This simulates API responses for UI testing
-
 import {
   nigeriaStates,
   nigeriaLGAs,
   getStateByCode,
   getLGAsByState,
-} from "@/lib/data/nigeria-locations";
+} from "@/lib/data/state-lga-locations";
 
 export type User = {
   id: string;
@@ -684,15 +683,55 @@ export const mockApi = {
     };
   },
 
-  // Get all candidates
-  getCandidates: async (): Promise<{ candidates: Candidate[] }> => {
-    console.log(`🗳️ Mock: Getting candidates`);
+  // Get candidates filtered by location (state, LGA)
+  getCandidates: async (
+    state?: string,
+    lga?: string,
+  ): Promise<{ candidates: Candidate[] }> => {
+    console.log(`🗳️ Mock: Getting candidates for ${state || "all states"}`);
 
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 800));
 
+    let filtered = candidates;
+
+    // Filter by state if provided
+    if (state) {
+      filtered = filtered.filter((candidate) => candidate.state === state);
+    }
+
+    // For House of Representatives, filter by LGA/constituency if provided
+    if (lga && state) {
+      filtered = filtered.filter((candidate) => {
+        // Governors and Senators match the state
+        if (
+          candidate.position === "Governor" ||
+          candidate.position === "Senator"
+        ) {
+          return candidate.state === state;
+        }
+
+        // House of Representatives: match if constituency contains the LGA
+        if (candidate.position === "House of Representatives") {
+          const constituencyLower = candidate.constituency.toLowerCase();
+          const lgaLower = lga.toLowerCase();
+
+          // Check if constituency contains the LGA name
+          // Example: "Fufore/Song Federal Constituency" matches "Fufore" or "Song"
+          return (
+            constituencyLower.includes(lgaLower) ||
+            lgaLower.includes(
+              constituencyLower.split("/")[0]?.toLowerCase() || "",
+            )
+          );
+        }
+
+        return true;
+      });
+    }
+
     return {
-      candidates: candidates,
+      candidates: filtered,
     };
   },
 

@@ -67,7 +67,7 @@ export function DuplicateCheckStep() {
         </p>
       </div>
 
-      <Card className="border-border/60 bg-card/80 shadow-xl backdrop-blur-sm">
+      <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
         <CardContent className="flex min-h-[300px] flex-col items-center justify-center space-y-6 py-12">
           {isLoading && (
             <>
