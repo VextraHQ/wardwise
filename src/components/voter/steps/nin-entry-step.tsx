@@ -45,6 +45,7 @@ import {
   ninSchema,
   normalizeNINInput,
 } from "@/lib/registration-schemas";
+import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 // Zod schema validation for terms and conditions check
 const ninFormSchema = z.object({
@@ -469,22 +470,22 @@ export function NinEntryStep() {
       </div>
 
       {/* Subtle Trust Indicators */}
-      <div className="mx-auto max-w-2xl">
-        <div className="text-muted-foreground/80 flex items-center justify-center gap-8 text-xs">
-          <div className="flex items-center gap-2">
-            <HiShieldCheck className="text-primary h-4 w-4" />
-            <span className="font-medium">Secure & Encrypted</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <HiCreditCard className="text-primary h-4 w-4" />
-            <span className="font-medium">NIMC Verified</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <HiCheckCircle className="text-primary h-4 w-4" />
-            <span className="font-medium">Trusted Platform</span>
-          </div>
-        </div>
-      </div>
+      <TrustIndicators
+        items={[
+          {
+            icon: <HiShieldCheck className="h-4 w-4" />,
+            label: "Secure & Encrypted",
+          },
+          {
+            icon: <HiCreditCard className="h-4 w-4" />,
+            label: "NIMC Verified",
+          },
+          {
+            icon: <HiCheckCircle className="h-4 w-4" />,
+            label: "Trusted Platform",
+          },
+        ]}
+      />
     </div>
   );
 }

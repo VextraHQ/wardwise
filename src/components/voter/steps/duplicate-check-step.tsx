@@ -3,12 +3,20 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  ShieldCheck,
+  Database,
+  Clock,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useRegistration } from "@/hooks/use-registration";
 import { mockApi } from "@/lib/mock/mockApi";
+import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 export function DuplicateCheckStep() {
   const router = useRouter();
@@ -134,6 +142,15 @@ export function DuplicateCheckStep() {
           )}
         </CardContent>
       </Card>
+
+      {/* Subtle Trust Indicators */}
+      <TrustIndicators
+        items={[
+          { icon: <ShieldCheck className="h-4 w-4" />, label: "Fraud Check" },
+          { icon: <Database className="h-4 w-4" />, label: "De-duplication" },
+          { icon: <Clock className="h-4 w-4" />, label: "Quick & Private" },
+        ]}
+      />
     </div>
   );
 }

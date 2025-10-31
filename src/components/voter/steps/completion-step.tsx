@@ -5,15 +5,17 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   CheckCircle2,
-  Share2,
   User,
   MapPin,
   Users,
   ClipboardList,
-  Copy,
-  MessageCircle,
-  Mail,
+  ShieldCheck,
+  Lock,
+  CheckCircle,
 } from "lucide-react";
+import { HiShare, HiClipboardCopy, HiChatAlt } from "react-icons/hi";
+import { FaWhatsapp } from "react-icons/fa";
+import { HiMail } from "react-icons/hi";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -21,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useRegistration } from "@/hooks/use-registration";
 import { cn } from "@/lib/utils";
+import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 export function CompletionStep() {
   const router = useRouter();
@@ -64,36 +67,66 @@ export function CompletionStep() {
     `${payload.basic?.firstName || ""} ${payload.basic?.lastName || ""}`.trim();
 
   return (
-    <div className="space-y-8">
-      {/* Success Animation */}
-      <div className="flex flex-col items-center justify-center space-y-4 text-center">
-        <div className="relative">
+    <div className="space-y-10">
+      {/* Success Header */}
+      <section aria-live="polite" className="text-center">
+        <div className="mx-auto w-fit">
           <div
             className={cn(
-              "bg-primary/20 flex h-24 w-24 items-center justify-center rounded-full transition-all duration-500",
+              "bg-primary/15 flex h-16 w-16 items-center justify-center rounded-full transition-transform",
               showConfetti && "scale-110",
             )}
           >
-            <div className="bg-primary flex h-20 w-20 items-center justify-center rounded-full">
-              <CheckCircle2 className="text-primary-foreground h-12 w-12" />
+            <div className="bg-primary flex h-12 w-12 items-center justify-center rounded-full">
+              <CheckCircle2 className="text-primary-foreground h-7 w-7" />
             </div>
           </div>
-          {showConfetti && (
-            <div className="absolute inset-0 animate-ping">
-              <div className="bg-primary/30 h-24 w-24 rounded-full" />
-            </div>
-          )}
         </div>
+        <h1 className="text-foreground mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">
+          You’re all set, {firstName}
+        </h1>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+          Your registration has been saved securely.
+        </p>
+      </section>
 
-        <div className="space-y-2">
-          <h1 className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
-            Registration Complete!
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Thank you, {firstName}! Your voice will be heard.
-          </p>
+      {/* Navigation Actions */}
+      <nav aria-label="Next steps" className="mx-auto max-w-3xl">
+        <div className="flex flex-col items-stretch gap-3 sm:flex-row">
+          <Button
+            asChild
+            size="lg"
+            className="from-primary to-primary/90 h-11 flex-1 bg-gradient-to-r font-semibold shadow-sm"
+          >
+            <Link href="/voter/profile" aria-label="View my profile">
+              <User className="mr-2 h-4 w-4" />
+              View My Profile
+            </Link>
+          </Button>
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+            className="border-border/60 h-11 flex-1 font-medium"
+          >
+            <Link href="/" aria-label="Return to home">
+              Return Home
+            </Link>
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="border-border/60 h-11 flex-1 font-medium"
+            onClick={() => {
+              reset();
+              router.push("/register");
+            }}
+            aria-label="Start a new registration"
+          >
+            New Registration
+          </Button>
         </div>
-      </div>
+      </nav>
 
       {/* Summary Card */}
       <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
@@ -224,90 +257,81 @@ export function CompletionStep() {
         </CardContent>
       </Card>
 
-      {/* Actions */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Button
-          asChild
-          size="lg"
-          className="from-primary to-primary/90 h-12 bg-gradient-to-r"
-        >
-          <Link href="/voter/profile">
-            <User className="mr-2 h-5 w-5" />
-            View My Profile
-          </Link>
-        </Button>
-        <Button asChild size="lg" variant="outline" className="h-12">
-          <Link href="/">Return to Home</Link>
-        </Button>
-        <Button
-          size="lg"
-          variant="outline"
-          className="h-12"
-          onClick={() => {
-            reset();
-            router.push("/register");
-          }}
-        >
-          <User className="mr-2 h-5 w-5" />
-          New Registration
-        </Button>
-      </div>
-
-      {/* Share Section */}
+      {/* Share WardWise Card */}
       <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="border-border border-b pb-6">
+        <CardContent className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-primary/15 flex h-10 w-10 items-center justify-center rounded-full">
-              <Share2 className="text-primary h-5 w-5" />
+            <div className="border-primary/30 bg-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border">
+              <HiShare className="text-primary h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-foreground text-xl font-semibold">
+              <h3 className="text-foreground text-base font-semibold">
                 Share WardWise
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                Help others register and make their voices heard
+              </h3>
+              <p className="text-muted-foreground text-xs">
+                Spread the word with your network
               </p>
             </div>
           </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex flex-shrink-0 items-center gap-2">
             <Button
               variant="outline"
-              className="h-12 gap-2"
+              size="sm"
+              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 px-3"
               onClick={handleWhatsAppShare}
+              aria-label="Share on WhatsApp"
             >
-              <MessageCircle className="h-5 w-5 text-green-600" />
-              Share on WhatsApp
+              <FaWhatsapp className="h-3.5 w-3.5" />
+              <span>WhatsApp</span>
             </Button>
             <Button
               variant="outline"
-              className="h-12 gap-2"
-              onClick={handleSMSShare}
-            >
-              <MessageCircle className="h-5 w-5 text-blue-600" />
-              Share via SMS
-            </Button>
-            <Button
-              variant="outline"
-              className="h-12 gap-2"
+              size="sm"
+              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 px-3"
               onClick={handleEmailShare}
+              aria-label="Share via Email"
             >
-              <Mail className="h-5 w-5 text-red-600" />
-              Share via Email
+              <HiMail className="h-3.5 w-3.5" />
+              <span>Email</span>
             </Button>
             <Button
               variant="outline"
-              className="h-12 gap-2"
-              onClick={handleCopyLink}
+              size="sm"
+              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 px-3"
+              onClick={handleSMSShare}
+              aria-label="Share via SMS"
             >
-              <Copy className="h-5 w-5" />
-              Copy Link
+              <HiChatAlt className="h-3.5 w-3.5" />
+              <span>SMS</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 px-3"
+              onClick={handleCopyLink}
+              aria-label="Copy share link"
+            >
+              <HiClipboardCopy className="h-3.5 w-3.5" />
+              <span>Copy link</span>
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Subtle Trust Indicators */}
+      <TrustIndicators
+        items={[
+          {
+            icon: <ShieldCheck className="h-4 w-4" />,
+            label: "Verified Registration",
+          },
+          { icon: <Lock className="h-4 w-4" />, label: "Secure Data" },
+          {
+            icon: <CheckCircle className="h-4 w-4" />,
+            label: "Ready to Participate",
+          },
+        ]}
+      />
     </div>
   );
 }

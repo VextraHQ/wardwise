@@ -37,6 +37,7 @@ import {
 import { useRegistration } from "@/hooks/use-registration";
 import { normalizeNigerianPhoneInput } from "@/lib/registration-schemas";
 import { useEffect } from "react";
+import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -473,22 +474,13 @@ export function ProfileStep() {
       </div>
 
       {/* Subtle Trust Indicators */}
-      <div className="mx-auto max-w-2xl">
-        <div className="text-muted-foreground/80 flex items-center justify-center gap-8 text-xs">
-          <div className="flex items-center gap-2">
-            <HiUser className="text-primary h-4 w-4" />
-            <span className="font-medium">Data Privacy</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <HiCalendar className="text-primary h-4 w-4" />
-            <span className="font-medium">Age Verified</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <HiPhone className="text-primary h-4 w-4" />
-            <span className="font-medium">Optional Contact</span>
-          </div>
-        </div>
-      </div>
+      <TrustIndicators
+        items={[
+          { icon: <HiUser className="h-4 w-4" />, label: "Data Privacy" },
+          { icon: <HiCalendar className="h-4 w-4" />, label: "Age Verified" },
+          { icon: <HiPhone className="h-4 w-4" />, label: "Optional Contact" },
+        ]}
+      />
     </div>
   );
 }

@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, ArrowLeft, Loader2, FileQuestion } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowLeft,
+  Loader2,
+  FileQuestion,
+  ShieldCheck,
+  ClipboardList,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -15,6 +23,7 @@ import { useRegistration } from "@/hooks/use-registration";
 import { cn } from "@/lib/utils";
 import { mockApi, CandidateSurvey, SurveyQuestion } from "@/lib/mock/mockApi";
 import { Textarea } from "@/components/ui/textarea";
+import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 export function CandidateSurveyStep() {
   const router = useRouter();
@@ -484,6 +493,21 @@ export function CandidateSurveyStep() {
           })}
         </div>
       </div>
+
+      {/* Subtle Trust Indicators */}
+      <TrustIndicators
+        items={[
+          { icon: <ShieldCheck className="h-4 w-4" />, label: "Secure Survey" },
+          {
+            icon: <ClipboardList className="h-4 w-4" />,
+            label: "Policy-Guided",
+          },
+          {
+            icon: <Users className="h-4 w-4" />,
+            label: "Anonymous Aggregation",
+          },
+        ]}
+      />
     </div>
   );
 }

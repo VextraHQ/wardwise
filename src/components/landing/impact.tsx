@@ -107,14 +107,14 @@ export function ImpactSection() {
                     with field teams and partner organizations.
                   </p>
                 </div>
-                <div className="text-primary/80 flex flex-col gap-2 text-xs font-semibold tracking-[0.26em] uppercase sm:flex-row sm:items-center sm:gap-3">
-                  <span className="border-primary/30 bg-primary/10 text-primary inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1">
+                <div className="text-primary/80 flex flex-col flex-wrap gap-2 text-xs font-semibold tracking-[0.26em] uppercase sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-2">
+                  <span className="border-primary/30 bg-primary/10 text-primary inline-flex w-fit shrink-0 items-center gap-2 rounded-full border px-3 py-1 whitespace-nowrap">
                     17
                     <span className="text-[10px] font-medium">
                       Wards pending
                     </span>
                   </span>
-                  <span className="border-primary/30 bg-primary/10 text-primary inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1">
+                  <span className="border-primary/30 bg-primary/10 text-primary inline-flex w-fit shrink-0 items-center gap-2 rounded-full border px-3 py-1 whitespace-nowrap">
                     86%
                     <span className="text-[10px] font-medium">Coverage</span>
                   </span>

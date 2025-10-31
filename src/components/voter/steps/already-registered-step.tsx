@@ -2,10 +2,19 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, User, RefreshCw, LogOut } from "lucide-react";
+import {
+  CheckCircle2,
+  User,
+  RefreshCw,
+  LogOut,
+  ShieldCheck,
+  CheckCircle,
+  Lock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useRegistration } from "@/hooks/use-registration";
+import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 export function AlreadyRegisteredStep() {
   const router = useRouter();
@@ -108,6 +117,21 @@ export function AlreadyRegisteredStep() {
           </p>
         </CardContent>
       </Card>
+
+      {/* Subtle Trust Indicators */}
+      <TrustIndicators
+        items={[
+          {
+            icon: <ShieldCheck className="h-4 w-4" />,
+            label: "Verified Account",
+          },
+          {
+            icon: <CheckCircle className="h-4 w-4" />,
+            label: "Active Registration",
+          },
+          { icon: <Lock className="h-4 w-4" />, label: "Data Protected" },
+        ]}
+      />
     </div>
   );
 }

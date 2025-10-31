@@ -14,6 +14,7 @@ import {
   Landmark,
   Scale,
   Building2,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { mockApi } from "@/lib/mock/mockApi";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { type Candidate } from "@/lib/mock/mockApi";
+import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 export function CandidateSelectionStep() {
   const router = useRouter();
@@ -431,6 +433,18 @@ export function CandidateSelectionStep() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Subtle Trust Indicators */}
+      <TrustIndicators
+        items={[
+          {
+            icon: <ShieldCheck className="h-4 w-4" />,
+            label: "Verified Candidates",
+          },
+          { icon: <MapPin className="h-4 w-4" />, label: "Location Scoped" },
+          { icon: <Users className="h-4 w-4" />, label: "Data Integrity" },
+        ]}
+      />
     </div>
   );
 }

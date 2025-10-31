@@ -33,6 +33,7 @@ import {
 import { useRegistration } from "@/hooks/use-registration";
 import { useLocationData } from "@/hooks/use-location-data";
 import { useQueryClient } from "@tanstack/react-query";
+import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 const locationSchema = z.object({
   state: z.string().min(1, "Please select your state"),
@@ -457,18 +458,18 @@ export function LocationStep() {
       </div>
 
       {/* Subtle Trust Indicators */}
-      <div className="mx-auto max-w-2xl">
-        <div className="text-muted-foreground/80 flex items-center justify-center gap-8 text-xs">
-          <div className="flex items-center gap-2">
-            <HiLocationMarker className="text-primary h-4 w-4" />
-            <span className="font-medium">Accurate Location</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <HiQuestionMarkCircle className="text-primary h-4 w-4" />
-            <span className="font-medium">Help Available</span>
-          </div>
-        </div>
-      </div>
+      <TrustIndicators
+        items={[
+          {
+            icon: <HiLocationMarker className="h-4 w-4" />,
+            label: "Accurate Location",
+          },
+          {
+            icon: <HiQuestionMarkCircle className="h-4 w-4" />,
+            label: "Help Available",
+          },
+        ]}
+      />
     </div>
   );
 }

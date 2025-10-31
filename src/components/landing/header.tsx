@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Transition } from "@headlessui/react";
 import {
@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { navigationLinks } from "@/lib/landing-data";
 import { cn } from "@/lib/utils";
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 type SiteHeaderProps = {
   className?: string;
@@ -26,6 +27,13 @@ type SiteHeaderProps = {
 export function SiteHeader({ className }: SiteHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  useClickOutside(mobileMenuRef, () => setIsMobileOpen(false), {
+    active: isMobileOpen,
+    ignoreRefs: [toggleRef],
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,34 +50,34 @@ export function SiteHeader({ className }: SiteHeaderProps) {
     <header className={cn("sticky top-0 z-50 w-full", className)}>
       <div
         className={cn(
-          "transition-colors duration-300",
+          "bg-background/60 backdrop-blur transition-colors duration-300",
           scrolled
-            ? "border-border border-b shadow-[0_6px_18px_rgba(12,39,32,0.06)] backdrop-blur"
+            ? "border-border bg-card/90 border-b shadow-[0_6px_18px_rgba(12,39,32,0.06)]"
             : "border-b border-transparent",
         )}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 sm:py-6">
           <Link
             href="/"
-            className="flex items-center gap-3"
+            className="flex items-center gap-2 sm:gap-3"
             aria-label="WardWise home"
           >
-            <span className="relative flex size-12 items-center justify-center">
+            <span className="relative flex size-10 items-center justify-center sm:size-12">
               <span className="border-border bg-card absolute inset-0 rounded-full border shadow-[0_10px_24px_rgba(12,39,32,0.08)]" />
-              <span className="from-primary relative flex size-9 items-center justify-center rounded-full bg-gradient-to-br via-[#2f7f6b] to-[#163a30] text-white">
+              <span className="from-primary relative flex size-7 items-center justify-center rounded-full bg-gradient-to-br via-[#2f7f6b] to-[#163a30] text-white sm:size-9">
                 <MapIcon className="size-5" />
               </span>
             </span>
-            <div className="flex flex-col leading-none">
-              <span className="text-foreground text-base font-semibold tracking-[0.18em] uppercase">
+            <div className="flex min-w-0 flex-col leading-none">
+              <span className="text-foreground truncate text-sm font-semibold tracking-[0.18em] uppercase sm:text-base">
                 WardWise
               </span>
-              <span className="text-muted-foreground text-[11px] font-medium">
+              <span className="text-muted-foreground truncate text-[10px] font-medium sm:text-[11px]">
                 Civic Intelligence Platform
               </span>
             </div>
           </Link>
-          <nav className="text-accent hidden items-center gap-8 text-sm font-medium lg:flex">
+          <nav className="text-accent hidden items-center gap-6 text-sm font-medium lg:flex xl:gap-8 xl:text-base">
             {navigationLinks.map((link) => (
               <a
                 key={link.section}
@@ -117,6 +125,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
             type="button"
             onClick={() => setIsMobileOpen((prev) => !prev)}
             aria-label="Toggle navigation"
+            ref={toggleRef}
           >
             {isMobileOpen ? (
               <XMarkIcon className="size-5" />
@@ -137,7 +146,10 @@ export function SiteHeader({ className }: SiteHeaderProps) {
         leaveTo="opacity-0 -translate-y-3"
       >
         <div className="lg:hidden">
-          <div className="border-border bg-card border-b px-6 pt-4 pb-6 shadow-[0_24px_48px_rgba(12,39,32,0.12)]">
+          <div
+            className="border-border bg-card border-b px-6 pt-4 pb-6 shadow-[0_24px_48px_rgba(12,39,32,0.12)]"
+            ref={mobileMenuRef}
+          >
             <nav className="text-accent flex flex-col gap-1 text-base">
               {navigationLinks.map((link) => (
                 <a
@@ -153,7 +165,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
             <div className="mt-5 flex flex-col gap-3">
               <Link
                 href="/login"
-                className="border-border text-foreground hover:border-primary hover:bg-foreground/90 rounded-lg border px-4 py-3 text-center text-sm font-semibold transition duration-200"
+                className="border-border text-foreground hover:bg-foreground hover:text-background rounded-lg border px-4 py-3 text-center text-sm font-semibold transition-colors duration-200 hover:border-transparent"
                 onClick={() => setIsMobileOpen(false)}
               >
                 Candidate Login

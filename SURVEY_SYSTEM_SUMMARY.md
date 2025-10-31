@@ -5,12 +5,14 @@
 A **beautiful, candidate-specific survey system** that makes voters feel heard and gives candidates real insights about their constituents.
 
 ### The Problem
+
 - Generic surveys are boring and impersonal
 - Voters don't feel connected to the candidates
 - Candidates get generic feedback that doesn't help them
 - The old flow was: Register → Survey → Pick Candidate (wrong order!)
 
 ### The Solution
+
 - **Candidate-Branded Surveys** - Each candidate has their own questions
 - **Perfect Flow** - Voters pick candidate FIRST, then answer their questions
 - **Beautiful UI** - Emojis, icons, smooth interactions
@@ -42,6 +44,7 @@ that are stored and can be accessed later
 ## 🎨 Survey Examples
 
 ### Hon. Aliyu Wakili Boya's Survey
+
 **"Help Aliyu Understand Song & Fufore"**
 
 ```
@@ -62,7 +65,9 @@ that are stored and can be accessed later
 ```
 
 ### Dr. Maryam's Survey
+
 **"Dr. Maryam's Vision for Adamawa Central"**
+
 - Focus: Healthcare & Women's Empowerment
 - Questions on health concerns and women's needs
 - Shorter, 3-question format for quick completion
@@ -72,12 +77,14 @@ that are stored and can be accessed later
 ## 🏗️ Technical Implementation
 
 ### New Files Created:
+
 1. **candidate-survey-step.tsx** (400 lines)
    - Beautiful, fully-featured survey component
    - Handles 5 question types
    - Full accessibility & responsive design
 
 ### Updated Files:
+
 1. **mockApi.ts** (100+ lines added)
    - New types: CandidateSurvey, SurveyQuestion, SurveyOption
    - 5 complete candidate surveys with data
@@ -92,6 +99,7 @@ that are stored and can be accessed later
    - Updated metadata
 
 ### No Changes Needed:
+
 - Candidate selection step (works perfectly as-is)
 - Registration hook (uses flexible Partial<RegistrationPayload>)
 - Most other components (clean architecture!)
@@ -101,6 +109,7 @@ that are stored and can be accessed later
 ## ✨ Key Features
 
 ### 🎯 Question Types
+
 - **Single Choice** - Pick one (radio buttons with icons)
 - **Multiple Choice** - Pick several (checkboxes)
 - **Scale** - Rate 1-5 (beautiful button grid)
@@ -108,6 +117,7 @@ that are stored and can be accessed later
 - **Ranking** - Future feature ready
 
 ### 🎨 Visual Polish
+
 - ✅ Candidate name & tagline at top
 - ✅ Survey title & description
 - ✅ Large emoji/icon on each question
@@ -118,6 +128,7 @@ that are stored and can be accessed later
 - ✅ Loading states & error handling
 
 ### 🔧 Smart Interactions
+
 - Answer validation (can't skip questions)
 - Question history (go back to previous)
 - Real-time answer tracking
@@ -129,6 +140,7 @@ that are stored and can be accessed later
 ## 💾 Data Flow
 
 ### What Gets Saved:
+
 ```javascript
 {
   "survey": {
@@ -144,6 +156,7 @@ that are stored and can be accessed later
 ```
 
 ### Candidates Get:
+
 - List of voters who selected them
 - Raw survey responses
 - Aggregated analytics (future)
@@ -156,27 +169,32 @@ that are stored and can be accessed later
 When showing to politicians:
 
 ### "Your voters will feel heard"
+
 - Survey is uniquely about THEIR priorities
 - Answers help YOU understand YOUR district
 - Voters see their name/constituency in survey
 
 ### "Beautiful, professional experience"
+
 - Modern design (looks like a real product)
 - Fast & responsive (3-minute survey)
 - Mobile-friendly & accessible
 
 ### "Real-time insights"
+
 - See responses as they come in
 - Know your actual support base
 - Track sentiment during campaign
 
 ### "Easy customization"
+
 - You create your own questions
 - Match your campaign messaging
 - 5 different question types
 - Update anytime
 
 ### "Voter loyalty"
+
 - Feels personal, not generic
 - Voters get notified of your progress on priorities
 - Creates ongoing engagement
@@ -186,18 +204,21 @@ When showing to politicians:
 ## 🚀 What's Next
 
 ### Short Term (Before 2027):
+
 1. **Candidate Dashboard** - View & analyze responses
 2. **Export Data** - CSV, charts, reports
 3. **Survey Builder** - Candidates customize questions
 4. **Mobile App** - For field agents
 
 ### Medium Term (2025-2026):
+
 1. **Admin Panel** - Manage all surveys
 2. **Advanced Analytics** - Heat maps, demographics
 3. **Notification System** - Alert candidates of new responses
 4. **Email Integration** - Share results with team
 
 ### Long Term (2026+):
+
 1. **AI-Powered Insights** - Sentiment analysis
 2. **Competitor Comparison** - See vs other candidates
 3. **Predictive Models** - Forecast election outcomes
@@ -208,6 +229,7 @@ When showing to politicians:
 ## 📈 Business Value
 
 ### For WardWise:
+
 - ✅ Unique feature differentiator vs competitors
 - ✅ Higher engagement = more data
 - ✅ Beautiful demo for investors
@@ -215,6 +237,7 @@ When showing to politicians:
 - ✅ Revenue: Per-candidate subscription or per-response fee
 
 ### For Candidates:
+
 - ✅ Know real voter priorities (not guesses)
 - ✅ Targeted campaign messaging
 - ✅ Build voter database
@@ -222,6 +245,7 @@ When showing to politicians:
 - ✅ Create community connection
 
 ### For Voters:
+
 - ✅ Feel heard and valued
 - ✅ Easy, quick process (3 minutes)
 - ✅ Beautiful, modern experience
@@ -286,5 +310,5 @@ The architecture is clean, scalable, and ready for production use or investor de
 
 ---
 
-*Built with ❤️ by the WardWise team*
-*Ready for demo to NASS members and political candidates*
+_Built with ❤️ by the WardWise team_
+_Ready for demo to NASS members and political candidates_
