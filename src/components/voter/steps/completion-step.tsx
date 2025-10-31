@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -13,29 +12,28 @@ import {
   Lock,
   CheckCircle,
 } from "lucide-react";
-import { HiShare, HiClipboardCopy, HiChatAlt } from "react-icons/hi";
+import {
+  HiShare,
+  HiClipboardCopy,
+  HiChatAlt,
+  HiHome,
+  HiUser,
+  HiUserAdd,
+  HiMail,
+  HiCheckCircle,
+} from "react-icons/hi";
 import { FaWhatsapp } from "react-icons/fa";
-import { HiMail } from "react-icons/hi";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useRegistration } from "@/hooks/use-registration";
-import { cn } from "@/lib/utils";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 export function CompletionStep() {
   const router = useRouter();
   const { payload, reset } = useRegistration();
-  const [showConfetti, setShowConfetti] = useState(false);
-
-  useEffect(() => {
-    // Show confetti animation
-    setTimeout(() => setShowConfetti(true), 1000);
-    const timer = setTimeout(() => setShowConfetti(false), 3000);
-    return () => clearTimeout(timer);
-  }, []);
 
   const shareUrl =
     typeof window !== "undefined" ? window.location.origin + "/register" : "";
@@ -69,60 +67,57 @@ export function CompletionStep() {
   return (
     <div className="space-y-10">
       {/* Success Header */}
-      <section aria-live="polite" className="text-center">
-        <div className="mx-auto w-fit">
-          <div
-            className={cn(
-              "bg-primary/15 flex h-16 w-16 items-center justify-center rounded-full transition-transform",
-              showConfetti && "scale-110",
-            )}
-          >
-            <div className="bg-primary flex h-12 w-12 items-center justify-center rounded-full">
-              <CheckCircle2 className="text-primary-foreground h-7 w-7" />
-            </div>
+      <section aria-live="polite" className="mx-auto max-w-2xl">
+        <div className="space-y-3 text-center">
+          <div className="border-primary/30 bg-primary/10 text-accent inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
+            <HiCheckCircle className="h-3.5 w-3.5" />
+            <span>Registration Complete</span>
           </div>
+          <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+            You're all set, {firstName}
+          </h1>
+          <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
+            Your registration has been saved securely
+          </p>
         </div>
-        <h1 className="text-foreground mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">
-          You’re all set, {firstName}
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-          Your registration has been saved securely.
-        </p>
       </section>
 
       {/* Navigation Actions */}
-      <nav aria-label="Next steps" className="mx-auto max-w-3xl">
-        <div className="flex flex-col items-stretch gap-3 sm:flex-row">
+      <nav aria-label="Next steps" className="mx-auto max-w-2xl">
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
           <Button
             asChild
-            size="lg"
-            className="from-primary to-primary/90 h-11 flex-1 bg-gradient-to-r font-semibold shadow-sm"
+            size="default"
+            variant="outline"
+            className="border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 h-10 px-5 text-sm font-medium transition-colors"
           >
             <Link href="/voter/profile" aria-label="View my profile">
-              <User className="mr-2 h-4 w-4" />
+              <HiUser className="h-3.5 w-3.5" />
               View My Profile
             </Link>
           </Button>
           <Button
             asChild
-            size="lg"
+            size="default"
             variant="outline"
-            className="border-border/60 h-11 flex-1 font-medium"
+            className="border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/50 h-10 gap-1.5 px-4 text-sm font-normal transition-colors"
           >
             <Link href="/" aria-label="Return to home">
+              <HiHome className="h-3.5 w-3.5" />
               Return Home
             </Link>
           </Button>
           <Button
-            size="lg"
+            size="default"
             variant="outline"
-            className="border-border/60 h-11 flex-1 font-medium"
+            className="border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/50 h-10 gap-1.5 px-4 text-sm font-normal transition-colors"
             onClick={() => {
               reset();
               router.push("/register");
             }}
             aria-label="Start a new registration"
           >
+            <HiUserAdd className="h-3.5 w-3.5" />
             New Registration
           </Button>
         </div>
