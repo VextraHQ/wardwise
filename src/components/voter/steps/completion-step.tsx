@@ -35,41 +35,47 @@ export function CompletionStep() {
   const router = useRouter();
   const { payload, reset } = useRegistration();
 
+  // Share URL and text
   const shareUrl =
     typeof window !== "undefined" ? window.location.origin + "/register" : "";
   const shareText = `I just registered with WardWise to participate in Adamawa State elections! Join me in making your voice heard. Register now: ${shareUrl}`;
 
+  // Copy link to clipboard
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareUrl);
     toast.success("Link copied to clipboard!");
   };
 
+  // Share on WhatsApp
   const handleWhatsAppShare = () => {
     const url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
     window.open(url, "_blank");
   };
 
+  // Share via SMS
   const handleSMSShare = () => {
     const url = `sms:?body=${encodeURIComponent(shareText)}`;
     window.location.href = url;
   };
 
+  // Share via Email
   const handleEmailShare = () => {
     const subject = "Join WardWise - Register to Vote";
     const url = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(shareText)}`;
     window.location.href = url;
   };
 
+  // First name and full name
   const firstName = payload.basic?.firstName || "Voter";
   const fullName =
     `${payload.basic?.firstName || ""} ${payload.basic?.lastName || ""}`.trim();
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       {/* Success Header */}
       <section aria-live="polite" className="mx-auto max-w-2xl">
-        <div className="space-y-3 text-center">
-          <div className="border-primary/30 bg-primary/10 text-accent inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
+        <div className="text-center">
+          <div className="border-primary/30 bg-primary/10 text-accent mb-3 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
             <HiCheckCircle className="h-3.5 w-3.5" />
             <span>Registration Complete</span>
           </div>
@@ -125,7 +131,7 @@ export function CompletionStep() {
 
       {/* Summary Card */}
       <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="border-border border-b pb-6">
+        <CardHeader className="border-border border-b">
           <h2 className="text-foreground text-xl font-semibold">
             Your Registration Summary
           </h2>
@@ -254,7 +260,7 @@ export function CompletionStep() {
 
       {/* Share WardWise Card */}
       <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
-        <CardContent className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <CardContent className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
             <div className="border-primary/30 bg-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border">
               <HiShare className="text-primary h-5 w-5" />
@@ -268,7 +274,7 @@ export function CompletionStep() {
               </p>
             </div>
           </div>
-          <div className="flex flex-shrink-0 items-center gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end">
             <Button
               variant="outline"
               size="sm"

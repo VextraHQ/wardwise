@@ -14,13 +14,15 @@ import {
   HiExclamationCircle,
   HiInformationCircle,
 } from "react-icons/hi";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, User, MapPin, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { StepProgress } from "@/components/ui/step-progress";
 import {
   Tooltip,
@@ -55,8 +57,10 @@ const ninFormSchema = z.object({
   }),
 });
 
+// Type for NIN form values
 type NinFormValues = z.infer<typeof ninFormSchema>;
 
+// Type for verification status
 type VerificationStatus = "idle" | "verifying" | "verified" | "error";
 
 interface VerificationData {
@@ -197,33 +201,35 @@ export function NinEntryStep() {
 
   return (
     <div className="space-y-6">
-      {/* Reusable Progress Component */}
+      {/* Progress Component */}
       <StepProgress
         currentStep={1}
         totalSteps={6}
         stepTitle="Identity Verification"
       />
 
-      {/* Hero Section with Sparkles Badge */}
-      <div className="space-y-3 text-center">
-        <div className="border-primary/30 bg-primary/10 text-accent inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
-          <HiSparkles className="h-3.5 w-3.5" />
-          <span>Your Voice Shapes Tomorrow</span>
+      {/* Hero Section */}
+      <section className="mx-auto max-w-2xl">
+        <div className="space-y-3 text-center">
+          <div className="border-primary/30 bg-primary/10 text-accent inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
+            <HiSparkles className="h-3.5 w-3.5" />
+            <span>Your Voice Shapes Tomorrow</span>
+          </div>
+          <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+            Voter Registration
+          </h1>
+          <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
+            Verify your identity to participate in nationwide elections
+          </p>
         </div>
-        <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-          Voter Registration
-        </h1>
-        <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
-          Verify your identity to participate in nationwide elections
-        </p>
-      </div>
+      </section>
 
-      {/* Main Card */}
+      {/* Main Form Card */}
       <div className="mx-auto w-full max-w-2xl">
-        <Card className="border-border/60 bg-card/95 backdrop-blur-sm">
-          <CardHeader className="border-border/40 border-b">
+        <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
+          <CardHeader className="border-border border-b">
             <div className="space-y-1">
-              <h2 className="text-foreground text-lg font-semibold tracking-tight">
+              <h2 className="text-foreground text-xl font-semibold">
                 Enter Your NIN
               </h2>
               <p className="text-muted-foreground text-sm">
@@ -236,67 +242,72 @@ export function NinEntryStep() {
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-3"
+                className="space-y-6"
               >
                 {/* NIN Input Section */}
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="nin"
-                    className="text-foreground text-sm font-medium"
-                  >
-                    National Identification Number (NIN)
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <HiInformationCircle className="text-muted-foreground h-4 w-4 cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>
-                            Your 11-digit NIN is found on your NIMC ID card or
-                            National ID slip
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </Label>
-                  <div className="relative">
-                    <HiCreditCard className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
-                    <Input
-                      id="nin"
-                      type="text"
-                      placeholder="Enter your 11-digit NIN"
-                      value={rawNin}
-                      onChange={(e) => handleNINChange(e.target.value)}
-                      disabled={verificationStatus === "verifying"}
-                      maxLength={13}
-                      className={cn(
-                        "border-border/60 focus:border-primary focus:ring-primary disabled:bg-muted/50 h-12 pr-16 pl-12 text-base tracking-wider transition-all duration-200 placeholder:text-sm",
-                        form.formState.errors.nin &&
-                          "border-destructive focus:border-destructive",
-                        verificationStatus === "verified" &&
-                          "border-green-500 bg-green-50/50 focus:border-green-500",
-                        verificationStatus === "error" &&
-                          "border-red-500 bg-red-50/50 focus:border-red-500",
+                {verificationStatus !== "verified" && (
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor="nin"
+                      className="text-foreground flex items-center gap-2 text-sm font-medium"
+                    >
+                      National Identification Number (NIN)
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HiInformationCircle className="text-muted-foreground h-4 w-4 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              Your 11-digit NIN is found on your NIMC ID card or
+                              National ID slip
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </Label>
+                    <div className="relative">
+                      <HiCreditCard className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+                      <Input
+                        id="nin"
+                        type="text"
+                        placeholder="Enter your 11-digit NIN"
+                        value={rawNin}
+                        onChange={(e) => handleNINChange(e.target.value)}
+                        disabled={verificationStatus === "verifying"}
+                        maxLength={13}
+                        className={cn(
+                          "border-border/60 focus:border-primary focus:ring-primary disabled:bg-muted/50 h-12 pr-16 pl-12 text-base tracking-wider transition-all duration-200 placeholder:text-sm",
+                          form.formState.errors.nin &&
+                            "border-destructive focus:border-destructive focus:ring-destructive",
+                        )}
+                      />
+                      {verificationStatus === "idle" && (
+                        <div className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 font-mono text-xs">
+                          {getCharacterCount()}
+                        </div>
                       )}
-                    />
-                    {/* Digit Counter */}
-                    <div className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 font-mono text-xs">
-                      {getCharacterCount()}
                     </div>
+                    {form.formState.errors.nin && (
+                      <p className="text-destructive text-xs">
+                        {form.formState.errors.nin.message}
+                      </p>
+                    )}
                   </div>
-                </div>
+                )}
 
                 {/* Error State */}
                 {verificationStatus === "error" && (
-                  <div className="space-y-2">
-                    <div className="bg-destructive/10 border-destructive/20 flex gap-3 rounded-md border p-3">
-                      <HiExclamationCircle className="text-destructive mt-0.5 h-4 w-4 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="text-destructive text-sm font-medium">
-                          NIN verification failed
+                  <div className="space-y-3">
+                    <div className="bg-destructive/10 border-destructive/20 flex gap-3 rounded-lg border p-4">
+                      <HiExclamationCircle className="text-destructive mt-0.5 h-5 w-5 flex-shrink-0" />
+                      <div className="flex-1 space-y-1">
+                        <p className="text-destructive text-sm font-semibold">
+                          Verification Failed
                         </p>
-                        <p className="text-destructive/80 mt-1 text-xs">
-                          Please check your NIN and try again
+                        <p className="text-destructive/80 text-xs">
+                          Please check your NIN and try again. Make sure you've
+                          entered all 11 digits correctly.
                         </p>
                       </div>
                     </div>
@@ -313,145 +324,218 @@ export function NinEntryStep() {
 
                 {/* Loading State */}
                 {verificationStatus === "verifying" && (
-                  <div className="flex flex-col items-center justify-center gap-2 py-8">
-                    <Loader2 className="text-primary h-5 w-5 animate-spin" />
-                    <p className="text-muted-foreground text-sm">
-                      Verifying your NIN with NIMC...
-                    </p>
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <div className="border-primary/30 bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full border">
+                      <Loader2 className="text-primary h-6 w-6 animate-spin" />
+                    </div>
+                    <div className="space-y-1 text-center">
+                      <p className="text-foreground text-sm font-medium">
+                        Verifying your NIN
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        Connecting to NIMC database...
+                      </p>
+                    </div>
                   </div>
                 )}
 
-                {/* Success State */}
+                {/* Success State - Verification Details */}
                 {verificationStatus === "verified" && verificationData && (
-                  <div className="space-y-4">
-                    <div className="flex gap-3 rounded-lg border border-green-200 bg-green-50 p-4">
-                      <HiCheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-700" />
-                      <div>
+                  <div className="space-y-6">
+                    {/* Success Badge */}
+                    <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4">
+                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
+                        <CheckCircle2 className="h-5 w-5 text-green-700" />
+                      </div>
+                      <div className="flex-1">
                         <p className="text-sm font-semibold text-green-900">
                           Verification Successful
                         </p>
-                        <p className="mt-0.5 text-xs text-green-700">
-                          Your identity has been verified
+                        <p className="text-xs text-green-700">
+                          Your identity has been verified with NIMC
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="gap-1">
+                        <HiCheckCircle className="h-3 w-3" />
+                        Verified
+                      </Badge>
+                    </div>
+
+                    {/* Verified Information Section */}
+                    <div className="space-y-4">
+                      {/* Section Header */}
+                      <div className="text-accent flex items-center gap-2 text-sm font-semibold">
+                        <User className="h-4 w-4" />
+                        <span>Verified Identity Information</span>
+                      </div>
+
+                      {/* Personal Information */}
+                      <div className="space-y-3">
+                        <div className="bg-muted/50 rounded-lg p-4">
+                          <dl className="space-y-3">
+                            <div>
+                              <dt className="text-muted-foreground text-xs">
+                                Full Name
+                              </dt>
+                              <dd className="text-foreground mt-1 text-base font-medium">
+                                {verificationData.firstName}{" "}
+                                {verificationData.lastName}
+                              </dd>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <dt className="text-muted-foreground flex items-center gap-1 text-xs">
+                                  Date of Birth
+                                </dt>
+                                <dd className="text-foreground mt-1 text-sm font-medium">
+                                  {new Date(
+                                    verificationData.dateOfBirth,
+                                  ).toLocaleDateString("en-NG", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  })}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt className="text-muted-foreground text-xs">
+                                  Age
+                                </dt>
+                                <dd className="text-foreground mt-1 text-sm font-medium">
+                                  {new Date().getFullYear() -
+                                    new Date(
+                                      verificationData.dateOfBirth,
+                                    ).getFullYear()}{" "}
+                                  years
+                                </dd>
+                              </div>
+                            </div>
+                          </dl>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Location Information */}
+                      <div className="space-y-3">
+                        <div className="text-accent flex items-center gap-2 text-xs font-semibold">
+                          <MapPin className="h-3.5 w-3.5" />
+                          <span>Location Information</span>
+                        </div>
+                        <div className="bg-muted/50 rounded-lg p-4">
+                          <dl className="grid gap-3 sm:grid-cols-2">
+                            <div>
+                              <dt className="text-muted-foreground text-xs">
+                                State
+                              </dt>
+                              <dd className="text-foreground mt-1 text-sm font-medium">
+                                {verificationData.state}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="text-muted-foreground text-xs">
+                                LGA
+                              </dt>
+                              <dd className="text-foreground mt-1 text-sm font-medium">
+                                {verificationData.lga}
+                              </dd>
+                            </div>
+                          </dl>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Verification Timestamp */}
+                      <div>
+                        <p className="text-muted-foreground text-xs">
+                          Verified at{" "}
+                          {new Date(verificationData.verifiedAt).toLocaleString(
+                            "en-NG",
+                            {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            },
+                          )}
                         </p>
                       </div>
                     </div>
 
-                    <div className="bg-muted/50 border-border space-y-3 rounded-lg border p-4">
-                      <div>
-                        <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                          Full Name
-                        </p>
-                        <p className="text-foreground mt-1 text-base font-medium">
-                          {verificationData.firstName}{" "}
-                          {verificationData.lastName}
-                        </p>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                            State
-                          </p>
-                          <p className="text-foreground mt-1 text-sm font-medium">
-                            {verificationData.state}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                            LGA
-                          </p>
-                          <p className="text-foreground mt-1 text-sm font-medium">
-                            {verificationData.lga}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="border-border border-t pt-2">
-                        <p className="text-muted-foreground text-xs">
-                          Verified at{" "}
-                          {new Date(
-                            verificationData.verifiedAt,
-                          ).toLocaleTimeString()}
-                        </p>
-                      </div>
+                    {/* Terms and Conditions */}
+                    <div className="space-y-3">
+                      <FormField
+                        control={form.control}
+                        name="terms"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="border-border/60 bg-muted/30 rounded-lg border p-4">
+                              <div className="flex items-start space-x-3">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    className="mt-0.5"
+                                  />
+                                </FormControl>
+                                <div className="min-w-0 flex-1">
+                                  <FormLabel className="text-foreground block cursor-pointer text-sm leading-relaxed font-normal">
+                                    I confirm that the information provided is
+                                    accurate and I accept the{" "}
+                                    <Link
+                                      href="/terms"
+                                      className="text-primary hover:text-primary/80 font-medium underline underline-offset-2"
+                                      target="_blank"
+                                    >
+                                      terms and conditions
+                                    </Link>{" "}
+                                    for voter registration.
+                                  </FormLabel>
+                                </div>
+                              </div>
+                            </div>
+                            <FormMessage className="mt-2" />
+                          </FormItem>
+                        )}
+                      />
                     </div>
                   </div>
                 )}
 
-                {/* Terms Checkbox */}
-                {verificationStatus === "verified" && (
-                  <FormField
-                    control={form.control}
-                    name="terms"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex items-start space-x-3">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              className="mt-1"
-                            />
-                          </FormControl>
-                          <div className="min-w-0 flex-1">
-                            <FormLabel className="text-foreground block cursor-pointer text-sm leading-relaxed font-normal">
-                              I confirm that the information provided is
-                              accurate and I accept the{" "}
-                              <Link
-                                href="/terms"
-                                className="text-primary hover:text-primary/80 font-medium underline underline-offset-2"
-                              >
-                                terms and conditions
-                              </Link>{" "}
-                              for voter registration.
-                            </FormLabel>
-                          </div>
-                        </div>
-                        <FormMessage className="mt-2 ml-7" />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
                 {/* Action Buttons */}
-                <div className="flex gap-3 pt-4">
-                  {verificationStatus === "verified" ? (
-                    <>
+                {verificationStatus !== "verifying" && (
+                  <div className="flex gap-3 pt-2">
+                    {verificationStatus === "verified" ? (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleReset}
+                          className="h-10 flex-1"
+                        >
+                          <ArrowLeft className="mr-2 h-4 w-4" />
+                          Edit NIN
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={!termsAccepted}
+                          className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-gradient-to-r font-semibold transition-all duration-200 disabled:opacity-50"
+                        >
+                          Continue to Profile
+                        </Button>
+                      </>
+                    ) : (
                       <Button
                         type="button"
-                        variant="outline"
-                        onClick={handleReset}
-                        className="h-10 flex-1"
+                        onClick={handleVerifyNin}
+                        disabled={!isNINComplete()}
+                        className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 w-full bg-gradient-to-r font-semibold transition-all duration-200 disabled:opacity-50"
                       >
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back
+                        <HiShieldCheck className="mr-2 h-4 w-4" />
+                        Verify NIN
                       </Button>
-                      <Button
-                        type="submit"
-                        disabled={!termsAccepted}
-                        className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-gradient-to-r font-semibold transition-all duration-200"
-                      >
-                        Continue
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      type="button"
-                      onClick={handleVerifyNin}
-                      disabled={
-                        !isNINComplete() || verificationStatus === "verifying"
-                      }
-                      className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 w-full bg-gradient-to-r font-semibold transition-all duration-200"
-                    >
-                      {verificationStatus === "verifying" ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Verifying...
-                        </>
-                      ) : (
-                        "Verify NIN"
-                      )}
-                    </Button>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
               </form>
             </Form>
 
@@ -469,7 +553,7 @@ export function NinEntryStep() {
         </Card>
       </div>
 
-      {/* Subtle Trust Indicators */}
+      {/* Trust Indicators */}
       <TrustIndicators
         items={[
           {
