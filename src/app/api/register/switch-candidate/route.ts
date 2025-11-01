@@ -1,11 +1,24 @@
 import { NextResponse } from "next/server";
+import { mockApi } from "@/lib/mock/mockApi";
 
 export async function POST(req: Request) {
-  const { phone, constituency, electionYear, newCandidateId } =
-    await req.json();
-  if (!phone || !constituency || !electionYear || !newCandidateId) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  const { nin, newCandidateId } = await req.json();
+
+  if (!nin || !newCandidateId) {
+    return NextResponse.json(
+      { error: "Missing required fields" },
+      { status: 400 },
+    );
   }
-  // Mock accept once
-  return NextResponse.json({ success: true });
+
+  try {
+    const result = await mockApi.switchCandidate(nin, newCandidateId);
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Error switching candidate:", error);
+    return NextResponse.json(
+      { error: "Failed to switch candidate" },
+      { status: 500 },
+    );
+  }
 }

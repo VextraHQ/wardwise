@@ -1,3 +1,5 @@
+# WardWise Demo
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -16,9 +18,30 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Documentation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+All project documentation has been moved to the `/docs` folder. Key documents include:
+
+- **[Architecture Flow](docs/ARCHITECTURE_FLOW.md)** - Data architecture and flow diagrams
+- **[Voter System](docs/VOTER_SYSTEM.md)** - Complete voter system documentation
+- **[Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md)** - Overview of implementation
+- **[Quick Start](docs/QUICK_START.md)** - Quick start guide
+- **[Voter Flow](docs/VOTER_FLOW.md)** - Voter registration flow details
+
+For detailed documentation, see the `/docs` directory.
+
+## Project Structure
+
+```
+src/
+├── types/          # Production-ready types (Voter, Candidate, etc.)
+├── lib/
+│   ├── mock/      # Mock API and data
+│   └── data/      # Location data (states, LGAs, wards, polling units)
+└── components/    # React components
+
+docs/              # All documentation files
+```
 
 ## Learn More
 

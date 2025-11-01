@@ -1,13 +1,7 @@
 "use client";
 
 import { useQuery, type QueryClient } from "@tanstack/react-query";
-import {
-  mockApi,
-  type LocationState,
-  type LocationLGA,
-  type LocationWard,
-  type LocationPollingUnit,
-} from "@/lib/mock/mockApi";
+import { mockApi } from "@/lib/mock/mockApi";
 
 // Query keys for consistent caching
 export const locationQueryKeys = {
@@ -128,6 +122,3 @@ export function useNINVerificationWithLocation(nin: string | null) {
     retry: 2, // Retry failed requests twice
   });
 }
-
-// Types for convenience
-export type { LocationState, LocationLGA, LocationWard, LocationPollingUnit };

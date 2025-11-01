@@ -1,3 +1,16 @@
+/**
+ * Dashboard Ward Data
+ *
+ * NOTE: Currently hardcoded for demo purposes
+ * TODO: When building candidate dashboards, calculate from actual voter data:
+ * - target: Set by campaign (could be stored in database)
+ * - limit: getSupportersByWard(ward, candidateId).length (actual supporters)
+ * - status: "Active" if limit >= target * 0.8, "Planning" otherwise
+ * - type: "High/Medium/Low Priority" based on target size or strategic importance
+ *
+ * This data will be replaced with dynamic calculations from voter registrations
+ */
+
 export const dashboardData = [
   {
     id: 1,

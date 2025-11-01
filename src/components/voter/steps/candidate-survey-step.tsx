@@ -21,7 +21,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useRegistration } from "@/hooks/use-registration";
 import { cn } from "@/lib/utils";
-import { mockApi, CandidateSurvey, SurveyQuestion } from "@/lib/mock/mockApi";
+import { mockApi } from "@/lib/mock/mockApi";
+import type { CandidateSurvey, SurveyQuestion } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 

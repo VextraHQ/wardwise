@@ -21,22 +21,22 @@ import { TrustIndicators } from "@/components/ui/trust-indicators";
 export function DuplicateCheckStep() {
   const router = useRouter();
   const { payload } = useRegistration();
-  const phone = payload.phone || "";
+  const nin = payload.nin || "";
   const electionYear = payload.electionYear || new Date().getFullYear();
 
   useEffect(() => {
-    if (!phone) {
+    if (!nin) {
       router.push("/register");
     }
-  }, [phone, router]);
+  }, [nin, router]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["check-registration", phone, electionYear],
+    queryKey: ["check-registration", nin, electionYear],
     queryFn: async () => {
       // Use mock API for demo
-      return await mockApi.checkRegistration(phone, electionYear);
+      return await mockApi.checkRegistration(nin, electionYear);
     },
-    enabled: !!phone,
+    enabled: !!nin,
   });
 
   useEffect(() => {

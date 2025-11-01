@@ -77,20 +77,41 @@ export function VoterLogin() {
       return await mockApi.checkRegistration(nin, 2024);
     },
     onSuccess: (data) => {
-      // Update registration state with NIN
-      update({ nin: formattedNin });
-
-      if (data.exists && data.user) {
-        // User exists - successful login
+      if (data.exists && data.voter) {
+        // Voter exists - populate full registration state with voter data
+        const voter = data.voter;
+        update({
+          nin: voter.nin,
+          phone: voter.phoneNumber,
+          basic: {
+            firstName: voter.firstName,
+            lastName: voter.lastName,
+            dateOfBirth: voter.dateOfBirth,
+            age: voter.age,
+            gender: voter.gender,
+          },
+          location: {
+            state: voter.state,
+            lga: voter.lga,
+            ward: voter.ward,
+            pollingUnit: voter.pollingUnit,
+          },
+          candidate: {
+            candidateId: voter.candidateId,
+          },
+          survey: {
+            surveyId: "", // Survey ID can be fetched separately if needed
+            answers: voter.surveyAnswers || {},
+          },
+        });
         toast.success("Login successful - redirecting to profile");
+        router.push("/voter/profile");
       } else {
         // User doesn't exist - redirect to registration
         toast.info("Account not found - redirecting to registration");
+        update({ nin: formattedNin }); // Save NIN for registration flow
         router.push("/register");
-        return;
       }
-
-      router.push("/voter/profile");
     },
     onError: (error: Error) => {
       setLoginAttempts((prev) => prev + 1);

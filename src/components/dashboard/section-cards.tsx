@@ -1,4 +1,4 @@
-import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
+import { IconTrendingUp, IconTrendingDown } from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,6 +10,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+/**
+ * Dashboard Section Cards
+ *
+ * NOTE: Currently uses hardcoded values for demo
+ * TODO: Replace with calculated metrics from voter data when building candidate dashboards:
+ * - Total Supporters: getSupportersCount(candidateId)
+ * - Ward Coverage: getUniqueWardsWithSupporters(candidateId).length / totalWards
+ * - Polling Units: getUniquePollingUnitsWithSupporters(candidateId).length
+ * - Support Strength: calculate from survey responses or engagement metrics
+ */
+
 export function SectionCards() {
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
@@ -17,18 +28,21 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>Total Supporters</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            10,247
+            8,743
           </CardTitle>
           <CardAction>
-            <Badge variant="outline" className="border-primary/30 text-primary">
-              <IconTrendingUp />
-              +12.5%
+            <Badge
+              variant="outline"
+              className="border-destructive/30 text-destructive"
+            >
+              <IconTrendingDown />
+              -3.2%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Growing supporter base <IconTrendingUp className="size-4" />
+            Recent supporter decline <IconTrendingDown className="size-4" />
           </div>
           <div className="text-muted-foreground">
             Registered voters in Song & Fufore
@@ -39,18 +53,18 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>Ward Coverage</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            18/20
+            16/20
           </CardTitle>
           <CardAction>
             <Badge variant="outline" className="border-primary/30 text-primary">
               <IconTrendingUp />
-              90%
+              80%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Strong ward presence <IconTrendingUp className="size-4" />
+            Expanding ward presence <IconTrendingUp className="size-4" />
           </div>
           <div className="text-muted-foreground">
             Wards with active supporters
@@ -61,18 +75,21 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>Polling Units</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            420
+            387
           </CardTitle>
           <CardAction>
-            <Badge variant="outline" className="border-primary/30 text-primary">
-              <IconTrendingUp />
-              +8.2%
+            <Badge
+              variant="outline"
+              className="border-destructive/30 text-destructive"
+            >
+              <IconTrendingDown />
+              -5.1%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Precise unit mapping <IconTrendingUp className="size-4" />
+            Lost some unit coverage <IconTrendingDown className="size-4" />
           </div>
           <div className="text-muted-foreground">Units with voter data</div>
         </CardFooter>
@@ -81,18 +98,18 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>Support Strength</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            78%
+            82%
           </CardTitle>
           <CardAction>
             <Badge variant="outline" className="border-primary/30 text-primary">
               <IconTrendingUp />
-              +4.5%
+              +6.3%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Strong candidate preference <IconTrendingUp className="size-4" />
+            Improving candidate preference <IconTrendingUp className="size-4" />
           </div>
           <div className="text-muted-foreground">Average support rating</div>
         </CardFooter>

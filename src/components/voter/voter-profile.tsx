@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import {
   User,
   MapPin,
@@ -39,13 +40,58 @@ import { useRegistration } from "@/hooks/use-registration";
 import { generateRegistrationId } from "@/lib/registration-schemas";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { mockApi } from "@/lib/mock/mockApi";
+import type { Voter } from "@/types";
 
 export function VoterProfile() {
   const router = useRouter();
-  const { payload, reset } = useRegistration();
+  const { payload, reset, update } = useRegistration();
   const [canEdit, _setCanEdit] = useState(true); // In production, check if within 7 days
   const [isOnline, _setIsOnline] = useState(true);
   const [_lastSync, _setLastSync] = useState(new Date());
+
+  // Fetch voter data from API if we have NIN but incomplete data
+  const { data: voterData } = useQuery({
+    queryKey: ["voter-profile", payload.nin],
+    queryFn: async (): Promise<Voter | null> => {
+      if (!payload.nin) return null;
+      const result = await mockApi.getUserProfile(payload.nin);
+      return result.voter;
+    },
+    enabled:
+      !!payload.nin && (!payload.basic?.firstName || !payload.location?.state),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Update registration state when voter data is fetched
+  useEffect(() => {
+    if (voterData) {
+      update({
+        nin: voterData.nin,
+        phone: voterData.phoneNumber,
+        basic: {
+          firstName: voterData.firstName,
+          lastName: voterData.lastName,
+          dateOfBirth: voterData.dateOfBirth,
+          age: voterData.age,
+          gender: voterData.gender,
+        },
+        location: {
+          state: voterData.state,
+          lga: voterData.lga,
+          ward: voterData.ward,
+          pollingUnit: voterData.pollingUnit,
+        },
+        candidate: {
+          candidateId: voterData.candidateId,
+        },
+        survey: {
+          surveyId: "", // Survey ID can be fetched separately if needed
+          answers: voterData.surveyAnswers || {},
+        },
+      });
+    }
+  }, [voterData, update]);
 
   const fullName =
     `${payload.basic?.firstName || ""} ${payload.basic?.lastName || ""}`.trim();

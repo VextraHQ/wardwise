@@ -27,7 +27,7 @@ import { useRegistration } from "@/hooks/use-registration";
 import { cn } from "@/lib/utils";
 import { mockApi } from "@/lib/mock/mockApi";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { type Candidate } from "@/lib/mock/mockApi";
+import type { Candidate } from "@/types";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 export function CandidateSelectionStep() {
