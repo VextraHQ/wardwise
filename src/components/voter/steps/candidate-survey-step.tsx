@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -11,6 +11,10 @@ import {
   ShieldCheck,
   ClipboardList,
   Users,
+  Clock,
+  TrendingUp,
+  CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -24,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { mockApi } from "@/lib/mock/mockApi";
 import type { CandidateSurvey, SurveyQuestion } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 export function CandidateSurveyStep() {
@@ -31,8 +36,23 @@ export function CandidateSurveyStep() {
   const { update, payload } = useRegistration();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  const [otherTexts, setOtherTexts] = useState<Record<string, string>>({}); // For "Other" option text inputs
+  // TODO: Implement ranking question type with drag-and-drop functionality
+  // const [rankingOrder, setRankingOrder] = useState<Record<string, string[]>>({});
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const completionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const candidateId = payload.candidate?.candidateId;
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (completionTimeoutRef.current) {
+        clearTimeout(completionTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // TODO: Replace with actual API call
   // Fetch the survey for the candidate
@@ -62,31 +82,120 @@ export function CandidateSurveyStep() {
   const wordCount = (text: string) =>
     text.trim().split(/\s+/).filter(Boolean).length;
 
-  // Check if the current answer has been answered
-  const hasAnswer = currentAnswer
-    ? Array.isArray(currentAnswer)
-      ? currentAnswer.length > 0
-      : currentAnswer.length > 0
-    : false;
+  // Check if the current answer has been answered (including "Other" text validation)
+  const hasAnswer = (() => {
+    if (!currentAnswer || !currentQuestion) return false;
 
-  // Handle single choice
+    // Check basic answer existence
+    const hasBasicAnswer = Array.isArray(currentAnswer)
+      ? currentAnswer.length > 0
+      : currentAnswer.length > 0;
+
+    if (!hasBasicAnswer) return false;
+
+    // Check if "Other" option is selected and requires text
+    if (currentQuestion.options) {
+      const selectedOptions = Array.isArray(currentAnswer)
+        ? currentAnswer
+        : [currentAnswer];
+
+      // Find if any selected option has allowOther
+      const hasOtherOption = currentQuestion.options.some(
+        (opt) => opt.allowOther && selectedOptions.includes(opt.id),
+      );
+
+      // If "Other" option is selected, validate the text is provided
+      if (hasOtherOption) {
+        const otherText = otherTexts[currentQuestion.id];
+        return otherText && otherText.trim().length > 0;
+      }
+    }
+
+    return true;
+  })();
+
+  // Calculate total answered (answers already includes current if answered)
+  const totalAnswered = Object.keys(answers).length;
+
+  // Calculate progress percentage
+  const progressPercentage = survey
+    ? Math.round((totalAnswered / survey.questions.length) * 100)
+    : 0;
+
+  // Calculate questions remaining
+  const questionsRemaining = survey
+    ? survey.questions.length - totalAnswered
+    : 0;
+
+  // Estimate time remaining (simplified: 30 seconds per question)
+  const estimatedMinutes = Math.ceil((questionsRemaining * 30) / 60);
+
+  // Handle single choice (with deselection support)
   const handleSingleChoice = (optionId: string) => {
     if (currentQuestion) {
-      setAnswers((prev) => ({
-        ...prev,
-        [currentQuestion.id]: optionId,
-      }));
+      setAnswers((prev) => {
+        // If clicking the same option, deselect it
+        if (prev[currentQuestion.id] === optionId) {
+          // Also clear "Other" text if deselecting
+          setOtherTexts((otherPrev) => {
+            const { [currentQuestion.id]: _, ...rest } = otherPrev;
+            return rest;
+          });
+          const { [currentQuestion.id]: _, ...rest } = prev;
+          return rest;
+        }
+        // Otherwise, select the new option
+        // Clear "Other" text when switching to a different option
+        const previousOption = currentQuestion.options?.find(
+          (opt) => opt.id === prev[currentQuestion.id],
+        );
+        if (previousOption?.allowOther) {
+          setOtherTexts((otherPrev) => {
+            const { [currentQuestion.id]: _, ...rest } = otherPrev;
+            return rest;
+          });
+        }
+        return {
+          ...prev,
+          [currentQuestion.id]: optionId,
+        };
+      });
     }
   };
 
   // Handle multiple choice
   const handleMultipleChoice = (optionId: string, checked: boolean) => {
     if (currentQuestion) {
+      // If unchecking an "Other" option, clear its text
+      if (!checked) {
+        const option = currentQuestion.options?.find(
+          (opt) => opt.id === optionId,
+        );
+        if (option?.allowOther) {
+          setOtherTexts((otherPrev) => {
+            const { [currentQuestion.id]: _, ...rest } = otherPrev;
+            return rest;
+          });
+        }
+      }
+
       setAnswers((prev) => {
         const current = (prev[currentQuestion.id] as string[]) || [];
         const updated = checked
           ? [...current, optionId]
           : current.filter((id) => id !== optionId);
+
+        // If no options are selected, remove the question from answers entirely
+        if (updated.length === 0) {
+          // Also clear "Other" text
+          setOtherTexts((otherPrev) => {
+            const { [currentQuestion.id]: _, ...rest } = otherPrev;
+            return rest;
+          });
+          const { [currentQuestion.id]: _, ...rest } = prev;
+          return rest;
+        }
+
         return {
           ...prev,
           [currentQuestion.id]: updated,
@@ -95,23 +204,42 @@ export function CandidateSurveyStep() {
     }
   };
 
-  // Handle scale change
+  // Handle scale change (with deselection support)
   const handleScaleChange = (value: string) => {
     if (currentQuestion) {
-      setAnswers((prev) => ({
-        ...prev,
-        [currentQuestion.id]: value,
-      }));
+      setAnswers((prev) => {
+        // If clicking the same value, deselect it
+        if (prev[currentQuestion.id] === value) {
+          const { [currentQuestion.id]: _, ...rest } = prev;
+          return rest;
+        }
+        // Otherwise, select the new value
+        return {
+          ...prev,
+          [currentQuestion.id]: value,
+        };
+      });
     }
   };
 
   // Handle text change
   const handleTextChange = (text: string) => {
     if (currentQuestion) {
-      setAnswers((prev) => ({
-        ...prev,
-        [currentQuestion.id]: text,
-      }));
+      setAnswers((prev) => {
+        const trimmedText = text.trim();
+
+        // If completely empty, remove from answers
+        if (trimmedText.length === 0) {
+          const { [currentQuestion.id]: _, ...rest } = prev;
+          return rest;
+        }
+
+        // Valid text with content - update normally
+        return {
+          ...prev,
+          [currentQuestion.id]: text,
+        };
+      });
     }
   };
 
@@ -123,16 +251,94 @@ export function CandidateSurveyStep() {
     }
 
     if (isLastQuestion && survey) {
+      // Prevent double submission
+      if (isSubmitting) return;
+
+      // Final validation: Check all questions are answered
+      const allAnswered = survey.questions.every((q) => {
+        const answer = answers[q.id];
+        if (!answer) return false;
+
+        // Validate based on question type
+        if (q.type === "multiple") {
+          const isValidArray = Array.isArray(answer) && answer.length > 0;
+          if (!isValidArray) return false;
+        } else if (q.type === "text") {
+          const isValidText =
+            typeof answer === "string" && answer.trim().length > 0;
+          if (!isValidText) return false;
+        } else {
+          // single, scale, ranking
+          const isValidString = typeof answer === "string" && answer.length > 0;
+          if (!isValidString) return false;
+        }
+
+        // Check "Other" text if option with allowOther is selected
+        if (q.options) {
+          const selectedOptions = Array.isArray(answer) ? answer : [answer];
+          const hasOtherOption = q.options.some(
+            (opt) => opt.allowOther && selectedOptions.includes(opt.id),
+          );
+
+          if (hasOtherOption) {
+            const otherText = otherTexts[q.id];
+            return otherText && otherText.trim().length > 0;
+          }
+        }
+
+        return true;
+      });
+
+      if (!allAnswered) {
+        toast.error("Please answer all questions before submitting the survey");
+        return;
+      }
+
+      // Mark as submitting
+      setIsSubmitting(true);
+
+      // Prepare answers with "Other" text included
+      const finalAnswers = { ...answers };
+      Object.keys(otherTexts).forEach((questionId) => {
+        if (otherTexts[questionId]) {
+          // Append "Other" text to the answer
+          // Format: optionId + ": " + otherText
+          const answer = finalAnswers[questionId];
+          if (answer) {
+            // Store the other text separately in a special format
+            finalAnswers[`${questionId}_other_text`] = otherTexts[questionId];
+          }
+        }
+      });
+
       // Save survey data
       update({
         survey: {
           surveyId: survey.id,
-          answers: answers,
+          answers: finalAnswers,
         } as { surveyId: string; answers: Record<string, string | string[]> },
       });
-      toast.success("Survey completed!");
-      router.push("/register/complete");
+
+      // Show celebration for completion
+      setShowCelebration(true);
+
+      // Navigate after delay with cleanup tracking
+      completionTimeoutRef.current = setTimeout(() => {
+        toast.success("Survey completed! Thank you for your input.");
+        router.push("/register/complete");
+      }, 800);
     } else {
+      // Show mini celebration for milestone progress
+      const nextProgress = Math.round(
+        ((currentQuestionIndex + 2) / (survey?.questions.length || 1)) * 100,
+      );
+
+      if (nextProgress === 50) {
+        toast.success("Halfway there! You're doing great!");
+      } else if (nextProgress === 75) {
+        toast.success("Almost done! Just a few more questions.");
+      }
+
       setCurrentQuestionIndex((prev) => prev + 1);
     }
   };
@@ -143,6 +349,38 @@ export function CandidateSurveyStep() {
       setCurrentQuestionIndex((prev) => prev - 1);
     } else {
       router.push("/register/candidate");
+    }
+  };
+
+  // Handle question navigation via navigator dots
+  const handleQuestionNavigate = (targetIndex: number) => {
+    // Allow navigation to current or previous questions
+    // For forward navigation, require all intermediate questions to be answered
+    if (targetIndex <= currentQuestionIndex) {
+      // Going backward or staying - always allowed
+      setCurrentQuestionIndex(targetIndex);
+    } else if (survey) {
+      // Going forward - check if all questions up to target are answered
+      const allPreviousAnswered = survey.questions
+        .slice(0, targetIndex)
+        .every((q) => {
+          const answer = answers[q.id];
+          if (!answer) return false;
+
+          if (q.type === "multiple") {
+            return Array.isArray(answer) && answer.length > 0;
+          }
+          if (q.type === "text") {
+            return typeof answer === "string" && answer.trim().length > 0;
+          }
+          return typeof answer === "string" && answer.length > 0;
+        });
+
+      if (allPreviousAnswered) {
+        setCurrentQuestionIndex(targetIndex);
+      } else {
+        toast.error("Please answer previous questions first");
+      }
     }
   };
 
@@ -204,7 +442,7 @@ export function CandidateSurveyStep() {
 
         <div className="mx-auto w-full max-w-md">
           <Card>
-            <CardContent className="flex min-h-[300px] flex-col items-center justify-center space-y-6 py-12">
+            <CardContent className="flex min-h-[300px] flex-col items-center justify-center space-y-6">
               <FileQuestion className="text-muted-foreground h-16 w-16" />
               <div className="space-y-4 text-center">
                 <div className="space-y-2">
@@ -244,271 +482,426 @@ export function CandidateSurveyStep() {
   return (
     <div className="space-y-6">
       {/* Reusable Progress Component */}
-      <StepProgress
-        currentStep={5}
-        totalSteps={6}
-        stepTitle={`Question ${currentQuestionIndex + 1} of ${survey.questions.length}`}
-      />
+      <StepProgress currentStep={5} totalSteps={6} stepTitle="Survey" />
 
-      {/* Hero Section */}
-      <div className="space-y-2 text-center">
-        <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-          {survey.title}
-        </h1>
-        <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
-          {survey.description}
-        </p>
-      </div>
-
-      {/* Main Survey Card */}
-      <div className="mx-auto w-full max-w-2xl">
-        <Card className="border-border/60 bg-card/95 backdrop-blur-sm">
-          <CardHeader className="border-border border-b">
-            <div className="space-y-1">
-              <h2 className="text-foreground text-lg font-semibold tracking-tight">
-                {currentQuestion.question}
-              </h2>
-              {currentQuestion.description && (
-                <p className="text-muted-foreground text-sm">
-                  {currentQuestion.description}
-                </p>
-              )}
-            </div>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            {/* Single Choice */}
-            {currentQuestion.type === "single" && currentQuestion.options && (
-              <RadioGroup
-                value={currentAnswer as string}
-                onValueChange={handleSingleChoice}
-                className="space-y-3"
-              >
-                {currentQuestion.options.map((option) => {
-                  const isSelected = currentAnswer === option.id;
-                  return (
-                    <div key={option.id} className="relative">
-                      <RadioGroupItem
-                        value={option.id}
-                        id={option.id}
-                        className="peer sr-only"
-                      />
-                      <Label
-                        htmlFor={option.id}
-                        className={cn(
-                          "block h-full cursor-pointer rounded-lg border p-4 transition-all duration-200",
-                          isSelected
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:bg-muted/50",
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          {option.icon && (
-                            <span className="flex-shrink-0 text-xl">
-                              {option.icon}
-                            </span>
-                          )}
-                          <div
-                            className={cn(
-                              "flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-                              isSelected
-                                ? "border-primary bg-primary"
-                                : "border-muted-foreground/30",
-                            )}
-                          >
-                            {isSelected && (
-                              <div className="bg-primary-foreground h-1.5 w-1.5 rounded-full" />
-                            )}
-                          </div>
-                          <span
-                            className={cn(
-                              "flex-1 text-sm font-medium transition-colors",
-                              isSelected
-                                ? "text-foreground"
-                                : "text-muted-foreground",
-                            )}
-                          >
-                            {option.label}
-                          </span>
-                        </div>
-                      </Label>
-                    </div>
-                  );
-                })}
-              </RadioGroup>
+      {/* Hero Section - Only show on first question */}
+      {currentQuestionIndex === 0 && (
+        <div className="space-y-2 text-center">
+          <div className="flex items-center justify-center gap-2">
+            <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+              {survey.title}
+            </h1>
+            {showCelebration && (
+              <Sparkles className="text-primary h-6 w-6 animate-pulse" />
             )}
+          </div>
+          <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
+            {survey.description}
+          </p>
+        </div>
+      )}
 
-            {/* Multiple Choice */}
-            {currentQuestion.type === "multiple" && currentQuestion.options && (
-              <div className="space-y-3">
-                {currentQuestion.options.map((option) => {
-                  const isChecked = (currentAnswer as string[])?.includes(
-                    option.id,
-                  );
-                  return (
-                    <div key={option.id} className="relative">
-                      <div
-                        className={cn(
-                          "block h-full cursor-pointer rounded-lg border p-4 transition-all duration-200",
-                          isChecked
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:bg-muted/50",
-                        )}
-                        onClick={() =>
-                          handleMultipleChoice(option.id, !isChecked)
-                        }
-                      >
-                        <div className="flex items-center gap-3">
-                          <Checkbox
+      {/* Progress and Stats Bar */}
+      <div className="space-y-3">
+        <div className="bg-muted/50 mx-auto flex max-w-2xl items-center justify-between gap-4 rounded-lg border px-4 py-3">
+          <div className="flex items-center gap-2">
+            <div className="bg-primary/10 text-primary relative flex h-14 w-14 items-center justify-center rounded-full">
+              <span className="text-sm font-bold">{progressPercentage}%</span>
+              <svg className="absolute inset-0 -rotate-90" viewBox="0 0 56 56">
+                <circle
+                  cx="28"
+                  cy="28"
+                  r="24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  className="text-primary opacity-20"
+                />
+                <circle
+                  cx="28"
+                  cy="28"
+                  r="24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  className="text-primary transition-all duration-500"
+                  strokeDasharray={`${(progressPercentage / 100) * 150.8} 150.8`}
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+            <div className="text-left">
+              <p className="text-foreground text-sm font-semibold">
+                {totalAnswered} of {survey.questions.length} answered
+              </p>
+              <p className="text-muted-foreground text-xs">
+                {questionsRemaining > 0
+                  ? `${questionsRemaining} question${questionsRemaining !== 1 ? "s" : ""} remaining`
+                  : "All done!"}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 border-l pl-4">
+            {survey.estimatedMinutes && (
+              <div className="flex items-center gap-1.5">
+                <Clock className="text-muted-foreground h-4 w-4" />
+                <span className="text-muted-foreground text-xs">
+                  {estimatedMinutes > 0
+                    ? `~${estimatedMinutes} min left`
+                    : "Almost done!"}
+                </span>
+              </div>
+            )}
+            {survey.totalResponses && (
+              <div className="flex items-center gap-1.5">
+                <Users className="text-muted-foreground h-4 w-4" />
+                <span className="text-muted-foreground text-xs">
+                  {survey.totalResponses.toLocaleString()} voters
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main Survey Card */}
+        <div className="mx-auto w-full max-w-2xl">
+          <Card className="border-border/60 bg-card/95 backdrop-blur-sm">
+            <CardHeader className="border-border border-b">
+              <div className="space-y-2">
+                <div className="flex items-start justify-between gap-4">
+                  <h2 className="text-foreground flex-1 text-lg font-semibold tracking-tight">
+                    {currentQuestion.question}
+                  </h2>
+                  {hasAnswer && (
+                    <CheckCircle2 className="text-primary h-5 w-5 flex-shrink-0" />
+                  )}
+                </div>
+                {currentQuestion.description && (
+                  <p className="text-muted-foreground text-sm">
+                    {currentQuestion.description}
+                  </p>
+                )}
+
+                {/* Social Proof - Show anonymized stats */}
+                {currentQuestion.responseStats &&
+                  currentQuestion.responseStats.topAnswer && (
+                    <div className="bg-primary/5 border-primary/20 flex items-center gap-2 rounded-md border px-3 py-2">
+                      <TrendingUp className="text-primary h-4 w-4 flex-shrink-0" />
+                      <p className="text-muted-foreground text-xs">
+                        <span className="text-foreground font-medium">
+                          {currentQuestion.responseStats.topAnswer.percentage}%
+                        </span>{" "}
+                        of{" "}
+                        {currentQuestion.responseStats.totalResponses.toLocaleString()}{" "}
+                        voters prioritize:{" "}
+                        <span className="text-foreground font-medium">
+                          {currentQuestion.responseStats.topAnswer.label}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+              </div>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+              {/* Single Choice */}
+              {currentQuestion.type === "single" && currentQuestion.options && (
+                <RadioGroup
+                  value={typeof currentAnswer === "string" ? currentAnswer : ""}
+                  onValueChange={handleSingleChoice}
+                  className="space-y-3"
+                >
+                  {currentQuestion.options.map((option) => {
+                    const isSelected = currentAnswer === option.id;
+                    const showOtherInput = option.allowOther && isSelected;
+                    return (
+                      <div key={option.id} className="space-y-2">
+                        <div className="relative">
+                          <RadioGroupItem
+                            value={option.id}
                             id={option.id}
-                            checked={isChecked}
-                            onCheckedChange={(checked) =>
-                              handleMultipleChoice(
-                                option.id,
-                                checked as boolean,
-                              )
-                            }
-                            className="flex-shrink-0"
+                            className="peer sr-only"
                           />
-                          {option.icon && (
-                            <span className="flex-shrink-0 text-xl">
-                              {option.icon}
-                            </span>
-                          )}
                           <Label
                             htmlFor={option.id}
                             className={cn(
-                              "flex-1 cursor-pointer text-sm font-medium transition-colors",
-                              isChecked
-                                ? "text-foreground"
-                                : "text-muted-foreground",
+                              "block h-full cursor-pointer rounded-lg border p-4 transition-all duration-200",
+                              isSelected
+                                ? "border-primary bg-primary/5 ring-primary/20 ring-2 ring-offset-1"
+                                : "border-border hover:bg-muted/50 hover:border-primary/30",
                             )}
                           >
-                            {option.label}
+                            <div className="flex items-center gap-3">
+                              {option.icon && (
+                                <span className="flex-shrink-0 text-xl">
+                                  {option.icon}
+                                </span>
+                              )}
+                              <div
+                                className={cn(
+                                  "flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                                  isSelected
+                                    ? "border-primary bg-primary"
+                                    : "border-muted-foreground/30",
+                                )}
+                              >
+                                {isSelected && (
+                                  <div className="bg-primary-foreground h-1.5 w-1.5 rounded-full" />
+                                )}
+                              </div>
+                              <span
+                                className={cn(
+                                  "flex-1 text-sm font-medium transition-colors",
+                                  isSelected
+                                    ? "text-foreground"
+                                    : "text-muted-foreground",
+                                )}
+                              >
+                                {option.label}
+                              </span>
+                            </div>
                           </Label>
                         </div>
+                        {showOtherInput && (
+                          <div className="pl-7">
+                            <Input
+                              placeholder="Please specify..."
+                              value={otherTexts[currentQuestion.id] || ""}
+                              onChange={(e) => {
+                                setOtherTexts((prev) => ({
+                                  ...prev,
+                                  [currentQuestion.id]: e.target.value,
+                                }));
+                              }}
+                              className="focus:border-primary"
+                              autoFocus
+                            />
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                    );
+                  })}
+                </RadioGroup>
+              )}
 
-            {/* Scale/Slider */}
-            {currentQuestion.type === "scale" && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground text-xs font-medium">
-                    {currentQuestion.minLabel || "Not at all"}
-                  </span>
-                  <span className="text-muted-foreground text-xs font-medium">
-                    {currentQuestion.maxLabel || "Very much"}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((score) => (
-                    <button
-                      key={score}
-                      onClick={() => handleScaleChange(String(score))}
-                      className={cn(
-                        "flex-1 rounded-lg border py-3 font-semibold transition-all duration-200",
-                        currentAnswer === String(score)
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-card hover:border-primary/50 hover:bg-muted/50",
-                      )}
-                    >
-                      {score}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Text Input */}
-            {currentQuestion.type === "text" && (
-              <div className="space-y-2">
-                <Textarea
-                  placeholder="Share your thoughts..."
-                  value={(currentAnswer as string) || ""}
-                  onChange={(e) => handleTextChange(e.target.value)}
-                  maxLength={500}
-                  className="focus:border-primary min-h-32 resize-y rounded-lg border p-3 transition-all"
-                />
-                <div className="text-muted-foreground flex justify-between text-xs">
-                  <span>
-                    {wordCount((currentAnswer as string) || "")} words
-                  </span>
-                  <span>
-                    {((currentAnswer as string) || "").length}/{500} characters
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleBack}
-                className="h-10 flex-1"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                {currentQuestionIndex > 0 ? "Previous" : "Back"}
-              </Button>
-              <Button
-                onClick={handleNext}
-                disabled={!hasAnswer}
-                className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-gradient-to-r font-semibold transition-all duration-200 disabled:opacity-50"
-              >
-                {isLastQuestion ? "Complete Survey" : "Next Question"}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Question Navigator */}
-      <div className="mx-auto max-w-2xl">
-        <div className="flex flex-wrap justify-center gap-2">
-          {survey.questions.map((_, index) => {
-            const isAnswered = !!answers[survey.questions[index].id];
-            const isCurrent = index === currentQuestionIndex;
-            return (
-              <button
-                key={index}
-                onClick={() => setCurrentQuestionIndex(index)}
-                className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all",
-                  isCurrent &&
-                    "ring-primary ring-offset-background ring-2 ring-offset-2",
-                  isAnswered
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80",
+              {/* Multiple Choice */}
+              {currentQuestion.type === "multiple" &&
+                currentQuestion.options && (
+                  <div className="space-y-3">
+                    {currentQuestion.options.map((option) => {
+                      const currentAnswerArray =
+                        (currentAnswer as string[]) || [];
+                      const isChecked = currentAnswerArray.includes(option.id);
+                      const showOtherInput = option.allowOther && isChecked;
+                      return (
+                        <div key={option.id} className="space-y-2">
+                          <div className="relative">
+                            <Label
+                              htmlFor={option.id}
+                              className={cn(
+                                "block h-full cursor-pointer rounded-lg border p-4 transition-all duration-200",
+                                isChecked
+                                  ? "border-primary bg-primary/5 ring-primary/20 ring-2 ring-offset-1"
+                                  : "border-border hover:bg-muted/50 hover:border-primary/30",
+                              )}
+                            >
+                              <div className="flex items-center gap-3">
+                                <Checkbox
+                                  id={option.id}
+                                  checked={isChecked}
+                                  onCheckedChange={(checked) =>
+                                    handleMultipleChoice(
+                                      option.id,
+                                      checked as boolean,
+                                    )
+                                  }
+                                  className="flex-shrink-0"
+                                />
+                                {option.icon && (
+                                  <span className="flex-shrink-0 text-xl">
+                                    {option.icon}
+                                  </span>
+                                )}
+                                <span
+                                  className={cn(
+                                    "flex-1 text-sm font-medium transition-colors",
+                                    isChecked
+                                      ? "text-foreground"
+                                      : "text-muted-foreground",
+                                  )}
+                                >
+                                  {option.label}
+                                </span>
+                              </div>
+                            </Label>
+                          </div>
+                          {showOtherInput && (
+                            <div className="pl-7">
+                              <Input
+                                placeholder="Please specify..."
+                                value={otherTexts[currentQuestion.id] || ""}
+                                onChange={(e) => {
+                                  setOtherTexts((prev) => ({
+                                    ...prev,
+                                    [currentQuestion.id]: e.target.value,
+                                  }));
+                                }}
+                                className="focus:border-primary"
+                                autoFocus
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
-              >
-                {index + 1}
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Subtle Trust Indicators */}
-      <TrustIndicators
-        items={[
-          { icon: <ShieldCheck className="h-4 w-4" />, label: "Secure Survey" },
-          {
-            icon: <ClipboardList className="h-4 w-4" />,
-            label: "Policy-Guided",
-          },
-          {
-            icon: <Users className="h-4 w-4" />,
-            label: "Anonymous Aggregation",
-          },
-        ]}
-      />
+              {/* Scale/Slider */}
+              {currentQuestion.type === "scale" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground text-xs font-medium">
+                      {currentQuestion.minLabel || "Not at all"}
+                    </span>
+                    <span className="text-muted-foreground text-xs font-medium">
+                      {currentQuestion.maxLabel || "Very much"}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((score) => (
+                      <button
+                        key={score}
+                        onClick={() => handleScaleChange(String(score))}
+                        className={cn(
+                          "flex-1 rounded-lg border py-3 font-semibold transition-all duration-200",
+                          currentAnswer === String(score)
+                            ? "border-primary bg-primary text-primary-foreground ring-primary/20 ring-2 ring-offset-1"
+                            : "border-border bg-card hover:border-primary/50 hover:bg-muted/50",
+                        )}
+                      >
+                        {score}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Text Input */}
+              {currentQuestion.type === "text" && (
+                <div className="space-y-2">
+                  <Textarea
+                    placeholder="Share your thoughts..."
+                    value={(currentAnswer as string) || ""}
+                    onChange={(e) => handleTextChange(e.target.value)}
+                    maxLength={500}
+                    className="focus:border-primary min-h-32 resize-y rounded-lg border p-3 transition-all"
+                  />
+                  <div className="text-muted-foreground flex justify-between text-xs">
+                    <span>
+                      {wordCount((currentAnswer as string) || "")} words
+                    </span>
+                    <span>
+                      {((currentAnswer as string) || "").length}/{500}{" "}
+                      characters
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* TODO: Ranking Question Type */}
+              {/* Implement drag-and-drop ranking with @dnd-kit/core or react-beautiful-dnd */}
+              {/* {currentQuestion.type === "ranking" && currentQuestion.options && (
+                <RankingQuestion
+                  options={currentQuestion.options}
+                  value={rankingOrder[currentQuestion.id] || []}
+                  onChange={(order) => setRankingOrder(prev => ({ ...prev, [currentQuestion.id]: order }))}
+                />
+              )} */}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBack}
+                  className="h-10 flex-1"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  {currentQuestionIndex > 0 ? "Previous" : "Back"}
+                </Button>
+                <Button
+                  onClick={handleNext}
+                  disabled={!hasAnswer || isSubmitting}
+                  className={cn(
+                    "bg-primary hover:bg-primary/90 text-primary-foreground h-10 flex-1 font-semibold transition-all duration-300 ease-in-out disabled:opacity-50",
+                    hasAnswer &&
+                      !isSubmitting &&
+                      "hover:bg-primary/90 hover:text-primary-foreground",
+                  )}
+                >
+                  {isLastQuestion ? (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Complete Survey
+                    </>
+                  ) : (
+                    <>
+                      Next Question
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Question Navigator */}
+        <div className="mx-auto max-w-2xl">
+          <div className="flex flex-wrap justify-center gap-2">
+            {survey.questions.map((_, index) => {
+              const isAnswered = !!answers[survey.questions[index].id];
+              const isCurrent = index === currentQuestionIndex;
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleQuestionNavigate(index)}
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all",
+                    isCurrent &&
+                      "ring-primary ring-offset-background ring-2 ring-offset-2",
+                    isAnswered
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80",
+                  )}
+                >
+                  {index + 1}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Subtle Trust Indicators */}
+        <TrustIndicators
+          items={[
+            {
+              icon: <ShieldCheck className="h-4 w-4" />,
+              label: "Secure Survey",
+            },
+            {
+              icon: <ClipboardList className="h-4 w-4" />,
+              label: "Policy-Guided",
+            },
+            {
+              icon: <Users className="h-4 w-4" />,
+              label: "Anonymous Aggregation",
+            },
+          ]}
+        />
+      </div>
     </div>
   );
 }

@@ -89,6 +89,8 @@ export function VoterLogin() {
             dateOfBirth: voter.dateOfBirth,
             age: voter.age,
             gender: voter.gender,
+            occupation: voter.occupation || "",
+            religion: voter.religion || "",
           },
           location: {
             state: voter.state,

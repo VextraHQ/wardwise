@@ -13,6 +13,8 @@ export type RegistrationData = {
     dateOfBirth: string;
     age: number;
     gender: "male" | "female" | "other";
+    occupation: string;
+    religion: string;
   };
   location: {
     state: string;

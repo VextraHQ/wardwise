@@ -88,6 +88,8 @@ model Voter {
   email         String?   @unique
   phoneNumber   String?   // Optional phone number
   gender        String?   // male, female, other
+  occupation    String?   // Occupation/profession
+  religion      String?   // Religion/creed
   age           Int
   state         String
   lga           String

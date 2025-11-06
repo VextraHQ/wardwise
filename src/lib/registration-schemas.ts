@@ -110,6 +110,8 @@ export const basicInfoSchema = z.object({
   lastName: z.string().min(2),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
   gender: z.enum(["male", "female", "other"]).optional(),
+  occupation: z.string().min(1),
+  religion: z.string().min(1),
   age: z.number().int().min(18).max(120),
 });
 

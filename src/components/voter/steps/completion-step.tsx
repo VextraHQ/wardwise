@@ -168,6 +168,20 @@ export function CompletionStep() {
                   </dd>
                 </div>
                 <div>
+                  <dt className="text-muted-foreground text-xs">Occupation</dt>
+                  <dd className="text-foreground text-sm font-medium capitalize">
+                    {payload.basic?.occupation
+                      ? payload.basic.occupation.replace(/-/g, " ")
+                      : "Not provided"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground text-xs">Religion</dt>
+                  <dd className="text-foreground text-sm font-medium capitalize">
+                    {payload.basic?.religion || "Not provided"}
+                  </dd>
+                </div>
+                <div>
                   <dt className="text-muted-foreground text-xs">Phone</dt>
                   <dd className="text-foreground text-sm font-medium">
                     {payload.phone || "Not provided"}

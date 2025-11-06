@@ -4,7 +4,7 @@ import { MapIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 export function VoterHeader() {
   return (
     <header className="sticky top-0 z-50 w-full">
-      <div className="border-border border-b backdrop-blur transition-colors duration-300">
+      <div className="border-border bg-background/60 border-b backdrop-blur transition-colors duration-300">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
           <Link
             href="/"

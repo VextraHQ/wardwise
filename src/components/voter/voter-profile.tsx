@@ -28,6 +28,7 @@ import {
   Unlock,
   BarChart3,
   Heart,
+  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -75,6 +76,8 @@ export function VoterProfile() {
           dateOfBirth: voterData.dateOfBirth,
           age: voterData.age,
           gender: voterData.gender,
+          occupation: voterData.occupation || "",
+          religion: voterData.religion || "",
         },
         location: {
           state: voterData.state,
@@ -359,6 +362,28 @@ export function VoterProfile() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
+                    <Briefcase className="text-muted-foreground h-4 w-4" />
+                    <div className="flex-1">
+                      <p className="text-muted-foreground text-xs">
+                        Occupation
+                      </p>
+                      <p className="text-foreground font-medium capitalize">
+                        {payload.basic?.occupation
+                          ? payload.basic.occupation.replace(/-/g, " ")
+                          : "Not provided"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Heart className="text-muted-foreground h-4 w-4" />
+                    <div className="flex-1">
+                      <p className="text-muted-foreground text-xs">Religion</p>
+                      <p className="text-foreground font-medium capitalize">
+                        {payload.basic?.religion || "Not provided"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
                     <Phone className="text-muted-foreground h-4 w-4" />
                     <div className="flex-1">
                       <p className="text-muted-foreground text-xs">Phone</p>
@@ -615,6 +640,24 @@ export function VoterProfile() {
                     </dt>
                     <dd className="text-foreground font-medium capitalize">
                       {payload.basic?.gender || "Not provided"}
+                    </dd>
+                  </div>
+                  <div className="bg-muted/30 rounded-lg p-4">
+                    <dt className="text-muted-foreground mb-1 text-xs">
+                      Occupation
+                    </dt>
+                    <dd className="text-foreground font-medium capitalize">
+                      {payload.basic?.occupation
+                        ? payload.basic.occupation.replace(/-/g, " ")
+                        : "Not provided"}
+                    </dd>
+                  </div>
+                  <div className="bg-muted/30 rounded-lg p-4">
+                    <dt className="text-muted-foreground mb-1 text-xs">
+                      Religion
+                    </dt>
+                    <dd className="text-foreground font-medium capitalize">
+                      {payload.basic?.religion || "Not provided"}
                     </dd>
                   </div>
                 </dl>

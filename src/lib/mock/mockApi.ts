@@ -254,16 +254,18 @@ export const mockApi = {
 
         // House of Representatives: match if constituency contains the LGA
         if (candidate.position === "House of Representatives") {
-          const constituencyLower = candidate.constituency.toLowerCase();
-          const lgaLower = lga.toLowerCase();
+          // Normalize by converting to lowercase and replacing spaces/hyphens with a common delimiter
+          const normalize = (str: string) =>
+            str.toLowerCase().replace(/[\s-]/g, "-");
+          const constituencyNormalized = normalize(candidate.constituency);
+          const lgaNormalized = normalize(lga);
 
           // Check if constituency contains the LGA name
           // Example: "Fufore/Song Federal Constituency" matches "Fufore" or "Song"
+          // Also handles "Mayo Belwa" (space) matching "Mayo-Belwa" (hyphen)
           return (
-            constituencyLower.includes(lgaLower) ||
-            lgaLower.includes(
-              constituencyLower.split("/")[0]?.toLowerCase() || "",
-            )
+            constituencyNormalized.includes(lgaNormalized) ||
+            lgaNormalized.includes(constituencyNormalized.split("/")[0] || "")
           );
         }
 

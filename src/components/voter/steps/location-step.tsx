@@ -23,17 +23,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useRegistration } from "@/hooks/use-registration";
 import { useLocationData } from "@/hooks/use-location-data";
 import { useQueryClient } from "@tanstack/react-query";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
+import {
+  ComboboxSelect,
+  type ComboboxSelectOption,
+} from "@/components/ui/combobox-select";
 
 const locationSchema = z.object({
   state: z.string().min(1, "Please select your state"),
@@ -208,211 +205,210 @@ export function LocationStep() {
                   <FormField
                     control={form.control}
                     name="state"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          State
-                          {isStateComplete && (
-                            <Check className="h-3.5 w-3.5 text-green-600" />
-                          )}
-                        </FormLabel>
-                        <Select
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            setSelectedState(value);
-                            // Reset dependent fields and states
-                            setSelectedLga("");
-                            setSelectedWard("");
-                            // Prefetch LGAs for better UX
-                            locationData.prefetchLGAs(queryClient, value);
-                          }}
-                          value={field.value}
-                          disabled={locationData.statesLoading}
-                        >
+                    render={({ field }) => {
+                      const stateOptions: ComboboxSelectOption[] = states.map(
+                        (state) => ({
+                          value: state.code,
+                          label: state.name,
+                        }),
+                      );
+
+                      return (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            State
+                            {isStateComplete && (
+                              <Check className="text-primary h-3.5 w-3.5" />
+                            )}
+                          </FormLabel>
                           <FormControl>
-                            <SelectTrigger className="h-11 w-full">
-                              <SelectValue
-                                placeholder={
-                                  locationData.statesLoading
-                                    ? "Loading states..."
-                                    : "Select your state"
-                                }
-                              />
-                            </SelectTrigger>
+                            <ComboboxSelect
+                              options={stateOptions}
+                              value={field.value}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                setSelectedState(value);
+                                // Reset dependent fields and states
+                                setSelectedLga("");
+                                setSelectedWard("");
+                                // Prefetch LGAs for better UX
+                                locationData.prefetchLGAs(queryClient, value);
+                              }}
+                              placeholder={
+                                locationData.statesLoading
+                                  ? "Loading states..."
+                                  : "Select your state"
+                              }
+                              searchPlaceholder="Search states..."
+                              emptyMessage="No state found."
+                              disabled={locationData.statesLoading}
+                            />
                           </FormControl>
-                          <SelectContent>
-                            {states.map((state) => (
-                              <SelectItem key={state.code} value={state.code}>
-                                {state.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   {/* LGA */}
                   <FormField
                     control={form.control}
                     name="lga"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          Local Government Area (LGA)
-                          {isLgaComplete && (
-                            <Check className="h-3.5 w-3.5 text-green-600" />
-                          )}
-                        </FormLabel>
-                        <Select
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            setSelectedLga(value);
-                            // Reset dependent field and state
-                            setSelectedWard("");
-                            // Prefetch wards for better UX
-                            locationData.prefetchWards(queryClient, value);
-                          }}
-                          value={field.value}
-                          disabled={!selectedState || isLoading("lgas")}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-11 w-full">
-                              <SelectValue
-                                placeholder={
-                                  !selectedState
-                                    ? "Select state first"
-                                    : isLoading("lgas")
-                                      ? "Loading LGAs..."
-                                      : "Select your LGA"
-                                }
-                              />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {lgas.length > 0 ? (
-                              lgas.map((lga) => (
-                                <SelectItem key={lga.code} value={lga.code}>
-                                  {lga.name}
-                                </SelectItem>
-                              ))
-                            ) : (
-                              <SelectItem value="not-available" disabled>
-                                LGAs not available
-                              </SelectItem>
+                    render={({ field }) => {
+                      const lgaOptions: ComboboxSelectOption[] =
+                        lgas.length > 0
+                          ? lgas.map((lga) => ({
+                              value: lga.code,
+                              label: lga.name,
+                            }))
+                          : [];
+
+                      return (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            Local Government Area (LGA)
+                            {isLgaComplete && (
+                              <Check className="h-3.5 w-3.5 text-green-600" />
                             )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                          </FormLabel>
+                          <FormControl>
+                            <ComboboxSelect
+                              options={lgaOptions}
+                              value={field.value}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                setSelectedLga(value);
+                                // Reset dependent field and state
+                                setSelectedWard("");
+                                // Prefetch wards for better UX
+                                locationData.prefetchWards(queryClient, value);
+                              }}
+                              placeholder={
+                                !selectedState
+                                  ? "Select state first"
+                                  : isLoading("lgas")
+                                    ? "Loading LGAs..."
+                                    : "Select your LGA"
+                              }
+                              searchPlaceholder="Search LGAs..."
+                              emptyMessage={
+                                lgas.length === 0
+                                  ? "LGAs not available"
+                                  : "No LGA found."
+                              }
+                              disabled={!selectedState || isLoading("lgas")}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   {/* Ward */}
                   <FormField
                     control={form.control}
                     name="ward"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          Ward
-                          {isWardComplete && (
-                            <Check className="h-3.5 w-3.5 text-green-600" />
-                          )}
-                        </FormLabel>
-                        <Select
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            setSelectedWard(value);
-                            // Prefetch polling units for better UX
-                            locationData.prefetchPollingUnits(
-                              queryClient,
-                              value,
-                            );
-                          }}
-                          value={field.value}
-                          disabled={!selectedLga || isLoading("wards")}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-11 w-full">
-                              <SelectValue
-                                placeholder={
-                                  !selectedLga
-                                    ? "Select LGA first"
-                                    : isLoading("wards")
-                                      ? "Loading wards..."
-                                      : "Select your ward"
-                                }
-                              />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {wards.length > 0 ? (
-                              wards.map((ward) => (
-                                <SelectItem key={ward.code} value={ward.code}>
-                                  {ward.name}
-                                </SelectItem>
-                              ))
-                            ) : (
-                              <SelectItem value="not-available" disabled>
-                                Ward data not available
-                              </SelectItem>
+                    render={({ field }) => {
+                      const wardOptions: ComboboxSelectOption[] =
+                        wards.length > 0
+                          ? wards.map((ward) => ({
+                              value: ward.code,
+                              label: ward.name,
+                            }))
+                          : [];
+
+                      return (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            Ward
+                            {isWardComplete && (
+                              <Check className="h-3.5 w-3.5 text-green-600" />
                             )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                          </FormLabel>
+                          <FormControl>
+                            <ComboboxSelect
+                              options={wardOptions}
+                              value={field.value}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                setSelectedWard(value);
+                                // Prefetch polling units for better UX
+                                locationData.prefetchPollingUnits(
+                                  queryClient,
+                                  value,
+                                );
+                              }}
+                              placeholder={
+                                !selectedLga
+                                  ? "Select LGA first"
+                                  : isLoading("wards")
+                                    ? "Loading wards..."
+                                    : "Select your ward"
+                              }
+                              searchPlaceholder="Search wards..."
+                              emptyMessage={
+                                wards.length === 0
+                                  ? "Ward data not available"
+                                  : "No ward found."
+                              }
+                              disabled={!selectedLga || isLoading("wards")}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   {/* Polling Unit */}
                   <FormField
                     control={form.control}
                     name="pollingUnit"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          Polling Unit
-                          {isPollingUnitComplete && (
-                            <Check className="h-3.5 w-3.5 text-green-600" />
-                          )}
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          disabled={!selectedWard || isLoading("pollingUnits")}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-11 w-full">
-                              <SelectValue
-                                placeholder={
-                                  !selectedWard
-                                    ? "Select ward first"
-                                    : isLoading("pollingUnits")
-                                      ? "Loading polling units..."
-                                      : "Select your polling unit"
-                                }
-                              />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {pollingUnits.length > 0 ? (
-                              pollingUnits.map((unit) => (
-                                <SelectItem key={unit.code} value={unit.code}>
-                                  {unit.name}
-                                </SelectItem>
-                              ))
-                            ) : (
-                              <SelectItem value="not-available" disabled>
-                                Polling units not available
-                              </SelectItem>
+                    render={({ field }) => {
+                      const pollingUnitOptions: ComboboxSelectOption[] =
+                        pollingUnits.length > 0
+                          ? pollingUnits.map((unit) => ({
+                              value: unit.code,
+                              label: unit.name,
+                            }))
+                          : [];
+
+                      return (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            Polling Unit
+                            {isPollingUnitComplete && (
+                              <Check className="h-3.5 w-3.5 text-green-600" />
                             )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                          </FormLabel>
+                          <FormControl>
+                            <ComboboxSelect
+                              options={pollingUnitOptions}
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              placeholder={
+                                !selectedWard
+                                  ? "Select ward first"
+                                  : isLoading("pollingUnits")
+                                    ? "Loading polling units..."
+                                    : "Select your polling unit"
+                              }
+                              searchPlaceholder="Search polling units..."
+                              emptyMessage={
+                                pollingUnits.length === 0
+                                  ? "Polling units not available"
+                                  : "No polling unit found."
+                              }
+                              disabled={
+                                !selectedWard || isLoading("pollingUnits")
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
                 </div>
 

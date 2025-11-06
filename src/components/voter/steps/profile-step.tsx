@@ -38,7 +38,12 @@ import { useRegistration } from "@/hooks/use-registration";
 import { normalizeNigerianPhoneInput } from "@/lib/registration-schemas";
 import { useEffect } from "react";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
+import {
+  ComboboxSelect,
+  type ComboboxSelectOption,
+} from "@/components/ui/combobox-select";
 
+// Profile Form Schema Validation
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
@@ -51,6 +56,8 @@ const profileSchema = z.object({
   gender: z.enum(["male", "female", "other"], {
     message: "Please select your gender",
   }),
+  occupation: z.string().min(1, "Please select your occupation"),
+  religion: z.string().min(1, "Please select your religion"),
   phoneNumber: z.string().optional(),
 });
 
@@ -60,6 +67,7 @@ export function ProfileStep() {
   const router = useRouter();
   const { update, payload } = useRegistration();
 
+  // Form Initial Values
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -69,6 +77,8 @@ export function ProfileStep() {
       age: payload.basic?.age ?? 18, // Use 18 as default to avoid undefined
       gender:
         (payload.basic?.gender as "male" | "female" | "other") || undefined,
+      occupation: payload.basic?.occupation || "",
+      religion: payload.basic?.religion || "",
       phoneNumber: payload.phone ? payload.phone.replace("+234", "0") : "",
     },
   });
@@ -89,6 +99,7 @@ export function ProfileStep() {
     }
   }, [payload.basic, form]);
 
+  // Form Submission Handler
   const onSubmit = (data: ProfileFormValues) => {
     update({
       basic: {
@@ -97,6 +108,8 @@ export function ProfileStep() {
         dateOfBirth: data.dateOfBirth,
         age: data.age,
         gender: data.gender,
+        occupation: data.occupation,
+        religion: data.religion,
       },
       phone: data.phoneNumber
         ? normalizeNigerianPhoneInput(data.phoneNumber)
@@ -106,6 +119,7 @@ export function ProfileStep() {
     router.push("/register/location");
   };
 
+  // Calculate Age from Date of Birth
   const calculateAge = (dateOfBirth: string) => {
     if (!dateOfBirth) return undefined;
     const today = new Date();
@@ -121,6 +135,7 @@ export function ProfileStep() {
     return age;
   };
 
+  // Handle Date of Birth Change
   const handleDateChange = (date: string) => {
     form.setValue("dateOfBirth", date);
     const age = calculateAge(date);
@@ -129,7 +144,50 @@ export function ProfileStep() {
     }
   };
 
+  // Autofilled Information
   const isAutoFilled = payload.basic?.firstName && payload.basic?.lastName;
+
+  const occupationOptions: ComboboxSelectOption[] = [
+    { value: "civil-servant", label: "Civil Servant" },
+    { value: "teacher", label: "Teacher" },
+    {
+      value: "healthcare-worker",
+      label: "Healthcare Worker",
+    },
+    { value: "farmer", label: "Farmer" },
+    { value: "trader", label: "Trader/Business Owner" },
+    {
+      value: "artisan",
+      label: "Artisan (Carpenter, Tailor, etc.)",
+    },
+    { value: "student", label: "Student" },
+    { value: "unemployed", label: "Unemployed" },
+    { value: "retired", label: "Retired" },
+    {
+      value: "private-sector",
+      label: "Private Sector Employee",
+    },
+    { value: "security", label: "Security Personnel" },
+    { value: "driver", label: "Driver/Transport Worker" },
+    { value: "engineer", label: "Engineer" },
+    { value: "lawyer", label: "Lawyer" },
+    { value: "doctor", label: "Doctor/Medical Professional" },
+    { value: "nurse", label: "Nurse" },
+    { value: "accountant", label: "Accountant" },
+    { value: "banker", label: "Banker" },
+    { value: "journalist", label: "Journalist/Media" },
+    { value: "pastor", label: "Pastor/Religious Leader" },
+    { value: "imam", label: "Imam/Religious Leader" },
+    { value: "other", label: "Other" },
+  ];
+
+  const religionOptions: ComboboxSelectOption[] = [
+    { value: "christianity", label: "Christianity" },
+    { value: "islam", label: "Islam" },
+    { value: "traditional", label: "Traditional Religion" },
+    { value: "other", label: "Other" },
+    { value: "none", label: "None/Prefer not to say" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -398,12 +456,60 @@ export function ProfileStep() {
                           </FormItem>
                         </RadioGroup>
                       </FormControl>
-                      <FormDescription>
+                      {/* <FormDescription>
                         Select the option that best describes you
-                      </FormDescription>
+                      </FormDescription> */}
                       <FormMessage />
                     </FormItem>
                   )}
+                />
+
+                {/* Occupation Field */}
+                <FormField
+                  control={form.control}
+                  name="occupation"
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Occupation</FormLabel>
+                        <FormControl>
+                          <ComboboxSelect
+                            options={occupationOptions}
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder="Select your occupation"
+                            searchPlaceholder="Search occupations..."
+                            emptyMessage="No occupation found."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+
+                {/* Religion Field */}
+                <FormField
+                  control={form.control}
+                  name="religion"
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Religion/Creed</FormLabel>
+                        <FormControl>
+                          <ComboboxSelect
+                            options={religionOptions}
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder="Select your religion"
+                            searchPlaceholder="Search religions..."
+                            emptyMessage="No religion found."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 {/* Phone Number Field (Optional) */}
