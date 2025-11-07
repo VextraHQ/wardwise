@@ -1,67 +1,105 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
-  User,
-  MapPin,
-  Users,
-  ClipboardList,
-  Edit,
-  LogOut,
-  Shield,
-  Calendar,
-  CheckCircle2,
-  Phone,
-  Clock,
-  Star,
-  TrendingUp,
-  Eye,
-  Download,
-  Share2,
-  AlertTriangle,
-  Wifi,
-  WifiOff,
-  FileText,
-  Lock,
-  Unlock,
-  BarChart3,
-  Heart,
-  Briefcase,
-} from "lucide-react";
+  HiUser,
+  HiLocationMarker,
+  HiUsers,
+  HiClipboardList,
+  HiCheckCircle,
+  HiClock,
+  HiTrendingUp,
+  HiShieldCheck,
+  HiExclamationCircle,
+  HiArrowRight,
+  HiExternalLink,
+  HiRefresh,
+} from "react-icons/hi";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useRegistration } from "@/hooks/use-registration";
 import { generateRegistrationId } from "@/lib/registration-schemas";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { mockApi } from "@/lib/mock/mockApi";
+import { getSupportersCount } from "@/lib/mock/data/voters";
 import type { Voter } from "@/types";
+import { ProfileHeader } from "@/components/voter/profile/profile-header";
+import {
+  ProfileInfoCard,
+  InfoRow,
+} from "@/components/voter/profile/profile-info-card";
+import { ProfileTabs } from "@/components/voter/profile/profile-tabs";
+import { TabsContent } from "@/components/ui/tabs";
 
 export function VoterProfile() {
   const router = useRouter();
   const { payload, reset, update } = useRegistration();
-  const [canEdit, _setCanEdit] = useState(true); // In production, check if within 7 days
-  const [isOnline, _setIsOnline] = useState(true);
-  const [_lastSync, _setLastSync] = useState(new Date());
 
-  // Fetch voter data from API if we have NIN but incomplete data
-  const { data: voterData } = useQuery({
+  // Calculate days remaining for editing (7 days from registration)
+  const calculateDaysRemaining = (registrationDate?: string): number => {
+    if (!registrationDate) return 0;
+    const regDate = new Date(registrationDate);
+    const today = new Date();
+    const diffTime = today.getTime() - regDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const daysRemaining = 7 - diffDays;
+    return daysRemaining > 0 ? daysRemaining : 0;
+  };
+
+  // Fetch voter data if we have NIN
+  const {
+    data: voterData,
+    isLoading: isLoadingVoter,
+    error: voterError,
+  } = useQuery({
     queryKey: ["voter-profile", payload.nin],
     queryFn: async (): Promise<Voter | null> => {
       if (!payload.nin) return null;
       const result = await mockApi.getUserProfile(payload.nin);
       return result.voter;
     },
-    enabled:
-      !!payload.nin && (!payload.basic?.firstName || !payload.location?.state),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: !!payload.nin,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Fetch candidate data
+  const { data: candidateData, isLoading: isLoadingCandidate } = useQuery({
+    queryKey: ["candidate", payload.candidate?.candidateId],
+    queryFn: async () => {
+      if (!payload.candidate?.candidateId) return null;
+      const result = await mockApi.getCandidateById(
+        payload.candidate.candidateId,
+      );
+      return result.candidate;
+    },
+    enabled: !!payload.candidate?.candidateId,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+
+  // Fetch survey data
+  const { data: surveyData, isLoading: isLoadingSurvey } = useQuery({
+    queryKey: ["survey", payload.candidate?.candidateId],
+    queryFn: async () => {
+      if (!payload.candidate?.candidateId) return null;
+      const result = await mockApi.getCandidateSurvey(
+        payload.candidate.candidateId,
+      );
+      return result.survey;
+    },
+    enabled: !!payload.candidate?.candidateId,
+    staleTime: 1000 * 60 * 10, // 10 minutes
   });
 
   // Update registration state when voter data is fetched
@@ -89,7 +127,7 @@ export function VoterProfile() {
           candidateId: voterData.candidateId,
         },
         survey: {
-          surveyId: "", // Survey ID can be fetched separately if needed
+          surveyId: "",
           answers: voterData.surveyAnswers || {},
         },
       });
@@ -98,15 +136,75 @@ export function VoterProfile() {
 
   const fullName =
     `${payload.basic?.firstName || ""} ${payload.basic?.lastName || ""}`.trim();
-  const registrationDate = new Date().toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+
+  // Use actual registration date from voter data or fallback to current date
+  const actualRegistrationDate =
+    voterData?.registrationDate ||
+    payload.basic?.dateOfBirth ||
+    new Date().toISOString().split("T")[0];
+  const registrationDate = new Date(actualRegistrationDate).toLocaleDateString(
+    "en-US",
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    },
+  );
+
+  // Format dates for activity timeline
+  const formatActivityDate = (dateString?: string | null): string | null => {
+    if (!dateString) return null;
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffTime = now.getTime() - date.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0) return "Today";
+      if (diffDays === 1) return "Yesterday";
+      if (diffDays < 7) return `${diffDays} days ago`;
+      if (diffDays < 30) {
+        const weeks = Math.floor(diffDays / 7);
+        return `${weeks} week${weeks !== 1 ? "s" : ""} ago`;
+      }
+
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
+      });
+    } catch {
+      return null;
+    }
+  };
+
+  // Get last updated timestamp
+  const lastUpdated = voterData?.updatedAt
+    ? formatActivityDate(voterData.updatedAt)
+    : null;
 
   // Calculate days remaining for editing
-  const daysRemaining = canEdit ? 7 : 0;
-  const isLocked = !canEdit;
+  const daysRemaining = calculateDaysRemaining(
+    voterData?.registrationDate || actualRegistrationDate,
+  );
+  const canEdit = daysRemaining > 0;
+
+  // Calculate survey completion stats
+  const surveyAnswers = payload.survey?.answers || {};
+  const surveyQuestions = surveyData?.questions || [];
+  const answeredCount = Object.keys(surveyAnswers).filter(
+    (key) => !key.endsWith("_other_text") && surveyAnswers[key],
+  ).length;
+  const totalQuestions = surveyQuestions.length;
+  const surveyProgress =
+    totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+  const isSurveyComplete =
+    totalQuestions > 0 && answeredCount === totalQuestions;
+
+  // Get supporter count
+  const supporterCount = payload.candidate?.candidateId
+    ? getSupportersCount(payload.candidate.candidateId)
+    : 0;
 
   const handleLogout = () => {
     reset();
@@ -114,1014 +212,940 @@ export function VoterProfile() {
     router.push("/");
   };
 
-  const handleDownloadData = () => {
-    // NDPA compliance - allow users to download their data
-    const userData = {
-      personalInfo: payload.basic,
-      location: payload.location,
-      phone: payload.phone,
-      registrationDate,
-      lastUpdated: new Date().toISOString(),
+  const handleRetry = () => {
+    window.location.reload();
+  };
+
+  // Loading state
+  const isLoading = isLoadingVoter || isLoadingCandidate || isLoadingSurvey;
+
+  // Redirect ONLY if we have no NIN and no basic data
+  // Check both zustand state AND localStorage to handle hydration delay
+  useEffect(() => {
+    // Don't redirect while loading - data might be coming
+    if (isLoading) return;
+
+    // Check localStorage directly as fallback (zustand persist key)
+    const checkStorage = () => {
+      try {
+        const stored = localStorage.getItem("wardwise-registration");
+        const parsed = stored ? JSON.parse(stored) : null;
+        const storedNIN = parsed?.state?.payload?.nin;
+        const storedBasic = parsed?.state?.payload?.basic?.firstName;
+
+        // Check both current state and stored state
+        const hasNIN = !!payload.nin || !!storedNIN;
+        const hasBasicData =
+          !!(payload.basic?.firstName && payload.location?.state) ||
+          !!storedBasic;
+
+        // Only redirect if we have absolutely nothing
+        if (!hasNIN && !hasBasicData) {
+          router.push("/");
+        }
+      } catch {
+        // If localStorage check fails, just use zustand state
+        const hasNIN = !!payload.nin;
+        const hasBasicData = !!(
+          payload.basic?.firstName && payload.location?.state
+        );
+        if (!hasNIN && !hasBasicData) {
+          router.push("/");
+        }
+      }
     };
 
-    const blob = new Blob([JSON.stringify(userData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `wardwise-data-${fullName.replace(/\s+/g, "-")}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Give zustand time to hydrate
+    const timer = setTimeout(checkStorage, 200);
 
-    toast.success("Your data has been downloaded");
-  };
+    return () => clearTimeout(timer);
+  }, [
+    isLoading,
+    payload.nin,
+    payload.basic?.firstName,
+    payload.location?.state,
+    router,
+  ]);
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Network Status Alert */}
-      {!isOnline && (
-        <Alert className="border-orange-200 bg-orange-50">
-          <WifiOff className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800">
-            You're offline. Your data is saved locally and will sync when you're
-            back online.
+  // Error state
+  if (voterError) {
+    return (
+      <div className="space-y-4 sm:space-y-6">
+        <Alert className="border-red-200 bg-red-50">
+          <HiExclamationCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            Failed to load profile data. Please try again later.
           </AlertDescription>
         </Alert>
-      )}
-
-      {/* Critical Status Banner */}
-      <Alert
-        className={cn(
-          "border-2",
-          isLocked
-            ? "border-red-200 bg-red-50"
-            : "border-green-200 bg-green-50",
-        )}
-      >
-        {isLocked ? (
-          <Lock className="h-4 w-4 text-red-600" />
-        ) : (
-          <Unlock className="h-4 w-4 text-green-600" />
-        )}
-        <AlertDescription
-          className={cn(isLocked ? "text-red-800" : "text-green-800")}
-        >
-          {isLocked
-            ? "Profile locked for election integrity. Contact support if you need changes."
-            : `You can edit your profile for ${daysRemaining} more days. After that, it's locked until the next election cycle.`}
-        </AlertDescription>
-      </Alert>
-
-      {/* Modern Profile Header */}
-      <div className="from-primary/5 via-background to-primary/5 relative overflow-hidden rounded-2xl bg-gradient-to-br p-8">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(70,194,167,0.1),transparent_50%)]"></div>
-
-        <div className="relative flex flex-col items-center space-y-6 text-center lg:flex-row lg:items-start lg:space-y-0 lg:space-x-8 lg:text-left">
-          {/* Avatar Section */}
-          <div className="relative">
-            <div className="bg-primary/10 ring-primary/20 flex h-24 w-24 items-center justify-center rounded-full ring-4">
-              <span className="text-primary text-2xl font-bold">
-                {getInitials(fullName || "Voter")}
-              </span>
-            </div>
-            <div className="ring-background absolute -right-1 -bottom-1 flex h-6 w-6 items-center justify-center rounded-full bg-green-500 ring-2">
-              <CheckCircle2 className="h-3 w-3 text-white" />
-            </div>
-          </div>
-
-          {/* Profile Info */}
-          <div className="flex-1 space-y-3">
-            <div className="space-y-1">
-              <h1 className="text-foreground text-3xl font-bold tracking-tight lg:text-4xl">
-                {fullName || "Voter Profile"}
-              </h1>
-              <p className="text-muted-foreground text-lg">
-                Registered Voter • {payload.location?.state || "Adamawa State"}
-              </p>
-              <p className="text-muted-foreground text-sm">
-                Registration ID: {generateRegistrationId(payload)}
-              </p>
-            </div>
-
-            {/* Status Badges */}
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="gap-1">
-                <CheckCircle2 className="h-3 w-3" />
-                Verified
-              </Badge>
-              <Badge variant="outline" className="gap-1">
-                <Calendar className="h-3 w-3" />
-                {registrationDate}
-              </Badge>
-              {canEdit ? (
-                <Badge variant="default" className="gap-1">
-                  <Edit className="h-3 w-3" />
-                  Editable ({daysRemaining} days left)
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="gap-1">
-                  <Lock className="h-3 w-3" />
-                  Locked
-                </Badge>
-              )}
-              <Badge variant="outline" className="gap-1">
-                {isOnline ? (
-                  <Wifi className="h-3 w-3" />
-                ) : (
-                  <WifiOff className="h-3 w-3" />
-                )}
-                {isOnline ? "Online" : "Offline"}
-              </Badge>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4 pt-2 lg:grid-cols-4">
-              <div className="bg-background/50 rounded-lg p-3 text-center">
-                <div className="text-primary text-lg font-bold">100%</div>
-                <div className="text-muted-foreground text-xs">Complete</div>
-              </div>
-              <div className="bg-background/50 rounded-lg p-3 text-center">
-                <div className="text-primary text-lg font-bold">3/3</div>
-                <div className="text-muted-foreground text-xs">Survey</div>
-              </div>
-              <div className="bg-background/50 rounded-lg p-3 text-center">
-                <div className="text-primary text-lg font-bold">1</div>
-                <div className="text-muted-foreground text-xs">Candidate</div>
-              </div>
-              <div className="bg-background/50 rounded-lg p-3 text-center">
-                <div className="text-primary text-lg font-bold">✓</div>
-                <div className="text-muted-foreground text-xs">Verified</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col gap-2 lg:flex-row">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Share2 className="h-4 w-4" />
-              Share
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDownloadData}
-              className="gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export Data
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              className="text-destructive hover:text-destructive gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
-          </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button onClick={handleRetry} variant="default" className="gap-2">
+            <HiRefresh className="h-4 w-4" />
+            Retry
+          </Button>
+          <Button onClick={() => router.push("/")} variant="outline">
+            Go Home
+          </Button>
         </div>
       </div>
+    );
+  }
 
-      {/* Main Content */}
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">My Profile</TabsTrigger>
-          <TabsTrigger value="details">Full Details</TabsTrigger>
-          <TabsTrigger value="activity">Activity</TabsTrigger>
-          <TabsTrigger value="privacy">Data &amp; Privacy</TabsTrigger>
-        </TabsList>
+  return (
+    <div className="space-y-6 sm:space-y-8">
+      {/* Profile Header */}
+      <div className="space-y-2">
+        <ProfileHeader
+          fullName={fullName}
+          state={payload.location?.state || "Adamawa State"}
+          registrationId={generateRegistrationId(payload)}
+          registrationDate={registrationDate}
+          daysRemaining={daysRemaining}
+          isLoading={isLoading}
+          onLogout={handleLogout}
+        />
+        {/* Last Updated Indicator */}
+        {!isLoading && lastUpdated && (
+          <div className="flex items-center justify-end gap-1.5">
+            <p className="text-muted-foreground text-xs">
+              Last updated: {lastUpdated}
+            </p>
+          </div>
+        )}
+      </div>
 
-        {/* Overview Tab - Clean Profile Focus */}
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Personal Information Card */}
-            <Card className="border-border bg-card">
-              <CardHeader className="border-border border-b pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                      <User className="text-primary h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-foreground font-semibold">
-                        Personal Information
-                      </h3>
-                      <p className="text-muted-foreground text-sm">
-                        Your basic details
-                      </p>
-                    </div>
-                  </div>
-                  {canEdit && (
-                    <Button size="sm" variant="ghost" className="gap-1">
-                      <Edit className="h-3 w-3" />
-                      Edit
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4 pt-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <User className="text-muted-foreground h-4 w-4" />
-                    <div className="flex-1">
-                      <p className="text-muted-foreground text-xs">Full Name</p>
-                      <p className="text-foreground font-medium">
-                        {fullName || "Not provided"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Calendar className="text-muted-foreground h-4 w-4" />
-                    <div className="flex-1">
-                      <p className="text-muted-foreground text-xs">Age</p>
-                      <p className="text-foreground font-medium">
-                        {payload.basic?.age || "Not provided"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <User className="text-muted-foreground h-4 w-4" />
-                    <div className="flex-1">
-                      <p className="text-muted-foreground text-xs">Gender</p>
-                      <p className="text-foreground font-medium capitalize">
-                        {payload.basic?.gender || "Not provided"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Briefcase className="text-muted-foreground h-4 w-4" />
-                    <div className="flex-1">
-                      <p className="text-muted-foreground text-xs">
-                        Occupation
-                      </p>
-                      <p className="text-foreground font-medium capitalize">
-                        {payload.basic?.occupation
-                          ? payload.basic.occupation.replace(/-/g, " ")
-                          : "Not provided"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Heart className="text-muted-foreground h-4 w-4" />
-                    <div className="flex-1">
-                      <p className="text-muted-foreground text-xs">Religion</p>
-                      <p className="text-foreground font-medium capitalize">
-                        {payload.basic?.religion || "Not provided"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Phone className="text-muted-foreground h-4 w-4" />
-                    <div className="flex-1">
-                      <p className="text-muted-foreground text-xs">Phone</p>
-                      <p className="text-foreground font-medium">
-                        {payload.phone || "Not provided"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Voting Location Card */}
-            <Card className="border-border bg-card">
-              <CardHeader className="border-border border-b pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                      <MapPin className="text-primary h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-foreground font-semibold">
-                        Your Voting Location
-                      </h3>
-                      <p className="text-muted-foreground text-sm">
-                        Where you vote
-                      </p>
-                    </div>
-                  </div>
-                  {canEdit && (
-                    <Button size="sm" variant="ghost" className="gap-1">
-                      <Edit className="h-3 w-3" />
-                      Edit
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4 pt-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <MapPin className="text-muted-foreground h-4 w-4" />
-                    <div className="flex-1">
-                      <p className="text-muted-foreground text-xs">State</p>
-                      <p className="text-foreground font-medium">
-                        {payload.location?.state || "Not provided"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <MapPin className="text-muted-foreground h-4 w-4" />
-                    <div className="flex-1">
-                      <p className="text-muted-foreground text-xs">LGA</p>
-                      <p className="text-foreground font-medium">
-                        {payload.location?.lga || "Not provided"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <MapPin className="text-muted-foreground h-4 w-4" />
-                    <div className="flex-1">
-                      <p className="text-muted-foreground text-xs">Ward</p>
-                      <p className="text-foreground font-medium">
-                        {payload.location?.ward || "Not provided"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <MapPin className="text-muted-foreground h-4 w-4" />
-                    <div className="flex-1">
-                      <p className="text-muted-foreground text-xs">
-                        Polling Unit
-                      </p>
-                      <p className="text-foreground font-medium">
-                        {payload.location?.pollingUnit || "Not provided"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Your Support Card */}
-            <Card className="border-border bg-card">
-              <CardHeader className="border-border border-b pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                      <Users className="text-primary h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-foreground font-semibold">
-                        Your Support
-                      </h3>
-                      <p className="text-muted-foreground text-sm">
-                        Your candidate choice
-                      </p>
-                    </div>
-                  </div>
-                  {canEdit && (
-                    <Button size="sm" variant="ghost" className="gap-1">
-                      <Edit className="h-3 w-3" />
-                      Change
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4 pt-6">
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-muted-foreground text-xs">
-                      Currently Supporting
-                    </p>
-                    <p className="text-foreground font-semibold">
-                      Hon. Ahmed Suleiman (APC)
-                    </p>
-                  </div>
-                  <div className="bg-muted/50 flex items-center justify-between rounded-lg px-3 py-2">
-                    <span className="text-muted-foreground text-sm">
-                      Total Supporters
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <TrendingUp className="h-3 w-3 text-green-600" />
-                      <span className="text-foreground font-semibold">
-                        2,847
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" className="w-full gap-2">
-                  <Eye className="h-4 w-4" />
-                  View Candidate Profile
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Survey Status Card */}
-            <Card className="border-border bg-card">
-              <CardHeader className="border-border border-b pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                    <ClipboardList className="text-primary h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-foreground font-semibold">
-                      Survey Status
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      Your responses
-                    </p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4 pt-6">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm">
-                      Survey Completed
-                    </span>
-                    <Badge variant="secondary" className="gap-1">
-                      <CheckCircle2 className="h-3 w-3" />
-                      Complete
-                    </Badge>
-                  </div>
+      {/* Main Content Tabs */}
+      <ProfileTabs>
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-4 sm:space-y-6">
+          {/* Completion Summary */}
+          <Card className="border-primary/20 from-primary/5 to-primary/10 bg-gradient-to-br">
+            <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              {isLoading ? (
+                <>
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground text-sm">
-                        Questions Answered
-                      </span>
-                      <span className="text-foreground font-semibold">
-                        3 of 3
-                      </span>
-                    </div>
-                    <Progress value={100} className="h-2" />
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-6 w-48" />
+                    <Skeleton className="h-3 w-40" />
                   </div>
+                  <div className="flex gap-3 sm:gap-6">
+                    <div className="text-center">
+                      <Skeleton className="h-8 w-12 sm:h-10 sm:w-16" />
+                      <Skeleton className="mt-1 h-3 w-12" />
+                    </div>
+                    <div className="text-center">
+                      <Skeleton className="h-8 w-12 sm:h-10 sm:w-16" />
+                      <Skeleton className="mt-1 h-3 w-16" />
+                    </div>
+                    <div className="text-center">
+                      <Skeleton className="h-8 w-12 sm:h-10 sm:w-16" />
+                      <Skeleton className="mt-1 h-3 w-12" />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground text-xs sm:text-sm">
+                      Registration Status
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`flex h-2.5 w-2.5 rounded-full ${
+                          payload.basic && payload.location
+                            ? "bg-green-500"
+                            : "bg-yellow-500"
+                        }`}
+                      />
+                      <p className="text-foreground text-base font-semibold sm:text-lg">
+                        {payload.basic && payload.location
+                          ? "Registration Complete"
+                          : "Registration Incomplete"}
+                      </p>
+                    </div>
+                    {voterData?.registrationDate && (
+                      <p className="text-muted-foreground text-xs">
+                        Registered on {registrationDate}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex gap-3 sm:gap-6">
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <p className="text-foreground text-xl font-bold sm:text-2xl">
+                          {payload.basic && payload.location ? "100%" : "0%"}
+                        </p>
+                        {payload.basic && payload.location && (
+                          <HiCheckCircle className="h-4 w-4 text-green-600" />
+                        )}
+                      </div>
+                      <p className="text-muted-foreground text-xs">Profile</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <p className="text-foreground text-xl font-bold sm:text-2xl">
+                          {payload.candidate?.candidateId ? "✓" : "—"}
+                        </p>
+                        {payload.candidate?.candidateId && (
+                          <HiCheckCircle className="h-4 w-4 text-green-600" />
+                        )}
+                      </div>
+                      <p className="text-muted-foreground text-xs">Candidate</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <p className="text-foreground text-xl font-bold sm:text-2xl">
+                          {isSurveyComplete
+                            ? "✓"
+                            : totalQuestions > 0
+                              ? `${Math.round(surveyProgress)}%`
+                              : "—"}
+                        </p>
+                        {isSurveyComplete && (
+                          <HiCheckCircle className="h-4 w-4 text-green-600" />
+                        )}
+                      </div>
+                      <p className="text-muted-foreground text-xs">Survey</p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+            {/* Personal Information */}
+            <ProfileInfoCard
+              title="Personal Information"
+              canEdit={canEdit}
+              isLoading={isLoading}
+            >
+              <InfoRow
+                label="Full Name"
+                value={fullName || undefined}
+                isLoading={isLoadingVoter && !fullName}
+              />
+              <InfoRow
+                label="Age"
+                value={payload.basic?.age?.toString()}
+                isLoading={isLoadingVoter && !payload.basic?.age}
+              />
+              <InfoRow
+                label="Gender"
+                value={
+                  payload.basic?.gender
+                    ? payload.basic.gender.charAt(0).toUpperCase() +
+                      payload.basic.gender.slice(1)
+                    : undefined
+                }
+                isLoading={isLoadingVoter && !payload.basic?.gender}
+              />
+              <InfoRow
+                label="Occupation"
+                value={
+                  payload.basic?.occupation
+                    ? payload.basic.occupation.replace(/-/g, " ")
+                    : undefined
+                }
+                isLoading={isLoadingVoter && !payload.basic?.occupation}
+              />
+              <InfoRow
+                label="Religion"
+                value={
+                  payload.basic?.religion
+                    ? payload.basic.religion.charAt(0).toUpperCase() +
+                      payload.basic.religion.slice(1)
+                    : undefined
+                }
+                isLoading={isLoadingVoter && !payload.basic?.religion}
+              />
+              <InfoRow
+                label="Phone"
+                value={payload.phone}
+                isLoading={isLoadingVoter && !payload.phone}
+              />
+            </ProfileInfoCard>
+
+            {/* Voting Location */}
+            <ProfileInfoCard
+              title="Voting Location"
+              canEdit={canEdit}
+              isLoading={isLoading}
+            >
+              <InfoRow
+                label="State"
+                value={payload.location?.state}
+                isLoading={isLoadingVoter && !payload.location?.state}
+              />
+              <InfoRow
+                label="LGA"
+                value={payload.location?.lga}
+                isLoading={isLoadingVoter && !payload.location?.lga}
+              />
+              <InfoRow
+                label="Ward"
+                value={payload.location?.ward}
+                isLoading={isLoadingVoter && !payload.location?.ward}
+              />
+              <InfoRow
+                label="Polling Unit"
+                value={payload.location?.pollingUnit}
+                isLoading={isLoadingVoter && !payload.location?.pollingUnit}
+              />
+            </ProfileInfoCard>
+
+            {/* Candidate Support */}
+            <Card className="hover:border-primary/50 transition-all duration-200">
+              <CardHeader className="border-border border-b">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-foreground text-base font-semibold sm:text-lg">
+                    Candidate Support
+                  </h3>
                 </div>
-                <Button variant="outline" size="sm" className="w-full gap-2">
-                  <Eye className="h-4 w-4" />
-                  View Survey Responses
-                </Button>
+              </CardHeader>
+              <CardContent>
+                {isLoadingCandidate ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-full" />
+                  </div>
+                ) : candidateData ? (
+                  <div className="space-y-0">
+                    <div className="border-border/30 border-b py-4 last:border-0">
+                      <dt className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase sm:text-sm">
+                        Currently Supporting
+                      </dt>
+                      <dd className="text-foreground text-base font-semibold sm:text-lg">
+                        {candidateData.name}
+                      </dd>
+                      <dd className="text-muted-foreground mt-1 text-sm">
+                        {candidateData.party} • {candidateData.position}
+                      </dd>
+                    </div>
+                    <div className="border-border/30 border-b py-4 last:border-0">
+                      <div className="flex items-center justify-between">
+                        <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase sm:text-sm">
+                          Total Supporters
+                        </dt>
+                        <dd className="text-foreground flex items-center gap-1.5 text-sm font-semibold sm:text-base">
+                          <HiTrendingUp className="text-primary h-4 w-4" />
+                          {supporterCount.toLocaleString()}
+                        </dd>
+                      </div>
+                    </div>
+                    <div className="space-y-2 pt-4">
+                      {canEdit && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push("/register/candidate")}
+                          className="w-full gap-2"
+                        >
+                          <HiExternalLink className="h-4 w-4" />
+                          Change Candidate
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          toast.info("Candidate profile view coming soon!");
+                        }}
+                        className="w-full gap-2"
+                      >
+                        View Candidate Profile
+                        <HiArrowRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
+                    <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                      <HiUsers className="text-muted-foreground h-6 w-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-foreground text-sm font-medium">
+                        No candidate selected
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        Select a candidate to show your support
+                      </p>
+                    </div>
+                    {canEdit && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => router.push("/register/candidate")}
+                        className="gap-2"
+                      >
+                        Select Candidate
+                        <HiArrowRight className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Survey Status */}
+            <Card className="hover:border-primary/50 transition-all duration-200">
+              <CardHeader className="border-border border-b">
+                <h3 className="text-foreground text-base font-semibold sm:text-lg">
+                  Survey Status
+                </h3>
+              </CardHeader>
+              <CardContent>
+                {isLoadingSurvey ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-full" />
+                  </div>
+                ) : totalQuestions > 0 ? (
+                  <div className="space-y-0">
+                    <div className="border-border/30 border-b py-4 last:border-0">
+                      <div className="flex items-center justify-between">
+                        <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase sm:text-sm">
+                          Status
+                        </dt>
+                        {isSurveyComplete ? (
+                          <Badge variant="secondary" className="gap-1.5">
+                            <HiCheckCircle className="h-3 w-3" />
+                            Complete
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="gap-1.5">
+                            <HiClock className="h-3 w-3" />
+                            In Progress
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="border-border/30 border-b py-4 last:border-0">
+                      <dt className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase sm:text-sm">
+                        Questions Answered
+                      </dt>
+                      <div className="mb-2 flex items-center justify-between text-sm sm:text-base">
+                        <dd className="text-foreground font-semibold">
+                          {answeredCount} of {totalQuestions}
+                        </dd>
+                        <dd className="text-muted-foreground text-xs">
+                          {Math.round(surveyProgress)}%
+                        </dd>
+                      </div>
+                      <Progress value={surveyProgress} className="h-2" />
+                    </div>
+                    <div className="space-y-2 pt-4">
+                      {!isSurveyComplete && totalQuestions > 0 && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => router.push("/register/survey")}
+                          className="w-full gap-2"
+                        >
+                          {answeredCount === 0
+                            ? "Start Survey"
+                            : "Continue Survey"}
+                          <HiArrowRight className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {isSurveyComplete && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            toast.info("Survey responses view coming soon!");
+                          }}
+                          className="w-full gap-2"
+                        >
+                          View Responses
+                          <HiArrowRight className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
+                    <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                      <HiClipboardList className="text-muted-foreground h-6 w-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-foreground text-sm font-medium">
+                        No survey available
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        Your candidate hasn't created a survey yet
+                      </p>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
-
-          {/* Important Notice */}
-          <Card className="border-primary/30 bg-primary/5">
-            <CardContent className="flex items-start gap-4 py-6">
-              <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                <Shield className="text-primary h-5 w-5" />
-              </div>
-              <div className="space-y-2">
-                <p className="text-foreground font-semibold">
-                  Data Protection Notice
-                </p>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  Your information is encrypted and secure. You can update your
-                  details once within 7 days of registration. After that, your
-                  data is locked to maintain election integrity.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* Details Tab */}
-        <TabsContent value="details" className="space-y-6">
-          <Card className="border-border bg-card">
-            <CardHeader className="border-border border-b">
-              <div className="flex items-center gap-3">
-                <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                  <User className="text-primary h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-foreground text-lg font-semibold">
-                    Complete Registration Details
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    All your registration information
-                  </p>
-                </div>
-              </div>
+        <TabsContent value="details" className="space-y-4 sm:space-y-6">
+          <Card>
+            <CardHeader>
+              <h3 className="text-foreground text-base font-semibold sm:text-lg">
+                Registration Details
+              </h3>
+              <p className="text-muted-foreground text-xs sm:text-sm">
+                Complete breakdown of your registration information
+              </p>
             </CardHeader>
-            <CardContent className="space-y-8 pt-6">
-              <div className="space-y-6">
-                <h4 className="text-foreground flex items-center gap-2 font-semibold">
-                  <User className="h-4 w-4" />
+            <CardContent className="space-y-6 sm:space-y-8">
+              {/* Personal Information */}
+              <div className="space-y-3 sm:space-y-4">
+                <h4 className="text-foreground flex items-center gap-2 text-xs font-semibold sm:text-sm">
+                  <HiUser className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   Personal Information
                 </h4>
-                <dl className="grid gap-4 sm:grid-cols-2">
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <dt className="text-muted-foreground mb-1 text-xs">
+                <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-xs">
                       First Name
                     </dt>
-                    <dd className="text-foreground font-medium">
+                    <dd className="text-foreground text-xs font-medium sm:text-sm">
                       {payload.basic?.firstName || "Not provided"}
                     </dd>
                   </div>
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <dt className="text-muted-foreground mb-1 text-xs">
-                      Last Name
-                    </dt>
-                    <dd className="text-foreground font-medium">
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-xs">Last Name</dt>
+                    <dd className="text-foreground text-xs font-medium sm:text-sm">
                       {payload.basic?.lastName || "Not provided"}
                     </dd>
                   </div>
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <dt className="text-muted-foreground mb-1 text-xs">Age</dt>
-                    <dd className="text-foreground font-medium">
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-xs">
+                      Date of Birth
+                    </dt>
+                    <dd className="text-foreground text-xs font-medium sm:text-sm">
+                      {payload.basic?.dateOfBirth
+                        ? new Date(
+                            payload.basic.dateOfBirth,
+                          ).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
+                        : "Not provided"}
+                    </dd>
+                  </div>
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-xs">Age</dt>
+                    <dd className="text-foreground text-xs font-medium sm:text-sm">
                       {payload.basic?.age || "Not provided"}
                     </dd>
                   </div>
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <dt className="text-muted-foreground mb-1 text-xs">
-                      Gender
-                    </dt>
-                    <dd className="text-foreground font-medium capitalize">
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-xs">Gender</dt>
+                    <dd className="text-foreground text-xs font-medium capitalize sm:text-sm">
                       {payload.basic?.gender || "Not provided"}
                     </dd>
                   </div>
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <dt className="text-muted-foreground mb-1 text-xs">
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-xs">
                       Occupation
                     </dt>
-                    <dd className="text-foreground font-medium capitalize">
+                    <dd className="text-foreground text-xs font-medium capitalize sm:text-sm">
                       {payload.basic?.occupation
                         ? payload.basic.occupation.replace(/-/g, " ")
                         : "Not provided"}
                     </dd>
                   </div>
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <dt className="text-muted-foreground mb-1 text-xs">
-                      Religion
-                    </dt>
-                    <dd className="text-foreground font-medium capitalize">
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-xs">Religion</dt>
+                    <dd className="text-foreground text-xs font-medium capitalize sm:text-sm">
                       {payload.basic?.religion || "Not provided"}
                     </dd>
                   </div>
-                </dl>
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-xs">
+                      Phone Number
+                    </dt>
+                    <dd className="text-foreground text-xs font-medium sm:text-sm">
+                      {payload.phone || "Not provided"}
+                    </dd>
+                  </div>
+                </div>
               </div>
 
               <Separator />
 
-              <div className="space-y-6">
-                <h4 className="text-foreground flex items-center gap-2 font-semibold">
-                  <MapPin className="h-4 w-4" />
-                  Contact &amp; Location
+              {/* Location Information */}
+              <div className="space-y-3 sm:space-y-4">
+                <h4 className="text-foreground flex items-center gap-2 text-xs font-semibold sm:text-sm">
+                  <HiLocationMarker className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  Location Information
                 </h4>
-                <dl className="grid gap-4 sm:grid-cols-2">
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <dt className="text-muted-foreground mb-1 text-xs">
-                      Phone Number
-                    </dt>
-                    <dd className="text-foreground font-medium">
-                      {payload.phone || "Not provided"}
-                    </dd>
-                  </div>
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <dt className="text-muted-foreground mb-1 text-xs">
-                      State
-                    </dt>
-                    <dd className="text-foreground font-medium">
+                <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-xs">State</dt>
+                    <dd className="text-foreground text-xs font-medium sm:text-sm">
                       {payload.location?.state || "Not provided"}
                     </dd>
                   </div>
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <dt className="text-muted-foreground mb-1 text-xs">LGA</dt>
-                    <dd className="text-foreground font-medium">
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-xs">LGA</dt>
+                    <dd className="text-foreground text-xs font-medium sm:text-sm">
                       {payload.location?.lga || "Not provided"}
                     </dd>
                   </div>
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <dt className="text-muted-foreground mb-1 text-xs">Ward</dt>
-                    <dd className="text-foreground font-medium">
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-xs">Ward</dt>
+                    <dd className="text-foreground text-xs font-medium sm:text-sm">
                       {payload.location?.ward || "Not provided"}
                     </dd>
                   </div>
-                  <div className="bg-muted/30 rounded-lg p-4 sm:col-span-2">
-                    <dt className="text-muted-foreground mb-1 text-xs">
+                  <div className="space-y-1 sm:col-span-2">
+                    <dt className="text-muted-foreground text-xs">
                       Polling Unit
                     </dt>
-                    <dd className="text-foreground font-medium">
+                    <dd className="text-foreground text-xs font-medium sm:text-sm">
                       {payload.location?.pollingUnit || "Not provided"}
                     </dd>
                   </div>
-                </dl>
+                </div>
               </div>
+
+              <Separator />
+
+              {/* Candidate Information */}
+              {candidateData && (
+                <div className="space-y-3 sm:space-y-4">
+                  <h4 className="text-foreground flex items-center gap-2 text-xs font-semibold sm:text-sm">
+                    <HiUsers className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    Candidate Support
+                  </h4>
+                  <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                    <div className="space-y-1 sm:col-span-2">
+                      <dt className="text-muted-foreground text-xs">
+                        Candidate Name
+                      </dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {candidateData.name}
+                      </dd>
+                    </div>
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">Party</dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {candidateData.party}
+                      </dd>
+                    </div>
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">
+                        Position
+                      </dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {candidateData.position}
+                      </dd>
+                    </div>
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">
+                        Constituency
+                      </dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {candidateData.constituency || "Not specified"}
+                      </dd>
+                    </div>
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">
+                        Total Supporters
+                      </dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {supporterCount.toLocaleString()}
+                      </dd>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Survey Information */}
+              {totalQuestions > 0 && (
+                <>
+                  <Separator />
+                  <div className="space-y-3 sm:space-y-4">
+                    <h4 className="text-foreground flex items-center gap-2 text-xs font-semibold sm:text-sm">
+                      <HiClipboardList className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      Survey Information
+                    </h4>
+                    <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                      <div className="space-y-1">
+                        <dt className="text-muted-foreground text-xs">
+                          Status
+                        </dt>
+                        <dd className="text-foreground text-xs font-medium sm:text-sm">
+                          {isSurveyComplete ? (
+                            <Badge variant="secondary" className="gap-1">
+                              <HiCheckCircle className="h-3 w-3" />
+                              Complete
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="gap-1">
+                              <HiClock className="h-3 w-3" />
+                              In Progress
+                            </Badge>
+                          )}
+                        </dd>
+                      </div>
+                      <div className="space-y-1">
+                        <dt className="text-muted-foreground text-xs">
+                          Progress
+                        </dt>
+                        <dd className="text-foreground text-xs font-medium sm:text-sm">
+                          {answeredCount} of {totalQuestions} questions
+                        </dd>
+                      </div>
+                      <div className="space-y-1 sm:col-span-2">
+                        <dt className="text-muted-foreground text-xs">
+                          Completion
+                        </dt>
+                        <div className="mt-1">
+                          <Progress value={surveyProgress} className="h-2" />
+                          <p className="text-muted-foreground mt-1 text-xs">
+                            {Math.round(surveyProgress)}% complete
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
         {/* Activity Tab */}
-        <TabsContent value="activity" className="space-y-6">
-          <Card className="border-border bg-card">
-            <CardHeader className="border-border border-b">
-              <div className="flex items-center gap-3">
-                <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                  <Clock className="text-primary h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-foreground text-lg font-semibold">
-                    Recent Activity
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Your registration timeline
-                  </p>
-                </div>
-              </div>
+        <TabsContent value="activity" className="space-y-4 sm:space-y-6">
+          <Card>
+            <CardHeader>
+              <h3 className="text-foreground text-base font-semibold sm:text-lg">
+                Registration Timeline
+              </h3>
+              <p className="text-muted-foreground text-xs sm:text-sm">
+                Your registration activity history
+              </p>
             </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
+            <CardContent>
+              <div className="space-y-3 sm:space-y-4">
                 {[
                   {
-                    icon: CheckCircle2,
+                    icon: HiCheckCircle,
                     title: "Registration Completed",
-                    date: registrationDate,
-                    color: "text-green-600",
-                    bgColor: "bg-green-50",
+                    date: formatActivityDate(
+                      voterData?.registrationDate || actualRegistrationDate,
+                    ),
+                    fullDate: registrationDate,
+                    description:
+                      "Your voter registration was successfully completed",
+                    completed: true,
                   },
                   {
-                    icon: ClipboardList,
-                    title: "Survey Submitted",
-                    date: registrationDate,
-                    color: "text-blue-600",
-                    bgColor: "bg-blue-50",
-                  },
-                  {
-                    icon: Users,
+                    icon: HiUsers,
                     title: "Candidate Selected",
-                    date: registrationDate,
-                    color: "text-purple-600",
-                    bgColor: "bg-purple-50",
+                    date: candidateData
+                      ? formatActivityDate(voterData?.createdAt)
+                      : null,
+                    fullDate: candidateData
+                      ? voterData?.createdAt
+                        ? new Date(voterData.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            },
+                          )
+                        : registrationDate
+                      : null,
+                    description: candidateData
+                      ? `Supporting ${candidateData.name}`
+                      : "No candidate selected yet",
+                    completed: !!candidateData,
                   },
                   {
-                    icon: Shield,
-                    title: "Phone Verified",
-                    date: registrationDate,
-                    color: "text-primary",
-                    bgColor: "bg-primary/10",
+                    icon: HiClipboardList,
+                    title: "Survey Completed",
+                    date: isSurveyComplete
+                      ? formatActivityDate(voterData?.updatedAt)
+                      : null,
+                    fullDate: isSurveyComplete
+                      ? voterData?.updatedAt
+                        ? new Date(voterData.updatedAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            },
+                          )
+                        : registrationDate
+                      : null,
+                    description: isSurveyComplete
+                      ? "Survey responses submitted"
+                      : totalQuestions > 0
+                        ? `${answeredCount} of ${totalQuestions} questions answered`
+                        : "No survey available",
+                    completed: isSurveyComplete,
                   },
-                ].map((activity, index) => (
-                  <div
-                    key={index}
-                    className="border-border bg-card flex items-start gap-4 rounded-lg border p-4"
-                  >
+                ]
+                  .filter((activity) => activity.completed || activity.date)
+                  .map((activity, index) => (
                     <div
-                      className={cn(
-                        "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg",
-                        activity.bgColor,
-                        activity.color,
-                      )}
+                      key={index}
+                      className="flex items-start gap-3 border-b pb-3 transition-all duration-200 last:border-0 last:pb-0 sm:gap-4 sm:pb-4"
                     >
-                      <activity.icon className="h-5 w-5" />
+                      <div
+                        className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg transition-colors duration-200 sm:h-10 sm:w-10 ${
+                          activity.completed
+                            ? "bg-primary/10 text-primary"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        <activity.icon className="h-4 w-4 transition-transform duration-200 sm:h-5 sm:w-5" />
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <p className="text-foreground text-xs font-medium sm:text-sm">
+                            {activity.title}
+                          </p>
+                          {activity.completed && (
+                            <HiCheckCircle className="h-3 w-3 text-green-600 transition-opacity duration-200" />
+                          )}
+                        </div>
+                        <p className="text-muted-foreground text-xs">
+                          {activity.description}
+                        </p>
+                        {activity.date && (
+                          <div className="flex items-center gap-1">
+                            <p className="text-muted-foreground text-xs">
+                              {activity.date}
+                            </p>
+                            {activity.fullDate &&
+                              activity.fullDate !== activity.date && (
+                                <Tooltip delayDuration={200}>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      type="button"
+                                      className="text-muted-foreground hover:text-foreground cursor-help text-xs underline-offset-2 transition-colors hover:underline"
+                                      aria-label={`Full date: ${activity.fullDate}`}
+                                    >
+                                      (view full date)
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" align="start">
+                                    <p className="font-medium">
+                                      {activity.fullDate}
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-foreground font-medium">
-                        {activity.title}
-                      </p>
-                      <p className="text-muted-foreground text-sm">
-                        {activity.date}
-                      </p>
-                    </div>
-                    <Badge variant="secondary" className="gap-1">
-                      <CheckCircle2 className="h-3 w-3" />
-                      Complete
-                    </Badge>
+                  ))}
+                {!candidateData && !isSurveyComplete && (
+                  <div className="border-border/30 rounded-lg border border-dashed p-4 text-center">
+                    <p className="text-muted-foreground text-xs">
+                      Complete your registration to see more activity
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Data & Privacy Tab - NDPA Compliance */}
-        <TabsContent value="privacy" className="space-y-6">
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Data Rights */}
-            <Card className="border-border bg-card">
-              <CardHeader className="border-border border-b">
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                    <FileText className="text-primary h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-foreground text-lg font-semibold">
-                      Your Data Rights
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      NDPA compliant data management
-                    </p>
-                  </div>
-                </div>
+        {/* Privacy Tab */}
+        <TabsContent value="privacy" className="space-y-4 sm:space-y-6">
+          <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <h3 className="text-foreground text-base font-semibold sm:text-lg">
+                  Data Rights
+                </h3>
+                <p className="text-muted-foreground text-xs sm:text-sm">
+                  Your rights under NDPA 2023
+                </p>
               </CardHeader>
-              <CardContent className="space-y-4 pt-6">
-                <div className="space-y-3">
+              <CardContent className="space-y-3 sm:space-y-4">
+                <div className="space-y-2 sm:space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm">
+                    <span className="text-muted-foreground text-xs sm:text-sm">
                       Data Collection
                     </span>
-                    <Badge variant="secondary" className="gap-1">
-                      <CheckCircle2 className="h-3 w-3" />
-                      Transparent
-                    </Badge>
+                    <Badge variant="secondary">Transparent</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm">
+                    <span className="text-muted-foreground text-xs sm:text-sm">
                       Data Storage
                     </span>
-                    <Badge variant="secondary" className="gap-1">
-                      <Shield className="h-3 w-3" />
-                      Encrypted
-                    </Badge>
+                    <Badge variant="secondary">Encrypted</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm">
+                    <span className="text-muted-foreground text-xs sm:text-sm">
                       Data Sharing
                     </span>
-                    <Badge variant="secondary" className="gap-1">
-                      <Lock className="h-3 w-3" />
-                      Restricted
-                    </Badge>
+                    <Badge variant="secondary">Restricted</Badge>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  className="w-full gap-2"
-                  onClick={handleDownloadData}
-                >
-                  <Download className="h-4 w-4" />
-                  Download My Data
-                </Button>
               </CardContent>
             </Card>
 
-            {/* Privacy Settings */}
-            <Card className="border-border bg-card">
-              <CardHeader className="border-border border-b">
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                    <Shield className="text-primary h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-foreground text-lg font-semibold">
-                      Privacy Settings
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      Control your data visibility
-                    </p>
-                  </div>
-                </div>
+            <Card>
+              <CardHeader>
+                <h3 className="text-foreground text-base font-semibold sm:text-lg">
+                  Privacy Settings
+                </h3>
+                <p className="text-muted-foreground text-xs sm:text-sm">
+                  Control your data visibility
+                </p>
               </CardHeader>
-              <CardContent className="space-y-4 pt-6">
-                <div className="space-y-3">
+              <CardContent className="space-y-3 sm:space-y-4">
+                <div className="space-y-2 sm:space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm">
+                    <span className="text-muted-foreground text-xs sm:text-sm">
                       Profile Visibility
                     </span>
-                    <Badge variant="secondary" className="gap-1">
-                      <Eye className="h-3 w-3" />
-                      Public
-                    </Badge>
+                    <Badge variant="secondary">Private</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm">
+                    <span className="text-muted-foreground text-xs sm:text-sm">
                       Survey Responses
                     </span>
-                    <Badge variant="secondary" className="gap-1">
-                      <BarChart3 className="h-3 w-3" />
-                      Anonymous
-                    </Badge>
+                    <Badge variant="secondary">Anonymous</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm">
+                    <span className="text-muted-foreground text-xs sm:text-sm">
                       Contact Information
                     </span>
-                    <Badge variant="secondary" className="gap-1">
-                      <Lock className="h-3 w-3" />
-                      Private
-                    </Badge>
+                    <Badge variant="secondary">Private</Badge>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  className="text-destructive hover:text-destructive w-full gap-2"
-                >
-                  <AlertTriangle className="h-4 w-4" />
-                  Request Data Deletion
-                </Button>
               </CardContent>
             </Card>
           </div>
 
           {/* Data Protection Notice */}
-          <Card className="border-primary/30 bg-primary/5">
-            <CardContent className="flex items-start gap-4 py-6">
-              <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                <Shield className="text-primary h-5 w-5" />
-              </div>
-              <div className="space-y-2">
-                <p className="text-foreground font-semibold">
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="flex items-start gap-3 sm:gap-4">
+              <HiShieldCheck className="text-primary mt-0.5 h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+              <div className="space-y-1.5 sm:space-y-2">
+                <p className="text-foreground text-sm font-semibold sm:text-base">
                   Data Protection Notice
                 </p>
-                <p className="text-muted-foreground text-sm leading-relaxed">
+                <p className="text-muted-foreground text-xs leading-relaxed sm:text-sm">
                   Your information is protected by Nigerian Data Protection Act
                   (NDPA) 2023. We use encryption, secure servers, and strict
                   access controls. Your data is never sold to third parties and
-                  is only used for election-related purposes. You have the right
-                  to access, correct, or delete your data at any time.
+                  is only used for election-related purposes.
                 </p>
-                <div className="flex gap-2 pt-2">
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <FileText className="h-3 w-3" />
-                    Privacy Policy
-                  </Button>
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <Shield className="h-3 w-3" />
-                    Terms of Service
-                  </Button>
-                </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
-
-      {/* Community Voice Section - WardWise Differentiator */}
-      <div className="space-y-6">
-        {/* Section Header */}
-        <div className="space-y-3 text-center">
-          <div className="bg-primary/10 inline-flex items-center gap-2 rounded-full px-4 py-2">
-            <BarChart3 className="text-primary h-4 w-4" />
-            <span className="text-primary text-sm font-semibold">
-              WardWise Community Voice
-            </span>
-          </div>
-          <h2 className="text-foreground text-3xl font-bold">
-            {payload.location?.ward || "Your Ward"} Community Voice
-          </h2>
-          <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-            See what matters most to your neighbors and how your voice fits in.
-            This is what makes WardWise different - real community insights.
-          </p>
-        </div>
-
-        {/* Community Stats Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Top Priority */}
-          <Card className="border-border bg-card">
-            <CardHeader className="border-border border-b pb-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                  <BarChart3 className="text-primary h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-foreground font-semibold">
-                    Top Priority
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    What your ward cares about most
-                  </p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-6">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">
-                    Jobs &amp; Economy
-                  </span>
-                  <span className="text-muted-foreground text-sm">68%</span>
-                </div>
-                <Progress value={68} className="h-2" />
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Education</span>
-                  <span className="text-muted-foreground text-sm">45%</span>
-                </div>
-                <Progress value={45} className="h-2" />
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Healthcare</span>
-                  <span className="text-muted-foreground text-sm">32%</span>
-                </div>
-                <Progress value={32} className="h-2" />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Your Voice */}
-          <Card className="border-border bg-card">
-            <CardHeader className="border-border border-b pb-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                  <Heart className="text-primary h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-foreground font-semibold">Your Voice</h3>
-                  <p className="text-muted-foreground text-sm">
-                    How you compare to your ward
-                  </p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-6">
-              <div className="space-y-2 text-center">
-                <div className="text-primary text-2xl font-bold">Education</div>
-                <p className="text-muted-foreground text-sm">
-                  You prioritize education, while 68% of your ward prioritizes
-                  jobs
-                </p>
-                <Badge variant="secondary" className="gap-1">
-                  <Star className="h-3 w-3" />
-                  Unique Perspective
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Ward Activity */}
-          <Card className="border-border bg-card">
-            <CardHeader className="border-border border-b pb-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                  <Users className="text-primary h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-foreground font-semibold">
-                    Ward Activity
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Community engagement
-                  </p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-6">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Registered Voters</span>
-                  <span className="font-semibold">2,847</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Survey Responses</span>
-                  <span className="font-semibold">1,923</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Active This Week</span>
-                  <span className="font-semibold">156</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Community Insights */}
-        <Card className="border-border bg-card">
-          <CardHeader className="border-border border-b">
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                <TrendingUp className="text-primary h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="text-foreground text-lg font-semibold">
-                  Community Insights
-                </h3>
-                <p className="text-muted-foreground text-sm">
-                  What's happening in your ward
-                </p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="flex items-start gap-3 rounded-lg bg-green-50 p-4">
-                <TrendingUp className="mt-0.5 h-5 w-5 text-green-600" />
-                <div>
-                  <p className="font-medium text-green-800">
-                    Education support is growing
-                  </p>
-                  <p className="text-sm text-green-700">
-                    +12% more people prioritizing education this week
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 rounded-lg bg-blue-50 p-4">
-                <Users className="mt-0.5 h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="font-medium text-blue-800">
-                    High engagement in your area
-                  </p>
-                  <p className="text-sm text-blue-700">
-                    Your ward has 67% survey completion rate (above average)
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      </ProfileTabs>
     </div>
   );
 }

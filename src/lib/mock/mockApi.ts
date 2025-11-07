@@ -32,6 +32,7 @@ import type {
 import { getVoterByNIN } from "@/lib/mock/data/voters";
 import { candidates } from "@/lib/mock/data/candidates";
 import { getSurveyByCandidateId } from "@/lib/mock/data/candidate-surveys";
+import { getCandidateById } from "@/lib/helpers/candidate-helpers";
 
 // Mock API functions
 export const mockApi = {
@@ -275,6 +276,23 @@ export const mockApi = {
 
     return {
       candidates: filtered,
+    };
+  },
+
+  // Get candidate by ID
+  getCandidateById: async (
+    candidateId: string,
+  ): Promise<{ candidate: Candidate | null }> => {
+    console.log(`👤 Mock: Getting candidate ${candidateId}`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    // Use helper function from helpers (single source of truth)
+    const candidate = getCandidateById(candidateId);
+
+    return {
+      candidate: candidate || null,
     };
   },
 
