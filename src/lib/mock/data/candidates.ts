@@ -4,7 +4,7 @@
 // For accurate, real-time supporter counts, use:
 // - getCandidateByIdWithSupporters() from @/lib/helpers/candidate-helpers
 // - getCandidatesWithSupporters() from @/lib/helpers/candidate-helpers
-// - getSupportersCount(candidateId) from @/lib/mock/data/candidate-analytics
+// - getSupportersCount(candidateId) from @/lib/helpers/voter-analytics
 //
 // These functions calculate supporters dynamically from actual voter data.
 import type { Candidate } from "@/types";
@@ -296,18 +296,3 @@ export const candidates: Candidate[] = [
     updatedAt: "2024-10-20T09:00:00Z",
   },
 ];
-
-/**
- * NOTE: Helper functions have been moved to @/lib/helpers/candidate-helpers.ts
- * Please import from there for better organization and DRY principles.
- *
- * Available helper functions:
- * - getCandidateById(id)
- * - getCandidatesByState(state)
- * - getCandidatesByParty(party)
- * - getCandidatesByPosition(position)
- * - filterCandidates(filters)
- * - searchCandidates(query)
- * - groupCandidatesByState()
- * - And many more...
- */

@@ -200,7 +200,7 @@ export function useCandidateRegistrationTrends(
     queryFn: async () => {
       if (!candidateId) throw new Error("No candidate ID");
       const { getRegistrationTrends } = await import(
-        "@/lib/mock/data/candidate-analytics"
+        "@/lib/helpers/voter-analytics"
       );
       return getRegistrationTrends(candidateId, period);
     },

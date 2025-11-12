@@ -1,9 +1,9 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
+// Global Prisma instance to prevent multiple connections in development
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
@@ -12,6 +12,7 @@ const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
+// NextAuth configuration for candidate authentication
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -20,6 +21,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
+      // Custom authorization logic for email/password login
       async authorize(credentials) {
         console.log("🔐 Auth attempt:", credentials?.email);
 
@@ -28,9 +30,10 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // Fetch user from database including their candidate profile
         const user = await prisma.user.findUnique({
           where: {
-            email: credentials.email,
+            email: credentials.email as string,
           },
           include: {
             candidate: true,
@@ -45,8 +48,9 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // Verify password using bcrypt
         const isPasswordValid = await bcrypt.compare(
-          credentials.password,
+          credentials.password as string,
           user.password,
         );
 
@@ -58,20 +62,22 @@ export const authOptions: NextAuthOptions = {
         }
 
         console.log("✅ Authentication successful");
+        // Return user data to be stored in JWT token
         return {
           id: user.id,
-          email: user.email,
+          email: user.email as string,
           name: user.name,
           role: user.role,
-          candidateId: user.candidateId,
+          candidateId: user.candidateId as string,
         };
       },
     }),
   ],
   session: {
-    strategy: "jwt",
+    strategy: "jwt", // Use JWT tokens instead of database sessions
   },
   callbacks: {
+    // Add custom fields to JWT token
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
@@ -79,6 +85,7 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
+    // Add custom fields from JWT to session object
     async session({ session, token }) {
       if (token) {
         session.user.id = token.sub!;

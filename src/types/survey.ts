@@ -1,9 +1,3 @@
-/**
- * Survey Types
- *
- * Types for candidate surveys and survey questions.
- */
-
 import type { Candidate } from "@/types/candidate";
 
 // Survey question option

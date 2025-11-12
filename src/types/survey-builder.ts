@@ -1,18 +1,10 @@
-/**
- * Survey Builder Component Types
- *
- * Type definitions for survey builder components
- */
-
 import type {
   SurveyQuestion,
   SurveyTemplate,
   SurveyBuilderStep,
 } from "@/types";
 
-/**
- * Props for StepBasicInfo component
- */
+// Props for StepBasicInfo component
 export interface StepBasicInfoProps {
   title: string;
   description: string;
@@ -26,9 +18,7 @@ export interface StepBasicInfoProps {
   onTemplateSelect: (template: SurveyTemplate) => void;
 }
 
-/**
- * Props for StepQuestions component
- */
+// Props for StepQuestions component
 export interface StepQuestionsProps {
   questions: SurveyQuestion[];
   onAddQuestion: (question: SurveyQuestion) => void;
@@ -40,20 +30,16 @@ export interface StepQuestionsProps {
   maxQuestions: number;
 }
 
-/**
- * Props for StepReview component
- */
+// Props for StepReview component
 export interface StepReviewProps {
   title: string;
   description: string;
   estimatedMinutes: number;
   questions: SurveyQuestion[];
-  onEditStep: (step: "info" | "questions") => void;
+  onEditStep: (step: SurveyBuilderStep) => void;
 }
 
-/**
- * Props for QuestionEditor component
- */
+// Props for QuestionEditor component
 export interface QuestionEditorProps {
   question?: SurveyQuestion;
   isOpen: boolean;
@@ -61,26 +47,20 @@ export interface QuestionEditorProps {
   onSave: (question: SurveyQuestion) => void;
 }
 
-/**
- * Props for TemplateCard component
- */
+// Props for TemplateCard component
 export interface TemplateCardProps {
   template: SurveyTemplate;
   onSelect: (template: SurveyTemplate) => void;
   isSelected?: boolean;
 }
 
-/**
- * Props for QuestionTypeIcon component
- */
+// Props for QuestionTypeIcon component
 export interface QuestionTypeIconProps {
   type: SurveyQuestion["type"];
   className?: string;
 }
 
-/**
- * Props for SurveyWizard component
- */
+// Props for SurveyWizard component
 export interface SurveyWizardProps {
   initialSurvey?: {
     id?: string;
@@ -92,9 +72,7 @@ export interface SurveyWizardProps {
   isEditMode?: boolean;
 }
 
-/**
- * Survey payload for API calls
- */
+// Survey payload for API calls
 export interface SurveyPayload {
   title: string;
   description: string;
@@ -104,9 +82,7 @@ export interface SurveyPayload {
   >;
 }
 
-/**
- * Update survey mutation payload
- */
+// Update survey mutation payload
 export interface UpdateSurveyPayload {
   surveyId: string;
   surveyData: SurveyPayload;

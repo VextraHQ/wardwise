@@ -10,7 +10,7 @@ import type {
   CandidateWithUser,
   CreateCandidateData,
   UpdateCandidateData,
-} from "./admin-api";
+} from "@/lib/services/admin-api";
 import type { Voter } from "@/types/voter";
 import { candidates } from "@/lib/mock/data/candidates";
 import { voters } from "@/lib/mock/data/voters";
@@ -31,10 +31,14 @@ const generateMockUser = (
   createdAt: new Date().toISOString(),
 });
 
+// Mock Admin API service implementation
 export const adminApi: AdminApiService = {
+  // Candidates API operations
   candidates: {
     getAll: async () => {
+      // Simulate API delay
       await delay(500);
+      // Map candidates to CandidateWithUser format
       return candidates.map((candidate) => ({
         ...candidate,
         user: generateMockUser(
@@ -46,9 +50,11 @@ export const adminApi: AdminApiService = {
     },
 
     getById: async (id: string) => {
+      // Simulate API delay
       await delay(300);
       const candidate = candidates.find((c) => c.id === id);
       if (!candidate) return null;
+      // Map candidate to CandidateWithUser format
       return {
         ...candidate,
         user: generateMockUser(
@@ -60,7 +66,9 @@ export const adminApi: AdminApiService = {
     },
 
     create: async (data: CreateCandidateData) => {
+      // Simulate API delay
       await delay(800);
+      // Create new candidate
       const newCandidate: CandidateWithUser = {
         id: `cand-${Date.now()}`,
         name: data.name,
@@ -79,12 +87,15 @@ export const adminApi: AdminApiService = {
       return newCandidate;
     },
 
+    // Update candidate
     update: async (data: UpdateCandidateData) => {
+      // Simulate API delay
       await delay(600);
       const candidate = candidates.find((c) => c.id === data.id);
       if (!candidate) {
         throw new Error("Candidate not found");
       }
+      // Map candidate to CandidateWithUser format
       const updated: CandidateWithUser = {
         ...candidate,
         ...data,
@@ -96,13 +107,17 @@ export const adminApi: AdminApiService = {
           data.name || candidate.name,
         ),
       };
+      // Log updated candidate
       console.log("Mock: Updated candidate", updated);
       return updated;
     },
 
+    // Delete candidate
     delete: async (id: string) => {
+      // Simulate API delay
       await delay(400);
       const candidate = candidates.find((c) => c.id === id);
+      // Check if candidate exists
       if (!candidate) {
         throw new Error("Candidate not found");
       }
@@ -110,45 +125,47 @@ export const adminApi: AdminApiService = {
     },
   },
 
+  // Voters API operations
   voters: {
     getAll: async (params?: {
       candidateId?: string;
       limit?: number;
       offset?: number;
     }) => {
+      // Simulate API delay
       await delay(600);
       let filteredVoters = voters;
 
+      // Filter voters by candidate ID
       if (params?.candidateId) {
         filteredVoters = voters.filter(
           (v) => v.candidateId === params.candidateId,
-        );
+        ) as Voter[];
       }
 
-      const total = filteredVoters.length;
-      const offset = params?.offset || 0;
-      const limit = params?.limit || 50;
-      const paginated = filteredVoters.slice(offset, offset + limit);
-
       return {
-        voters: paginated,
-        total,
+        voters: filteredVoters,
+        total: filteredVoters.length,
       };
     },
 
+    // Get voter by ID
     getById: async (id: string) => {
+      // Simulate API delay
       await delay(300);
-      return voters.find((v) => v.id === id) || null;
+      return voters.find((v) => v.id === id) || (null as Voter | null);
     },
 
+    // Get voter by NIN
     getByNIN: async (nin: string) => {
       await delay(300);
-      return voters.find((v) => v.nin === nin) || null;
+      return voters.find((v) => v.nin === nin) || (null as Voter | null);
     },
 
+    // Delete voter
     delete: async (id: string) => {
       await delay(400);
-      const voter = voters.find((v) => v.id === id);
+      const voter = voters.find((v) => v.id === id) as Voter | undefined;
       if (!voter) {
         throw new Error("Voter not found");
       }

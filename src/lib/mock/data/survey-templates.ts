@@ -1667,9 +1667,7 @@ export const surveyTemplates: SurveyTemplate[] = [
   },
 ];
 
-/**
- * Get templates by position
- */
+// Get templates by position
 export function getTemplatesByPosition(
   position: Candidate["position"] | "All",
 ): SurveyTemplate[] {
@@ -1679,9 +1677,7 @@ export function getTemplatesByPosition(
   return surveyTemplates.filter((template) => template.position === position);
 }
 
-/**
- * Get template by ID
- */
+// Get template by ID
 export function getTemplateById(id: string): SurveyTemplate | undefined {
   return surveyTemplates.find((template) => template.id === id);
 }

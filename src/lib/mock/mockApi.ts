@@ -26,6 +26,7 @@ import type {
   LocationLGA,
   LocationWard,
   LocationPollingUnit,
+  SurveyQuestion,
 } from "@/types";
 
 // Import data from centralized data files (single source of truth)
@@ -555,7 +556,7 @@ export const mockApi = {
 
     // Import analytics functions
     const { getCandidateDashboardData } = await import(
-      "@/lib/mock/data/candidate-analytics"
+      "@/lib/helpers/voter-analytics"
     );
 
     const dashboard = getCandidateDashboardData(candidateId);
@@ -592,7 +593,7 @@ export const mockApi = {
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 600));
 
-    const { getVotersByCandidate } = await import("./data/voters");
+    const { getVotersByCandidate } = await import("@/lib/mock/data/voters");
 
     let supporters = getVotersByCandidate(candidateId);
 
@@ -655,7 +656,7 @@ export const mockApi = {
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const { getWardCoverage } = await import("./data/candidate-analytics");
+    const { getWardCoverage } = await import("@/lib/helpers/voter-analytics");
 
     const wardData = getWardCoverage(candidateId);
 
@@ -677,7 +678,9 @@ export const mockApi = {
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const { getSurveyAnalytics } = await import("./data/candidate-analytics");
+    const { getSurveyAnalytics } = await import(
+      "@/lib/helpers/voter-analytics"
+    );
 
     const surveyAnalytics = getSurveyAnalytics(candidateId);
 
@@ -697,7 +700,7 @@ export const mockApi = {
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 400));
 
-    const { getDemographics } = await import("./data/candidate-analytics");
+    const { getDemographics } = await import("@/lib/helpers/voter-analytics");
 
     const demographics = getDemographics(candidateId);
 
@@ -780,7 +783,7 @@ export const mockApi = {
       estimatedMinutes: number;
       questions: Array<{
         id: string;
-        type: "single" | "multiple" | "ranking" | "scale" | "text";
+        type: SurveyQuestion["type"];
         question: string;
         description?: string;
         options?: Array<{
@@ -799,7 +802,7 @@ export const mockApi = {
     await new Promise((resolve) => setTimeout(resolve, 600));
 
     const { candidateSurveys, getSurveyById } = await import(
-      "./data/candidate-surveys"
+      "@/lib/mock/data/candidate-surveys"
     );
 
     const existingSurvey = getSurveyById(surveyId);
@@ -837,7 +840,7 @@ export const mockApi = {
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     const { candidateSurveys, getSurveyById } = await import(
-      "./data/candidate-surveys"
+      "@/lib/mock/data/candidate-surveys"
     );
 
     const survey = getSurveyById(surveyId);
@@ -871,7 +874,7 @@ export const mockApi = {
       estimatedMinutes: number;
       questions: Array<{
         id: string;
-        type: "single" | "multiple" | "ranking" | "scale" | "text";
+        type: SurveyQuestion["type"];
         question: string;
         description?: string;
         options?: Array<{
@@ -892,7 +895,7 @@ export const mockApi = {
     await new Promise((resolve) => setTimeout(resolve, 300));
 
     const { candidateSurveys, getSurveyByCandidateId } = await import(
-      "./data/candidate-surveys"
+      "@/lib/mock/data/candidate-surveys"
     );
     const { getCandidateByIdWithSupporters } = await import(
       "@/lib/helpers/candidate-helpers"

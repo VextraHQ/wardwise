@@ -1,9 +1,3 @@
-/**
- * Location Types
- *
- * Types for Nigerian administrative divisions.
- */
-
 export type LocationState = {
   code: string;
   name: string;

@@ -1,9 +1,3 @@
-/**
- * Registration Types
- *
- * Types for voter registration data submission.
- */
-
 export type RegistrationData = {
   nin: string;
   phone: string;

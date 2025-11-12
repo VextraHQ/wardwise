@@ -1,10 +1,3 @@
-/**
- * Candidate Types
- *
- * These types align with the Prisma schema.
- * Additional fields (photo, surveyId, tagline, vision) are UI-specific.
- */
-
 // Candidate type matching Prisma Candidate model
 export type Candidate = {
   id: string;

@@ -1,8 +1,8 @@
 /**
- * Candidate Analytics Functions
+ * Voter Analytics Functions
  *
- * Comprehensive analytics functions for candidate dashboards.
- * All functions read from voters.ts JSON data - single source of truth.
+ * Comprehensive analytics functions for analyzing voter/supporter data.
+ * All functions read from voters.ts data - single source of truth.
  *
  * These functions calculate real metrics from voter data:
  * - Supporter counts and distributions
@@ -13,24 +13,23 @@
  *
  * NOTE: All functions filter by candidateId to ensure data isolation.
  * Each candidate sees only their own supporters and metrics.
+ *
+ * These analytics can be used by:
+ * - Candidates (for dashboards)
+ * - Voters (for viewing community stats)
+ * - Admin (for platform-wide analytics)
  */
 
 import type { Voter, CandidateSurvey } from "@/types";
 import { getVotersByCandidate } from "@/lib/mock/data/voters";
 import { getSurveyByCandidateId } from "@/lib/mock/data/candidate-surveys";
 
-/**
- * Get total supporter count for a candidate
- * Calculated from actual voters supporting the candidate
- */
+// Get total supporter count for a candidate - Calculated from actual voters supporting the candidate
 export function getSupportersCount(candidateId: string): number {
   return getVotersByCandidate(candidateId).length;
 }
 
-/**
- * Get supporters filtered by ward
- * Returns all voters supporting a candidate in a specific ward
- */
+// Get supporters filtered by ward - Returns all voters supporting a candidate in a specific ward
 export function getSupportersByWard(
   candidateId: string,
   ward: string,
@@ -40,18 +39,12 @@ export function getSupportersByWard(
   );
 }
 
-/**
- * Get supporters filtered by LGA
- * Returns all voters supporting a candidate in a specific LGA
- */
+// Get supporters filtered by LGA - Returns all voters supporting a candidate in a specific LGA
 export function getSupportersByLGA(candidateId: string, lga: string): Voter[] {
   return getVotersByCandidate(candidateId).filter((voter) => voter.lga === lga);
 }
 
-/**
- * Get ward coverage statistics for a candidate
- * Calculates coverage metrics: covered wards, total wards, coverage percentage
- */
+// Get ward coverage statistics for a candidate - Calculates coverage metrics: covered wards, total wards, coverage percentage
 export function getWardCoverage(candidateId: string): {
   coveredWards: number;
   totalWards: number;
@@ -96,10 +89,7 @@ export function getWardCoverage(candidateId: string): {
   };
 }
 
-/**
- * Get polling unit statistics for a candidate
- * Returns unique polling units and voters per unit
- */
+// Get polling unit statistics for a candidate - Returns unique polling units and voters per unit
 export function getPollingUnitStats(candidateId: string): {
   uniquePollingUnits: number;
   votersPerUnit: Record<string, number>;
@@ -151,10 +141,7 @@ export function getPollingUnitStats(candidateId: string): {
   };
 }
 
-/**
- * Get demographic breakdown for a candidate's supporters
- * Returns age groups, gender distribution, and location breakdowns
- */
+// Get demographic breakdown for a candidate's supporters - Returns age groups, gender distribution, and location breakdowns
 export function getDemographics(candidateId: string): {
   ageGroups: Record<string, number>;
   gender: Record<string, number>;
@@ -187,16 +174,22 @@ export function getDemographics(candidateId: string): {
 
   supporters.forEach((voter) => {
     // Age grouping
-    if (voter.age >= 18 && voter.age <= 25) {
-      ageGroups["18-25"]++;
-    } else if (voter.age >= 26 && voter.age <= 35) {
-      ageGroups["26-35"]++;
-    } else if (voter.age >= 36 && voter.age <= 45) {
-      ageGroups["36-45"]++;
-    } else if (voter.age >= 46 && voter.age <= 55) {
-      ageGroups["46-55"]++;
-    } else if (voter.age >= 56) {
-      ageGroups["56+"]++;
+    switch (true) {
+      case voter.age >= 18 && voter.age <= 25:
+        ageGroups["18-25"]++;
+        break;
+      case voter.age >= 26 && voter.age <= 35:
+        ageGroups["26-35"]++;
+        break;
+      case voter.age >= 36 && voter.age <= 45:
+        ageGroups["36-45"]++;
+        break;
+      case voter.age >= 46 && voter.age <= 55:
+        ageGroups["46-55"]++;
+        break;
+      case voter.age >= 56:
+        ageGroups["56+"]++;
+        break;
     }
 
     // Gender
@@ -222,10 +215,7 @@ export function getDemographics(candidateId: string): {
   };
 }
 
-/**
- * Get registration trends over time for a candidate
- * Returns registration counts grouped by date, week, or month
- */
+// Get registration trends over time for a candidate - Returns registration counts grouped by date, week, or month
 export function getRegistrationTrends(
   candidateId: string,
   period: "daily" | "weekly" | "monthly" = "daily",
@@ -306,10 +296,7 @@ export function getRegistrationTrends(
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-/**
- * Get survey analytics for a candidate
- * Aggregates survey responses from voters who completed the candidate's survey
- */
+// Get survey analytics for a candidate - Aggregates survey responses from voters who completed the candidate's survey
 export function getSurveyAnalytics(candidateId: string): {
   totalResponses: number;
   completionRate: number;
@@ -434,11 +421,8 @@ export function getSurveyAnalytics(candidateId: string): {
   };
 }
 
-/**
- * Get support strength metric
- * Calculates a support strength percentage based on various factors
- * For now, uses survey completion rate as a proxy
- */
+// Get support strength metric - Calculates a support strength percentage based on various factors
+// For now, uses survey completion rate as a proxy
 export function getSupportStrength(candidateId: string): number {
   const supporters = getVotersByCandidate(candidateId);
   if (supporters.length === 0) return 0;
@@ -455,10 +439,7 @@ export function getSupportStrength(candidateId: string): number {
   return completionRate;
 }
 
-/**
- * Get comprehensive dashboard data for a candidate
- * Aggregates all key metrics in one call
- */
+// Get comprehensive dashboard data for a candidate - Aggregates all key metrics in one call
 export function getCandidateDashboardData(candidateId: string): {
   totalSupporters: number;
   wardCoverage: ReturnType<typeof getWardCoverage>;

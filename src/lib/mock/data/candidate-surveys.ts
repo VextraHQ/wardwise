@@ -2977,47 +2977,31 @@ export const candidateSurveys: CandidateSurvey[] = [
   },
 ];
 
-/**
- * Survey Helper Functions
- * These are kept here as they're tightly coupled to survey data structure
- */
+// Survey Helper Functions - These are kept here as they're tightly coupled to survey data structure
 
-/**
- * Get survey by candidate ID
- * Used by mockApi functions to ensure consistent data access
- */
+// Get survey by candidate ID - Used by mockApi functions to ensure consistent data access
 export function getSurveyByCandidateId(
   candidateId: string,
 ): CandidateSurvey | undefined {
   return candidateSurveys.find((survey) => survey.candidateId === candidateId);
 }
 
-/**
- * Get survey by survey ID
- * Useful for direct survey lookups
- */
+// Get survey by survey ID - Useful for direct survey lookups
 export function getSurveyById(id: string): CandidateSurvey | undefined {
   return candidateSurveys.find((survey) => survey.id === id);
 }
 
-/**
- * Get all surveys
- * Useful for dashboard aggregations and analytics
- */
+// Get all surveys - Useful for dashboard aggregations and analytics
 export function getAllSurveys(): CandidateSurvey[] {
   return candidateSurveys;
 }
 
-/**
- * Check if candidate has a survey
- */
+// Check if candidate has a survey
 export function candidateHasSurvey(candidateId: string): boolean {
   return candidateSurveys.some((survey) => survey.candidateId === candidateId);
 }
 
-/**
- * Get survey status for a candidate
- */
+// Get survey status for a candidate
 export function getSurveyStatus(candidateId: string): SurveyStatus | "none" {
   const survey = getSurveyByCandidateId(candidateId);
   if (!survey) return "none";

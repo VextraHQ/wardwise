@@ -7,19 +7,25 @@
  *
  * NOTE: Supporter counts are now calculated dynamically from voter data.
  * Use getCandidateByIdWithSupporters() or getCandidatesWithSupporters() for accurate counts.
+ *
+ * USAGE STATUS:
+ * - ✅ Currently Used: getCandidateByIdWithSupporters()
+ * - 🔮 Future Use: Most other functions are kept for future features (admin panels, search, filtering, etc.)
  */
 
 import type { Candidate, CandidateSurvey } from "@/types";
 import { candidates } from "@/lib/mock/data/candidates";
 import { candidateSurveys } from "@/lib/mock/data/candidate-surveys";
-import { getSupportersCount } from "@/lib/mock/data/candidate-analytics";
+import { getSupportersCount } from "@/lib/helpers/voter-analytics";
 
 // ============================================================================
 // FILTERING FUNCTIONS
 // ============================================================================
+// NOTE: These functions are kept for future use (admin panels, search features, etc.)
 
 /**
  * Get all candidates (useful as a base for chaining filters)
+ * 🔮 Future Use: Admin panels, candidate listings
  */
 export function getAllCandidates(): Candidate[] {
   return candidates;
@@ -27,6 +33,7 @@ export function getAllCandidates(): Candidate[] {
 
 /**
  * Get candidates by state
+ * 🔮 Future Use: State-based filtering in admin/search
  * @param state - The state name (e.g., "Adamawa State", "Bauchi State")
  * @returns Array of candidates from the specified state
  */
@@ -36,6 +43,7 @@ export function getCandidatesByState(state: string): Candidate[] {
 
 /**
  * Get candidates by party
+ * 🔮 Future Use: Party-based filtering in admin/search
  * @param party - The party abbreviation (e.g., "APC", "PDP")
  * @returns Array of candidates from the specified party
  */
@@ -45,6 +53,7 @@ export function getCandidatesByParty(party: string): Candidate[] {
 
 /**
  * Get candidates by position
+ * 🔮 Future Use: Position-based filtering in admin/search
  * @param position - The position (e.g., "Governor", "Senator", "House of Representatives")
  * @returns Array of candidates running for the specified position
  */
@@ -56,6 +65,7 @@ export function getCandidatesByPosition(
 
 /**
  * Get candidates by constituency
+ * 🔮 Future Use: Constituency-based filtering
  * @param constituency - The constituency name
  * @returns Array of candidates from the specified constituency
  */
@@ -67,6 +77,7 @@ export function getCandidatesByConstituency(constituency: string): Candidate[] {
 
 /**
  * Get a single candidate by ID
+ * ⚙️ Internal Use: Used by other helper functions
  * @param id - The candidate ID
  * @returns The candidate object or undefined if not found
  */
@@ -106,9 +117,11 @@ export function getCandidatesWithSupporters(): Candidate[] {
 // ============================================================================
 // ADVANCED FILTERING
 // ============================================================================
+// NOTE: These functions are kept for future use (advanced search, filtering UI)
 
 /**
  * Filter candidates by multiple criteria
+ * 🔮 Future Use: Advanced search/filter UI
  * @param filters - Object containing filter criteria
  * @returns Array of candidates matching all specified criteria
  *
@@ -139,6 +152,7 @@ export function filterCandidates(filters: {
 
 /**
  * Search candidates by name, description, tagline, or vision
+ * 🔮 Future Use: Search functionality in admin/voter interfaces
  * @param query - The search query string
  * @returns Array of candidates matching the search query
  */
@@ -156,9 +170,11 @@ export function searchCandidates(query: string): Candidate[] {
 // ============================================================================
 // GROUPING FUNCTIONS
 // ============================================================================
+// NOTE: These functions are kept for future use (admin dashboards, analytics)
 
 /**
  * Group candidates by state
+ * 🔮 Future Use: Admin dashboards, analytics views
  * @returns Object with state names as keys and arrays of candidates as values
  *
  * @example
@@ -180,6 +196,7 @@ export function groupCandidatesByState(): Record<string, Candidate[]> {
 
 /**
  * Group candidates by party
+ * 🔮 Future Use: Admin dashboards, analytics views
  * @returns Object with party names as keys and arrays of candidates as values
  */
 export function groupCandidatesByParty(): Record<string, Candidate[]> {
@@ -197,6 +214,7 @@ export function groupCandidatesByParty(): Record<string, Candidate[]> {
 
 /**
  * Group candidates by position
+ * 🔮 Future Use: Admin dashboards, analytics views
  * @returns Object with position names as keys and arrays of candidates as values
  */
 export function groupCandidatesByPosition(): Record<string, Candidate[]> {
@@ -215,9 +233,11 @@ export function groupCandidatesByPosition(): Record<string, Candidate[]> {
 // ============================================================================
 // STATISTICS & ANALYTICS
 // ============================================================================
+// NOTE: These functions are kept for future use (admin dashboards, platform stats)
 
 /**
  * Get total number of candidates
+ * 🔮 Future Use: Admin dashboard stats
  */
 export function getTotalCandidates(): number {
   return candidates.length;
@@ -225,6 +245,7 @@ export function getTotalCandidates(): number {
 
 /**
  * Get candidate count by state
+ * 🔮 Future Use: Admin dashboard analytics
  * @returns Object with state names as keys and counts as values
  */
 export function getCandidateCountByState(): Record<string, number> {
@@ -239,6 +260,7 @@ export function getCandidateCountByState(): Record<string, number> {
 
 /**
  * Get candidate count by party
+ * 🔮 Future Use: Admin dashboard analytics
  * @returns Object with party names as keys and counts as values
  */
 export function getCandidateCountByParty(): Record<string, number> {
@@ -253,6 +275,7 @@ export function getCandidateCountByParty(): Record<string, number> {
 
 /**
  * Get candidate count by position
+ * 🔮 Future Use: Admin dashboard analytics
  * @returns Object with position names as keys and counts as values
  */
 export function getCandidateCountByPosition(): Record<string, number> {
@@ -267,22 +290,27 @@ export function getCandidateCountByPosition(): Record<string, number> {
 
 /**
  * Get total supporters across all candidates
+ * 🔮 Future Use: Admin dashboard platform stats
+ * NOTE: Uses dynamic supporter counts from voter data for accuracy
  */
 export function getTotalSupporters(): number {
   return candidates.reduce(
-    (total, candidate) => total + candidate.supporters,
+    (total, candidate) => total + getSupportersCount(candidate.id),
     0,
   );
 }
 
 /**
  * Get total supporters by state
+ * 🔮 Future Use: Admin dashboard analytics
+ * NOTE: Uses dynamic supporter counts from voter data for accuracy
  * @returns Object with state names as keys and supporter counts as values
  */
 export function getSupportersByState(): Record<string, number> {
   return candidates.reduce(
     (acc, candidate) => {
-      acc[candidate.state] = (acc[candidate.state] || 0) + candidate.supporters;
+      acc[candidate.state] =
+        (acc[candidate.state] || 0) + getSupportersCount(candidate.id);
       return acc;
     },
     {} as Record<string, number>,
@@ -291,12 +319,15 @@ export function getSupportersByState(): Record<string, number> {
 
 /**
  * Get total supporters by party
+ * 🔮 Future Use: Admin dashboard analytics
+ * NOTE: Uses dynamic supporter counts from voter data for accuracy
  * @returns Object with party names as keys and supporter counts as values
  */
 export function getSupportersByParty(): Record<string, number> {
   return candidates.reduce(
     (acc, candidate) => {
-      acc[candidate.party] = (acc[candidate.party] || 0) + candidate.supporters;
+      acc[candidate.party] =
+        (acc[candidate.party] || 0) + getSupportersCount(candidate.id);
       return acc;
     },
     {} as Record<string, number>,
@@ -305,11 +336,13 @@ export function getSupportersByParty(): Record<string, number> {
 
 /**
  * Get top N candidates by supporter count
+ * 🔮 Future Use: Leaderboards, admin dashboards
+ * NOTE: Uses dynamic supporter counts from voter data for accuracy
  * @param limit - Number of top candidates to return (default: 10)
  * @returns Array of candidates sorted by supporter count (descending)
  */
 export function getTopCandidatesBySupporters(limit: number = 10): Candidate[] {
-  return [...candidates]
+  return getCandidatesWithSupporters()
     .sort((a, b) => b.supporters - a.supporters)
     .slice(0, limit);
 }
@@ -317,9 +350,11 @@ export function getTopCandidatesBySupporters(limit: number = 10): Candidate[] {
 // ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
+// NOTE: These functions are kept for future use (dropdowns, filters, etc.)
 
 /**
  * Get list of unique states from candidates
+ * 🔮 Future Use: Dropdown filters, form options
  * @returns Array of unique state names
  */
 export function getUniqueStates(): string[] {
@@ -328,6 +363,7 @@ export function getUniqueStates(): string[] {
 
 /**
  * Get list of unique parties from candidates
+ * 🔮 Future Use: Dropdown filters, form options
  * @returns Array of unique party names
  */
 export function getUniqueParties(): string[] {
@@ -336,6 +372,7 @@ export function getUniqueParties(): string[] {
 
 /**
  * Get list of unique positions from candidates
+ * 🔮 Future Use: Dropdown filters, form options
  * @returns Array of unique position names
  */
 export function getUniquePositions(): string[] {
@@ -344,6 +381,7 @@ export function getUniquePositions(): string[] {
 
 /**
  * Get candidates sorted by a specific field
+ * 🔮 Future Use: Sortable tables, candidate listings
  * @param field - The field to sort by
  * @param order - Sort order ("asc" or "desc")
  * @returns Sorted array of candidates
@@ -370,9 +408,13 @@ export function sortCandidatesBy(
 // ============================================================================
 // SURVEY HELPER FUNCTIONS
 // ============================================================================
+// NOTE: These functions filter surveys by candidate metadata (state/party/position)
+// Different from candidate-surveys.ts functions which are data accessors
+// 🔮 Future Use: Admin dashboards, survey filtering/analytics
 
 /**
  * Get surveys by state
+ * 🔮 Future Use: Admin dashboards, survey filtering
  * Returns all surveys for candidates from a specific state
  * @param state - The state name (e.g., "Adamawa State", "Bauchi State")
  * @returns Array of surveys for candidates from the specified state
@@ -390,6 +432,7 @@ export function getSurveysByState(state: string): CandidateSurvey[] {
 
 /**
  * Get surveys by party
+ * 🔮 Future Use: Admin dashboards, survey filtering
  * Returns all surveys for candidates from a specific party
  * @param party - The party abbreviation (e.g., "APC", "PDP")
  * @returns Array of surveys for candidates from the specified party
@@ -407,6 +450,7 @@ export function getSurveysByParty(party: string): CandidateSurvey[] {
 
 /**
  * Get surveys by position
+ * 🔮 Future Use: Admin dashboards, survey filtering
  * Returns all surveys for candidates running for a specific position
  * @param position - The position (e.g., "Governor", "Senator", "House of Representatives")
  * @returns Array of surveys for candidates running for the specified position
@@ -426,6 +470,7 @@ export function getSurveysByPosition(
 
 /**
  * Get candidate information for a survey
+ * 🔮 Future Use: Survey display components, admin views
  * Convenience function to get candidate details when you have a survey
  * @param survey - The survey object
  * @returns The candidate object or undefined if not found

@@ -33,7 +33,7 @@ import { useRegistration } from "@/hooks/use-registration";
 import { generateRegistrationId } from "@/lib/registration-schemas";
 import { toast } from "sonner";
 import { mockApi } from "@/lib/mock/mockApi";
-import { getSupportersCount } from "@/lib/mock/data/candidate-analytics";
+import { getSupportersCount } from "@/lib/helpers/voter-analytics";
 import type { Voter } from "@/types";
 import { ProfileHeader } from "@/components/voter/profile/profile-header";
 import {
