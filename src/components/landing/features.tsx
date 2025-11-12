@@ -36,7 +36,7 @@ export function FeaturesSection() {
               className="group border-border/60 bg-card/80 hover:border-primary/70 relative flex h-full flex-col overflow-hidden rounded-3xl border p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-1 sm:p-8"
             >
               <div
-                className="absolute inset-0 bg-gradient-to-br from-white/8 via-transparent to-white/12 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                className="absolute inset-0 bg-linear-to-br from-white/8 via-transparent to-white/12 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                 aria-hidden="true"
               />
               <span
@@ -94,7 +94,7 @@ export function FeaturesSection() {
                 </div>
 
                 <div className="relative flex items-center gap-2">
-                  <div className="from-primary/30 via-primary/60 to-primary h-1 flex-1 rounded-full bg-gradient-to-r"></div>
+                  <div className="from-primary/30 via-primary/60 to-primary h-1 flex-1 rounded-full bg-linear-to-r"></div>
                   <span className="text-primary/70 text-[11px] font-medium tracking-[0.28em] uppercase">
                     Nigeria-wide
                   </span>

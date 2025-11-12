@@ -13,7 +13,7 @@ export function VoterHeader() {
           >
             <span className="relative flex size-12 items-center justify-center">
               <span className="border-border bg-card absolute inset-0 rounded-full border" />
-              <span className="from-primary relative flex size-9 items-center justify-center rounded-full bg-gradient-to-br via-[#2f7f6b] to-[#163a30] text-white">
+              <span className="from-primary relative flex size-9 items-center justify-center rounded-full bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
                 <MapIcon className="size-5" />
               </span>
             </span>

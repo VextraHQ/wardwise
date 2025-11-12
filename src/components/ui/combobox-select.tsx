@@ -74,7 +74,7 @@ export function ComboboxSelect({
       </PopoverTrigger>
       <PopoverContent
         className={cn(
-          "w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-md p-0",
+          "w-(--radix-popover-trigger-width) overflow-hidden rounded-md p-0",
           className,
         )}
         align="start"

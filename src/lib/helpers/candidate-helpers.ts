@@ -4,11 +4,15 @@
  * Utility functions for querying and filtering candidate data.
  * These helpers make it easy to access candidates by different criteria
  * without restructuring the underlying data source.
+ *
+ * NOTE: Supporter counts are now calculated dynamically from voter data.
+ * Use getCandidateByIdWithSupporters() or getCandidatesWithSupporters() for accurate counts.
  */
 
 import type { Candidate, CandidateSurvey } from "@/types";
 import { candidates } from "@/lib/mock/data/candidates";
 import { candidateSurveys } from "@/lib/mock/data/candidate-surveys";
+import { getSupportersCount } from "@/lib/mock/data/candidate-analytics";
 
 // ============================================================================
 // FILTERING FUNCTIONS
@@ -45,7 +49,7 @@ export function getCandidatesByParty(party: string): Candidate[] {
  * @returns Array of candidates running for the specified position
  */
 export function getCandidatesByPosition(
-  position: "Governor" | "Senator" | "House of Representatives",
+  position: Candidate["position"],
 ): Candidate[] {
   return candidates.filter((candidate) => candidate.position === position);
 }
@@ -70,6 +74,35 @@ export function getCandidateById(id: string): Candidate | undefined {
   return candidates.find((candidate) => candidate.id === id);
 }
 
+/**
+ * Get a single candidate by ID with dynamically calculated supporter count
+ * @param id - The candidate ID
+ * @returns The candidate object with calculated supporters or undefined if not found
+ */
+export function getCandidateByIdWithSupporters(
+  id: string,
+): Candidate | undefined {
+  const candidate = candidates.find((c) => c.id === id);
+  if (!candidate) return undefined;
+
+  return {
+    ...candidate,
+    supporters: getSupportersCount(id),
+  };
+}
+
+/**
+ * Get all candidates with dynamically calculated supporter counts
+ * Use this instead of the raw candidates array when supporter counts are needed
+ * @returns Array of candidates with calculated supporter counts
+ */
+export function getCandidatesWithSupporters(): Candidate[] {
+  return candidates.map((candidate) => ({
+    ...candidate,
+    supporters: getSupportersCount(candidate.id),
+  }));
+}
+
 // ============================================================================
 // ADVANCED FILTERING
 // ============================================================================
@@ -90,7 +123,7 @@ export function getCandidateById(id: string): Candidate | undefined {
 export function filterCandidates(filters: {
   state?: string;
   party?: string;
-  position?: "Governor" | "Senator" | "House of Representatives";
+  position?: Candidate["position"];
   constituency?: string;
 }): Candidate[] {
   return candidates.filter((candidate) => {
@@ -383,7 +416,7 @@ export function getSurveysByParty(party: string): CandidateSurvey[] {
  * const governorSurveys = getSurveysByPosition("Governor")
  */
 export function getSurveysByPosition(
-  position: "Governor" | "Senator" | "House of Representatives",
+  position: Candidate["position"],
 ): CandidateSurvey[] {
   return candidateSurveys.filter((survey) => {
     const candidate = getCandidateById(survey.candidateId);

@@ -116,7 +116,7 @@ export function HeroSection() {
               {/* Dashboard card */}
               <div className="overflow-hidden rounded-2xl border border-[#dcece6] bg-white">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-[#dcece6] bg-gradient-to-br from-[#f8fbfa] to-white px-6 py-4">
+                <div className="flex items-center justify-between border-b border-[#dcece6] bg-linear-to-br from-[#f8fbfa] to-white px-6 py-4">
                   <div>
                     <p className="text-xs font-semibold tracking-wider text-[#1D453A] uppercase">
                       Live Metrics
@@ -131,7 +131,7 @@ export function HeroSection() {
                 </div>
 
                 {/* Main content */}
-                <div className="relative bg-gradient-to-br from-[#124438] via-[#0f2b24] to-[#0b1e1a] p-6">
+                <div className="relative bg-linear-to-br from-[#124438] via-[#0f2b24] to-[#0b1e1a] p-6">
                   {/* Decorative elements */}
                   <div className="absolute top-0 left-0 h-32 w-32 rounded-full bg-[#46C2A7] opacity-10 blur-2xl" />
                   <div className="absolute right-0 bottom-0 h-24 w-24 rounded-full bg-[#46C2A7] opacity-10 blur-2xl" />
@@ -185,7 +185,7 @@ export function HeroSection() {
                 </div>
 
                 {/* Footer */}
-                <div className="space-y-3 border-t border-[#dcece6] bg-gradient-to-br from-white to-[#f8fbfa] px-6 py-5">
+                <div className="space-y-3 border-t border-[#dcece6] bg-linear-to-br from-white to-[#f8fbfa] px-6 py-5">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-[#3b6558]">Next ward outreach</span>
                     <span className="font-semibold text-[#0f2b24]">

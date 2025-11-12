@@ -982,26 +982,26 @@ export function getStatesByZone(zone: StateData["zone"]): StateData[] {
 // Statistics (computed on demand)
 export function getLocationStats() {
   return {
-  totalStates: nigeriaStates.length,
-  totalLGAs: nigeriaLGAs.length,
-  lgasByState: Object.fromEntries(
-    nigeriaStates.map((state) => [
-      state.code,
-      getLGAsByState(state.code).length,
-    ]),
-  ),
-  statesByZone: Object.fromEntries(
-    [
-      "North Central",
-      "North East",
-      "North West",
-      "South East",
-      "South South",
-      "South West",
+    totalStates: nigeriaStates.length,
+    totalLGAs: nigeriaLGAs.length,
+    lgasByState: Object.fromEntries(
+      nigeriaStates.map((state) => [
+        state.code,
+        getLGAsByState(state.code).length,
+      ]),
+    ),
+    statesByZone: Object.fromEntries(
+      [
+        "North Central",
+        "North East",
+        "North West",
+        "South East",
+        "South South",
+        "South West",
       ].map((zone) => [
         zone,
         getStatesByZone(zone as StateData["zone"]).length,
       ]),
-  ),
-};
+    ),
+  };
 }

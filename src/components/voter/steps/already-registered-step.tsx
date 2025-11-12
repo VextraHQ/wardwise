@@ -56,7 +56,7 @@ export function AlreadyRegisteredStep() {
           <Button
             asChild
             size="lg"
-            className="from-primary to-primary/90 h-14 w-full justify-start gap-4 bg-gradient-to-r"
+            className="from-primary to-primary/90 h-14 w-full justify-start gap-4 bg-linear-to-r"
           >
             <Link href="/voter/profile">
               <User className="h-5 w-5" />

@@ -64,7 +64,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
           >
             <span className="relative flex size-10 items-center justify-center sm:size-12">
               <span className="border-border bg-card absolute inset-0 rounded-full border shadow-[0_10px_24px_rgba(12,39,32,0.08)]" />
-              <span className="from-primary relative flex size-7 items-center justify-center rounded-full bg-gradient-to-br via-[#2f7f6b] to-[#163a30] text-white sm:size-9">
+              <span className="from-primary relative flex size-7 items-center justify-center rounded-full bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white sm:size-9">
                 <MapIcon className="size-5" />
               </span>
             </span>

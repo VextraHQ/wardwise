@@ -18,7 +18,7 @@
  * Each survey must have a matching candidateId in candidates.ts
  */
 
-import type { CandidateSurvey } from "@/types";
+import type { CandidateSurvey, SurveyStatus } from "@/types";
 
 export const candidateSurveys: CandidateSurvey[] = [
   // ============================================================================
@@ -3006,4 +3006,20 @@ export function getSurveyById(id: string): CandidateSurvey | undefined {
  */
 export function getAllSurveys(): CandidateSurvey[] {
   return candidateSurveys;
+}
+
+/**
+ * Check if candidate has a survey
+ */
+export function candidateHasSurvey(candidateId: string): boolean {
+  return candidateSurveys.some((survey) => survey.candidateId === candidateId);
+}
+
+/**
+ * Get survey status for a candidate
+ */
+export function getSurveyStatus(candidateId: string): SurveyStatus | "none" {
+  const survey = getSurveyByCandidateId(candidateId);
+  if (!survey) return "none";
+  return survey.status || "published";
 }

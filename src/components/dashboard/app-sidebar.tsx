@@ -8,10 +8,12 @@ import {
   IconHelp,
   IconMapPin,
   IconReport,
-  IconSearch,
   IconSettings,
   IconUsers,
-  IconUserCheck,
+  IconPlus,
+  IconClipboardList,
+  IconMessageCircle,
+  IconBell,
 } from "@tabler/icons-react";
 
 import { NavDocuments } from "@/components/dashboard/nav-documents";
@@ -39,80 +41,84 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: IconDashboard,
     },
     {
       title: "Supporters",
-      url: "#",
+      url: "/dashboard/supporters",
       icon: IconUsers,
     },
     {
-      title: "Ward Analytics",
-      url: "#",
+      title: "Surveys",
+      url: "/dashboard/surveys",
+      icon: IconClipboardList,
+    },
+    {
+      title: "Analytics",
+      url: "/dashboard/analytics",
       icon: IconChartBar,
     },
     {
-      title: "Campaign Map",
-      url: "#",
+      title: "Wards",
+      url: "/dashboard/wards",
       icon: IconMapPin,
     },
-    {
-      title: "Voter Outreach",
-      url: "#",
-      icon: IconUserCheck,
-    },
   ],
-  navClouds: [
+  quickActions: [
     {
-      title: "Campaign Tools",
-      icon: IconFileDescription,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Campaigns",
-          url: "#",
-        },
-        {
-          title: "Archived Campaigns",
-          url: "#",
-        },
-      ],
+      title: "Create Survey",
+      url: "/dashboard/surveys/create",
+      icon: IconPlus,
+    },
+    {
+      title: "Send Message",
+      url: "/dashboard/messages",
+      icon: IconMessageCircle,
+    },
+    {
+      title: "Notifications",
+      url: "/dashboard/notifications",
+      icon: IconBell,
     },
   ],
   navSecondary: [
     {
       title: "Settings",
-      url: "#",
+      url: "/dashboard/settings",
       icon: IconSettings,
     },
     {
       title: "Get Help",
-      url: "#",
+      url: "/dashboard/help",
       icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
     },
   ],
   documents: [
     {
-      name: "Voter Database",
-      url: "#",
-      icon: IconUsers,
-    },
-    {
       name: "Campaign Reports",
-      url: "#",
+      url: "/dashboard/reports",
       icon: IconReport,
     },
     {
-      name: "Ward Insights",
-      url: "#",
-      icon: IconMapPin,
+      name: "Export Data",
+      url: "/dashboard/export",
+      icon: IconFileDescription,
+    },
+    {
+      name: "Messages",
+      url: "/dashboard/messages",
+      icon: IconMessageCircle,
+    },
+    {
+      name: "Notifications",
+      url: "/dashboard/notifications",
+      icon: IconBell,
+    },
+    {
+      name: "Chart Patterns",
+      url: "/dashboard/charts",
+      icon: IconChartBar,
     },
   ],
 };
@@ -125,10 +131,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-0"
+              className="data-[slot=sidebar-menu-button]:p-0!"
             >
               <Link href="/">
-                <div className="from-primary flex size-8 items-center justify-center rounded-lg bg-gradient-to-br via-[#2f7f6b] to-[#163a30] text-white">
+                <div className="from-primary flex size-8 items-center justify-center rounded-lg bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
                   <MapIcon className="size-4" />
                 </div>
                 <span className="text-base font-semibold">WardWise</span>
@@ -138,7 +144,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={data.navMain} quickActions={data.quickActions} />
         <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

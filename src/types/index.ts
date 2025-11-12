@@ -6,9 +6,26 @@ export type { Candidate } from "@/types/candidate";
 // Types for candidate survey data
 export type {
   CandidateSurvey,
-  SurveyQuestion,
   SurveyOption,
+  SurveyQuestion,
+  SurveyTemplate,
+  SurveyStatus,
+  SurveyBuilderStep,
+  SurveyBuilderState,
 } from "@/types/survey";
+
+// Types for survey builder components
+export type {
+  StepBasicInfoProps,
+  StepQuestionsProps,
+  StepReviewProps,
+  QuestionEditorProps,
+  TemplateCardProps,
+  QuestionTypeIconProps,
+  SurveyWizardProps,
+  SurveyPayload,
+  UpdateSurveyPayload,
+} from "@/types/survey-builder";
 
 // Types for location data
 export type {

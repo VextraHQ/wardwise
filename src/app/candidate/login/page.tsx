@@ -11,20 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  IconMail,
-  IconLock,
-  IconArrowRight,
-  IconChevronDown,
-} from "@tabler/icons-react";
+import { IconMail, IconLock, IconArrowRight } from "@tabler/icons-react";
 import { MapIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
@@ -39,7 +27,6 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function CandidateLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isDemoOpen, setIsDemoOpen] = useState(false);
   const router = useRouter();
 
   const {
@@ -100,7 +87,7 @@ export default function CandidateLogin() {
             >
               <span className="relative flex size-12 items-center justify-center">
                 <span className="border-border bg-card absolute inset-0 rounded-full border" />
-                <span className="from-primary relative flex size-9 items-center justify-center rounded-full bg-gradient-to-br via-[#2f7f6b] to-[#163a30] text-white">
+                <span className="from-primary relative flex size-9 items-center justify-center rounded-full bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
                   <MapIcon className="size-5" />
                 </span>
               </span>
@@ -147,7 +134,7 @@ export default function CandidateLogin() {
                 Enter your credentials to access the dashboard
               </p>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 {error && (
                   <Alert variant="destructive">
@@ -229,55 +216,6 @@ export default function CandidateLogin() {
                   )}
                 </Button>
               </form>
-
-              <Separator />
-
-              {/* Demo Credentials */}
-              <Collapsible open={isDemoOpen} onOpenChange={setIsDemoOpen}>
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    type="button"
-                    className="hover:bg-muted/50 h-auto w-full justify-between p-3 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs font-medium">
-                        Demo Credentials
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground text-xs">
-                        Click to expand
-                      </span>
-                      <IconChevronDown
-                        className={`text-muted-foreground h-4 w-4 transition-transform duration-200 ${isDemoOpen ? "rotate-180" : ""}`}
-                      />
-                    </div>
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="mt-2 space-y-3">
-                  <div className="space-y-2 text-sm">
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <p className="font-medium">Candidate Account:</p>
-                      <p className="text-muted-foreground">
-                        <strong>Email:</strong> ahmed.suleiman@wardwise.ng
-                      </p>
-                      <p className="text-muted-foreground">
-                        <strong>Password:</strong> demo123
-                      </p>
-                    </div>
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <p className="font-medium">Admin Account:</p>
-                      <p className="text-muted-foreground">
-                        <strong>Email:</strong> admin@wardwise.ng
-                      </p>
-                      <p className="text-muted-foreground">
-                        <strong>Password:</strong> admin123
-                      </p>
-                    </div>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
             </CardContent>
           </Card>
 

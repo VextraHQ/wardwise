@@ -574,7 +574,7 @@ export function CandidateSurveyStep() {
                     {currentQuestion.question}
                   </h2>
                   {hasAnswer && (
-                    <CheckCircle2 className="text-primary h-5 w-5 flex-shrink-0" />
+                    <CheckCircle2 className="text-primary h-5 w-5 shrink-0" />
                   )}
                 </div>
                 {currentQuestion.description && (
@@ -587,7 +587,7 @@ export function CandidateSurveyStep() {
                 {currentQuestion.responseStats &&
                   currentQuestion.responseStats.topAnswer && (
                     <div className="bg-primary/5 border-primary/20 flex items-center gap-2 rounded-md border px-3 py-2">
-                      <TrendingUp className="text-primary h-4 w-4 flex-shrink-0" />
+                      <TrendingUp className="text-primary h-4 w-4 shrink-0" />
                       <p className="text-muted-foreground text-xs">
                         <span className="text-foreground font-medium">
                           {currentQuestion.responseStats.topAnswer.percentage}%
@@ -634,13 +634,13 @@ export function CandidateSurveyStep() {
                           >
                             <div className="flex items-center gap-3">
                               {option.icon && (
-                                <span className="flex-shrink-0 text-xl">
+                                <span className="shrink-0 text-xl">
                                   {option.icon}
                                 </span>
                               )}
                               <div
                                 className={cn(
-                                  "flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                                  "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
                                   isSelected
                                     ? "border-primary bg-primary"
                                     : "border-muted-foreground/30",
@@ -716,10 +716,10 @@ export function CandidateSurveyStep() {
                                       checked as boolean,
                                     )
                                   }
-                                  className="flex-shrink-0"
+                                  className="shrink-0"
                                 />
                                 {option.icon && (
-                                  <span className="flex-shrink-0 text-xl">
+                                  <span className="shrink-0 text-xl">
                                     {option.icon}
                                   </span>
                                 )}

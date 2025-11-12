@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -23,8 +20,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -38,18 +34,17 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  password      String?   // For credentials provider
-  role          String    @default("candidate") // candidate, admin, etc.
-  candidateId   String?   @unique // Link to candidate data
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  accounts Account[]
-  sessions Session[]
-  candidate Candidate? @relation(fields: [candidateId], references: [id])
+  id          String     @id @default(cuid())
+  name        String?
+  email       String     @unique
+  password    String?
+  role        String     @default("candidate")
+  candidateId String?    @unique
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  accounts    Account[]
+  sessions    Session[]
+  candidate   Candidate? @relation(fields: [candidateId], references: [id])
 }
 
 model VerificationToken {
@@ -61,47 +56,41 @@ model VerificationToken {
 }
 
 model Candidate {
-  id          String   @id @default(cuid())
-  name        String
-  party       String
-  position    String
+  id           String   @id @default(cuid())
+  name         String
+  party        String
+  position     String
   constituency String
-  description String?
-  supporters  Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Link to auth user
-  user User?
-  
-  // Voters who support this candidate
-  voters Voter[]
+  description  String?
+  supporters   Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User?
+  voters       Voter[]
 }
 
 model Voter {
-  id            String    @id @default(cuid())
-  nin           String    @unique // National Identification Number (11 digits)
-  firstName     String
-  middleName    String?
-  lastName      String
-  dateOfBirth   DateTime
-  email         String?   @unique
-  phoneNumber   String?   // Optional phone number
-  gender        String?   // male, female, other
-  occupation    String?   // Occupation/profession
-  religion      String?   // Religion/creed
-  age           Int
-  state         String
-  lga           String
-  ward          String
-  pollingUnit   String
-  candidateId   String
-  surveyAnswers Json?     // Store survey responses as JSON
-  verifiedAt     DateTime? // When NIN was verified
-  registrationDate DateTime @default(now())
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  // Relations
-  candidate Candidate @relation(fields: [candidateId], references: [id])
+  id               String    @id @default(cuid())
+  nin              String    @unique
+  firstName        String
+  middleName       String?
+  lastName         String
+  dateOfBirth      DateTime
+  email            String?   @unique
+  phoneNumber      String
+  gender           String?
+  occupation       String?
+  religion         String?
+  age              Int
+  state            String
+  lga              String
+  ward             String
+  pollingUnit      String
+  candidateId      String
+  surveyAnswers    Json?
+  verifiedAt       DateTime?
+  registrationDate DateTime  @default(now())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  candidate        Candidate @relation(fields: [candidateId], references: [id])
 }

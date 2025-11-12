@@ -1,4 +1,12 @@
 // Mock Candidate Data - DEMO ONLY
+//
+// NOTE: The `supporters` field in this array is hardcoded for backward compatibility.
+// For accurate, real-time supporter counts, use:
+// - getCandidateByIdWithSupporters() from @/lib/helpers/candidate-helpers
+// - getCandidatesWithSupporters() from @/lib/helpers/candidate-helpers
+// - getSupportersCount(candidateId) from @/lib/mock/data/candidate-analytics
+//
+// These functions calculate supporters dynamically from actual voter data.
 import type { Candidate } from "@/types";
 
 export const candidates: Candidate[] = [
@@ -210,6 +218,80 @@ export const candidates: Candidate[] = [
     tagline: "Agriculture, Food Security, Farmers First",
     vision:
       "Empowering our farmers and ensuring food security for Bauchi State",
+    createdAt: "2024-01-20T09:00:00Z",
+    updatedAt: "2024-10-20T09:00:00Z",
+  },
+
+  // --- State Assembly Candidates ---
+  {
+    id: "cand-apc-adamawa-sa-1",
+    name: "Hon. Ibrahim Usman",
+    party: "APC",
+    position: "State Assembly",
+    state: "Adamawa State",
+    constituency: "Song State Constituency",
+    description:
+      "Grassroots leader focused on local development and community empowerment.",
+    supporters: 420,
+    photo: "/api/placeholder/150/150",
+    surveyId: "survey-apc-adamawa-sa-1",
+    tagline: "Local Development, Community First",
+    vision:
+      "Empowering Song constituency through grassroots development and community engagement",
+    createdAt: "2024-01-15T10:00:00Z",
+    updatedAt: "2024-10-15T10:00:00Z",
+  },
+  {
+    id: "cand-pdp-adamawa-sa-1",
+    name: "Hon. Fatima Bello",
+    party: "PDP",
+    position: "State Assembly",
+    state: "Adamawa State",
+    constituency: "Fufore State Constituency",
+    description:
+      "Education advocate and women's rights champion at the state level.",
+    supporters: 380,
+    photo: "/api/placeholder/150/150",
+    surveyId: "survey-pdp-adamawa-sa-1",
+    tagline: "Education, Women's Rights, Local Empowerment",
+    vision:
+      "Building a better Fufore through education and inclusive development",
+    createdAt: "2024-01-15T10:00:00Z",
+    updatedAt: "2024-10-15T10:00:00Z",
+  },
+  {
+    id: "cand-apc-bauchi-sa-1",
+    name: "Hon. Mohammed Sani",
+    party: "APC",
+    position: "State Assembly",
+    state: "Bauchi State",
+    constituency: "Bauchi Central State Constituency",
+    description:
+      "Business leader and advocate for local economic development and job creation.",
+    supporters: 450,
+    photo: "/api/placeholder/150/150",
+    surveyId: "survey-apc-bauchi-sa-1",
+    tagline: "Local Economy, Jobs, Development",
+    vision:
+      "Transforming Bauchi Central through local business growth and job opportunities",
+    createdAt: "2024-01-20T09:00:00Z",
+    updatedAt: "2024-10-20T09:00:00Z",
+  },
+  {
+    id: "cand-pdp-bauchi-sa-1",
+    name: "Hon. Aisha Mohammed",
+    party: "PDP",
+    position: "State Assembly",
+    state: "Bauchi State",
+    constituency: "Bauchi South State Constituency",
+    description:
+      "Healthcare professional focused on improving local health services and rural access.",
+    supporters: 390,
+    photo: "/api/placeholder/150/150",
+    surveyId: "survey-pdp-bauchi-sa-1",
+    tagline: "Healthcare Access, Rural Development",
+    vision:
+      "Ensuring quality healthcare reaches every community in Bauchi South",
     createdAt: "2024-01-20T09:00:00Z",
     updatedAt: "2024-10-20T09:00:00Z",
   },

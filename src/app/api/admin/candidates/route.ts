@@ -101,17 +101,24 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      candidate: {
-        ...candidate,
+    // Fetch candidate with user
+    const candidateWithUser = await prisma.candidate.findUnique({
+      where: { id: candidate.id },
+      include: {
         user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            createdAt: true,
+          },
         },
       },
+    });
+
+    return NextResponse.json({
+      candidate: candidateWithUser,
     });
   } catch (error) {
     console.error("Error creating candidate:", error);

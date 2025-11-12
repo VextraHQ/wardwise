@@ -47,8 +47,8 @@ export const voters: Voter[] = [
     middleName: undefined,
     lastName: "Mohammed",
     dateOfBirth: "1996-03-15",
-    email: "aliyu.mohammed@example.com",
-    phoneNumber: "+2348012345678",
+    email: "aliyumohammed96@gmail.com",
+    phoneNumber: "+2348034567890",
     gender: "male",
     occupation: "farmer",
     religion: "islam",
@@ -77,8 +77,8 @@ export const voters: Voter[] = [
     middleName: undefined,
     lastName: "Bello",
     dateOfBirth: "1992-07-22",
-    email: "hauwa.bello@example.com",
-    phoneNumber: "+2348098765432",
+    email: "hauwa.bello92@yahoo.com",
+    phoneNumber: "+2347067890123",
     gender: "female",
     occupation: "teacher",
     religion: "islam",
@@ -107,8 +107,8 @@ export const voters: Voter[] = [
     middleName: "Ahmad",
     lastName: "Tukur",
     dateOfBirth: "1988-11-05",
-    email: "musa.tukur@example.com",
-    phoneNumber: "+2348055566677",
+    email: "musaahmad88@outlook.com",
+    phoneNumber: "+2348123456789",
     gender: "male",
     occupation: "civil-servant",
     religion: "islam",
@@ -133,8 +133,8 @@ export const voters: Voter[] = [
     firstName: "Aisha",
     lastName: "Mohammed",
     dateOfBirth: "1990-05-12",
-    email: "aisha.mohammed@example.com",
-    phoneNumber: "+2348023344556",
+    email: "aishamohammed90@gmail.com",
+    phoneNumber: "+2348156789012",
     gender: "female",
     occupation: "trader",
     religion: "islam",
@@ -156,8 +156,8 @@ export const voters: Voter[] = [
     firstName: "Ibrahim",
     lastName: "Aliyu",
     dateOfBirth: "1987-08-20",
-    email: "ibrahim.aliyu@example.com",
-    phoneNumber: "+2348033445566",
+    email: "ibrahim.aliyu87@yahoo.com",
+    phoneNumber: "+2349087654321",
     gender: "male",
     occupation: "private-sector",
     religion: "islam",
@@ -179,8 +179,8 @@ export const voters: Voter[] = [
     firstName: "Fatima",
     lastName: "Usman",
     dateOfBirth: "1993-11-03",
-    email: "fatima.usman@example.com",
-    phoneNumber: "+2348044556677",
+    email: "fatimausman93@gmail.com",
+    phoneNumber: "+2347012345678",
     gender: "female",
     occupation: "healthcare-worker",
     religion: "christianity",
@@ -219,16 +219,6 @@ export function getVotersByCandidate(candidateId: string): Voter[] {
  * These calculate real metrics from voter data for dashboard use
  * Currently minimal but will be expanded when building candidate dashboards
  */
-
-/**
- * Get supporter count for a candidate (calculated from actual voters)
- * This replaces hardcoded supporters field in candidates
- *
- * FUTURE: When building dashboards, use this instead of hardcoded values
- */
-export function getSupportersCount(candidateId: string): number {
-  return getVotersByCandidate(candidateId).length;
-}
 
 /**
  * Get supporters grouped by ward

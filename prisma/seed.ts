@@ -1,45 +1,27 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { candidates } from "@/lib/mock/data/candidates";
+import { voters } from "@/lib/mock/data/voters";
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("🌱 Seeding database with multiple candidates...");
 
-  const candidates = [
-    {
-      id: "demo-candidate-1",
-      name: "Hon. Ahmed Suleiman",
-      party: "APC",
-      position: "House of Representatives",
-      constituency: "Song & Fufore Federal Constituency",
-      description: "Experienced leader committed to community development",
-      supporters: 2847,
-      email: "ahmed.suleiman@wardwise.ng",
-    },
-    {
-      id: "demo-candidate-2",
-      name: "Alhaji Bello Ibrahim",
-      party: "PDP",
-      position: "House of Representatives",
-      constituency: "Song & Fufore Federal Constituency",
-      description: "Community advocate with grassroots experience",
-      supporters: 2156,
-      email: "bello.ibrahim@wardwise.ng",
-    },
-    {
-      id: "demo-candidate-3",
-      name: "Dr. Fatima Yusuf",
-      party: "LP",
-      position: "House of Representatives",
-      constituency: "Song & Fufore Federal Constituency",
-      description: "Healthcare professional focused on development",
-      supporters: 1923,
-      email: "fatima.yusuf@wardwise.ng",
-    },
-  ];
+  // Use actual candidate data from mock data for proper sync
+  // Map candidate IDs to email addresses for user account creation
+  const candidateEmails: Record<string, string> = {
+    "cand-apc-4": "aliyu.boya@wardwise.ng",
+    "cand-pdp-2": "maryam.ciroma@wardwise.ng",
+    "cand-apc-1": "ahmadu.fintiri@wardwise.ng",
+  };
 
-  for (const candidateData of candidates) {
+  // Filter to only seed the candidates we want (the ones with emails)
+  const candidatesToSeed = candidates.filter((c) =>
+    Object.keys(candidateEmails).includes(c.id),
+  );
+
+  for (const candidateData of candidatesToSeed) {
     // Create candidate first
     const candidate = await prisma.candidate.upsert({
       where: { id: candidateData.id },
@@ -50,19 +32,20 @@ async function main() {
         party: candidateData.party,
         position: candidateData.position,
         constituency: candidateData.constituency,
-        description: candidateData.description,
+        description: candidateData.description || "",
         supporters: candidateData.supporters,
       },
     });
 
     // Create user account for candidate
     const hashedPassword = await bcrypt.hash("demo123", 12);
+    const email = candidateEmails[candidateData.id];
 
     await prisma.user.upsert({
-      where: { email: candidateData.email },
+      where: { email },
       update: {},
       create: {
-        email: candidateData.email,
+        email,
         name: candidateData.name,
         password: hashedPassword,
         role: "candidate",
@@ -87,6 +70,61 @@ async function main() {
   });
 
   console.log("✅ Created admin account: admin@wardwise.ng");
+
+  // Seed demo voters for dashboard sync
+  // These match the documented NINs in mock data for consistent demo experience
+  console.log("🌱 Seeding demo voters...");
+
+  // Filter to only seed the documented demo voters
+  const demoNINs = ["12345678901", "98765432109", "11223344556"];
+  const votersToSeed = voters.filter((v) => demoNINs.includes(v.nin));
+
+  // Convert mock voter data to Prisma format (dates need to be Date objects)
+  const votersForDb = votersToSeed.map((voter) => ({
+    nin: voter.nin,
+    firstName: voter.firstName,
+    middleName: voter.middleName,
+    lastName: voter.lastName,
+    dateOfBirth: new Date(voter.dateOfBirth),
+    email: voter.email,
+    phoneNumber: voter.phoneNumber,
+    gender: voter.gender,
+    occupation: voter.occupation,
+    religion: voter.religion,
+    age: voter.age,
+    state: voter.state,
+    lga: voter.lga,
+    ward: voter.ward,
+    pollingUnit: voter.pollingUnit,
+    candidateId: voter.candidateId,
+    surveyAnswers: voter.surveyAnswers || null,
+    verifiedAt: voter.verifiedAt ? new Date(voter.verifiedAt) : null,
+    registrationDate: new Date(voter.registrationDate),
+  }));
+
+  for (const voterData of votersForDb) {
+    await prisma.voter.upsert({
+      where: { nin: voterData.nin },
+      update: {},
+      create: voterData,
+    });
+    console.log(
+      `✅ Created voter: ${voterData.firstName} ${voterData.lastName} (NIN: ${voterData.nin})`,
+    );
+  }
+
+  // Update candidate supporter count based on actual voters
+  const voterCount = await prisma.voter.count({
+    where: { candidateId: "cand-apc-4" },
+  });
+  await prisma.candidate.update({
+    where: { id: "cand-apc-4" },
+    data: { supporters: voterCount },
+  });
+  console.log(
+    `✅ Updated candidate supporter count for cand-apc-4: ${voterCount}`,
+  );
+
   console.log("🎉 Database seeded successfully!");
 }
 

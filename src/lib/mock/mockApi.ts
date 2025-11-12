@@ -32,7 +32,7 @@ import type {
 import { getVoterByNIN } from "@/lib/mock/data/voters";
 import { candidates } from "@/lib/mock/data/candidates";
 import { getSurveyByCandidateId } from "@/lib/mock/data/candidate-surveys";
-import { getCandidateById } from "@/lib/helpers/candidate-helpers";
+import { getCandidateByIdWithSupporters } from "@/lib/helpers/candidate-helpers";
 
 // Mock API functions
 export const mockApi = {
@@ -270,6 +270,22 @@ export const mockApi = {
           );
         }
 
+        // State Assembly: match if constituency contains the LGA or ward
+        // State Assembly constituencies are typically based on LGAs or combinations of wards
+        if (candidate.position === "State Assembly") {
+          const normalize = (str: string) =>
+            str.toLowerCase().replace(/[\s-]/g, "-");
+          const constituencyNormalized = normalize(candidate.constituency);
+          const lgaNormalized = normalize(lga);
+
+          // Check if constituency contains the LGA name
+          // Example: "Song State Constituency" matches "Song" LGA
+          return (
+            constituencyNormalized.includes(lgaNormalized) ||
+            lgaNormalized.includes(constituencyNormalized.split(" ")[0] || "")
+          );
+        }
+
         return true;
       });
     }
@@ -288,8 +304,8 @@ export const mockApi = {
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 300));
 
-    // Use helper function from helpers (single source of truth)
-    const candidate = getCandidateById(candidateId);
+    // Use helper function with dynamically calculated supporters
+    const candidate = getCandidateByIdWithSupporters(candidateId);
 
     return {
       candidate: candidate || null,
@@ -307,6 +323,23 @@ export const mockApi = {
 
     // Use helper function from data file (single source of truth)
     const survey = getSurveyByCandidateId(candidateId);
+
+    return {
+      survey: survey || null,
+    };
+  },
+
+  // Get survey by survey ID
+  getSurveyById: async (
+    surveyId: string,
+  ): Promise<{ survey: CandidateSurvey | null }> => {
+    console.log(`📋 Mock: Getting survey ${surveyId}`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const { getSurveyById } = await import("./data/candidate-surveys");
+    const survey = getSurveyById(surveyId);
 
     return {
       survey: survey || null,
@@ -502,6 +535,419 @@ export const mockApi = {
     return {
       verified: false,
       message: "Invalid NIN format",
+    };
+  },
+
+  // ============================================================================
+  // CANDIDATE DASHBOARD API FUNCTIONS
+  // ============================================================================
+
+  // Get comprehensive dashboard data for a candidate
+  getCandidateDashboard: async (
+    candidateId: string,
+  ): Promise<{
+    dashboard: ReturnType<typeof getCandidateDashboardData>;
+  }> => {
+    console.log(`📊 Mock: Getting dashboard data for candidate ${candidateId}`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
+    // Import analytics functions
+    const { getCandidateDashboardData } = await import(
+      "@/lib/mock/data/candidate-analytics"
+    );
+
+    const dashboard = getCandidateDashboardData(candidateId);
+
+    return {
+      dashboard,
+    };
+  },
+
+  // Get paginated supporters list with filters
+  getCandidateSupporters: async (
+    candidateId: string,
+    options?: {
+      page?: number;
+      pageSize?: number;
+      ward?: string;
+      lga?: string;
+      search?: string;
+      startDate?: string;
+      endDate?: string;
+    },
+  ): Promise<{
+    supporters: Voter[];
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  }> => {
+    console.log(
+      `👥 Mock: Getting supporters for candidate ${candidateId}`,
+      options,
+    );
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
+    const { getVotersByCandidate } = await import("./data/voters");
+
+    let supporters = getVotersByCandidate(candidateId);
+
+    // Apply filters
+    if (options?.ward) {
+      supporters = supporters.filter((v) => v.ward === options.ward);
+    }
+    if (options?.lga) {
+      supporters = supporters.filter((v) => v.lga === options.lga);
+    }
+    if (options?.search) {
+      const searchLower = options.search.toLowerCase();
+      supporters = supporters.filter(
+        (v) =>
+          v.firstName.toLowerCase().includes(searchLower) ||
+          v.lastName.toLowerCase().includes(searchLower) ||
+          v.nin.includes(searchLower) ||
+          v.phoneNumber?.toLowerCase().includes(searchLower) ||
+          v.email?.toLowerCase().includes(searchLower),
+      );
+    }
+    if (options?.startDate) {
+      supporters = supporters.filter(
+        (v) => v.registrationDate >= options.startDate!,
+      );
+    }
+    if (options?.endDate) {
+      supporters = supporters.filter(
+        (v) => v.registrationDate <= options.endDate!,
+      );
+    }
+
+    const total = supporters.length;
+    const page = options?.page || 1;
+    const pageSize = options?.pageSize || 25;
+    const totalPages = Math.ceil(total / pageSize);
+
+    // Apply pagination
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedSupporters = supporters.slice(startIndex, endIndex);
+
+    return {
+      supporters: paginatedSupporters,
+      total,
+      page,
+      pageSize,
+      totalPages,
+    };
+  },
+
+  // Get ward breakdown data for a candidate
+  getCandidateWardData: async (
+    candidateId: string,
+  ): Promise<{
+    wardData: ReturnType<typeof getWardCoverage>;
+  }> => {
+    console.log(`🏘️ Mock: Getting ward data for candidate ${candidateId}`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const { getWardCoverage } = await import("./data/candidate-analytics");
+
+    const wardData = getWardCoverage(candidateId);
+
+    return {
+      wardData,
+    };
+  },
+
+  // Get survey response analytics for a candidate
+  getCandidateSurveyResponses: async (
+    candidateId: string,
+  ): Promise<{
+    surveyAnalytics: ReturnType<typeof getSurveyAnalytics>;
+  }> => {
+    console.log(
+      `📋 Mock: Getting survey responses for candidate ${candidateId}`,
+    );
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const { getSurveyAnalytics } = await import("./data/candidate-analytics");
+
+    const surveyAnalytics = getSurveyAnalytics(candidateId);
+
+    return {
+      surveyAnalytics,
+    };
+  },
+
+  // Get demographic breakdown for a candidate
+  getCandidateDemographics: async (
+    candidateId: string,
+  ): Promise<{
+    demographics: ReturnType<typeof getDemographics>;
+  }> => {
+    console.log(`📊 Mock: Getting demographics for candidate ${candidateId}`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    const { getDemographics } = await import("./data/candidate-analytics");
+
+    const demographics = getDemographics(candidateId);
+
+    return {
+      demographics,
+    };
+  },
+
+  // ============================================================================
+  // SURVEY MANAGEMENT API FUNCTIONS
+  // ============================================================================
+
+  // Create a new survey (draft)
+  createCandidateSurvey: async (
+    candidateId: string,
+    surveyData: {
+      title: string;
+      description: string;
+      estimatedMinutes: number;
+      questions: Array<{
+        id: string;
+        type: "single" | "multiple" | "ranking" | "scale" | "text";
+        question: string;
+        description?: string;
+        options?: Array<{
+          id: string;
+          label: string;
+          allowOther?: boolean;
+        }>;
+        minLabel?: string;
+        maxLabel?: string;
+      }>;
+    },
+  ): Promise<{ survey: CandidateSurvey }> => {
+    console.log(`📝 Mock: Creating survey for candidate ${candidateId}`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
+    const { candidateSurveys } = await import("./data/candidate-surveys");
+    const { getCandidateByIdWithSupporters } = await import(
+      "@/lib/helpers/candidate-helpers"
+    );
+
+    const candidate = getCandidateByIdWithSupporters(candidateId);
+    if (!candidate) {
+      throw new Error("Candidate not found");
+    }
+
+    const surveyId = `survey-${candidateId}-${Date.now()}`;
+    const newSurvey: CandidateSurvey = {
+      id: surveyId,
+      candidateId,
+      candidateName: candidate.name,
+      title: surveyData.title,
+      description: surveyData.description,
+      questions: surveyData.questions as CandidateSurvey["questions"],
+      estimatedMinutes: surveyData.estimatedMinutes,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: "draft",
+      totalResponses: 0,
+    };
+
+    // In a real app, this would save to database
+    // For mock, we'll add it to the array
+    candidateSurveys.push(newSurvey);
+
+    return {
+      survey: newSurvey,
+    };
+  },
+
+  // Update an existing survey
+  updateCandidateSurvey: async (
+    surveyId: string,
+    surveyData: {
+      title: string;
+      description: string;
+      estimatedMinutes: number;
+      questions: Array<{
+        id: string;
+        type: "single" | "multiple" | "ranking" | "scale" | "text";
+        question: string;
+        description?: string;
+        options?: Array<{
+          id: string;
+          label: string;
+          allowOther?: boolean;
+        }>;
+        minLabel?: string;
+        maxLabel?: string;
+      }>;
+    },
+  ): Promise<{ survey: CandidateSurvey }> => {
+    console.log(`📝 Mock: Updating survey ${surveyId}`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
+    const { candidateSurveys, getSurveyById } = await import(
+      "./data/candidate-surveys"
+    );
+
+    const existingSurvey = getSurveyById(surveyId);
+    if (!existingSurvey) {
+      throw new Error("Survey not found");
+    }
+
+    const updatedSurvey: CandidateSurvey = {
+      ...existingSurvey,
+      title: surveyData.title,
+      description: surveyData.description,
+      questions: surveyData.questions as CandidateSurvey["questions"],
+      estimatedMinutes: surveyData.estimatedMinutes,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Update in array
+    const index = candidateSurveys.findIndex((s) => s.id === surveyId);
+    if (index !== -1) {
+      candidateSurveys[index] = updatedSurvey;
+    }
+
+    return {
+      survey: updatedSurvey,
+    };
+  },
+
+  // Publish a survey (change status from draft to published)
+  publishCandidateSurvey: async (
+    surveyId: string,
+  ): Promise<{ survey: CandidateSurvey }> => {
+    console.log(`📢 Mock: Publishing survey ${surveyId}`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const { candidateSurveys, getSurveyById } = await import(
+      "./data/candidate-surveys"
+    );
+
+    const survey = getSurveyById(surveyId);
+    if (!survey) {
+      throw new Error("Survey not found");
+    }
+
+    const publishedSurvey: CandidateSurvey = {
+      ...survey,
+      status: "published",
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Update in array
+    const index = candidateSurveys.findIndex((s) => s.id === surveyId);
+    if (index !== -1) {
+      candidateSurveys[index] = publishedSurvey;
+    }
+
+    return {
+      survey: publishedSurvey,
+    };
+  },
+
+  // Save survey draft (auto-save functionality)
+  saveSurveyDraft: async (
+    candidateId: string,
+    surveyData: {
+      title: string;
+      description: string;
+      estimatedMinutes: number;
+      questions: Array<{
+        id: string;
+        type: "single" | "multiple" | "ranking" | "scale" | "text";
+        question: string;
+        description?: string;
+        options?: Array<{
+          id: string;
+          label: string;
+          allowOther?: boolean;
+        }>;
+        minLabel?: string;
+        maxLabel?: string;
+      }>;
+    },
+  ): Promise<{ survey: CandidateSurvey }> => {
+    console.log(
+      `💾 Mock: Auto-saving survey draft for candidate ${candidateId}`,
+    );
+
+    // Simulate network delay (shorter for auto-save)
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    const { candidateSurveys, getSurveyByCandidateId } = await import(
+      "./data/candidate-surveys"
+    );
+    const { getCandidateByIdWithSupporters } = await import(
+      "@/lib/helpers/candidate-helpers"
+    );
+
+    const candidate = getCandidateByIdWithSupporters(candidateId);
+    if (!candidate) {
+      throw new Error("Candidate not found");
+    }
+
+    // Check if draft exists
+    const existingDraft = getSurveyByCandidateId(candidateId);
+    if (existingDraft && existingDraft.status === "draft") {
+      // Update existing draft
+      const updatedSurvey: CandidateSurvey = {
+        ...existingDraft,
+        title: surveyData.title,
+        description: surveyData.description,
+        questions: surveyData.questions as CandidateSurvey["questions"],
+        estimatedMinutes: surveyData.estimatedMinutes,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const index = candidateSurveys.findIndex(
+        (s) => s.id === existingDraft.id,
+      );
+      if (index !== -1) {
+        candidateSurveys[index] = updatedSurvey;
+      }
+
+      return {
+        survey: updatedSurvey,
+      };
+    }
+
+    // Create new draft
+    const surveyId = `survey-${candidateId}-${Date.now()}`;
+    const newDraft: CandidateSurvey = {
+      id: surveyId,
+      candidateId,
+      candidateName: candidate.name,
+      title: surveyData.title,
+      description: surveyData.description,
+      questions: surveyData.questions as CandidateSurvey["questions"],
+      estimatedMinutes: surveyData.estimatedMinutes,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: "draft",
+      totalResponses: 0,
+    };
+
+    candidateSurveys.push(newDraft);
+
+    return {
+      survey: newDraft,
     };
   },
 };

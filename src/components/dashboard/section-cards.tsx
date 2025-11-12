@@ -1,3 +1,5 @@
+"use client";
+
 import { IconTrendingUp, IconTrendingDown } from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -13,105 +15,199 @@ import {
 /**
  * Dashboard Section Cards
  *
- * NOTE: Currently uses hardcoded values for demo
- * TODO: Replace with calculated metrics from voter data when building candidate dashboards:
- * - Total Supporters: getSupportersCount(candidateId)
- * - Ward Coverage: getUniqueWardsWithSupporters(candidateId).length / totalWards
- * - Polling Units: getUniquePollingUnitsWithSupporters(candidateId).length
- * - Support Strength: calculate from survey responses or engagement metrics
+ * Displays key metrics calculated from voter data:
+ * - Total Supporters: Calculated from actual voters
+ * - Ward Coverage: Unique wards with supporters / total wards
+ * - Polling Units: Unique polling units with supporters
+ * - Support Strength: Survey completion rate as engagement metric
  */
 
-export function SectionCards() {
+interface SectionCardsProps {
+  dashboardData?: {
+    totalSupporters: number;
+    wardCoverage: {
+      coveredWards: number;
+      totalWards: number;
+      coveragePercentage: number;
+    };
+    pollingUnitStats: {
+      uniquePollingUnits: number;
+    };
+    supportStrength: number;
+  };
+}
+
+export function SectionCards({ dashboardData }: SectionCardsProps) {
+  const totalSupporters = dashboardData?.totalSupporters || 0;
+  const wardCoverage = dashboardData?.wardCoverage || {
+    coveredWards: 0,
+    totalWards: 20,
+    coveragePercentage: 0,
+  };
+  const pollingUnits = dashboardData?.pollingUnitStats?.uniquePollingUnits || 0;
+  const supportStrength = dashboardData?.supportStrength || 0;
+
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Total Supporters</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            8,743
+            {totalSupporters.toLocaleString()}
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
-              className="border-destructive/30 text-destructive"
+              className={
+                totalSupporters > 0
+                  ? "border-primary/30 text-primary"
+                  : "border-muted text-muted-foreground"
+              }
             >
-              <IconTrendingDown />
-              -3.2%
+              {totalSupporters > 0 ? <IconTrendingUp /> : <IconTrendingDown />}
+              {totalSupporters > 0 ? "Active" : "None"}
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Recent supporter decline <IconTrendingDown className="size-4" />
+            {totalSupporters > 0
+              ? "Growing supporter base"
+              : "Start building your base"}{" "}
+            {totalSupporters > 0 ? (
+              <IconTrendingUp className="size-4" />
+            ) : (
+              <IconTrendingDown className="size-4" />
+            )}
           </div>
           <div className="text-muted-foreground">
-            Registered voters in Song & Fufore
+            {totalSupporters > 0 ? `Registered` : "No supporters yet"}
           </div>
         </CardFooter>
       </Card>
+
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Ward Coverage</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            16/20
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline" className="border-primary/30 text-primary">
-              <IconTrendingUp />
-              80%
-            </Badge>
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Expanding ward presence <IconTrendingUp className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            Wards with active supporters
-          </div>
-        </CardFooter>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Polling Units</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            387
+            {wardCoverage.coveredWards}/{wardCoverage.totalWards}
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
-              className="border-destructive/30 text-destructive"
+              className={
+                wardCoverage.coveragePercentage >= 50
+                  ? "border-primary/30 text-primary"
+                  : "border-muted text-muted-foreground"
+              }
             >
-              <IconTrendingDown />
-              -5.1%
+              {wardCoverage.coveragePercentage >= 50 ? (
+                <IconTrendingUp />
+              ) : (
+                <IconTrendingDown />
+              )}
+              {wardCoverage.coveragePercentage}%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Lost some unit coverage <IconTrendingDown className="size-4" />
+            {wardCoverage.coveragePercentage >= 50
+              ? "Strong ward presence"
+              : "Expanding coverage"}{" "}
+            {wardCoverage.coveragePercentage >= 50 ? (
+              <IconTrendingUp className="size-4" />
+            ) : (
+              <IconTrendingDown className="size-4" />
+            )}
           </div>
-          <div className="text-muted-foreground">Units with voter data</div>
+          <div className="text-muted-foreground">
+            {wardCoverage.coveragePercentage >= 50
+              ? "Good territorial reach"
+              : "More wards to cover"}
+          </div>
         </CardFooter>
       </Card>
+
+      <Card className="@container/card">
+        <CardHeader>
+          <CardDescription>Polling Units</CardDescription>
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+            {pollingUnits}
+          </CardTitle>
+          <CardAction>
+            <Badge
+              variant="outline"
+              className={
+                pollingUnits > 0
+                  ? "border-primary/30 text-primary"
+                  : "border-muted text-muted-foreground"
+              }
+            >
+              {pollingUnits > 0 ? <IconTrendingUp /> : <IconTrendingDown />}
+              {pollingUnits > 0 ? "Active" : "None"}
+            </Badge>
+          </CardAction>
+        </CardHeader>
+        <CardFooter className="flex-col items-start gap-1.5 text-sm">
+          <div className="line-clamp-1 flex gap-2 font-medium">
+            {pollingUnits > 0
+              ? "Units with supporters"
+              : "No units covered yet"}{" "}
+            {pollingUnits > 0 ? (
+              <IconTrendingUp className="size-4" />
+            ) : (
+              <IconTrendingDown className="size-4" />
+            )}
+          </div>
+          <div className="text-muted-foreground">
+            {pollingUnits > 0
+              ? "Grassroots presence"
+              : "Start at polling units"}
+          </div>
+        </CardFooter>
+      </Card>
+
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Support Strength</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            82%
+            {supportStrength}%
           </CardTitle>
           <CardAction>
-            <Badge variant="outline" className="border-primary/30 text-primary">
-              <IconTrendingUp />
-              +6.3%
+            <Badge
+              variant="outline"
+              className={
+                supportStrength >= 50
+                  ? "border-primary/30 text-primary"
+                  : "border-muted text-muted-foreground"
+              }
+            >
+              {supportStrength >= 50 ? (
+                <IconTrendingUp />
+              ) : (
+                <IconTrendingDown />
+              )}
+              {supportStrength >= 50 ? "Strong" : "Building"}
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Improving candidate preference <IconTrendingUp className="size-4" />
+            {supportStrength >= 50
+              ? "High engagement rate"
+              : "Growing engagement"}{" "}
+            {supportStrength >= 50 ? (
+              <IconTrendingUp className="size-4" />
+            ) : (
+              <IconTrendingDown className="size-4" />
+            )}
           </div>
-          <div className="text-muted-foreground">Average support rating</div>
+          <div className="text-muted-foreground">
+            {supportStrength >= 50
+              ? "Strong supporter commitment"
+              : "Building momentum"}
+          </div>
         </CardFooter>
       </Card>
     </div>

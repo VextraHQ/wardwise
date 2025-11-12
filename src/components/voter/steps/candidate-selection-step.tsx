@@ -15,6 +15,7 @@ import {
   Scale,
   Building2,
   ShieldCheck,
+  Building,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -57,7 +58,7 @@ export function CandidateSelectionStep() {
   const candidates: Candidate[] = data?.candidates || [];
 
   // Helper to get position display info (icon, label, variant)
-  const getPositionInfo = (position: string) => {
+  const getPositionInfo = (position: Candidate["position"]) => {
     switch (position) {
       case "Governor":
         return {
@@ -76,6 +77,12 @@ export function CandidateSelectionStep() {
           icon: Building2,
           label: "House of Reps",
           variant: "outline" as const,
+        };
+      case "State Assembly":
+        return {
+          icon: Building,
+          label: "State House of Assembly",
+          variant: "secondary" as const,
         };
       default:
         return {
@@ -234,7 +241,7 @@ export function CandidateSelectionStep() {
                           {/* Header with avatar, name and radio button */}
                           <div className="mb-3 flex items-start gap-3">
                             {/* Avatar */}
-                            <div className="flex-shrink-0">
+                            <div className="shrink-0">
                               <Avatar className="h-10 w-10">
                                 <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                                   {candidate.name.charAt(0).toUpperCase() ||
@@ -252,7 +259,7 @@ export function CandidateSelectionStep() {
                               </div>
 
                               {/* Radio button indicator */}
-                              <div className="flex-shrink-0">
+                              <div className="shrink-0">
                                 <div
                                   className={cn(
                                     "flex h-4 w-4 items-center justify-center rounded-full border-2 transition-colors",
@@ -294,7 +301,7 @@ export function CandidateSelectionStep() {
                               <>
                                 {/* Constituency */}
                                 <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
-                                  <MapPin className="h-3 w-3 flex-shrink-0" />
+                                  <MapPin className="h-3 w-3 shrink-0" />
                                   <span className="truncate">
                                     {candidate.constituency}
                                   </span>
@@ -303,7 +310,7 @@ export function CandidateSelectionStep() {
                                 {/* Supporters */}
                                 {candidate.supporters !== undefined && (
                                   <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
-                                    <Users className="h-3 w-3 flex-shrink-0" />
+                                    <Users className="h-3 w-3 shrink-0" />
                                     <span>
                                       {candidate.supporters.toLocaleString()}{" "}
                                       supporters

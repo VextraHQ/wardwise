@@ -26,7 +26,7 @@ export function ImpactSection() {
         aria-hidden="true"
       />
       <div
-        className="absolute inset-x-0 top-1/2 h-[120%] -translate-y-1/2 bg-gradient-to-b from-[#0f2b24]/5 via-transparent to-[#46C2A7]/10"
+        className="absolute inset-x-0 top-1/2 h-[120%] -translate-y-1/2 bg-linear-to-b from-[#0f2b24]/5 via-transparent to-[#46C2A7]/10"
         aria-hidden="true"
       />
       <div className="relative mx-auto flex max-w-7xl flex-col gap-14 px-6">
@@ -46,7 +46,7 @@ export function ImpactSection() {
         <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-end">
           <div className="border-border/60 bg-card/90 relative overflow-hidden rounded-2xl border backdrop-blur-xl sm:rounded-3xl">
             <div
-              className="bg-primary/15 absolute top-1/2 -left-32 hidden size-[28rem] -translate-y-1/2 rounded-full mix-blend-screen blur-3xl lg:block"
+              className="bg-primary/15 absolute top-1/2 -left-32 hidden size-112 -translate-y-1/2 rounded-full mix-blend-screen blur-3xl lg:block"
               aria-hidden="true"
             />
             <div className="relative flex flex-col gap-6 p-6 sm:gap-8 sm:p-8 lg:p-12">
@@ -90,7 +90,7 @@ export function ImpactSection() {
                       {stat.caption}
                     </p>
                     <div
-                      className="from-primary/20 via-primary/50 to-primary mt-3 h-1 rounded-full bg-gradient-to-r sm:mt-4"
+                      className="from-primary/20 via-primary/50 to-primary mt-3 h-1 rounded-full bg-linear-to-r sm:mt-4"
                       aria-hidden="true"
                     />
                   </div>

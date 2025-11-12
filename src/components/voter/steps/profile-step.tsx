@@ -58,7 +58,13 @@ const profileSchema = z.object({
   }),
   occupation: z.string().min(1, "Please select your occupation"),
   religion: z.string().min(1, "Please select your religion"),
-  phoneNumber: z.string().optional(),
+  phoneNumber: z
+    .string()
+    .min(1, "Phone number is required")
+    .regex(
+      /^(\+234|0)?(7\d{2}|8\d{2}|9\d{2})\d{7}$/,
+      "Enter a valid Nigerian mobile number (e.g., 08031234567 or +2348031234567)",
+    ),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -111,9 +117,7 @@ export function ProfileStep() {
         occupation: data.occupation,
         religion: data.religion,
       },
-      phone: data.phoneNumber
-        ? normalizeNigerianPhoneInput(data.phoneNumber)
-        : undefined,
+      phone: normalizeNigerianPhoneInput(data.phoneNumber),
     });
     toast.success("Profile information saved!");
     router.push("/register/location");
@@ -512,14 +516,14 @@ export function ProfileStep() {
                   }}
                 />
 
-                {/* Phone Number Field (Optional) */}
+                {/* Phone Number Field (Required) */}
                 <FormField
                   control={form.control}
                   name="phoneNumber"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
-                        Phone Number (Optional)
+                        Phone Number <span className="text-destructive">*</span>
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -527,8 +531,9 @@ export function ProfileStep() {
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>
-                                Add your phone number to receive notifications
-                                about your registration
+                                Your phone number is required for registration
+                                and to receive notifications about your
+                                registration
                               </p>
                             </TooltipContent>
                           </Tooltip>
@@ -547,7 +552,8 @@ export function ProfileStep() {
                         </div>
                       </FormControl>
                       <FormDescription>
-                        Optional: Add your phone number for notifications
+                        Required: Your phone number for registration and
+                        notifications
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -567,7 +573,7 @@ export function ProfileStep() {
                   </Button>
                   <Button
                     type="submit"
-                    className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-gradient-to-r font-semibold transition-all duration-200"
+                    className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-linear-to-r font-semibold transition-all duration-200"
                   >
                     Continue
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -584,7 +590,7 @@ export function ProfileStep() {
         items={[
           { icon: <HiUser className="h-4 w-4" />, label: "Data Privacy" },
           { icon: <HiCalendar className="h-4 w-4" />, label: "Age Verified" },
-          { icon: <HiPhone className="h-4 w-4" />, label: "Optional Contact" },
+          { icon: <HiPhone className="h-4 w-4" />, label: "Contact Verified" },
         ]}
       />
     </div>

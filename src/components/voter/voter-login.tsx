@@ -263,7 +263,7 @@ export function VoterLogin() {
               {loginAttempts > 0 && loginMutation.isError && (
                 <div className="space-y-3">
                   <div className="bg-destructive/10 border-destructive/20 flex gap-3 rounded-lg border p-4">
-                    <HiExclamationCircle className="text-destructive mt-0.5 h-5 w-5 flex-shrink-0" />
+                    <HiExclamationCircle className="text-destructive mt-0.5 h-5 w-5 shrink-0" />
                     <div className="flex-1 space-y-1">
                       <p className="text-destructive text-sm font-semibold">
                         {loginAttempts >= 3
@@ -283,7 +283,7 @@ export function VoterLogin() {
               {/* Offline State */}
               {isOffline && (
                 <div className="flex gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4">
-                  <HiExclamationCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-orange-700" />
+                  <HiExclamationCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange-700" />
                   <div className="flex-1 space-y-1">
                     <p className="text-sm font-semibold text-orange-900">
                       Offline Mode
@@ -321,7 +321,7 @@ export function VoterLogin() {
                       loginAttempts >= 3
                     }
                     className={cn(
-                      "from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 bg-gradient-to-r font-semibold transition-all duration-200 disabled:opacity-50",
+                      "from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 bg-linear-to-r font-semibold transition-all duration-200 disabled:opacity-50",
                       loginAttempts > 0 && loginAttempts < 3
                         ? "flex-1"
                         : "w-full",

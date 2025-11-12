@@ -276,7 +276,7 @@ export function CompletionStep() {
       <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
         <CardContent className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
-            <div className="border-primary/30 bg-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border">
+            <div className="border-primary/30 bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border">
               <HiShare className="text-primary h-5 w-5" />
             </div>
             <div>

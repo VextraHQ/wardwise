@@ -10,7 +10,11 @@ export type Candidate = {
   id: string;
   name: string;
   party: string;
-  position: "Governor" | "Senator" | "House of Representatives";
+  position:
+    | "Governor"
+    | "Senator"
+    | "House of Representatives"
+    | "State Assembly";
   state: string;
   constituency: string;
   description?: string;

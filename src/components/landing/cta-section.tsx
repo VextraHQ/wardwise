@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export function CallToActionSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-[#f8fbfa] to-white py-16 sm:py-20 lg:py-24">
+    <section className="relative overflow-hidden bg-linear-to-b from-white via-[#f8fbfa] to-white py-16 sm:py-20 lg:py-24">
       {/* Subtle grid pattern */}
       <div
         className="absolute inset-0 opacity-[0.02]"

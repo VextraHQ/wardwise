@@ -29,7 +29,7 @@ export function SiteFooter() {
         aria-hidden="true"
       />
       <div
-        className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(70,194,167,0.16),transparent_55%),radial-gradient(circle_at_bottom,_rgba(15,43,36,0.28),transparent_62%)]"
+        className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(70,194,167,0.16),transparent_55%),radial-gradient(circle_at_bottom,rgba(15,43,36,0.28),transparent_62%)]"
         aria-hidden="true"
       />
       <div className="relative mx-auto max-w-7xl px-6 py-16">
@@ -38,7 +38,7 @@ export function SiteFooter() {
             <div className="flex items-center gap-3">
               <span className="relative flex size-12 items-center justify-center">
                 <span className="border-accent-foreground/20 bg-accent/40 absolute inset-0 rounded-full border shadow-[0_6px_16px_rgba(0,0,0,0.2)]" />
-                <span className="from-primary relative flex size-9 items-center justify-center rounded-full bg-gradient-to-br via-[#2f7f6b] to-[#163a30] text-white">
+                <span className="from-primary relative flex size-9 items-center justify-center rounded-full bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
                   <MapIcon className="size-5" />
                 </span>
               </span>

@@ -415,7 +415,7 @@ export function LocationStep() {
                 {/* Help Section */}
                 <div className="border-border bg-muted/50 rounded-lg border p-4">
                   <div className="flex items-start gap-3">
-                    <HiQuestionMarkCircle className="text-primary mt-0.5 h-5 w-5 flex-shrink-0" />
+                    <HiQuestionMarkCircle className="text-primary mt-0.5 h-5 w-5 shrink-0" />
                     <div className="space-y-2">
                       <p className="text-foreground text-sm font-medium">
                         Need help finding your location details?
@@ -441,7 +441,7 @@ export function LocationStep() {
                   </Button>
                   <Button
                     type="submit"
-                    className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-gradient-to-r font-semibold transition-all duration-200"
+                    className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-linear-to-r font-semibold transition-all duration-200"
                   >
                     Continue
                     <ArrowRight className="ml-2 h-4 w-4" />

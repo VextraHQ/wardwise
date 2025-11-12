@@ -135,6 +135,8 @@ export function NinEntryStep() {
             firstName: data.data.firstName,
             lastName: data.data.lastName,
             dateOfBirth: data.data.dateOfBirth,
+            occupation: "",
+            religion: "",
             age:
               new Date().getFullYear() -
               new Date(data.data.dateOfBirth).getFullYear(),
@@ -300,7 +302,7 @@ export function NinEntryStep() {
                 {verificationStatus === "error" && (
                   <div className="space-y-3">
                     <div className="bg-destructive/10 border-destructive/20 flex gap-3 rounded-lg border p-4">
-                      <HiExclamationCircle className="text-destructive mt-0.5 h-5 w-5 flex-shrink-0" />
+                      <HiExclamationCircle className="text-destructive mt-0.5 h-5 w-5 shrink-0" />
                       <div className="flex-1 space-y-1">
                         <p className="text-destructive text-sm font-semibold">
                           Verification Failed
@@ -344,7 +346,7 @@ export function NinEntryStep() {
                   <div className="space-y-6">
                     {/* Success Badge */}
                     <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4">
-                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100">
                         <CheckCircle2 className="h-5 w-5 text-green-700" />
                       </div>
                       <div className="flex-1">
@@ -518,7 +520,7 @@ export function NinEntryStep() {
                         <Button
                           type="submit"
                           disabled={!termsAccepted}
-                          className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-gradient-to-r font-semibold transition-all duration-200 disabled:opacity-50"
+                          className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-linear-to-r font-semibold transition-all duration-200 disabled:opacity-50"
                         >
                           Continue to Profile
                         </Button>
@@ -528,7 +530,7 @@ export function NinEntryStep() {
                         type="button"
                         onClick={handleVerifyNin}
                         disabled={!isNINComplete()}
-                        className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 w-full bg-gradient-to-r font-semibold transition-all duration-200 disabled:opacity-50"
+                        className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 w-full bg-linear-to-r font-semibold transition-all duration-200 disabled:opacity-50"
                       >
                         <HiShieldCheck className="mr-2 h-4 w-4" />
                         Verify NIN

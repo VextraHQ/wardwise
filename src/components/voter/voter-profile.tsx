@@ -33,7 +33,7 @@ import { useRegistration } from "@/hooks/use-registration";
 import { generateRegistrationId } from "@/lib/registration-schemas";
 import { toast } from "sonner";
 import { mockApi } from "@/lib/mock/mockApi";
-import { getSupportersCount } from "@/lib/mock/data/voters";
+import { getSupportersCount } from "@/lib/mock/data/candidate-analytics";
 import type { Voter } from "@/types";
 import { ProfileHeader } from "@/components/voter/profile/profile-header";
 import {
@@ -318,7 +318,7 @@ export function VoterProfile() {
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4 sm:space-y-6">
           {/* Completion Summary */}
-          <Card className="border-primary/20 from-primary/5 to-primary/10 bg-gradient-to-br">
+          <Card className="border-primary/20 from-primary/5 to-primary/10 bg-linear-to-br">
             <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               {isLoading ? (
                 <>
@@ -996,7 +996,7 @@ export function VoterProfile() {
                       className="flex items-start gap-3 border-b pb-3 transition-all duration-200 last:border-0 last:pb-0 sm:gap-4 sm:pb-4"
                     >
                       <div
-                        className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg transition-colors duration-200 sm:h-10 sm:w-10 ${
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-200 sm:h-10 sm:w-10 ${
                           activity.completed
                             ? "bg-primary/10 text-primary"
                             : "bg-muted text-muted-foreground"

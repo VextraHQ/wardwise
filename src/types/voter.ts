@@ -16,7 +16,7 @@ export type Voter = {
   lastName: string;
   dateOfBirth: string; // ISO date string
   email?: string;
-  phoneNumber?: string;
+  phoneNumber: string;
   gender: "male" | "female" | "other";
   occupation: string;
   religion: string;

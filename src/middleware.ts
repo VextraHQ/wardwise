@@ -1,14 +1,17 @@
 import { withAuth } from "next-auth/middleware";
 
 export default withAuth(
-  function middleware(req) {
+  function middleware(_req) {
     // Add any additional middleware logic here
   },
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Protect dashboard routes
-        if (req.nextUrl.pathname.startsWith("/dashboard")) {
+        // Protect candidate dashboard routes
+        if (
+          req.nextUrl.pathname.startsWith("/dashboard") ||
+          req.nextUrl.pathname.startsWith("/(candidate)")
+        ) {
           return !!token && token.role === "candidate";
         }
         // Protect admin routes
@@ -22,5 +25,10 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/(candidate)/:path*",
+    "/admin/:path*",
+    "/admin",
+  ],
 };

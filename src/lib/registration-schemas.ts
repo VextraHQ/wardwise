@@ -48,7 +48,7 @@ export const phoneSchema = z
   .string()
   .trim()
   .regex(PHONE_REGEX, PHONE_ERROR_MESSAGE)
-  .optional(); // Phone is now optional
+  .min(1, "Phone number is required"); // Phone is now required
 
 // Helper function to validate phone numbers (for use in components)
 export const isValidNigerianPhone = (phone: string): boolean => {

@@ -43,3 +43,9 @@ next-env.d.ts
 # documentation (keep README.md in root, ignore docs folder)
 /docs/
 !README.md
+
+# Cursor
+.cursor
+
+# Claude	
+.claude

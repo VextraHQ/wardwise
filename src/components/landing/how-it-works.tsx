@@ -8,7 +8,7 @@ export function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="from-background via-muted to-background relative overflow-hidden bg-gradient-to-b py-24"
+      className="from-background via-muted to-background relative overflow-hidden bg-linear-to-b py-24"
     >
       <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(70,194,167,0.15),transparent_55%),radial-gradient(circle_at_80%_0%,rgba(15,43,36,0.12),transparent_55%)]"
@@ -43,7 +43,7 @@ export function HowItWorksSection() {
               }}
               className="group border-border bg-card/90 hover:border-primary/60 relative flex flex-col gap-5 overflow-hidden rounded-3xl border p-8 backdrop-blur-sm transition duration-300 hover:-translate-y-0.5"
             >
-              <div className="from-primary/8 to-accent/8 absolute inset-0 bg-gradient-to-br via-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
+              <div className="from-primary/8 to-accent/8 absolute inset-0 bg-linear-to-br via-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
               <div className="relative flex items-center gap-4">
                 <div className="border-primary/30 bg-primary/12 text-accent flex size-12 items-center justify-center rounded-2xl border shadow-inner">
                   <step.icon className="size-6" aria-hidden="true" />

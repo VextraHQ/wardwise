@@ -4,6 +4,8 @@
  * Types for candidate surveys and survey questions.
  */
 
+import type { Candidate } from "@/types/candidate";
+
 // Survey question option
 export type SurveyOption = {
   id: string;
@@ -29,6 +31,9 @@ export type SurveyQuestion = {
   };
 };
 
+// Survey status
+export type SurveyStatus = "draft" | "published" | "archived";
+
 // Candidate survey
 export type CandidateSurvey = {
   id: string;
@@ -38,6 +43,44 @@ export type CandidateSurvey = {
   description: string;
   questions: SurveyQuestion[];
   createdAt: string; // ISO datetime string
+  updatedAt?: string; // ISO datetime string
   estimatedMinutes?: number; // Estimated time to complete
   totalResponses?: number; // Total completed responses for social proof
+  status?: SurveyStatus; // Survey status (defaults to "published" for existing surveys)
+};
+
+// Survey template metadata
+export type SurveyTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  position: Candidate["position"] | "All";
+  focusArea: string;
+  estimatedMinutes: number;
+  questionCount: number;
+  preview: {
+    title: string;
+    description: string;
+    sampleQuestions: Array<{
+      type: SurveyQuestion["type"];
+      question: string;
+    }>;
+  };
+  questions: SurveyQuestion[];
+};
+
+// Survey builder state types
+export type SurveyBuilderStep = "info" | "questions" | "review";
+
+export type SurveyBuilderState = {
+  step: SurveyBuilderStep;
+  survey: {
+    title: string;
+    description: string;
+    estimatedMinutes: number;
+    questions: SurveyQuestion[];
+  };
+  selectedTemplateId?: string;
+  isDirty: boolean;
+  lastSaved?: string;
 };

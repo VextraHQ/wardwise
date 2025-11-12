@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production",
+  },
   // Optimize static asset serving
   generateEtags: false,
   poweredByHeader: false,

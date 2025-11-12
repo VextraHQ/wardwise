@@ -11,7 +11,7 @@ export function PlatformPillarsSection() {
         aria-hidden="true"
       />
       <div
-        className="from-primary/0 via-primary/30 absolute inset-x-1/2 top-0 h-[120%] w-px -translate-x-1/2 bg-gradient-to-b to-transparent"
+        className="from-primary/0 via-primary/30 absolute inset-x-1/2 top-0 h-[120%] w-px -translate-x-1/2 bg-linear-to-b to-transparent"
         aria-hidden="true"
       />
       <div className="relative mx-auto flex max-w-7xl flex-col gap-16 px-6">
@@ -31,15 +31,15 @@ export function PlatformPillarsSection() {
 
         <div className="relative flex flex-col gap-6 md:flex-row md:items-stretch md:justify-between">
           <div
-            className="from-primary/0 via-primary/30 pointer-events-none absolute top-0 left-[6%] hidden h-full w-px bg-gradient-to-b to-transparent md:block"
+            className="from-primary/0 via-primary/30 pointer-events-none absolute top-0 left-[6%] hidden h-full w-px bg-linear-to-b to-transparent md:block"
             aria-hidden="true"
           />
           <div
-            className="from-primary/0 via-primary/20 pointer-events-none absolute top-0 left-[38%] hidden h-full w-px bg-gradient-to-b to-transparent lg:block"
+            className="from-primary/0 via-primary/20 pointer-events-none absolute top-0 left-[38%] hidden h-full w-px bg-linear-to-b to-transparent lg:block"
             aria-hidden="true"
           />
           <div
-            className="from-primary/0 via-primary/20 pointer-events-none absolute top-0 left-[68%] hidden h-full w-px bg-gradient-to-b to-transparent xl:block"
+            className="from-primary/0 via-primary/20 pointer-events-none absolute top-0 left-[68%] hidden h-full w-px bg-linear-to-b to-transparent xl:block"
             aria-hidden="true"
           />
 
@@ -97,7 +97,7 @@ export function PlatformPillarsSection() {
                   className="absolute inset-y-0 -right-10 hidden w-10 items-center justify-center md:flex"
                   aria-hidden="true"
                 >
-                  <div className="from-primary/0 via-primary/40 relative h-16 w-px rounded-full bg-gradient-to-b to-transparent sm:h-20 lg:h-24">
+                  <div className="from-primary/0 via-primary/40 relative h-16 w-px rounded-full bg-linear-to-b to-transparent sm:h-20 lg:h-24">
                     <span className="bg-primary/80 absolute -top-3 left-1/2 size-2 -translate-x-1/2 rounded-full border border-white/40 shadow-lg sm:-top-4 sm:size-3" />
                     <span className="bg-primary/40 absolute -bottom-3 left-1/2 size-2 -translate-x-1/2 rounded-full border border-white/40 sm:-bottom-4 sm:size-3" />
                   </div>

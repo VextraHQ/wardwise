@@ -6,7 +6,7 @@
 
 export type RegistrationData = {
   nin: string;
-  phone?: string;
+  phone: string;
   basic: {
     firstName: string;
     lastName: string;
