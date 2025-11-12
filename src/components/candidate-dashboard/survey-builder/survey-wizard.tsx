@@ -11,7 +11,7 @@ import {
   StepQuestions,
   StepReview,
   ValidationErrors,
-} from "@/components/dashboard/survey-builder";
+} from "@/components/candidate-dashboard/survey-builder";
 import {
   useCreateSurvey,
   useUpdateSurvey,

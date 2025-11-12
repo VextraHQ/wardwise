@@ -7,8 +7,17 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useSurveyById, useCandidateSurveyResponses } from "@/hooks/use-candidate-dashboard";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  useSurveyById,
+  useCandidateSurveyResponses,
+} from "@/hooks/use-candidate-dashboard";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -54,7 +63,10 @@ export default function SurveyDetailPage() {
             The survey you're looking for doesn't exist.
           </p>
         </div>
-        <Button variant="outline" onClick={() => router.push("/dashboard/surveys")}>
+        <Button
+          variant="outline"
+          onClick={() => router.push("/dashboard/surveys")}
+        >
           <IconArrowLeft className="mr-2 size-4" />
           Back to Surveys
         </Button>
@@ -174,7 +186,9 @@ export default function SurveyDetailPage() {
               <div>
                 <p className="text-sm font-medium">Responses</p>
                 <p className="text-muted-foreground text-xs">
-                  {surveyAnalytics?.totalResponses || survey.totalResponses || 0}{" "}
+                  {surveyAnalytics?.totalResponses ||
+                    survey.totalResponses ||
+                    0}{" "}
                   total responses
                 </p>
               </div>
@@ -216,7 +230,11 @@ export default function SurveyDetailPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <QuestionsList questions={survey.questions} showIndex={true} showType={true} />
+          <QuestionsList
+            questions={survey.questions}
+            showIndex={true}
+            showType={true}
+          />
         </CardContent>
       </Card>
 
@@ -227,9 +245,7 @@ export default function SurveyDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle>Response Analytics</CardTitle>
-              <CardDescription>
-                Top responses for each question
-              </CardDescription>
+              <CardDescription>Top responses for each question</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -268,7 +284,7 @@ export default function SurveyDetailPage() {
                       )}
 
                       {breakdown.responseCount === 0 && (
-                        <div className="rounded-lg border p-4 text-center text-sm text-muted-foreground">
+                        <div className="text-muted-foreground rounded-lg border p-4 text-center text-sm">
                           No responses yet
                         </div>
                       )}
@@ -287,4 +303,3 @@ export default function SurveyDetailPage() {
     </div>
   );
 }
-

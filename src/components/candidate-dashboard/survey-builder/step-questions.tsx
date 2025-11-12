@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   QuestionEditor,
   QuestionTypeIcon,
-} from "@/components/dashboard/survey-builder";
+} from "@/components/candidate-dashboard/survey-builder";
 import type { StepQuestionsProps } from "@/types/survey-builder";
 import type { SurveyQuestion } from "@/types";
 import { IconPlus, IconTrash, IconCopy } from "@tabler/icons-react";

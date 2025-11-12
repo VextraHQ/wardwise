@@ -15,7 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { QuestionTypeIcon } from "@/components/dashboard/survey-builder/question-type-icon";
+import { QuestionTypeIcon } from "@/components/candidate-dashboard/survey-builder/question-type-icon";
 import { cn } from "@/lib/utils";
 
 export interface QuestionDisplayProps {

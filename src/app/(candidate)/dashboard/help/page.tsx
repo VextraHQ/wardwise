@@ -1,5 +1,4 @@
-"use client";
-
+import type { Metadata } from "next";
 import {
   Card,
   CardContent,
@@ -7,6 +6,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Help & Support | WardWise",
+  description:
+    "Get help and learn how to use WardWise. Documentation, FAQs, tutorials, and contact information.",
+};
 
 export default function HelpPage() {
   return (

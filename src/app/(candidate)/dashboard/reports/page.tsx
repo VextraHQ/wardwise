@@ -1,5 +1,4 @@
-"use client";
-
+import type { Metadata } from "next";
 import {
   Card,
   CardContent,
@@ -7,6 +6,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Campaign Reports | WardWise",
+  description:
+    "View and download campaign reports including supporter lists, analytics summaries, and ward breakdowns.",
+};
 
 export default function ReportsPage() {
   return (

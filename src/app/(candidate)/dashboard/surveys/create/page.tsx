@@ -6,7 +6,7 @@
 
 "use client";
 
-import { SurveyWizard } from "@/components/dashboard/survey-builder";
+import { SurveyWizard } from "@/components/candidate-dashboard/survey-builder";
 
 export default function SurveysCreatePage() {
   return (

@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { QuestionTypeIcon } from "@/components/dashboard/survey-builder/question-type-icon";
+import { QuestionTypeIcon } from "@/components/candidate-dashboard/survey-builder/question-type-icon";
 import { cn } from "@/lib/utils";
 
 /**

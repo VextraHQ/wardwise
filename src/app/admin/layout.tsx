@@ -28,16 +28,16 @@ export default function AdminLayout({
   // Show loading state while checking authentication
   if (status === "loading") {
     return (
-      <div className="flex min-h-screen">
-        <div className="w-64 border-r p-4">
+      <div className="flex min-h-screen flex-col sm:flex-row">
+        <div className="hidden w-64 border-r p-4 sm:block">
           <Skeleton className="h-12 w-full" />
           <div className="mt-4 space-y-2">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
           </div>
         </div>
-        <div className="flex-1 p-6">
-          <Skeleton className="mb-6 h-16 w-full" />
+        <div className="flex-1 p-4 sm:p-6">
+          <Skeleton className="mb-4 h-12 w-full sm:mb-6 sm:h-16" />
           <Skeleton className="h-64 w-full" />
         </div>
       </div>

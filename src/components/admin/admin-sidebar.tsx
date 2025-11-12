@@ -12,8 +12,8 @@ import {
   IconHistory,
   IconHelp,
 } from "@tabler/icons-react";
-import { NavMain } from "@/components/dashboard/nav-main";
-import { NavSecondary } from "@/components/dashboard/nav-secondary";
+import { NavMain } from "@/components/candidate-dashboard/nav-main";
+import { NavSecondary } from "@/components/candidate-dashboard/nav-secondary";
 import { AdminNavUser } from "@/components/admin/admin-nav-user";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
