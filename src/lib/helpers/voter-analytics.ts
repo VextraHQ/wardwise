@@ -20,7 +20,8 @@
  * - Admin (for platform-wide analytics)
  */
 
-import type { Voter, CandidateSurvey } from "@/types";
+import type { Voter } from "@/types/voter";
+import type { CandidateSurvey } from "@/types/survey";
 import { getVotersByCandidate } from "@/lib/mock/data/voters";
 import { getSurveyByCandidateId } from "@/lib/mock/data/candidate-surveys";
 

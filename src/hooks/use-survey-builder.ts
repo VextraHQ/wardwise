@@ -10,7 +10,7 @@ import type {
   SurveyBuilderStep,
   SurveyBuilderState,
   SurveyTemplate,
-} from "@/types";
+} from "@/types/survey";
 
 const MIN_QUESTIONS = 3;
 const MAX_QUESTIONS = 15;

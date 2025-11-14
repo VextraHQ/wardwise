@@ -1,14 +1,8 @@
-/**
- * Edit Survey Page
- *
- * Page for editing an existing survey
- */
-
 "use client";
 
 import { useParams } from "next/navigation";
 import { useSurveyById } from "@/hooks/use-candidate-dashboard";
-import { SurveyWizard } from "@/components/candidate-dashboard/survey-builder";
+import { SurveyWizard } from "@/components/candidate-dashboard/survey-builder/survey-wizard";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SurveysEditPage() {

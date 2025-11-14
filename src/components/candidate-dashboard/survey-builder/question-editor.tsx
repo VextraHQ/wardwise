@@ -21,9 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { SurveyQuestion, SurveyOption } from "@/types";
+import type { SurveyQuestion, SurveyOption } from "@/types/survey";
 import type { QuestionEditorProps } from "@/types/survey-builder";
-import { QuestionTypeIcon } from "@/components/candidate-dashboard/survey-builder";
+import { QuestionTypeIcon } from "@/components/candidate-dashboard/survey-builder/question-type-icon";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 
 const QUESTION_TYPES: Array<{

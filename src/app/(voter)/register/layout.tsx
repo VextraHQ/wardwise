@@ -1,20 +1,16 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Register to Vote | WardWise",
-  description:
-    "Register to participate in your State elections. Complete our survey and choose your candidate.",
-  openGraph: {
-    title: "Register to Vote | WardWise",
-    description:
-      "Register to participate in your State elections. Complete our survey and choose your candidate.",
-  },
-};
+import { DemoIndicator } from "@/components/ui/demo-indicator";
 
 export default function RegisterLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <div className="relative">
+      <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2">
+        <DemoIndicator variant="badge" />
+      </div>
+      {children}
+    </div>
+  );
 }

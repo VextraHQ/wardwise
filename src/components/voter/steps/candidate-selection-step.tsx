@@ -24,16 +24,16 @@ import { StepProgress } from "@/components/ui/step-progress";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { useRegistration } from "@/hooks/use-registration";
+import { useRegistrationStore } from "@/stores/registration-store";
 import { cn } from "@/lib/utils";
 import { mockApi } from "@/lib/mock/mockApi";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import type { Candidate } from "@/types";
+import type { Candidate } from "@/types/candidate";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 export function CandidateSelectionStep() {
   const router = useRouter();
-  const { update, payload } = useRegistration();
+  const { update, payload } = useRegistrationStore();
   const [selectedCandidateId, setSelectedCandidateId] = useState("");
 
   // Get state and lga from payload

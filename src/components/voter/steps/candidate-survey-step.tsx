@@ -23,17 +23,17 @@ import { StepProgress } from "@/components/ui/step-progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useRegistration } from "@/hooks/use-registration";
+import { useRegistrationStore } from "@/stores/registration-store";
 import { cn } from "@/lib/utils";
 import { mockApi } from "@/lib/mock/mockApi";
-import type { CandidateSurvey, SurveyQuestion } from "@/types";
+import type { CandidateSurvey, SurveyQuestion } from "@/types/survey";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 export function CandidateSurveyStep() {
   const router = useRouter();
-  const { update, payload } = useRegistration();
+  const { update, payload } = useRegistrationStore();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [otherTexts, setOtherTexts] = useState<Record<string, string>>({}); // For "Other" option text inputs

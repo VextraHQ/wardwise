@@ -2,7 +2,7 @@ import type {
   SurveyQuestion,
   SurveyTemplate,
   SurveyBuilderStep,
-} from "@/types";
+} from "@/types/survey";
 
 // Props for StepBasicInfo component
 export interface StepBasicInfoProps {

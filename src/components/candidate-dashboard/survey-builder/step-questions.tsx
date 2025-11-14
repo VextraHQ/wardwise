@@ -10,12 +10,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  QuestionEditor,
-  QuestionTypeIcon,
-} from "@/components/candidate-dashboard/survey-builder";
+import { QuestionEditor } from "@/components/candidate-dashboard/survey-builder/question-editor";
+import { QuestionTypeIcon } from "@/components/candidate-dashboard/survey-builder/question-type-icon";
 import type { StepQuestionsProps } from "@/types/survey-builder";
-import type { SurveyQuestion } from "@/types";
+import type { SurveyQuestion } from "@/types/survey";
 import { IconPlus, IconTrash, IconCopy } from "@tabler/icons-react";
 
 export function StepQuestions({

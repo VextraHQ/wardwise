@@ -110,11 +110,13 @@ export function ProfileHeader({
             ) : (
               <>
                 <h1 className="text-foreground truncate text-lg font-semibold sm:text-2xl">
-                  {fullName || "Voter Profile"}
+                  {fullName}
                 </h1>
-                <p className="text-muted-foreground truncate text-xs sm:text-sm">
-                  {state || "Adamawa State"} • Registered Voter
-                </p>
+                {state && (
+                  <p className="text-muted-foreground truncate text-xs sm:text-sm">
+                    {state} • Registered Voter
+                  </p>
+                )}
                 <div className="flex items-center gap-1.5">
                   <p className="text-muted-foreground truncate font-mono text-[10px] sm:text-xs">
                     ID: {registrationId}

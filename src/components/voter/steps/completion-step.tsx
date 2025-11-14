@@ -28,12 +28,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useRegistration } from "@/hooks/use-registration";
+import { useRegistrationStore } from "@/stores/registration-store";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 export function CompletionStep() {
   const router = useRouter();
-  const { payload, reset } = useRegistration();
+  const { payload, reset } = useRegistrationStore();
 
   // Share URL and text
   const shareUrl =

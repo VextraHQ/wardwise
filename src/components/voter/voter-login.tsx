@@ -18,13 +18,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useRegistration } from "@/hooks/use-registration";
+import { useRegistrationStore } from "@/stores/registration-store";
 import { cn } from "@/lib/utils";
 import { mockApi } from "@/lib/mock/mockApi";
 import {
@@ -33,13 +39,27 @@ import {
   formatNINForDisplay,
 } from "@/lib/registration-schemas";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
+import { DemoIndicator } from "@/components/ui/demo-indicator";
+import { Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
+
+// Demo credentials for testing
+const DEMO_CREDENTIALS = [
+  { nin: "12345678901", name: "Aliyu Mohammed", hasSurvey: true },
+  { nin: "98765432109", name: "Hauwa Bello", hasSurvey: true },
+  { nin: "11223344556", name: "Musa Ahmad Tukur", hasSurvey: true },
+  { nin: "22334455667", name: "Aisha Mohammed", hasSurvey: false },
+  { nin: "33445566778", name: "Ibrahim Aliyu", hasSurvey: false },
+  { nin: "44556677889", name: "Fatima Usman", hasSurvey: true },
+];
 
 export function VoterLogin() {
   const router = useRouter();
-  const { update } = useRegistration();
+  const { update } = useRegistrationStore();
   const [rawNin, setRawNin] = useState("");
   const [isOffline, setIsOffline] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
+  const [copiedNin, setCopiedNin] = useState<string | null>(null);
+  const [isCredentialsOpen, setIsCredentialsOpen] = useState<boolean>(false);
 
   // Check online status
   useEffect(() => {
@@ -148,6 +168,26 @@ export function VoterLogin() {
   const getCharacterCount = () => {
     const digits = rawNin.replace(/\D/g, "");
     return `${digits.length}/11`;
+  };
+
+  // Handle copying NIN to clipboard
+  const handleCopyNIN = async (nin: string) => {
+    try {
+      await navigator.clipboard.writeText(nin);
+      setCopiedNin(nin);
+      setTimeout(() => setCopiedNin(null), 2000);
+      toast.success("NIN copied to clipboard");
+    } catch (error) {
+      console.error(error);
+      toast.error(`Failed to copy NIN: ${error}`);
+    }
+  };
+
+  // Handle using demo NIN
+  const handleUseDemoNIN = (nin: string) => {
+    const formatted = formatNINForDisplay(nin);
+    setRawNin(formatted);
+    toast.info("Demo NIN filled in");
   };
 
   return (
@@ -344,6 +384,100 @@ export function VoterLogin() {
                 Register here
               </Link>
             </div>
+
+            {/* Demo Credentials Section */}
+            <Collapsible
+              open={isCredentialsOpen}
+              onOpenChange={setIsCredentialsOpen}
+            >
+              <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50/50">
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-amber-50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <HiInformationCircle className="h-4 w-4 text-amber-700" />
+                      <div>
+                        <h3 className="text-sm font-semibold text-amber-900">
+                          Demo Credentials
+                        </h3>
+                        <p className="text-xs text-amber-700">
+                          {isCredentialsOpen
+                            ? "Click to collapse"
+                            : `${DEMO_CREDENTIALS.length} demo credentials available`}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <DemoIndicator variant="inline" />
+                      {isCredentialsOpen ? (
+                        <ChevronUp className="h-4 w-4 text-amber-700" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-amber-700" />
+                      )}
+                    </div>
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="space-y-3 border-t border-amber-200 p-4 pt-3">
+                    <p className="text-xs text-amber-800">
+                      Use any of these registered NINs to test the login
+                      functionality:
+                    </p>
+                    <div className="space-y-2">
+                      {DEMO_CREDENTIALS.map((cred) => (
+                        <div
+                          key={cred.nin}
+                          className="flex items-center justify-between rounded-md border border-amber-200 bg-white px-3 py-2 text-xs"
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono font-medium text-amber-900">
+                                {formatNINForDisplay(cred.nin)}
+                              </span>
+                              {cred.hasSurvey && (
+                                <Badge
+                                  variant="outline"
+                                  className="h-4 border-green-300 bg-green-50 px-1.5 text-[10px] text-green-700"
+                                >
+                                  Survey
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="mt-0.5 text-amber-700">{cred.name}</p>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleUseDemoNIN(cred.nin)}
+                              className="h-7 px-2 text-[10px]"
+                            >
+                              Use
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCopyNIN(cred.nin)}
+                              className="h-7 w-7 p-0"
+                            >
+                              {copiedNin === cred.nin ? (
+                                <Check className="h-3.5 w-3.5 text-green-600" />
+                              ) : (
+                                <Copy className="h-3.5 w-3.5" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
           </CardContent>
         </Card>
       </div>

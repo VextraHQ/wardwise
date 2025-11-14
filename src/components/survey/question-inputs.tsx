@@ -7,7 +7,7 @@
 
 "use client";
 
-import type { SurveyQuestion, SurveyOption } from "@/types";
+import type { SurveyQuestion, SurveyOption } from "@/types/survey";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";

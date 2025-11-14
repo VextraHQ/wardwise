@@ -18,7 +18,7 @@
  * Each survey must have a matching candidateId in candidates.ts
  */
 
-import type { CandidateSurvey, SurveyStatus } from "@/types";
+import type { CandidateSurvey, SurveyStatus } from "@/types/survey";
 
 export const candidateSurveys: CandidateSurvey[] = [
   // ============================================================================

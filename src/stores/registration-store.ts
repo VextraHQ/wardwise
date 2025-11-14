@@ -35,7 +35,16 @@ type RegistrationState = {
   reset: () => void;
 };
 
-export const useRegistration = create<RegistrationState>()(
+/**
+ * Registration store for voter registration wizard.
+ * Manages multi-step registration flow state with persistence.
+ *
+ * @example
+ * ```tsx
+ * const { step, payload, update, advance } = useRegistrationStore();
+ * ```
+ */
+export const useRegistrationStore = create<RegistrationState>()(
   persist(
     (set, get) => ({
       step: "nin",

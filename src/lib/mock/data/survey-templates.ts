@@ -5,7 +5,7 @@
  * Templates are organized by position and focus area.
  */
 
-import type { SurveyTemplate } from "@/types";
+import type { SurveyTemplate } from "@/types/survey";
 import type { Candidate } from "@/types/candidate";
 
 export const surveyTemplates: SurveyTemplate[] = [

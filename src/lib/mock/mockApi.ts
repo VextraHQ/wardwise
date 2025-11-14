@@ -17,17 +17,16 @@ import { getWardsByLGA } from "@/lib/data/wards";
 import { getPollingUnitsByWard } from "@/lib/data/polling-units";
 
 // Import types from centralized types folder
+import type { Voter } from "@/types/voter";
+import type { Candidate } from "@/types/candidate";
+import type { CandidateSurvey, SurveyQuestion } from "@/types/survey";
+import type { RegistrationData } from "@/types/registration";
 import type {
-  Voter,
-  Candidate,
-  CandidateSurvey,
-  RegistrationData,
   LocationState,
   LocationLGA,
   LocationWard,
   LocationPollingUnit,
-  SurveyQuestion,
-} from "@/types";
+} from "@/types/location";
 
 // Import data from centralized data files (single source of truth)
 import { getVoterByNIN } from "@/lib/mock/data/voters";

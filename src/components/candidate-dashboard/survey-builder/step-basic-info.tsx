@@ -17,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { TemplateCard } from "@/components/candidate-dashboard/survey-builder";
+import { TemplateCard } from "@/components/candidate-dashboard/survey-builder/template-card";
 import { getTemplatesByPosition } from "@/lib/mock/data/survey-templates";
 import type { StepBasicInfoProps } from "@/types/survey-builder";
 import { useCandidateProfile } from "@/hooks/use-candidate-dashboard";

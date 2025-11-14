@@ -11,9 +11,17 @@ async function main() {
   // Use actual candidate data from mock data for proper sync
   // Map candidate IDs to email addresses for user account creation
   const candidateEmails: Record<string, string> = {
-    "cand-apc-4": "aliyu.boya@wardwise.ng",
-    "cand-pdp-2": "maryam.ciroma@wardwise.ng",
+    // Governor Candidates
     "cand-apc-1": "ahmadu.fintiri@wardwise.ng",
+    "cand-pdp-1": "aishatu.ahmed@wardwise.ng",
+    // Senator Candidates
+    "cand-pdp-2": "maryam.ciroma@wardwise.ng",
+    // House of Representatives Candidates
+    "cand-apc-2": "abdulrazak.namdas@wardwise.ng",
+    "cand-apc-4": "aliyu.boya@wardwise.ng",
+    // State Assembly Candidates
+    "cand-apc-adamawa-sa-1": "ibrahim.usman@wardwise.ng",
+    "cand-pdp-adamawa-sa-1": "fatima.bello@wardwise.ng",
   };
 
   // Filter to only seed the candidates we want (the ones with emails)
@@ -75,8 +83,15 @@ async function main() {
   // These match the documented NINs in mock data for consistent demo experience
   console.log("🌱 Seeding demo voters...");
 
-  // Filter to only seed the documented demo voters
-  const demoNINs = ["12345678901", "98765432109", "11223344556"];
+  // Filter to only seed the documented demo voters (6 voters for better demo experience)
+  const demoNINs = [
+    "12345678901", // Aliyu Mohammed - has survey answers
+    "98765432109", // Hauwa Bello - has survey answers
+    "11223344556", // Musa Ahmad Tukur - partial survey answers
+    "22334455667", // Aisha Mohammed - new registration
+    "33445566778", // Ibrahim Aliyu - new registration
+    "44556677889", // Fatima Usman - has survey answers
+  ];
   const votersToSeed = voters.filter((v) => demoNINs.includes(v.nin));
 
   // Convert mock voter data to Prisma format (dates need to be Date objects)
@@ -113,17 +128,19 @@ async function main() {
     );
   }
 
-  // Update candidate supporter count based on actual voters
-  const voterCount = await prisma.voter.count({
-    where: { candidateId: "cand-apc-4" },
-  });
-  await prisma.candidate.update({
-    where: { id: "cand-apc-4" },
-    data: { supporters: voterCount },
-  });
-  console.log(
-    `✅ Updated candidate supporter count for cand-apc-4: ${voterCount}`,
-  );
+  // Update candidate supporter counts based on actual voters
+  for (const candidateId of Object.keys(candidateEmails)) {
+    const voterCount = await prisma.voter.count({
+      where: { candidateId },
+    });
+    await prisma.candidate.update({
+      where: { id: candidateId },
+      data: { supporters: voterCount },
+    });
+    console.log(
+      `✅ Updated candidate supporter count for ${candidateId}: ${voterCount}`,
+    );
+  }
 
   console.log("🎉 Database seeded successfully!");
 }

@@ -23,7 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useRegistration } from "@/hooks/use-registration";
+import { useRegistrationStore } from "@/stores/registration-store";
 import { useLocationData } from "@/hooks/use-location-data";
 import { useQueryClient } from "@tanstack/react-query";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
@@ -44,7 +44,7 @@ type LocationFormValues = z.infer<typeof locationSchema>;
 export function LocationStep() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { update } = useRegistration();
+  const { update } = useRegistrationStore();
   const [selectedState, setSelectedState] = useState("");
   const [selectedLga, setSelectedLga] = useState("");
   const [selectedWard, setSelectedWard] = useState("");

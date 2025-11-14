@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+// Comment out real next/router navigation for routing mock
+// import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   HiUser,
@@ -16,6 +17,7 @@ import {
   HiArrowRight,
   HiExternalLink,
   HiRefresh,
+  HiLockClosed,
 } from "react-icons/hi";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -29,12 +31,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useRegistration } from "@/hooks/use-registration";
+import { useRegistrationStore } from "@/stores/registration-store";
 import { generateRegistrationId } from "@/lib/registration-schemas";
 import { toast } from "sonner";
 import { mockApi } from "@/lib/mock/mockApi";
 import { getSupportersCount } from "@/lib/helpers/voter-analytics";
-import type { Voter } from "@/types";
+import type { Voter } from "@/types/voter";
 import { ProfileHeader } from "@/components/voter/profile/profile-header";
 import {
   ProfileInfoCard,
@@ -43,9 +45,68 @@ import {
 import { ProfileTabs } from "@/components/voter/profile/profile-tabs";
 import { TabsContent } from "@/components/ui/tabs";
 
+/**
+ * MOCKED CLIENT SIDE ROUTER.
+ * This is a mock implementation for router.push and router.replace.
+ * It does nothing, so .push("/") won't actually navigate.
+ * The shape matches Next.js useRouter for compatibility.
+ */
+const useMockRouter = () => {
+  return {
+    push: (_: string) => {},
+    replace: (_: string) => {},
+    prefetch: (_: string) => {},
+    // add more methods if needed
+  };
+};
+
+/**
+ * Simple authentication check.
+ * In production, replace with real auth (e.g., NextAuth session check).
+ * Handles hydration properly by checking only on client.
+ */
+const useAuthCheck = () => {
+  const { payload } = useRegistrationStore();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Check auth only on client (after hydration)
+  useEffect(() => {
+    const checkAuth = () => {
+      try {
+        const stored = localStorage.getItem("wardwise-registration");
+        const parsed = stored ? JSON.parse(stored) : null;
+        const storedNIN = parsed?.state?.payload?.nin;
+        const storedBasic = parsed?.state?.payload?.basic?.firstName;
+
+        const hasNIN = !!payload.nin || !!storedNIN;
+        const hasBasicData =
+          !!(payload.basic?.firstName && payload.location?.state) ||
+          !!storedBasic;
+
+        setIsAuthenticated(hasNIN || hasBasicData);
+      } catch {
+        const hasNIN = !!payload.nin;
+        const hasBasicData = !!(
+          payload.basic?.firstName && payload.location?.state
+        );
+        setIsAuthenticated(hasNIN || hasBasicData);
+      } finally {
+        setIsHydrated(true);
+      }
+    };
+
+    checkAuth();
+  }, [payload.nin, payload.basic?.firstName, payload.location?.state]);
+
+  return { isAuthenticated, isHydrated };
+};
+
 export function VoterProfile() {
-  const router = useRouter();
-  const { payload, reset, update } = useRegistration();
+  // const router = useRouter();
+  const _router = useMockRouter(); // Reserved for future use when transitioning to real routing
+  const { payload, reset, update } = useRegistrationStore();
+  const { isAuthenticated, isHydrated } = useAuthCheck();
 
   // Calculate days remaining for editing (7 days from registration)
   const calculateDaysRemaining = (registrationDate?: string): number => {
@@ -114,8 +175,8 @@ export function VoterProfile() {
           dateOfBirth: voterData.dateOfBirth,
           age: voterData.age,
           gender: voterData.gender,
-          occupation: voterData.occupation || "",
-          religion: voterData.religion || "",
+          occupation: voterData.occupation,
+          religion: voterData.religion,
         },
         location: {
           state: voterData.state,
@@ -134,22 +195,20 @@ export function VoterProfile() {
     }
   }, [voterData, update]);
 
-  const fullName =
-    `${payload.basic?.firstName || ""} ${payload.basic?.lastName || ""}`.trim();
+  const fullName = `${
+    payload.basic?.firstName || ""
+  } ${payload.basic?.lastName || ""}`.trim();
 
-  // Use actual registration date from voter data or fallback to current date
+  // Use actual registration date from voter data
   const actualRegistrationDate =
-    voterData?.registrationDate ||
-    payload.basic?.dateOfBirth ||
-    new Date().toISOString().split("T")[0];
-  const registrationDate = new Date(actualRegistrationDate).toLocaleDateString(
-    "en-US",
-    {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    },
-  );
+    voterData?.registrationDate || payload.basic?.dateOfBirth;
+  const registrationDate = actualRegistrationDate
+    ? new Date(actualRegistrationDate).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
 
   // Format dates for activity timeline
   const formatActivityDate = (dateString?: string | null): string | null => {
@@ -206,10 +265,18 @@ export function VoterProfile() {
     ? getSupportersCount(payload.candidate.candidateId)
     : 0;
 
+  // Handle logout
   const handleLogout = () => {
     reset();
     toast.success("Logged out successfully");
-    router.push("/");
+
+    // For mock: Show logged out state briefly, then redirect
+    // In production: Uncomment router.push("/voter-login")
+    setTimeout(() => {
+      // Using window.location for hard redirect (works in mock and production)
+      // In production with NextAuth: router.push("/voter-login")
+      window.location.href = "/voter-login";
+    }, 500); // Brief delay to show success toast
   };
 
   const handleRetry = () => {
@@ -219,53 +286,81 @@ export function VoterProfile() {
   // Loading state
   const isLoading = isLoadingVoter || isLoadingCandidate || isLoadingSurvey;
 
-  // Redirect ONLY if we have no NIN and no basic data
-  // Check both zustand state AND localStorage to handle hydration delay
-  useEffect(() => {
-    // Don't redirect while loading - data might be coming
-    if (isLoading) return;
+  // Show loading during hydration to prevent mismatch
+  if (!isHydrated) {
+    return (
+      <div className="space-y-6 sm:space-y-8">
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full max-w-md" />
+          <Skeleton className="h-6 w-48" />
+        </div>
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-40" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-40" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
-    // Check localStorage directly as fallback (zustand persist key)
-    const checkStorage = () => {
-      try {
-        const stored = localStorage.getItem("wardwise-registration");
-        const parsed = stored ? JSON.parse(stored) : null;
-        const storedNIN = parsed?.state?.payload?.nin;
-        const storedBasic = parsed?.state?.payload?.basic?.firstName;
-
-        // Check both current state and stored state
-        const hasNIN = !!payload.nin || !!storedNIN;
-        const hasBasicData =
-          !!(payload.basic?.firstName && payload.location?.state) ||
-          !!storedBasic;
-
-        // Only redirect if we have absolutely nothing
-        if (!hasNIN && !hasBasicData) {
-          router.push("/");
-        }
-      } catch {
-        // If localStorage check fails, just use zustand state
-        const hasNIN = !!payload.nin;
-        const hasBasicData = !!(
-          payload.basic?.firstName && payload.location?.state
-        );
-        if (!hasNIN && !hasBasicData) {
-          router.push("/");
-        }
-      }
-    };
-
-    // Give zustand time to hydrate
-    const timer = setTimeout(checkStorage, 200);
-
-    return () => clearTimeout(timer);
-  }, [
-    isLoading,
-    payload.nin,
-    payload.basic?.firstName,
-    payload.location?.state,
-    router,
-  ]);
+  // Show unauthenticated state
+  if (!isAuthenticated) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center space-y-6 px-4 text-center sm:space-y-8">
+        <div className="bg-muted flex h-20 w-20 items-center justify-center rounded-full sm:h-24 sm:w-24">
+          <HiLockClosed className="text-muted-foreground h-10 w-10 sm:h-12 sm:w-12" />
+        </div>
+        <div className="space-y-2 sm:space-y-3">
+          <h2 className="text-foreground text-xl font-semibold sm:text-2xl">
+            Authentication Required
+          </h2>
+          <p className="text-muted-foreground mx-auto max-w-md text-sm leading-relaxed sm:text-base">
+            Please log in to view your voter profile. You need to be
+            authenticated to access this page.
+          </p>
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button
+            onClick={() => {
+              // In production: router.push("/voter-login")
+              window.location.href = "/voter-login";
+            }}
+            variant="default"
+            className="gap-2"
+          >
+            <HiUser className="h-4 w-4" />
+            Go to Login
+          </Button>
+          <Button
+            onClick={() => {
+              // In production: router.push("/")
+              window.location.href = "/";
+            }}
+            variant="outline"
+          >
+            Go Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Error state
   if (voterError) {
@@ -282,7 +377,13 @@ export function VoterProfile() {
             <HiRefresh className="h-4 w-4" />
             Retry
           </Button>
-          <Button onClick={() => router.push("/")} variant="outline">
+          <Button
+            onClick={() => {
+              // In production: router.push("/")
+              toast.info("Redirecting to home");
+            }}
+            variant="outline"
+          >
             Go Home
           </Button>
         </div>
@@ -296,7 +397,7 @@ export function VoterProfile() {
       <div className="space-y-2">
         <ProfileHeader
           fullName={fullName}
-          state={payload.location?.state || "Adamawa State"}
+          state={payload.location?.state || ""}
           registrationId={generateRegistrationId(payload)}
           registrationDate={registrationDate}
           daysRemaining={daysRemaining}
@@ -349,17 +450,9 @@ export function VoterProfile() {
                       Registration Status
                     </p>
                     <div className="flex items-center gap-2">
-                      <div
-                        className={`flex h-2.5 w-2.5 rounded-full ${
-                          payload.basic && payload.location
-                            ? "bg-green-500"
-                            : "bg-yellow-500"
-                        }`}
-                      />
+                      <div className="flex h-2.5 w-2.5 rounded-full bg-green-500" />
                       <p className="text-foreground text-base font-semibold sm:text-lg">
-                        {payload.basic && payload.location
-                          ? "Registration Complete"
-                          : "Registration Incomplete"}
+                        Registration Complete
                       </p>
                     </div>
                     {voterData?.registrationDate && (
@@ -372,11 +465,9 @@ export function VoterProfile() {
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-1">
                         <p className="text-foreground text-xl font-bold sm:text-2xl">
-                          {payload.basic && payload.location ? "100%" : "0%"}
+                          100%
                         </p>
-                        {payload.basic && payload.location && (
-                          <HiCheckCircle className="h-4 w-4 text-green-600" />
-                        )}
+                        <HiCheckCircle className="h-4 w-4 text-green-600" />
                       </div>
                       <p className="text-muted-foreground text-xs">Profile</p>
                     </div>
@@ -493,192 +584,163 @@ export function VoterProfile() {
               />
             </ProfileInfoCard>
 
-            {/* Candidate Support */}
-            <Card className="hover:border-primary/50 transition-all duration-200">
-              <CardHeader className="border-border border-b">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-foreground text-base font-semibold sm:text-lg">
-                    Candidate Support
-                  </h3>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {isLoadingCandidate ? (
-                  <div className="space-y-4">
-                    <Skeleton className="h-5 w-full" />
-                    <Skeleton className="h-5 w-full" />
+            {/* Candidate Support - Only show if candidate data exists */}
+            {candidateData && (
+              <Card className="hover:border-primary/50 transition-all duration-200">
+                <CardHeader className="border-border border-b">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-foreground text-base font-semibold sm:text-lg">
+                      Candidate Support
+                    </h3>
                   </div>
-                ) : candidateData ? (
-                  <div className="space-y-0">
-                    <div className="border-border/30 border-b py-4 last:border-0">
-                      <dt className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase sm:text-sm">
-                        Currently Supporting
-                      </dt>
-                      <dd className="text-foreground text-base font-semibold sm:text-lg">
-                        {candidateData.name}
-                      </dd>
-                      <dd className="text-muted-foreground mt-1 text-sm">
-                        {candidateData.party} • {candidateData.position}
-                      </dd>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingCandidate ? (
+                    <div className="space-y-4">
+                      <Skeleton className="h-5 w-full" />
+                      <Skeleton className="h-5 w-full" />
                     </div>
-                    <div className="border-border/30 border-b py-4 last:border-0">
-                      <div className="flex items-center justify-between">
-                        <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase sm:text-sm">
-                          Total Supporters
+                  ) : (
+                    <div className="space-y-0">
+                      <div className="border-border/30 border-b py-4 last:border-0">
+                        <dt className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase sm:text-sm">
+                          Currently Supporting
                         </dt>
-                        <dd className="text-foreground flex items-center gap-1.5 text-sm font-semibold sm:text-base">
-                          <HiTrendingUp className="text-primary h-4 w-4" />
-                          {supporterCount.toLocaleString()}
+                        <dd className="text-foreground text-base font-semibold sm:text-lg">
+                          {candidateData.name}
+                        </dd>
+                        <dd className="text-muted-foreground mt-1 text-sm">
+                          {candidateData.party} • {candidateData.position}
                         </dd>
                       </div>
-                    </div>
-                    <div className="space-y-2 pt-4">
-                      {canEdit && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => router.push("/register/candidate")}
-                          className="w-full gap-2"
-                        >
-                          <HiExternalLink className="h-4 w-4" />
-                          Change Candidate
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          toast.info("Candidate profile view coming soon!");
-                        }}
-                        className="w-full gap-2"
-                      >
-                        View Candidate Profile
-                        <HiArrowRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
-                    <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-                      <HiUsers className="text-muted-foreground h-6 w-6" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-foreground text-sm font-medium">
-                        No candidate selected
-                      </p>
-                      <p className="text-muted-foreground text-xs">
-                        Select a candidate to show your support
-                      </p>
-                    </div>
-                    {canEdit && (
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => router.push("/register/candidate")}
-                        className="gap-2"
-                      >
-                        Select Candidate
-                        <HiArrowRight className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Survey Status */}
-            <Card className="hover:border-primary/50 transition-all duration-200">
-              <CardHeader className="border-border border-b">
-                <h3 className="text-foreground text-base font-semibold sm:text-lg">
-                  Survey Status
-                </h3>
-              </CardHeader>
-              <CardContent>
-                {isLoadingSurvey ? (
-                  <div className="space-y-4">
-                    <Skeleton className="h-5 w-full" />
-                    <Skeleton className="h-5 w-full" />
-                  </div>
-                ) : totalQuestions > 0 ? (
-                  <div className="space-y-0">
-                    <div className="border-border/30 border-b py-4 last:border-0">
-                      <div className="flex items-center justify-between">
-                        <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase sm:text-sm">
-                          Status
-                        </dt>
-                        {isSurveyComplete ? (
-                          <Badge variant="secondary" className="gap-1.5">
-                            <HiCheckCircle className="h-3 w-3" />
-                            Complete
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="gap-1.5">
-                            <HiClock className="h-3 w-3" />
-                            In Progress
-                          </Badge>
+                      <div className="border-border/30 border-b py-4 last:border-0">
+                        <div className="flex items-center justify-between">
+                          <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase sm:text-sm">
+                            Total Supporters
+                          </dt>
+                          <dd className="text-foreground flex items-center gap-1.5 text-sm font-semibold sm:text-base">
+                            <HiTrendingUp className="text-primary h-4 w-4" />
+                            {supporterCount.toLocaleString()}
+                          </dd>
+                        </div>
+                      </div>
+                      <div className="space-y-2 pt-4">
+                        {canEdit && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={
+                              // () => router.push("/register/candidate")
+                              () => {}
+                            }
+                            className="w-full gap-2"
+                          >
+                            <HiExternalLink className="h-4 w-4" />
+                            Change Candidate
+                          </Button>
                         )}
-                      </div>
-                    </div>
-                    <div className="border-border/30 border-b py-4 last:border-0">
-                      <dt className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase sm:text-sm">
-                        Questions Answered
-                      </dt>
-                      <div className="mb-2 flex items-center justify-between text-sm sm:text-base">
-                        <dd className="text-foreground font-semibold">
-                          {answeredCount} of {totalQuestions}
-                        </dd>
-                        <dd className="text-muted-foreground text-xs">
-                          {Math.round(surveyProgress)}%
-                        </dd>
-                      </div>
-                      <Progress value={surveyProgress} className="h-2" />
-                    </div>
-                    <div className="space-y-2 pt-4">
-                      {!isSurveyComplete && totalQuestions > 0 && (
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={() => router.push("/register/survey")}
-                          className="w-full gap-2"
-                        >
-                          {answeredCount === 0
-                            ? "Start Survey"
-                            : "Continue Survey"}
-                          <HiArrowRight className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {isSurveyComplete && (
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => {
-                            toast.info("Survey responses view coming soon!");
+                            toast.info("Candidate profile view coming soon!");
                           }}
                           className="w-full gap-2"
                         >
-                          View Responses
+                          View Candidate Profile
                           <HiArrowRight className="h-4 w-4" />
                         </Button>
-                      )}
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
-                    <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-                      <HiClipboardList className="text-muted-foreground h-6 w-6" />
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Survey Status - Only show if survey exists */}
+            {totalQuestions > 0 && (
+              <Card className="hover:border-primary/50 transition-all duration-200">
+                <CardHeader className="border-border border-b">
+                  <h3 className="text-foreground text-base font-semibold sm:text-lg">
+                    Survey Status
+                  </h3>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingSurvey ? (
+                    <div className="space-y-4">
+                      <Skeleton className="h-5 w-full" />
+                      <Skeleton className="h-5 w-full" />
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-foreground text-sm font-medium">
-                        No survey available
-                      </p>
-                      <p className="text-muted-foreground text-xs">
-                        Your candidate hasn't created a survey yet
-                      </p>
+                  ) : (
+                    <div className="space-y-0">
+                      <div className="border-border/30 border-b py-4 last:border-0">
+                        <div className="flex items-center justify-between">
+                          <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase sm:text-sm">
+                            Status
+                          </dt>
+                          {isSurveyComplete ? (
+                            <Badge variant="secondary" className="gap-1.5">
+                              <HiCheckCircle className="h-3 w-3" />
+                              Complete
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="gap-1.5">
+                              <HiClock className="h-3 w-3" />
+                              In Progress
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="border-border/30 border-b py-4 last:border-0">
+                        <dt className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase sm:text-sm">
+                          Questions Answered
+                        </dt>
+                        <div className="mb-2 flex items-center justify-between text-sm sm:text-base">
+                          <dd className="text-foreground font-semibold">
+                            {answeredCount} of {totalQuestions}
+                          </dd>
+                          <dd className="text-muted-foreground text-xs">
+                            {Math.round(surveyProgress)}%
+                          </dd>
+                        </div>
+                        <Progress value={surveyProgress} className="h-2" />
+                      </div>
+                      <div className="space-y-2 pt-4">
+                        {!isSurveyComplete && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={
+                              // () => router.push("/register/survey")
+                              () => {}
+                            }
+                            className="w-full gap-2"
+                          >
+                            {answeredCount === 0
+                              ? "Start Survey"
+                              : "Continue Survey"}
+                            <HiArrowRight className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {isSurveyComplete && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              toast.info("Survey responses view coming soon!");
+                            }}
+                            className="w-full gap-2"
+                          >
+                            View Responses
+                            <HiArrowRight className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
 
@@ -701,72 +763,89 @@ export function VoterProfile() {
                   Personal Information
                 </h4>
                 <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-                  <div className="space-y-1">
-                    <dt className="text-muted-foreground text-xs">
-                      First Name
-                    </dt>
-                    <dd className="text-foreground text-xs font-medium sm:text-sm">
-                      {payload.basic?.firstName || "Not provided"}
-                    </dd>
-                  </div>
-                  <div className="space-y-1">
-                    <dt className="text-muted-foreground text-xs">Last Name</dt>
-                    <dd className="text-foreground text-xs font-medium sm:text-sm">
-                      {payload.basic?.lastName || "Not provided"}
-                    </dd>
-                  </div>
-                  <div className="space-y-1">
-                    <dt className="text-muted-foreground text-xs">
-                      Date of Birth
-                    </dt>
-                    <dd className="text-foreground text-xs font-medium sm:text-sm">
-                      {payload.basic?.dateOfBirth
-                        ? new Date(
-                            payload.basic.dateOfBirth,
-                          ).toLocaleDateString("en-US", {
+                  {payload.basic?.firstName && (
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">
+                        First Name
+                      </dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {payload.basic.firstName}
+                      </dd>
+                    </div>
+                  )}
+                  {payload.basic?.lastName && (
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">
+                        Last Name
+                      </dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {payload.basic.lastName}
+                      </dd>
+                    </div>
+                  )}
+                  {payload.basic?.dateOfBirth && (
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">
+                        Date of Birth
+                      </dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {new Date(payload.basic.dateOfBirth).toLocaleDateString(
+                          "en-US",
+                          {
                             year: "numeric",
                             month: "long",
                             day: "numeric",
-                          })
-                        : "Not provided"}
-                    </dd>
-                  </div>
-                  <div className="space-y-1">
-                    <dt className="text-muted-foreground text-xs">Age</dt>
-                    <dd className="text-foreground text-xs font-medium sm:text-sm">
-                      {payload.basic?.age || "Not provided"}
-                    </dd>
-                  </div>
-                  <div className="space-y-1">
-                    <dt className="text-muted-foreground text-xs">Gender</dt>
-                    <dd className="text-foreground text-xs font-medium capitalize sm:text-sm">
-                      {payload.basic?.gender || "Not provided"}
-                    </dd>
-                  </div>
-                  <div className="space-y-1">
-                    <dt className="text-muted-foreground text-xs">
-                      Occupation
-                    </dt>
-                    <dd className="text-foreground text-xs font-medium capitalize sm:text-sm">
-                      {payload.basic?.occupation
-                        ? payload.basic.occupation.replace(/-/g, " ")
-                        : "Not provided"}
-                    </dd>
-                  </div>
-                  <div className="space-y-1">
-                    <dt className="text-muted-foreground text-xs">Religion</dt>
-                    <dd className="text-foreground text-xs font-medium capitalize sm:text-sm">
-                      {payload.basic?.religion || "Not provided"}
-                    </dd>
-                  </div>
-                  <div className="space-y-1">
-                    <dt className="text-muted-foreground text-xs">
-                      Phone Number
-                    </dt>
-                    <dd className="text-foreground text-xs font-medium sm:text-sm">
-                      {payload.phone || "Not provided"}
-                    </dd>
-                  </div>
+                          },
+                        )}
+                      </dd>
+                    </div>
+                  )}
+                  {payload.basic?.age && (
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">Age</dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {payload.basic.age}
+                      </dd>
+                    </div>
+                  )}
+                  {payload.basic?.gender && (
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">Gender</dt>
+                      <dd className="text-foreground text-xs font-medium capitalize sm:text-sm">
+                        {payload.basic.gender}
+                      </dd>
+                    </div>
+                  )}
+                  {payload.basic?.occupation && (
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">
+                        Occupation
+                      </dt>
+                      <dd className="text-foreground text-xs font-medium capitalize sm:text-sm">
+                        {payload.basic.occupation.replace(/-/g, " ")}
+                      </dd>
+                    </div>
+                  )}
+                  {payload.basic?.religion && (
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">
+                        Religion
+                      </dt>
+                      <dd className="text-foreground text-xs font-medium capitalize sm:text-sm">
+                        {payload.basic.religion}
+                      </dd>
+                    </div>
+                  )}
+                  {payload.phone && (
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">
+                        Phone Number
+                      </dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {payload.phone}
+                      </dd>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -779,32 +858,40 @@ export function VoterProfile() {
                   Location Information
                 </h4>
                 <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-                  <div className="space-y-1">
-                    <dt className="text-muted-foreground text-xs">State</dt>
-                    <dd className="text-foreground text-xs font-medium sm:text-sm">
-                      {payload.location?.state || "Not provided"}
-                    </dd>
-                  </div>
-                  <div className="space-y-1">
-                    <dt className="text-muted-foreground text-xs">LGA</dt>
-                    <dd className="text-foreground text-xs font-medium sm:text-sm">
-                      {payload.location?.lga || "Not provided"}
-                    </dd>
-                  </div>
-                  <div className="space-y-1">
-                    <dt className="text-muted-foreground text-xs">Ward</dt>
-                    <dd className="text-foreground text-xs font-medium sm:text-sm">
-                      {payload.location?.ward || "Not provided"}
-                    </dd>
-                  </div>
-                  <div className="space-y-1 sm:col-span-2">
-                    <dt className="text-muted-foreground text-xs">
-                      Polling Unit
-                    </dt>
-                    <dd className="text-foreground text-xs font-medium sm:text-sm">
-                      {payload.location?.pollingUnit || "Not provided"}
-                    </dd>
-                  </div>
+                  {payload.location?.state && (
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">State</dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {payload.location.state}
+                      </dd>
+                    </div>
+                  )}
+                  {payload.location?.lga && (
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">LGA</dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {payload.location.lga}
+                      </dd>
+                    </div>
+                  )}
+                  {payload.location?.ward && (
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground text-xs">Ward</dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {payload.location.ward}
+                      </dd>
+                    </div>
+                  )}
+                  {payload.location?.pollingUnit && (
+                    <div className="space-y-1 sm:col-span-2">
+                      <dt className="text-muted-foreground text-xs">
+                        Polling Unit
+                      </dt>
+                      <dd className="text-foreground text-xs font-medium sm:text-sm">
+                        {payload.location.pollingUnit}
+                      </dd>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -960,7 +1047,7 @@ export function VoterProfile() {
                       : null,
                     description: candidateData
                       ? `Supporting ${candidateData.name}`
-                      : "No candidate selected yet",
+                      : null,
                     completed: !!candidateData,
                   },
                   {
@@ -985,11 +1072,15 @@ export function VoterProfile() {
                       ? "Survey responses submitted"
                       : totalQuestions > 0
                         ? `${answeredCount} of ${totalQuestions} questions answered`
-                        : "No survey available",
+                        : null,
                     completed: isSurveyComplete,
                   },
                 ]
-                  .filter((activity) => activity.completed || activity.date)
+                  .filter(
+                    (activity) =>
+                      activity.completed ||
+                      (activity.date && activity.description),
+                  )
                   .map((activity, index) => (
                     <div
                       key={index}
@@ -1045,13 +1136,6 @@ export function VoterProfile() {
                       </div>
                     </div>
                   ))}
-                {!candidateData && !isSurveyComplete && (
-                  <div className="border-border/30 rounded-lg border border-dashed p-4 text-center">
-                    <p className="text-muted-foreground text-xs">
-                      Complete your registration to see more activity
-                    </p>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>

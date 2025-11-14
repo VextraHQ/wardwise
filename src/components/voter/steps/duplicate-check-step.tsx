@@ -14,13 +14,14 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useRegistration } from "@/hooks/use-registration";
+import { useRegistrationStore } from "@/stores/registration-store";
 import { mockApi } from "@/lib/mock/mockApi";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
+import { DemoIndicator } from "@/components/ui/demo-indicator";
 
 export function DuplicateCheckStep() {
   const router = useRouter();
-  const { payload } = useRegistration();
+  const { payload } = useRegistrationStore();
   const nin = payload.nin || "";
   const electionYear = payload.electionYear || new Date().getFullYear();
 
@@ -87,6 +88,7 @@ export function DuplicateCheckStep() {
                 <p className="text-muted-foreground text-sm">
                   This will only take a moment
                 </p>
+                <DemoIndicator variant="inline" />
               </div>
             </>
           )}

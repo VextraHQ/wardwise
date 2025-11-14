@@ -37,7 +37,7 @@
  * - First checks this list, then falls back to deterministic generation
  */
 
-import type { Voter } from "@/types";
+import type { Voter } from "@/types/voter";
 
 export const voters: Voter[] = [
   {
@@ -57,7 +57,7 @@ export const voters: Voter[] = [
     lga: "Song",
     ward: "Song Ward 1",
     pollingUnit: "Unit 001 - Community Centre",
-    candidateId: "cand-apc-4", // Supporting Hon. Aliyu Wakili Boya
+    candidateId: "cand-pdp-1", // Supporting Senator Aishatu Dahiru Ahmed
     surveyAnswers: {
       q1: "opt-good",
       q2: ["opt-roads", "opt-electricity"],
@@ -65,10 +65,10 @@ export const voters: Voter[] = [
       q4: "opt-farming",
       q5: "We need better road access to our farms and improved electricity supply for our businesses.",
     },
-    verifiedAt: "2025-10-15T10:30:00Z",
-    registrationDate: "2025-10-15",
-    createdAt: "2025-10-15T10:00:00Z",
-    updatedAt: "2025-10-15T10:30:00Z",
+    verifiedAt: "2025-08-20T10:30:00Z",
+    registrationDate: "2025-08-20",
+    createdAt: "2025-08-20T10:00:00Z",
+    updatedAt: "2025-08-20T10:30:00Z",
   },
   {
     id: "voter-2",
@@ -87,7 +87,7 @@ export const voters: Voter[] = [
     lga: "Fufore",
     ward: "Malabu Ward",
     pollingUnit: "Unit 002 - Malabu Primary School",
-    candidateId: "cand-apc-4", // Supporting Hon. Aliyu Wakili Boya
+    candidateId: "cand-apc-2", // Supporting Hon. Abdulrazak Namdas
     surveyAnswers: {
       q1: "opt-fair",
       q2: ["opt-schools", "opt-healthcare"],
@@ -95,10 +95,10 @@ export const voters: Voter[] = [
       q4: "opt-government",
       q5: "Better educational facilities and healthcare access would transform our community.",
     },
-    verifiedAt: "2025-10-14T14:20:00Z",
-    registrationDate: "2025-10-14",
-    createdAt: "2025-10-14T14:00:00Z",
-    updatedAt: "2025-10-14T14:20:00Z",
+    verifiedAt: "2025-08-22T14:20:00Z",
+    registrationDate: "2025-08-22",
+    createdAt: "2025-08-22T14:00:00Z",
+    updatedAt: "2025-08-22T14:20:00Z",
   },
   {
     id: "voter-3",
@@ -125,10 +125,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-agriculture-state"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-10-13T09:15:00Z",
-    registrationDate: "2025-10-13",
-    createdAt: "2025-10-13T09:15:00Z",
-    updatedAt: "2025-10-13T09:15:00Z",
+    verifiedAt: "2025-08-25T09:15:00Z",
+    registrationDate: "2025-08-25",
+    createdAt: "2025-08-25T09:15:00Z",
+    updatedAt: "2025-08-25T09:15:00Z",
   },
   {
     id: "voter-4",
@@ -146,12 +146,12 @@ export const voters: Voter[] = [
     lga: "Song",
     ward: "Song Ward 2",
     pollingUnit: "Unit 004 - Secondary School",
-    candidateId: "cand-apc-4",
+    candidateId: "cand-apc-4", // Supporting Hon. Aliyu Wakili Boya
     surveyAnswers: {},
-    verifiedAt: "2025-10-16T09:00:00Z",
-    registrationDate: "2025-10-16",
-    createdAt: "2025-10-16T09:00:00Z",
-    updatedAt: "2025-10-16T09:00:00Z",
+    verifiedAt: "2025-08-27T09:00:00Z",
+    registrationDate: "2025-08-27",
+    createdAt: "2025-08-27T09:00:00Z",
+    updatedAt: "2025-08-27T09:00:00Z",
   },
   {
     id: "voter-5",
@@ -169,12 +169,12 @@ export const voters: Voter[] = [
     lga: "Fufore",
     ward: "Fufore Ward 1",
     pollingUnit: "Unit 005 - Town Hall",
-    candidateId: "cand-pdp-2",
+    candidateId: "cand-pdp-2", // Supporting Dr. Maryam Inna Ciroma
     surveyAnswers: {},
-    verifiedAt: "2025-10-17T10:00:00Z",
-    registrationDate: "2025-10-17",
-    createdAt: "2025-10-17T10:00:00Z",
-    updatedAt: "2025-10-17T10:00:00Z",
+    verifiedAt: "2025-08-30T10:00:00Z",
+    registrationDate: "2025-08-30",
+    createdAt: "2025-08-30T10:00:00Z",
+    updatedAt: "2025-08-30T10:00:00Z",
   },
   {
     id: "voter-6",
@@ -192,7 +192,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Bamoi",
     pollingUnit: "Unit 006 - Health Centre",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-1", // Supporting Senator Aishatu Dahiru Ahmed
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-community-policing"],
@@ -200,13 +200,14 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-agriculture-state"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-10-18T11:00:00Z",
-    registrationDate: "2025-10-18",
-    createdAt: "2025-10-18T11:00:00Z",
-    updatedAt: "2025-10-18T11:00:00Z",
+    verifiedAt: "2025-09-02T11:00:00Z",
+    registrationDate: "2025-09-02",
+    createdAt: "2025-09-02T11:00:00Z",
+    updatedAt: "2025-09-02T11:00:00Z",
   },
   // ============================================================================
-  // DR. AHMADU UMARU FINTIRI SUPPORTERS - Added for Dashboard Demo
+  // ADDITIONAL VOTERS - Distributed Across All Candidates
+  // Registration dates spread from August to November for trend analysis
   // ============================================================================
   // These voters provide comprehensive data for registration trends, survey insights, and demographics
   {
@@ -225,7 +226,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Doubeli",
     pollingUnit: "Unit 007 - Doubeli Market",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-4", // Supporting Hon. Aliyu Wakili Boya
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-intelligence", "opt-community-policing"],
@@ -233,10 +234,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-agriculture-state", "opt-power"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-09-15T08:30:00Z",
-    registrationDate: "2025-09-15",
-    createdAt: "2025-09-15T08:30:00Z",
-    updatedAt: "2025-09-15T08:30:00Z",
+    verifiedAt: "2025-09-05T08:30:00Z",
+    registrationDate: "2025-09-05",
+    createdAt: "2025-09-05T08:30:00Z",
+    updatedAt: "2025-09-05T08:30:00Z",
   },
   {
     id: "voter-fintiri-2",
@@ -254,7 +255,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Doubeli",
     pollingUnit: "Unit 008 - Primary School",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-2", // Supporting Dr. Maryam Inna Ciroma
     surveyAnswers: {
       q1: "opt-insurgency",
       q2: ["opt-security-ops", "opt-technology", "opt-cooperation"],
@@ -262,10 +263,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-employment", "opt-economy"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-09-16T10:15:00Z",
-    registrationDate: "2025-09-16",
-    createdAt: "2025-09-16T10:15:00Z",
-    updatedAt: "2025-09-16T10:15:00Z",
+    verifiedAt: "2025-09-08T10:15:00Z",
+    registrationDate: "2025-09-08",
+    createdAt: "2025-09-08T10:15:00Z",
+    updatedAt: "2025-09-08T10:15:00Z",
   },
   {
     id: "voter-fintiri-3",
@@ -283,7 +284,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei Central",
     pollingUnit: "Unit 009 - Town Hall",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-2", // Supporting Hon. Abdulrazak Namdas
     surveyAnswers: {
       q1: "opt-kidnapping",
       q2: ["opt-security-ops", "opt-border", "opt-intelligence"],
@@ -291,10 +292,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-investment"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-09-17T14:20:00Z",
-    registrationDate: "2025-09-17",
-    createdAt: "2025-09-17T14:20:00Z",
-    updatedAt: "2025-09-17T14:20:00Z",
+    verifiedAt: "2025-09-10T14:20:00Z",
+    registrationDate: "2025-09-10",
+    createdAt: "2025-09-10T14:20:00Z",
+    updatedAt: "2025-09-10T14:20:00Z",
   },
   {
     id: "voter-fintiri-4",
@@ -312,7 +313,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Jambutu",
     pollingUnit: "Unit 010 - Market Square",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-1", // Supporting Senator Aishatu Dahiru Ahmed
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-community-policing"],
@@ -320,10 +321,10 @@ export const voters: Voter[] = [
       q4: ["opt-economy", "opt-employment", "opt-tourism-state"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-09-18T09:45:00Z",
-    registrationDate: "2025-09-18",
-    createdAt: "2025-09-18T09:45:00Z",
-    updatedAt: "2025-09-18T09:45:00Z",
+    verifiedAt: "2025-09-12T09:45:00Z",
+    registrationDate: "2025-09-12",
+    createdAt: "2025-09-12T09:45:00Z",
+    updatedAt: "2025-09-12T09:45:00Z",
   },
   {
     id: "voter-fintiri-5",
@@ -341,7 +342,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei North",
     pollingUnit: "Unit 011 - Community Centre",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-4", // Supporting Hon. Aliyu Wakili Boya
     surveyAnswers: {
       q1: "opt-crime",
       q2: ["opt-security-ops", "opt-technology", "opt-rehabilitation"],
@@ -349,10 +350,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-power", "opt-investment"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-09-19T11:30:00Z",
-    registrationDate: "2025-09-19",
-    createdAt: "2025-09-19T11:30:00Z",
-    updatedAt: "2025-09-19T11:30:00Z",
+    verifiedAt: "2025-09-14T11:30:00Z",
+    registrationDate: "2025-09-14",
+    createdAt: "2025-09-14T11:30:00Z",
+    updatedAt: "2025-09-14T11:30:00Z",
   },
   {
     id: "voter-fintiri-6",
@@ -370,7 +371,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Bamoi",
     pollingUnit: "Unit 012 - Secondary School",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-2", // Supporting Dr. Maryam Inna Ciroma
     surveyAnswers: {
       q1: "opt-insurgency",
       q2: ["opt-security-ops", "opt-intelligence"],
@@ -378,10 +379,10 @@ export const voters: Voter[] = [
       q4: ["opt-employment", "opt-economy", "opt-infrastructure"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-09-20T13:00:00Z",
-    registrationDate: "2025-09-20",
-    createdAt: "2025-09-20T13:00:00Z",
-    updatedAt: "2025-09-20T13:00:00Z",
+    verifiedAt: "2025-09-16T13:00:00Z",
+    registrationDate: "2025-09-16",
+    createdAt: "2025-09-16T13:00:00Z",
+    updatedAt: "2025-09-16T13:00:00Z",
   },
   {
     id: "voter-fintiri-7",
@@ -399,7 +400,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei South",
     pollingUnit: "Unit 013 - Farm Settlement",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-2", // Supporting Hon. Abdulrazak Namdas
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-community-policing", "opt-border"],
@@ -407,10 +408,10 @@ export const voters: Voter[] = [
       q4: ["opt-agriculture-state", "opt-infrastructure", "opt-power"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-09-21T08:15:00Z",
-    registrationDate: "2025-09-21",
-    createdAt: "2025-09-21T08:15:00Z",
-    updatedAt: "2025-09-21T08:15:00Z",
+    verifiedAt: "2025-09-18T08:15:00Z",
+    registrationDate: "2025-09-18",
+    createdAt: "2025-09-18T08:15:00Z",
+    updatedAt: "2025-09-18T08:15:00Z",
   },
   {
     id: "voter-fintiri-8",
@@ -428,7 +429,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Doubeli",
     pollingUnit: "Unit 014 - Health Centre",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-1", // Supporting Senator Aishatu Dahiru Ahmed
     surveyAnswers: {
       q1: "opt-kidnapping",
       q2: ["opt-security-ops", "opt-technology"],
@@ -436,10 +437,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-economy"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-09-22T15:45:00Z",
-    registrationDate: "2025-09-22",
-    createdAt: "2025-09-22T15:45:00Z",
-    updatedAt: "2025-09-22T15:45:00Z",
+    verifiedAt: "2025-09-20T15:45:00Z",
+    registrationDate: "2025-09-20",
+    createdAt: "2025-09-20T15:45:00Z",
+    updatedAt: "2025-09-20T15:45:00Z",
   },
   {
     id: "voter-fintiri-9",
@@ -457,7 +458,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Doubeli",
     pollingUnit: "Unit 015 - Market Area",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-4", // Supporting Hon. Aliyu Wakili Boya
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-community-policing"],
@@ -465,10 +466,10 @@ export const voters: Voter[] = [
       q4: ["opt-economy", "opt-employment"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-09-23T10:20:00Z",
-    registrationDate: "2025-09-23",
-    createdAt: "2025-09-23T10:20:00Z",
-    updatedAt: "2025-09-23T10:20:00Z",
+    verifiedAt: "2025-09-22T10:20:00Z",
+    registrationDate: "2025-09-22",
+    createdAt: "2025-09-22T10:20:00Z",
+    updatedAt: "2025-09-22T10:20:00Z",
   },
   {
     id: "voter-fintiri-10",
@@ -486,7 +487,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei Central",
     pollingUnit: "Unit 016 - Primary School",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-2", // Supporting Dr. Maryam Inna Ciroma
     surveyAnswers: {
       q1: "opt-insurgency",
       q2: ["opt-security-ops", "opt-intelligence", "opt-cooperation"],
@@ -515,7 +516,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Jambutu",
     pollingUnit: "Unit 017 - Government Office",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-2", // Supporting Hon. Abdulrazak Namdas
     surveyAnswers: {
       q1: "opt-crime",
       q2: ["opt-security-ops", "opt-rehabilitation"],
@@ -523,10 +524,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-investment"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-09-25T09:30:00Z",
-    registrationDate: "2025-09-25",
-    createdAt: "2025-09-25T09:30:00Z",
-    updatedAt: "2025-09-25T09:30:00Z",
+    verifiedAt: "2025-09-26T09:30:00Z",
+    registrationDate: "2025-09-26",
+    createdAt: "2025-09-26T09:30:00Z",
+    updatedAt: "2025-09-26T09:30:00Z",
   },
   {
     id: "voter-fintiri-12",
@@ -544,7 +545,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Bamoi",
     pollingUnit: "Unit 018 - Trading Post",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-1", // Supporting Senator Aishatu Dahiru Ahmed
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-border"],
@@ -552,10 +553,10 @@ export const voters: Voter[] = [
       q4: ["opt-economy", "opt-tourism-state"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-09-26T14:00:00Z",
-    registrationDate: "2025-09-26",
-    createdAt: "2025-09-26T14:00:00Z",
-    updatedAt: "2025-09-26T14:00:00Z",
+    verifiedAt: "2025-09-28T14:00:00Z",
+    registrationDate: "2025-09-28",
+    createdAt: "2025-09-28T14:00:00Z",
+    updatedAt: "2025-09-28T14:00:00Z",
   },
   {
     id: "voter-fintiri-13",
@@ -573,7 +574,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei North",
     pollingUnit: "Unit 019 - Agricultural Extension",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-4", // Supporting Hon. Aliyu Wakili Boya
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-community-policing", "opt-intelligence"],
@@ -581,10 +582,10 @@ export const voters: Voter[] = [
       q4: ["opt-agriculture-state", "opt-infrastructure"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-09-27T11:15:00Z",
-    registrationDate: "2025-09-27",
-    createdAt: "2025-09-27T11:15:00Z",
-    updatedAt: "2025-09-27T11:15:00Z",
+    verifiedAt: "2025-09-30T11:15:00Z",
+    registrationDate: "2025-09-30",
+    createdAt: "2025-09-30T11:15:00Z",
+    updatedAt: "2025-09-30T11:15:00Z",
   },
   {
     id: "voter-fintiri-14",
@@ -602,7 +603,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Doubeli",
     pollingUnit: "Unit 020 - Clinic",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-2", // Supporting Dr. Maryam Inna Ciroma
     surveyAnswers: {
       q1: "opt-kidnapping",
       q2: ["opt-security-ops", "opt-technology"],
@@ -610,10 +611,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-power"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-09-28T08:45:00Z",
-    registrationDate: "2025-09-28",
-    createdAt: "2025-09-28T08:45:00Z",
-    updatedAt: "2025-09-28T08:45:00Z",
+    verifiedAt: "2025-10-02T08:45:00Z",
+    registrationDate: "2025-10-02",
+    createdAt: "2025-10-02T08:45:00Z",
+    updatedAt: "2025-10-02T08:45:00Z",
   },
   {
     id: "voter-fintiri-15",
@@ -631,7 +632,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Doubeli",
     pollingUnit: "Unit 021 - Business District",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-2", // Supporting Hon. Abdulrazak Namdas
     surveyAnswers: {
       q1: "opt-insurgency",
       q2: ["opt-security-ops", "opt-cooperation"],
@@ -639,10 +640,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-investment", "opt-economy"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-09-29T13:30:00Z",
-    registrationDate: "2025-09-29",
-    createdAt: "2025-09-29T13:30:00Z",
-    updatedAt: "2025-09-29T13:30:00Z",
+    verifiedAt: "2025-10-04T13:30:00Z",
+    registrationDate: "2025-10-04",
+    createdAt: "2025-10-04T13:30:00Z",
+    updatedAt: "2025-10-04T13:30:00Z",
   },
   {
     id: "voter-fintiri-16",
@@ -660,7 +661,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei South",
     pollingUnit: "Unit 022 - University Campus",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-1", // Supporting Senator Aishatu Dahiru Ahmed
     surveyAnswers: {
       q1: "opt-insurgency",
       q2: ["opt-security-ops", "opt-intelligence"],
@@ -668,10 +669,10 @@ export const voters: Voter[] = [
       q4: ["opt-employment", "opt-economy"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-09-30T10:00:00Z",
-    registrationDate: "2025-09-30",
-    createdAt: "2025-09-30T10:00:00Z",
-    updatedAt: "2025-09-30T10:00:00Z",
+    verifiedAt: "2025-10-05T10:00:00Z",
+    registrationDate: "2025-10-05",
+    createdAt: "2025-10-05T10:00:00Z",
+    updatedAt: "2025-10-05T10:00:00Z",
   },
   {
     id: "voter-fintiri-17",
@@ -689,7 +690,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Jambutu",
     pollingUnit: "Unit 023 - Farm Cooperative",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-4", // Supporting Hon. Aliyu Wakili Boya
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-community-policing"],
@@ -697,10 +698,10 @@ export const voters: Voter[] = [
       q4: ["opt-agriculture-state", "opt-power"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-10-01T09:15:00Z",
-    registrationDate: "2025-10-01",
-    createdAt: "2025-10-01T09:15:00Z",
-    updatedAt: "2025-10-01T09:15:00Z",
+    verifiedAt: "2025-10-06T09:15:00Z",
+    registrationDate: "2025-10-06",
+    createdAt: "2025-10-06T09:15:00Z",
+    updatedAt: "2025-10-06T09:15:00Z",
   },
   {
     id: "voter-fintiri-18",
@@ -718,7 +719,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Bamoi",
     pollingUnit: "Unit 024 - School Compound",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-2", // Supporting Dr. Maryam Inna Ciroma
     surveyAnswers: {
       q1: "opt-kidnapping",
       q2: ["opt-security-ops", "opt-technology", "opt-intelligence"],
@@ -726,10 +727,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-employment"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-10-02T11:45:00Z",
-    registrationDate: "2025-10-02",
-    createdAt: "2025-10-02T11:45:00Z",
-    updatedAt: "2025-10-02T11:45:00Z",
+    verifiedAt: "2025-10-07T11:45:00Z",
+    registrationDate: "2025-10-07",
+    createdAt: "2025-10-07T11:45:00Z",
+    updatedAt: "2025-10-07T11:45:00Z",
   },
   {
     id: "voter-fintiri-19",
@@ -747,7 +748,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei Central",
     pollingUnit: "Unit 025 - Administrative Block",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-2", // Supporting Hon. Abdulrazak Namdas
     surveyAnswers: {
       q1: "opt-crime",
       q2: ["opt-security-ops", "opt-rehabilitation"],
@@ -755,10 +756,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-investment"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-10-03T14:20:00Z",
-    registrationDate: "2025-10-03",
-    createdAt: "2025-10-03T14:20:00Z",
-    updatedAt: "2025-10-03T14:20:00Z",
+    verifiedAt: "2025-10-08T14:20:00Z",
+    registrationDate: "2025-10-08",
+    createdAt: "2025-10-08T14:20:00Z",
+    updatedAt: "2025-10-08T14:20:00Z",
   },
   {
     id: "voter-fintiri-20",
@@ -776,7 +777,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Doubeli",
     pollingUnit: "Unit 026 - Commercial Area",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-1", // Supporting Senator Aishatu Dahiru Ahmed
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-border"],
@@ -784,10 +785,10 @@ export const voters: Voter[] = [
       q4: ["opt-economy", "opt-tourism-state"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-10-04T10:30:00Z",
-    registrationDate: "2025-10-04",
-    createdAt: "2025-10-04T10:30:00Z",
-    updatedAt: "2025-10-04T10:30:00Z",
+    verifiedAt: "2025-10-09T10:30:00Z",
+    registrationDate: "2025-10-09",
+    createdAt: "2025-10-09T10:30:00Z",
+    updatedAt: "2025-10-09T10:30:00Z",
   },
   {
     id: "voter-fintiri-21",
@@ -805,7 +806,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Doubeli",
     pollingUnit: "Unit 027 - Industrial Zone",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-adamawa-sa-1", // Supporting Hon. Ibrahim Usman
     surveyAnswers: {
       q1: "opt-insurgency",
       q2: ["opt-security-ops", "opt-cooperation"],
@@ -813,10 +814,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-economy"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-10-05T12:00:00Z",
-    registrationDate: "2025-10-05",
-    createdAt: "2025-10-05T12:00:00Z",
-    updatedAt: "2025-10-05T12:00:00Z",
+    verifiedAt: "2025-10-10T12:00:00Z",
+    registrationDate: "2025-10-10",
+    createdAt: "2025-10-10T12:00:00Z",
+    updatedAt: "2025-10-10T12:00:00Z",
   },
   {
     id: "voter-fintiri-22",
@@ -834,7 +835,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei North",
     pollingUnit: "Unit 028 - Rural Settlement",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-2", // Supporting Dr. Maryam Inna Ciroma
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-community-policing", "opt-intelligence"],
@@ -842,10 +843,10 @@ export const voters: Voter[] = [
       q4: ["opt-agriculture-state", "opt-infrastructure", "opt-power"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-10-06T08:45:00Z",
-    registrationDate: "2025-10-06",
-    createdAt: "2025-10-06T08:45:00Z",
-    updatedAt: "2025-10-06T08:45:00Z",
+    verifiedAt: "2025-10-11T08:45:00Z",
+    registrationDate: "2025-10-11",
+    createdAt: "2025-10-11T08:45:00Z",
+    updatedAt: "2025-10-11T08:45:00Z",
   },
   {
     id: "voter-fintiri-23",
@@ -863,7 +864,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Jambutu",
     pollingUnit: "Unit 029 - Medical Centre",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-2", // Supporting Hon. Abdulrazak Namdas
     surveyAnswers: {
       q1: "opt-kidnapping",
       q2: ["opt-security-ops", "opt-technology"],
@@ -871,10 +872,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-power"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-10-07T15:15:00Z",
-    registrationDate: "2025-10-07",
-    createdAt: "2025-10-07T15:15:00Z",
-    updatedAt: "2025-10-07T15:15:00Z",
+    verifiedAt: "2025-10-12T15:15:00Z",
+    registrationDate: "2025-10-12",
+    createdAt: "2025-10-12T15:15:00Z",
+    updatedAt: "2025-10-12T15:15:00Z",
   },
   {
     id: "voter-fintiri-24",
@@ -892,7 +893,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Bamoi",
     pollingUnit: "Unit 030 - Market Place",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-1", // Supporting Senator Aishatu Dahiru Ahmed
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-border"],
@@ -900,10 +901,10 @@ export const voters: Voter[] = [
       q4: ["opt-economy", "opt-employment"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-10-08T09:30:00Z",
-    registrationDate: "2025-10-08",
-    createdAt: "2025-10-08T09:30:00Z",
-    updatedAt: "2025-10-08T09:30:00Z",
+    verifiedAt: "2025-10-13T09:30:00Z",
+    registrationDate: "2025-10-13",
+    createdAt: "2025-10-13T09:30:00Z",
+    updatedAt: "2025-10-13T09:30:00Z",
   },
   {
     id: "voter-fintiri-25",
@@ -921,7 +922,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei South",
     pollingUnit: "Unit 031 - Education Complex",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-adamawa-sa-1", // Supporting Hon. Fatima Bello
     surveyAnswers: {
       q1: "opt-insurgency",
       q2: ["opt-security-ops", "opt-intelligence", "opt-cooperation"],
@@ -929,10 +930,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-employment"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-10-09T11:00:00Z",
-    registrationDate: "2025-10-09",
-    createdAt: "2025-10-09T11:00:00Z",
-    updatedAt: "2025-10-09T11:00:00Z",
+    verifiedAt: "2025-10-14T11:00:00Z",
+    registrationDate: "2025-10-14",
+    createdAt: "2025-10-14T11:00:00Z",
+    updatedAt: "2025-10-14T11:00:00Z",
   },
   {
     id: "voter-fintiri-26",
@@ -950,7 +951,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Doubeli",
     pollingUnit: "Unit 032 - Government Building",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-2", // Supporting Dr. Maryam Inna Ciroma
     surveyAnswers: {
       q1: "opt-crime",
       q2: ["opt-security-ops", "opt-rehabilitation"],
@@ -958,10 +959,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-investment"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-10-10T13:45:00Z",
-    registrationDate: "2025-10-10",
-    createdAt: "2025-10-10T13:45:00Z",
-    updatedAt: "2025-10-10T13:45:00Z",
+    verifiedAt: "2025-10-15T13:45:00Z",
+    registrationDate: "2025-10-15",
+    createdAt: "2025-10-15T13:45:00Z",
+    updatedAt: "2025-10-15T13:45:00Z",
   },
   {
     id: "voter-fintiri-27",
@@ -979,7 +980,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Doubeli",
     pollingUnit: "Unit 033 - Shopping Complex",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-2", // Supporting Hon. Abdulrazak Namdas
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-community-policing"],
@@ -987,10 +988,10 @@ export const voters: Voter[] = [
       q4: ["opt-economy", "opt-tourism-state"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-10-11T10:20:00Z",
-    registrationDate: "2025-10-11",
-    createdAt: "2025-10-11T10:20:00Z",
-    updatedAt: "2025-10-11T10:20:00Z",
+    verifiedAt: "2025-10-18T10:20:00Z",
+    registrationDate: "2025-10-18",
+    createdAt: "2025-10-18T10:20:00Z",
+    updatedAt: "2025-10-18T10:20:00Z",
   },
   {
     id: "voter-fintiri-28",
@@ -1008,7 +1009,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei Central",
     pollingUnit: "Unit 034 - Business Park",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-adamawa-sa-1", // Supporting Hon. Ibrahim Usman
     surveyAnswers: {
       q1: "opt-insurgency",
       q2: ["opt-security-ops", "opt-cooperation"],
@@ -1016,10 +1017,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-investment", "opt-economy"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-10-12T14:00:00Z",
-    registrationDate: "2025-10-12",
-    createdAt: "2025-10-12T14:00:00Z",
-    updatedAt: "2025-10-12T14:00:00Z",
+    verifiedAt: "2025-10-20T14:00:00Z",
+    registrationDate: "2025-10-20",
+    createdAt: "2025-10-20T14:00:00Z",
+    updatedAt: "2025-10-20T14:00:00Z",
   },
   {
     id: "voter-fintiri-29",
@@ -1037,7 +1038,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Jambutu",
     pollingUnit: "Unit 035 - Campus Area",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-pdp-adamawa-sa-1", // Supporting Hon. Fatima Bello
     surveyAnswers: {
       q1: "opt-insurgency",
       q2: ["opt-security-ops", "opt-intelligence"],
@@ -1045,10 +1046,10 @@ export const voters: Voter[] = [
       q4: ["opt-employment", "opt-economy"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-10-13T08:30:00Z",
-    registrationDate: "2025-10-13",
-    createdAt: "2025-10-13T08:30:00Z",
-    updatedAt: "2025-10-13T08:30:00Z",
+    verifiedAt: "2025-10-22T08:30:00Z",
+    registrationDate: "2025-10-22",
+    createdAt: "2025-10-22T08:30:00Z",
+    updatedAt: "2025-10-22T08:30:00Z",
   },
   {
     id: "voter-fintiri-30",
@@ -1066,7 +1067,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Bamoi",
     pollingUnit: "Unit 036 - Agricultural Zone",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-1", // Supporting Dr. Ahmadu Umaru Fintiri
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-community-policing", "opt-border"],
@@ -1074,10 +1075,10 @@ export const voters: Voter[] = [
       q4: ["opt-agriculture-state", "opt-infrastructure", "opt-power"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-11-01T12:15:00Z",
-    registrationDate: "2025-11-01",
-    createdAt: "2025-11-01T12:15:00Z",
-    updatedAt: "2025-11-01T12:15:00Z",
+    verifiedAt: "2025-10-24T12:15:00Z",
+    registrationDate: "2025-10-24",
+    createdAt: "2025-10-24T12:15:00Z",
+    updatedAt: "2025-10-24T12:15:00Z",
   },
   {
     id: "voter-fintiri-31",
@@ -1095,7 +1096,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Doubeli",
     pollingUnit: "Unit 037 - Education Centre",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-1", // Supporting Dr. Ahmadu Umaru Fintiri
     surveyAnswers: {
       q1: "opt-insurgency",
       q2: ["opt-security-ops", "opt-intelligence"],
@@ -1103,10 +1104,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-employment"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-11-02T10:00:00Z",
-    registrationDate: "2025-11-02",
-    createdAt: "2025-11-02T10:00:00Z",
-    updatedAt: "2025-11-02T10:00:00Z",
+    verifiedAt: "2025-10-26T10:00:00Z",
+    registrationDate: "2025-10-26",
+    createdAt: "2025-10-26T10:00:00Z",
+    updatedAt: "2025-10-26T10:00:00Z",
   },
   {
     id: "voter-fintiri-32",
@@ -1124,7 +1125,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Doubeli",
     pollingUnit: "Unit 038 - Market Complex",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-1", // Supporting Dr. Ahmadu Umaru Fintiri
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-border"],
@@ -1132,10 +1133,10 @@ export const voters: Voter[] = [
       q4: ["opt-economy", "opt-tourism-state"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-11-03T14:30:00Z",
-    registrationDate: "2025-11-03",
-    createdAt: "2025-11-03T14:30:00Z",
-    updatedAt: "2025-11-03T14:30:00Z",
+    verifiedAt: "2025-10-28T14:30:00Z",
+    registrationDate: "2025-10-28",
+    createdAt: "2025-10-28T14:30:00Z",
+    updatedAt: "2025-10-28T14:30:00Z",
   },
   {
     id: "voter-fintiri-33",
@@ -1153,7 +1154,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei Central",
     pollingUnit: "Unit 039 - Medical Facility",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-1", // Supporting Dr. Ahmadu Umaru Fintiri
     surveyAnswers: {
       q1: "opt-kidnapping",
       q2: ["opt-security-ops", "opt-technology"],
@@ -1161,10 +1162,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-power"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-11-04T09:15:00Z",
-    registrationDate: "2025-11-04",
-    createdAt: "2025-11-04T09:15:00Z",
-    updatedAt: "2025-11-04T09:15:00Z",
+    verifiedAt: "2025-10-30T09:15:00Z",
+    registrationDate: "2025-10-30",
+    createdAt: "2025-10-30T09:15:00Z",
+    updatedAt: "2025-10-30T09:15:00Z",
   },
   {
     id: "voter-fintiri-34",
@@ -1182,7 +1183,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Jambutu",
     pollingUnit: "Unit 040 - Agricultural Hub",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-1", // Supporting Dr. Ahmadu Umaru Fintiri
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-community-policing", "opt-intelligence"],
@@ -1190,10 +1191,10 @@ export const voters: Voter[] = [
       q4: ["opt-agriculture-state", "opt-infrastructure", "opt-power"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-11-05T11:45:00Z",
-    registrationDate: "2025-11-05",
-    createdAt: "2025-11-05T11:45:00Z",
-    updatedAt: "2025-11-05T11:45:00Z",
+    verifiedAt: "2025-11-01T11:45:00Z",
+    registrationDate: "2025-11-01",
+    createdAt: "2025-11-01T11:45:00Z",
+    updatedAt: "2025-11-01T11:45:00Z",
   },
   {
     id: "voter-fintiri-35",
@@ -1211,7 +1212,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Bamoi",
     pollingUnit: "Unit 041 - University Area",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-1", // Supporting Dr. Ahmadu Umaru Fintiri
     surveyAnswers: {
       q1: "opt-insurgency",
       q2: ["opt-security-ops", "opt-intelligence"],
@@ -1219,10 +1220,10 @@ export const voters: Voter[] = [
       q4: ["opt-employment", "opt-economy"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-11-06T13:20:00Z",
-    registrationDate: "2025-11-06",
-    createdAt: "2025-11-06T13:20:00Z",
-    updatedAt: "2025-11-06T13:20:00Z",
+    verifiedAt: "2025-11-03T13:20:00Z",
+    registrationDate: "2025-11-03",
+    createdAt: "2025-11-03T13:20:00Z",
+    updatedAt: "2025-11-03T13:20:00Z",
   },
   {
     id: "voter-fintiri-36",
@@ -1240,7 +1241,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei North",
     pollingUnit: "Unit 042 - Government Office",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-1", // Supporting Dr. Ahmadu Umaru Fintiri
     surveyAnswers: {
       q1: "opt-crime",
       q2: ["opt-security-ops", "opt-rehabilitation"],
@@ -1248,10 +1249,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-investment"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-11-07T08:00:00Z",
-    registrationDate: "2025-11-07",
-    createdAt: "2025-11-07T08:00:00Z",
-    updatedAt: "2025-11-07T08:00:00Z",
+    verifiedAt: "2025-11-05T08:00:00Z",
+    registrationDate: "2025-11-05",
+    createdAt: "2025-11-05T08:00:00Z",
+    updatedAt: "2025-11-05T08:00:00Z",
   },
   {
     id: "voter-fintiri-37",
@@ -1269,7 +1270,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Doubeli",
     pollingUnit: "Unit 043 - Commercial District",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-1", // Supporting Dr. Ahmadu Umaru Fintiri
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-community-policing"],
@@ -1277,10 +1278,10 @@ export const voters: Voter[] = [
       q4: ["opt-economy", "opt-tourism-state"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-11-08T15:30:00Z",
-    registrationDate: "2025-11-08",
-    createdAt: "2025-11-08T15:30:00Z",
-    updatedAt: "2025-11-08T15:30:00Z",
+    verifiedAt: "2025-11-07T15:30:00Z",
+    registrationDate: "2025-11-07",
+    createdAt: "2025-11-07T15:30:00Z",
+    updatedAt: "2025-11-07T15:30:00Z",
   },
   {
     id: "voter-fintiri-38",
@@ -1298,7 +1299,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Doubeli",
     pollingUnit: "Unit 044 - Business Park",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-1", // Supporting Dr. Ahmadu Umaru Fintiri
     surveyAnswers: {
       q1: "opt-insurgency",
       q2: ["opt-security-ops", "opt-cooperation"],
@@ -1327,7 +1328,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei South",
     pollingUnit: "Unit 045 - School Campus",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-1", // Supporting Dr. Ahmadu Umaru Fintiri
     surveyAnswers: {
       q1: "opt-kidnapping",
       q2: ["opt-security-ops", "opt-technology", "opt-intelligence"],
@@ -1335,10 +1336,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-employment"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-11-10T12:00:00Z",
-    registrationDate: "2025-11-10",
-    createdAt: "2025-11-10T12:00:00Z",
-    updatedAt: "2025-11-10T12:00:00Z",
+    verifiedAt: "2025-11-11T12:00:00Z",
+    registrationDate: "2025-11-11",
+    createdAt: "2025-11-11T12:00:00Z",
+    updatedAt: "2025-11-11T12:00:00Z",
   },
   {
     id: "voter-fintiri-40",
@@ -1356,7 +1357,7 @@ export const voters: Voter[] = [
     lga: "Yola North",
     ward: "Jambutu",
     pollingUnit: "Unit 046 - Farm Cooperative",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-1", // Supporting Dr. Ahmadu Umaru Fintiri
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-community-policing", "opt-border"],
@@ -1364,10 +1365,10 @@ export const voters: Voter[] = [
       q4: ["opt-agriculture-state", "opt-power"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-11-11T09:30:00Z",
-    registrationDate: "2025-11-11",
-    createdAt: "2025-11-11T09:30:00Z",
-    updatedAt: "2025-11-11T09:30:00Z",
+    verifiedAt: "2025-11-12T09:30:00Z",
+    registrationDate: "2025-11-12",
+    createdAt: "2025-11-12T09:30:00Z",
+    updatedAt: "2025-11-12T09:30:00Z",
   },
   {
     id: "voter-fintiri-41",
@@ -1385,7 +1386,7 @@ export const voters: Voter[] = [
     lga: "Yola South",
     ward: "Bamoi",
     pollingUnit: "Unit 047 - Health Centre",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-1", // Supporting Dr. Ahmadu Umaru Fintiri
     surveyAnswers: {
       q1: "opt-kidnapping",
       q2: ["opt-security-ops", "opt-technology"],
@@ -1393,10 +1394,10 @@ export const voters: Voter[] = [
       q4: ["opt-infrastructure", "opt-power"],
       q5: "opt-governance-good",
     },
-    verifiedAt: "2025-11-12T14:15:00Z",
-    registrationDate: "2025-11-12",
-    createdAt: "2025-11-12T14:15:00Z",
-    updatedAt: "2025-11-12T14:15:00Z",
+    verifiedAt: "2025-11-13T14:15:00Z",
+    registrationDate: "2025-11-13",
+    createdAt: "2025-11-13T14:15:00Z",
+    updatedAt: "2025-11-13T14:15:00Z",
   },
   {
     id: "voter-fintiri-42",
@@ -1414,7 +1415,7 @@ export const voters: Voter[] = [
     lga: "Girei",
     ward: "Girei Central",
     pollingUnit: "Unit 048 - Market Square",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-apc-adamawa-sa-1", // Supporting Hon. Ibrahim Usman
     surveyAnswers: {
       q1: "opt-herder-farmer",
       q2: ["opt-security-ops", "opt-border"],
@@ -1422,10 +1423,10 @@ export const voters: Voter[] = [
       q4: ["opt-economy", "opt-employment"],
       q5: "opt-governance-fair",
     },
-    verifiedAt: "2025-11-13T11:00:00Z",
-    registrationDate: "2025-11-13",
-    createdAt: "2025-11-13T11:00:00Z",
-    updatedAt: "2025-11-13T11:00:00Z",
+    verifiedAt: "2025-11-14T11:00:00Z",
+    registrationDate: "2025-11-14",
+    createdAt: "2025-11-14T11:00:00Z",
+    updatedAt: "2025-11-14T11:00:00Z",
   },
 ];
 

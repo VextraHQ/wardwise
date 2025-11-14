@@ -1,9 +1,3 @@
-/**
- * Survey Detail Page
- *
- * Page for viewing survey details and analytics
- */
-
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -23,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { QuestionsList } from "@/components/survey";
+import { QuestionsList } from "@/components/survey/question-display";
 import {
   IconArrowLeft,
   IconEdit,

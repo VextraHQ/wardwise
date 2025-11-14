@@ -6,7 +6,7 @@
 
 "use client";
 
-import type { SurveyQuestion } from "@/types";
+import type { SurveyQuestion } from "@/types/survey";
 import {
   Card,
   CardContent,

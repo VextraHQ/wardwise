@@ -13,12 +13,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useRegistration } from "@/hooks/use-registration";
+import { useRegistrationStore } from "@/stores/registration-store";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 
 export function AlreadyRegisteredStep() {
   const router = useRouter();
-  const { reset } = useRegistration();
+  const { reset } = useRegistrationStore();
 
   return (
     <div className="space-y-8">

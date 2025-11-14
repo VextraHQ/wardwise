@@ -80,6 +80,11 @@ export function InfoRow({ label, value, isLoading }: InfoRowProps) {
     );
   }
 
+  // If authenticated, value should exist - no need for empty state
+  if (!value) {
+    return null;
+  }
+
   return (
     <div className="border-border/30 border-b py-3 last:border-0">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
@@ -87,13 +92,7 @@ export function InfoRow({ label, value, isLoading }: InfoRowProps) {
           {label}
         </dt>
         <dd className="text-foreground text-sm font-semibold sm:text-base">
-          {value ? (
-            value
-          ) : (
-            <span className="text-muted-foreground font-normal italic">
-              Not provided
-            </span>
-          )}
+          {value}
         </dd>
       </div>
     </div>

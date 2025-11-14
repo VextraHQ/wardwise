@@ -6,12 +6,10 @@ import { StepProgress } from "@/components/ui/step-progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSurveyBuilder } from "@/hooks/use-survey-builder";
-import {
-  StepBasicInfo,
-  StepQuestions,
-  StepReview,
-  ValidationErrors,
-} from "@/components/candidate-dashboard/survey-builder";
+import { StepBasicInfo } from "@/components/candidate-dashboard/survey-builder/step-basic-info";
+import { StepQuestions } from "@/components/candidate-dashboard/survey-builder/step-questions";
+import { StepReview } from "@/components/candidate-dashboard/survey-builder/step-review";
+import { ValidationErrors } from "@/components/candidate-dashboard/survey-builder/validation-errors";
 import {
   useCreateSurvey,
   useUpdateSurvey,
@@ -34,7 +32,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { SurveyWizardProps } from "@/types/survey-builder";
-import type { SurveyTemplate } from "@/types";
+import type { SurveyTemplate } from "@/types/survey";
 
 const STEP_TITLES = {
   info: "Basic Information",

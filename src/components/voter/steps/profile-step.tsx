@@ -34,7 +34,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useRegistration } from "@/hooks/use-registration";
+import { useRegistrationStore } from "@/stores/registration-store";
 import { normalizeNigerianPhoneInput } from "@/lib/registration-schemas";
 import { useEffect } from "react";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
@@ -71,7 +71,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export function ProfileStep() {
   const router = useRouter();
-  const { update, payload } = useRegistration();
+  const { update, payload } = useRegistrationStore();
 
   // Form Initial Values
   const form = useForm<ProfileFormValues>({

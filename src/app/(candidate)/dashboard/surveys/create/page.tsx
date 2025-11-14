@@ -1,12 +1,6 @@
-/**
- * Create Survey Page
- *
- * Page for creating a new survey
- */
-
 "use client";
 
-import { SurveyWizard } from "@/components/candidate-dashboard/survey-builder";
+import { SurveyWizard } from "@/components/candidate-dashboard/survey-builder/survey-wizard";
 
 export default function SurveysCreatePage() {
   return (

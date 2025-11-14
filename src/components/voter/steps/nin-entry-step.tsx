@@ -38,7 +38,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useRegistration } from "@/hooks/use-registration";
+import { useRegistrationStore } from "@/stores/registration-store";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { mockApi } from "@/lib/mock/mockApi";
@@ -48,6 +48,7 @@ import {
   normalizeNINInput,
 } from "@/lib/registration-schemas";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
+import { DemoIndicator } from "@/components/ui/demo-indicator";
 
 // Zod schema validation for terms and conditions check
 const ninFormSchema = z.object({
@@ -74,7 +75,7 @@ interface VerificationData {
 
 export function NinEntryStep() {
   const router = useRouter();
-  const { update } = useRegistration();
+  const { update } = useRegistrationStore();
   const [rawNin, setRawNin] = useState("");
   const [verificationStatus, setVerificationStatus] =
     useState<VerificationStatus>("idle");
@@ -234,9 +235,12 @@ export function NinEntryStep() {
               <h2 className="text-foreground text-xl font-semibold">
                 Enter Your NIN
               </h2>
-              <p className="text-muted-foreground text-sm">
-                National Identification Number verification
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-muted-foreground text-sm">
+                  National Identification Number verification
+                </p>
+                <DemoIndicator variant="inline" />
+              </div>
             </div>
           </CardHeader>
 
@@ -337,6 +341,7 @@ export function NinEntryStep() {
                       <p className="text-muted-foreground text-xs">
                         Connecting to NIMC database...
                       </p>
+                      <DemoIndicator variant="inline" className="mt-1" />
                     </div>
                   </div>
                 )}
