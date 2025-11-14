@@ -316,7 +316,7 @@ export const candidateSurveys: CandidateSurvey[] = [
           "Please provide detailed suggestions (minimum 20 words, maximum 500 words)",
       },
     ],
-    createdAt: "2024-10-15T10:00:00Z",
+    createdAt: "2025-10-15T10:00:00Z",
   },
   {
     id: "survey-pdp-2",
@@ -566,7 +566,7 @@ export const candidateSurveys: CandidateSurvey[] = [
           "Please provide detailed recommendations (minimum 20 words, maximum 500 words)",
       },
     ],
-    createdAt: "2024-10-15T10:00:00Z",
+    createdAt: "2025-10-15T10:00:00Z",
   },
   {
     id: "survey-apc-1",
@@ -852,7 +852,7 @@ export const candidateSurveys: CandidateSurvey[] = [
           "Please provide detailed recommendations (minimum 20 words, maximum 500 words)",
       },
     ],
-    createdAt: "2024-10-15T10:00:00Z",
+    createdAt: "2025-10-15T10:00:00Z",
   },
   {
     id: "survey-pdp-1",
@@ -1147,7 +1147,7 @@ export const candidateSurveys: CandidateSurvey[] = [
           "Please provide detailed recommendations for legislative action (minimum 20 words, maximum 500 words)",
       },
     ],
-    createdAt: "2024-10-15T10:00:00Z",
+    createdAt: "2025-10-15T10:00:00Z",
   },
   {
     id: "survey-apc-2",
@@ -1446,7 +1446,7 @@ export const candidateSurveys: CandidateSurvey[] = [
           "Please provide detailed recommendations (minimum 20 words, maximum 500 words)",
       },
     ],
-    createdAt: "2024-10-15T10:00:00Z",
+    createdAt: "2025-10-15T10:00:00Z",
   },
   // ============================================================================
   // BAUCHI STATE CANDIDATE SURVEYS
@@ -1695,7 +1695,7 @@ export const candidateSurveys: CandidateSurvey[] = [
           "Please provide detailed suggestions (minimum 20 words, maximum 500 words)",
       },
     ],
-    createdAt: "2024-01-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
   },
   {
     id: "survey-pdp-bauchi-1",
@@ -1907,7 +1907,7 @@ export const candidateSurveys: CandidateSurvey[] = [
           "Please provide detailed recommendations (minimum 20 words, maximum 500 words)",
       },
     ],
-    createdAt: "2024-01-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
   },
   {
     id: "survey-apc-bauchi-2",
@@ -2117,7 +2117,7 @@ export const candidateSurveys: CandidateSurvey[] = [
           "Please provide detailed recommendations (minimum 20 words, maximum 500 words)",
       },
     ],
-    createdAt: "2024-01-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
   },
   {
     id: "survey-pdp-bauchi-2",
@@ -2324,7 +2324,7 @@ export const candidateSurveys: CandidateSurvey[] = [
           "Please provide detailed recommendations (minimum 20 words, maximum 500 words)",
       },
     ],
-    createdAt: "2024-01-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
   },
   {
     id: "survey-apc-bauchi-3",
@@ -2527,7 +2527,7 @@ export const candidateSurveys: CandidateSurvey[] = [
           "Please provide detailed recommendations (minimum 20 words, maximum 500 words)",
       },
     ],
-    createdAt: "2024-01-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
   },
   {
     id: "survey-pdp-bauchi-3",
@@ -2741,7 +2741,7 @@ export const candidateSurveys: CandidateSurvey[] = [
           "Please provide detailed recommendations (minimum 20 words, maximum 500 words)",
       },
     ],
-    createdAt: "2024-01-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
   },
 
   // ============================================================================

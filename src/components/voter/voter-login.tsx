@@ -74,7 +74,7 @@ export function VoterLogin() {
         );
       }
       // Use mock API to check registration
-      return await mockApi.checkRegistration(nin, 2024);
+      return await mockApi.checkRegistration(nin, 2025);
     },
     onSuccess: (data) => {
       if (data.exists && data.voter) {

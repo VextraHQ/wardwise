@@ -34,11 +34,19 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-const COLORS = [
-  "hsl(var(--primary))",
-  "hsl(var(--primary))",
-  "hsl(var(--primary))",
-];
+// Generate theme-based color variations for pie charts
+const getThemeColors = () => {
+  // Using chart colors from theme (chart-1 through chart-5)
+  return [
+    "var(--chart-1)", // Primary green
+    "var(--chart-2)", // Dark green
+    "var(--chart-3)", // Medium green
+    "var(--chart-4)", // Accent color
+    "var(--chart-5)", // Muted green
+  ];
+};
+
+const themeColors = getThemeColors();
 
 export function AnalyticsContent() {
   const [trendPeriod, setTrendPeriod] = useState<
@@ -80,7 +88,7 @@ export function AnalyticsContent() {
   const chartConfig = {
     registrations: {
       label: "Registrations",
-      color: "hsl(var(--primary))",
+      color: "var(--primary)",
     },
   } satisfies ChartConfig;
 
@@ -155,8 +163,8 @@ export function AnalyticsContent() {
                       <Area
                         type="monotone"
                         dataKey="count"
-                        stroke="hsl(var(--primary))"
-                        fill="hsl(var(--primary))"
+                        stroke="var(--primary)"
+                        fill="var(--primary)"
                         fillOpacity={0.2}
                       />
                     </AreaChart>
@@ -189,7 +197,7 @@ export function AnalyticsContent() {
                       <XAxis dataKey="name" />
                       <YAxis />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="value" fill="hsl(var(--primary))" />
+                      <Bar dataKey="value" fill="var(--primary)" />
                     </BarChart>
                   </ChartContainer>
                 ) : (
@@ -227,7 +235,7 @@ export function AnalyticsContent() {
                         {genderData.map((entry, index) => (
                           <Cell
                             key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
+                            fill={themeColors[index % themeColors.length]}
                           />
                         ))}
                       </Pie>

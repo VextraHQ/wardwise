@@ -28,8 +28,8 @@ export const candidates: Candidate[] = [
     surveyId: "survey-apc-1",
     tagline: "Security, Development, Progress",
     vision: "Building a safer and more prosperous Adamawa State",
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-10-15T10:00:00Z",
+    createdAt: "2025-01-15T10:00:00Z",
+    updatedAt: "2025-10-15T10:00:00Z",
   },
   {
     id: "cand-pdp-1",
@@ -45,8 +45,8 @@ export const candidates: Candidate[] = [
     tagline: "Education, Healthcare, Women Empowerment",
     vision:
       "Creating an Adamawa State where everyone has access to quality education and healthcare",
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-10-15T10:00:00Z",
+    createdAt: "2025-01-15T10:00:00Z",
+    updatedAt: "2025-10-15T10:00:00Z",
   },
 
   // --- Senatorial Candidates ---
@@ -65,8 +65,8 @@ export const candidates: Candidate[] = [
     tagline: "Healthcare, Women's Rights, Community Welfare",
     vision:
       "Ensuring every community in Adamawa Central has access to quality healthcare",
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-10-15T10:00:00Z",
+    createdAt: "2025-01-15T10:00:00Z",
+    updatedAt: "2025-10-15T10:00:00Z",
   },
 
   // --- House of Representatives Candidates ---
@@ -84,8 +84,8 @@ export const candidates: Candidate[] = [
     tagline: "Youth Empowerment, Infrastructure",
     vision:
       "Transforming Jada/Ganye/Mayo-Belwa/Toungo through youth-driven development",
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-10-15T10:00:00Z",
+    createdAt: "2025-01-15T10:00:00Z",
+    updatedAt: "2025-10-15T10:00:00Z",
   },
   {
     id: "cand-apc-4",
@@ -102,8 +102,8 @@ export const candidates: Candidate[] = [
     tagline: "Fixing Roads, Creating Jobs, Building Communities",
     vision:
       "Transforming Fufore/Song through infrastructure and economic development",
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-10-15T10:00:00Z",
+    createdAt: "2025-01-15T10:00:00Z",
+    updatedAt: "2025-10-15T10:00:00Z",
   },
 
   // ============================================================================
@@ -126,8 +126,8 @@ export const candidates: Candidate[] = [
     tagline: "Infrastructure, Economic Growth, Unity",
     vision:
       "Transforming Bauchi into a hub of commerce and sustainable development",
-    createdAt: "2024-01-20T09:00:00Z",
-    updatedAt: "2024-10-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
+    updatedAt: "2025-10-20T09:00:00Z",
   },
   {
     id: "cand-pdp-bauchi-1",
@@ -144,8 +144,8 @@ export const candidates: Candidate[] = [
     tagline: "Quality Education, Social Welfare, Inclusivity",
     vision:
       "Creating equal opportunities for all Bauchi citizens through education and empowerment",
-    createdAt: "2024-01-20T09:00:00Z",
-    updatedAt: "2024-10-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
+    updatedAt: "2025-10-20T09:00:00Z",
   },
 
   // --- Senatorial Candidates ---
@@ -163,8 +163,8 @@ export const candidates: Candidate[] = [
     surveyId: "survey-apc-bauchi-2",
     tagline: "Jobs, Business Growth, Prosperity",
     vision: "Making Bauchi Central the economic powerhouse of Northern Nigeria",
-    createdAt: "2024-01-20T09:00:00Z",
-    updatedAt: "2024-10-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
+    updatedAt: "2025-10-20T09:00:00Z",
   },
   {
     id: "cand-pdp-bauchi-2",
@@ -181,8 +181,8 @@ export const candidates: Candidate[] = [
     tagline: "Healthcare Access, Rural Development",
     vision:
       "Ensuring every community in Bauchi South has access to modern healthcare",
-    createdAt: "2024-01-20T09:00:00Z",
-    updatedAt: "2024-10-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
+    updatedAt: "2025-10-20T09:00:00Z",
   },
 
   // --- House of Representatives Candidates ---
@@ -200,8 +200,8 @@ export const candidates: Candidate[] = [
     surveyId: "survey-apc-bauchi-3",
     tagline: "Power to the People, Rural Development",
     vision: "Bringing electricity and modern amenities to every community",
-    createdAt: "2024-01-20T09:00:00Z",
-    updatedAt: "2024-10-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
+    updatedAt: "2025-10-20T09:00:00Z",
   },
   {
     id: "cand-pdp-bauchi-3",
@@ -218,8 +218,8 @@ export const candidates: Candidate[] = [
     tagline: "Agriculture, Food Security, Farmers First",
     vision:
       "Empowering our farmers and ensuring food security for Bauchi State",
-    createdAt: "2024-01-20T09:00:00Z",
-    updatedAt: "2024-10-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
+    updatedAt: "2025-10-20T09:00:00Z",
   },
 
   // --- State Assembly Candidates ---
@@ -238,8 +238,8 @@ export const candidates: Candidate[] = [
     tagline: "Local Development, Community First",
     vision:
       "Empowering Song constituency through grassroots development and community engagement",
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-10-15T10:00:00Z",
+    createdAt: "2025-01-15T10:00:00Z",
+    updatedAt: "2025-10-15T10:00:00Z",
   },
   {
     id: "cand-pdp-adamawa-sa-1",
@@ -256,8 +256,8 @@ export const candidates: Candidate[] = [
     tagline: "Education, Women's Rights, Local Empowerment",
     vision:
       "Building a better Fufore through education and inclusive development",
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-10-15T10:00:00Z",
+    createdAt: "2025-01-15T10:00:00Z",
+    updatedAt: "2025-10-15T10:00:00Z",
   },
   {
     id: "cand-apc-bauchi-sa-1",
@@ -274,8 +274,8 @@ export const candidates: Candidate[] = [
     tagline: "Local Economy, Jobs, Development",
     vision:
       "Transforming Bauchi Central through local business growth and job opportunities",
-    createdAt: "2024-01-20T09:00:00Z",
-    updatedAt: "2024-10-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
+    updatedAt: "2025-10-20T09:00:00Z",
   },
   {
     id: "cand-pdp-bauchi-sa-1",
@@ -292,7 +292,7 @@ export const candidates: Candidate[] = [
     tagline: "Healthcare Access, Rural Development",
     vision:
       "Ensuring quality healthcare reaches every community in Bauchi South",
-    createdAt: "2024-01-20T09:00:00Z",
-    updatedAt: "2024-10-20T09:00:00Z",
+    createdAt: "2025-01-20T09:00:00Z",
+    updatedAt: "2025-10-20T09:00:00Z",
   },
 ];
