@@ -34,7 +34,8 @@ import {
 import { useRegistrationStore } from "@/stores/registration-store";
 import { generateRegistrationId } from "@/lib/registration-schemas";
 import { toast } from "sonner";
-import { mockApi } from "@/lib/mock/mockApi";
+import { voterApi } from "@/lib/api/voter";
+import { candidateApi } from "@/lib/api/candidate";
 import { getSupportersCount } from "@/lib/helpers/voter-analytics";
 import type { Voter } from "@/types/voter";
 import { ProfileHeader } from "@/components/voter/profile/profile-header";
@@ -128,7 +129,7 @@ export function VoterProfile() {
     queryKey: ["voter-profile", payload.nin],
     queryFn: async (): Promise<Voter | null> => {
       if (!payload.nin) return null;
-      const result = await mockApi.getUserProfile(payload.nin);
+      const result = await voterApi.getUserProfile(payload.nin);
       return result.voter;
     },
     enabled: !!payload.nin,
@@ -140,7 +141,7 @@ export function VoterProfile() {
     queryKey: ["candidate", payload.candidate?.candidateId],
     queryFn: async () => {
       if (!payload.candidate?.candidateId) return null;
-      const result = await mockApi.getCandidateById(
+      const result = await candidateApi.getCandidateById(
         payload.candidate.candidateId,
       );
       return result.candidate;
@@ -154,7 +155,7 @@ export function VoterProfile() {
     queryKey: ["survey", payload.candidate?.candidateId],
     queryFn: async () => {
       if (!payload.candidate?.candidateId) return null;
-      const result = await mockApi.getCandidateSurvey(
+      const result = await candidateApi.getCandidateSurvey(
         payload.candidate.candidateId,
       );
       return result.survey;
@@ -185,7 +186,11 @@ export function VoterProfile() {
           pollingUnit: voterData.pollingUnit,
         },
         candidate: {
-          candidateId: voterData.candidateId,
+          // Use the nullish coalescing operator (??) here to handle both null and undefined.
+          // If voterData.candidateId is null or undefined, default to an empty string.
+          // Unlike ||, ?? does not replace 0, false, or "" (empty string) with the default,
+          // which is important if candidateId could ever be an empty string and that's a valid value.
+          candidateId: voterData.candidateId ?? "",
         },
         survey: {
           surveyId: "",
@@ -257,8 +262,10 @@ export function VoterProfile() {
   const totalQuestions = surveyQuestions.length;
   const surveyProgress =
     totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+  // Use voterData.surveyCompleted if available (production-ready), otherwise calculate
   const isSurveyComplete =
-    totalQuestions > 0 && answeredCount === totalQuestions;
+    voterData?.surveyCompleted ??
+    (totalQuestions > 0 && answeredCount === totalQuestions);
 
   // Get supporter count
   const supporterCount = payload.candidate?.candidateId
@@ -418,91 +425,6 @@ export function VoterProfile() {
       <ProfileTabs>
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4 sm:space-y-6">
-          {/* Completion Summary */}
-          <Card className="border-primary/20 from-primary/5 to-primary/10 bg-linear-to-br">
-            <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              {isLoading ? (
-                <>
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-6 w-48" />
-                    <Skeleton className="h-3 w-40" />
-                  </div>
-                  <div className="flex gap-3 sm:gap-6">
-                    <div className="text-center">
-                      <Skeleton className="h-8 w-12 sm:h-10 sm:w-16" />
-                      <Skeleton className="mt-1 h-3 w-12" />
-                    </div>
-                    <div className="text-center">
-                      <Skeleton className="h-8 w-12 sm:h-10 sm:w-16" />
-                      <Skeleton className="mt-1 h-3 w-16" />
-                    </div>
-                    <div className="text-center">
-                      <Skeleton className="h-8 w-12 sm:h-10 sm:w-16" />
-                      <Skeleton className="mt-1 h-3 w-12" />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="space-y-2">
-                    <p className="text-muted-foreground text-xs sm:text-sm">
-                      Registration Status
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-2.5 w-2.5 rounded-full bg-green-500" />
-                      <p className="text-foreground text-base font-semibold sm:text-lg">
-                        Registration Complete
-                      </p>
-                    </div>
-                    {voterData?.registrationDate && (
-                      <p className="text-muted-foreground text-xs">
-                        Registered on {registrationDate}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex gap-3 sm:gap-6">
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <p className="text-foreground text-xl font-bold sm:text-2xl">
-                          100%
-                        </p>
-                        <HiCheckCircle className="h-4 w-4 text-green-600" />
-                      </div>
-                      <p className="text-muted-foreground text-xs">Profile</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <p className="text-foreground text-xl font-bold sm:text-2xl">
-                          {payload.candidate?.candidateId ? "✓" : "—"}
-                        </p>
-                        {payload.candidate?.candidateId && (
-                          <HiCheckCircle className="h-4 w-4 text-green-600" />
-                        )}
-                      </div>
-                      <p className="text-muted-foreground text-xs">Candidate</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <p className="text-foreground text-xl font-bold sm:text-2xl">
-                          {isSurveyComplete
-                            ? "✓"
-                            : totalQuestions > 0
-                              ? `${Math.round(surveyProgress)}%`
-                              : "—"}
-                        </p>
-                        {isSurveyComplete && (
-                          <HiCheckCircle className="h-4 w-4 text-green-600" />
-                        )}
-                      </div>
-                      <p className="text-muted-foreground text-xs">Survey</p>
-                    </div>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
           <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
             {/* Personal Information */}
             <ProfileInfoCard
@@ -1212,14 +1134,14 @@ export function VoterProfile() {
           </div>
 
           {/* Data Protection Notice */}
-          <Card className="border-primary/20 bg-primary/5">
+          <Card className="border-border bg-muted/30">
             <CardContent className="flex items-start gap-3 sm:gap-4">
-              <HiShieldCheck className="text-primary mt-0.5 h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
-              <div className="space-y-1.5 sm:space-y-2">
-                <p className="text-foreground text-sm font-semibold sm:text-base">
+              <HiShieldCheck className="text-primary mt-0.5 h-5 w-5 shrink-0" />
+              <div className="min-w-0 flex-1 space-y-1">
+                <p className="text-foreground text-sm font-semibold">
                   Data Protection Notice
                 </p>
-                <p className="text-muted-foreground text-xs leading-relaxed sm:text-sm">
+                <p className="text-muted-foreground text-xs leading-relaxed">
                   Your information is protected by Nigerian Data Protection Act
                   (NDPA) 2023. We use encryption, secure servers, and strict
                   access controls. Your data is never sold to third parties and

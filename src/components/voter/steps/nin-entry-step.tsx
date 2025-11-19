@@ -13,8 +13,12 @@ import {
   HiShieldCheck,
   HiExclamationCircle,
   HiInformationCircle,
+  HiArrowLeft,
+  HiUser,
+  HiLocationMarker,
+  HiBadgeCheck,
 } from "react-icons/hi";
-import { ArrowLeft, Loader2, User, MapPin, CheckCircle2 } from "lucide-react";
+import { PiSpinnerGapBold } from "react-icons/pi";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +45,7 @@ import {
 import { useRegistrationStore } from "@/stores/registration-store";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { mockApi } from "@/lib/mock/mockApi";
+import { voterApi } from "@/lib/api/voter";
 import {
   formatNINForDisplay,
   ninSchema,
@@ -118,7 +122,7 @@ export function NinEntryStep() {
   const verifyNin = useMutation({
     mutationFn: async (nin: string) => {
       // Verify NIN with mock API
-      return await mockApi.verifyNIN(nin);
+      return await voterApi.verifyNIN(nin);
     },
     onSuccess: (data) => {
       if (data.verified && data.data) {
@@ -330,9 +334,13 @@ export function NinEntryStep() {
 
                 {/* Loading State */}
                 {verificationStatus === "verifying" && (
-                  <div className="flex flex-col items-center justify-center gap-3">
+                  <div
+                    role="status"
+                    aria-live="assertive"
+                    className="flex flex-col items-center justify-center gap-3"
+                  >
                     <div className="border-primary/30 bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full border">
-                      <Loader2 className="text-primary h-6 w-6 animate-spin" />
+                      <PiSpinnerGapBold className="text-primary h-6 w-6 animate-spin" />
                     </div>
                     <div className="space-y-1 text-center">
                       <p className="text-foreground text-sm font-medium">
@@ -352,7 +360,7 @@ export function NinEntryStep() {
                     {/* Success Badge */}
                     <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100">
-                        <CheckCircle2 className="h-5 w-5 text-green-700" />
+                        <HiBadgeCheck className="h-5 w-5 text-green-700" />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-semibold text-green-900">
@@ -372,7 +380,7 @@ export function NinEntryStep() {
                     <div className="space-y-4">
                       {/* Section Header */}
                       <div className="text-accent flex items-center gap-2 text-sm font-semibold">
-                        <User className="h-4 w-4" />
+                        <HiUser className="h-4 w-4" />
                         <span>Verified Identity Information</span>
                       </div>
 
@@ -426,7 +434,7 @@ export function NinEntryStep() {
                       {/* Location Information */}
                       <div className="space-y-3">
                         <div className="text-accent flex items-center gap-2 text-xs font-semibold">
-                          <MapPin className="h-3.5 w-3.5" />
+                          <HiLocationMarker className="h-3.5 w-3.5" />
                           <span>Location Information</span>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-4">
@@ -519,7 +527,7 @@ export function NinEntryStep() {
                           onClick={handleReset}
                           className="h-10 flex-1"
                         >
-                          <ArrowLeft className="mr-2 h-4 w-4" />
+                          <HiArrowLeft className="mr-2 h-4 w-4" />
                           Edit NIN
                         </Button>
                         <Button

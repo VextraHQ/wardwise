@@ -69,6 +69,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-08-20",
     createdAt: "2025-08-20T10:00:00Z",
     updatedAt: "2025-08-20T10:30:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-2",
@@ -99,6 +101,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-08-22",
     createdAt: "2025-08-22T14:00:00Z",
     updatedAt: "2025-08-22T14:20:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-3",
@@ -129,6 +133,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-08-25",
     createdAt: "2025-08-25T09:15:00Z",
     updatedAt: "2025-08-25T09:15:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-4",
@@ -152,7 +158,10 @@ export const voters: Voter[] = [
     registrationDate: "2025-08-27",
     createdAt: "2025-08-27T09:00:00Z",
     updatedAt: "2025-08-27T09:00:00Z",
+    lastCompletedStep: "confirm", // Complete registration
+    surveyCompleted: false,
   },
+  // INCOMPLETE REGISTRATION EXAMPLE - Stopped at candidate selection
   {
     id: "voter-5",
     nin: "33445566778",
@@ -169,12 +178,14 @@ export const voters: Voter[] = [
     lga: "Fufore",
     ward: "Fufore Ward 1",
     pollingUnit: "Unit 005 - Town Hall",
-    candidateId: "cand-pdp-2", // Supporting Dr. Maryam Inna Ciroma
+    // No candidate selected yet (incomplete)
     surveyAnswers: {},
     verifiedAt: "2025-08-30T10:00:00Z",
     registrationDate: "2025-08-30",
     createdAt: "2025-08-30T10:00:00Z",
     updatedAt: "2025-08-30T10:00:00Z",
+    lastCompletedStep: "location", // Stopped after location step
+    surveyCompleted: false,
   },
   {
     id: "voter-6",
@@ -204,6 +215,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-02",
     createdAt: "2025-09-02T11:00:00Z",
     updatedAt: "2025-09-02T11:00:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   // ============================================================================
   // ADDITIONAL VOTERS - Distributed Across All Candidates
@@ -238,6 +251,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-05",
     createdAt: "2025-09-05T08:30:00Z",
     updatedAt: "2025-09-05T08:30:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-2",
@@ -267,6 +282,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-08",
     createdAt: "2025-09-08T10:15:00Z",
     updatedAt: "2025-09-08T10:15:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-3",
@@ -296,6 +313,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-10",
     createdAt: "2025-09-10T14:20:00Z",
     updatedAt: "2025-09-10T14:20:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-4",
@@ -325,6 +344,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-12",
     createdAt: "2025-09-12T09:45:00Z",
     updatedAt: "2025-09-12T09:45:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-5",
@@ -354,6 +375,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-14",
     createdAt: "2025-09-14T11:30:00Z",
     updatedAt: "2025-09-14T11:30:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-6",
@@ -383,6 +406,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-16",
     createdAt: "2025-09-16T13:00:00Z",
     updatedAt: "2025-09-16T13:00:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-7",
@@ -412,6 +437,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-18",
     createdAt: "2025-09-18T08:15:00Z",
     updatedAt: "2025-09-18T08:15:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-8",
@@ -441,6 +468,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-20",
     createdAt: "2025-09-20T15:45:00Z",
     updatedAt: "2025-09-20T15:45:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-9",
@@ -470,6 +499,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-22",
     createdAt: "2025-09-22T10:20:00Z",
     updatedAt: "2025-09-22T10:20:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-10",
@@ -499,6 +530,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-24",
     createdAt: "2025-09-24T12:10:00Z",
     updatedAt: "2025-09-24T12:10:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-11",
@@ -528,6 +561,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-26",
     createdAt: "2025-09-26T09:30:00Z",
     updatedAt: "2025-09-26T09:30:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-12",
@@ -557,6 +592,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-28",
     createdAt: "2025-09-28T14:00:00Z",
     updatedAt: "2025-09-28T14:00:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-13",
@@ -586,6 +623,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-09-30",
     createdAt: "2025-09-30T11:15:00Z",
     updatedAt: "2025-09-30T11:15:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-14",
@@ -615,6 +654,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-02",
     createdAt: "2025-10-02T08:45:00Z",
     updatedAt: "2025-10-02T08:45:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-15",
@@ -644,6 +685,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-04",
     createdAt: "2025-10-04T13:30:00Z",
     updatedAt: "2025-10-04T13:30:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-16",
@@ -673,6 +716,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-05",
     createdAt: "2025-10-05T10:00:00Z",
     updatedAt: "2025-10-05T10:00:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-17",
@@ -702,6 +747,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-06",
     createdAt: "2025-10-06T09:15:00Z",
     updatedAt: "2025-10-06T09:15:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-18",
@@ -731,6 +778,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-07",
     createdAt: "2025-10-07T11:45:00Z",
     updatedAt: "2025-10-07T11:45:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-19",
@@ -760,6 +809,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-08",
     createdAt: "2025-10-08T14:20:00Z",
     updatedAt: "2025-10-08T14:20:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-20",
@@ -789,6 +840,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-09",
     createdAt: "2025-10-09T10:30:00Z",
     updatedAt: "2025-10-09T10:30:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-21",
@@ -818,6 +871,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-10",
     createdAt: "2025-10-10T12:00:00Z",
     updatedAt: "2025-10-10T12:00:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-22",
@@ -847,6 +902,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-11",
     createdAt: "2025-10-11T08:45:00Z",
     updatedAt: "2025-10-11T08:45:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-23",
@@ -876,6 +933,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-12",
     createdAt: "2025-10-12T15:15:00Z",
     updatedAt: "2025-10-12T15:15:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-24",
@@ -905,6 +964,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-13",
     createdAt: "2025-10-13T09:30:00Z",
     updatedAt: "2025-10-13T09:30:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-25",
@@ -934,6 +995,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-14",
     createdAt: "2025-10-14T11:00:00Z",
     updatedAt: "2025-10-14T11:00:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-26",
@@ -963,6 +1026,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-15",
     createdAt: "2025-10-15T13:45:00Z",
     updatedAt: "2025-10-15T13:45:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-27",
@@ -992,6 +1057,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-18",
     createdAt: "2025-10-18T10:20:00Z",
     updatedAt: "2025-10-18T10:20:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-28",
@@ -1021,6 +1088,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-20",
     createdAt: "2025-10-20T14:00:00Z",
     updatedAt: "2025-10-20T14:00:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-29",
@@ -1050,6 +1119,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-22",
     createdAt: "2025-10-22T08:30:00Z",
     updatedAt: "2025-10-22T08:30:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-30",
@@ -1079,6 +1150,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-24",
     createdAt: "2025-10-24T12:15:00Z",
     updatedAt: "2025-10-24T12:15:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-31",
@@ -1108,6 +1181,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-26",
     createdAt: "2025-10-26T10:00:00Z",
     updatedAt: "2025-10-26T10:00:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-32",
@@ -1137,6 +1212,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-28",
     createdAt: "2025-10-28T14:30:00Z",
     updatedAt: "2025-10-28T14:30:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-33",
@@ -1166,6 +1243,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-10-30",
     createdAt: "2025-10-30T09:15:00Z",
     updatedAt: "2025-10-30T09:15:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-34",
@@ -1195,6 +1274,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-11-01",
     createdAt: "2025-11-01T11:45:00Z",
     updatedAt: "2025-11-01T11:45:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-35",
@@ -1224,6 +1305,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-11-03",
     createdAt: "2025-11-03T13:20:00Z",
     updatedAt: "2025-11-03T13:20:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-36",
@@ -1253,6 +1336,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-11-05",
     createdAt: "2025-11-05T08:00:00Z",
     updatedAt: "2025-11-05T08:00:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-37",
@@ -1282,6 +1367,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-11-07",
     createdAt: "2025-11-07T15:30:00Z",
     updatedAt: "2025-11-07T15:30:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-38",
@@ -1311,6 +1398,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-11-09",
     createdAt: "2025-11-09T10:45:00Z",
     updatedAt: "2025-11-09T10:45:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-39",
@@ -1340,6 +1429,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-11-11",
     createdAt: "2025-11-11T12:00:00Z",
     updatedAt: "2025-11-11T12:00:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-40",
@@ -1369,6 +1460,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-11-12",
     createdAt: "2025-11-12T09:30:00Z",
     updatedAt: "2025-11-12T09:30:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-41",
@@ -1398,6 +1491,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-11-13",
     createdAt: "2025-11-13T14:15:00Z",
     updatedAt: "2025-11-13T14:15:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
   {
     id: "voter-fintiri-42",
@@ -1427,6 +1522,8 @@ export const voters: Voter[] = [
     registrationDate: "2025-11-14",
     createdAt: "2025-11-14T11:00:00Z",
     updatedAt: "2025-11-14T11:00:00Z",
+    lastCompletedStep: "confirm",
+    surveyCompleted: true,
   },
 ];
 

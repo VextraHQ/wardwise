@@ -6,7 +6,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { mockApi } from "@/lib/mock/mockApi";
+import { surveyApi } from "@/lib/api/survey";
 import { toast } from "sonner";
 import type {
   SurveyPayload,
@@ -25,7 +25,7 @@ export function useCreateSurvey() {
   return useMutation({
     mutationFn: async (surveyData: SurveyPayload) => {
       if (!candidateId) throw new Error("No candidate ID");
-      const result = await mockApi.createCandidateSurvey(candidateId, {
+      const result = await surveyApi.createCandidateSurvey(candidateId, {
         ...surveyData,
         questions: surveyData.questions.map((q) => ({
           id:
@@ -45,7 +45,7 @@ export function useCreateSurvey() {
       });
       return result.survey;
     },
-    onSuccess: (survey) => {
+    onSuccess: (_survey) => {
       queryClient.invalidateQueries({
         queryKey: ["candidate-survey", candidateId],
       });
@@ -66,7 +66,7 @@ export function useUpdateSurvey() {
 
   return useMutation({
     mutationFn: async ({ surveyId, surveyData }: UpdateSurveyPayload) => {
-      const result = await mockApi.updateCandidateSurvey(surveyId, {
+      const result = await surveyApi.updateCandidateSurvey(surveyId, {
         ...surveyData,
         questions: surveyData.questions.map((q) => ({
           id:
@@ -86,7 +86,7 @@ export function useUpdateSurvey() {
       });
       return result.survey;
     },
-    onSuccess: (survey) => {
+    onSuccess: (_survey) => {
       queryClient.invalidateQueries({
         queryKey: ["candidate-survey", candidateId],
       });
@@ -107,10 +107,10 @@ export function usePublishSurvey() {
 
   return useMutation({
     mutationFn: async (surveyId: string) => {
-      const result = await mockApi.publishCandidateSurvey(surveyId);
+      const result = await surveyApi.publishCandidateSurvey(surveyId);
       return result.survey;
     },
-    onSuccess: (survey) => {
+    onSuccess: (_survey) => {
       queryClient.invalidateQueries({
         queryKey: ["candidate-survey", candidateId],
       });
@@ -132,7 +132,7 @@ export function useSaveDraft() {
   return useMutation({
     mutationFn: async (surveyData: SurveyPayload) => {
       if (!candidateId) throw new Error("No candidate ID");
-      const result = await mockApi.saveSurveyDraft(candidateId, {
+      const result = await surveyApi.saveSurveyDraft(candidateId, {
         ...surveyData,
         questions: surveyData.questions.map((q) => ({
           id:

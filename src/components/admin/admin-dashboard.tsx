@@ -55,7 +55,7 @@ import {
 } from "react-icons/hi";
 import { toast } from "sonner";
 import type { Candidate } from "@/types/candidate";
-import { adminApi, type CandidateWithUser } from "@/lib/services/admin-api";
+import { adminApi, type CandidateWithUser } from "@/lib/api/admin";
 import {
   StatCardSkeleton,
   CandidateCardSkeleton,

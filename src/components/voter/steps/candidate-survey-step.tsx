@@ -4,18 +4,20 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
-  ArrowRight,
-  ArrowLeft,
-  Loader2,
-  FileQuestion,
-  ShieldCheck,
-  ClipboardList,
-  Users,
-  Clock,
-  TrendingUp,
-  CheckCircle2,
-  Sparkles,
-} from "lucide-react";
+  HiArrowRight,
+  HiArrowLeft,
+  HiQuestionMarkCircle,
+  HiShieldCheck,
+  HiClipboardList,
+  HiUsers,
+  HiOutlineClock,
+  HiTrendingUp,
+  HiCheckCircle,
+  HiSparkles,
+  HiFire,
+  HiLightningBolt,
+} from "react-icons/hi";
+import { PiSpinnerGapBold } from "react-icons/pi";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -25,7 +27,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useRegistrationStore } from "@/stores/registration-store";
 import { cn } from "@/lib/utils";
-import { mockApi } from "@/lib/mock/mockApi";
+import { candidateApi } from "@/lib/api/candidate";
 import type { CandidateSurvey, SurveyQuestion } from "@/types/survey";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -41,6 +43,8 @@ export function CandidateSurveyStep() {
   // const [rankingOrder, setRankingOrder] = useState<Record<string, string[]>>({});
   const [showCelebration, setShowCelebration] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastMilestone, setLastMilestone] = useState<number | null>(null);
+  const [showMilestone, setShowMilestone] = useState(false);
   const completionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const candidateId = payload.candidate?.candidateId;
@@ -60,7 +64,7 @@ export function CandidateSurveyStep() {
     queryKey: ["candidate-survey", candidateId],
     queryFn: async () => {
       if (!candidateId) return null;
-      return await mockApi.getCandidateSurvey(candidateId);
+      return await candidateApi.getCandidateSurvey(candidateId);
     },
     enabled: !!candidateId,
   });
@@ -328,15 +332,33 @@ export function CandidateSurveyStep() {
         router.push("/register/complete");
       }, 800);
     } else {
-      // Show mini celebration for milestone progress
+      // Check for milestones and show celebration
       const nextProgress = Math.round(
         ((currentQuestionIndex + 2) / (survey?.questions.length || 1)) * 100,
       );
 
-      if (nextProgress === 50) {
-        toast.success("Halfway there! You're doing great!");
-      } else if (nextProgress === 75) {
-        toast.success("Almost done! Just a few more questions.");
+      const milestones = [25, 50, 75];
+      const hitMilestone = milestones.find(
+        (m) =>
+          nextProgress >= m && (lastMilestone === null || lastMilestone < m),
+      );
+
+      if (hitMilestone) {
+        setLastMilestone(hitMilestone);
+        setShowMilestone(true);
+
+        const messages = {
+          25: "Great start! You're 25% done! 🎉",
+          50: "Halfway there! You're doing amazing! ⚡",
+          75: "Almost done! Just a few more questions! 🔥",
+        };
+
+        toast.success(messages[hitMilestone as keyof typeof messages], {
+          duration: 3000,
+        });
+
+        // Hide milestone after animation
+        setTimeout(() => setShowMilestone(false), 2000);
       }
 
       setCurrentQuestionIndex((prev) => prev + 1);
@@ -403,7 +425,7 @@ export function CandidateSurveyStep() {
           <Card>
             <CardContent className="flex min-h-[300px] items-center justify-center">
               <div className="flex flex-col items-center justify-center gap-3 text-center">
-                <Loader2 className="text-primary h-8 w-8 animate-spin" />
+                <PiSpinnerGapBold className="text-primary h-8 w-8 animate-spin" />
                 <div className="space-y-1">
                   <p className="text-foreground text-sm font-medium">
                     Loading candidate survey...
@@ -443,7 +465,7 @@ export function CandidateSurveyStep() {
         <div className="mx-auto w-full max-w-md">
           <Card>
             <CardContent className="flex min-h-[300px] flex-col items-center justify-center space-y-6">
-              <FileQuestion className="text-muted-foreground h-16 w-16" />
+              <HiQuestionMarkCircle className="text-muted-foreground h-16 w-16" />
               <div className="space-y-4 text-center">
                 <div className="space-y-2">
                   <p className="text-foreground text-lg font-semibold">
@@ -461,7 +483,7 @@ export function CandidateSurveyStep() {
                     variant="outline"
                     className="h-10 flex-1"
                   >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    <HiArrowLeft className="mr-2 h-4 w-4" />
                     Select Different Candidate
                   </Button>
                 </div>
@@ -492,7 +514,7 @@ export function CandidateSurveyStep() {
               {survey.title}
             </h1>
             {showCelebration && (
-              <Sparkles className="text-primary h-6 w-6 animate-pulse" />
+              <HiSparkles className="text-primary h-6 w-6 animate-pulse" />
             )}
           </div>
           <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
@@ -501,11 +523,31 @@ export function CandidateSurveyStep() {
         </div>
       )}
 
+      {/* Milestone Celebration */}
+      {showMilestone && lastMilestone && (
+        <div className="mx-auto max-w-2xl">
+          <div className="border-primary/30 bg-primary/5 flex items-center justify-center gap-3 rounded-lg border p-4">
+            {lastMilestone === 25 && (
+              <HiSparkles className="text-primary h-6 w-6" />
+            )}
+            {lastMilestone === 50 && (
+              <HiLightningBolt className="text-primary h-6 w-6" />
+            )}
+            {lastMilestone === 75 && (
+              <HiFire className="text-primary h-6 w-6" />
+            )}
+            <p className="text-foreground text-sm font-semibold">
+              {lastMilestone}% Complete! Keep going! 🎉
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Progress and Stats Bar */}
       <div className="space-y-3">
-        <div className="bg-muted/50 mx-auto flex max-w-2xl items-center justify-between gap-4 rounded-lg border px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary/10 text-primary relative flex h-14 w-14 items-center justify-center rounded-full">
+        <div className="bg-muted/50 mx-auto flex max-w-2xl flex-col gap-3 rounded-lg border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-primary/10 text-primary relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full">
               <span className="text-sm font-bold">{progressPercentage}%</span>
               <svg className="absolute inset-0 -rotate-90" viewBox="0 0 56 56">
                 <circle
@@ -524,13 +566,13 @@ export function CandidateSurveyStep() {
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="3"
-                  className="text-primary transition-all duration-500"
-                  strokeDasharray={`${(progressPercentage / 100) * 150.8} 150.8`}
+                  className="text-primary transition-all duration-300"
                   strokeLinecap="round"
+                  strokeDasharray={`${(progressPercentage / 100) * 150.8} 150.8`}
                 />
               </svg>
             </div>
-            <div className="text-left">
+            <div className="min-w-0 flex-1 text-left">
               <p className="text-foreground text-sm font-semibold">
                 {totalAnswered} of {survey.questions.length} answered
               </p>
@@ -539,13 +581,20 @@ export function CandidateSurveyStep() {
                   ? `${questionsRemaining} question${questionsRemaining !== 1 ? "s" : ""} remaining`
                   : "All done!"}
               </p>
+              {/* Progress bar for mobile */}
+              <div className="bg-muted mt-2 h-1.5 overflow-hidden rounded-full sm:hidden">
+                <div
+                  className="bg-primary h-full transition-all duration-300"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 border-l pl-4">
+          <div className="flex flex-wrap items-center gap-3 border-t pt-3 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4">
             {survey.estimatedMinutes && (
               <div className="flex items-center gap-1.5">
-                <Clock className="text-muted-foreground h-4 w-4" />
+                <HiOutlineClock className="text-muted-foreground h-4 w-4 shrink-0" />
                 <span className="text-muted-foreground text-xs">
                   {estimatedMinutes > 0
                     ? `~${estimatedMinutes} min left`
@@ -555,7 +604,7 @@ export function CandidateSurveyStep() {
             )}
             {survey.totalResponses && (
               <div className="flex items-center gap-1.5">
-                <Users className="text-muted-foreground h-4 w-4" />
+                <HiUsers className="text-muted-foreground h-4 w-4 shrink-0" />
                 <span className="text-muted-foreground text-xs">
                   {survey.totalResponses.toLocaleString()} voters
                 </span>
@@ -568,13 +617,23 @@ export function CandidateSurveyStep() {
         <div className="mx-auto w-full max-w-2xl">
           <Card className="border-border/60 bg-card/95 backdrop-blur-sm">
             <CardHeader className="border-border border-b">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex items-start justify-between gap-4">
-                  <h2 className="text-foreground flex-1 text-lg font-semibold tracking-tight">
-                    {currentQuestion.question}
-                  </h2>
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground text-xs font-medium">
+                        Question {currentQuestionIndex + 1} of{" "}
+                        {survey.questions.length}
+                      </span>
+                    </div>
+                    <h2 className="text-foreground text-lg leading-tight font-semibold tracking-tight sm:text-xl">
+                      {currentQuestion.question}
+                    </h2>
+                  </div>
                   {hasAnswer && (
-                    <CheckCircle2 className="text-primary h-5 w-5 shrink-0" />
+                    <div>
+                      <HiCheckCircle className="text-primary h-5 w-5 shrink-0" />
+                    </div>
                   )}
                 </div>
                 {currentQuestion.description && (
@@ -586,109 +645,130 @@ export function CandidateSurveyStep() {
                 {/* Social Proof - Show anonymized stats */}
                 {currentQuestion.responseStats &&
                   currentQuestion.responseStats.topAnswer && (
-                    <div className="bg-primary/5 border-primary/20 flex items-center gap-2 rounded-md border px-3 py-2">
-                      <TrendingUp className="text-primary h-4 w-4 shrink-0" />
-                      <p className="text-muted-foreground text-xs">
-                        <span className="text-foreground font-medium">
-                          {currentQuestion.responseStats.topAnswer.percentage}%
-                        </span>{" "}
-                        of{" "}
-                        {currentQuestion.responseStats.totalResponses.toLocaleString()}{" "}
-                        voters prioritize:{" "}
-                        <span className="text-foreground font-medium">
-                          {currentQuestion.responseStats.topAnswer.label}
-                        </span>
-                      </p>
+                    <div className="bg-primary/5 border-primary/20 flex items-start gap-2 rounded-lg border p-3">
+                      <HiTrendingUp className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <p className="text-foreground text-xs font-semibold">
+                          Community Insight
+                        </p>
+                        <p className="text-muted-foreground text-xs leading-relaxed">
+                          <span className="text-foreground font-semibold">
+                            {currentQuestion.responseStats.topAnswer.percentage}
+                            %
+                          </span>{" "}
+                          of{" "}
+                          {currentQuestion.responseStats.totalResponses.toLocaleString()}{" "}
+                          voters chose:{" "}
+                          <span className="text-foreground font-medium">
+                            {currentQuestion.responseStats.topAnswer.label}
+                          </span>
+                        </p>
+                      </div>
                     </div>
                   )}
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-4">
+            <CardContent>
               {/* Single Choice */}
               {currentQuestion.type === "single" && currentQuestion.options && (
-                <RadioGroup
-                  value={typeof currentAnswer === "string" ? currentAnswer : ""}
-                  onValueChange={handleSingleChoice}
-                  className="space-y-3"
+                <div
+                  className={cn(
+                    "space-y-3",
+                    currentQuestion.options.length > 5 &&
+                      "max-h-[400px] overflow-y-auto px-1 sm:max-h-[500px]",
+                  )}
                 >
-                  {currentQuestion.options.map((option) => {
-                    const isSelected = currentAnswer === option.id;
-                    const showOtherInput = option.allowOther && isSelected;
-                    return (
-                      <div key={option.id} className="space-y-2">
-                        <div className="relative">
-                          <RadioGroupItem
-                            value={option.id}
-                            id={option.id}
-                            className="peer sr-only"
-                          />
-                          <Label
-                            htmlFor={option.id}
-                            className={cn(
-                              "block h-full cursor-pointer rounded-lg border p-4 transition-all duration-200",
-                              isSelected
-                                ? "border-primary bg-primary/5 ring-primary/20 ring-2 ring-offset-1"
-                                : "border-border hover:bg-muted/50 hover:border-primary/30",
-                            )}
-                          >
-                            <div className="flex items-center gap-3">
-                              {option.icon && (
-                                <span className="shrink-0 text-xl">
-                                  {option.icon}
-                                </span>
-                              )}
-                              <div
-                                className={cn(
-                                  "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-                                  isSelected
-                                    ? "border-primary bg-primary"
-                                    : "border-muted-foreground/30",
-                                )}
-                              >
-                                {isSelected && (
-                                  <div className="bg-primary-foreground h-1.5 w-1.5 rounded-full" />
-                                )}
-                              </div>
-                              <span
-                                className={cn(
-                                  "flex-1 text-sm font-medium transition-colors",
-                                  isSelected
-                                    ? "text-foreground"
-                                    : "text-muted-foreground",
-                                )}
-                              >
-                                {option.label}
-                              </span>
-                            </div>
-                          </Label>
-                        </div>
-                        {showOtherInput && (
-                          <div className="pl-7">
-                            <Input
-                              placeholder="Please specify..."
-                              value={otherTexts[currentQuestion.id] || ""}
-                              onChange={(e) => {
-                                setOtherTexts((prev) => ({
-                                  ...prev,
-                                  [currentQuestion.id]: e.target.value,
-                                }));
-                              }}
-                              className="focus:border-primary"
-                              autoFocus
+                  <RadioGroup
+                    value={
+                      typeof currentAnswer === "string" ? currentAnswer : ""
+                    }
+                    onValueChange={handleSingleChoice}
+                  >
+                    {currentQuestion.options.map((option) => {
+                      const isSelected = currentAnswer === option.id;
+                      const showOtherInput = option.allowOther && isSelected;
+                      return (
+                        <div key={option.id} className="space-y-2">
+                          <div className="relative">
+                            <RadioGroupItem
+                              value={option.id}
+                              id={option.id}
+                              className="peer sr-only"
                             />
+                            <Label
+                              htmlFor={option.id}
+                              className={cn(
+                                "block h-full cursor-pointer rounded-lg border p-4 transition-all duration-200",
+                                isSelected
+                                  ? "border-primary bg-primary/5 ring-primary/20 ring-2 ring-offset-1"
+                                  : "border-border hover:bg-muted/50 hover:border-primary/30",
+                              )}
+                            >
+                              <div className="flex items-center gap-3">
+                                {option.icon && (
+                                  <span className="shrink-0 text-xl">
+                                    {option.icon}
+                                  </span>
+                                )}
+                                <div
+                                  className={cn(
+                                    "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                                    isSelected
+                                      ? "border-primary bg-primary"
+                                      : "border-muted-foreground/30",
+                                  )}
+                                >
+                                  {isSelected && (
+                                    <div className="bg-primary-foreground h-1.5 w-1.5 rounded-full" />
+                                  )}
+                                </div>
+                                <span
+                                  className={cn(
+                                    "flex-1 text-sm font-medium transition-colors",
+                                    isSelected
+                                      ? "text-foreground"
+                                      : "text-muted-foreground",
+                                  )}
+                                >
+                                  {option.label}
+                                </span>
+                              </div>
+                            </Label>
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </RadioGroup>
+                          {showOtherInput && (
+                            <div className="pl-7">
+                              <Input
+                                placeholder="Please specify..."
+                                value={otherTexts[currentQuestion.id] || ""}
+                                onChange={(e) => {
+                                  setOtherTexts((prev) => ({
+                                    ...prev,
+                                    [currentQuestion.id]: e.target.value,
+                                  }));
+                                }}
+                                className="focus:border-primary"
+                                autoFocus
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </RadioGroup>
+                </div>
               )}
 
               {/* Multiple Choice */}
               {currentQuestion.type === "multiple" &&
                 currentQuestion.options && (
-                  <div className="space-y-3">
+                  <div
+                    className={cn(
+                      "space-y-3",
+                      currentQuestion.options.length > 5 &&
+                        "max-h-[400px] overflow-y-auto px-1 sm:max-h-[500px]",
+                    )}
+                  >
                     {currentQuestion.options.map((option) => {
                       const currentAnswerArray =
                         (currentAnswer as string[]) || [];
@@ -828,7 +908,7 @@ export function CandidateSurveyStep() {
                   onClick={handleBack}
                   className="h-10 flex-1"
                 >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  <HiArrowLeft className="mr-2 h-4 w-4" />
                   {currentQuestionIndex > 0 ? "Previous" : "Back"}
                 </Button>
                 <Button
@@ -843,13 +923,13 @@ export function CandidateSurveyStep() {
                 >
                   {isLastQuestion ? (
                     <>
-                      <Sparkles className="mr-2 h-4 w-4" />
+                      <HiSparkles className="mr-2 h-4 w-4" />
                       Complete Survey
                     </>
                   ) : (
                     <>
                       Next Question
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      <HiArrowRight className="ml-2 h-4 w-4" />
                     </>
                   )}
                 </Button>
@@ -860,43 +940,54 @@ export function CandidateSurveyStep() {
 
         {/* Question Navigator */}
         <div className="mx-auto max-w-2xl">
-          <div className="flex flex-wrap justify-center gap-2">
-            {survey.questions.map((_, index) => {
-              const isAnswered = !!answers[survey.questions[index].id];
-              const isCurrent = index === currentQuestionIndex;
-              return (
-                <button
-                  key={index}
-                  onClick={() => handleQuestionNavigate(index)}
-                  className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all",
-                    isCurrent &&
-                      "ring-primary ring-offset-background ring-2 ring-offset-2",
-                    isAnswered
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80",
-                  )}
-                >
-                  {index + 1}
-                </button>
-              );
-            })}
+          <div className="overflow-x-auto py-2">
+            <div className="flex min-w-fit justify-center gap-2 px-2">
+              {survey.questions.map((_, index) => {
+                const isAnswered = !!answers[survey.questions[index].id];
+                const isCurrent = index === currentQuestionIndex;
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleQuestionNavigate(index)}
+                    className={cn(
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-all sm:h-8 sm:w-8",
+                      isCurrent &&
+                        "ring-primary ring-offset-background ring-2 ring-offset-2",
+                      isAnswered
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80",
+                    )}
+                    aria-label={`Question ${index + 1}${isAnswered ? ", answered" : ""}${isCurrent ? ", current question" : ""}`}
+                  >
+                    {isAnswered ? (
+                      <HiCheckCircle className="h-4 w-4" />
+                    ) : (
+                      index + 1
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
+          <p className="text-muted-foreground mt-3 text-center text-xs">
+            Click any number to navigate. Green dots indicate answered
+            questions.
+          </p>
         </div>
 
         {/* Subtle Trust Indicators */}
         <TrustIndicators
           items={[
             {
-              icon: <ShieldCheck className="h-4 w-4" />,
+              icon: <HiShieldCheck className="h-4 w-4" />,
               label: "Secure Survey",
             },
             {
-              icon: <ClipboardList className="h-4 w-4" />,
+              icon: <HiClipboardList className="h-4 w-4" />,
               label: "Policy-Guided",
             },
             {
-              icon: <Users className="h-4 w-4" />,
+              icon: <HiUsers className="h-4 w-4" />,
               label: "Anonymous Aggregation",
             },
           ]}

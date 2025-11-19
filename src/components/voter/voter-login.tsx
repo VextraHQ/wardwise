@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useRegistrationStore } from "@/stores/registration-store";
 import { cn } from "@/lib/utils";
-import { mockApi } from "@/lib/mock/mockApi";
+import { voterApi } from "@/lib/api/voter";
 import {
   isValidNIN,
   normalizeNINInput,
@@ -94,12 +94,53 @@ export function VoterLogin() {
         );
       }
       // Use mock API to check registration
-      return await mockApi.checkRegistration(nin, 2025);
+      return await voterApi.checkRegistration(nin, 2025);
     },
     onSuccess: (data) => {
       if (data.exists && data.voter) {
-        // Voter exists - populate full registration state with voter data
         const voter = data.voter;
+        const status = data.status || "complete";
+
+        // Handle incomplete registrations
+        if (status === "incomplete") {
+          // Populate partial registration state
+          update({
+            nin: voter.nin,
+            phone: voter.phoneNumber,
+            basic: voter.firstName
+              ? {
+                  firstName: voter.firstName,
+                  lastName: voter.lastName,
+                  dateOfBirth: voter.dateOfBirth,
+                  age: voter.age,
+                  gender: voter.gender,
+                  occupation: voter.occupation || "",
+                  religion: voter.religion || "",
+                }
+              : undefined,
+            location:
+              voter.state && voter.lga
+                ? {
+                    state: voter.state,
+                    lga: voter.lga,
+                    ward: voter.ward,
+                    pollingUnit: voter.pollingUnit,
+                  }
+                : undefined,
+            candidate: voter.candidateId
+              ? { candidateId: voter.candidateId }
+              : undefined,
+            survey: {
+              surveyId: "",
+              answers: voter.surveyAnswers || {},
+            },
+          });
+          toast.info("Incomplete registration found - redirecting to resume");
+          router.push("/register/resume");
+          return;
+        }
+
+        // Complete registration - populate full state
         update({
           nin: voter.nin,
           phone: voter.phoneNumber,
@@ -119,10 +160,10 @@ export function VoterLogin() {
             pollingUnit: voter.pollingUnit,
           },
           candidate: {
-            candidateId: voter.candidateId,
+            candidateId: voter.candidateId ?? "",
           },
           survey: {
-            surveyId: "", // Survey ID can be fetched separately if needed
+            surveyId: "",
             answers: voter.surveyAnswers || {},
           },
         });

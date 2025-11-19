@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { mockApi } from "@/lib/mock/mockApi";
+import { voterApi } from "@/lib/api/voter";
 
 export async function POST(req: Request) {
   const { nin, newCandidateId } = await req.json();
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const result = await mockApi.switchCandidate(nin, newCandidateId);
+    const result = await voterApi.switchCandidate(nin, newCandidateId);
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error switching candidate:", error);

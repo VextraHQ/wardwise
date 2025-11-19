@@ -9,11 +9,15 @@ import {
   HiLocationMarker,
   HiQuestionMarkCircle,
   HiSparkles,
+  HiArrowRight,
+  HiArrowLeft,
+  HiCheck,
+  HiInformationCircle,
 } from "react-icons/hi";
-import { ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { StepProgress } from "@/components/ui/step-progress";
 import {
   Form,
@@ -38,6 +42,34 @@ const locationSchema = z.object({
   ward: z.string().min(1, "Please select your ward"),
   pollingUnit: z.string().min(1, "Please select your polling unit"),
 });
+
+const pilotCoverage = [
+  {
+    code: "AD",
+    name: "Adamawa State",
+    lgAs: [
+      { code: "YOLN", name: "Yola North" },
+      { code: "YOLS", name: "Yola South" },
+      { code: "FUF", name: "Fufore" },
+      { code: "SONG", name: "Song" },
+      { code: "JADA", name: "Jada" },
+      { code: "GANYE", name: "Ganye" },
+      { code: "MAYO-BELWA", name: "Mayo Belwa" },
+      { code: "TOUNGO", name: "Toungo" },
+    ],
+  },
+  {
+    code: "BA",
+    name: "Bauchi State",
+    lgAs: [
+      { code: "BAUCHI-LGA", name: "Bauchi" },
+      { code: "JAMA-ARE", name: "Jama'are" },
+      { code: "ITAS-GADAU", name: "Itas/Gadau" },
+      { code: "NINGI", name: "Ningi" },
+      { code: "WARJI", name: "Warji" },
+    ],
+  },
+];
 
 type LocationFormValues = z.infer<typeof locationSchema>;
 
@@ -83,6 +115,24 @@ export function LocationStep() {
   const lgas = lgasQuery.data || [];
   const wards = wardsQuery.data || [];
   const pollingUnits = pollingUnitsQuery.data || [];
+
+  const selectedStateName =
+    states.find((state) => state.code === selectedState)?.name || "";
+  const selectedLgaName =
+    lgas.find((lga) => lga.code === selectedLga)?.name || "";
+  const selectedWardName =
+    wards.find((ward) => ward.code === selectedWard)?.name || "";
+
+  const selectedStateLabel = selectedStateName || "this state";
+  const selectedLgaLabel = selectedLgaName || "this LGA";
+  const selectedWardLabel = selectedWardName || "this ward";
+
+  const pilotState = pilotCoverage.find(
+    (state) => state.code === selectedState,
+  );
+  const pilotLga = pilotState?.lgAs.find((lga) => lga.code === selectedLga);
+  const isStateCovered = Boolean(pilotState);
+  const isLgaCovered = Boolean(pilotLga);
 
   // Reset dependent fields when parent selection changes
   useEffect(() => {
@@ -167,15 +217,52 @@ export function LocationStep() {
         </p>
       </div>
 
+      {/* Pilot Coverage Notice */}
+      <Card className="border-border/70 bg-card/80 border-dashed backdrop-blur-sm">
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <div className="text-primary">
+            <HiInformationCircle className="h-6 w-6" />
+          </div>
+          <div className="space-y-3 text-left">
+            <div>
+              <p className="text-foreground text-sm font-semibold">
+                Pilot availability
+              </p>
+              <p className="text-muted-foreground text-xs">
+                All states and LGAs are selectable, but wards & polling units
+                are only digitized in the pilot corridors below.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {pilotCoverage.map((state) => (
+                <Badge
+                  key={state.code}
+                  variant="secondary"
+                  className="gap-1 text-xs font-medium"
+                >
+                  <HiLocationMarker className="h-3 w-3" />
+                  {state.name.replace(" State", "")}
+                </Badge>
+              ))}
+            </div>
+            <p className="text-muted-foreground text-xs">
+              Choose LGAs like Yola North, Fufore, Jama'are or Bauchi to explore
+              the end-to-end demo experience. Other areas will show limited ward
+              data for now.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Main Card */}
       <div className="mx-auto w-full max-w-2xl">
         <Card className="border-border/60 bg-card/95 backdrop-blur-sm">
           <CardHeader className="border-border border-b">
-            <div className="space-y-1">
+            <div className="space-y-2">
               <h2 className="text-foreground text-lg font-semibold tracking-tight">
                 Polling Unit Location
               </h2>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-muted-foreground text-sm">
                   Select your voting location details
                 </p>
@@ -218,7 +305,7 @@ export function LocationStep() {
                           <FormLabel className="flex items-center gap-2">
                             State
                             {isStateComplete && (
-                              <Check className="text-primary h-3.5 w-3.5" />
+                              <HiCheck className="text-primary h-3.5 w-3.5" />
                             )}
                           </FormLabel>
                           <FormControl>
@@ -245,6 +332,14 @@ export function LocationStep() {
                             />
                           </FormControl>
                           <FormMessage />
+                          {selectedState &&
+                            !isStateCovered &&
+                            !locationData.statesLoading && (
+                              <p className="mt-2 flex items-center gap-1 text-xs text-amber-600">
+                                <HiInformationCircle className="h-3 w-3" />
+                                {`Wards and polling units for ${selectedStateLabel} are still being mapped. Pilot coverage currently focuses on Adamawa & Bauchi.`}
+                              </p>
+                            )}
                         </FormItem>
                       );
                     }}
@@ -268,7 +363,7 @@ export function LocationStep() {
                           <FormLabel className="flex items-center gap-2">
                             Local Government Area (LGA)
                             {isLgaComplete && (
-                              <Check className="h-3.5 w-3.5 text-green-600" />
+                              <HiCheck className="h-3.5 w-3.5 text-green-600" />
                             )}
                           </FormLabel>
                           <FormControl>
@@ -300,6 +395,32 @@ export function LocationStep() {
                             />
                           </FormControl>
                           <FormMessage />
+                          {selectedLga &&
+                            selectedState &&
+                            isStateCovered &&
+                            !isLgaCovered &&
+                            !isLoading("wards") && (
+                              <p className="mt-2 flex items-center gap-1 text-xs text-amber-600">
+                                <HiInformationCircle className="h-3 w-3" />
+                                {selectedLgaLabel} is outside the current pilot
+                                coverage for wards. Try{" "}
+                                {pilotState?.lgAs
+                                  .map((lga) => lga.name)
+                                  .slice(0, 4)
+                                  .join(", ")}
+                                ...
+                              </p>
+                            )}
+                          {selectedLga &&
+                            isLgaCovered &&
+                            !isLoading("wards") &&
+                            wards.length === 0 && (
+                              <p className="mt-2 flex items-center gap-1 text-xs text-amber-600">
+                                <HiInformationCircle className="h-3 w-3" />
+                                Wards for {selectedLgaLabel} are syncing. Please
+                                try another pilot LGA or check back shortly.
+                              </p>
+                            )}
                         </FormItem>
                       );
                     }}
@@ -323,7 +444,7 @@ export function LocationStep() {
                           <FormLabel className="flex items-center gap-2">
                             Ward
                             {isWardComplete && (
-                              <Check className="h-3.5 w-3.5 text-green-600" />
+                              <HiCheck className="h-3.5 w-3.5 text-green-600" />
                             )}
                           </FormLabel>
                           <FormControl>
@@ -356,6 +477,16 @@ export function LocationStep() {
                             />
                           </FormControl>
                           <FormMessage />
+                          {selectedWard &&
+                            isLgaCovered &&
+                            !isLoading("pollingUnits") &&
+                            pollingUnits.length === 0 && (
+                              <p className="mt-2 flex items-center gap-1 text-xs text-amber-600">
+                                <HiInformationCircle className="h-3 w-3" />
+                                Polling units for {selectedWardLabel} are coming
+                                soon in the pilot rollout.
+                              </p>
+                            )}
                         </FormItem>
                       );
                     }}
@@ -379,7 +510,7 @@ export function LocationStep() {
                           <FormLabel className="flex items-center gap-2">
                             Polling Unit
                             {isPollingUnitComplete && (
-                              <Check className="h-3.5 w-3.5 text-green-600" />
+                              <HiCheck className="h-3.5 w-3.5 text-green-600" />
                             )}
                           </FormLabel>
                           <FormControl>
@@ -436,7 +567,7 @@ export function LocationStep() {
                     onClick={() => router.push("/register/profile")}
                     className="h-10 flex-1"
                   >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    <HiArrowLeft className="mr-2 h-4 w-4" />
                     Back
                   </Button>
                   <Button
@@ -444,7 +575,7 @@ export function LocationStep() {
                     className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-linear-to-r font-semibold transition-all duration-200"
                   >
                     Continue
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <HiArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               </form>

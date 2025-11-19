@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { candidates } from "@/lib/mock/data/candidates";
 import { voters } from "@/lib/mock/data/voters";
@@ -111,17 +111,20 @@ async function main() {
     lga: voter.lga,
     ward: voter.ward,
     pollingUnit: voter.pollingUnit,
-    candidateId: voter.candidateId,
+    // Handle empty string candidateId (incomplete registrations) - convert to undefined
+    candidateId: voter.candidateId?.trim() || undefined,
     surveyAnswers: voter.surveyAnswers || null,
     verifiedAt: voter.verifiedAt ? new Date(voter.verifiedAt) : null,
     registrationDate: new Date(voter.registrationDate),
+    lastCompletedStep: voter.lastCompletedStep || null,
+    surveyCompleted: voter.surveyCompleted ?? false,
   }));
 
   for (const voterData of votersForDb) {
     await prisma.voter.upsert({
       where: { nin: voterData.nin },
-      update: {},
-      create: voterData,
+      update: voterData as Prisma.VoterUncheckedUpdateInput,
+      create: voterData as Prisma.VoterUncheckedCreateInput,
     });
     console.log(
       `✅ Created voter: ${voterData.firstName} ${voterData.lastName} (NIN: ${voterData.nin})`,

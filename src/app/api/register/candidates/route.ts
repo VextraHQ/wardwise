@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { mockApi } from "@/lib/mock/mockApi";
+import { candidateApi } from "@/lib/api/candidate";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const state = searchParams.get("state") || undefined;
   const lga = searchParams.get("lga") || undefined;
 
-  // Use mockApi for single source of truth
-  const result = await mockApi.getCandidates(state, lga);
+  // Use candidateApi (switches between mock and real based on env)
+  const result = await candidateApi.getCandidates(state, lga);
   return NextResponse.json(result);
 }

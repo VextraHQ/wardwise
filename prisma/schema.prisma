@@ -70,27 +70,29 @@ model Candidate {
 }
 
 model Voter {
-  id               String    @id @default(cuid())
-  nin              String    @unique
-  firstName        String
-  middleName       String?
-  lastName         String
-  dateOfBirth      DateTime
-  email            String?   @unique
-  phoneNumber      String
-  gender           String?
-  occupation       String?
-  religion         String?
-  age              Int
-  state            String
-  lga              String
-  ward             String
-  pollingUnit      String
-  candidateId      String
-  surveyAnswers    Json?
-  verifiedAt       DateTime?
-  registrationDate DateTime  @default(now())
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  candidate        Candidate @relation(fields: [candidateId], references: [id])
+  id                 String     @id @default(cuid())
+  nin                String     @unique
+  firstName          String
+  middleName         String?
+  lastName           String
+  dateOfBirth        DateTime
+  email              String?     @unique
+  phoneNumber        String
+  gender             String?
+  occupation         String?
+  religion           String?
+  age                Int
+  state              String
+  lga                String
+  ward               String
+  pollingUnit        String
+  candidateId        String?
+  surveyAnswers      Json?
+  verifiedAt         DateTime?
+  registrationDate   DateTime   @default(now())
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  lastCompletedStep  String?    // "nin" | "profile" | "location" | "candidate" | "survey" | "confirm"
+  surveyCompleted    Boolean?   @default(false)
+  candidate          Candidate? @relation(fields: [candidateId], references: [id])
 }

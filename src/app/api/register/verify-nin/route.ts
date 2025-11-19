@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { mockApi } from "@/lib/mock/mockApi";
+import { voterApi } from "@/lib/api/voter";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
   try {
     // Use mock API for demo
-    const result = await mockApi.verifyNIN(nin);
+    const result = await voterApi.verifyNIN(nin);
 
     if (result.verified) {
       return NextResponse.json({

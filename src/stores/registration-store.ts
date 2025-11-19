@@ -3,16 +3,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { RegistrationPayload } from "@/lib/registration-schemas";
+import type { RegistrationStep } from "@/types/voter";
 
-export type WizardStep =
-  | "nin"
-  | "profile"
-  | "location"
-  | "candidate"
-  | "survey"
-  | "confirm";
-
-export const orderedSteps: WizardStep[] = [
+export const orderedSteps: RegistrationStep[] = [
   "nin",
   "profile",
   "location",
@@ -22,22 +15,27 @@ export const orderedSteps: WizardStep[] = [
 ];
 
 type RegistrationState = {
-  step: WizardStep;
+  step: RegistrationStep;
   payload: Partial<RegistrationPayload> & { electionYear?: number };
   isSwitching: boolean;
   maxStepIndex: number;
-  setStep: (s: WizardStep) => void;
+  hasHydrated: boolean; // Track if store has hydrated from localStorage
+  setStep: (s: RegistrationStep) => void;
   update: (p: Partial<RegistrationPayload>) => void;
   setSwitching: (v: boolean) => void;
   advance: () => void;
   back: () => void;
-  goToStep: (s: WizardStep) => void;
+  goToStep: (s: RegistrationStep) => void;
   reset: () => void;
+  setHasHydrated: (value: boolean) => void;
 };
 
 /**
  * Registration store for voter registration wizard.
  * Manages multi-step registration flow state with persistence.
+ *
+ * Progress is automatically saved to localStorage via zustand's persist middleware.
+ * In production, this would be synced with the backend API after each step completion.
  *
  * @example
  * ```tsx
@@ -51,6 +49,7 @@ export const useRegistrationStore = create<RegistrationState>()(
       payload: { electionYear: new Date().getFullYear() },
       isSwitching: false,
       maxStepIndex: 0,
+      hasHydrated: false, // Initially false until localStorage loads
       setStep: (s) => set({ step: s }),
       update: (p) => set((state) => ({ payload: { ...state.payload, ...p } })),
       setSwitching: (v) => set({ isSwitching: v }),
@@ -81,7 +80,16 @@ export const useRegistrationStore = create<RegistrationState>()(
           isSwitching: false,
           maxStepIndex: 0,
         }),
+      setHasHydrated: (value) => set({ hasHydrated: value }),
     }),
-    { name: "wardwise-registration" },
+    {
+      name: "wardwise-registration",
+      // Mark as hydrated after rehydration completes
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.setHasHydrated(true);
+        }
+      },
+    },
   ),
 );

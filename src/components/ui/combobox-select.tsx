@@ -17,6 +17,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export interface ComboboxSelectOption {
   value: string;
@@ -54,24 +59,44 @@ export function ComboboxSelect({
     [options, value],
   );
 
+  const renderTriggerButton = () => (
+    <Button
+      variant="outline"
+      role="combobox"
+      aria-expanded={open}
+      disabled={disabled}
+      title={selectedOption?.label}
+      className={cn(
+        "h-11 w-full justify-between overflow-hidden font-normal",
+        !selectedOption && "text-muted-foreground",
+        triggerClassName,
+      )}
+    >
+      <span className="min-w-0 flex-1 truncate text-left">
+        {selectedOption ? selectedOption.label : placeholder}
+      </span>
+      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+    </Button>
+  );
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          disabled={disabled}
-          className={cn(
-            "h-11 w-full justify-between text-left font-normal",
-            !selectedOption && "text-muted-foreground",
-            triggerClassName,
-          )}
-        >
-          {selectedOption ? selectedOption.label : placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+      {selectedOption ? (
+        <Tooltip delayDuration={150}>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>{renderTriggerButton()}</PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent
+            side="top"
+            align="start"
+            className="max-w-xs text-left wrap-break-word"
+          >
+            {selectedOption.label}
+          </TooltipContent>
+        </Tooltip>
+      ) : (
+        <PopoverTrigger asChild>{renderTriggerButton()}</PopoverTrigger>
+      )}
       <PopoverContent
         className={cn(
           "w-(--radix-popover-trigger-width) overflow-hidden rounded-md p-0",

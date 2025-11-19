@@ -13,7 +13,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { mockApi } from "@/lib/mock/mockApi";
+import { dashboardApi } from "@/lib/api/candidate-dashboard";
+import { candidateApi } from "@/lib/api/candidate";
 
 /**
  * Get candidateId from session
@@ -35,7 +36,7 @@ export function useCandidateDashboard() {
     queryKey: ["candidate-dashboard", candidateId],
     queryFn: async () => {
       if (!candidateId) throw new Error("No candidate ID");
-      const result = await mockApi.getCandidateDashboard(candidateId);
+      const result = await dashboardApi.getCandidateDashboard(candidateId);
       return result.dashboard;
     },
     enabled: !!candidateId,
@@ -72,7 +73,10 @@ export function useCandidateSupporters(options?: {
     ],
     queryFn: async () => {
       if (!candidateId) throw new Error("No candidate ID");
-      const result = await mockApi.getCandidateSupporters(candidateId, options);
+      const result = await dashboardApi.getCandidateSupporters(
+        candidateId,
+        options,
+      );
       return result;
     },
     enabled: !!candidateId,
@@ -91,7 +95,7 @@ export function useCandidateWardData() {
     queryKey: ["candidate-ward-data", candidateId],
     queryFn: async () => {
       if (!candidateId) throw new Error("No candidate ID");
-      const result = await mockApi.getCandidateWardData(candidateId);
+      const result = await dashboardApi.getCandidateWardData(candidateId);
       return result.wardData;
     },
     enabled: !!candidateId,
@@ -109,7 +113,8 @@ export function useCandidateSurveyResponses() {
     queryKey: ["candidate-survey-responses", candidateId],
     queryFn: async () => {
       if (!candidateId) throw new Error("No candidate ID");
-      const result = await mockApi.getCandidateSurveyResponses(candidateId);
+      const result =
+        await dashboardApi.getCandidateSurveyResponses(candidateId);
       return result.surveyAnalytics;
     },
     enabled: !!candidateId,
@@ -127,7 +132,7 @@ export function useCandidateDemographics() {
     queryKey: ["candidate-demographics", candidateId],
     queryFn: async () => {
       if (!candidateId) throw new Error("No candidate ID");
-      const result = await mockApi.getCandidateDemographics(candidateId);
+      const result = await dashboardApi.getCandidateDemographics(candidateId);
       return result.demographics;
     },
     enabled: !!candidateId,
@@ -145,7 +150,7 @@ export function useCandidateProfile() {
     queryKey: ["candidate-profile", candidateId],
     queryFn: async () => {
       if (!candidateId) throw new Error("No candidate ID");
-      const result = await mockApi.getCandidateById(candidateId);
+      const result = await candidateApi.getCandidateById(candidateId);
       return result.candidate;
     },
     enabled: !!candidateId,
@@ -163,7 +168,7 @@ export function useCandidateSurvey() {
     queryKey: ["candidate-survey", candidateId],
     queryFn: async () => {
       if (!candidateId) throw new Error("No candidate ID");
-      const result = await mockApi.getCandidateSurvey(candidateId);
+      const result = await candidateApi.getCandidateSurvey(candidateId);
       return result.survey;
     },
     enabled: !!candidateId,
@@ -179,7 +184,7 @@ export function useSurveyById(surveyId: string | null) {
     queryKey: ["survey", surveyId],
     queryFn: async () => {
       if (!surveyId) throw new Error("No survey ID");
-      const result = await mockApi.getSurveyById(surveyId);
+      const result = await candidateApi.getSurveyById(surveyId);
       return result.survey;
     },
     enabled: !!surveyId,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, type QueryClient } from "@tanstack/react-query";
-import { mockApi } from "@/lib/mock/mockApi";
+import { locationApi } from "@/lib/api/location";
 
 // Query keys for consistent caching
 export const locationQueryKeys = {
@@ -16,7 +16,7 @@ export const locationQueryKeys = {
 export function useStates() {
   return useQuery({
     queryKey: locationQueryKeys.states,
-    queryFn: () => mockApi.getStates(),
+    queryFn: () => locationApi.getStates(),
     staleTime: 1000 * 60 * 60, // 1 hour - states rarely change
     gcTime: 1000 * 60 * 60 * 24, // 24 hours cache
     select: (data) => data.states,
@@ -27,7 +27,7 @@ export function useStates() {
 export function useLGAsByState(stateCode: string | null) {
   return useQuery({
     queryKey: locationQueryKeys.lgas(stateCode || ""),
-    queryFn: () => mockApi.getLGAsByState(stateCode!),
+    queryFn: () => locationApi.getLGAsByState(stateCode!),
     enabled: !!stateCode, // Only fetch when stateCode is available
     staleTime: 1000 * 60 * 30, // 30 minutes
     gcTime: 1000 * 60 * 60 * 2, // 2 hours cache
@@ -39,7 +39,7 @@ export function useLGAsByState(stateCode: string | null) {
 export function useWardsByLGA(lgaCode: string | null) {
   return useQuery({
     queryKey: locationQueryKeys.wards(lgaCode || ""),
-    queryFn: () => mockApi.getWardsByLGA(lgaCode!),
+    queryFn: () => locationApi.getWardsByLGA(lgaCode!),
     enabled: !!lgaCode, // Only fetch when lgaCode is available
     staleTime: 1000 * 60 * 15, // 15 minutes
     gcTime: 1000 * 60 * 60, // 1 hour cache
@@ -51,7 +51,7 @@ export function useWardsByLGA(lgaCode: string | null) {
 export function usePollingUnitsByWard(wardCode: string | null) {
   return useQuery({
     queryKey: locationQueryKeys.pollingUnits(wardCode || ""),
-    queryFn: () => mockApi.getPollingUnitsByWard(wardCode!),
+    queryFn: () => locationApi.getPollingUnitsByWard(wardCode!),
     enabled: !!wardCode, // Only fetch when wardCode is available
     staleTime: 1000 * 60 * 10, // 10 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes cache
@@ -83,7 +83,7 @@ export function useLocationData() {
     prefetchLGAs: (queryClient: QueryClient, stateCode: string) => {
       return queryClient.prefetchQuery({
         queryKey: locationQueryKeys.lgas(stateCode),
-        queryFn: () => mockApi.getLGAsByState(stateCode),
+        queryFn: () => locationApi.getLGAsByState(stateCode),
         staleTime: 1000 * 60 * 30,
       });
     },
@@ -91,7 +91,7 @@ export function useLocationData() {
     prefetchWards: (queryClient: QueryClient, lgaCode: string) => {
       return queryClient.prefetchQuery({
         queryKey: locationQueryKeys.wards(lgaCode),
-        queryFn: () => mockApi.getWardsByLGA(lgaCode),
+        queryFn: () => locationApi.getWardsByLGA(lgaCode),
         staleTime: 1000 * 60 * 15,
       });
     },
@@ -99,7 +99,7 @@ export function useLocationData() {
     prefetchPollingUnits: (queryClient: QueryClient, wardCode: string) => {
       return queryClient.prefetchQuery({
         queryKey: locationQueryKeys.pollingUnits(wardCode),
-        queryFn: () => mockApi.getPollingUnitsByWard(wardCode),
+        queryFn: () => locationApi.getPollingUnitsByWard(wardCode),
         staleTime: 1000 * 60 * 10,
       });
     },
@@ -112,9 +112,9 @@ export function useNINVerificationWithLocation(nin: string | null) {
     queryKey: ["nin-verification", nin],
     queryFn: async () => {
       // This would be replaced with a real NIN verification service
-      // For now, we import the mock API dynamically
-      const { mockApi } = await import("@/lib/mock/mockApi");
-      return mockApi.verifyNINWithLocation(nin!);
+      // For now, we import the location API dynamically
+      const { locationApi } = await import("@/lib/api/location");
+      return locationApi.verifyNINWithLocation(nin!);
     },
     enabled: !!nin && nin.length === 11,
     staleTime: 1000 * 60 * 5, // 5 minutes for NIN verification
