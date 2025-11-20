@@ -1,18 +1,18 @@
 import {
-  ArrowDownTrayIcon,
-  ChartBarIcon,
-  CheckCircleIcon,
-  DevicePhoneMobileIcon,
-  GlobeAltIcon,
-  LockClosedIcon,
-  MapPinIcon,
-  MegaphoneIcon,
-  ShieldCheckIcon,
-  Squares2X2Icon,
-} from "@heroicons/react/24/outline";
+  HiArrowDown,
+  HiChartBar,
+  HiCheckCircle,
+  HiDeviceMobile,
+  HiGlobeAlt,
+  HiLockClosed,
+  HiLocationMarker,
+  HiSpeakerphone,
+  HiShieldCheck,
+  HiViewGrid,
+} from "react-icons/hi";
 import type { ComponentType } from "react";
 
-type IconType = ComponentType<React.SVGProps<SVGSVGElement>>;
+type IconType = ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
 
 export type NavigationLink = {
   label: string;
@@ -79,21 +79,21 @@ export const processSteps: ProcessStep[] = [
     number: "01",
     description:
       "Voters complete a guided survey about their priorities, concerns, and candidate support from any device.",
-    icon: Squares2X2Icon,
+    icon: HiViewGrid,
   },
   {
     name: "Geographic Precision",
     number: "02",
     description:
       "Responses organize automatically by State → LGA → Ward → Polling Unit for unrivaled accuracy.",
-    icon: MapPinIcon,
+    icon: HiLocationMarker,
   },
   {
     name: "Actionable Insights",
     number: "03",
     description:
       "Candidates view real-time dashboards surfacing support strength, sentiment, and policy priorities.",
-    icon: ChartBarIcon,
+    icon: HiChartBar,
   },
 ];
 
@@ -111,7 +111,7 @@ export const featureCards: FeatureCard[] = [
     title: "Know Your Exact Location",
     description:
       "We organize every response by State → LGA → Ward → Polling Unit for unmatched clarity.",
-    icon: MapPinIcon,
+    icon: HiLocationMarker,
     metricLabel: "Coverage Accuracy",
     metricValue: "99.2%",
     metricTrend: "+4.8%",
@@ -120,7 +120,7 @@ export const featureCards: FeatureCard[] = [
     title: "Make Your Voice Heard",
     description:
       "Let candidates know the priorities in your community through concise survey questions.",
-    icon: MegaphoneIcon,
+    icon: HiSpeakerphone,
     metricLabel: "Responses Logged",
     metricValue: "18,420",
     metricTrend: "+620",
@@ -129,7 +129,7 @@ export const featureCards: FeatureCard[] = [
     title: "Support Who You Trust",
     description:
       "Choose the candidate you believe in—your support routes straight to their dashboard.",
-    icon: CheckCircleIcon,
+    icon: HiCheckCircle,
     metricLabel: "Verified Choices",
     metricValue: "12,305",
     metricTrend: "+12%",
@@ -138,7 +138,7 @@ export const featureCards: FeatureCard[] = [
     title: "Your Data is Protected",
     description:
       "Phone verification and encrypted storage protect voter information from end to end.",
-    icon: LockClosedIcon,
+    icon: HiLockClosed,
     metricLabel: "Encryption Uptime",
     metricValue: "100%",
     metricTrend: "Secure",
@@ -147,7 +147,7 @@ export const featureCards: FeatureCard[] = [
     title: "Candidates See Trends",
     description:
       "Dashboards surface demographics, sentiment, and issue trends in real time.",
-    icon: ChartBarIcon,
+    icon: HiChartBar,
     metricLabel: "Insights Generated",
     metricValue: "740",
     metricTrend: "+38",
@@ -156,7 +156,7 @@ export const featureCards: FeatureCard[] = [
     title: "Register Anywhere",
     description:
       "Optimized for mobile, tablet, or desktop so supporters can join from any device.",
-    icon: DevicePhoneMobileIcon,
+    icon: HiDeviceMobile,
     metricLabel: "Mobile Sessions",
     metricValue: "68%",
     metricTrend: "+9%",
@@ -224,20 +224,20 @@ export const impactHighlights = [
   {
     title: "Built for nationwide rollout",
     description:
-      "WardWise maps Nigeria’s electoral structure so campaigns and civic teams can activate every ward and polling unit with confidence.",
-    icon: GlobeAltIcon,
+      "WardWise maps Nigeria's electoral structure so campaigns and civic teams can activate every ward and polling unit with confidence.",
+    icon: HiGlobeAlt,
   },
   {
     title: "Trusted by supporters and candidates",
     description:
       "Voters know their insights go straight to the candidate they choose, while teams receive structured, consent-driven data.",
-    icon: ShieldCheckIcon,
+    icon: HiShieldCheck,
   },
   {
     title: "Decisions grounded in communities",
     description:
       "Leadership groups interpret real-time dashboards that highlight local needs—from jobs to infrastructure—so action plans start with constituents.",
-    icon: ChartBarIcon,
+    icon: HiChartBar,
   },
 ];
 
@@ -252,25 +252,25 @@ export const securityHighlights = [
     title: "Verified identities",
     description:
       "Phone OTP verification, voter roll matching, and field-agent attestations keep registrations real and duplications out.",
-    icon: CheckCircleIcon,
+    icon: HiCheckCircle,
   },
   {
     title: "Data residency in Nigeria",
     description:
       "Encrypted databases hosted within Nigeria offer compliance with national data protection laws and resilient uptime.",
-    icon: LockClosedIcon,
+    icon: HiLockClosed,
   },
   {
     title: "Role-based access",
     description:
       "Candidates, analysts, and field teams get tailored workspaces with auditable access trails and download controls.",
-    icon: ShieldCheckIcon,
+    icon: HiShieldCheck,
   },
   {
     title: "Secure exports",
     description:
       "Sensitive exports are watermarked, timed, and logged so campaign assets stay in the right hands.",
-    icon: ArrowDownTrayIcon,
+    icon: HiArrowDown,
   },
 ];
 
@@ -281,9 +281,3 @@ export const candidateBenefits = [
   "Export data for campaign planning",
   "Identify gaps in your coverage",
 ];
-
-export const candidateDashboardPlaceholder = {
-  imageUrl:
-    "https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=1200&q=80",
-  alt: "Candidate dashboard mockup",
-};

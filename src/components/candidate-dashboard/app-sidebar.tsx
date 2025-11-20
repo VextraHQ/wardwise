@@ -30,7 +30,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { MapIcon } from "@heroicons/react/24/outline";
+import { HiMap } from "react-icons/hi";
 
 const data = {
   user: {
@@ -135,7 +135,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <Link href="/">
                 <div className="from-primary flex size-8 items-center justify-center rounded-lg bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
-                  <MapIcon className="size-4" />
+                  <HiMap className="h-4 w-4" />
                 </div>
                 <span className="text-base font-semibold">WardWise</span>
               </Link>

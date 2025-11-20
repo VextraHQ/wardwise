@@ -18,10 +18,10 @@ export default function CandidateLayout({
   useEffect(() => {
     // Redirect to login if not authenticated or not a candidate
     if (status === "unauthenticated") {
-      redirect("/candidate/login");
+      redirect("/login");
     }
     if (status === "authenticated" && session?.user?.role !== "candidate") {
-      redirect("/candidate/login");
+      redirect("/login");
     }
   }, [status, session]);
 

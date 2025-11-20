@@ -75,6 +75,7 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt", // Use JWT tokens instead of database sessions
+    maxAge: 7 * 24 * 60 * 60, // 7 days - reasonable for demo purposes
   },
   callbacks: {
     // Add custom fields to JWT token
@@ -96,7 +97,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: "/candidate/login",
-    error: "/candidate/login",
+    signIn: "/login",
+    error: "/login",
   },
 };

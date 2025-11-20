@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { HiShieldCheck, HiEye, HiLockClosed } from "react-icons/hi";
-import { MapIcon } from "@heroicons/react/24/outline";
+import { HiMap } from "react-icons/hi";
 
 export function VoterFooter() {
   return (
@@ -25,7 +25,7 @@ export function VoterFooter() {
               <span className="relative flex size-12 items-center justify-center">
                 <span className="border-border bg-card absolute inset-0 rounded-full border" />
                 <span className="from-primary relative flex size-9 items-center justify-center rounded-full bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
-                  <MapIcon className="size-5" />
+                  <HiMap className="size-5" />
                 </span>
               </span>
               <div className="flex flex-col leading-none">
@@ -46,7 +46,7 @@ export function VoterFooter() {
           {/* Trust badges */}
           <div className="grid gap-6 sm:grid-cols-3 lg:gap-8">
             <div className="flex items-start gap-2.5">
-              <HiShieldCheck className="text-primary mt-0.5 h-5 w-5 shrink-0" />
+              <HiShieldCheck className="text-primary size-5" />
               <div>
                 <h4 className="text-foreground text-sm font-medium">
                   Privacy First
@@ -58,7 +58,7 @@ export function VoterFooter() {
             </div>
 
             <div className="flex items-start gap-2.5">
-              <HiEye className="text-primary mt-0.5 h-5 w-5 shrink-0" />
+              <HiEye className="text-primary size-5" />
               <div>
                 <h4 className="text-foreground text-sm font-medium">
                   Transparent
@@ -70,7 +70,7 @@ export function VoterFooter() {
             </div>
 
             <div className="flex items-start gap-2.5">
-              <HiLockClosed className="text-primary mt-0.5 h-5 w-5 shrink-0" />
+              <HiLockClosed className="text-primary size-5" />
               <div>
                 <h4 className="text-foreground text-sm font-medium">
                   Verified

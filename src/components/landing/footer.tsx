@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { HiMap } from "react-icons/hi";
 
 import { nigeriaGradient } from "@/lib/landing-data";
-import { MapIcon } from "@heroicons/react/24/outline";
 
 const platformLinks = [
   { label: "How It Works", href: "#how-it-works" },
@@ -37,9 +37,9 @@ export function SiteFooter() {
           <div className="max-w-sm space-y-4">
             <div className="flex items-center gap-3">
               <span className="relative flex size-12 items-center justify-center">
-                <span className="border-accent-foreground/20 bg-accent/40 absolute inset-0 rounded-full border shadow-[0_6px_16px_rgba(0,0,0,0.2)]" />
+                <span className="border-accent-foreground/20 bg-accent/40 absolute inset-0 rounded-full border" />
                 <span className="from-primary relative flex size-9 items-center justify-center rounded-full bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
-                  <MapIcon className="size-5" />
+                  <HiMap className="h-5 w-5" />
                 </span>
               </span>
               <div className="text-accent-foreground text-lg font-semibold tracking-[0.14em] uppercase">

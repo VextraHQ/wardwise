@@ -33,14 +33,14 @@ export function FeaturesSection() {
           {featureCards.map((feature, index) => (
             <article
               key={feature.title}
-              className="group border-border/60 bg-card/80 hover:border-primary/70 relative flex h-full flex-col overflow-hidden rounded-3xl border p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-1 sm:p-8"
+              className="group border-border/60 bg-card/80 hover:border-primary/50 relative flex h-full flex-col overflow-hidden rounded-3xl border p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-8"
             >
               <div
                 className="absolute inset-0 bg-linear-to-br from-white/8 via-transparent to-white/12 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                 aria-hidden="true"
               />
               <span
-                className="absolute top-0 -right-10 size-32 rounded-full bg-[#46C2A7]/15 blur-3xl transition-transform duration-300 group-hover:translate-x-4"
+                className="bg-primary/15 absolute top-0 -right-10 size-32 rounded-full blur-3xl transition-transform duration-300 group-hover:translate-x-4"
                 aria-hidden="true"
               />
               <div className="relative flex items-start gap-4">

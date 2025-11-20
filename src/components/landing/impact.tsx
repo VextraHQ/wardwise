@@ -127,7 +127,7 @@ export function ImpactSection() {
             {impactHighlights.map((item) => (
               <article
                 key={item.title}
-                className="group border-border/60 bg-card/80 hover:border-primary/70 relative flex flex-col gap-3 rounded-2xl border p-5 backdrop-blur-xl transition duration-300 hover:-translate-y-1 sm:gap-4 sm:rounded-3xl sm:p-6"
+                className="group border-border/60 bg-card/80 hover:border-primary/50 relative flex flex-col gap-3 rounded-2xl border p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:gap-4 sm:rounded-3xl sm:p-6"
               >
                 <div className="flex items-center gap-3">
                   <div className="border-primary/30 bg-primary/12 text-accent flex size-10 items-center justify-center rounded-2xl border">

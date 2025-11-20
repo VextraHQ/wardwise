@@ -30,7 +30,7 @@ export function AdminNavUser() {
   const { isMobile } = useSidebar();
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: "/login" });
+    signOut({ callbackUrl: "/" });
   };
 
   const user = {

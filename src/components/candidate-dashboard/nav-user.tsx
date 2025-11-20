@@ -31,7 +31,7 @@ export function NavUser() {
   const { isMobile } = useSidebar();
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: "/candidate/login" });
+    signOut({ callbackUrl: "/" });
   };
 
   const user = {
