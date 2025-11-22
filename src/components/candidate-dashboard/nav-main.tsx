@@ -59,7 +59,7 @@ export function NavMain({
                         href={action.url}
                         className="flex items-center gap-2"
                       >
-                        <action.icon className="size-4" />
+                        <action.icon className="hover:text-primary-foreground size-4" />
                         <span>{action.title}</span>
                       </Link>
                     </DropdownMenuItem>

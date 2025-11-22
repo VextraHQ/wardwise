@@ -7,10 +7,13 @@ import { PlatformPillarsSection } from "@/components/landing/platform-pillars";
 import { SecuritySection } from "@/components/landing/security";
 import { SiteFooter } from "@/components/landing/footer";
 import { SiteHeader } from "@/components/landing/header";
+import { ScrollToTop } from "@/components/landing/scroll-to-top";
+import { DemoBanner } from "@/components/landing/demo-banner";
 
 export default function Home() {
   return (
     <div className="bg-background text-foreground flex min-h-screen flex-col">
+      <DemoBanner />
       <SiteHeader />
       <main className="flex-1">
         <HeroSection />
@@ -22,6 +25,7 @@ export default function Home() {
         <CallToActionSection />
       </main>
       <SiteFooter />
+      <ScrollToTop />
     </div>
   );
 }

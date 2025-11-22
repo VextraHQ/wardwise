@@ -349,7 +349,6 @@ export function NinEntryStep() {
                       <p className="text-muted-foreground text-xs">
                         Connecting to NIMC database...
                       </p>
-                      <DemoIndicator variant="inline" className="mt-1" />
                     </div>
                   </div>
                 )}

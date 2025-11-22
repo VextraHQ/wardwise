@@ -146,7 +146,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="bg-card border-border text-card-foreground w-52"
+                  className="bg-card border-border text-card-foreground"
                 >
                   <DropdownMenuItem asChild>
                     <Link
@@ -188,7 +188,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
               className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 text-sm font-semibold transition-all duration-200"
               asChild
             >
-              <Link href="/register">Register Supporter</Link>
+              <Link href="/register">Support a Candidate</Link>
             </Button>
           </div>
           <button
@@ -294,7 +294,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                 asChild
               >
                 <Link href="/register" onClick={() => setIsMobileOpen(false)}>
-                  Register Supporter
+                  Support a Candidate
                 </Link>
               </Button>
             </div>

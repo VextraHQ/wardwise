@@ -48,9 +48,9 @@ export function AdminNavUser() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">
+                <AvatarFallback className="text-primary-foreground bg-primary rounded-lg">
                   {user.name.charAt(0)}
                 </AvatarFallback>
               </Avatar>
@@ -88,17 +88,20 @@ export function AdminNavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <IconUserCircle />
+                <IconUserCircle className="hover:text-primary-foreground" />
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <IconSettings />
+                <IconSettings className="hover:text-primary-foreground" />
                 Settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut}>
-              <IconLogout />
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              className="text-destructive hover:text-destructive/80 focus:text-destructive/80 focus:bg-destructive/10 hover:bg-destructive/10"
+            >
+              <IconLogout className="hover:text-primary-foreground" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
