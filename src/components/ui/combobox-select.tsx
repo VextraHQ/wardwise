@@ -4,6 +4,7 @@ import * as React from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Command,
   CommandEmpty,
@@ -59,25 +60,46 @@ export function ComboboxSelect({
     [options, value],
   );
 
-  const renderTriggerButton = () => (
-    <Button
-      variant="outline"
-      role="combobox"
-      aria-expanded={open}
-      disabled={disabled}
-      title={selectedOption?.label}
-      className={cn(
-        "h-11 w-full justify-between overflow-hidden font-normal",
-        !selectedOption && "text-muted-foreground",
-        triggerClassName,
-      )}
-    >
-      <span className="min-w-0 flex-1 truncate text-left">
-        {selectedOption ? selectedOption.label : placeholder}
-      </span>
-      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-    </Button>
-  );
+  const renderTriggerButton = () => {
+    // Parse polling unit format: "001 - Polling Unit Name"
+    const labelMatch = selectedOption?.label.match(/^(\d{3})\s*-\s*(.+)$/);
+    const code = labelMatch ? labelMatch[1] : null;
+    const name = labelMatch ? labelMatch[2] : selectedOption?.label;
+
+    return (
+      <Button
+        variant="outline"
+        role="combobox"
+        aria-expanded={open}
+        disabled={disabled}
+        title={selectedOption?.label}
+        className={cn(
+          "h-11 w-full justify-between overflow-hidden font-normal",
+          !selectedOption && "text-muted-foreground",
+          triggerClassName,
+        )}
+      >
+        <span className="flex min-w-0 flex-1 items-center gap-2 truncate text-left">
+          {selectedOption && code ? (
+            <>
+              <Badge
+                variant="secondary"
+                className="shrink-0 font-mono text-xs font-semibold"
+              >
+                {code}
+              </Badge>
+              <span className="truncate">{name}</span>
+            </>
+          ) : selectedOption ? (
+            selectedOption.label
+          ) : (
+            placeholder
+          )}
+        </span>
+        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+      </Button>
+    );
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -110,25 +132,49 @@ export function ComboboxSelect({
           <CommandList className="max-h-[300px]">
             <CommandEmpty>{emptyMessage}</CommandEmpty>
             <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  disabled={option.disabled}
-                  onSelect={(currentValue) => {
-                    onValueChange(currentValue === value ? "" : currentValue);
-                    setOpen(false);
-                  }}
-                >
-                  {option.label}
-                  <Check
-                    className={cn(
-                      "ml-auto h-4 w-4",
-                      value === option.value ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                </CommandItem>
-              ))}
+              {options.map((option) => {
+                // Parse polling unit format: "001 - Polling Unit Name"
+                // Extract code if label follows this pattern
+                const labelMatch = option.label.match(/^(\d{3})\s*-\s*(.+)$/);
+                const code = labelMatch ? labelMatch[1] : null;
+                const name = labelMatch ? labelMatch[2] : option.label;
+
+                return (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    disabled={option.disabled}
+                    onSelect={(currentValue) => {
+                      onValueChange(currentValue === value ? "" : currentValue);
+                      setOpen(false);
+                    }}
+                  >
+                    {/* Hidden text for search - cmdk searches by text content */}
+                    <span className="sr-only">{option.label}</span>
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
+                      {code ? (
+                        <>
+                          <Badge
+                            variant="secondary"
+                            className="shrink-0 font-mono text-xs font-semibold"
+                          >
+                            {code}
+                          </Badge>
+                          <span className="truncate">{name}</span>
+                        </>
+                      ) : (
+                        <span className="truncate">{option.label}</span>
+                      )}
+                    </div>
+                    <Check
+                      className={cn(
+                        "ml-auto h-4 w-4 shrink-0",
+                        value === option.value ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

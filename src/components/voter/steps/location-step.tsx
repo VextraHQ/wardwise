@@ -501,7 +501,7 @@ export function LocationStep() {
                         pollingUnits.length > 0
                           ? pollingUnits.map((unit) => ({
                               value: unit.code,
-                              label: unit.name,
+                              label: `${unit.code} - ${unit.name}`,
                             }))
                           : [];
 
@@ -523,9 +523,9 @@ export function LocationStep() {
                                   ? "Select ward first"
                                   : isLoading("pollingUnits")
                                     ? "Loading polling units..."
-                                    : "Select your polling unit"
+                                    : "Select your polling unit (e.g., 001, 010)"
                               }
-                              searchPlaceholder="Search polling units..."
+                              searchPlaceholder="Search by code (001) or name..."
                               emptyMessage={
                                 pollingUnits.length === 0
                                   ? "Polling units not available"
