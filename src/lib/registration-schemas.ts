@@ -105,30 +105,66 @@ export const toLocalPhoneDisplay = (phone: string): string => {
   return phone;
 };
 
+// VIN (Voter Identification Number) validation - 19-20 digits
+const VIN_REGEX = /^\d{19,20}$/;
+const VIN_ERROR_MESSAGE = "Please enter a valid VIN/PVC number (19-20 digits)";
+
+export const vinSchema = z
+  .string()
+  .trim()
+  .regex(VIN_REGEX, VIN_ERROR_MESSAGE)
+  .optional();
+
+// Email validation
+export const emailSchema = z
+  .string()
+  .min(1, "Email is required")
+  .email("Please enter a valid email address");
+
+export const roleSchema = z.enum(["voter", "supporter"]);
+
 export const basicInfoSchema = z.object({
-  firstName: z.string().min(2),
-  lastName: z.string().min(2),
+  role: roleSchema,
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  middleName: z.string().optional(),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
+  email: emailSchema,
   gender: z.enum(["male", "female", "other"]).optional(),
-  occupation: z.string().min(1),
-  religion: z.string().min(1),
-  age: z.number().int().min(18).max(120),
+  occupation: z.string().optional(),
+  religion: z.string().optional(),
+  age: z.number().int().min(1).max(120),
+  vin: vinSchema,
 });
 
 export const locationSchema = z.object({
-  state: z.string().min(2),
-  lga: z.string().min(2),
-  ward: z.string().min(2),
-  pollingUnit: z.string().min(2),
+  state: z.string().min(2, "State is required"),
+  lga: z.string().min(2, "LGA is required"),
+  ward: z.string().min(2, "Ward is required"),
+  pollingUnit: z.string().min(2, "Polling unit is required"),
 });
 
-export const candidateSchema = z.object({
-  candidateId: z.string().min(1),
+export const candidateSelectionSchema = z.object({
+  position: z.enum([
+    "President",
+    "Governor",
+    "Senator",
+    "House of Representatives",
+    "State Assembly",
+  ]),
+  candidateId: z.string().min(1, "Please select a candidate"),
+  candidateName: z.string().optional(),
+  candidateParty: z.string().optional(),
 });
 
-export const surveySchema = z.object({
-  surveyId: z.string().min(1),
-  answers: z.record(z.string(), z.union([z.string(), z.array(z.string())])),
+export const candidateSelectionsSchema = z.object({
+  selections: z
+    .array(candidateSelectionSchema)
+    .length(5, "You must select exactly 5 candidates (one for each position)"),
+});
+
+export const canvasserSchema = z.object({
+  canvasserCode: z.string().optional(),
 });
 
 export const registrationSchema = z.object({
@@ -137,8 +173,8 @@ export const registrationSchema = z.object({
   phone: phoneSchema,
   basic: basicInfoSchema,
   location: locationSchema,
-  candidate: candidateSchema,
-  survey: surveySchema,
+  candidates: candidateSelectionsSchema,
+  canvasser: canvasserSchema.optional(),
   registrationId: z.string().optional(),
 });
 

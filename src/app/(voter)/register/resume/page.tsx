@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ResumeRegistrationStep } from "@/components/voter/steps/resume-registration-step";
 
 export const metadata: Metadata = {
-  title: "Resume Registration | WardWise",
+  title: "Resume Your Registration | WardWise Registration",
   description: "Continue your incomplete voter registration.",
 };
 

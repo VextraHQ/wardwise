@@ -19,7 +19,16 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = parseInt(searchParams.get("offset") || "0");
 
-    const where = candidateId ? { candidateId } : {};
+    // Multi-candidate support: filter by candidate selections if candidateId provided
+    const where = candidateId
+      ? {
+          candidateSelections: {
+            some: {
+              candidateId,
+            },
+          },
+        }
+      : {};
 
     const [voters, total] = await Promise.all([
       prisma.voter.findMany({

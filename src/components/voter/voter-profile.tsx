@@ -11,13 +11,12 @@ import {
   HiClipboardList,
   HiCheckCircle,
   HiClock,
-  HiTrendingUp,
   HiShieldCheck,
   HiExclamationCircle,
-  HiArrowRight,
   HiExternalLink,
   HiRefresh,
   HiLockClosed,
+  HiMail,
 } from "react-icons/hi";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -36,7 +35,6 @@ import { generateRegistrationId } from "@/lib/registration-schemas";
 import { toast } from "sonner";
 import { voterApi } from "@/lib/api/voter";
 import { candidateApi } from "@/lib/api/candidate";
-import { getSupportersCount } from "@/lib/helpers/voter-analytics";
 import type { Voter } from "@/types/voter";
 import { ProfileHeader } from "@/components/voter/profile/profile-header";
 import {
@@ -136,33 +134,23 @@ export function VoterProfile() {
     staleTime: 1000 * 60 * 5,
   });
 
-  // Fetch candidate data
-  const { data: candidateData, isLoading: isLoadingCandidate } = useQuery({
-    queryKey: ["candidate", payload.candidate?.candidateId],
+  // Multi-candidate support - fetch all 5 selected candidates
+  const candidateIds =
+    payload.candidates?.selections?.map((s) => s.candidateId) || [];
+
+  const { data: candidatesData, isLoading: isLoadingCandidates } = useQuery({
+    queryKey: ["candidates-multi", candidateIds],
     queryFn: async () => {
-      if (!payload.candidate?.candidateId) return null;
-      const result = await candidateApi.getCandidateById(
-        payload.candidate.candidateId,
-      );
-      return result.candidate;
+      if (candidateIds.length === 0) return { candidates: [] };
+      return await candidateApi.getCandidatesByIds(candidateIds);
     },
-    enabled: !!payload.candidate?.candidateId,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    enabled: candidateIds.length > 0,
+    staleTime: 1000 * 60 * 5,
   });
 
-  // Fetch survey data
-  const { data: surveyData, isLoading: isLoadingSurvey } = useQuery({
-    queryKey: ["survey", payload.candidate?.candidateId],
-    queryFn: async () => {
-      if (!payload.candidate?.candidateId) return null;
-      const result = await candidateApi.getCandidateSurvey(
-        payload.candidate.candidateId,
-      );
-      return result.survey;
-    },
-    enabled: !!payload.candidate?.candidateId,
-    staleTime: 1000 * 60 * 10, // 10 minutes
-  });
+  // Survey disabled for now
+  // const surveyData = null;
+  const isLoadingSurvey = false;
 
   // Update registration state when voter data is fetched
   useEffect(() => {
@@ -171,13 +159,17 @@ export function VoterProfile() {
         nin: voterData.nin,
         phone: voterData.phoneNumber,
         basic: {
+          role: voterData.role || "voter",
           firstName: voterData.firstName,
+          middleName: voterData.middleName,
           lastName: voterData.lastName,
+          email: voterData.email || "",
           dateOfBirth: voterData.dateOfBirth,
           age: voterData.age,
           gender: voterData.gender,
           occupation: voterData.occupation,
           religion: voterData.religion,
+          vin: voterData.vin,
         },
         location: {
           state: voterData.state,
@@ -185,17 +177,9 @@ export function VoterProfile() {
           ward: voterData.ward,
           pollingUnit: voterData.pollingUnit,
         },
-        candidate: {
-          // Use the nullish coalescing operator (??) here to handle both null and undefined.
-          // If voterData.candidateId is null or undefined, default to an empty string.
-          // Unlike ||, ?? does not replace 0, false, or "" (empty string) with the default,
-          // which is important if candidateId could ever be an empty string and that's a valid value.
-          candidateId: voterData.candidateId ?? "",
-        },
-        survey: {
-          surveyId: "",
-          answers: voterData.surveyAnswers || {},
-        },
+        candidates: voterData.candidateSelections
+          ? { selections: voterData.candidateSelections }
+          : undefined,
       });
     }
   }, [voterData, update]);
@@ -253,24 +237,15 @@ export function VoterProfile() {
   );
   const canEdit = daysRemaining > 0;
 
-  // Calculate survey completion stats
-  const surveyAnswers = payload.survey?.answers || {};
-  const surveyQuestions = surveyData?.questions || [];
-  const answeredCount = Object.keys(surveyAnswers).filter(
-    (key) => !key.endsWith("_other_text") && surveyAnswers[key],
-  ).length;
-  const totalQuestions = surveyQuestions.length;
+  // Calculate survey completion stats - disabled for multi-candidate support
+  const answeredCount = 0;
+  const totalQuestions = 0;
   const surveyProgress =
     totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
   // Use voterData.surveyCompleted if available (production-ready), otherwise calculate
   const isSurveyComplete =
     voterData?.surveyCompleted ??
     (totalQuestions > 0 && answeredCount === totalQuestions);
-
-  // Get supporter count
-  const supporterCount = payload.candidate?.candidateId
-    ? getSupportersCount(payload.candidate.candidateId)
-    : 0;
 
   // Handle logout
   const handleLogout = () => {
@@ -290,45 +265,12 @@ export function VoterProfile() {
     window.location.reload();
   };
 
-  // Loading state
-  const isLoading = isLoadingVoter || isLoadingCandidate || isLoadingSurvey;
-
-  // Show loading during hydration to prevent mismatch
-  if (!isHydrated) {
-    return (
-      <div className="space-y-6 sm:space-y-8">
-        <div className="space-y-4">
-          <Skeleton className="h-12 w-full max-w-md" />
-          <Skeleton className="h-6 w-48" />
-        </div>
-        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-40" />
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-40" />
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+  // Loading state - consolidate hydration and data fetching
+  const isLoading =
+    !isHydrated || isLoadingVoter || isLoadingCandidates || isLoadingSurvey;
 
   // Show unauthenticated state
-  if (!isAuthenticated) {
+  if (isHydrated && !isAuthenticated) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center space-y-6 px-4 text-center sm:space-y-8">
         <div className="bg-muted flex h-20 w-20 items-center justify-center rounded-full sm:h-24 sm:w-24">
@@ -410,6 +352,8 @@ export function VoterProfile() {
           daysRemaining={daysRemaining}
           isLoading={isLoading}
           onLogout={handleLogout}
+          role={payload.basic?.role}
+          vin={payload.basic?.vin}
         />
         {/* Last Updated Indicator */}
         {!isLoading && lastUpdated && (
@@ -424,245 +368,251 @@ export function VoterProfile() {
       {/* Main Content Tabs */}
       <ProfileTabs>
         {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-4 sm:space-y-6">
-          <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
-            {/* Personal Information */}
-            <ProfileInfoCard
-              title="Personal Information"
-              canEdit={canEdit}
-              isLoading={isLoading}
-            >
-              <InfoRow
-                label="Full Name"
-                value={fullName || undefined}
-                isLoading={isLoadingVoter && !fullName}
-              />
-              <InfoRow
-                label="Age"
-                value={payload.basic?.age?.toString()}
-                isLoading={isLoadingVoter && !payload.basic?.age}
-              />
-              <InfoRow
-                label="Gender"
-                value={
-                  payload.basic?.gender
-                    ? payload.basic.gender.charAt(0).toUpperCase() +
-                      payload.basic.gender.slice(1)
-                    : undefined
-                }
-                isLoading={isLoadingVoter && !payload.basic?.gender}
-              />
-              <InfoRow
-                label="Occupation"
-                value={
-                  payload.basic?.occupation
-                    ? payload.basic.occupation.replace(/-/g, " ")
-                    : undefined
-                }
-                isLoading={isLoadingVoter && !payload.basic?.occupation}
-              />
-              <InfoRow
-                label="Religion"
-                value={
-                  payload.basic?.religion
-                    ? payload.basic.religion.charAt(0).toUpperCase() +
-                      payload.basic.religion.slice(1)
-                    : undefined
-                }
-                isLoading={isLoadingVoter && !payload.basic?.religion}
-              />
-              <InfoRow
-                label="Phone"
-                value={payload.phone}
-                isLoading={isLoadingVoter && !payload.phone}
-              />
-            </ProfileInfoCard>
-
-            {/* Voting Location */}
-            <ProfileInfoCard
-              title="Voting Location"
-              canEdit={canEdit}
-              isLoading={isLoading}
-            >
-              <InfoRow
-                label="State"
-                value={payload.location?.state}
-                isLoading={isLoadingVoter && !payload.location?.state}
-              />
-              <InfoRow
-                label="LGA"
-                value={payload.location?.lga}
-                isLoading={isLoadingVoter && !payload.location?.lga}
-              />
-              <InfoRow
-                label="Ward"
-                value={payload.location?.ward}
-                isLoading={isLoadingVoter && !payload.location?.ward}
-              />
-              <InfoRow
-                label="Polling Unit"
-                value={payload.location?.pollingUnit}
-                isLoading={isLoadingVoter && !payload.location?.pollingUnit}
-              />
-            </ProfileInfoCard>
-
-            {/* Candidate Support - Only show if candidate data exists */}
-            {candidateData && (
-              <Card className="hover:border-primary/50 transition-all duration-200">
-                <CardHeader className="border-border border-b">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-foreground text-base font-semibold sm:text-lg">
-                      Candidate Support
+        <TabsContent value="overview" className="space-y-6">
+          {/* Candidates Section - Wide Grid */}
+          {payload.candidates?.selections &&
+            payload.candidates.selections.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-semibold">
+                      Selected Candidates
                     </h3>
+                    <p className="text-muted-foreground text-xs">
+                      Your chosen representatives for the upcoming election
+                    </p>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  {isLoadingCandidate ? (
-                    <div className="space-y-4">
-                      <Skeleton className="h-5 w-full" />
-                      <Skeleton className="h-5 w-full" />
-                    </div>
-                  ) : (
-                    <div className="space-y-0">
-                      <div className="border-border/30 border-b py-4 last:border-0">
-                        <dt className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase sm:text-sm">
-                          Currently Supporting
-                        </dt>
-                        <dd className="text-foreground text-base font-semibold sm:text-lg">
-                          {candidateData.name}
-                        </dd>
-                        <dd className="text-muted-foreground mt-1 text-sm">
-                          {candidateData.party} • {candidateData.position}
-                        </dd>
-                      </div>
-                      <div className="border-border/30 border-b py-4 last:border-0">
-                        <div className="flex items-center justify-between">
-                          <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase sm:text-sm">
-                            Total Supporters
-                          </dt>
-                          <dd className="text-foreground flex items-center gap-1.5 text-sm font-semibold sm:text-base">
-                            <HiTrendingUp className="text-primary h-4 w-4" />
-                            {supporterCount.toLocaleString()}
-                          </dd>
-                        </div>
-                      </div>
-                      <div className="space-y-2 pt-4">
-                        {canEdit && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={
-                              // () => router.push("/register/candidate")
-                              () => {}
-                            }
-                            className="w-full gap-2"
-                          >
-                            <HiExternalLink className="h-4 w-4" />
-                            Change Candidate
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            toast.info("Candidate profile view coming soon!");
-                          }}
-                          className="w-full gap-2"
-                        >
-                          View Candidate Profile
-                          <HiArrowRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
+                  {canEdit && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 text-xs"
+                      onClick={() => {
+                        // router.push("/register/candidate")
+                      }}
+                    >
+                      <HiExternalLink className="h-3 w-3" />
+                      Change Candidates
+                    </Button>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+
+                {isLoadingCandidates ? (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-32 w-full rounded-xl" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {payload.candidates.selections.map((selection, index) => {
+                      const fullCandidate = candidatesData?.candidates?.find(
+                        (c) => c.id === selection.candidateId,
+                      );
+                      return (
+                        <Card
+                          key={index}
+                          className="hover:border-primary/50 group overflow-hidden transition-all duration-300"
+                        >
+                          <CardContent>
+                            <div className="flex flex-col gap-3">
+                              <div>
+                                <div className="flex items-start justify-between gap-2">
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-background/50 mb-2 text-[10px] tracking-wider uppercase"
+                                  >
+                                    {selection.position}
+                                  </Badge>
+                                  {fullCandidate?.supporters !== undefined && (
+                                    <span className="text-muted-foreground flex items-center gap-1 text-[10px]">
+                                      <HiUsers className="h-3 w-3" />
+                                      {fullCandidate.supporters.toLocaleString()}
+                                    </span>
+                                  )}
+                                </div>
+                                <h4 className="text-foreground line-clamp-1 font-semibold">
+                                  {selection.candidateName ||
+                                    fullCandidate?.name ||
+                                    selection.candidateId}
+                                </h4>
+                                <p className="text-muted-foreground text-xs">
+                                  {selection.candidateParty ||
+                                    fullCandidate?.party}
+                                </p>
+                              </div>
+
+                              {fullCandidate?.constituency && (
+                                <div className="bg-muted/30 text-muted-foreground -mx-4 mt-1 -mb-4 flex items-center gap-2 border-t px-4 py-2 text-[10px]">
+                                  <HiLocationMarker className="h-3 w-3 shrink-0" />
+                                  <span className="truncate">
+                                    {fullCandidate.constituency}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             )}
 
-            {/* Survey Status - Only show if survey exists */}
-            {totalQuestions > 0 && (
-              <Card className="hover:border-primary/50 transition-all duration-200">
-                <CardHeader className="border-border border-b">
-                  <h3 className="text-foreground text-base font-semibold sm:text-lg">
-                    Survey Status
-                  </h3>
-                </CardHeader>
-                <CardContent>
-                  {isLoadingSurvey ? (
-                    <div className="space-y-4">
-                      <Skeleton className="h-5 w-full" />
-                      <Skeleton className="h-5 w-full" />
-                    </div>
-                  ) : (
-                    <div className="space-y-0">
-                      <div className="border-border/30 border-b py-4 last:border-0">
-                        <div className="flex items-center justify-between">
-                          <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase sm:text-sm">
-                            Status
-                          </dt>
-                          {isSurveyComplete ? (
-                            <Badge variant="secondary" className="gap-1.5">
-                              <HiCheckCircle className="h-3 w-3" />
-                              Complete
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="gap-1.5">
-                              <HiClock className="h-3 w-3" />
-                              In Progress
-                            </Badge>
-                          )}
-                        </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Left Column: Personal & Canvasser */}
+            <div className="space-y-6">
+              {/* Personal Information */}
+              <ProfileInfoCard
+                title="Personal Information"
+                canEdit={canEdit}
+                isLoading={isLoading}
+              >
+                <InfoRow
+                  label="Full Name"
+                  value={fullName || undefined}
+                  isLoading={isLoadingVoter && !fullName}
+                />
+                <InfoRow
+                  label="Email"
+                  value={payload.basic?.email}
+                  isLoading={isLoadingVoter && !payload.basic?.email}
+                />
+                <InfoRow
+                  label="Registration Role"
+                  value={
+                    payload.basic?.role
+                      ? payload.basic.role.charAt(0).toUpperCase() +
+                        payload.basic.role.slice(1)
+                      : undefined
+                  }
+                  isLoading={isLoadingVoter && !payload.basic?.role}
+                />
+                {payload.basic?.vin && (
+                  <InfoRow
+                    label="VIN Status"
+                    value="Verified"
+                    isLoading={isLoadingVoter}
+                  />
+                )}
+                <InfoRow
+                  label="Phone"
+                  value={payload.phone}
+                  isLoading={isLoadingVoter && !payload.phone}
+                />
+              </ProfileInfoCard>
+
+              {/* Canvasser Referral */}
+              {payload.canvasser?.canvasserCode && (
+                <Card className="bg-primary/5 border-primary/20">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-full">
+                        <HiUsers className="text-primary h-4 w-4" />
                       </div>
-                      <div className="border-border/30 border-b py-4 last:border-0">
-                        <dt className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase sm:text-sm">
-                          Questions Answered
-                        </dt>
-                        <div className="mb-2 flex items-center justify-between text-sm sm:text-base">
-                          <dd className="text-foreground font-semibold">
-                            {answeredCount} of {totalQuestions}
-                          </dd>
-                          <dd className="text-muted-foreground text-xs">
+                      <h3 className="text-foreground font-semibold">
+                        Canvasser Referral
+                      </h3>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground text-sm">
+                        Referral Code
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className="border-primary/30 bg-primary/10 text-primary font-mono"
+                      >
+                        {payload.canvasser.canvasserCode}
+                      </Badge>
+                    </div>
+                    <p className="text-muted-foreground mt-2 text-xs">
+                      You registered via a campaign canvasser.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Right Column: Location & Survey */}
+            <div className="space-y-6">
+              <ProfileInfoCard
+                title="Voting Location"
+                canEdit={canEdit}
+                isLoading={isLoading}
+              >
+                <InfoRow
+                  label="State"
+                  value={payload.location?.state}
+                  isLoading={isLoadingVoter && !payload.location?.state}
+                />
+                <InfoRow
+                  label="LGA"
+                  value={payload.location?.lga}
+                  isLoading={isLoadingVoter && !payload.location?.lga}
+                />
+                <InfoRow
+                  label="Ward"
+                  value={payload.location?.ward}
+                  isLoading={isLoadingVoter && !payload.location?.ward}
+                />
+                <InfoRow
+                  label="Polling Unit"
+                  value={payload.location?.pollingUnit}
+                  isLoading={isLoadingVoter && !payload.location?.pollingUnit}
+                />
+              </ProfileInfoCard>
+
+              {/* Survey Status - Compact */}
+              {totalQuestions > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-foreground font-semibold">
+                        Voter Survey
+                      </h3>
+                      {isSurveyComplete ? (
+                        <Badge variant="secondary" className="gap-1 text-xs">
+                          <HiCheckCircle className="h-3 w-3" />
+                          Complete
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="gap-1 text-xs">
+                          <HiClock className="h-3 w-3" />
+                          In Progress
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">
+                            Progress
+                          </span>
+                          <span className="font-medium">
                             {Math.round(surveyProgress)}%
-                          </dd>
+                          </span>
                         </div>
-                        <Progress value={surveyProgress} className="h-2" />
+                        <Progress value={surveyProgress} className="h-1.5" />
                       </div>
-                      <div className="space-y-2 pt-4">
-                        {!isSurveyComplete && (
-                          <Button
-                            variant="default"
-                            size="sm"
-                            onClick={
-                              // () => router.push("/register/survey")
-                              () => {}
-                            }
-                            className="w-full gap-2"
-                          >
-                            {answeredCount === 0
-                              ? "Start Survey"
-                              : "Continue Survey"}
-                            <HiArrowRight className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {isSurveyComplete && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              toast.info("Survey responses view coming soon!");
-                            }}
-                            className="w-full gap-2"
-                          >
-                            View Responses
-                            <HiArrowRight className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
+                      {!isSurveyComplete && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="w-full text-xs"
+                        >
+                          Continue Survey
+                        </Button>
+                      )}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </div>
         </TabsContent>
 
@@ -685,23 +635,33 @@ export function VoterProfile() {
                   Personal Information
                 </h4>
                 <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-                  {payload.basic?.firstName && (
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-xs">Full Name</dt>
+                    <dd className="text-foreground text-xs font-medium sm:text-sm">
+                      {fullName}
+                    </dd>
+                  </div>
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-xs">Email</dt>
+                    <dd className="text-foreground text-xs font-medium sm:text-sm">
+                      {payload.basic?.email}
+                    </dd>
+                  </div>
+                  {payload.basic?.role && (
                     <div className="space-y-1">
-                      <dt className="text-muted-foreground text-xs">
-                        First Name
-                      </dt>
-                      <dd className="text-foreground text-xs font-medium sm:text-sm">
-                        {payload.basic.firstName}
+                      <dt className="text-muted-foreground text-xs">Role</dt>
+                      <dd className="text-foreground text-xs font-medium capitalize sm:text-sm">
+                        {payload.basic.role}
                       </dd>
                     </div>
                   )}
-                  {payload.basic?.lastName && (
+                  {payload.basic?.vin && (
                     <div className="space-y-1">
                       <dt className="text-muted-foreground text-xs">
-                        Last Name
+                        VIN (Verified)
                       </dt>
-                      <dd className="text-foreground text-xs font-medium sm:text-sm">
-                        {payload.basic.lastName}
+                      <dd className="text-foreground font-mono text-xs font-medium sm:text-sm">
+                        {payload.basic.vin}
                       </dd>
                     </div>
                   )}
@@ -817,59 +777,30 @@ export function VoterProfile() {
                 </div>
               </div>
 
-              <Separator />
-
-              {/* Candidate Information */}
-              {candidateData && (
-                <div className="space-y-3 sm:space-y-4">
-                  <h4 className="text-foreground flex items-center gap-2 text-xs font-semibold sm:text-sm">
-                    <HiUsers className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    Candidate Support
-                  </h4>
-                  <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-                    <div className="space-y-1 sm:col-span-2">
-                      <dt className="text-muted-foreground text-xs">
-                        Candidate Name
-                      </dt>
-                      <dd className="text-foreground text-xs font-medium sm:text-sm">
-                        {candidateData.name}
-                      </dd>
-                    </div>
-                    <div className="space-y-1">
-                      <dt className="text-muted-foreground text-xs">Party</dt>
-                      <dd className="text-foreground text-xs font-medium sm:text-sm">
-                        {candidateData.party}
-                      </dd>
-                    </div>
-                    <div className="space-y-1">
-                      <dt className="text-muted-foreground text-xs">
-                        Position
-                      </dt>
-                      <dd className="text-foreground text-xs font-medium sm:text-sm">
-                        {candidateData.position}
-                      </dd>
-                    </div>
-                    <div className="space-y-1">
-                      <dt className="text-muted-foreground text-xs">
-                        Constituency
-                      </dt>
-                      <dd className="text-foreground text-xs font-medium sm:text-sm">
-                        {candidateData.constituency || "Not specified"}
-                      </dd>
-                    </div>
-                    <div className="space-y-1">
-                      <dt className="text-muted-foreground text-xs">
-                        Total Supporters
-                      </dt>
-                      <dd className="text-foreground text-xs font-medium sm:text-sm">
-                        {supporterCount.toLocaleString()}
-                      </dd>
+              {/* Canvasser Info (If Present) */}
+              {payload.canvasser?.canvasserCode && (
+                <>
+                  <Separator />
+                  <div className="space-y-3 sm:space-y-4">
+                    <h4 className="text-foreground flex items-center gap-2 text-xs font-semibold sm:text-sm">
+                      <HiUsers className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      Referral Information
+                    </h4>
+                    <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                      <div className="space-y-1">
+                        <dt className="text-muted-foreground text-xs">
+                          Referred By Canvasser
+                        </dt>
+                        <dd className="text-foreground font-mono text-xs font-medium sm:text-sm">
+                          {payload.canvasser.canvasserCode}
+                        </dd>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </>
               )}
 
-              {/* Survey Information */}
+              {/* Survey Information (If Present) */}
               {totalQuestions > 0 && (
                 <>
                   <Separator />
@@ -924,95 +855,140 @@ export function VoterProfile() {
           </Card>
         </TabsContent>
 
-        {/* Activity Tab */}
-        <TabsContent value="activity" className="space-y-4 sm:space-y-6">
+        {/* Updates Tab */}
+        <TabsContent value="updates" className="space-y-4 sm:space-y-6">
           <Card>
             <CardHeader>
               <h3 className="text-foreground text-base font-semibold sm:text-lg">
-                Registration Timeline
+                Notifications & Updates
               </h3>
               <p className="text-muted-foreground text-xs sm:text-sm">
-                Your registration activity history
+                Latest news from your candidates and registration activity
               </p>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 sm:space-y-4">
-                {[
-                  {
-                    icon: HiCheckCircle,
-                    title: "Registration Completed",
-                    date: formatActivityDate(
-                      voterData?.registrationDate || actualRegistrationDate,
-                    ),
-                    fullDate: registrationDate,
-                    description:
-                      "Your voter registration was successfully completed",
-                    completed: true,
-                  },
-                  {
-                    icon: HiUsers,
-                    title: "Candidate Selected",
-                    date: candidateData
-                      ? formatActivityDate(voterData?.createdAt)
-                      : null,
-                    fullDate: candidateData
-                      ? voterData?.createdAt
-                        ? new Date(voterData.createdAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            },
-                          )
-                        : registrationDate
-                      : null,
-                    description: candidateData
-                      ? `Supporting ${candidateData.name}`
-                      : null,
-                    completed: !!candidateData,
-                  },
-                  {
-                    icon: HiClipboardList,
-                    title: "Survey Completed",
-                    date: isSurveyComplete
-                      ? formatActivityDate(voterData?.updatedAt)
-                      : null,
-                    fullDate: isSurveyComplete
-                      ? voterData?.updatedAt
-                        ? new Date(voterData.updatedAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            },
-                          )
-                        : registrationDate
-                      : null,
-                    description: isSurveyComplete
-                      ? "Survey responses submitted"
-                      : totalQuestions > 0
-                        ? `${answeredCount} of ${totalQuestions} questions answered`
+                {(
+                  [
+                    {
+                      icon: HiMail,
+                      title: "Campaign Update: Town Hall",
+                      date: "Today",
+                      fullDate: new Date().toLocaleDateString(),
+                      description:
+                        "Your selected Governor candidate is hosting a virtual town hall next Tuesday. Check your email for the link.",
+                      completed: false,
+                      highlight: true,
+                    },
+                    {
+                      icon: HiShieldCheck,
+                      title: "Profile Verified",
+                      date:
+                        formatActivityDate(voterData?.verifiedAt) || "Recently",
+                      fullDate: voterData?.verifiedAt
+                        ? new Date(voterData.verifiedAt).toLocaleDateString()
+                        : "",
+                      description:
+                        "Your voter registration details have been verified successfully.",
+                      completed: true,
+                    },
+                    {
+                      icon: HiCheckCircle,
+                      title: "Registration Completed",
+                      date: formatActivityDate(
+                        voterData?.registrationDate || actualRegistrationDate,
+                      ),
+                      fullDate: registrationDate,
+                      description:
+                        "Your voter registration was successfully completed",
+                      completed: true,
+                    },
+                    {
+                      icon: HiUsers,
+                      title: "Candidates Selected",
+                      date:
+                        payload.candidates?.selections &&
+                        payload.candidates.selections.length > 0
+                          ? formatActivityDate(voterData?.createdAt)
+                          : null,
+                      fullDate:
+                        payload.candidates?.selections &&
+                        payload.candidates.selections.length > 0
+                          ? voterData?.createdAt
+                            ? new Date(voterData.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                },
+                              )
+                            : registrationDate
+                          : null,
+                      description:
+                        payload.candidates?.selections &&
+                        payload.candidates.selections.length > 0
+                          ? `Selected ${payload.candidates.selections.length} candidates`
+                          : null,
+                      completed:
+                        payload.candidates?.selections &&
+                        payload.candidates.selections.length > 0,
+                    },
+                    {
+                      icon: HiClipboardList,
+                      title: "Survey Completed",
+                      date: isSurveyComplete
+                        ? formatActivityDate(voterData?.updatedAt)
                         : null,
-                    completed: isSurveyComplete,
-                  },
-                ]
+                      fullDate: isSurveyComplete
+                        ? voterData?.updatedAt
+                          ? new Date(voterData.updatedAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              },
+                            )
+                          : registrationDate
+                        : null,
+                      description: isSurveyComplete
+                        ? "Survey responses submitted"
+                        : totalQuestions > 0
+                          ? `${answeredCount} of ${totalQuestions} questions answered`
+                          : null,
+                      completed: isSurveyComplete,
+                    },
+                  ] as {
+                    icon: React.ComponentType<{ className?: string }>;
+                    title: string;
+                    date: string | null;
+                    fullDate: string | null;
+                    description: string | null;
+                    completed: boolean | undefined | null;
+                    highlight?: boolean;
+                  }[]
+                )
                   .filter(
                     (activity) =>
                       activity.completed ||
-                      (activity.date && activity.description),
+                      (activity.date && activity.description) ||
+                      activity.highlight,
                   )
                   .map((activity, index) => (
                     <div
                       key={index}
-                      className="flex items-start gap-3 border-b pb-3 transition-all duration-200 last:border-0 last:pb-0 sm:gap-4 sm:pb-4"
+                      className={`flex items-start gap-3 border-b pb-3 transition-all duration-200 last:border-0 last:pb-0 sm:gap-4 sm:pb-4 ${
+                        activity.highlight ? "bg-primary/5 -mx-4 px-4 py-3" : ""
+                      }`}
                     >
                       <div
                         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-200 sm:h-10 sm:w-10 ${
                           activity.completed
                             ? "bg-primary/10 text-primary"
-                            : "bg-muted text-muted-foreground"
+                            : activity.highlight
+                              ? "bg-primary text-primary-foreground shadow-sm"
+                              : "bg-muted text-muted-foreground"
                         }`}
                       >
                         <activity.icon className="h-4 w-4 transition-transform duration-200 sm:h-5 sm:w-5" />
@@ -1024,6 +1000,14 @@ export function VoterProfile() {
                           </p>
                           {activity.completed && (
                             <HiCheckCircle className="h-3 w-3 text-green-600 transition-opacity duration-200" />
+                          )}
+                          {activity.highlight && (
+                            <Badge
+                              variant="default"
+                              className="h-4 px-1.5 text-[9px]"
+                            >
+                              New
+                            </Badge>
                           )}
                         </div>
                         <p className="text-muted-foreground text-xs">

@@ -12,7 +12,7 @@ export function HowItWorksSection() {
     >
       <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(70,194,167,0.15),transparent_55%),radial-gradient(circle_at_80%_0%,rgba(15,43,36,0.12),transparent_55%)]"
-        aria-hidden="true"
+        aria-hidden={true}
       />
       <div className="text-foreground mx-auto flex max-w-7xl flex-col gap-12 px-6">
         <div className="max-w-2xl">
@@ -46,7 +46,7 @@ export function HowItWorksSection() {
               <div className="from-primary/8 to-accent/8 absolute inset-0 bg-linear-to-br via-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
               <div className="relative flex items-center gap-4">
                 <div className="border-primary/30 bg-primary/12 text-accent flex size-12 items-center justify-center rounded-2xl border shadow-inner">
-                  <step.icon className="size-6" aria-hidden="true" />
+                  <step.icon className="size-6" aria-hidden={true} />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-accent text-xs font-semibold tracking-[0.28em] uppercase">

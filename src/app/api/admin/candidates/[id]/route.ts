@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 // GET /api/admin/candidates/[id] - Get candidate by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -17,8 +17,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const candidate = await prisma.candidate.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         user: {
           select: {
@@ -52,7 +53,7 @@ export async function GET(
 // PUT /api/admin/candidates/[id] - Update candidate
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -61,12 +62,13 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const body = await request.json();
     const { name, email, party, position, constituency, description } = body;
 
     // Update candidate
     const updatedCandidate = await prisma.candidate.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(name && { name }),
         ...(party && { party }),
@@ -79,14 +81,14 @@ export async function PUT(
     // Update user email if provided
     if (email) {
       await prisma.user.updateMany({
-        where: { candidateId: params.id },
+        where: { candidateId: id },
         data: { email },
       });
     }
 
     // Fetch updated candidate with user
     const candidateWithUser = await prisma.candidate.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         user: {
           select: {
@@ -113,7 +115,7 @@ export async function PUT(
 // DELETE /api/admin/candidates/[id] - Delete candidate
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -122,9 +124,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     // Delete candidate (user will be deleted via cascade)
     await prisma.candidate.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

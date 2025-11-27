@@ -6,11 +6,11 @@ import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import {
   HiCreditCard,
-  HiSparkles,
   HiCheckCircle,
   HiShieldCheck,
   HiExclamationCircle,
   HiInformationCircle,
+  HiUserCircle,
 } from "react-icons/hi";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -18,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Collapsible,
   CollapsibleContent,
@@ -41,15 +40,16 @@ import {
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { DemoIndicator } from "@/components/ui/demo-indicator";
 import { Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { RegistrationStepHeader } from "@/components/voter/registration-step-header";
 
 // Demo credentials for testing
 const DEMO_CREDENTIALS = [
-  { nin: "12345678901", name: "Aliyu Mohammed", hasSurvey: true },
-  { nin: "98765432109", name: "Hauwa Bello", hasSurvey: true },
-  { nin: "11223344556", name: "Musa Ahmad Tukur", hasSurvey: true },
-  { nin: "22334455667", name: "Aisha Mohammed", hasSurvey: false },
-  { nin: "33445566778", name: "Ibrahim Aliyu", hasSurvey: false },
-  { nin: "44556677889", name: "Fatima Usman", hasSurvey: true },
+  { nin: "12345678901", name: "Aliyu Mohammed" },
+  { nin: "98765432109", name: "Hauwa Bello" },
+  { nin: "11223344556", name: "Musa Ahmad Tukur" },
+  { nin: "22334455667", name: "Aisha Mohammed" },
+  { nin: "33445566778", name: "Ibrahim Aliyu" },
+  { nin: "44556677889", name: "Fatima Usman" },
 ];
 
 export function VoterLogin() {
@@ -109,13 +109,17 @@ export function VoterLogin() {
             phone: voter.phoneNumber,
             basic: voter.firstName
               ? {
+                  role: voter.role || "voter",
                   firstName: voter.firstName,
+                  middleName: voter.middleName,
                   lastName: voter.lastName,
+                  email: voter.email || "",
                   dateOfBirth: voter.dateOfBirth,
                   age: voter.age,
                   gender: voter.gender,
                   occupation: voter.occupation || "",
                   religion: voter.religion || "",
+                  vin: voter.vin,
                 }
               : undefined,
             location:
@@ -127,13 +131,9 @@ export function VoterLogin() {
                     pollingUnit: voter.pollingUnit,
                   }
                 : undefined,
-            candidate: voter.candidateId
-              ? { candidateId: voter.candidateId }
+            candidates: voter.candidateSelections
+              ? { selections: voter.candidateSelections }
               : undefined,
-            survey: {
-              surveyId: "",
-              answers: voter.surveyAnswers || {},
-            },
           });
           toast.info("Incomplete registration found - redirecting to resume");
           router.push("/register/resume");
@@ -145,13 +145,17 @@ export function VoterLogin() {
           nin: voter.nin,
           phone: voter.phoneNumber,
           basic: {
+            role: voter.role || "voter",
             firstName: voter.firstName,
+            middleName: voter.middleName,
             lastName: voter.lastName,
+            email: voter.email || "",
             dateOfBirth: voter.dateOfBirth,
             age: voter.age,
             gender: voter.gender,
             occupation: voter.occupation || "",
             religion: voter.religion || "",
+            vin: voter.vin,
           },
           location: {
             state: voter.state,
@@ -159,13 +163,9 @@ export function VoterLogin() {
             ward: voter.ward,
             pollingUnit: voter.pollingUnit,
           },
-          candidate: {
-            candidateId: voter.candidateId ?? "",
-          },
-          survey: {
-            surveyId: "",
-            answers: voter.surveyAnswers || {},
-          },
+          candidates: voter.candidateSelections
+            ? { selections: voter.candidateSelections }
+            : undefined,
         });
         toast.success("Login successful - redirecting to profile");
         router.push("/voter/profile");
@@ -234,21 +234,12 @@ export function VoterLogin() {
   return (
     <div className="space-y-6">
       {/* Hero Section */}
-      <section className="mx-auto max-w-2xl">
-        <div className="space-y-3 text-center">
-          <div className="border-primary/30 bg-primary/10 text-accent inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
-            <HiSparkles className="h-3.5 w-3.5" />
-            <span>Returning Voter</span>
-          </div>
-          <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-            Welcome Back
-          </h1>
-          <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
-            Access your voter profile using your registered NIN
-          </p>
-        </div>
-      </section>
-
+      <RegistrationStepHeader
+        icon={HiUserCircle}
+        badge="Returning Voter"
+        title="Welcome Back"
+        description="Access your voter profile using your registered NIN"
+      />
       {/* Main Card */}
       <div className="mx-auto w-full max-w-2xl">
         <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
@@ -477,14 +468,6 @@ export function VoterLogin() {
                               <span className="font-mono font-medium text-amber-900">
                                 {formatNINForDisplay(cred.nin)}
                               </span>
-                              {cred.hasSurvey && (
-                                <Badge
-                                  variant="outline"
-                                  className="h-4 border-green-300 bg-green-50 px-1.5 text-[10px] text-green-700"
-                                >
-                                  Survey
-                                </Badge>
-                              )}
                             </div>
                             <p className="mt-0.5 text-amber-700">{cred.name}</p>
                           </div>

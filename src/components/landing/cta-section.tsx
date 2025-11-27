@@ -31,17 +31,17 @@ export function CallToActionSection() {
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231D453A' fill-opacity='1'%3E%3Cpath d='M0 0h1v1H0V0zm40 40h1v1h-1v-1z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}
-        aria-hidden="true"
+        aria-hidden={true}
       />
 
       {/* Accent elements */}
       <div
         className="bg-primary absolute top-1/4 -left-20 h-64 w-64 rounded-full opacity-[0.06] blur-3xl"
-        aria-hidden="true"
+        aria-hidden={true}
       />
       <div
         className="bg-accent absolute -right-20 bottom-1/4 h-64 w-64 rounded-full opacity-[0.04] blur-3xl"
-        aria-hidden="true"
+        aria-hidden={true}
       />
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">

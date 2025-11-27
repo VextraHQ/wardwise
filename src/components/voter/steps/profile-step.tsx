@@ -7,14 +7,16 @@ import { z } from "zod";
 import {
   HiUser,
   HiPhone,
+  HiMail,
   HiCalendar,
   HiInformationCircle,
-  HiSparkles,
   HiArrowRight,
   HiArrowLeft,
   HiUserCircle,
   HiCheckCircle,
+  HiShieldCheck,
 } from "react-icons/hi";
+import { UserCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +25,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { StepProgress } from "@/components/ui/step-progress";
 import { Separator } from "@/components/ui/separator";
+import { RegistrationStepHeader } from "../registration-step-header";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -49,16 +52,14 @@ import {
 } from "@/components/ui/combobox-select";
 import { Voter } from "@/types/voter";
 
-// Profile Form Schema Validation
+// Profile Form Schema Validation - Removed Role and Age Validation
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
+  middleName: z.string().optional(),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email address"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
-  age: z
-    .number()
-    .int()
-    .min(18, "You must be at least 18 years old")
-    .max(120, "Please enter a valid age"),
+  age: z.number().int().min(1).max(120),
   gender: z.enum(["male", "female", "other"], {
     message: "Please select your gender",
   }),
@@ -71,6 +72,11 @@ const profileSchema = z.object({
       /^(\+234|0)?(7\d{2}|8\d{2}|9\d{2})\d{7}$/,
       "Enter a valid Nigerian mobile number (e.g., 08031234567 or +2348031234567)",
     ),
+  vin: z
+    .string()
+    .regex(/^\d{19,20}$/, "VIN must be 19-20 digits")
+    .optional()
+    .or(z.literal("")),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -79,31 +85,40 @@ export function ProfileStep() {
   const router = useRouter();
   const { update, payload, hasHydrated } = useRegistrationStore();
 
+  // Get role from store payload (set in previous step)
+  const userRole = payload.basic?.role || "voter";
+
   // Get initial values - memoized to prevent unnecessary recalculations
   const initialValues = useMemo((): ProfileFormValues => {
     if (!hasHydrated) {
       // Return empty values until hydration
       return {
         firstName: "",
+        middleName: "",
         lastName: "",
+        email: "",
         dateOfBirth: "",
         age: 18,
         gender: "male", // Default to avoid undefined type error
         occupation: "",
         religion: "",
         phoneNumber: "",
+        vin: "",
       };
     }
     // Return hydrated values
     return {
       firstName: payload.basic?.firstName || "",
+      middleName: payload.basic?.middleName || "",
       lastName: payload.basic?.lastName || "",
+      email: payload.basic?.email || "",
       dateOfBirth: payload.basic?.dateOfBirth || "",
       age: payload.basic?.age ?? 18,
       gender: (payload.basic?.gender as Voter["gender"]) || "male",
       occupation: payload.basic?.occupation || "",
       religion: payload.basic?.religion || "",
       phoneNumber: payload.phone ? payload.phone.replace("+234", "0") : "",
+      vin: payload.basic?.vin || "",
     };
   }, [hasHydrated, payload.basic, payload.phone]);
 
@@ -123,13 +138,8 @@ export function ProfileStep() {
   const onSubmit = (data: ProfileFormValues) => {
     update({
       basic: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        dateOfBirth: data.dateOfBirth,
-        age: data.age,
-        gender: data.gender,
-        occupation: data.occupation,
-        religion: data.religion,
+        role: payload.basic?.role as Voter["role"],
+        ...data,
       },
       phone: normalizeNigerianPhoneInput(data.phoneNumber),
     });
@@ -157,7 +167,9 @@ export function ProfileStep() {
   const getMaxDate = () => {
     const today = new Date();
     const maxDate = new Date(today);
-    maxDate.setFullYear(today.getFullYear() - 18);
+    // Remove restriction since age validation is handled in previous step
+    // But keep a reasonable upper bound if needed, or just let it be
+    maxDate.setFullYear(today.getFullYear() - 10); // Example: min age 10 for supporters
     return maxDate.toISOString().split("T")[0];
   };
 
@@ -228,7 +240,7 @@ export function ProfileStep() {
     return (
       <div className="space-y-6">
         <StepProgress
-          currentStep={2}
+          currentStep={3}
           totalSteps={6}
           stepTitle="Personal Information"
         />
@@ -252,30 +264,24 @@ export function ProfileStep() {
     <div className="space-y-6">
       {/* Reusable Progress Component */}
       <StepProgress
-        currentStep={2}
+        currentStep={3}
         totalSteps={6}
         stepTitle="Personal Information"
       />
 
       {/* Hero Section with Sparkles Badge */}
-      <div className="space-y-3 text-center">
-        <div className="border-primary/30 bg-primary/10 text-accent inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
-          <HiSparkles className="h-3.5 w-3.5" />
-          <span>Building Your Profile</span>
-        </div>
-        <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-          Tell Us About Yourself
-        </h1>
-        <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
-          We need some basic information to complete your registration
-        </p>
-        {isAutoFilled && (
-          <Badge variant="secondary" className="mx-auto mt-2">
-            <HiInformationCircle className="mr-1 h-3 w-3" />
-            Some information was auto-filled from NIN verification
-          </Badge>
-        )}
-      </div>
+      <RegistrationStepHeader
+        icon={UserCircle}
+        badge="Building Your Profile"
+        title="Tell Us About Yourself"
+        description="We need some basic information to complete your registration"
+      />
+      {isAutoFilled && (
+        <Badge variant="secondary" className="mx-auto -mt-4 mb-6 flex w-fit">
+          <HiInformationCircle className="mr-1 h-3 w-3" />
+          Some information was auto-filled from NIN verification
+        </Badge>
+      )}
 
       {/* Main Card */}
       <div className="mx-auto w-full max-w-2xl">
@@ -394,6 +400,55 @@ export function ProfileStep() {
                       }}
                     />
                   </div>
+
+                  {/* Middle Name Field */}
+                  <FormField
+                    control={form.control}
+                    name="middleName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Middle Name (Optional)</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <HiUser className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+                            <Input
+                              {...field}
+                              placeholder="Enter your middle name (optional)"
+                              className="border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background h-12 pl-11 transition-all"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Email Field */}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email Address</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <HiMail className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+                            <Input
+                              {...field}
+                              type="email"
+                              placeholder="your.email@example.com"
+                              className="border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background h-12 pl-11 transition-all"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          We&apos;ll use this to keep you updated about your
+                          candidates
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 <Separator />
@@ -405,7 +460,9 @@ export function ProfileStep() {
                       Date of Birth & Age
                     </h3>
                     <p className="text-muted-foreground text-xs">
-                      You must be at least 18 years old to register
+                      {userRole === "voter"
+                        ? "Verifying your eligibility to vote"
+                        : "Your age helps us tailor your experience"}
                     </p>
                   </div>
 
@@ -431,19 +488,6 @@ export function ProfileStep() {
                                   Auto-filled
                                 </Badge>
                               )}
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <HiInformationCircle className="text-muted-foreground inline h-4 w-4 cursor-help" />
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>
-                                      You must be at least 18 years old to
-                                      register
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
                             </FormLabel>
                             <FormControl>
                               <div className="relative">
@@ -753,12 +797,57 @@ export function ProfileStep() {
                   />
                 </div>
 
+                {/* VIN - Only for voters */}
+                {userRole === "voter" && (
+                  <>
+                    <Separator />
+                    <FormField
+                      control={form.control}
+                      name="vin"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            VIN/PVC Number (Optional)
+                            <Badge variant="secondary" className="text-xs">
+                              Become Verified
+                            </Badge>
+                          </FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <HiShieldCheck className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+                              <Input
+                                {...field}
+                                placeholder="19-20 digit VIN number"
+                                maxLength={20}
+                                className="border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background h-12 pl-11 transition-all"
+                              />
+                            </div>
+                          </FormControl>
+                          <div className="text-muted-foreground space-y-1 text-sm">
+                            <span className="block font-medium">
+                              Benefits of adding your VIN:
+                            </span>
+                            <ul className="ml-4 list-disc text-xs">
+                              <li>Show commitment to your candidates</li>
+                              <li>Get verified voter badge</li>
+                              <li>Receive priority updates</li>
+                            </ul>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+
+                <Separator />
+
                 {/* Action Buttons */}
                 <div className="flex gap-3">
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => router.push("/register/nin")}
+                    onClick={() => router.push("/register/role")}
                     className="h-10 flex-1"
                   >
                     <HiArrowLeft className="mr-2 h-4 w-4" />

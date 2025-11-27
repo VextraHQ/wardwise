@@ -17,11 +17,12 @@
  * 4. Update error handling for real API responses
  */
 
-import type { Voter } from "@/types/voter";
+import type { CandidateSelection, Voter } from "@/types/voter";
 import type { RegistrationData } from "@/types/registration";
 import { getVoterByNIN } from "@/lib/mock/data/voters";
 import { computeRegistrationStatus } from "@/lib/helpers/registration-helpers";
 import type { RegistrationStep } from "@/types/voter";
+import { voters } from "@/lib/mock/data/voters";
 
 // Helper: Check localStorage for incomplete registration
 function getIncompleteFromStorage(nin: string): Voter | null {
@@ -42,22 +43,25 @@ function getIncompleteFromStorage(nin: string): Voter | null {
       return {
         id: `incomplete-${nin}`,
         nin: payload.nin || nin,
+        role: payload.basic?.role || "voter",
         firstName: payload.basic?.firstName || "",
         lastName: payload.basic?.lastName || "",
         middleName: payload.basic?.middleName,
         dateOfBirth: payload.basic?.dateOfBirth || "",
-        email: payload.email,
+        email: payload.basic?.email || payload.email || "",
         phoneNumber: payload.phone || "",
         gender: payload.basic?.gender || "male",
         occupation: payload.basic?.occupation || "",
         religion: payload.basic?.religion || "",
+        vin: payload.basic?.vin,
         age: payload.basic?.age || 0,
         state: payload.location?.state || "",
         lga: payload.location?.lga || "",
         ward: payload.location?.ward || "",
         pollingUnit: payload.location?.pollingUnit || "",
-        candidateId: payload.candidate?.candidateId,
-        surveyAnswers: payload.survey?.answers || {},
+        canvasserCode: payload.canvasser?.canvasserCode,
+        candidateSelections: payload.candidates?.selections || [],
+        surveyAnswers: {},
         verifiedAt: new Date().toISOString(),
         registrationDate: new Date().toISOString().split("T")[0],
         createdAt: new Date().toISOString(),
@@ -74,99 +78,33 @@ function getIncompleteFromStorage(nin: string): Voter | null {
   return null;
 }
 
-// Helper: Generate deterministic data for new NINs
-// EXACT COPY from mockApi.ts - DO NOT MODIFY
+// Helper: Generate deterministic data for new NINs using actual voters array
+// Uses voters array for realistic data generation
+// Supports both voters (18+) and supporters (any age) scenarios
 function generateNINData(nin: string) {
   const hash = nin.split("").reduce((acc, char) => acc + parseInt(char, 10), 0);
 
-  const names = [
-    { firstName: "Aisha", lastName: "Mohammed" },
-    { firstName: "Ibrahim", lastName: "Aliyu" },
-    { firstName: "Fatima", lastName: "Usman" },
-    { firstName: "Musa", lastName: "Ahmad" },
-    { firstName: "Zainab", lastName: "Hassan" },
-    { firstName: "Yusuf", lastName: "Ibrahim" },
-    { firstName: "Amina", lastName: "Suleiman" },
-    { firstName: "Mohammed", lastName: "Yakubu" },
-    { firstName: "Hauwa", lastName: "Bello" },
-    { firstName: "Aliyu", lastName: "Wakili" },
-    { firstName: "Maryam", lastName: "Tukur" },
-    { firstName: "Ahmadu", lastName: "Fintiri" },
-    { firstName: "Halima", lastName: "Jibrilla" },
-    { firstName: "Umar", lastName: "Bindow" },
-    { firstName: "Hadiza", lastName: "Shehu" },
-    { firstName: "Sani", lastName: "Ibrahim" },
-  ];
+  // Pick a voter from the array deterministically
+  const voterIndex = hash % voters.length;
+  const baseVoter = voters[voterIndex];
 
-  const states = [
-    {
-      state: "Adamawa State",
-      lgas: [
-        "Song",
-        "Fufore",
-        "Yola North",
-        "Yola South",
-        "Mubi North",
-        "Mubi South",
-        "Ganye",
-        "Toungo",
-        "Mayo Belwa",
-        "Jimeta",
-        "Numan",
-        "Demsa",
-        "Girei",
-        "Hong",
-        "Michika",
-        "Maiha",
-        "Shelleng",
-        "Lamurde",
-        "Guyuk",
-        "Madagali",
-      ],
-    },
-    {
-      state: "Lagos State",
-      lgas: [
-        "Ikeja",
-        "Eti-Osa",
-        "Surulere",
-        "Mushin",
-        "Oshodi-Isolo",
-        "Kosofe",
-      ],
-    },
-    {
-      state: "Kano State",
-      lgas: [
-        "Kano Municipal",
-        "Nassarawa",
-        "Gwale",
-        "Tarauni",
-        "Dala",
-        "Fagge",
-      ],
-    },
-  ];
+  // Generate age deterministically - mix of voters (18+) and supporters (any age)
+  const currentYear = new Date().getFullYear();
+  const isVoterScenario = hash % 3 === 0; // 33% chance of voter scenario
+  const age = isVoterScenario
+    ? 18 + ((hash * 5) % 63) // Voter: 18-80 years old
+    : 8 + ((hash * 7) % 78); // Supporter: 8-85 years old (includes under 18)
 
-  const nameIndex = hash % names.length;
-  const stateIndex = (hash * 7) % states.length;
-  const selectedState = states[stateIndex];
-  const lgaIndex = (hash * 13) % selectedState.lgas.length;
-  const yearOffset = hash % 20; // Ages 25-44 (realistic voting age range)
-  const monthOffset = (hash * 3) % 12;
-  const dayOffset = (hash * 5) % 28;
-
-  const selectedName = names[nameIndex];
-  const year = 1980 + yearOffset;
-  const month = monthOffset + 1;
-  const day = dayOffset + 1;
+  const year = currentYear - age;
+  const month = ((hash * 3) % 12) + 1;
+  const day = ((hash * 5) % 28) + 1;
 
   return {
-    firstName: selectedName.firstName,
-    lastName: selectedName.lastName,
+    firstName: baseVoter.firstName,
+    lastName: baseVoter.lastName,
     dateOfBirth: `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`,
-    state: selectedState.state,
-    lga: selectedState.lgas[lgaIndex],
+    state: baseVoter.state,
+    lga: baseVoter.lga,
   };
 }
 
@@ -339,11 +277,11 @@ export const voterApi = {
    * MOCK: Generates mock registration ID, simulates delay
    * PRODUCTION: Saves to database, returns real registration ID
    *
-   * @param data - Complete registration payload
+   * @param data - Complete registration payload (accepts Partial for flexibility)
    * @returns Success status and registration ID
    */
   submitRegistration: async (
-    data: RegistrationData,
+    data: Partial<RegistrationData> | RegistrationData,
   ): Promise<{ success: boolean; registrationId: string }> => {
     if (USE_MOCK) {
       // MOCK: EXACT COPY from mockApi.ts - generates mock ID
@@ -367,29 +305,31 @@ export const voterApi = {
    * PRODUCTION: Updates database record
    *
    * @param nin - 11-digit NIN string
-   * @param candidateId - New candidate ID to support
+   * @param candidateSelections - New candidate selections to support
    * @returns Success status
    */
   switchCandidate: async (
     nin: string,
-    candidateId: string,
+    candidateSelections: CandidateSelection[],
   ): Promise<{ success: boolean }> => {
     if (USE_MOCK) {
       // MOCK: Update in-memory data
-      console.log(`🔄 Mock: Switching candidate`);
+      // TODO: Implement and change to multiple candidates now supported check if it's good?
+      console.log(`🔄 Mock: Switching candidate`, candidateSelections);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       const voter = getVoterByNIN(nin);
       if (voter) {
-        voter.candidateId = candidateId;
+        voter.candidateSelections = candidateSelections;
         voter.updatedAt = new Date().toISOString();
+        return { success: true };
       }
-      return { success: !!voter };
+      return { success: false };
     }
 
     // Real API call
-    return apiCall("/register/switch-candidate", {
+    return apiCall<{ success: boolean }>("/register/switch-candidate", {
       method: "POST",
-      body: JSON.stringify({ nin, candidateId }),
-    });
+      body: JSON.stringify({ nin, candidateSelections }),
+    }) as Promise<{ success: boolean }>;
   },
 };

@@ -4,15 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { RegistrationPayload } from "@/lib/registration-schemas";
 import type { RegistrationStep } from "@/types/voter";
-
-export const orderedSteps: RegistrationStep[] = [
-  "nin",
-  "profile",
-  "location",
-  "candidate",
-  "survey",
-  "confirm",
-];
+import { orderedSteps } from "@/lib/helpers/registration-helpers";
 
 type RegistrationState = {
   step: RegistrationStep;

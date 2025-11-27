@@ -220,7 +220,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
         <div
           className="bg-foreground/40 fixed inset-x-0 top-[73px] bottom-0 z-40 backdrop-blur-sm sm:top-[81px] lg:hidden"
           onClick={() => setIsMobileOpen(false)}
-          aria-hidden="true"
+          aria-hidden={true}
         />
       </Transition>
       {/* Mobile menu */}

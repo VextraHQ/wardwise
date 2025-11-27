@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CompletionStep } from "@/components/voter/steps/completion-step";
 
 export const metadata: Metadata = {
-  title: "Registration Complete! | WardWise",
+  title: "Your Registration is Complete! | WardWise Registration",
   description:
     "Your voter registration is complete. Thank you for participating!",
 };

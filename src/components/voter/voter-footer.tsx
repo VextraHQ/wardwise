@@ -10,7 +10,7 @@ export function VoterFooter() {
       {/* Subtle accent */}
       <div
         className="bg-primary/5 absolute top-0 -left-20 h-40 w-40 rounded-full blur-3xl"
-        aria-hidden="true"
+        aria-hidden={true}
       />
 
       <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

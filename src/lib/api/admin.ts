@@ -263,8 +263,10 @@ export const adminApi = {
         let filteredVoters = voters;
 
         if (params?.candidateId) {
-          filteredVoters = voters.filter(
-            (v) => v.candidateId === params.candidateId,
+          filteredVoters = voters.filter((v) =>
+            v.candidateSelections?.some(
+              (sel) => sel.candidateId === params.candidateId,
+            ),
           ) as Voter[];
         }
 

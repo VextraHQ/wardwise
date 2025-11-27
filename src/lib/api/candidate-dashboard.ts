@@ -93,8 +93,8 @@ export const dashboardApi = {
       );
       await new Promise((resolve) => setTimeout(resolve, 600));
 
-      const { getVotersByCandidate } = await import("@/lib/mock/data/voters");
-      let supporters = getVotersByCandidate(candidateId);
+      const { getVotersByCandidateId } = await import("@/lib/mock/data/voters");
+      let supporters = getVotersByCandidateId(candidateId);
 
       // Apply filters
       if (options?.ward) {

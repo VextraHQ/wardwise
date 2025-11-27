@@ -21,8 +21,8 @@ export function ProfileTabs({
         <TabsTrigger value="details" className="text-xs sm:text-sm">
           Details
         </TabsTrigger>
-        <TabsTrigger value="activity" className="text-xs sm:text-sm">
-          Activity
+        <TabsTrigger value="updates" className="text-xs sm:text-sm">
+          Updates
         </TabsTrigger>
         <TabsTrigger value="privacy" className="text-xs sm:text-sm">
           Privacy

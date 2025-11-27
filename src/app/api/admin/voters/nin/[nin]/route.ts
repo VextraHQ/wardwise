@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 // GET /api/admin/voters/nin/[nin] - Get voter by NIN
 export async function GET(
   request: NextRequest,
-  { params }: { params: { nin: string } },
+  { params }: { params: Promise<{ nin: string }> },
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -17,8 +17,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { nin } = await params;
     const voter = await prisma.voter.findUnique({
-      where: { nin: params.nin },
+      where: { nin },
     });
 
     if (!voter) {

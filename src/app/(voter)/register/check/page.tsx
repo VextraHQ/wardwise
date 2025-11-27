@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { DuplicateCheckStep } from "@/components/voter/steps/duplicate-check-step";
 
 export const metadata: Metadata = {
-  title: "Checking Registration | WardWise",
+  title: "Checking Your Registration | WardWise Registration",
   description: "Checking if you're already registered in the system.",
 };
 

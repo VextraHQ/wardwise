@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { HiLogout } from "react-icons/hi";
+import { HiLogout, HiUser } from "react-icons/hi";
 import { HiLockClosed, HiPencil } from "react-icons/hi";
 import { HiCalendar } from "react-icons/hi";
 import { HiCheckCircle } from "react-icons/hi";
@@ -24,6 +24,8 @@ interface ProfileHeaderProps {
   daysRemaining: number;
   isLoading: boolean;
   onLogout: () => void;
+  role?: "voter" | "supporter";
+  vin?: string;
 }
 
 function formatDateForBadge(dateString: string): string {
@@ -61,6 +63,8 @@ export function ProfileHeader({
   daysRemaining,
   isLoading,
   onLogout,
+  role = "voter",
+  vin,
 }: ProfileHeaderProps) {
   // Derive canEdit from daysRemaining
   const canEdit = daysRemaining > 0;
@@ -112,11 +116,23 @@ export function ProfileHeader({
                 <h1 className="text-foreground truncate text-lg font-semibold sm:text-2xl">
                   {fullName}
                 </h1>
-                {state && (
-                  <p className="text-muted-foreground truncate text-xs sm:text-sm">
-                    {state} • Registered Voter
-                  </p>
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  {state && (
+                    <p className="text-muted-foreground truncate text-xs sm:text-sm">
+                      {state}
+                    </p>
+                  )}
+                  <span className="text-muted-foreground hidden text-xs sm:inline">
+                    •
+                  </span>
+                  <Badge
+                    variant={role === "voter" ? "default" : "secondary"}
+                    className="text-xs font-medium tracking-wider uppercase"
+                  >
+                    <HiUser className="h-3 w-3" />
+                    {role}
+                  </Badge>
+                </div>
                 <div className="flex items-center gap-1.5">
                   <p className="text-muted-foreground truncate font-mono text-[10px] sm:text-xs">
                     ID: {registrationId}
@@ -166,10 +182,24 @@ export function ProfileHeader({
           </>
         ) : (
           <>
-            <Badge variant="secondary" className="gap-1.5">
-              <HiCheckCircle className="h-3 w-3" />
-              Verified
-            </Badge>
+            {role === "voter" && (
+              <Badge
+                variant={vin ? "default" : "secondary"}
+                className="gap-1.5 transition-colors"
+              >
+                <HiCheckCircle className="h-3 w-3" />
+                {vin ? "Verified via VIN" : "Verified Voter"}
+              </Badge>
+            )}
+            {role === "supporter" && (
+              <Badge
+                variant="secondary"
+                className="gap-1.5 bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300"
+              >
+                <HiCheckCircle className="h-3 w-3" />
+                Registered Supporter
+              </Badge>
+            )}
             <Badge variant="outline" className="gap-1.5">
               <HiCalendar className="h-3 w-3" />
               <span className="hidden sm:inline">{registrationDate}</span>

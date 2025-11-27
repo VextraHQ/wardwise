@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
   HiCreditCard,
-  HiSparkles,
   HiCheckCircle,
   HiShieldCheck,
   HiExclamationCircle,
@@ -18,6 +17,7 @@ import {
   HiLocationMarker,
   HiBadgeCheck,
 } from "react-icons/hi";
+import { Sparkles } from "lucide-react";
 import { PiSpinnerGapBold } from "react-icons/pi";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { StepProgress } from "@/components/ui/step-progress";
+import { RegistrationStepHeader } from "../registration-step-header";
 import {
   Tooltip,
   TooltipContent,
@@ -137,14 +138,19 @@ export function NinEntryStep() {
         update({
           nin: form.getValues("nin"),
           basic: {
+            role: "voter",
             firstName: data.data.firstName,
+            middleName: "",
             lastName: data.data.lastName,
+            email: "",
             dateOfBirth: data.data.dateOfBirth,
+            gender: "male",
             occupation: "",
             religion: "",
             age:
               new Date().getFullYear() -
               new Date(data.data.dateOfBirth).getFullYear(),
+            vin: "",
           },
         });
       } else {
@@ -191,7 +197,7 @@ export function NinEntryStep() {
     update({ nin: data.nin });
 
     // Redirect to profile step
-    router.push("/register/profile");
+    router.push("/register/role");
   };
 
   // Get character count for NIN input
@@ -216,20 +222,12 @@ export function NinEntryStep() {
       />
 
       {/* Hero Section */}
-      <section className="mx-auto max-w-2xl">
-        <div className="space-y-3 text-center">
-          <div className="border-primary/30 bg-primary/10 text-accent inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
-            <HiSparkles className="h-3.5 w-3.5" />
-            <span>Your Voice Shapes Tomorrow</span>
-          </div>
-          <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-            Voter Registration
-          </h1>
-          <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
-            Verify your identity to participate in nationwide elections
-          </p>
-        </div>
-      </section>
+      <RegistrationStepHeader
+        icon={Sparkles}
+        badge="Your Voice Shapes Tomorrow"
+        title="Voter Registration"
+        description="Verify your identity to participate in nationwide elections"
+      />
 
       {/* Main Form Card */}
       <div className="mx-auto w-full max-w-2xl">

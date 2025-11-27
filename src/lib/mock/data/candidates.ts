@@ -11,40 +11,116 @@ import type { Candidate } from "@/types/candidate";
 
 export const candidates: Candidate[] = [
   // ============================================================================
+  // PRESIDENTIAL CANDIDATES (NATIONAL - ALL STATES)
+  // ============================================================================
+  {
+    id: "cand-president-apc",
+    name: "Bola Ahmed Tinubu",
+    party: "APC",
+    position: "President",
+    state: null,
+    constituency: "Federal Republic of Nigeria",
+    description:
+      "Former Lagos State Governor with extensive experience in governance and nation-building.",
+    supporters: 5420,
+    photo: "/api/placeholder/150/150",
+    surveyId: "survey-president-apc",
+    tagline: "Renewed Hope for Nigeria",
+    vision:
+      "Building a united, prosperous Nigeria with economic growth and security for all citizens",
+    createdAt: "2025-01-10T08:00:00Z",
+    updatedAt: "2025-10-10T08:00:00Z",
+  },
+  {
+    id: "cand-president-pdp",
+    name: "Atiku Abubakar",
+    party: "PDP",
+    position: "President",
+    state: null,
+    constituency: "Federal Republic of Nigeria",
+    description:
+      "Former Vice President and business mogul committed to economic restructuring and job creation.",
+    supporters: 4980,
+    photo: "/api/placeholder/150/150",
+    surveyId: "survey-president-pdp",
+    tagline: "Let's Get Nigeria Working Again",
+    vision:
+      "Restructuring Nigeria for economic prosperity, job creation, and unity in diversity",
+    createdAt: "2025-01-10T08:00:00Z",
+    updatedAt: "2025-10-10T08:00:00Z",
+  },
+  {
+    id: "cand-president-labour",
+    name: "Peter Obi",
+    party: "Labour Party",
+    position: "President",
+    state: null,
+    constituency: "Federal Republic of Nigeria",
+    description:
+      "Former Anambra Governor and business leader focused on youth empowerment and education reform.",
+    supporters: 6150,
+    photo: "/api/placeholder/150/150",
+    surveyId: "survey-president-labour",
+    tagline: "From Consumption to Production",
+    vision:
+      "Transforming Nigeria from consumption to production, prioritizing education, healthcare, and youth empowerment",
+    createdAt: "2025-01-10T08:00:00Z",
+    updatedAt: "2025-10-10T08:00:00Z",
+  },
+  {
+    id: "cand-president-nnpp",
+    name: "Rabiu Musa Kwankwaso",
+    party: "NNPP",
+    position: "President",
+    state: null,
+    constituency: "Federal Republic of Nigeria",
+    description:
+      "Former Kano State Governor and Senator with strong track record in education and infrastructure.",
+    supporters: 3890,
+    photo: "/api/placeholder/150/150",
+    surveyId: "survey-president-nnpp",
+    tagline: "Progress Through Education",
+    vision:
+      "Building a knowledge-based economy through quality education, infrastructure development, and good governance",
+    createdAt: "2025-01-10T08:00:00Z",
+    updatedAt: "2025-10-10T08:00:00Z",
+  },
+
+  // ============================================================================
   // ADAMAWA STATE CANDIDATES
   // ============================================================================
 
   // --- Gubernatorial Candidates ---
   {
     id: "cand-apc-1",
-    name: "Dr. Ahmadu Umaru Fintiri",
+    name: "Senator Aishatu Dahiru Ahmed (Binani)",
     party: "APC",
     position: "Governor",
     state: "Adamawa State",
     constituency: "Adamawa State",
-    description: "Experienced leader focused on development and security.",
+    description: "Progressive leader committed to education and healthcare.",
     supporters: 1250,
     photo: "/api/placeholder/150/150",
     surveyId: "survey-apc-1",
-    tagline: "Security, Development, Progress",
-    vision: "Building a safer and more prosperous Adamawa State",
+    tagline: "Education, Healthcare, Women Empowerment",
+    vision:
+      "Creating an Adamawa State where everyone has access to quality education and healthcare",
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
   },
   {
     id: "cand-pdp-1",
-    name: "Senator Aishatu Dahiru Ahmed",
+    name: "Dr. Ahmadu Umaru Fintiri",
     party: "PDP",
     position: "Governor",
     state: "Adamawa State",
     constituency: "Adamawa State",
-    description: "Progressive leader committed to education and healthcare.",
+    description: "Experienced leader focused on development and security.",
     supporters: 980,
     photo: "/api/placeholder/150/150",
     surveyId: "survey-pdp-1",
-    tagline: "Education, Healthcare, Women Empowerment",
-    vision:
-      "Creating an Adamawa State where everyone has access to quality education and healthcare",
+    tagline: "Fresh Air: Security, Development, Progress",
+    vision: "Building a safer and more prosperous Adamawa State",
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
   },

@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  HiBadgeCheck,
   HiUser,
   HiShieldCheck,
   HiCheckCircle,
@@ -12,10 +11,12 @@ import {
   HiInformationCircle,
   HiRefresh,
 } from "react-icons/hi";
+import { UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useRegistrationStore } from "@/stores/registration-store";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
+import { RegistrationStepHeader } from "../registration-step-header";
 
 export function AlreadyRegisteredStep() {
   const router = useRouter();
@@ -24,32 +25,12 @@ export function AlreadyRegisteredStep() {
   return (
     <div className="space-y-6">
       {/* Hero Section */}
-      <section className="mx-auto max-w-2xl text-center">
-        <div className="mb-6 flex justify-center">
-          <div className="relative">
-            {/* Outer ring */}
-            <div className="border-primary/30 absolute inset-0 animate-ping rounded-full border-2 opacity-20" />
-            {/* Icon circle */}
-            <div className="bg-primary/10 border-primary relative flex h-20 w-20 items-center justify-center rounded-full border-2 sm:h-24 sm:w-24">
-              <HiBadgeCheck className="text-primary h-10 w-10 sm:h-12 sm:w-12" />
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <div className="border-primary/30 bg-primary/10 text-primary inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
-            <HiCheckCircle className="h-3.5 w-3.5" />
-            <span>Registration Found</span>
-          </div>
-          <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-            You're Already Registered!
-          </h1>
-          <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
-            We found your registration in our system. Choose an option below to
-            continue.
-          </p>
-        </div>
-      </section>
+      <RegistrationStepHeader
+        icon={UserCheck}
+        badge="Registration Found"
+        title="You're Already Registered!"
+        description="We found your registration in our system. Choose an option below to continue."
+      />
 
       {/* Main Card */}
       <Card className="border-border/60 bg-card/80 backdrop-blur-sm">

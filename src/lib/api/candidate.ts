@@ -59,12 +59,26 @@ export const candidateApi = {
       let filtered = candidates;
 
       if (state) {
-        filtered = filtered.filter((candidate) => candidate.state === state);
+        // Presidential candidates (state = null) should always be included
+        // State/LGA candidates should be filtered by location
+        filtered = filtered.filter((candidate) => {
+          // Include Presidential candidates (isNational = true, state = null)
+          if (candidate.position === "President" && candidate.state === null) {
+            return true;
+          }
+          // Include candidates matching the state
+          return candidate.state === state;
+        });
       }
 
-      // For House of Representatives, filter by LGA/constituency if provided
+      // For House of Representatives and State Assembly, filter by LGA/constituency if provided
       if (lga && state) {
         filtered = filtered.filter((candidate) => {
+          // Presidential candidates always included
+          if (candidate.position === "President") {
+            return true;
+          }
+
           // Governors and Senators match the state
           if (
             candidate.position === "Governor" ||
@@ -132,6 +146,27 @@ export const candidateApi = {
 
     // PRODUCTION: Replace with real API call
     return apiCall(`/candidates/${candidateId}`);
+  },
+
+  /**
+   * Get multiple candidates by their IDs (for multi-candidate support)
+   * Used to fetch all 5 selected candidates at once
+   */
+  getCandidatesByIds: async (
+    candidateIds: string[],
+  ): Promise<{ candidates: Candidate[] }> => {
+    if (USE_MOCK) {
+      // MOCK: Returns multiple candidates with dynamically calculated supporters
+      console.log(`👥 Mock: Getting ${candidateIds.length} candidates`);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const fetchedCandidates = candidateIds
+        .map((id) => getCandidateByIdWithSupporters(id))
+        .filter((c): c is Candidate => c !== null);
+      return { candidates: fetchedCandidates };
+    }
+
+    // PRODUCTION: Replace with real API call
+    return apiCall(`/candidates/batch?ids=${candidateIds.join(",")}`);
   },
 
   getCandidateSurvey: async (

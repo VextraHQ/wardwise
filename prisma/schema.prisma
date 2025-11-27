@@ -60,13 +60,17 @@ model Candidate {
   name         String
   party        String
   position     String
-  constituency String
+  isNational   Boolean  @default(false)
+  state        String?
+  lga          String?
+  constituency String?
   description  String?
   supporters   Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   user         User?
-  voters       Voter[]
+  voterSelections VoterCandidateSelection[]
+  canvassers   Canvasser[]
 }
 
 model Voter {
@@ -76,7 +80,7 @@ model Voter {
   middleName         String?
   lastName           String
   dateOfBirth        DateTime
-  email              String?     @unique
+  email              String     @unique
   phoneNumber        String
   gender             String?
   occupation         String?
@@ -86,13 +90,51 @@ model Voter {
   lga                String
   ward               String
   pollingUnit        String
-  candidateId        String?
+  role               String     @default("voter")
+  vin                String?
+  canvasserCode      String?
   surveyAnswers      Json?
   verifiedAt         DateTime?
   registrationDate   DateTime   @default(now())
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
-  lastCompletedStep  String?    // "nin" | "profile" | "location" | "candidate" | "survey" | "confirm"
+  lastCompletedStep  String?    // "nin" | "profile" | "location" | "candidate" | "canvasser" | "confirm"
   surveyCompleted    Boolean?   @default(false)
-  candidate          Candidate? @relation(fields: [candidateId], references: [id])
+  candidateSelections VoterCandidateSelection[]
+  canvasser          Canvasser? @relation(fields: [canvasserCode], references: [code])
+}
+
+model VoterCandidateSelection {
+  id          String    @id @default(cuid())
+  voterId     String
+  candidateId String
+  position    String
+  createdAt   DateTime  @default(now())
+
+  voter       Voter     @relation(fields: [voterId], references: [id], onDelete: Cascade)
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@unique([voterId, position])
+  @@index([voterId])
+  @@index([candidateId])
+  @@index([position])
+}
+
+model Canvasser {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  name         String
+  phone        String
+  candidateId  String
+  ward         String?
+  lga          String?
+  state        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  candidate    Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  voters       Voter[]
+
+  @@index([candidateId])
+  @@index([code])
 }

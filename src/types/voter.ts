@@ -1,3 +1,5 @@
+import type { Candidate } from "@/types/candidate";
+
 export type Voter = {
   id: string;
   nin: string; // National Identification Number (11 digits, unique)
@@ -5,19 +7,22 @@ export type Voter = {
   middleName?: string;
   lastName: string;
   dateOfBirth: string; // ISO date string
-  email?: string;
+  email: string; // Now mandatory
   phoneNumber: string;
   gender: "male" | "female" | "other";
-  occupation: string;
-  religion: string;
+  occupation?: string;
+  religion?: string;
   age: number;
   state: string;
   lga: string;
   ward: string;
   pollingUnit: string;
-  candidateId?: string; // Optional for incomplete registrations
-  surveyAnswers: Record<string, string | string[]>; // JSON structure
-  verifiedAt: string; // ISO datetime string
+  role: "voter" | "supporter"; // User role
+  vin?: string; // Voter Identification Number (optional, for verified voters)
+  canvasserCode?: string; // Optional canvasser referral code
+  candidateSelections?: CandidateSelection[]; // Multi-candidate selections
+  surveyAnswers?: Record<string, string | string[]>; // JSON structure (optional)
+  verifiedAt?: string; // ISO datetime string
   registrationDate: string; // ISO date string
   createdAt: string; // ISO datetime string
   updatedAt: string; // ISO datetime string
@@ -27,10 +32,17 @@ export type Voter = {
   surveyCompleted?: boolean; // Whether survey is fully completed
 };
 
+export type CandidateSelection = {
+  position: Candidate["position"];
+  candidateId: string;
+  candidateName?: string;
+  candidateParty?: string;
+};
+
 export type RegistrationStep =
   | "nin"
+  | "role"
   | "profile"
   | "location"
   | "candidate"
-  | "survey"
   | "confirm";

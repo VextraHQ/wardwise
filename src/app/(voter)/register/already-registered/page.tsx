@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AlreadyRegisteredStep } from "@/components/voter/steps/already-registered-step";
 
 export const metadata: Metadata = {
-  title: "Already Registered | WardWise",
+  title: "You're Already Registered | WardWise Registration",
   description: "You're already registered in our system.",
 };
 

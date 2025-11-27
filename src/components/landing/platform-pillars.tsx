@@ -8,11 +8,11 @@ export function PlatformPillarsSection() {
     >
       <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(70,194,167,0.18),transparent_52%),radial-gradient(circle_at_88%_12%,rgba(12,39,32,0.12),transparent_58%)]"
-        aria-hidden="true"
+        aria-hidden={true}
       />
       <div
         className="from-primary/0 via-primary/30 absolute inset-x-1/2 top-0 h-[120%] w-px -translate-x-1/2 bg-linear-to-b to-transparent"
-        aria-hidden="true"
+        aria-hidden={true}
       />
       <div className="relative mx-auto flex max-w-7xl flex-col gap-16 px-6">
         <div className="max-w-3xl space-y-5">
@@ -32,15 +32,15 @@ export function PlatformPillarsSection() {
         <div className="relative flex flex-col gap-6 md:flex-row md:items-stretch md:justify-between">
           <div
             className="from-primary/0 via-primary/30 pointer-events-none absolute top-0 left-[6%] hidden h-full w-px bg-linear-to-b to-transparent md:block"
-            aria-hidden="true"
+            aria-hidden={true}
           />
           <div
             className="from-primary/0 via-primary/20 pointer-events-none absolute top-0 left-[38%] hidden h-full w-px bg-linear-to-b to-transparent lg:block"
-            aria-hidden="true"
+            aria-hidden={true}
           />
           <div
             className="from-primary/0 via-primary/20 pointer-events-none absolute top-0 left-[68%] hidden h-full w-px bg-linear-to-b to-transparent xl:block"
-            aria-hidden="true"
+            aria-hidden={true}
           />
 
           <div className="flex flex-1 flex-col gap-6 md:gap-8">
@@ -51,7 +51,7 @@ export function PlatformPillarsSection() {
               >
                 <span
                   className="bg-primary/20 absolute top-10 -left-10 hidden size-16 rounded-full mix-blend-screen blur-2xl md:block"
-                  aria-hidden="true"
+                  aria-hidden={true}
                 />
                 <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                   <span className="border-primary/30 bg-primary/10 text-accent inline-flex w-fit items-center rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.28em] uppercase">
@@ -61,7 +61,7 @@ export function PlatformPillarsSection() {
                     Step 0{index + 1}
                     <span
                       className="bg-primary size-1.5 animate-pulse rounded-full"
-                      aria-hidden="true"
+                      aria-hidden={true}
                     />
                   </div>
                 </div>
@@ -95,7 +95,7 @@ export function PlatformPillarsSection() {
 
                 <div
                   className="absolute inset-y-0 -right-10 hidden w-10 items-center justify-center md:flex"
-                  aria-hidden="true"
+                  aria-hidden={true}
                 >
                   <div className="from-primary/0 via-primary/40 relative h-16 w-px rounded-full bg-linear-to-b to-transparent sm:h-20 lg:h-24">
                     <span className="bg-primary/80 absolute -top-3 left-1/2 size-2 -translate-x-1/2 rounded-full border border-white/40 shadow-lg sm:-top-4 sm:size-3" />

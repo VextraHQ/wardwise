@@ -22,12 +22,12 @@
 
 import type { Voter } from "@/types/voter";
 import type { CandidateSurvey } from "@/types/survey";
-import { getVotersByCandidate } from "@/lib/mock/data/voters";
+import { getVotersByCandidateId } from "@/lib/mock/data/voters";
 import { getSurveyByCandidateId } from "@/lib/mock/data/candidate-surveys";
 
 // Get total supporter count for a candidate - Calculated from actual voters supporting the candidate
 export function getSupportersCount(candidateId: string): number {
-  return getVotersByCandidate(candidateId).length;
+  return getVotersByCandidateId(candidateId).length;
 }
 
 // Get supporters filtered by ward - Returns all voters supporting a candidate in a specific ward
@@ -35,14 +35,16 @@ export function getSupportersByWard(
   candidateId: string,
   ward: string,
 ): Voter[] {
-  return getVotersByCandidate(candidateId).filter(
+  return getVotersByCandidateId(candidateId).filter(
     (voter) => voter.ward === ward,
   );
 }
 
 // Get supporters filtered by LGA - Returns all voters supporting a candidate in a specific LGA
 export function getSupportersByLGA(candidateId: string, lga: string): Voter[] {
-  return getVotersByCandidate(candidateId).filter((voter) => voter.lga === lga);
+  return getVotersByCandidateId(candidateId).filter(
+    (voter) => voter.lga === lga,
+  );
 }
 
 // Get ward coverage statistics for a candidate - Calculates coverage metrics: covered wards, total wards, coverage percentage
@@ -57,7 +59,7 @@ export function getWardCoverage(candidateId: string): {
     lga: string;
   }>;
 } {
-  const supporters = getVotersByCandidate(candidateId);
+  const supporters = getVotersByCandidateId(candidateId);
 
   // Get unique wards with supporters
   const wardsWithSupporters = [
@@ -101,7 +103,7 @@ export function getPollingUnitStats(candidateId: string): {
     lga: string;
   }>;
 } {
-  const supporters = getVotersByCandidate(candidateId);
+  const supporters = getVotersByCandidateId(candidateId);
 
   // Get unique polling units
   const uniquePollingUnits = new Set(
@@ -153,7 +155,7 @@ export function getDemographics(candidateId: string): {
   };
   totalCount: number;
 } {
-  const supporters = getVotersByCandidate(candidateId);
+  const supporters = getVotersByCandidateId(candidateId);
 
   const ageGroups: Record<string, number> = {
     "18-25": 0,
@@ -225,7 +227,7 @@ export function getRegistrationTrends(
   count: number;
   label: string;
 }> {
-  const supporters = getVotersByCandidate(candidateId);
+  const supporters = getVotersByCandidateId(candidateId);
 
   // Group by date
   const dailyTrends: Record<string, number> = {};
@@ -317,7 +319,7 @@ export function getSurveyAnalytics(candidateId: string): {
   >;
   survey: CandidateSurvey | null;
 } {
-  const supporters = getVotersByCandidate(candidateId);
+  const supporters = getVotersByCandidateId(candidateId);
   const survey = getSurveyByCandidateId(candidateId);
 
   if (!survey) {
@@ -361,7 +363,7 @@ export function getSurveyAnalytics(candidateId: string): {
     const responses: Record<string, number> = {};
 
     votersWithAnswers.forEach((voter) => {
-      const answer = voter.surveyAnswers[question.id];
+      const answer = voter.surveyAnswers?.[question.id];
       if (answer) {
         if (Array.isArray(answer)) {
           // Multiple choice - count each selected option
@@ -425,7 +427,7 @@ export function getSurveyAnalytics(candidateId: string): {
 // Get support strength metric - Calculates a support strength percentage based on various factors
 // For now, uses survey completion rate as a proxy
 export function getSupportStrength(candidateId: string): number {
-  const supporters = getVotersByCandidate(candidateId);
+  const supporters = getVotersByCandidateId(candidateId);
   if (supporters.length === 0) return 0;
 
   const surveyAnalytics = getSurveyAnalytics(candidateId);

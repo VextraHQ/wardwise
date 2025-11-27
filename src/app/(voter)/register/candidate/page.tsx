@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { CandidateSelectionStep } from "@/components/voter/steps/candidate-selection-step";
 
 export const metadata: Metadata = {
-  title: "Choose Your Candidate | WardWise Registration",
+  title: "Choose Your Candidates | WardWise Registration",
   description:
-    "Select the candidate you want to support based on your survey responses.",
+    "Select candidates for all 5 positions: President, Governor, Senator, House of Representatives, and State Assembly.",
 };
 
 export default function CandidatePage() {

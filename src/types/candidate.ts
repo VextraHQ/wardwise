@@ -4,11 +4,12 @@ export type Candidate = {
   name: string;
   party: string;
   position:
+    | "President"
     | "Governor"
     | "Senator"
     | "House of Representatives"
     | "State Assembly";
-  state: string;
+  state: string | null; // Nullable for Presidential candidates (isNational = true)
   constituency: string;
   description?: string;
   supporters: number;

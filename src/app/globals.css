@@ -49,14 +49,6 @@
   /* max-width scale */
   --container-8xl: 90rem; /* enables max-w-8xl */
 
-  /* brand colors */
-  --color-green-deep: #1f4b2c;
-  --color-green-dark: #016f45;
-  --color-lemon-light: #f8ffb6;
-  --color-lemon-dark: #bbd137;
-  --color-lemon-deep: #bfd634;
-  --color-orange-dark: #ff7733;
-
   /* animation tokens */
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;

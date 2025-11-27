@@ -17,6 +17,7 @@ import {
   HiFire,
   HiLightningBolt,
 } from "react-icons/hi";
+import { ClipboardList } from "lucide-react";
 import { PiSpinnerGapBold } from "react-icons/pi";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -25,29 +26,29 @@ import { StepProgress } from "@/components/ui/step-progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useRegistrationStore } from "@/stores/registration-store";
 import { cn } from "@/lib/utils";
 import { candidateApi } from "@/lib/api/candidate";
 import type { CandidateSurvey, SurveyQuestion } from "@/types/survey";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
+import { RegistrationStepHeader } from "../registration-step-header";
 
 export function CandidateSurveyStep() {
   const router = useRouter();
-  const { update, payload } = useRegistrationStore();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [otherTexts, setOtherTexts] = useState<Record<string, string>>({}); // For "Other" option text inputs
   // TODO: Implement ranking question type with drag-and-drop functionality
   // const [rankingOrder, setRankingOrder] = useState<Record<string, string[]>>({});
-  const [showCelebration, setShowCelebration] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastMilestone, setLastMilestone] = useState<number | null>(null);
   const [showMilestone, setShowMilestone] = useState(false);
   const completionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const candidateId = payload.candidate?.candidateId;
+  // Multi-candidate support - survey disabled for now
+  // TODO: Implement per-position surveys or aggregate survey
+  const candidateId = null;
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -315,16 +316,14 @@ export function CandidateSurveyStep() {
         }
       });
 
-      // Save survey data
-      update({
-        survey: {
-          surveyId: survey.id,
-          answers: finalAnswers,
-        } as { surveyId: string; answers: Record<string, string | string[]> },
-      });
-
-      // Show celebration for completion
-      setShowCelebration(true);
+      // Survey data saving disabled - multi-candidate support
+      // TODO: Implement per-position surveys or aggregate survey later
+      // update({
+      //   survey: {
+      //     surveyId: survey.id,
+      //     answers: finalAnswers,
+      //   },
+      // });
 
       // Navigate after delay with cleanup tracking
       completionTimeoutRef.current = setTimeout(() => {
@@ -508,19 +507,12 @@ export function CandidateSurveyStep() {
 
       {/* Hero Section - Only show on first question */}
       {currentQuestionIndex === 0 && (
-        <div className="space-y-2 text-center">
-          <div className="flex items-center justify-center gap-2">
-            <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-              {survey.title}
-            </h1>
-            {showCelebration && (
-              <HiSparkles className="text-primary h-6 w-6 animate-pulse" />
-            )}
-          </div>
-          <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
-            {survey.description}
-          </p>
-        </div>
+        <RegistrationStepHeader
+          icon={ClipboardList}
+          badge="Candidate Survey"
+          title={survey.title}
+          description={survey.description}
+        />
       )}
 
       {/* Milestone Celebration */}

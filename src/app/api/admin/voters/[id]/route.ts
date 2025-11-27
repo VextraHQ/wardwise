@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 // GET /api/admin/voters/[id] - Get voter by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -17,8 +17,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const voter = await prisma.voter.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!voter) {
@@ -47,7 +48,7 @@ export async function GET(
 // DELETE /api/admin/voters/[id] - Delete voter
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -56,8 +57,9 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     await prisma.voter.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

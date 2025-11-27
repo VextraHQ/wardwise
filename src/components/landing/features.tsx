@@ -8,11 +8,11 @@ export function FeaturesSection() {
     >
       <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_82%_16%,rgba(70,194,167,0.22),transparent_52%),radial-gradient(circle_at_12%_88%,rgba(17,60,51,0.14),transparent_58%)]"
-        aria-hidden="true"
+        aria-hidden={true}
       />
       <div
         className={`absolute inset-0 ${nigeriaGradient} opacity-[0.25] mix-blend-multiply`}
-        aria-hidden="true"
+        aria-hidden={true}
       />
       <div className="relative mx-auto flex max-w-7xl flex-col gap-14 px-6">
         <div className="max-w-3xl space-y-5">
@@ -37,18 +37,18 @@ export function FeaturesSection() {
             >
               <div
                 className="absolute inset-0 bg-linear-to-br from-white/8 via-transparent to-white/12 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                aria-hidden="true"
+                aria-hidden={true}
               />
               <span
                 className="bg-primary/15 absolute top-0 -right-10 size-32 rounded-full blur-3xl transition-transform duration-300 group-hover:translate-x-4"
-                aria-hidden="true"
+                aria-hidden={true}
               />
               <div className="relative flex items-start gap-4">
                 <div className="border-primary/30 bg-primary/10 text-accent relative flex size-14 items-center justify-center rounded-2xl border shadow-inner">
-                  <feature.icon className="size-7" aria-hidden="true" />
+                  <feature.icon className="size-7" aria-hidden={true} />
                   <span
                     className="bg-primary/90 absolute -top-1 -right-1 size-3 rounded-full border border-white/60 shadow-md"
-                    aria-hidden="true"
+                    aria-hidden={true}
                   />
                 </div>
                 <div className="flex-1 space-y-3">
@@ -79,7 +79,7 @@ export function FeaturesSection() {
                       className="size-3"
                       viewBox="0 0 12 12"
                       fill="none"
-                      aria-hidden="true"
+                      aria-hidden={true}
                     >
                       <path
                         d="M2.5 7.5 5.25 4.5l2 2L9.5 4"
@@ -107,7 +107,7 @@ export function FeaturesSection() {
                   Signal ready
                   <span
                     className="bg-primary size-1.5 animate-pulse rounded-full"
-                    aria-hidden="true"
+                    aria-hidden={true}
                   />
                 </span>
               </div>

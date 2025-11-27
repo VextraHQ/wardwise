@@ -12,6 +12,7 @@ import {
   HiInformationCircle,
   HiCheckCircle,
 } from "react-icons/hi";
+import { History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -21,18 +22,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { cn } from "@/lib/utils";
 import { voterApi } from "@/lib/api/voter";
-import {
-  orderedSteps,
-  useRegistrationStore,
-} from "@/stores/registration-store";
+import { orderedSteps } from "@/lib/helpers/registration-helpers";
+import { useRegistrationStore } from "@/stores/registration-store";
+import { RegistrationStepHeader } from "../registration-step-header";
 import type { RegistrationStep } from "@/types/voter";
 
 const stepLabels: Record<RegistrationStep, string> = {
   nin: "NIN Verification",
+  role: "Role Selection",
   profile: "Profile Information",
   location: "Voting Location",
   candidate: "Candidate Selection",
-  survey: "Voter Survey",
   confirm: "Confirmation",
 };
 
@@ -78,13 +78,17 @@ export function ResumeRegistrationStep() {
       nin: voter.nin,
       phone: voter.phoneNumber,
       basic: {
+        role: voter.role || "voter",
         firstName: voter.firstName,
+        middleName: voter.middleName,
         lastName: voter.lastName,
+        email: voter.email || "",
         dateOfBirth: voter.dateOfBirth,
         age: voter.age,
         gender: voter.gender,
         occupation: voter.occupation,
         religion: voter.religion,
+        vin: voter.vin,
       },
       location: {
         state: voter.state,
@@ -92,13 +96,9 @@ export function ResumeRegistrationStep() {
         ward: voter.ward,
         pollingUnit: voter.pollingUnit,
       },
-      candidate: voter.candidateId
-        ? { candidateId: voter.candidateId }
+      candidates: voter.candidateSelections
+        ? { selections: voter.candidateSelections }
         : undefined,
-      survey: {
-        surveyId: "",
-        answers: voter.surveyAnswers || {},
-      },
     });
 
     const safeLastStep = normalizeStep(data.lastStep);
@@ -203,22 +203,12 @@ export function ResumeRegistrationStep() {
         stepTitle={stepLabels[resumeStep]}
       />
 
-      <div className="space-y-3 text-center sm:space-y-4">
-        <h1 className="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">
-          Welcome back, let’s pick up where you left off
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          We saved your progress after the{" "}
-          <span className="text-foreground font-medium">
-            {stepLabels[safeLastStep]}
-          </span>{" "}
-          step. You’re ready to continue with{" "}
-          <span className="text-foreground font-medium">
-            {stepLabels[resumeStep]}
-          </span>
-          .
-        </p>
-      </div>
+      <RegistrationStepHeader
+        icon={History}
+        badge="Welcome Back"
+        title="Resume Your Registration"
+        description={`We saved your progress after the ${stepLabels[safeLastStep]} step.`}
+      />
 
       <Card>
         <CardHeader className="border-b">
@@ -284,7 +274,7 @@ export function ResumeRegistrationStep() {
                         status === "upcoming" &&
                           "bg-muted text-muted-foreground",
                       )}
-                      aria-hidden="true"
+                      aria-hidden={true}
                     >
                       {status === "done" ? (
                         <HiCheckCircle className="h-5 w-5" />

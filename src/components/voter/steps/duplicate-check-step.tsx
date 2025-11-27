@@ -11,6 +11,7 @@ import {
   HiOutlineClock,
   HiArrowRight,
 } from "react-icons/hi";
+import { Search } from "lucide-react";
 import { PiSpinnerGapBold } from "react-icons/pi";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import { useRegistrationStore } from "@/stores/registration-store";
 import { voterApi } from "@/lib/api/voter";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { DemoIndicator } from "@/components/ui/demo-indicator";
+import { RegistrationStepHeader } from "../registration-step-header";
 
 export function DuplicateCheckStep() {
   const router = useRouter();
@@ -65,14 +67,12 @@ export function DuplicateCheckStep() {
       />
 
       {/* Hero Section */}
-      <section className="mx-auto max-w-2xl text-center">
-        <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-          Checking Your Registration
-        </h1>
-        <p className="text-muted-foreground mx-auto mt-3 max-w-lg text-sm sm:text-base">
-          Verifying if you're already registered in our system
-        </p>
-      </section>
+      <RegistrationStepHeader
+        icon={Search}
+        badge="Verification in Progress"
+        title="Checking Your Registration"
+        description="Verifying if you're already registered in our system"
+      />
 
       <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
         <CardContent className="flex flex-col items-center justify-center space-y-6">

@@ -23,11 +23,11 @@ export function ImpactSection() {
     >
       <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(70,194,167,0.2),transparent_52%),radial-gradient(circle_at_88%_22%,rgba(18,68,56,0.12),transparent_60%)]"
-        aria-hidden="true"
+        aria-hidden={true}
       />
       <div
         className="absolute inset-x-0 top-1/2 h-[120%] -translate-y-1/2 bg-linear-to-b from-[#0f2b24]/5 via-transparent to-[#46C2A7]/10"
-        aria-hidden="true"
+        aria-hidden={true}
       />
       <div className="relative mx-auto flex max-w-7xl flex-col gap-14 px-6">
         <div className="max-w-3xl space-y-5">
@@ -47,7 +47,7 @@ export function ImpactSection() {
           <div className="border-border/60 bg-card/90 relative overflow-hidden rounded-2xl border backdrop-blur-xl sm:rounded-3xl">
             <div
               className="bg-primary/15 absolute top-1/2 -left-32 hidden size-112 -translate-y-1/2 rounded-full mix-blend-screen blur-3xl lg:block"
-              aria-hidden="true"
+              aria-hidden={true}
             />
             <div className="relative flex flex-col gap-6 p-6 sm:gap-8 sm:p-8 lg:p-12">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
@@ -63,7 +63,7 @@ export function ImpactSection() {
                   Syncing
                   <span
                     className="bg-primary inline-flex size-1.5 animate-pulse rounded-full"
-                    aria-hidden="true"
+                    aria-hidden={true}
                   />
                 </div>
               </div>
@@ -91,7 +91,7 @@ export function ImpactSection() {
                     </p>
                     <div
                       className="from-primary/20 via-primary/50 to-primary mt-3 h-1 rounded-full bg-linear-to-r sm:mt-4"
-                      aria-hidden="true"
+                      aria-hidden={true}
                     />
                   </div>
                 ))}
@@ -131,7 +131,7 @@ export function ImpactSection() {
               >
                 <div className="flex items-center gap-3">
                   <div className="border-primary/30 bg-primary/12 text-accent flex size-10 items-center justify-center rounded-2xl border">
-                    <item.icon className="size-5" aria-hidden="true" />
+                    <item.icon className="size-5" aria-hidden={true} />
                   </div>
                   <h3 className="text-foreground text-lg font-semibold tracking-tight">
                     {item.title}
@@ -144,7 +144,7 @@ export function ImpactSection() {
                   Impact signal
                   <span
                     className="bg-primary size-1.5 animate-pulse rounded-full"
-                    aria-hidden="true"
+                    aria-hidden={true}
                   />
                 </span>
               </article>

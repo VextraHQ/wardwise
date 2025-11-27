@@ -42,11 +42,11 @@ export function SiteFooter() {
       {/* Subtle background layers */}
       <div
         className={`absolute inset-0 ${nigeriaGradient} opacity-[0.08]`}
-        aria-hidden="true"
+        aria-hidden={true}
       />
       <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(70,194,167,0.05),transparent_55%),radial-gradient(circle_at_bottom,rgba(15,43,36,0.08),transparent_62%)]"
-        aria-hidden="true"
+        aria-hidden={true}
       />
       <div className="relative mx-auto max-w-7xl px-6 py-16 sm:px-8 lg:py-20">
         {/* Main footer content */}

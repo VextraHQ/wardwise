@@ -8,7 +8,7 @@ export function SecuritySection() {
     >
       <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_84%_82%,rgba(70,194,167,0.14),transparent_55%),radial-gradient(circle_at_14%_88%,rgba(18,68,56,0.1),transparent_65%)]"
-        aria-hidden="true"
+        aria-hidden={true}
       />
       <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-6">
         <div className="max-w-3xl space-y-4">
@@ -31,7 +31,7 @@ export function SecuritySection() {
               className="border-border bg-card/70 hover:border-primary/50 hover:bg-card relative flex h-full flex-col gap-4 rounded-3xl border p-7 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
             >
               <div className="border-primary/30 bg-primary/12 text-accent flex size-10 items-center justify-center rounded-full border">
-                <item.icon className="size-5" aria-hidden="true" />
+                <item.icon className="size-5" aria-hidden={true} />
               </div>
               <h3 className="text-foreground text-lg font-semibold tracking-tight">
                 {item.title}

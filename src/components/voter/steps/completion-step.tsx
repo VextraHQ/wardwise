@@ -14,13 +14,13 @@ import {
   HiCheckCircle,
   HiLocationMarker,
   HiUsers,
-  HiClipboardList,
   HiShieldCheck,
   HiDownload,
   HiChatAlt,
   HiMail,
 } from "react-icons/hi";
 import { HiLockClosed } from "react-icons/hi2";
+import { PartyPopper } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ import { HiExclamationCircle } from "react-icons/hi";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import type { Candidate } from "@/types/candidate";
+import { RegistrationStepHeader } from "../registration-step-header";
 
 export function CompletionStep() {
   const router = useRouter();
@@ -85,33 +86,23 @@ export function CompletionStep() {
     window.location.href = url;
   };
 
-  // Support both single candidate (current) and multi-candidate (future)
-  // Current: payload.candidate?.candidateId
-  // Future: payload.candidates?.[position]?.candidateId
-  const singleCandidateId = payload.candidate?.candidateId;
-  // Type assertion for future multi-candidate support (not yet in schema)
-  const candidatesByPosition = (
-    payload as typeof payload & {
-      candidates?: Record<string, { candidateId: string }>;
-    }
-  ).candidates;
+  // Support multi-candidate selections
+  const candidateSelections = payload.candidates?.selections;
 
-  // Determine if we're using single or multi-candidate mode
+  // Determine if we're using multi-candidate mode
   const isMultiCandidateMode = Boolean(
-    candidatesByPosition && Object.keys(candidatesByPosition).length > 0,
+    candidateSelections && candidateSelections.length > 0,
   );
+
   const candidateIds = useMemo(() => {
-    if (isMultiCandidateMode && candidatesByPosition) {
-      return Object.entries(candidatesByPosition).map(([position, data]) => ({
-        position,
-        candidateId: data.candidateId,
+    if (isMultiCandidateMode && candidateSelections) {
+      return candidateSelections.map((selection) => ({
+        position: selection.position,
+        candidateId: selection.candidateId,
       }));
     }
-    if (singleCandidateId) {
-      return [{ position: null, candidateId: singleCandidateId }];
-    }
     return [];
-  }, [isMultiCandidateMode, candidatesByPosition, singleCandidateId]);
+  }, [isMultiCandidateMode, candidateSelections]);
 
   // Fetch all candidate details using useQueries for dynamic queries
   const candidateQueriesResults = useQueries({
@@ -169,6 +160,7 @@ export function CompletionStep() {
   // Get position labels for display
   const getPositionLabel = (position: string) => {
     const labels: Record<string, string> = {
+      President: "President",
       Governor: "Governor",
       Senator: "Senator",
       "House of Representatives": "House of Reps",
@@ -324,7 +316,7 @@ Important: You can update your information once within 7 days.
 
   return (
     <div className="space-y-6">
-      {/* Success Header with Animated Checkmark */}
+      {/* Success Header with RegistrationStepHeader */}
       <section aria-live="polite" className="mx-auto max-w-2xl">
         <div className="text-center">
           {/* Simplified Animated Checkmark Circle */}
@@ -339,19 +331,12 @@ Important: You can update your information once within 7 days.
             </div>
           </div>
 
-          {/* Heading with integrated badge */}
-          <div className="mb-3 space-y-2">
-            <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-              You're all set, {firstName}!
-            </h1>
-            <div className="border-primary/30 bg-primary/10 text-primary inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium">
-              <span>Registration Complete</span>
-            </div>
-          </div>
-          <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
-            Your registration has been saved securely and is ready for
-            verification
-          </p>
+          <RegistrationStepHeader
+            icon={PartyPopper}
+            badge="Registration Complete"
+            title={`You're all set, ${firstName}!`}
+            description="Your registration has been saved securely and is ready for verification"
+          />
         </div>
       </section>
 
@@ -452,6 +437,31 @@ Important: You can update your information once within 7 days.
                 </div>
                 <div>
                   <dt className="text-muted-foreground text-xs font-medium">
+                    Email
+                  </dt>
+                  <dd className="text-foreground mt-1 text-sm font-semibold">
+                    {payload.basic?.email || "Not provided"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground text-xs font-medium">
+                    Role
+                  </dt>
+                  <dd className="mt-1">
+                    <Badge
+                      variant={
+                        payload.basic?.role === "voter"
+                          ? "default"
+                          : "secondary"
+                      }
+                      className="capitalize"
+                    >
+                      {payload.basic?.role || "Not specified"}
+                    </Badge>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground text-xs font-medium">
                     Age
                   </dt>
                   <dd className="text-foreground mt-1 text-sm font-semibold">
@@ -460,6 +470,29 @@ Important: You can update your information once within 7 days.
                       : "Not provided"}
                   </dd>
                 </div>
+                {payload.basic?.vin && (
+                  <div className="sm:col-span-2">
+                    <dt className="text-muted-foreground text-xs font-medium">
+                      VIN Status
+                    </dt>
+                    <dd className="mt-1">
+                      <Badge variant="default" className="gap-1.5">
+                        <HiShieldCheck className="h-3 w-3" />
+                        Verified Voter
+                      </Badge>
+                    </dd>
+                  </div>
+                )}
+                {payload.canvasser?.canvasserCode && (
+                  <div className="sm:col-span-2">
+                    <dt className="text-muted-foreground text-xs font-medium">
+                      Referred by Canvasser
+                    </dt>
+                    <dd className="text-foreground mt-1 text-sm font-semibold">
+                      Code: {payload.canvasser.canvasserCode}
+                    </dd>
+                  </div>
+                )}
                 <div>
                   <dt className="text-muted-foreground text-xs font-medium">
                     Gender
@@ -546,46 +579,21 @@ Important: You can update your information once within 7 days.
 
           <Separator />
 
-          {/* Survey & Candidate */}
+          {/* Candidate Support */}
           <div className="space-y-3">
             <div className="text-primary flex items-center gap-2 text-sm font-semibold">
-              <HiClipboardList className="h-4 w-4" />
-              <span>Survey & Support</span>
+              <HiUsers className="h-4 w-4" />
+              <span>Your Selected Candidates</span>
             </div>
             <div className="bg-muted/50 space-y-4 rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <HiClipboardList className="text-muted-foreground h-4 w-4" />
-                  <span className="text-muted-foreground text-xs font-medium">
-                    Survey Completed
-                  </span>
-                </div>
-                <Badge
-                  variant="secondary"
-                  className="bg-primary/10 text-primary border-primary/20"
-                >
-                  Complete
-                </Badge>
-              </div>
-              <Separator />
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <HiUsers className="text-muted-foreground h-4 w-4" />
-                    <span className="text-muted-foreground text-xs font-medium">
-                      {isMultiCandidateMode
-                        ? "Candidates Selected"
-                        : "Candidate Selected"}
-                    </span>
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className="bg-primary/10 text-primary border-primary/20"
-                  >
+                <div className="flex items-center gap-2">
+                  <HiUsers className="text-muted-foreground h-4 w-4" />
+                  <span className="text-muted-foreground text-xs font-medium">
                     {isMultiCandidateMode
-                      ? `${Object.values(candidatesData).flat().length} Selected`
-                      : "Confirmed"}
-                  </Badge>
+                      ? "Positions Selected"
+                      : "Candidate Selected"}
+                  </span>
                 </div>
                 {hasCandidates ? (
                   <div className="ml-6 space-y-3">
@@ -605,8 +613,9 @@ Important: You can update your information once within 7 days.
                       // Group by position for better organization
                       Object.entries(candidatesData)
                         .sort(([a], [b]) => {
-                          // Sort positions: Governor, Senator, House of Reps, State Assembly
+                          // Sort positions: President, Governor, Senator, House of Reps, State Assembly
                           const order = [
+                            "President",
                             "Governor",
                             "Senator",
                             "House of Representatives",
@@ -677,19 +686,16 @@ Important: You can update your information once within 7 days.
           </div>
 
           {/* Important Notice */}
-          <div className="border-border bg-muted rounded-lg border p-4">
-            <div className="flex items-start gap-3">
-              <HiShieldCheck className="text-primary mt-0.5 h-5 w-5 shrink-0" />
-              <div className="min-w-0 flex-1 space-y-1">
-                <p className="text-foreground text-sm font-semibold">
-                  Important Notice
-                </p>
-                <p className="text-muted-foreground text-xs leading-relaxed">
-                  You can update your information once within 7 days. After
-                  that, your registration is locked to maintain election
-                  integrity.
-                </p>
-              </div>
+          <div className="flex gap-3 rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-amber-900 dark:text-amber-100">
+            <HiShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+            <div className="space-y-1">
+              <p className="text-sm font-semibold">
+                Important: 7-Day Update Window
+              </p>
+              <p className="text-xs leading-relaxed opacity-90">
+                You can update your information once within 7 days. After that,
+                your registration is locked to maintain election integrity.
+              </p>
             </div>
           </div>
 

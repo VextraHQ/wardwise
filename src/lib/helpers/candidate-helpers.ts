@@ -185,10 +185,11 @@ export function searchCandidates(query: string): Candidate[] {
 export function groupCandidatesByState(): Record<string, Candidate[]> {
   return candidates.reduce(
     (acc, candidate) => {
-      if (!acc[candidate.state]) {
-        acc[candidate.state] = [];
+      const state = candidate.state ?? "National";
+      if (!acc[state]) {
+        acc[state] = [];
       }
-      acc[candidate.state].push(candidate);
+      acc[state].push(candidate);
       return acc;
     },
     {} as Record<string, Candidate[]>,
@@ -203,7 +204,8 @@ export function groupCandidatesByState(): Record<string, Candidate[]> {
 export function groupCandidatesByParty(): Record<string, Candidate[]> {
   return candidates.reduce(
     (acc, candidate) => {
-      if (!acc[candidate.party]) {
+      const party = candidate.party;
+      if (!acc[party]) {
         acc[candidate.party] = [];
       }
       acc[candidate.party].push(candidate);
@@ -221,7 +223,8 @@ export function groupCandidatesByParty(): Record<string, Candidate[]> {
 export function groupCandidatesByPosition(): Record<string, Candidate[]> {
   return candidates.reduce(
     (acc, candidate) => {
-      if (!acc[candidate.position]) {
+      const position = candidate.position;
+      if (!acc[position]) {
         acc[candidate.position] = [];
       }
       acc[candidate.position].push(candidate);
@@ -252,7 +255,8 @@ export function getTotalCandidates(): number {
 export function getCandidateCountByState(): Record<string, number> {
   return candidates.reduce(
     (acc, candidate) => {
-      acc[candidate.state] = (acc[candidate.state] || 0) + 1;
+      const state = candidate.state || "National";
+      acc[state] = (acc[state] || 0) + 1;
       return acc;
     },
     {} as Record<string, number>,
@@ -267,7 +271,8 @@ export function getCandidateCountByState(): Record<string, number> {
 export function getCandidateCountByParty(): Record<string, number> {
   return candidates.reduce(
     (acc, candidate) => {
-      acc[candidate.party] = (acc[candidate.party] || 0) + 1;
+      const party = candidate.party;
+      acc[party] = (acc[party] || 0) + 1;
       return acc;
     },
     {} as Record<string, number>,
@@ -282,7 +287,8 @@ export function getCandidateCountByParty(): Record<string, number> {
 export function getCandidateCountByPosition(): Record<string, number> {
   return candidates.reduce(
     (acc, candidate) => {
-      acc[candidate.position] = (acc[candidate.position] || 0) + 1;
+      const position = candidate.position;
+      acc[position] = (acc[position] || 0) + 1;
       return acc;
     },
     {} as Record<string, number>,
@@ -310,8 +316,8 @@ export function getTotalSupporters(): number {
 export function getSupportersByState(): Record<string, number> {
   return candidates.reduce(
     (acc, candidate) => {
-      acc[candidate.state] =
-        (acc[candidate.state] || 0) + getSupportersCount(candidate.id);
+      const state = candidate.state || "National";
+      acc[state] = (acc[state] || 0) + getSupportersCount(candidate.id);
       return acc;
     },
     {} as Record<string, number>,
@@ -327,7 +333,8 @@ export function getSupportersByState(): Record<string, number> {
 export function getSupportersByParty(): Record<string, number> {
   return candidates.reduce(
     (acc, candidate) => {
-      acc[candidate.party] =
+      const party = candidate.party;
+      acc[party] =
         (acc[candidate.party] || 0) + getSupportersCount(candidate.id);
       return acc;
     },
@@ -359,7 +366,13 @@ export function getTopCandidatesBySupporters(limit: number = 10): Candidate[] {
  * @returns Array of unique state names
  */
 export function getUniqueStates(): string[] {
-  return Array.from(new Set(candidates.map((c) => c.state)));
+  return Array.from<string>(
+    new Set(
+      candidates
+        .map((c) => c.state ?? "National")
+        .filter((state): state is string => Boolean(state)),
+    ),
+  ).sort() as string[];
 }
 
 /**
@@ -368,7 +381,13 @@ export function getUniqueStates(): string[] {
  * @returns Array of unique party names
  */
 export function getUniqueParties(): string[] {
-  return Array.from(new Set(candidates.map((c) => c.party)));
+  return Array.from<string>(
+    new Set(
+      candidates
+        .map((c) => c.party)
+        .filter((party): party is string => Boolean(party)),
+    ),
+  ).sort() as string[];
 }
 
 /**
@@ -395,10 +414,14 @@ export function sortCandidatesBy(
     const aVal = a[field];
     const bVal = b[field];
 
-    // Handle undefined values
-    if (aVal === undefined && bVal === undefined) return 0;
-    if (aVal === undefined) return order === "asc" ? 1 : -1;
-    if (bVal === undefined) return order === "asc" ? -1 : 1;
+    // Handle undefined and null values
+    if (
+      (aVal === undefined || aVal === null) &&
+      (bVal === undefined || bVal === null)
+    )
+      return 0;
+    if (aVal === undefined || aVal === null) return order === "asc" ? 1 : -1;
+    if (bVal === undefined || bVal === null) return order === "asc" ? -1 : 1;
 
     if (aVal < bVal) return order === "asc" ? -1 : 1;
     if (aVal > bVal) return order === "asc" ? 1 : -1;

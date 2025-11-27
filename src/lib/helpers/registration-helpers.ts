@@ -1,17 +1,26 @@
 /**
  * Registration Status Helpers
  *
- * Single source of truth for computing registration status from lastCompletedStep.
+ * Single source of truth for:
+ * - Registration step order (orderedSteps array)
+ * - Computing registration status from lastCompletedStep
+ * - Step navigation and validation logic
+ *
  * This eliminates redundancy and prevents data inconsistency.
  */
 import type { RegistrationStep } from "@/types/voter";
 
+/**
+ * Ordered list of registration steps.
+ * This is the single source of truth for step order across the application.
+ * Import this constant wherever you need to reference the step sequence.
+ */
 export const orderedSteps: RegistrationStep[] = [
   "nin",
+  "role",
   "profile",
   "location",
   "candidate",
-  "survey",
   "confirm",
 ];
 
@@ -70,10 +79,10 @@ export function canProceedToStep(
 export function getStepLabel(step: RegistrationStep): string {
   const labels: Record<RegistrationStep, string> = {
     nin: "NIN Verification",
+    role: "Role Selection",
     profile: "Personal Information",
     location: "Voting Location",
     candidate: "Candidate Selection",
-    survey: "Survey",
     confirm: "Confirmation",
   };
   return labels[step] || step;

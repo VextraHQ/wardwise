@@ -38,17 +38,17 @@ export function HeroSection() {
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231f6b5e' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}
-        aria-hidden="true"
+        aria-hidden={true}
       />
 
       {/* Accent shapes */}
       <div
         className="bg-primary absolute -top-24 -right-24 h-96 w-96 rounded-full opacity-[0.08] blur-3xl"
-        aria-hidden="true"
+        aria-hidden={true}
       />
       <div
         className="bg-accent absolute -bottom-32 -left-32 h-80 w-80 rounded-full opacity-[0.06] blur-3xl"
-        aria-hidden="true"
+        aria-hidden={true}
       />
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">

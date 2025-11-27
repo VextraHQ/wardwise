@@ -8,17 +8,18 @@ import { z } from "zod";
 import {
   HiLocationMarker,
   HiQuestionMarkCircle,
-  HiSparkles,
   HiArrowRight,
   HiArrowLeft,
   HiCheck,
   HiInformationCircle,
 } from "react-icons/hi";
+import { MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StepProgress } from "@/components/ui/step-progress";
+import { RegistrationStepHeader } from "../registration-step-header";
 import {
   Form,
   FormControl,
@@ -198,24 +199,18 @@ export function LocationStep() {
     <div className="space-y-6">
       {/* Reusable Progress Component */}
       <StepProgress
-        currentStep={3}
+        currentStep={4}
         totalSteps={6}
         stepTitle="Voting Location"
       />
 
       {/* Hero Section with Sparkles Badge */}
-      <div className="space-y-3 text-center">
-        <div className="border-primary/30 bg-primary/10 text-accent inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
-          <HiSparkles className="h-3.5 w-3.5" />
-          <span>Finding Your Polling Unit</span>
-        </div>
-        <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-          Where Do You Vote?
-        </h1>
-        <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
-          Help us find your exact polling unit location
-        </p>
-      </div>
+      <RegistrationStepHeader
+        icon={MapPin}
+        badge="Finding Your Polling Unit"
+        title="Where Do You Vote?"
+        description="Help us find your exact polling unit location"
+      />
 
       {/* Pilot Coverage Notice */}
       <Card className="border-border/70 bg-card/80 border-dashed backdrop-blur-sm">
