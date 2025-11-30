@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 // GET /api/admin/voters/[id] - Get voter by ID
 export async function GET(
@@ -58,6 +57,16 @@ export async function DELETE(
     }
 
     const { id } = await params;
+
+    // Check if voter exists
+    const voter = await prisma.voter.findUnique({
+      where: { id },
+    });
+
+    if (!voter) {
+      return NextResponse.json({ error: "Voter not found" }, { status: 404 });
+    }
+
     await prisma.voter.delete({
       where: { id },
     });
@@ -65,6 +74,14 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting voter:", error);
+
+    // Handle Prisma errors
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        return NextResponse.json({ error: "Voter not found" }, { status: 404 });
+      }
+    }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

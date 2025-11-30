@@ -1,5 +1,6 @@
 import { PrismaClient, Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import type { Candidate } from "@/types/candidate";
 // TODO: Refactor to use mock data imports for consistency
 // import { candidates as mockCandidates } from "@/lib/mock/data/candidates";
 // import { voters as mockVoters } from "@/lib/mock/data/voters";
@@ -12,7 +13,7 @@ async function main() {
   // ========================================
   // 1. PRESIDENTIAL CANDIDATES (National - not in mock data)
   // ========================================
-  const presidentialCandidates = [
+  const presidentialCandidates: Candidate[] = [
     {
       id: "cand-president-apc",
       name: "Bola Ahmed Tinubu",
@@ -21,10 +22,12 @@ async function main() {
       isNational: true,
       state: null,
       lga: null,
-      constituency: null,
+      constituency: "Federal Republic of Nigeria",
       description: "Presidential candidate for the All Progressives Congress",
-      supporters: 0,
-      email: "tinubu@wardwise.ng",
+      supporters: 5420,
+      email: "bola.tinubu@wardwise.ng",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
     {
       id: "cand-president-pdp",
@@ -34,10 +37,12 @@ async function main() {
       isNational: true,
       state: null,
       lga: null,
-      constituency: null,
+      constituency: "Federal Republic of Nigeria",
       description: "Presidential candidate for the People's Democratic Party",
-      supporters: 0,
-      email: "atiku@wardwise.ng",
+      supporters: 4980,
+      email: "atiku.abubakar@wardwise.ng",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
     {
       id: "cand-president-labour",
@@ -49,8 +54,10 @@ async function main() {
       lga: null,
       constituency: null,
       description: "Presidential candidate for the Labour Party",
-      supporters: 0,
-      email: "peterobi@wardwise.ng",
+      supporters: 6150,
+      email: "peter.obi@wardwise.ng",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
     {
       id: "cand-president-nnpp",
@@ -62,74 +69,163 @@ async function main() {
       lga: null,
       constituency: null,
       description: "Presidential candidate for the New Nigeria People's Party",
-      supporters: 0,
-      email: "kwankwaso@wardwise.ng",
+      supporters: 3200,
+      email: "rabiu.kwankwaso@wardwise.ng",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
   ];
 
   for (const candData of presidentialCandidates) {
-    const candidate = await prisma.candidate.upsert({
-      where: { id: candData.id },
-      update: {},
-      create: {
-        id: candData.id,
-        name: candData.name,
-        party: candData.party,
-        position: candData.position,
-        isNational: candData.isNational,
-        state: null,
-        lga: null,
-        constituency: null,
-        description: candData.description,
-        supporters: 0,
-      },
-    });
+    try {
+      // Check if candidate already exists
+      const existingCandidate = await prisma.candidate.findUnique({
+        where: { id: candData.id },
+      });
 
-    // Create user account for presidential candidate
-    const hashedPassword = await bcrypt.hash("demo123", 12);
-    await prisma.user.upsert({
-      where: { email: candData.email },
-      update: {},
-      create: {
-        email: candData.email,
-        name: candData.name,
-        password: hashedPassword,
-        role: "candidate",
-        candidateId: candidate.id,
-      },
-    });
+      const candidate = existingCandidate
+        ? await prisma.candidate.update({
+            where: { id: candData.id },
+            data: {},
+          })
+        : await prisma.candidate.create({
+            data: {
+              id: candData.id,
+              name: candData.name,
+              party: candData.party,
+              position: candData.position,
+              isNational: candData.isNational,
+              state: candData.state,
+              lga: candData.lga,
+              constituency: candData.constituency,
+              description: candData.description,
+              supporters: 0,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          });
 
-    console.log(
-      `✅ Created Presidential candidate: ${candidate.name} (${candidate.party})`,
-    );
+      // Track if we should log this candidate
+      let shouldLog = !existingCandidate;
+      let logMessage = "";
+
+      // Create or update user account for presidential candidate
+      const hashedPassword = await bcrypt.hash("demo123", 12);
+
+      // Find existing user by candidateId first (since candidateId is unique)
+      const existingUser = await prisma.user.findUnique({
+        where: { candidateId: candidate.id },
+      });
+
+      if (existingUser) {
+        // Check if email changed
+        const emailChanged = existingUser.email !== candData.email;
+        const oldEmail = existingUser.email;
+
+        // Update existing user with new email
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            email: candData.email,
+            name: candData.name,
+            password: hashedPassword,
+          },
+        });
+
+        if (emailChanged) {
+          shouldLog = true;
+          logMessage = `  📧 Updated user email: ${oldEmail} → ${candData.email}\n`;
+        }
+        // Silently skip if no changes
+      } else {
+        // Check if user exists with this email but different candidateId
+        const userByEmail = await prisma.user.findUnique({
+          where: { email: candData.email },
+        });
+
+        if (userByEmail) {
+          // Check if linking is needed
+          if (userByEmail.candidateId !== candidate.id) {
+            await prisma.user.update({
+              where: { id: userByEmail.id },
+              data: {
+                candidateId: candidate.id,
+                name: candData.name,
+                password: hashedPassword,
+              },
+            });
+            shouldLog = true;
+            logMessage = `  🔗 Linked existing user to candidate: ${candData.email}\n`;
+          }
+          // Silently skip if already linked
+        } else {
+          // Create new user
+          await prisma.user.create({
+            data: {
+              email: candData.email,
+              name: candData.name,
+              password: hashedPassword,
+              role: "candidate",
+              candidateId: candidate.id,
+            },
+          });
+          shouldLog = true;
+          logMessage = `  ✨ Created new user account: ${candData.email}\n`;
+        }
+      }
+
+      // Only log if something was created or changed
+      if (shouldLog) {
+        if (logMessage) {
+          console.log(logMessage.trimEnd());
+        }
+        console.log(
+          `✅ Presidential candidate: ${candidate.name} (${candidate.party})`,
+        );
+      }
+    } catch (error) {
+      console.error(
+        `❌ Error processing candidate ${candData.name}:`,
+        error instanceof Error ? error.message : String(error),
+      );
+      throw error;
+    }
   }
 
   // ========================================
   // 2. STATE/LGA CANDIDATES (Adamawa State)
   // ========================================
-  const adamawaCandidates = [
+  const adamawaCandidates: Candidate[] = [
     // Governors
     {
       id: "cand-gov-apc-adamawa",
       name: "Ahmadu Umaru Fintiri",
       party: "APC",
       position: "Governor",
+      isNational: false,
       state: "Adamawa",
       lga: null,
       constituency: "Adamawa State",
       description: "Gubernatorial candidate for Adamawa State",
-      email: "fintiri@wardwise.ng",
+      supporters: 1000,
+      email: "ahmadu.fintiri@wardwise.ng",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
     {
       id: "cand-gov-pdp-adamawa",
       name: "Aishatu Dahiru Ahmed",
       party: "PDP",
       position: "Governor",
+      isNational: false,
       state: "Adamawa",
       lga: null,
       constituency: "Adamawa State",
       description: "Gubernatorial candidate for Adamawa State",
+      supporters: 1000,
       email: "aishatu.ahmed@wardwise.ng",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
     // Senators
     {
@@ -137,22 +233,30 @@ async function main() {
       name: "Maryam Ciroma",
       party: "PDP",
       position: "Senator",
+      isNational: false,
       state: "Adamawa",
       lga: null,
       constituency: "Adamawa North Senatorial District",
       description: "Senatorial candidate for Adamawa North",
+      supporters: 1000,
       email: "maryam.ciroma@wardwise.ng",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
     {
       id: "cand-sen-apc-adamawa",
       name: "Mohammed Jibrilla Bindow",
       party: "APC",
       position: "Senator",
+      isNational: false,
       state: "Adamawa",
       lga: null,
       constituency: "Adamawa North Senatorial District",
       description: "Senatorial candidate for Adamawa North",
-      email: "bindow@wardwise.ng",
+      supporters: 1000,
+      email: "mohammed.bindow@wardwise.ng",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
     // House of Representatives
     {
@@ -160,22 +264,30 @@ async function main() {
       name: "Abdulrazak Namdas",
       party: "APC",
       position: "House of Representatives",
+      isNational: false,
       state: "Adamawa",
       lga: "Yola North",
       constituency: "Yola North/Yola South/Girei Federal Constituency",
       description: "House of Representatives candidate",
-      email: "namdas@wardwise.ng",
+      supporters: 1000,
+      email: "abdulrazak.namdas@wardwise.ng",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
     {
       id: "cand-hr-pdp-adamawa",
       name: "Aliyu Boya",
       party: "PDP",
       position: "House of Representatives",
+      isNational: false,
       state: "Adamawa",
       lga: "Yola North",
       constituency: "Yola North/Yola South/Girei Federal Constituency",
       description: "House of Representatives candidate",
-      email: "boya@wardwise.ng",
+      supporters: 1000,
+      email: "aliyu.boya@wardwise.ng",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
     // State Assembly
     {
@@ -183,60 +295,147 @@ async function main() {
       name: "Ibrahim Usman",
       party: "APC",
       position: "State Assembly",
+      isNational: false,
       state: "Adamawa",
       lga: "Yola North",
       constituency: "Yola North Constituency",
       description: "State Assembly candidate for Yola North",
       email: "ibrahim.usman@wardwise.ng",
+      supporters: 1000,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
     {
       id: "cand-sa-pdp-adamawa",
       name: "Fatima Bello",
       party: "PDP",
       position: "State Assembly",
+      isNational: false,
       state: "Adamawa",
       lga: "Yola North",
       constituency: "Yola North Constituency",
       description: "State Assembly candidate for Yola North",
       email: "fatima.bello@wardwise.ng",
+      supporters: 1000,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
   ];
 
   for (const candData of adamawaCandidates) {
-    const candidate = await prisma.candidate.upsert({
-      where: { id: candData.id },
-      update: {},
-      create: {
-        id: candData.id,
-        name: candData.name,
-        party: candData.party,
-        position: candData.position,
-        isNational: false,
-        state: candData.state,
-        lga: candData.lga,
-        constituency: candData.constituency,
-        description: candData.description,
-        supporters: 0,
-      },
-    });
+    try {
+      // Check if candidate already exists
+      const existingCandidate = await prisma.candidate.findUnique({
+        where: { id: candData.id },
+      });
 
-    // Create user account
-    const hashedPassword = await bcrypt.hash("demo123", 12);
-    await prisma.user.upsert({
-      where: { email: candData.email },
-      update: {},
-      create: {
-        email: candData.email,
-        name: candData.name,
-        password: hashedPassword,
-        role: "candidate",
-        candidateId: candidate.id,
-      },
-    });
+      const candidate = existingCandidate
+        ? await prisma.candidate.update({
+            where: { id: candData.id },
+            data: {},
+          })
+        : await prisma.candidate.create({
+            data: {
+              id: candData.id,
+              name: candData.name,
+              party: candData.party,
+              position: candData.position,
+              isNational: false,
+              state: candData.state,
+              lga: candData.lga,
+              constituency: candData.constituency,
+              description: candData.description,
+              supporters: candData.supporters,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          });
 
-    console.log(
-      `✅ Created ${candData.position}: ${candidate.name} (${candidate.party})`,
-    );
+      // Track if we should log this candidate
+      let shouldLog = !existingCandidate;
+      let logMessage = "";
+
+      // Create or update user account
+      const hashedPassword = await bcrypt.hash("demo123", 12);
+
+      // Find existing user by candidateId first (since candidateId is unique)
+      const existingUser = await prisma.user.findUnique({
+        where: { candidateId: candidate.id },
+      });
+
+      if (existingUser) {
+        // Check if email changed
+        const emailChanged = existingUser.email !== candData.email;
+        const oldEmail = existingUser.email;
+
+        // Update existing user with new email
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            email: candData.email,
+            name: candData.name,
+            password: hashedPassword,
+          },
+        });
+
+        if (emailChanged) {
+          shouldLog = true;
+          logMessage = `  📧 Updated user email: ${oldEmail} → ${candData.email}\n`;
+        }
+        // Silently skip if no changes
+      } else {
+        // Check if user exists with this email but different candidateId
+        const userByEmail = await prisma.user.findUnique({
+          where: { email: candData.email },
+        });
+
+        if (userByEmail) {
+          // Check if linking is needed
+          if (userByEmail.candidateId !== candidate.id) {
+            await prisma.user.update({
+              where: { id: userByEmail.id },
+              data: {
+                candidateId: candidate.id,
+                name: candData.name,
+                password: hashedPassword,
+              },
+            });
+            shouldLog = true;
+            logMessage = `  🔗 Linked existing user to candidate: ${candData.email}\n`;
+          }
+          // Silently skip if already linked
+        } else {
+          // Create new user
+          await prisma.user.create({
+            data: {
+              email: candData.email,
+              name: candData.name,
+              password: hashedPassword,
+              role: "candidate",
+              candidateId: candidate.id,
+            },
+          });
+          shouldLog = true;
+          logMessage = `  ✨ Created new user account: ${candData.email}\n`;
+        }
+      }
+
+      // Only log if something was created or changed
+      if (shouldLog) {
+        if (logMessage) {
+          console.log(logMessage.trimEnd());
+        }
+        console.log(
+          `✅ ${candData.position}: ${candidate.name} (${candidate.party})`,
+        );
+      }
+    } catch (error) {
+      console.error(
+        `❌ Error processing candidate ${candData.name}:`,
+        error instanceof Error ? error.message : String(error),
+      );
+      throw error;
+    }
   }
 
   // ========================================
@@ -310,12 +509,42 @@ async function main() {
   ];
 
   for (const canvData of canvassers) {
-    await prisma.canvasser.upsert({
-      where: { code: canvData.code },
-      update: {},
-      create: canvData,
-    });
-    console.log(`✅ Created canvasser: ${canvData.name} (${canvData.code})`);
+    try {
+      // Validate candidate exists
+      const candidate = await prisma.candidate.findUnique({
+        where: { id: canvData.candidateId },
+      });
+      if (!candidate) {
+        console.error(
+          `  ⚠️  Skipping canvasser ${canvData.name}: Candidate ${canvData.candidateId} not found`,
+        );
+        continue;
+      }
+
+      // Simple upsert - only log on creation
+      const existing = await prisma.canvasser.findUnique({
+        where: { code: canvData.code },
+      });
+
+      if (!existing) {
+        await prisma.canvasser.create({ data: canvData });
+        console.log(
+          `  ✨ Created canvasser: ${canvData.name} (${canvData.code})`,
+        );
+      } else {
+        // Silently update if exists (no logging)
+        await prisma.canvasser.update({
+          where: { code: canvData.code },
+          data: canvData,
+        });
+      }
+    } catch (error) {
+      console.error(
+        `  ❌ Error processing canvasser ${canvData.name}:`,
+        error instanceof Error ? error.message : String(error),
+      );
+      throw error;
+    }
   }
 
   // ========================================
@@ -511,35 +740,80 @@ async function main() {
   ];
 
   for (const voterData of demoVoters) {
-    const { candidateSelections, ...voterFields } = voterData;
+    try {
+      const { candidateSelections, ...voterFields } = voterData;
 
-    const voter = await prisma.voter.upsert({
-      where: { nin: voterData.nin },
-      update: voterFields as Prisma.VoterUncheckedUpdateInput,
-      create: voterFields as Prisma.VoterUncheckedCreateInput,
-    });
+      // Validate canvasser code if provided
+      if (voterFields.canvasserCode) {
+        const canvasser = await prisma.canvasser.findUnique({
+          where: { code: voterFields.canvasserCode },
+        });
+        if (!canvasser) {
+          console.warn(
+            `  ⚠️  Voter ${voterData.firstName} ${voterData.lastName}: Canvasser code ${voterFields.canvasserCode} not found`,
+          );
+          // Remove invalid canvasser code
+          (voterFields as { canvasserCode?: string }).canvasserCode = undefined;
+        }
+      }
 
-    // Create candidate selections
-    for (const selection of candidateSelections) {
-      await prisma.voterCandidateSelection.upsert({
-        where: {
-          voterId_position: {
+      const existing = await prisma.voter.findUnique({
+        where: { nin: voterData.nin },
+      });
+
+      const voter = existing
+        ? await prisma.voter.update({
+            where: { nin: voterData.nin },
+            data: voterFields as Prisma.VoterUncheckedUpdateInput,
+          })
+        : await prisma.voter.create({
+            data: voterFields as Prisma.VoterUncheckedCreateInput,
+          });
+
+      // Update candidate selections (validate candidate exists)
+      for (const selection of candidateSelections) {
+        const candidate = await prisma.candidate.findUnique({
+          where: { id: selection.candidateId },
+        });
+        if (!candidate) {
+          console.warn(
+            `  ⚠️  Skipping selection: Candidate ${selection.candidateId} for position ${selection.position} not found`,
+          );
+          continue;
+        }
+
+        await prisma.voterCandidateSelection.upsert({
+          where: {
+            voterId_position: {
+              voterId: voter.id,
+              position: selection.position,
+            },
+          },
+          update: {
+            candidateId: selection.candidateId,
+          },
+          create: {
             voterId: voter.id,
+            candidateId: selection.candidateId,
             position: selection.position,
           },
-        },
-        update: {},
-        create: {
-          voterId: voter.id,
-          candidateId: selection.candidateId,
-          position: selection.position,
-        },
-      });
-    }
+        });
+      }
 
-    console.log(
-      `✅ Created ${voterData.role}: ${voterData.firstName} ${voterData.lastName} with ${candidateSelections.length} candidate selections`,
-    );
+      // Only log on creation
+      if (!existing) {
+        console.log(
+          `  ✨ Created ${voterData.role}: ${voterData.firstName} ${voterData.lastName} (${candidateSelections.length} selections)`,
+        );
+      }
+      // Silently update if exists
+    } catch (error) {
+      console.error(
+        `  ❌ Error processing voter ${voterData.firstName} ${voterData.lastName}:`,
+        error instanceof Error ? error.message : String(error),
+      );
+      throw error;
+    }
   }
 
   // ========================================
@@ -553,36 +827,76 @@ async function main() {
   ];
 
   for (const candidateId of allCandidateIds) {
-    const supporterCount = await prisma.voterCandidateSelection.count({
-      where: { candidateId },
-    });
+    try {
+      const supporterCount = await prisma.voterCandidateSelection.count({
+        where: { candidateId },
+      });
 
-    await prisma.candidate.update({
-      where: { id: candidateId },
-      data: { supporters: supporterCount },
-    });
+      const candidate = await prisma.candidate.findUnique({
+        where: { id: candidateId },
+      });
 
-    console.log(
-      `✅ Updated supporter count for ${candidateId}: ${supporterCount}`,
-    );
+      if (candidate) {
+        // Only log if supporter count changed
+        if (candidate.supporters !== supporterCount) {
+          await prisma.candidate.update({
+            where: { id: candidateId },
+            data: { supporters: supporterCount },
+          });
+          console.log(
+            `  ✅ ${candidate.name}: ${supporterCount} supporters (was ${candidate.supporters})`,
+          );
+        }
+        // Silently skip if count unchanged
+      }
+    } catch (error) {
+      console.error(
+        `  ❌ Error updating supporter count for ${candidateId}:`,
+        error instanceof Error ? error.message : String(error),
+      );
+      // Don't throw - continue with other candidates
+    }
   }
 
   // ========================================
   // 6. CREATE ADMIN ACCOUNT
   // ========================================
-  const adminPassword = await bcrypt.hash("admin123", 12);
-  await prisma.user.upsert({
-    where: { email: "admin@wardwise.ng" },
-    update: {},
-    create: {
-      email: "admin@wardwise.ng",
-      name: "WardWise Admin",
-      password: adminPassword,
-      role: "admin",
-    },
-  });
+  console.log("🌱 Creating admin account...");
+  try {
+    const adminPassword = await bcrypt.hash("admin123", 12);
+    const existingAdmin = await prisma.user.findUnique({
+      where: { email: "admin@wardwise.ng" },
+    });
 
-  console.log("✅ Created admin account: admin@wardwise.ng");
+    // Only log on creation
+    if (!existingAdmin) {
+      await prisma.user.create({
+        data: {
+          email: "admin@wardwise.ng",
+          name: "WardWise Admin",
+          password: adminPassword,
+          role: "admin",
+        },
+      });
+      console.log("  ✨ Created admin account: admin@wardwise.ng");
+    } else {
+      // Silently update if exists
+      await prisma.user.update({
+        where: { email: "admin@wardwise.ng" },
+        data: {
+          name: "WardWise Admin",
+          password: adminPassword,
+          role: "admin",
+        },
+      });
+    }
+  } catch (error) {
+    console.error(
+      "  ❌ Error creating admin account:",
+      error instanceof Error ? error.message : String(error),
+    );
+    throw error;
+  }
 
   console.log("\n🎉 Database seeded successfully!");
   console.log("\n📊 Summary:");
@@ -595,7 +909,20 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error("❌ Error seeding database:", e);
+    console.error("\n❌ Error seeding database:");
+    if (e instanceof Error) {
+      console.error(`   Message: ${e.message}`);
+      if (e.stack) {
+        console.error(
+          `   Stack: ${e.stack.split("\n").slice(0, 3).join("\n")}`,
+        );
+      }
+    } else {
+      console.error(`   ${String(e)}`);
+    }
+    console.error(
+      "\n💡 Tip: Try running 'pnpm db:reset' to reset the database first.\n",
+    );
     process.exit(1);
   })
   .finally(async () => {

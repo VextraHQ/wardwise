@@ -9,15 +9,17 @@ export type Candidate = {
     | "Senator"
     | "House of Representatives"
     | "State Assembly";
+  isNational: boolean;
   state: string | null; // Nullable for Presidential candidates (isNational = true)
-  constituency: string;
+  lga: string | null; // Nullable for Presidential candidates (isNational = true)
+  constituency: string | null; // Nullable for Presidential candidates (isNational = true)
   description?: string;
   supporters: number;
+  email: string;
   createdAt: string; // ISO datetime string
   updatedAt: string; // ISO datetime string
 
   // Additional fields for UI (not in Prisma but useful)
-  photo?: string;
   surveyId?: string; // Link to survey ID
   tagline?: string;
   vision?: string;

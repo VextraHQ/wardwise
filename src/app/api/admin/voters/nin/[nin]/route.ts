@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 // GET /api/admin/voters/nin/[nin] - Get voter by NIN
 export async function GET(
@@ -18,6 +16,11 @@ export async function GET(
     }
 
     const { nin } = await params;
+
+    if (!nin || nin.trim() === "") {
+      return NextResponse.json({ error: "NIN is required" }, { status: 400 });
+    }
+
     const voter = await prisma.voter.findUnique({
       where: { nin },
     });
@@ -37,7 +40,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error fetching voter:", error);
+    console.error("Error fetching voter by NIN:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

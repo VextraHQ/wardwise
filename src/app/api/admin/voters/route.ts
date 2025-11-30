@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 // GET /api/admin/voters - Get all voters with pagination
 export async function GET(request: NextRequest) {
@@ -16,19 +15,29 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const candidateId = searchParams.get("candidateId");
-    const limit = parseInt(searchParams.get("limit") || "50");
-    const offset = parseInt(searchParams.get("offset") || "0");
+    const state = searchParams.get("state");
+    const lga = searchParams.get("lga");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
+    const offset = Math.max(parseInt(searchParams.get("offset") || "0"), 0);
 
-    // Multi-candidate support: filter by candidate selections if candidateId provided
-    const where = candidateId
-      ? {
-          candidateSelections: {
-            some: {
-              candidateId,
-            },
-          },
-        }
-      : {};
+    // Build where clause
+    const where: Prisma.VoterWhereInput = {};
+
+    if (candidateId) {
+      where.candidateSelections = {
+        some: {
+          candidateId,
+        },
+      };
+    }
+
+    if (state) {
+      where.state = state;
+    }
+
+    if (lga) {
+      where.lga = lga;
+    }
 
     const [voters, total] = await Promise.all([
       prisma.voter.findMany({

@@ -4,70 +4,40 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   HiOutlineUserGroup,
   HiOutlineUserAdd,
-  HiOutlinePencil,
-  HiOutlineTrash,
-  HiOutlineCheckCircle,
-  HiOutlineXCircle,
-  HiOutlineSearch,
   HiOutlineUsers,
   HiOutlineUserCircle,
+  HiExclamationCircle,
+  HiOutlineIdentification,
 } from "react-icons/hi";
 import { toast } from "sonner";
 import type { Candidate } from "@/types/candidate";
-import { adminApi, type CandidateWithUser } from "@/lib/api/admin";
 import {
-  StatCardSkeleton,
-  CandidateCardSkeleton,
-  VoterCardSkeleton,
-} from "@/components/admin/admin-skeletons";
-
-const POSITIONS: Candidate["position"][] = [
-  "Governor",
-  "Senator",
-  "House of Representatives",
-  "State Assembly",
-];
+  adminApi,
+  type CandidateWithUser,
+  type CanvasserWithCandidate,
+} from "@/lib/api/admin";
+import { StatCardSkeleton } from "@/components/admin/admin-skeletons";
+import { AdminSearchBar } from "@/components/admin/admin-search-bar";
+import { CandidateFilters } from "@/components/admin/admin-filters/candidate-filters";
+import { VoterFilters } from "@/components/admin/admin-filters/voter-filters";
+import { CanvasserFilters } from "@/components/admin/admin-filters/canvasser-filters";
+import { CandidatesTab } from "@/components/admin/admin-tabs/candidates-tab";
+import { VotersTab } from "@/components/admin/admin-tabs/voters-tab";
+import { CanvassersTab } from "@/components/admin/admin-tabs/canvassers-tab";
+import { CreateCandidateDialog } from "@/components/admin/admin-dialogs/create-candidate-dialog";
+import { EditCandidateDialog } from "@/components/admin/admin-dialogs/edit-candidate-dialog";
+import { DeleteCandidateDialog } from "@/components/admin/admin-dialogs/delete-candidate-dialog";
+import { DeleteVoterDialog } from "@/components/admin/admin-dialogs/delete-voter-dialog";
+import { DeleteCanvasserDialog } from "@/components/admin/admin-dialogs/delete-canvasser-dialog";
+import { EditCanvasserDialog } from "@/components/admin/admin-dialogs/edit-canvasser-dialog";
 
 export function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -78,20 +48,66 @@ export function AdminDashboard() {
   // Derive activeTab from URL params, default to "candidates"
   const tabParam = searchParams?.get("tab");
   const activeTab =
-    tabParam === "candidates" || tabParam === "voters"
+    tabParam === "candidates" ||
+    tabParam === "voters" ||
+    tabParam === "canvassers"
       ? tabParam
       : "candidates";
   const [searchQuery, setSearchQuery] = useState("");
+  // Filter states for candidates
+  const [partyFilter, setPartyFilter] = useState("all");
+  const [positionFilter, setPositionFilter] = useState("all");
+  const [candidateSort, setCandidateSort] = useState<
+    "name" | "supporters" | "date"
+  >("name");
+  // Filter states for voters
+  const [stateFilter, setStateFilter] = useState("all");
+  const [lgaFilter, setLgaFilter] = useState("all");
+  const [voterSort, setVoterSort] = useState<"name" | "date">("name");
+  // Filter states for canvassers
+  const [canvasserStateFilter, setCanvasserStateFilter] = useState("all");
+  const [canvasserLgaFilter, setCanvasserLgaFilter] = useState("all");
+  const [canvasserCandidateFilter, setCanvasserCandidateFilter] =
+    useState("all");
+  const [canvasserSort, setCanvasserSort] = useState<
+    "name" | "voters" | "date"
+  >("name");
+  // Pagination state
+  const [candidatePage, setCandidatePage] = useState(1);
+  const [voterPage, setVoterPage] = useState(1);
+  const [canvasserPage, setCanvasserPage] = useState(1);
+  const [candidatePageSize, setCandidatePageSize] = useState(10);
+  const [voterPageSize, setVoterPageSize] = useState(10);
+  const [canvasserPageSize, setCanvasserPageSize] = useState(10);
 
   // Update URL when tab changes
   const handleTabChange = (value: string) => {
-    setSearchQuery(""); // Clear search when switching tabs
+    // Reset all filters and pagination when switching tabs
+    setSearchQuery("");
+    setPartyFilter("all");
+    setPositionFilter("all");
+    setCandidateSort("name");
+    setStateFilter("all");
+    setLgaFilter("all");
+    setVoterSort("name");
+    setCanvasserStateFilter("all");
+    setCanvasserLgaFilter("all");
+    setCanvasserCandidateFilter("all");
+    setCanvasserSort("name");
+    setCandidatePage(1);
+    setVoterPage(1);
+    setCanvasserPage(1);
+    setCandidatePageSize(10);
+    setVoterPageSize(10);
+    setCanvasserPageSize(10);
     // Update URL with tab parameter
     const params = new URLSearchParams(searchParams?.toString() || "");
     if (value === "candidates") {
       params.set("tab", "candidates");
     } else if (value === "voters") {
       params.set("tab", "voters");
+    } else if (value === "canvassers") {
+      params.set("tab", "canvassers");
     }
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
@@ -102,21 +118,11 @@ export function AdminDashboard() {
     null,
   );
   const [deletingVoterId, setDeletingVoterId] = useState<string | null>(null);
-  const [newCandidate, setNewCandidate] = useState<{
-    name: string;
-    email: string;
-    party: string;
-    position: Candidate["position"] | "";
-    constituency: string;
-    description: string;
-  }>({
-    name: "",
-    email: "",
-    party: "",
-    position: "",
-    constituency: "",
-    description: "",
-  });
+  const [editingCanvasser, setEditingCanvasser] =
+    useState<CanvasserWithCandidate | null>(null);
+  const [deletingCanvasserId, setDeletingCanvasserId] = useState<string | null>(
+    null,
+  );
 
   // Fetch candidates - optimized for non-real-time data
   const {
@@ -125,209 +131,927 @@ export function AdminDashboard() {
     error: candidatesError,
   } = useQuery({
     queryKey: ["admin", "candidates"],
-    queryFn: () => adminApi.candidates.getAll(),
+    queryFn: async () => {
+      try {
+        return await adminApi.candidates.getAll();
+      } catch (error) {
+        console.error("Failed to fetch candidates:", error);
+        throw error;
+      }
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes - data doesn't change frequently
     refetchOnWindowFocus: false, // Don't refetch on window focus for admin data
     refetchOnMount: false, // Use cached data if available
+    retry: 2, // Retry twice on failure
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
-  // Fetch voters - only when tab is active
-  const { data: votersData, isLoading: isLoadingVoters } = useQuery({
+  // Fetch voters - always fetch to show counts in tabs
+  const {
+    data: votersData,
+    isLoading: isLoadingVoters,
+    error: votersError,
+  } = useQuery({
     queryKey: ["admin", "voters"],
-    queryFn: () => adminApi.voters.getAll({ limit: 100 }),
-    enabled: activeTab === "voters",
+    queryFn: async () => {
+      try {
+        return await adminApi.voters.getAll({ limit: 100 });
+      } catch (error) {
+        console.error("Failed to fetch voters:", error);
+        throw error;
+      }
+    },
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  // Filtered candidates based on search
-  const filteredCandidates = useMemo(() => {
-    if (!searchQuery.trim()) return candidates;
-    const query = searchQuery.toLowerCase();
-    return candidates.filter(
-      (c) =>
-        c.name.toLowerCase().includes(query) ||
-        c.party.toLowerCase().includes(query) ||
-        c.constituency.toLowerCase().includes(query) ||
-        c.user.email.toLowerCase().includes(query),
-    );
-  }, [candidates, searchQuery]);
+  // Fetch canvassers - always fetch to show counts in tabs
+  const {
+    data: canvassersData,
+    isLoading: isLoadingCanvassers,
+    error: canvassersError,
+  } = useQuery({
+    queryKey: ["admin", "canvassers"],
+    queryFn: async () => {
+      try {
+        return await adminApi.canvassers.getAll({ limit: 100 });
+      } catch (error) {
+        console.error("Failed to fetch canvassers:", error);
+        throw error;
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
 
-  // Filtered voters based on search
+  // Get unique parties and positions for filters
+  const uniqueParties = useMemo(
+    () =>
+      Array.from(
+        new Set(candidates.map((c) => c.party).filter(Boolean)),
+      ).sort(),
+    [candidates],
+  );
+
+  const uniquePositions = useMemo(
+    () =>
+      Array.from(
+        new Set(candidates.map((c) => c.position).filter(Boolean)),
+      ).sort(),
+    [candidates],
+  );
+
+  // Filtered candidates based on search, party, position, and sort
+  const filteredCandidates = useMemo(() => {
+    // Safety check: ensure candidates is an array
+    if (!Array.isArray(candidates) || candidates.length === 0) {
+      return [];
+    }
+
+    // Defensive deduplication by email (safety net)
+    const seen = new Set<string>();
+    let filtered = candidates.filter((c) => {
+      // Safety checks for user and email
+      if (!c?.user?.email) return false;
+      const email = c.user.email.toLowerCase();
+      if (seen.has(email)) return false;
+      seen.add(email);
+      return true;
+    });
+
+    const query = searchQuery?.trim().toLowerCase() || "";
+
+    // Apply party filter
+    if (partyFilter !== "all" && partyFilter) {
+      filtered = filtered.filter((c) => c.party === partyFilter);
+    }
+
+    // Apply position filter
+    if (positionFilter !== "all" && positionFilter) {
+      filtered = filtered.filter((c) => c.position === positionFilter);
+    }
+
+    // Apply search query
+    if (query) {
+      filtered = filtered.filter((c) => {
+        const name = c.name?.toLowerCase() || "";
+        const party = c.party?.toLowerCase() || "";
+        const constituency = c.constituency?.toLowerCase() || "";
+        const email = c.user?.email?.toLowerCase() || "";
+        return (
+          name.includes(query) ||
+          party.includes(query) ||
+          constituency.includes(query) ||
+          email.includes(query)
+        );
+      });
+    }
+
+    // Apply sorting with null safety
+    filtered.sort((a, b) => {
+      if (candidateSort === "name") {
+        return (a.name || "").localeCompare(b.name || "");
+      } else if (candidateSort === "supporters") {
+        return (b.supporters || 0) - (a.supporters || 0);
+      } else {
+        // date - handle missing createdAt
+        const dateA = a.user?.createdAt
+          ? new Date(a.user.createdAt).getTime()
+          : 0;
+        const dateB = b.user?.createdAt
+          ? new Date(b.user.createdAt).getTime()
+          : 0;
+        return dateB - dateA;
+      }
+    });
+
+    return filtered;
+  }, [candidates, searchQuery, partyFilter, positionFilter, candidateSort]);
+
+  // Calculate total pages for candidates
+  const candidateTotalPages = Math.max(
+    1,
+    Math.ceil(filteredCandidates.length / candidatePageSize),
+  );
+
+  // Paginated candidates with bounds checking
+  const paginatedCandidates = useMemo(() => {
+    if (!Array.isArray(filteredCandidates) || filteredCandidates.length === 0) {
+      return [];
+    }
+
+    const safePage = Math.max(1, Math.min(candidatePage, candidateTotalPages));
+    const start = (safePage - 1) * candidatePageSize;
+    const end = Math.min(start + candidatePageSize, filteredCandidates.length);
+
+    return filteredCandidates.slice(start, end);
+  }, [
+    filteredCandidates,
+    candidatePage,
+    candidatePageSize,
+    candidateTotalPages,
+  ]);
+
+  // Reset candidate page if out of bounds (outside useMemo to avoid infinite loop)
+  if (candidatePage > candidateTotalPages && candidateTotalPages > 0) {
+    setCandidatePage(1);
+  }
+
+  // Get unique states and LGAs for voter filters
+  const uniqueStates = useMemo(
+    () =>
+      Array.from(
+        new Set((votersData?.voters || []).map((v) => v.state).filter(Boolean)),
+      ).sort(),
+    [votersData?.voters],
+  );
+
+  const uniqueLgas = useMemo(
+    () =>
+      Array.from(
+        new Set((votersData?.voters || []).map((v) => v.lga).filter(Boolean)),
+      ).sort(),
+    [votersData?.voters],
+  );
+
+  // Filtered voters based on search, state, lga, and sort
   const filteredVoters = useMemo(() => {
-    if (!searchQuery.trim()) return votersData?.voters || [];
-    const query = searchQuery.toLowerCase();
-    return (votersData?.voters || []).filter(
-      (v) =>
-        `${v.firstName} ${v.lastName}`.toLowerCase().includes(query) ||
-        v.nin.toLowerCase().includes(query) ||
-        v.email?.toLowerCase().includes(query) ||
-        v.state.toLowerCase().includes(query) ||
-        v.lga.toLowerCase().includes(query),
+    const voters = votersData?.voters || [];
+    if (!Array.isArray(voters) || voters.length === 0) {
+      return [];
+    }
+
+    let filtered = [...voters];
+    const query = searchQuery?.trim().toLowerCase() || "";
+
+    // Apply state filter
+    if (stateFilter !== "all" && stateFilter) {
+      filtered = filtered.filter((v) => v.state === stateFilter);
+    }
+
+    // Apply LGA filter
+    if (lgaFilter !== "all" && lgaFilter) {
+      filtered = filtered.filter((v) => v.lga === lgaFilter);
+    }
+
+    // Apply search query with null safety
+    if (query) {
+      filtered = filtered.filter((v) => {
+        const fullName = `${v.firstName || ""} ${v.lastName || ""}`
+          .trim()
+          .toLowerCase();
+        const nin = v.nin?.toLowerCase() || "";
+        const email = v.email?.toLowerCase() || "";
+        const state = v.state?.toLowerCase() || "";
+        const lga = v.lga?.toLowerCase() || "";
+        return (
+          fullName.includes(query) ||
+          nin.includes(query) ||
+          email.includes(query) ||
+          state.includes(query) ||
+          lga.includes(query)
+        );
+      });
+    }
+
+    // Apply sorting with null safety
+    filtered.sort((a, b) => {
+      if (voterSort === "name") {
+        const nameA = `${a.firstName || ""} ${a.lastName || ""}`
+          .trim()
+          .toLowerCase();
+        const nameB = `${b.firstName || ""} ${b.lastName || ""}`
+          .trim()
+          .toLowerCase();
+        return nameA.localeCompare(nameB);
+      } else {
+        // date - handle missing registrationDate
+        const dateA = a.registrationDate
+          ? new Date(a.registrationDate).getTime()
+          : 0;
+        const dateB = b.registrationDate
+          ? new Date(b.registrationDate).getTime()
+          : 0;
+        return dateB - dateA;
+      }
+    });
+
+    return filtered;
+  }, [votersData?.voters, searchQuery, stateFilter, lgaFilter, voterSort]);
+
+  // Paginated voters with bounds checking
+  const paginatedVoters = useMemo(() => {
+    if (!Array.isArray(filteredVoters) || filteredVoters.length === 0) {
+      return [];
+    }
+
+    const totalPages = Math.ceil(filteredVoters.length / voterPageSize);
+    const safePage = Math.max(1, Math.min(voterPage, totalPages || 1));
+    const start = (safePage - 1) * voterPageSize;
+    const end = Math.min(start + voterPageSize, filteredVoters.length);
+
+    return filteredVoters.slice(start, end);
+  }, [filteredVoters, voterPage, voterPageSize]);
+
+  const voterTotalPages = Math.max(
+    1,
+    Math.ceil(filteredVoters.length / voterPageSize),
+  );
+
+  // Reset voter page if out of bounds
+  if (voterPage > voterTotalPages && voterTotalPages > 0) {
+    setVoterPage(1);
+  }
+
+  // Get unique states, LGAs, and candidates for canvasser filters
+  const canvassers = useMemo(
+    () => canvassersData?.canvassers || [],
+    [canvassersData?.canvassers],
+  );
+  const uniqueCanvasserStates = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          canvassers.map((c) => c.state).filter((s): s is string => Boolean(s)),
+        ),
+      ).sort(),
+    [canvassers],
+  );
+
+  const uniqueCanvasserLgas = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          canvassers.map((c) => c.lga).filter((l): l is string => Boolean(l)),
+        ),
+      ).sort(),
+    [canvassers],
+  );
+
+  const uniqueCanvasserCandidates = useMemo(() => {
+    const candidateMap = new Map<string, { id: string; name: string }>();
+    canvassers.forEach((c) => {
+      if (!candidateMap.has(c.candidateId)) {
+        candidateMap.set(c.candidateId, {
+          id: c.candidateId,
+          name: c.candidate.name,
+        });
+      }
+    });
+    return Array.from(candidateMap.values()).sort((a, b) =>
+      a.name.localeCompare(b.name),
     );
-  }, [votersData?.voters, searchQuery]);
+  }, [canvassers]);
+
+  // Filtered canvassers based on search, state, lga, candidate, and sort
+  const filteredCanvassers = useMemo(() => {
+    if (!Array.isArray(canvassers) || canvassers.length === 0) {
+      return [];
+    }
+
+    let filtered = [...canvassers];
+    const query = searchQuery?.trim().toLowerCase() || "";
+
+    // Apply state filter
+    if (canvasserStateFilter !== "all" && canvasserStateFilter) {
+      filtered = filtered.filter((c) => c.state === canvasserStateFilter);
+    }
+
+    // Apply LGA filter
+    if (canvasserLgaFilter !== "all" && canvasserLgaFilter) {
+      filtered = filtered.filter((c) => c.lga === canvasserLgaFilter);
+    }
+
+    // Apply candidate filter
+    if (canvasserCandidateFilter !== "all" && canvasserCandidateFilter) {
+      filtered = filtered.filter(
+        (c) => c.candidateId === canvasserCandidateFilter,
+      );
+    }
+
+    // Apply search query with null safety
+    if (query) {
+      filtered = filtered.filter((c) => {
+        const name = c.name?.toLowerCase() || "";
+        const code = c.code?.toLowerCase() || "";
+        const phone = c.phone?.toLowerCase() || "";
+        const candidateName = c.candidate?.name?.toLowerCase() || "";
+        const state = c.state?.toLowerCase() || "";
+        const lga = c.lga?.toLowerCase() || "";
+        return (
+          name.includes(query) ||
+          code.includes(query) ||
+          phone.includes(query) ||
+          candidateName.includes(query) ||
+          state.includes(query) ||
+          lga.includes(query)
+        );
+      });
+    }
+
+    // Apply sorting with null safety
+    filtered.sort((a, b) => {
+      if (canvasserSort === "name") {
+        return (a.name || "").localeCompare(b.name || "");
+      } else if (canvasserSort === "voters") {
+        return (b.votersCount || 0) - (a.votersCount || 0);
+      } else {
+        // date - handle missing createdAt
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      }
+    });
+
+    return filtered;
+  }, [
+    canvassers,
+    searchQuery,
+    canvasserStateFilter,
+    canvasserLgaFilter,
+    canvasserCandidateFilter,
+    canvasserSort,
+  ]);
+
+  // Calculate total pages for canvassers
+  const canvasserTotalPages = Math.max(
+    1,
+    Math.ceil(filteredCanvassers.length / canvasserPageSize),
+  );
+
+  // Paginated canvassers with bounds checking
+  const paginatedCanvassers = useMemo(() => {
+    if (!Array.isArray(filteredCanvassers) || filteredCanvassers.length === 0) {
+      return [];
+    }
+
+    const safePage = Math.max(1, Math.min(canvasserPage, canvasserTotalPages));
+    const start = (safePage - 1) * canvasserPageSize;
+    const end = Math.min(start + canvasserPageSize, filteredCanvassers.length);
+
+    return filteredCanvassers.slice(start, end);
+  }, [
+    filteredCanvassers,
+    canvasserPage,
+    canvasserPageSize,
+    canvasserTotalPages,
+  ]);
+
+  // Reset canvasser page if out of bounds
+  if (canvasserPage > canvasserTotalPages && canvasserTotalPages > 0) {
+    setCanvasserPage(1);
+  }
+
+  // Check if filters are applied
+  const hasCandidateFilters =
+    partyFilter !== "all" ||
+    positionFilter !== "all" ||
+    candidateSort !== "name" ||
+    searchQuery.trim().length > 0;
+
+  const hasVoterFilters =
+    stateFilter !== "all" ||
+    lgaFilter !== "all" ||
+    voterSort !== "name" ||
+    searchQuery.trim().length > 0;
+
+  const hasCanvasserFilters =
+    canvasserStateFilter !== "all" ||
+    canvasserLgaFilter !== "all" ||
+    canvasserCandidateFilter !== "all" ||
+    canvasserSort !== "name" ||
+    searchQuery.trim().length > 0;
+
+  // Reset filter handlers
+  const handleResetCandidateFilters = () => {
+    setSearchQuery("");
+    setPartyFilter("all");
+    setPositionFilter("all");
+    setCandidateSort("name");
+    setCandidatePage(1);
+  };
+
+  const handleResetVoterFilters = () => {
+    setSearchQuery("");
+    setStateFilter("all");
+    setLgaFilter("all");
+    setVoterSort("name");
+    setVoterPage(1);
+  };
+
+  const handleResetCanvasserFilters = () => {
+    setSearchQuery("");
+    setCanvasserStateFilter("all");
+    setCanvasserLgaFilter("all");
+    setCanvasserCandidateFilter("all");
+    setCanvasserSort("name");
+    setCanvasserPage(1);
+  };
+
+  // Filter change handlers
+  const handleCandidateFilterChange = (filter: {
+    party?: string;
+    position?: string;
+    sort?: "name" | "supporters" | "date";
+  }) => {
+    if (filter.party !== undefined) {
+      setPartyFilter(filter.party);
+      setCandidatePage(1);
+    }
+    if (filter.position !== undefined) {
+      setPositionFilter(filter.position);
+      setCandidatePage(1);
+    }
+    if (filter.sort !== undefined) {
+      setCandidateSort(filter.sort);
+      setCandidatePage(1);
+    }
+  };
+
+  const handleVoterFilterChange = (filter: {
+    state?: string;
+    lga?: string;
+    sort?: "name" | "date";
+  }) => {
+    if (filter.state !== undefined) {
+      setStateFilter(filter.state);
+      setVoterPage(1);
+    }
+    if (filter.lga !== undefined) {
+      setLgaFilter(filter.lga);
+      setVoterPage(1);
+    }
+    if (filter.sort !== undefined) {
+      setVoterSort(filter.sort);
+      setVoterPage(1);
+    }
+  };
+
+  const handleCanvasserFilterChange = (filter: {
+    state?: string;
+    lga?: string;
+    candidate?: string;
+    sort?: "name" | "voters" | "date";
+  }) => {
+    if (filter.state !== undefined) {
+      setCanvasserStateFilter(filter.state);
+      setCanvasserPage(1);
+    }
+    if (filter.lga !== undefined) {
+      setCanvasserLgaFilter(filter.lga);
+      setCanvasserPage(1);
+    }
+    if (filter.candidate !== undefined) {
+      setCanvasserCandidateFilter(filter.candidate);
+      setCanvasserPage(1);
+    }
+    if (filter.sort !== undefined) {
+      setCanvasserSort(filter.sort);
+      setCanvasserPage(1);
+    }
+  };
 
   // Create candidate mutation
   const createCandidateMutation = useMutation({
-    mutationFn: (data: typeof newCandidate) =>
-      adminApi.candidates.create({
-        ...data,
-        position: data.position as Candidate["position"],
-      }),
+    mutationFn: async (data: {
+      name: string;
+      email: string;
+      party: string;
+      position: Candidate["position"];
+      constituency: string;
+      description: string;
+    }) => {
+      // Validation
+      if (!data.name?.trim()) {
+        throw new Error("Candidate name is required");
+      }
+      if (!data.email?.trim()) {
+        throw new Error("Email is required");
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
+        throw new Error("Please enter a valid email address");
+      }
+      if (!data.party?.trim()) {
+        throw new Error("Party is required");
+      }
+      if (!data.constituency?.trim()) {
+        throw new Error("Constituency is required");
+      }
+
+      try {
+        return await adminApi.candidates.create({
+          ...data,
+          position: data.position as Candidate["position"],
+        });
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Network error. Please check your connection and try again.";
+        throw new Error(message);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "candidates"] });
       toast.success("Candidate created successfully!");
-      setNewCandidate({
-        name: "",
-        email: "",
-        party: "",
-        position: "",
-        constituency: "",
-        description: "",
-      });
       setIsCreateDialogOpen(false);
     },
     onError: (error: Error) => {
+      console.error("Failed to create candidate:", error);
       toast.error(error.message || "Failed to create candidate");
     },
   });
 
   // Update candidate mutation
   const updateCandidateMutation = useMutation({
-    mutationFn: (data: Parameters<typeof adminApi.candidates.update>[0]) =>
-      adminApi.candidates.update(data),
+    mutationFn: async (
+      data: Parameters<typeof adminApi.candidates.update>[0],
+    ) => {
+      // Validation
+      if (!data.id) {
+        throw new Error("Candidate ID is required");
+      }
+      if (data.name !== undefined && !data.name?.trim()) {
+        throw new Error("Candidate name cannot be empty");
+      }
+      if (data.email !== undefined) {
+        if (!data.email.trim()) {
+          throw new Error("Email cannot be empty");
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
+          throw new Error("Please enter a valid email address");
+        }
+      }
+
+      try {
+        return await adminApi.candidates.update(data);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Network error. Please check your connection and try again.";
+        throw new Error(message);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "candidates"] });
       toast.success("Candidate updated successfully!");
       setEditingCandidate(null);
     },
     onError: (error: Error) => {
+      console.error("Failed to update candidate:", error);
       toast.error(error.message || "Failed to update candidate");
     },
   });
 
   // Delete candidate mutation
   const deleteCandidateMutation = useMutation({
-    mutationFn: (id: string) => adminApi.candidates.delete(id),
+    mutationFn: async (id: string) => {
+      if (!id?.trim()) {
+        throw new Error("Candidate ID is required");
+      }
+
+      try {
+        await adminApi.candidates.delete(id);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Network error. Please check your connection and try again.";
+        throw new Error(message);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "candidates"] });
       toast.success("Candidate deleted successfully!");
       setDeletingCandidateId(null);
     },
     onError: (error: Error) => {
+      console.error("Failed to delete candidate:", error);
       toast.error(error.message || "Failed to delete candidate");
     },
   });
 
   // Delete voter mutation
   const deleteVoterMutation = useMutation({
-    mutationFn: (id: string) => adminApi.voters.delete(id),
+    mutationFn: async (id: string) => {
+      if (!id?.trim()) {
+        throw new Error("Voter ID is required");
+      }
+
+      try {
+        await adminApi.voters.delete(id);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Network error. Please check your connection and try again.";
+        throw new Error(message);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "voters"] });
       toast.success("Voter deleted successfully!");
       setDeletingVoterId(null);
     },
     onError: (error: Error) => {
+      console.error("Failed to delete voter:", error);
       toast.error(error.message || "Failed to delete voter");
     },
   });
 
-  const handleCreateCandidate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCandidate.position) {
-      toast.error("Please select a position");
-      return;
-    }
-    createCandidateMutation.mutate(newCandidate);
+  // Update canvasser mutation
+  const updateCanvasserMutation = useMutation({
+    mutationFn: async (
+      data: Parameters<typeof adminApi.canvassers.update>[0],
+    ) => {
+      // Validation
+      if (!data.id) {
+        throw new Error("Canvasser ID is required");
+      }
+      if (data.name !== undefined && !data.name?.trim()) {
+        throw new Error("Canvasser name cannot be empty");
+      }
+      if (data.phone !== undefined && !data.phone?.trim()) {
+        throw new Error("Phone number cannot be empty");
+      }
+
+      try {
+        return await adminApi.canvassers.update(data);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Network error. Please check your connection and try again.";
+        throw new Error(message);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "canvassers"] });
+      toast.success("Canvasser updated successfully!");
+      setEditingCanvasser(null);
+    },
+    onError: (error: Error) => {
+      console.error("Failed to update canvasser:", error);
+      toast.error(error.message || "Failed to update canvasser");
+    },
+  });
+
+  // Delete canvasser mutation
+  const deleteCanvasserMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!id?.trim()) {
+        throw new Error("Canvasser ID is required");
+      }
+
+      try {
+        await adminApi.canvassers.delete(id);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Network error. Please check your connection and try again.";
+        throw new Error(message);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "canvassers"] });
+      toast.success("Canvasser deleted successfully!");
+      setDeletingCanvasserId(null);
+    },
+    onError: (error: Error) => {
+      console.error("Failed to delete canvasser:", error);
+      toast.error(error.message || "Failed to delete canvasser");
+    },
+  });
+
+  const handleCreateCandidate = async (data: {
+    name: string;
+    email: string;
+    party: string;
+    position: Candidate["position"];
+    constituency: string;
+    description: string;
+  }) => {
+    createCandidateMutation.mutate(data);
   };
 
-  const handleUpdateCandidate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingCandidate) return;
-    updateCandidateMutation.mutate({
-      id: editingCandidate.id,
-      name: editingCandidate.name,
-      email: editingCandidate.user.email,
-      party: editingCandidate.party,
-      position: editingCandidate.position,
-      constituency: editingCandidate.constituency,
-      description: editingCandidate.description,
-    });
+  const handleUpdateCandidate = async (data: {
+    id: string;
+    name: string;
+    email: string;
+    party: string;
+    position: Candidate["position"];
+    constituency: string;
+    description: string;
+  }) => {
+    updateCandidateMutation.mutate(data);
   };
 
-  const totalSupporters = candidates.reduce((sum, c) => sum + c.supporters, 0);
+  const handleUpdateCanvasser = async (data: {
+    id: string;
+    code?: string;
+    name?: string;
+    phone?: string;
+    candidateId?: string;
+    ward?: string;
+    lga?: string;
+    state?: string;
+  }) => {
+    updateCanvasserMutation.mutate(data);
+  };
+
+  const totalSupporters = useMemo(() => {
+    if (!Array.isArray(candidates)) return 0;
+    return candidates.reduce((sum, c) => sum + (c.supporters || 0), 0);
+  }, [candidates]);
 
   return (
     <div className="flex flex-1 flex-col gap-2">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+          {/* Error States */}
+          {candidatesError && (
+            <Alert
+              variant="destructive"
+              className="border-destructive/50 bg-destructive/10 mx-4 sm:mx-6"
+            >
+              <HiExclamationCircle className="h-4 w-4" />
+              <AlertTitle>Failed to load candidates</AlertTitle>
+              <AlertDescription>
+                {candidatesError instanceof Error
+                  ? candidatesError.message
+                  : "An error occurred while loading candidates. Please try refreshing the page."}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {votersError && activeTab === "voters" && (
+            <Alert
+              variant="destructive"
+              className="border-destructive/50 bg-destructive/10 mx-4 sm:mx-6"
+            >
+              <HiExclamationCircle className="h-4 w-4" />
+              <AlertTitle>Failed to load voters</AlertTitle>
+              <AlertDescription>
+                {votersError instanceof Error
+                  ? votersError.message
+                  : "An error occurred while loading voters. Please try refreshing the page."}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {canvassersError && activeTab === "canvassers" && (
+            <Alert
+              variant="destructive"
+              className="border-destructive/50 bg-destructive/10 mx-4 sm:mx-6"
+            >
+              <HiExclamationCircle className="h-4 w-4" />
+              <AlertTitle>Failed to load canvassers</AlertTitle>
+              <AlertDescription>
+                {canvassersError instanceof Error
+                  ? canvassersError.message
+                  : "An error occurred while loading canvassers. Please try refreshing the page."}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-3 lg:px-6">
+          <div className="grid grid-cols-1 gap-3 px-4 sm:grid-cols-3 sm:gap-4 lg:px-6">
             {isLoadingCandidates ? (
               <>
                 <StatCardSkeleton />
                 <StatCardSkeleton />
                 <StatCardSkeleton />
               </>
+            ) : candidatesError ? (
+              <>
+                <Card className="border-destructive/20 bg-destructive/5">
+                  <CardContent className="pt-6">
+                    <div className="text-destructive text-sm">
+                      Unable to load stats
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-destructive/20 bg-destructive/5">
+                  <CardContent className="pt-6">
+                    <div className="text-destructive text-sm">
+                      Unable to load stats
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-destructive/20 bg-destructive/5">
+                  <CardContent className="pt-6">
+                    <div className="text-destructive text-sm">
+                      Unable to load stats
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
             ) : (
               <>
                 <Card className="border-border/50 hover:border-primary/30 transition-colors">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                    <CardTitle className="text-muted-foreground text-sm font-medium">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3">
+                    <CardTitle className="text-muted-foreground text-xs font-medium sm:text-sm">
                       Total Candidates
                     </CardTitle>
-                    <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-lg">
-                      <HiOutlineUserGroup className="text-primary h-5 w-5" />
+                    <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg sm:h-9 sm:w-9">
+                      <HiOutlineUserGroup className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-foreground text-2xl font-semibold">
+                  <CardContent className="pt-0">
+                    <div className="text-foreground text-xl font-semibold sm:text-2xl">
                       {candidates.length}
                     </div>
-                    <p className="text-muted-foreground mt-1 text-xs">
+                    <p className="text-muted-foreground mt-0.5 text-xs sm:mt-1">
                       Active candidate accounts
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card className="border-border/50 hover:border-primary/30 transition-colors">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                    <CardTitle className="text-muted-foreground text-sm font-medium">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3">
+                    <CardTitle className="text-muted-foreground text-xs font-medium sm:text-sm">
                       Total Supporters
                     </CardTitle>
-                    <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-lg">
-                      <HiOutlineUsers className="text-primary h-5 w-5" />
+                    <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg sm:h-9 sm:w-9">
+                      <HiOutlineUsers className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-foreground text-2xl font-semibold">
+                  <CardContent className="pt-0">
+                    <div className="text-foreground text-xl font-semibold sm:text-2xl">
                       {totalSupporters.toLocaleString()}
                     </div>
-                    <p className="text-muted-foreground mt-1 text-xs">
+                    <p className="text-muted-foreground mt-0.5 text-xs sm:mt-1">
                       Across all candidates
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card className="border-border/50 hover:border-primary/30 transition-colors">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                    <CardTitle className="text-muted-foreground text-sm font-medium">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3">
+                    <CardTitle className="text-muted-foreground text-xs font-medium sm:text-sm">
                       Total Voters
                     </CardTitle>
-                    <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-lg">
-                      <HiOutlineUserCircle className="text-primary h-5 w-5" />
+                    <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg sm:h-9 sm:w-9">
+                      <HiOutlineUserCircle className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-foreground text-2xl font-semibold">
+                  <CardContent className="pt-0">
+                    <div className="text-foreground text-xl font-semibold sm:text-2xl">
                       {activeTab === "voters" && isLoadingVoters ? (
-                        <Skeleton className="h-8 w-16" />
+                        <Skeleton className="h-6 w-12 sm:h-8 sm:w-16" />
                       ) : (
                         votersData?.total.toLocaleString() || "0"
                       )}
                     </div>
-                    <p className="text-muted-foreground mt-1 text-xs">
+                    <p className="text-muted-foreground mt-0.5 text-xs sm:mt-1">
                       Registered voters
                     </p>
                   </CardContent>
@@ -340,704 +1064,306 @@ export function AdminDashboard() {
           <Tabs
             value={activeTab}
             onValueChange={handleTabChange}
+            defaultValue="candidates"
             className="flex flex-1 flex-col"
           >
             {/* Search and Actions Bar */}
-            <div className="flex flex-col gap-4 px-4 sm:flex-row sm:items-center sm:justify-between lg:px-6">
-              <TabsList className="border-border/50 bg-muted/50">
-                <TabsTrigger
-                  value="candidates"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  <HiOutlineUserGroup className="mr-2 h-4 w-4" />
-                  Candidates
-                  {candidates.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      className="bg-primary/20 text-primary ml-2"
+            <div className="flex flex-col gap-4 px-4 lg:px-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 overflow-hidden sm:flex-row sm:items-center sm:gap-4">
+                  <TabsList className="border-border/50 bg-muted/50 w-full justify-start overflow-x-auto sm:w-auto">
+                    <TabsTrigger
+                      value="candidates"
+                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground group relative min-w-fit flex-1 items-center gap-2 px-4 py-2.5 sm:flex-none"
                     >
-                      {candidates.length}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger
-                  value="voters"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  <HiOutlineUserCircle className="mr-2 h-4 w-4" />
-                  Voters
-                  {votersData && votersData.total > 0 && (
-                    <Badge
-                      variant="secondary"
-                      className="bg-primary/20 text-primary ml-2"
+                      <HiOutlineUserGroup className="h-4 w-4 shrink-0" />
+                      <span className="font-medium">Candidates</span>
+                      {!isLoadingCandidates && (
+                        <Badge
+                          variant="secondary"
+                          className="bg-primary/20 text-primary ml-auto font-semibold"
+                        >
+                          {candidates.length}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="voters"
+                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground group relative min-w-fit flex-1 items-center gap-2 px-4 py-2.5 sm:flex-none"
                     >
-                      {votersData.total}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-              </TabsList>
+                      <HiOutlineUserCircle className="h-4 w-4 shrink-0" />
+                      <span className="font-medium">Voters</span>
+                      {!isLoadingVoters && (
+                        <Badge
+                          variant="secondary"
+                          className="bg-primary/20 text-primary ml-auto font-semibold"
+                        >
+                          {votersData?.total.toLocaleString() || "0"}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="canvassers"
+                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground group relative min-w-fit flex-1 items-center gap-2 px-4 py-2.5 sm:flex-none"
+                    >
+                      <HiOutlineIdentification className="h-4 w-4 shrink-0" />
+                      <span className="font-medium">Canvassers</span>
+                      {!isLoadingCanvassers && (
+                        <Badge
+                          variant="secondary"
+                          className="bg-primary/20 text-primary ml-auto font-semibold"
+                        >
+                          {canvassersData?.total.toLocaleString() || "0"}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
+                  </TabsList>
 
-              <div className="flex flex-1 items-center gap-2 sm:justify-end">
-                {/* Search Bar */}
-                <div className="relative flex-1 sm:w-64">
-                  <HiOutlineSearch className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                  <Input
-                    placeholder={`Search ${activeTab}...`}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="border-border/50 pl-9"
-                  />
+                  {/* Tab Preview Info - Hidden on mobile */}
+                  <div className="hidden items-center gap-4 text-sm sm:flex">
+                    {activeTab === "candidates" ? (
+                      <div className="text-muted-foreground flex items-center gap-2">
+                        <HiOutlineUserGroup className="h-4 w-4" />
+                        <span>
+                          <span className="text-foreground font-semibold">
+                            {candidates.length}
+                          </span>{" "}
+                          candidate{candidates.length !== 1 ? "s" : ""}{" "}
+                          registered
+                        </span>
+                      </div>
+                    ) : activeTab === "voters" ? (
+                      <div className="text-muted-foreground flex items-center gap-2">
+                        <HiOutlineUserCircle className="h-4 w-4" />
+                        <span>
+                          <span className="text-foreground font-semibold">
+                            {votersData?.total.toLocaleString() || "0"}
+                          </span>{" "}
+                          voter{(votersData?.total || 0) !== 1 ? "s" : ""}{" "}
+                          registered
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="text-muted-foreground flex items-center gap-2">
+                        <HiOutlineIdentification className="h-4 w-4" />
+                        <span>
+                          <span className="text-foreground font-semibold">
+                            {canvassersData?.total.toLocaleString() || "0"}
+                          </span>{" "}
+                          canvasser
+                          {(canvassersData?.total || 0) !== 1 ? "s" : ""}{" "}
+                          registered
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Create Button - Only show for candidates tab */}
                 {activeTab === "candidates" && (
                   <Button
                     onClick={() => setIsCreateDialogOpen(true)}
-                    className="gap-2"
+                    className="w-full gap-2 sm:w-auto"
                   >
                     <HiOutlineUserAdd className="h-4 w-4" />
-                    <span className="hidden sm:inline">Create Candidate</span>
-                    <span className="sm:hidden">Create</span>
+                    <span>Create Candidate</span>
                   </Button>
                 )}
               </div>
+
+              {/* Search Bar */}
+              <AdminSearchBar
+                value={searchQuery}
+                onChange={(value) => {
+                  setSearchQuery(value);
+                  // Reset to page 1 when search changes
+                  if (activeTab === "candidates") setCandidatePage(1);
+                  else if (activeTab === "voters") setVoterPage(1);
+                  else if (activeTab === "canvassers") setCanvasserPage(1);
+                }}
+                placeholder={`Search ${activeTab}...`}
+              />
+
+              {/* Filters Row - Candidates */}
+              {activeTab === "candidates" && (
+                <CandidateFilters
+                  partyFilter={partyFilter}
+                  positionFilter={positionFilter}
+                  sort={candidateSort}
+                  uniqueParties={uniqueParties}
+                  uniquePositions={uniquePositions}
+                  onFilterChange={handleCandidateFilterChange}
+                  onReset={handleResetCandidateFilters}
+                  hasFilters={hasCandidateFilters}
+                />
+              )}
+
+              {/* Filters Row - Voters */}
+              {activeTab === "voters" && (
+                <VoterFilters
+                  stateFilter={stateFilter}
+                  lgaFilter={lgaFilter}
+                  sort={voterSort}
+                  uniqueStates={uniqueStates}
+                  uniqueLgas={uniqueLgas}
+                  onFilterChange={handleVoterFilterChange}
+                  onReset={handleResetVoterFilters}
+                  hasFilters={hasVoterFilters}
+                />
+              )}
+
+              {/* Filters Row - Canvassers */}
+              {activeTab === "canvassers" && (
+                <CanvasserFilters
+                  stateFilter={canvasserStateFilter}
+                  lgaFilter={canvasserLgaFilter}
+                  candidateFilter={canvasserCandidateFilter}
+                  sort={canvasserSort}
+                  uniqueStates={uniqueCanvasserStates}
+                  uniqueLgas={uniqueCanvasserLgas}
+                  uniqueCandidates={uniqueCanvasserCandidates}
+                  onFilterChange={handleCanvasserFilterChange}
+                  onReset={handleResetCanvasserFilters}
+                  hasFilters={hasCanvasserFilters}
+                />
+              )}
             </div>
 
             {/* Candidates Tab */}
-            <TabsContent
-              value="candidates"
-              className="flex-1 space-y-4 px-4 lg:px-6"
-            >
-              <Card className="border-border/50 flex-1">
-                <CardHeader>
-                  <CardTitle>Candidate Accounts</CardTitle>
-                  <CardDescription>
-                    {filteredCandidates.length === candidates.length
-                      ? `Manage ${candidates.length} candidate account${candidates.length !== 1 ? "s" : ""}`
-                      : `Showing ${filteredCandidates.length} of ${candidates.length} candidates`}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {isLoadingCandidates ? (
-                    <div className="space-y-4">
-                      <CandidateCardSkeleton />
-                      <CandidateCardSkeleton />
-                      <CandidateCardSkeleton />
-                    </div>
-                  ) : candidatesError ? (
-                    <div className="py-12 text-center">
-                      <HiOutlineXCircle className="text-destructive mx-auto mb-3 h-12 w-12" />
-                      <p className="text-muted-foreground mb-1 font-medium">
-                        Failed to load candidates
-                      </p>
-                      <p className="text-muted-foreground text-sm">
-                        Please try refreshing the page
-                      </p>
-                    </div>
-                  ) : filteredCandidates.length === 0 ? (
-                    <div className="py-12 text-center">
-                      <HiOutlineUserGroup className="text-muted-foreground mx-auto mb-3 h-12 w-12" />
-                      <p className="text-muted-foreground mb-1 font-medium">
-                        {searchQuery
-                          ? "No candidates match your search"
-                          : "No candidates found"}
-                      </p>
-                      <p className="text-muted-foreground text-sm">
-                        {searchQuery
-                          ? "Try adjusting your search terms"
-                          : "Create your first candidate using the button above"}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {filteredCandidates.map((candidate) => (
-                        <div
-                          key={candidate.id}
-                          className="border-border/50 hover:border-primary/30 flex flex-col gap-4 rounded-lg border p-4 transition-colors sm:flex-row sm:items-center sm:justify-between"
-                        >
-                          <div className="flex-1 space-y-2">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="text-foreground font-medium">
-                                {candidate.name}
-                              </h3>
-                              <Badge
-                                variant="default"
-                                className="bg-primary/10 text-primary"
-                              >
-                                {candidate.party}
-                              </Badge>
-                              <Badge
-                                variant="outline"
-                                className="border-border/50"
-                              >
-                                {candidate.position}
-                              </Badge>
-                            </div>
-                            <p className="text-muted-foreground text-sm">
-                              {candidate.user.email}
-                            </p>
-                            <p className="text-muted-foreground text-sm">
-                              {candidate.constituency} •{" "}
-                              <span className="text-foreground font-medium">
-                                {candidate.supporters.toLocaleString()}
-                              </span>{" "}
-                              supporters
-                            </p>
-                            <p className="text-muted-foreground text-xs">
-                              Created{" "}
-                              {new Date(
-                                candidate.user.createdAt,
-                              ).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              })}
-                            </p>
-                          </div>
-                          <div className="flex gap-2 sm:shrink-0">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setEditingCandidate(candidate)}
-                              disabled={
-                                updateCandidateMutation.isPending ||
-                                deleteCandidateMutation.isPending
-                              }
-                              className="border-border/50"
-                            >
-                              <HiOutlinePencil className="mr-2 h-4 w-4" />
-                              Edit
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() =>
-                                setDeletingCandidateId(candidate.id)
-                              }
-                              disabled={
-                                updateCandidateMutation.isPending ||
-                                deleteCandidateMutation.isPending
-                              }
-                            >
-                              <HiOutlineTrash className="mr-2 h-4 w-4" />
-                              Delete
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+            <CandidatesTab
+              candidates={candidates}
+              filteredCandidates={filteredCandidates}
+              paginatedCandidates={paginatedCandidates}
+              isLoading={isLoadingCandidates}
+              error={candidatesError}
+              searchQuery={searchQuery}
+              currentPage={candidatePage}
+              pageSize={candidatePageSize}
+              totalPages={candidateTotalPages}
+              onEdit={setEditingCandidate}
+              onDelete={setDeletingCandidateId}
+              onPageChange={setCandidatePage}
+              onPageSizeChange={(size) => {
+                setCandidatePageSize(size);
+                setCandidatePage(1);
+              }}
+              isLoadingActions={
+                updateCandidateMutation.isPending ||
+                deleteCandidateMutation.isPending
+              }
+            />
 
             {/* Voters Tab */}
-            <TabsContent
-              value="voters"
-              className="flex-1 space-y-4 px-4 lg:px-6"
-            >
-              <Card className="border-border/50 flex-1">
-                <CardHeader>
-                  <CardTitle>Registered Voters</CardTitle>
-                  <CardDescription>
-                    {filteredVoters.length === (votersData?.voters.length || 0)
-                      ? `View and manage ${votersData?.total || 0} registered voter${(votersData?.total || 0) !== 1 ? "s" : ""}`
-                      : `Showing ${filteredVoters.length} of ${votersData?.voters.length || 0} voters`}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {isLoadingVoters ? (
-                    <div className="space-y-4">
-                      <VoterCardSkeleton />
-                      <VoterCardSkeleton />
-                      <VoterCardSkeleton />
-                    </div>
-                  ) : filteredVoters.length === 0 ? (
-                    <div className="py-12 text-center">
-                      <HiOutlineUserCircle className="text-muted-foreground mx-auto mb-3 h-12 w-12" />
-                      <p className="text-muted-foreground mb-1 font-medium">
-                        {searchQuery
-                          ? "No voters match your search"
-                          : "No voters found"}
-                      </p>
-                      <p className="text-muted-foreground text-sm">
-                        {searchQuery
-                          ? "Try adjusting your search terms"
-                          : "Voters will appear here once they register"}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {filteredVoters.map((voter) => (
-                        <div
-                          key={voter.id}
-                          className="border-border/50 hover:border-primary/30 flex flex-col gap-4 rounded-lg border p-4 transition-colors sm:flex-row sm:items-center sm:justify-between"
-                        >
-                          <div className="flex-1 space-y-2">
-                            <h3 className="text-foreground font-medium">
-                              {voter.firstName} {voter.middleName || ""}{" "}
-                              {voter.lastName}
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                              NIN:{" "}
-                              <span className="font-mono">{voter.nin}</span> •{" "}
-                              {voter.email || "No email"}
-                            </p>
-                            <p className="text-muted-foreground text-sm">
-                              {voter.state} • {voter.lga} • {voter.ward}
-                            </p>
-                            <p className="text-muted-foreground text-xs">
-                              Registered{" "}
-                              {new Date(
-                                voter.registrationDate,
-                              ).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              })}
-                            </p>
-                          </div>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => setDeletingVoterId(voter.id)}
-                            disabled={deleteVoterMutation.isPending}
-                            className="sm:shrink-0"
-                          >
-                            <HiOutlineTrash className="mr-2 h-4 w-4" />
-                            Delete
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+            <VotersTab
+              voters={votersData?.voters || []}
+              filteredVoters={filteredVoters}
+              paginatedVoters={paginatedVoters}
+              totalVoters={votersData?.total || 0}
+              isLoading={isLoadingVoters}
+              searchQuery={searchQuery}
+              currentPage={voterPage}
+              pageSize={voterPageSize}
+              totalPages={voterTotalPages}
+              onDelete={setDeletingVoterId}
+              onPageChange={setVoterPage}
+              onPageSizeChange={(size) => {
+                setVoterPageSize(size);
+                setVoterPage(1);
+              }}
+              isLoadingActions={deleteVoterMutation.isPending}
+            />
+
+            {/* Canvassers Tab */}
+            <CanvassersTab
+              canvassers={canvassers}
+              filteredCanvassers={filteredCanvassers}
+              paginatedCanvassers={paginatedCanvassers}
+              isLoading={isLoadingCanvassers}
+              error={canvassersError}
+              searchQuery={searchQuery}
+              currentPage={canvasserPage}
+              pageSize={canvasserPageSize}
+              totalPages={canvasserTotalPages}
+              onEdit={setEditingCanvasser}
+              onDelete={setDeletingCanvasserId}
+              onPageChange={setCanvasserPage}
+              onPageSizeChange={(size) => {
+                setCanvasserPageSize(size);
+                setCanvasserPage(1);
+              }}
+              isLoadingActions={
+                updateCanvasserMutation.isPending ||
+                deleteCanvasserMutation.isPending
+              }
+            />
           </Tabs>
         </div>
       </div>
 
       {/* Create Candidate Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Create New Candidate</DialogTitle>
-            <DialogDescription>
-              Add a new candidate to the WardWise platform
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCreateCandidate} className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">
-                  Candidate Name *
-                </Label>
-                <Input
-                  id="name"
-                  placeholder="Hon. John Doe"
-                  value={newCandidate.name}
-                  onChange={(e) =>
-                    setNewCandidate({
-                      ...newCandidate,
-                      name: e.target.value,
-                    })
-                  }
-                  required
-                  disabled={createCandidateMutation.isPending}
-                  className="border-border/50"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
-                  Email Address *
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="john.doe@wardwise.ng"
-                  value={newCandidate.email}
-                  onChange={(e) =>
-                    setNewCandidate({
-                      ...newCandidate,
-                      email: e.target.value,
-                    })
-                  }
-                  required
-                  disabled={createCandidateMutation.isPending}
-                  className="border-border/50"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="party" className="text-sm font-medium">
-                  Political Party *
-                </Label>
-                <Input
-                  id="party"
-                  placeholder="APC, PDP, LP..."
-                  value={newCandidate.party}
-                  onChange={(e) =>
-                    setNewCandidate({
-                      ...newCandidate,
-                      party: e.target.value,
-                    })
-                  }
-                  required
-                  disabled={createCandidateMutation.isPending}
-                  className="border-border/50"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="position" className="text-sm font-medium">
-                  Position *
-                </Label>
-                <Select
-                  value={newCandidate.position}
-                  onValueChange={(value) =>
-                    setNewCandidate({
-                      ...newCandidate,
-                      position: value as Candidate["position"],
-                    })
-                  }
-                  disabled={createCandidateMutation.isPending}
-                >
-                  <SelectTrigger id="position" className="border-border/50">
-                    <SelectValue placeholder="Select position" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {POSITIONS.map((pos) => (
-                      <SelectItem key={pos} value={pos}>
-                        {pos}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="constituency" className="text-sm font-medium">
-                Constituency *
-              </Label>
-              <Input
-                id="constituency"
-                placeholder="Song & Fufore Federal Constituency"
-                value={newCandidate.constituency}
-                onChange={(e) =>
-                  setNewCandidate({
-                    ...newCandidate,
-                    constituency: e.target.value,
-                  })
-                }
-                required
-                disabled={createCandidateMutation.isPending}
-                className="border-border/50"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-sm font-medium">
-                Description (Optional)
-              </Label>
-              <Textarea
-                id="description"
-                placeholder="Brief description of the candidate"
-                value={newCandidate.description}
-                onChange={(e) =>
-                  setNewCandidate({
-                    ...newCandidate,
-                    description: e.target.value,
-                  })
-                }
-                rows={3}
-                disabled={createCandidateMutation.isPending}
-                className="border-border/50"
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsCreateDialogOpen(false)}
-                disabled={createCandidateMutation.isPending}
-                className="border-border/50"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={createCandidateMutation.isPending}
-              >
-                {createCandidateMutation.isPending ? (
-                  <>
-                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <HiOutlineCheckCircle className="mr-2 h-4 w-4" />
-                    Create Candidate
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <CreateCandidateDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onSubmit={handleCreateCandidate}
+        isLoading={createCandidateMutation.isPending}
+      />
 
       {/* Edit Candidate Dialog */}
-      <Dialog
+      <EditCandidateDialog
+        candidate={editingCandidate}
         open={!!editingCandidate}
         onOpenChange={(open) => !open && setEditingCandidate(null)}
-      >
-        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Candidate</DialogTitle>
-            <DialogDescription>Update candidate information</DialogDescription>
-          </DialogHeader>
-          {editingCandidate && (
-            <form onSubmit={handleUpdateCandidate} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-name" className="text-sm font-medium">
-                    Candidate Name *
-                  </Label>
-                  <Input
-                    id="edit-name"
-                    value={editingCandidate.name}
-                    onChange={(e) =>
-                      setEditingCandidate({
-                        ...editingCandidate,
-                        name: e.target.value,
-                      })
-                    }
-                    required
-                    disabled={updateCandidateMutation.isPending}
-                    className="border-border/50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-email" className="text-sm font-medium">
-                    Email Address *
-                  </Label>
-                  <Input
-                    id="edit-email"
-                    type="email"
-                    value={editingCandidate.user.email}
-                    onChange={(e) =>
-                      setEditingCandidate({
-                        ...editingCandidate,
-                        user: {
-                          ...editingCandidate.user,
-                          email: e.target.value,
-                        },
-                      })
-                    }
-                    required
-                    disabled={updateCandidateMutation.isPending}
-                    className="border-border/50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-party" className="text-sm font-medium">
-                    Political Party *
-                  </Label>
-                  <Input
-                    id="edit-party"
-                    value={editingCandidate.party}
-                    onChange={(e) =>
-                      setEditingCandidate({
-                        ...editingCandidate,
-                        party: e.target.value,
-                      })
-                    }
-                    required
-                    disabled={updateCandidateMutation.isPending}
-                    className="border-border/50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="edit-position"
-                    className="text-sm font-medium"
-                  >
-                    Position *
-                  </Label>
-                  <Select
-                    value={editingCandidate.position}
-                    onValueChange={(value) =>
-                      setEditingCandidate({
-                        ...editingCandidate,
-                        position: value as Candidate["position"],
-                      })
-                    }
-                    disabled={updateCandidateMutation.isPending}
-                  >
-                    <SelectTrigger
-                      id="edit-position"
-                      className="border-border/50"
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {POSITIONS.map((pos) => (
-                        <SelectItem key={pos} value={pos}>
-                          {pos}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label
-                  htmlFor="edit-constituency"
-                  className="text-sm font-medium"
-                >
-                  Constituency *
-                </Label>
-                <Input
-                  id="edit-constituency"
-                  value={editingCandidate.constituency}
-                  onChange={(e) =>
-                    setEditingCandidate({
-                      ...editingCandidate,
-                      constituency: e.target.value,
-                    })
-                  }
-                  required
-                  disabled={updateCandidateMutation.isPending}
-                  className="border-border/50"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label
-                  htmlFor="edit-description"
-                  className="text-sm font-medium"
-                >
-                  Description
-                </Label>
-                <Textarea
-                  id="edit-description"
-                  value={editingCandidate.description || ""}
-                  onChange={(e) =>
-                    setEditingCandidate({
-                      ...editingCandidate,
-                      description: e.target.value,
-                    })
-                  }
-                  rows={3}
-                  disabled={updateCandidateMutation.isPending}
-                  className="border-border/50"
-                />
-              </div>
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setEditingCandidate(null)}
-                  disabled={updateCandidateMutation.isPending}
-                  className="border-border/50"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={updateCandidateMutation.isPending}
-                >
-                  {updateCandidateMutation.isPending ? (
-                    <>
-                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                      Updating...
-                    </>
-                  ) : (
-                    <>
-                      <HiOutlineCheckCircle className="mr-2 h-4 w-4" />
-                      Update Candidate
-                    </>
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+        onSubmit={handleUpdateCandidate}
+        isLoading={updateCandidateMutation.isPending}
+      />
 
       {/* Delete Candidate Confirmation */}
-      <AlertDialog
+      <DeleteCandidateDialog
+        candidateId={deletingCandidateId}
+        candidateName={
+          candidates.find((c) => c.id === deletingCandidateId)?.name
+        }
         open={!!deletingCandidateId}
         onOpenChange={(open) => !open && setDeletingCandidateId(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              candidate account and all associated data.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteCandidateMutation.isPending}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (deletingCandidateId) {
-                  deleteCandidateMutation.mutate(deletingCandidateId);
-                }
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={deleteCandidateMutation.isPending}
-            >
-              {deleteCandidateMutation.isPending ? (
-                <>
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onConfirm={(id) => deleteCandidateMutation.mutate(id)}
+        isLoading={deleteCandidateMutation.isPending}
+      />
 
       {/* Delete Voter Confirmation */}
-      <AlertDialog
+      <DeleteVoterDialog
+        voterId={deletingVoterId}
+        voterName={
+          votersData?.voters.find((v) => v.id === deletingVoterId)
+            ? `${votersData.voters.find((v) => v.id === deletingVoterId)?.firstName} ${votersData.voters.find((v) => v.id === deletingVoterId)?.lastName}`
+            : undefined
+        }
         open={!!deletingVoterId}
         onOpenChange={(open) => !open && setDeletingVoterId(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              voter record.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteVoterMutation.isPending}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (deletingVoterId) {
-                  deleteVoterMutation.mutate(deletingVoterId);
-                }
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={deleteVoterMutation.isPending}
-            >
-              {deleteVoterMutation.isPending ? (
-                <>
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onConfirm={(id) => deleteVoterMutation.mutate(id)}
+        isLoading={deleteVoterMutation.isPending}
+      />
+
+      {/* Edit Canvasser Dialog */}
+      <EditCanvasserDialog
+        canvasser={editingCanvasser}
+        candidates={candidates}
+        open={!!editingCanvasser}
+        onOpenChange={(open) => !open && setEditingCanvasser(null)}
+        onSubmit={handleUpdateCanvasser}
+        isLoading={updateCanvasserMutation.isPending}
+      />
+
+      {/* Delete Canvasser Confirmation */}
+      <DeleteCanvasserDialog
+        canvasserId={deletingCanvasserId}
+        canvasserName={
+          canvassers.find((c) => c.id === deletingCanvasserId)?.name
+        }
+        open={!!deletingCanvasserId}
+        onOpenChange={(open) => !open && setDeletingCanvasserId(null)}
+        onConfirm={(id) => deleteCanvasserMutation.mutate(id)}
+        isLoading={deleteCanvasserMutation.isPending}
+      />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
   IconChartBar,
   IconHistory,
   IconHelp,
+  IconUserCheck,
 } from "@tabler/icons-react";
 import { NavMain } from "@/components/candidate-dashboard/nav-main";
 import { NavSecondary } from "@/components/candidate-dashboard/nav-secondary";
@@ -43,6 +44,11 @@ const adminNavItems = [
     title: "Voters",
     url: "/admin?tab=voters",
     icon: IconUserCircle,
+  },
+  {
+    title: "Canvassers",
+    url: "/admin?tab=canvassers",
+    icon: IconUserCheck,
   },
   {
     title: "Analytics",

@@ -4,7 +4,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { HiOutlineRefresh, HiOutlineHome } from "react-icons/hi";
+import { Badge } from "@/components/ui/badge";
+import {
+  HiOutlineRefresh,
+  HiOutlineHome,
+  HiOutlineShieldCheck,
+} from "react-icons/hi";
 import Link from "next/link";
 import { toast } from "sonner";
 import { usePathname } from "next/navigation";
@@ -41,12 +46,21 @@ export function AdminHeader() {
           className="mx-1 hidden data-[orientation=vertical]:h-4 sm:block"
         />
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-sm font-semibold sm:text-base">
-            {getBreadcrumbTitle()}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="truncate text-sm font-semibold sm:text-base">
+              {getBreadcrumbTitle()}
+            </h1>
+            <Badge
+              variant="default"
+              className="bg-primary/10 text-primary border-primary/20 hidden items-center gap-1 sm:inline-flex"
+            >
+              <HiOutlineShieldCheck className="h-3 w-3" />
+              <span>Super Admin</span>
+            </Badge>
+          </div>
           <p className="text-muted-foreground hidden truncate text-xs sm:block">
             {pathname === "/admin"
-              ? "Manage candidates, voters, and platform settings"
+              ? "Manage all users, candidates, and platform settings"
               : "Administrative controls and management"}
           </p>
         </div>
