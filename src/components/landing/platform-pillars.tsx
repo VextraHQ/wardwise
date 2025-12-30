@@ -6,14 +6,14 @@ export function PlatformPillarsSection() {
       id="platform-pillars"
       className="bg-background text-foreground relative overflow-hidden py-16 sm:py-20 lg:py-24"
     >
-      <div
+      {/* <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(70,194,167,0.18),transparent_52%),radial-gradient(circle_at_88%_12%,rgba(12,39,32,0.12),transparent_58%)]"
         aria-hidden={true}
       />
       <div
         className="from-primary/0 via-primary/30 absolute inset-x-1/2 top-0 h-[120%] w-px -translate-x-1/2 bg-linear-to-b to-transparent"
         aria-hidden={true}
-      />
+      /> */}
       <div className="relative mx-auto flex max-w-7xl flex-col gap-16 px-6">
         <div className="max-w-3xl space-y-5">
           <p className="text-accent text-xs font-semibold tracking-[0.32em] uppercase">

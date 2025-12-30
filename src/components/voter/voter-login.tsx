@@ -36,7 +36,7 @@ import {
   isValidNIN,
   normalizeNINInput,
   formatNINForDisplay,
-} from "@/lib/registration-schemas";
+} from "@/lib/schemas/common-schemas";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { DemoIndicator } from "@/components/ui/demo-indicator";
 import { Copy, Check, ChevronDown, ChevronUp } from "lucide-react";

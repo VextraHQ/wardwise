@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import { createRegistrationMetadata } from "@/lib/metadata";
 import { LocationStep } from "@/components/voter/steps/location-step";
 
-export const metadata: Metadata = {
-  title: "Select Your Location | WardWise Registration",
+export const metadata = createRegistrationMetadata({
+  title: "Select Your Location",
   description: "Select your state, LGA, ward, and polling unit.",
-};
+});
 
 export default function LocationPage() {
   return (

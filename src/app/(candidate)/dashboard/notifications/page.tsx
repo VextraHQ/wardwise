@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { NotificationsContent } from "@/components/candidate-dashboard/notifications-content";
 
 export const metadata: Metadata = {
-  title: "Notifications | WardWise",
+  title: "Notifications",
   description:
     "Stay updated with campaign activities, new supporters, survey responses, and campaign updates.",
 };

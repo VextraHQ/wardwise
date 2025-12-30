@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+import { createRegistrationMetadata } from "@/lib/metadata";
 import { CandidateSurveyStep } from "@/components/voter/steps/candidate-survey-step";
 
-export const metadata: Metadata = {
-  title: "Help Your Candidate Understand You | WardWise Registration",
+export const metadata = createRegistrationMetadata({
+  title: "Help Your Candidate Understand You",
   description:
     "Answer a few quick questions to help your selected candidate understand what matters most to you and your community.",
-};
+});
 
 export default function SurveyPage() {
   return (

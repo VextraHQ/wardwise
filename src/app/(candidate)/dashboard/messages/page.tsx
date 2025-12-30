@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { MessagesContent } from "@/components/candidate-dashboard/messages-content";
 
 export const metadata: Metadata = {
-  title: "Messages | WardWise",
+  title: "Messages",
   description: "Communicate with your supporters, groups, or wards.",
 };
 

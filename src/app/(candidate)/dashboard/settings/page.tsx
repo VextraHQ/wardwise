@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SettingsContent } from "@/components/candidate-dashboard/settings-content";
 
 export const metadata: Metadata = {
-  title: "Settings | WardWise",
+  title: "Settings",
   description: "Manage your account and dashboard preferences.",
 };
 

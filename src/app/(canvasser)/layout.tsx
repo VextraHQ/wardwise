@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { CanvasserHeader } from "@/components/canvasser/canvasser-header";
 import { DemoBanner } from "@/components/landing/demo-banner";
 import { VoterFooter } from "@/components/voter/voter-footer";

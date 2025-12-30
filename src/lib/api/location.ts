@@ -49,10 +49,12 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   return response.json();
 }
 
-// Use mock if NEXT_PUBLIC_USE_MOCK_API is true, or in development
+// Mock mode: true if explicitly set, or default to mock in development
+// Production mode: false if explicitly set, or default in production
 const USE_MOCK =
   process.env.NEXT_PUBLIC_USE_MOCK_API === "true" ||
-  process.env.NODE_ENV === "development";
+  (!process.env.NEXT_PUBLIC_USE_MOCK_API &&
+    process.env.NODE_ENV === "development");
 
 export const locationApi = {
   /**

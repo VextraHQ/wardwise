@@ -9,9 +9,9 @@ import { heroSupportingCopy, trustIndicators } from "@/lib/landing-data";
 import { HiArrowUpRight } from "react-icons/hi2";
 
 const benefitPoints = [
-  "Your voice reaches your chosen candidate directly",
-  "Share what matters most in your community",
-  "Organized by your exact polling unit location",
+  "Supporters share what matters most in their community",
+  "Canvassers verify voters with ward-level precision",
+  "Candidates drive strategy with real-time field data",
 ];
 
 export function HeroSection() {
@@ -31,7 +31,7 @@ export function HeroSection() {
         : "Login to dashboard";
 
   return (
-    <section className="bg-background relative overflow-hidden py-10 sm:py-12 lg:py-16">
+    <section className="bg-background border-border relative overflow-hidden border-b py-10 sm:py-12 lg:py-16">
       {/* Subtle background pattern */}
       <div
         className="absolute inset-0 opacity-[0.02]"
@@ -42,14 +42,14 @@ export function HeroSection() {
       />
 
       {/* Accent shapes */}
-      <div
+      {/* <div
         className="bg-primary absolute -top-24 -right-24 h-96 w-96 rounded-full opacity-[0.08] blur-3xl"
         aria-hidden={true}
       />
       <div
-        className="bg-accent absolute -bottom-32 -left-32 h-80 w-80 rounded-full opacity-[0.06] blur-3xl"
+        className="absolute -bottom-32 -left-32 h-80 w-80 rounded-full bg-orange-500 opacity-[0.05] blur-3xl"
         aria-hidden={true}
-      />
+      /> */}
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20">
@@ -59,6 +59,8 @@ export function HeroSection() {
               <span className="border-primary/20 bg-primary/5 text-foreground/80 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold tracking-wider uppercase">
                 <span className="bg-primary h-1.5 w-1.5 rounded-full" />
                 Civic Insight Platform
+                <span className="text-muted-foreground/30 mx-1">•</span>
+                <span className="text-orange-600/80">Canvasser Verified</span>
               </span>
             </div>
 
@@ -74,9 +76,11 @@ export function HeroSection() {
             </div>
 
             <ul className="space-y-3.5 sm:space-y-4">
-              {benefitPoints.map((benefit) => (
+              {benefitPoints.map((benefit, idx) => (
                 <li key={benefit} className="flex items-start gap-3">
-                  <div className="bg-primary mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+                  <div
+                    className={`${idx === 1 ? "bg-orange-500" : "bg-primary"} mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors duration-500`}
+                  >
                     <HiCheckCircle className="text-primary-foreground h-3 w-3" />
                   </div>
                   <span className="text-foreground text-sm leading-relaxed sm:text-base">
@@ -88,19 +92,38 @@ export function HeroSection() {
 
             <div className="space-y-4">
               {/* Primary CTA - Full width on mobile, auto on desktop */}
-              <Button
-                size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 w-full rounded-lg px-8 text-base font-semibold transition-all duration-200 hover:shadow-lg sm:w-auto"
-                asChild
-              >
-                <Link
-                  href="/register"
-                  className="flex items-center justify-center gap-2"
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button
+                  size="lg"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 w-full rounded-lg px-8 text-base font-semibold transition-all duration-200 hover:shadow-lg sm:w-auto"
+                  asChild
                 >
-                  Register to Support a Candidate
-                  <HiArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
+                  <Link
+                    href="/register"
+                    className="flex items-center justify-center gap-2"
+                  >
+                    Register as Voter
+                    <HiArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <div className="group relative">
+                  <div className="absolute -inset-0.5 animate-pulse rounded-lg bg-orange-500/20 opacity-0 blur transition group-hover:opacity-100" />
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="relative h-12 w-full rounded-lg border-orange-500/30 px-8 text-base font-semibold text-orange-600 hover:bg-orange-500/5 sm:w-auto"
+                    asChild
+                  >
+                    <Link
+                      href="/canvassers"
+                      className="flex items-center justify-center gap-2"
+                    >
+                      Canvasser Access
+                      <HiArrowUpRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
 
               {/* Secondary links */}
               <div className="flex flex-col gap-2.5 text-sm md:flex-row">
@@ -110,7 +133,7 @@ export function HeroSection() {
                     href="/voter-login"
                     className="text-foreground decoration-primary/30 hover:decoration-primary font-semibold underline decoration-2 underline-offset-4 transition-colors"
                   >
-                    Access your profile
+                    Access profile
                   </Link>
                 </div>
                 <span className="text-muted-foreground hidden sm:inline">
@@ -145,19 +168,19 @@ export function HeroSection() {
           <div className="relative flex items-center justify-center lg:justify-end">
             <div className="relative w-full max-w-lg">
               {/* Dashboard card */}
-              <div className="border-border bg-card overflow-hidden rounded-2xl border">
+              <div className="border-border bg-card overflow-hidden rounded-2xl border shadow-2xl">
                 {/* Header */}
                 <div className="border-border from-muted/50 to-card flex items-center justify-between border-b bg-linear-to-br px-6 py-4">
                   <div>
                     <p className="text-foreground/80 text-xs font-semibold tracking-wider uppercase">
-                      Live Metrics
+                      Live Ward Metrics
                     </p>
                     <p className="text-muted-foreground mt-0.5 text-[11px]">
-                      Supporters syncing every hour
+                      Updated across all polling units
                     </p>
                   </div>
-                  <span className="border-primary/20 bg-primary/10 text-foreground rounded-full border px-3 py-1 text-xs font-medium">
-                    Dashboard
+                  <span className="border-primary/20 bg-primary/10 text-primary rounded-full border px-3 py-1 text-xs font-medium">
+                    State Wide
                   </span>
                 </div>
 
@@ -165,13 +188,13 @@ export function HeroSection() {
                 <div className="from-accent relative bg-linear-to-br via-[#0f2b24] to-[#0b1e1a] p-6">
                   {/* Decorative elements */}
                   <div className="bg-primary absolute top-0 left-0 h-32 w-32 rounded-full opacity-10 blur-2xl" />
-                  <div className="bg-primary absolute right-0 bottom-0 h-24 w-24 rounded-full opacity-10 blur-2xl" />
+                  <div className="absolute right-0 bottom-0 h-24 w-24 rounded-full bg-orange-500 opacity-10 blur-2xl" />
 
                   <div className="relative space-y-4">
                     <div className="flex items-center justify-between text-[10px] font-medium tracking-wider text-white/60 uppercase">
                       <span>Adamawa Overview</span>
                       <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1">
-                        Updated 3m ago
+                        Live Data
                       </span>
                     </div>
 
@@ -189,15 +212,15 @@ export function HeroSection() {
                           Supporters verified
                         </span>
                         <span className="text-xl font-bold text-white">
-                          10,000+
+                          10k+
                         </span>
                       </div>
                       <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
                         <span className="text-sm text-white/70">
-                          Top issue today
+                          Active Canvassers
                         </span>
-                        <span className="text-xl font-bold text-white">
-                          Youth jobs
+                        <span className="text-xl font-bold text-orange-400">
+                          128
                         </span>
                       </div>
                     </div>
@@ -219,7 +242,7 @@ export function HeroSection() {
                 <div className="border-border from-card to-muted/30 space-y-3 border-t bg-linear-to-br px-6 py-5">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">
-                      Next ward outreach
+                      Latest field sync
                     </span>
                     <span className="text-foreground font-semibold">
                       Jimeta • Ward 08
@@ -227,13 +250,15 @@ export function HeroSection() {
                   </div>
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">
-                      Field agents active
+                      Verification throughput
                     </span>
-                    <span className="text-foreground font-semibold">27</span>
+                    <span className="font-semibold text-orange-600">
+                      84% verified
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">
-                      Household follow-ups
+                      Targeted outreach
                     </span>
                     <span className="text-foreground font-semibold">
                       312 scheduled
@@ -243,16 +268,16 @@ export function HeroSection() {
               </div>
 
               {/* Floating accent card */}
-              <div className="border-primary/20 bg-card absolute -bottom-6 -left-6 rounded-xl border p-4">
+              <div className="bg-card absolute -bottom-6 -left-6 rounded-xl border border-orange-500/20 p-4 shadow-xl">
                 <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
-                    <HiArrowUpRight className="text-primary h-5 w-5" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10">
+                    <HiArrowUpRight className="h-5 w-5 text-orange-600" />
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs font-medium">
-                      Growth this week
+                      Field Growth
                     </p>
-                    <p className="text-foreground text-lg font-bold">+24%</p>
+                    <p className="text-lg font-bold text-orange-600">+24%</p>
                   </div>
                 </div>
               </div>

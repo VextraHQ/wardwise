@@ -1,7 +1,8 @@
 "use client";
 
+import React from "react";
 import { motion } from "motion/react";
-import { LucideIcon } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 import type { IconType } from "react-icons";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +14,25 @@ interface RegistrationStepHeaderProps {
   className?: string;
 }
 
+function renderIcon(
+  icon: LucideIcon | IconType | React.ReactNode,
+): React.ReactNode {
+  if (React.isValidElement(icon)) {
+    const element = icon as React.ReactElement<{ className?: string }>;
+    return React.cloneElement(element, {
+      ...element.props,
+      className: "h-3.5 w-3.5",
+    });
+  }
+
+  if (icon && typeof icon === "function") {
+    const IconComponent = icon as React.ComponentType<{ className?: string }>;
+    return <IconComponent className="h-3.5 w-3.5" />;
+  }
+
+  return null;
+}
+
 export function RegistrationStepHeader({
   icon: Icon,
   badge,
@@ -20,14 +40,6 @@ export function RegistrationStepHeader({
   description,
   className,
 }: RegistrationStepHeaderProps) {
-  const renderIcon = () => {
-    if (typeof Icon === "function") {
-      const IconComponent = Icon as LucideIcon | IconType;
-      return <IconComponent className="h-3.5 w-3.5" />;
-    }
-    return <div className="h-3.5 w-3.5">{Icon}</div>;
-  };
-
   return (
     <div className={cn("mb-8 space-y-4 text-center", className)}>
       <motion.div
@@ -37,7 +49,7 @@ export function RegistrationStepHeader({
         className="flex justify-center"
       >
         <div className="border-primary/20 bg-primary/10 text-primary inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold shadow-sm backdrop-blur-sm">
-          {renderIcon()}
+          {renderIcon(Icon)}
           <span>{badge}</span>
         </div>
       </motion.div>

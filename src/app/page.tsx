@@ -9,6 +9,7 @@ import { SiteFooter } from "@/components/landing/footer";
 import { SiteHeader } from "@/components/landing/header";
 import { ScrollToTop } from "@/components/landing/scroll-to-top";
 import { DemoBanner } from "@/components/landing/demo-banner";
+import { EcosystemSection } from "@/components/landing/ecosystem";
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
       <main className="flex-1">
         <HeroSection />
         <HowItWorksSection />
+        <EcosystemSection />
         <FeaturesSection />
         <PlatformPillarsSection />
         <ImpactSection />

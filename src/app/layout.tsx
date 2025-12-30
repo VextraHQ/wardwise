@@ -16,7 +16,10 @@ const poppinsMono = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "WardWise - From Ward to Victory",
+  title: {
+    default: "WardWise | From Ward to Victory",
+    template: "%s | WardWise",
+  },
   description:
     "Nigeria's first location-precise civic intelligence platform for voter insights organized by LGA, Ward, and Polling Unit.",
 };

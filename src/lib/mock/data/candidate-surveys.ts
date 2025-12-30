@@ -26,7 +26,7 @@ export const candidateSurveys: CandidateSurvey[] = [
   // ============================================================================
   {
     id: "survey-apc-4",
-    candidateId: "cand-apc-4",
+    candidateId: "cand-hr-apc-fufore-song",
     candidateName: "Hon. Aliyu Wakili Boya",
     title:
       "Community Development Priorities for Fufore/Song Federal Constituency",
@@ -320,7 +320,7 @@ export const candidateSurveys: CandidateSurvey[] = [
   },
   {
     id: "survey-pdp-2",
-    candidateId: "cand-pdp-2",
+    candidateId: "cand-sen-pdp-adamawa-central",
     candidateName: "Dr. Maryam Inna Ciroma",
     title: "Healthcare and Social Welfare Priorities for Adamawa Central",
     description:
@@ -570,7 +570,7 @@ export const candidateSurveys: CandidateSurvey[] = [
   },
   {
     id: "survey-apc-1",
-    candidateId: "cand-apc-1",
+    candidateId: "cand-gov-apc-adamawa",
     candidateName: "Dr. Ahmadu Umaru Fintiri",
     title: "Security and Development Priorities for Adamawa State",
     description:
@@ -856,7 +856,7 @@ export const candidateSurveys: CandidateSurvey[] = [
   },
   {
     id: "survey-pdp-1",
-    candidateId: "cand-pdp-1",
+    candidateId: "cand-gov-pdp-adamawa",
     candidateName: "Senator Aishatu Dahiru Ahmed",
     title: "Education and Human Development Priorities for Adamawa State",
     description:
@@ -1151,7 +1151,7 @@ export const candidateSurveys: CandidateSurvey[] = [
   },
   {
     id: "survey-apc-2",
-    candidateId: "cand-apc-2",
+    candidateId: "cand-hr-apc-jada-ganye-mayo-belwa-toungo",
     candidateName: "Hon. Abdulrazak Namdas",
     title:
       "Youth Development and Economic Opportunities for Jada/Ganye/Mayo-Belwa/Toungo",
@@ -1454,7 +1454,7 @@ export const candidateSurveys: CandidateSurvey[] = [
 
   {
     id: "survey-apc-bauchi-1",
-    candidateId: "cand-apc-bauchi-1",
+    candidateId: "cand-gov-apc-bauchi",
     candidateName: "Senator Bala Abdulkadir Mohammed",
     title:
       "Infrastructure and Economic Development Priorities for Bauchi State",
@@ -1911,7 +1911,7 @@ export const candidateSurveys: CandidateSurvey[] = [
   },
   {
     id: "survey-apc-bauchi-2",
-    candidateId: "cand-apc-bauchi-2",
+    candidateId: "cand-sen-apc-bauchi-central",
     candidateName: "Senator Halliru Dauda Jika",
     title: "Economic Empowerment and Job Creation for Bauchi Central",
     description:
@@ -2121,7 +2121,7 @@ export const candidateSurveys: CandidateSurvey[] = [
   },
   {
     id: "survey-pdp-bauchi-2",
-    candidateId: "cand-pdp-bauchi-2",
+    candidateId: "cand-sen-pdp-bauchi-south",
     candidateName: "Dr. Fatima Binta Bello",
     title: "Healthcare Access and Rural Development for Bauchi South",
     description:
@@ -2328,7 +2328,7 @@ export const candidateSurveys: CandidateSurvey[] = [
   },
   {
     id: "survey-apc-bauchi-3",
-    candidateId: "cand-apc-bauchi-3",
+    candidateId: "cand-hr-apc-bauchi-federal",
     candidateName: "Hon. Yakubu Shehu Abdullahi",
     title:
       "Rural Electrification and Community Development for Bauchi Federal Constituency",
@@ -2531,7 +2531,7 @@ export const candidateSurveys: CandidateSurvey[] = [
   },
   {
     id: "survey-pdp-bauchi-3",
-    candidateId: "cand-pdp-bauchi-3",
+    candidateId: "cand-hr-pdp-ningi-warji",
     candidateName: "Hon. Abubakar Sadiq Ningi",
     title: "Agricultural Development and Food Security for Ningi/Warji",
     description:
@@ -2752,7 +2752,7 @@ export const candidateSurveys: CandidateSurvey[] = [
   // NOTE: This replaces the original survey-pdp-2 with comprehensive test coverage
   {
     id: "survey-pdp-2",
-    candidateId: "cand-pdp-2", // Dr. Maryam Inna Ciroma (Senator)
+    candidateId: "cand-sen-pdp-adamawa-central", // Dr. Maryam Inna Ciroma (Senator)
     candidateName: "Dr. Maryam Inna Ciroma",
     title: "Comprehensive Survey Test - All Question Types",
     description:

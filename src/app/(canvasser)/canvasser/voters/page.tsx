@@ -1,10 +1,10 @@
-import { Metadata } from "next";
+import { createCanvasserMetadata } from "@/lib/metadata";
 import { CanvasserVotersList } from "@/components/canvasser/canvasser-voters-list";
 
-export const metadata: Metadata = {
-  title: "My Voters | WardWise Canvasser",
+export const metadata = createCanvasserMetadata({
+  title: "My Voters",
   description: "View all voters you have registered.",
-};
+});
 
 export default function CanvasserVotersPage() {
   return <CanvasserVotersList />;

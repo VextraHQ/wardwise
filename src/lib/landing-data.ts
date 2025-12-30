@@ -104,26 +104,29 @@ export type FeatureCard = {
   metricLabel: string;
   metricValue: string;
   metricTrend: string;
+  color?: "primary" | "orange" | "emerald";
 };
 
 export const featureCards: FeatureCard[] = [
   {
-    title: "Know Your Exact Location",
+    title: "Voter Ward Mapping",
     description:
       "We organize every response by State → LGA → Ward → Polling Unit for unmatched clarity.",
     icon: HiLocationMarker,
     metricLabel: "Coverage Accuracy",
     metricValue: "99.2%",
     metricTrend: "+4.8%",
+    color: "primary",
   },
   {
-    title: "Make Your Voice Heard",
+    title: "Canvasser Field Portal",
     description:
-      "Let candidates know the priorities in your community through concise survey questions.",
-    icon: HiSpeakerphone,
-    metricLabel: "Responses Logged",
-    metricValue: "18,420",
-    metricTrend: "+620",
+      "Empower your boots on the ground with a mobile-optimized interface for real-time verification.",
+    icon: HiDeviceMobile,
+    metricLabel: "Active Canvassers",
+    metricValue: "420+",
+    metricTrend: "+12.4%",
+    color: "orange",
   },
   {
     title: "Support Who You Trust",
@@ -133,33 +136,37 @@ export const featureCards: FeatureCard[] = [
     metricLabel: "Verified Choices",
     metricValue: "12,305",
     metricTrend: "+12%",
+    color: "emerald",
   },
   {
-    title: "Your Data is Protected",
+    title: "Secure Verification",
     description:
-      "Phone verification and encrypted storage protect voter information from end to end.",
+      "OTP verification and unique agent codes ensure every voter is real and uniquely registered.",
     icon: HiLockClosed,
-    metricLabel: "Encryption Uptime",
+    metricLabel: "Security Uptime",
     metricValue: "100%",
     metricTrend: "Secure",
+    color: "primary",
   },
   {
-    title: "Candidates See Trends",
+    title: "Candidate Insights",
     description:
-      "Dashboards surface demographics, sentiment, and issue trends in real time.",
+      "Dashboards surface demographics, sentiment, and issue trends in real time for strategic decisions.",
     icon: HiChartBar,
     metricLabel: "Insights Generated",
     metricValue: "740",
     metricTrend: "+38",
+    color: "emerald",
   },
   {
-    title: "Register Anywhere",
+    title: "Community Outreach",
     description:
-      "Optimized for mobile, tablet, or desktop so supporters can join from any device.",
-    icon: HiDeviceMobile,
-    metricLabel: "Mobile Sessions",
-    metricValue: "68%",
-    metricTrend: "+9%",
+      "Identify gaps in coverage and coordinate field efforts at the polling-unit level.",
+    icon: HiSpeakerphone,
+    metricLabel: "Reach Extension",
+    metricValue: "85%",
+    metricTrend: "+15%",
+    color: "orange",
   },
 ];
 
@@ -176,16 +183,59 @@ export const heroPlaceholder = {
 };
 
 export const heroSupportingCopy =
-  "Supporters across Nigeria register their details, choose their candidate, and surface the issues that matter most. WardWise keeps every data point organized, private, and ready for action.";
+  "Empowering citizens, canvassers, and candidates with ward-level precision. From field-verified data to strategic victory, WardWise is Nigeria's premier civic engagement ecosystem.";
+
+export type EcosystemRole = {
+  role: string;
+  title: string;
+  description: string;
+  color: string;
+  features: string[];
+  icon: IconType;
+};
+
+export const ecosystemRoles: EcosystemRole[] = [
+  {
+    role: "Voters",
+    title: "Voice Your Priorities",
+    description:
+      "Support candidates and share community needs directly from your device.",
+    color: "teal",
+    features: ["Quick Registration", "Issue Reporting", "Candidate Support"],
+    icon: HiCheckCircle,
+  },
+  {
+    role: "Canvassers",
+    title: "Activate the Field",
+    description:
+      "Securely register and verify voters house-to-house with real-time sync.",
+    color: "orange",
+    features: ["Field-Ready Mobile App", "Agent Codes", "Instant Verification"],
+    icon: HiDeviceMobile,
+  },
+  {
+    role: "Candidates",
+    title: "Drive to Victory",
+    description:
+      "Access deep ward-level insights to optimize your campaign strategy.",
+    color: "emerald",
+    features: [
+      "Strategic Dashboards",
+      "Sentiment Analysis",
+      "Resource Allocation",
+    ],
+    icon: HiChartBar,
+  },
+];
 
 export const platformPillars = [
   {
     title: "Connected Field Network",
     description:
-      "Local enumerators, digital forms, and automated lookups ensure voter registrations are verified at the polling-unit level without friction.",
+      "Local canvassers, digital forms, and automated lookups ensure voter registrations are verified at the polling-unit level without friction.",
     focus: "Field Operations",
     signal:
-      "Polling-unit enumerators sync with verification bots to confirm identity records before campaigns go live.",
+      "Polling-unit canvassers sync with verification bots to confirm identity records before campaigns go live.",
     metric: {
       label: "Verification speed",
       value: "12m",
@@ -228,9 +278,9 @@ export const impactHighlights = [
     icon: HiGlobeAlt,
   },
   {
-    title: "Trusted by supporters and candidates",
+    title: "Trusted by seekers of change",
     description:
-      "Voters know their insights go straight to the candidate they choose, while teams receive structured, consent-driven data.",
+      "Voters, canvassers, and candidates trust our secure, transparent, and ward-focused data protocols.",
     icon: HiShieldCheck,
   },
   {
@@ -242,42 +292,42 @@ export const impactHighlights = [
 ];
 
 export const trustIndicators = [
-  "Backed by civic leaders and campaign strategists",
+  "Validated by field agents and campaign strategists",
   "Verified polling-unit mapping and validation",
-  "Secure infrastructure hosted in Nigeria",
+  "Secure infrastructure with end-to-end encryption",
 ];
 
 export const securityHighlights = [
   {
     title: "Verified identities",
     description:
-      "Phone OTP verification, voter roll matching, and field-agent attestations keep registrations real and duplications out.",
+      "Phone OTP verification, agent-facilitated attestations, and field-agent validation keep registrations real.",
     icon: HiCheckCircle,
   },
   {
-    title: "Data residency in Nigeria",
+    title: "Secure Field Access",
     description:
-      "Encrypted databases hosted within Nigeria offer compliance with national data protection laws and resilient uptime.",
+      "Canvassers use limited-access agent codes and location-locked registration to prevent fraud.",
     icon: HiLockClosed,
   },
   {
     title: "Role-based access",
     description:
-      "Candidates, analysts, and field teams get tailored workspaces with auditable access trails and download controls.",
+      "Candidates, canvassers, and analysts get tailored workspaces with auditable access trails.",
     icon: HiShieldCheck,
   },
   {
-    title: "Secure exports",
+    title: "Data Protection",
     description:
-      "Sensitive exports are watermarked, timed, and logged so campaign assets stay in the right hands.",
+      "All voter information is encrypted and stored according to strict privacy standards.",
     icon: HiArrowDown,
   },
 ];
 
 export const candidateBenefits = [
   "See all your supporters organized by polling unit",
+  "Empower your canvassers with mobile tools",
   "Understand what issues matter most in each ward",
   "Track registration growth in real time",
-  "Export data for campaign planning",
-  "Identify gaps in your coverage",
+  "Identify gaps in your field coverage",
 ];

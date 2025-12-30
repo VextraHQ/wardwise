@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+import { createRegistrationMetadata } from "@/lib/metadata";
 import { CompletionStep } from "@/components/voter/steps/completion-step";
 
-export const metadata: Metadata = {
-  title: "Your Registration is Complete! | WardWise Registration",
+export const metadata = createRegistrationMetadata({
+  title: "Your Registration is Complete!",
   description:
     "Your voter registration is complete. Thank you for participating!",
-};
+});
 
 export default function CompletePage() {
   return (

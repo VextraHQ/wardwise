@@ -6,10 +6,10 @@ export function SecuritySection() {
       id="security"
       className="bg-background text-foreground relative overflow-hidden py-16 sm:py-20 lg:py-24"
     >
-      <div
+      {/* <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_84%_82%,rgba(70,194,167,0.14),transparent_55%),radial-gradient(circle_at_14%_88%,rgba(18,68,56,0.1),transparent_65%)]"
         aria-hidden={true}
-      />
+      /> */}
       <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-6">
         <div className="max-w-3xl space-y-4">
           <p className="text-accent text-xs font-semibold tracking-[0.32em] uppercase">

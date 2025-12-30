@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AnalyticsContent } from "@/components/candidate-dashboard/analytics-content";
 
 export const metadata: Metadata = {
-  title: "Analytics | WardWise",
+  title: "Analytics",
   description:
     "View detailed campaign analytics, registration trends, demographics, and performance metrics.",
 };

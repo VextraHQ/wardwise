@@ -28,10 +28,18 @@ export interface ComboboxSelectOption {
   value: string;
   label: string;
   disabled?: boolean;
+  description?: string;
+  indicator?: React.ReactNode;
+}
+
+export interface ComboboxSelectGroup {
+  heading: string;
+  options: ComboboxSelectOption[];
 }
 
 interface ComboboxSelectProps {
-  options: ComboboxSelectOption[];
+  options?: ComboboxSelectOption[];
+  groups?: ComboboxSelectGroup[];
   value?: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
@@ -40,10 +48,12 @@ interface ComboboxSelectProps {
   disabled?: boolean;
   className?: string;
   triggerClassName?: string;
+  isLoading?: boolean;
 }
 
 export function ComboboxSelect({
-  options,
+  options = [],
+  groups,
   value,
   onValueChange,
   placeholder = "Select an option...",
@@ -52,12 +62,20 @@ export function ComboboxSelect({
   disabled = false,
   className,
   triggerClassName,
+  isLoading = false,
 }: ComboboxSelectProps) {
   const [open, setOpen] = React.useState(false);
 
+  const allOptions = React.useMemo(() => {
+    if (groups) {
+      return groups.flatMap((group) => group.options);
+    }
+    return options;
+  }, [options, groups]);
+
   const selectedOption = React.useMemo(
-    () => options.find((option) => option.value === value),
-    [options, value],
+    () => allOptions.find((option) => option.value === value),
+    [allOptions, value],
   );
 
   const renderTriggerButton = () => {
@@ -71,16 +89,22 @@ export function ComboboxSelect({
         variant="outline"
         role="combobox"
         aria-expanded={open}
-        disabled={disabled}
+        disabled={disabled || isLoading}
         title={selectedOption?.label}
         className={cn(
-          "h-11 w-full justify-between overflow-hidden font-normal",
+          "h-11 w-full justify-between overflow-hidden font-normal transition-all active:scale-[0.99]",
           !selectedOption && "text-muted-foreground",
+          isLoading && "opacity-70",
           triggerClassName,
         )}
       >
         <span className="flex min-w-0 flex-1 items-center gap-2 truncate text-left">
-          {selectedOption && code ? (
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+              <span className="text-muted-foreground">Loading...</span>
+            </div>
+          ) : selectedOption && code ? (
             <>
               <Badge
                 variant="secondary"
@@ -91,13 +115,66 @@ export function ComboboxSelect({
               <span className="truncate">{name}</span>
             </>
           ) : selectedOption ? (
-            selectedOption.label
+            <div className="flex items-center gap-2 truncate">
+              {selectedOption.indicator}
+              <span className="truncate">{selectedOption.label}</span>
+            </div>
           ) : (
             placeholder
           )}
         </span>
         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
+    );
+  };
+
+  const renderOption = (option: ComboboxSelectOption) => {
+    // Parse polling unit format: "001 - Polling Unit Name"
+    const labelMatch = option.label.match(/^(\d{3})\s*-\s*(.+)$/);
+    const code = labelMatch ? labelMatch[1] : null;
+    const name = labelMatch ? labelMatch[2] : option.label;
+
+    return (
+      <CommandItem
+        key={option.value}
+        value={option.value}
+        disabled={option.disabled}
+        className="group flex cursor-pointer items-center justify-between py-2.5"
+        onSelect={(currentValue) => {
+          onValueChange(currentValue === value ? "" : currentValue);
+          setOpen(false);
+        }}
+      >
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <div className="flex items-center gap-2 truncate">
+            {code ? (
+              <>
+                <Badge
+                  variant="secondary"
+                  className="shrink-0 font-mono text-[10px] font-bold"
+                >
+                  {code}
+                </Badge>
+                <span className="truncate font-medium">{name}</span>
+              </>
+            ) : (
+              <div className="flex items-center gap-2 truncate">
+                {option.indicator}
+                <span className="truncate font-medium">{option.label}</span>
+              </div>
+            )}
+            <Check
+              className={cn(
+                "text-primary h-3.5 w-3.5 shrink-0 transition-colors group-hover:text-white group-data-[selected=true]:text-white",
+                value === option.value ? "opacity-100" : "opacity-0",
+              )}
+            />
+          </div>
+          {option.description && (
+            <p className="line-clamp-1 text-[11px]">{option.description}</p>
+          )}
+        </div>
+      </CommandItem>
     );
   };
 
@@ -127,55 +204,36 @@ export function ComboboxSelect({
         align="start"
         sideOffset={4}
       >
-        <Command className="overflow-hidden rounded-md">
-          <CommandInput placeholder={searchPlaceholder} />
-          <CommandList className="max-h-[300px]">
-            <CommandEmpty>{emptyMessage}</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => {
-                // Parse polling unit format: "001 - Polling Unit Name"
-                // Extract code if label follows this pattern
-                const labelMatch = option.label.match(/^(\d{3})\s*-\s*(.+)$/);
-                const code = labelMatch ? labelMatch[1] : null;
-                const name = labelMatch ? labelMatch[2] : option.label;
-
-                return (
-                  <CommandItem
-                    key={option.value}
-                    value={option.value}
-                    disabled={option.disabled}
-                    onSelect={(currentValue) => {
-                      onValueChange(currentValue === value ? "" : currentValue);
-                      setOpen(false);
-                    }}
-                  >
-                    {/* Hidden text for search - cmdk searches by text content */}
-                    <span className="sr-only">{option.label}</span>
-                    <div className="flex min-w-0 flex-1 items-center gap-2">
-                      {code ? (
-                        <>
-                          <Badge
-                            variant="secondary"
-                            className="shrink-0 font-mono text-xs font-semibold"
-                          >
-                            {code}
-                          </Badge>
-                          <span className="truncate">{name}</span>
-                        </>
-                      ) : (
-                        <span className="truncate">{option.label}</span>
-                      )}
-                    </div>
-                    <Check
-                      className={cn(
-                        "ml-auto h-4 w-4 shrink-0",
-                        value === option.value ? "opacity-100" : "opacity-0",
-                      )}
-                    />
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
+        <Command className="overflow-hidden rounded-xl">
+          <CommandInput
+            placeholder={searchPlaceholder}
+            className="h-10 border-none focus:ring-0"
+          />
+          <CommandList className="scrollbar-thin scrollbar-thumb-muted-foreground/20 max-h-[300px]">
+            <CommandEmpty className="py-6 text-center text-sm">
+              <div className="text-muted-foreground flex flex-col items-center gap-2">
+                <p>{emptyMessage}</p>
+              </div>
+            </CommandEmpty>
+            {groups ? (
+              groups.map((group) => (
+                <CommandGroup
+                  key={group.heading}
+                  heading={
+                    <span className="text-primary/70 px-2 text-[10px] font-bold tracking-widest uppercase">
+                      {group.heading}
+                    </span>
+                  }
+                  className="px-1"
+                >
+                  {group.options.map(renderOption)}
+                </CommandGroup>
+              ))
+            ) : (
+              <CommandGroup className="px-1">
+                {options.map(renderOption)}
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

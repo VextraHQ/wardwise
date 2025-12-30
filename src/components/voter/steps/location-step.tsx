@@ -12,14 +12,23 @@ import {
   HiArrowLeft,
   HiCheck,
   HiInformationCircle,
+  HiExclamationCircle,
 } from "react-icons/hi";
-import { MapPin } from "lucide-react";
+import { MapPin, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StepProgress } from "@/components/ui/step-progress";
-import { RegistrationStepHeader } from "../registration-step-header";
+import { RegistrationStepHeader } from "@/components/voter/registration-step-header";
 import {
   Form,
   FormControl,
@@ -74,6 +83,67 @@ const pilotCoverage = [
 
 type LocationFormValues = z.infer<typeof locationSchema>;
 
+interface PilotStatusBadgeProps {
+  title: string;
+  description: string | React.ReactNode;
+  variant?: "warning" | "info" | "success";
+}
+
+function PilotStatusBadge({
+  title,
+  description,
+  variant = "warning",
+}: PilotStatusBadgeProps) {
+  const bgColor =
+    variant === "warning"
+      ? "bg-amber-100/50 text-amber-700 border-amber-200"
+      : "bg-blue-100/50 text-blue-700 border-blue-200";
+
+  const iconColor = variant === "warning" ? "text-amber-500" : "text-blue-500";
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            "hover:bg-opacity-80 flex cursor-pointer items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase transition-colors active:scale-95",
+            bgColor,
+          )}
+        >
+          <AlertCircle className={cn("h-3 w-3", iconColor)} />
+          <span>Status</span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 overflow-hidden border-none p-0 shadow-xl">
+        <div
+          className={cn(
+            "flex items-center gap-2 border-b p-3",
+            variant === "warning"
+              ? "border-amber-100 bg-amber-50"
+              : "border-blue-100 bg-blue-50",
+          )}
+        >
+          <AlertCircle className={cn("h-4 w-4", iconColor)} />
+          <h4
+            className={cn(
+              "text-xs font-bold tracking-tight uppercase",
+              variant === "warning" ? "text-amber-800" : "text-blue-800",
+            )}
+          >
+            {title}
+          </h4>
+        </div>
+        <div className="bg-white p-4">
+          <p className="text-muted-foreground text-xs leading-relaxed font-medium">
+            {description}
+          </p>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export function LocationStep() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -116,6 +186,10 @@ export function LocationStep() {
   const lgas = lgasQuery.data || [];
   const wards = wardsQuery.data || [];
   const pollingUnits = pollingUnitsQuery.data || [];
+
+  const lgasError = lgasQuery.isError;
+  const wardsError = wardsQuery.isError;
+  const puError = pollingUnitsQuery.isError;
 
   const selectedStateName =
     states.find((state) => state.code === selectedState)?.name || "";
@@ -190,8 +264,6 @@ export function LocationStep() {
         return wardsQuery.isLoading && !!selectedLga;
       case "pollingUnits":
         return pollingUnitsQuery.isLoading && !!selectedWard;
-      default:
-        return false;
     }
   };
 
@@ -288,53 +360,75 @@ export function LocationStep() {
                     control={form.control}
                     name="state"
                     render={({ field }) => {
-                      const stateOptions: ComboboxSelectOption[] = states.map(
-                        (state) => ({
-                          value: state.code,
-                          label: state.name,
-                        }),
+                      const pilotStates = states.filter((s) =>
+                        pilotCoverage.some((pc) => pc.code === s.code),
                       );
+                      const otherStates = states.filter(
+                        (s) => !pilotCoverage.some((pc) => pc.code === s.code),
+                      );
+
+                      const stateGroups = [
+                        {
+                          heading: "Pilot Areas (Digitized)",
+                          options: pilotStates.map((s) => ({
+                            value: s.code,
+                            label: s.name,
+                            indicator: (
+                              <div className="bg-primary group-hover:bg-secondary group-data-[selected=true]:bg-secondary h-1.5 w-1.5 rounded-full transition-colors" />
+                            ),
+                            description:
+                              "Full ward & polling unit data available",
+                          })),
+                        },
+                        {
+                          heading: "Other States",
+                          options: otherStates.map((s) => ({
+                            value: s.code,
+                            label: s.name,
+                          })),
+                        },
+                      ];
 
                       return (
                         <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            State
-                            {isStateComplete && (
-                              <HiCheck className="text-primary h-3.5 w-3.5" />
-                            )}
+                          <FormLabel className="flex items-center justify-between">
+                            <span className="text-muted-foreground/80 flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
+                              State
+                              {isStateComplete && (
+                                <HiCheck className="text-primary h-3.5 w-3.5" />
+                              )}
+                            </span>
+                            {selectedState &&
+                              !isStateCovered &&
+                              !locationData.statesLoading && (
+                                <PilotStatusBadge
+                                  title="Pilot Notice"
+                                  description={`Wards and polling units for ${selectedStateLabel} are still being mapped. Pilot coverage currently focuses on Adamawa & Bauchi.`}
+                                />
+                              )}
                           </FormLabel>
                           <FormControl>
                             <ComboboxSelect
-                              options={stateOptions}
+                              groups={stateGroups}
                               value={field.value}
+                              isLoading={locationData.statesLoading}
                               onValueChange={(value) => {
                                 field.onChange(value);
                                 setSelectedState(value);
-                                // Reset dependent fields and states
                                 setSelectedLga("");
                                 setSelectedWard("");
-                                // Prefetch LGAs for better UX
                                 locationData.prefetchLGAs(queryClient, value);
                               }}
-                              placeholder={
-                                locationData.statesLoading
-                                  ? "Loading states..."
-                                  : "Select your state"
-                              }
+                              placeholder="Select your state"
                               searchPlaceholder="Search states..."
-                              emptyMessage="No state found."
-                              disabled={locationData.statesLoading}
+                              emptyMessage={
+                                locationData.statesError
+                                  ? "Could not load states. Please check your connection."
+                                  : "No state found."
+                              }
                             />
                           </FormControl>
                           <FormMessage />
-                          {selectedState &&
-                            !isStateCovered &&
-                            !locationData.statesLoading && (
-                              <p className="mt-2 flex items-center gap-1 text-xs text-amber-600">
-                                <HiInformationCircle className="h-3 w-3" />
-                                {`Wards and polling units for ${selectedStateLabel} are still being mapped. Pilot coverage currently focuses on Adamawa & Bauchi.`}
-                              </p>
-                            )}
                         </FormItem>
                       );
                     }}
@@ -345,77 +439,113 @@ export function LocationStep() {
                     control={form.control}
                     name="lga"
                     render={({ field }) => {
-                      const lgaOptions: ComboboxSelectOption[] =
-                        lgas.length > 0
-                          ? lgas.map((lga) => ({
-                              value: lga.code,
-                              label: lga.name,
-                            }))
-                          : [];
+                      const pilotLgaCodes =
+                        pilotState?.lgAs.map((l) => l.code) || [];
+
+                      const pilotLgasList = lgas.filter((l) =>
+                        pilotLgaCodes.includes(l.code),
+                      );
+                      const otherLgasList = lgas.filter(
+                        (l) => !pilotLgaCodes.includes(l.code),
+                      );
+
+                      const lgaGroups = [
+                        ...(pilotLgasList.length > 0
+                          ? [
+                              {
+                                heading: "Digitized LGAs",
+                                options: pilotLgasList.map((l) => ({
+                                  value: l.code,
+                                  label: l.name,
+                                  indicator: (
+                                    <div className="bg-primary group-hover:bg-secondary group-data-[selected=true]:bg-secondary h-1.5 w-1.5 rounded-full transition-colors" />
+                                  ),
+                                  description: "Full digitized data available",
+                                })),
+                              },
+                            ]
+                          : []),
+                        ...(otherLgasList.length > 0
+                          ? [
+                              {
+                                heading: "Other LGAs",
+                                options: otherLgasList.map((l) => ({
+                                  value: l.code,
+                                  label: l.name,
+                                })),
+                              },
+                            ]
+                          : []),
+                      ];
 
                       return (
                         <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            Local Government Area (LGA)
-                            {isLgaComplete && (
-                              <HiCheck className="h-3.5 w-3.5 text-green-600" />
-                            )}
+                          <FormLabel className="flex items-center justify-between">
+                            <span className="text-muted-foreground/80 flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
+                              Local Government (LGA)
+                              {isLgaComplete && (
+                                <HiCheck className="text-primary h-3.5 w-3.5" />
+                              )}
+                            </span>
+                            {selectedLga &&
+                              selectedState &&
+                              isStateCovered &&
+                              !isLgaCovered &&
+                              !isLoading("wards") && (
+                                <PilotStatusBadge
+                                  title="Limited Demo"
+                                  description={
+                                    <>
+                                      Selected area is outside active
+                                      digitization. Try{" "}
+                                      <span className="text-foreground font-bold">
+                                        {pilotState?.lgAs
+                                          .map((lga) => lga.name)
+                                          .slice(0, 4)
+                                          .join(", ")}
+                                      </span>{" "}
+                                      for the full experience.
+                                    </>
+                                  }
+                                />
+                              )}
                           </FormLabel>
                           <FormControl>
                             <ComboboxSelect
-                              options={lgaOptions}
+                              groups={
+                                lgaGroups.length > 0 ? lgaGroups : undefined
+                              }
+                              options={
+                                lgaGroups.length === 0
+                                  ? lgas.map((l) => ({
+                                      value: l.code,
+                                      label: l.name,
+                                    }))
+                                  : undefined
+                              }
                               value={field.value}
+                              isLoading={isLoading("lgas")}
                               onValueChange={(value) => {
                                 field.onChange(value);
                                 setSelectedLga(value);
-                                // Reset dependent field and state
                                 setSelectedWard("");
-                                // Prefetch wards for better UX
                                 locationData.prefetchWards(queryClient, value);
                               }}
                               placeholder={
                                 !selectedState
                                   ? "Select state first"
-                                  : isLoading("lgas")
-                                    ? "Loading LGAs..."
-                                    : "Select your LGA"
+                                  : "Select your LGA"
                               }
                               searchPlaceholder="Search LGAs..."
                               emptyMessage={
-                                lgas.length === 0
-                                  ? "LGAs not available"
-                                  : "No LGA found."
+                                lgasError
+                                  ? "Error loading LGAs. Try re-selecting the state."
+                                  : "No LGA found in this state."
                               }
-                              disabled={!selectedState || isLoading("lgas")}
+                              disabled={!selectedState}
                             />
                           </FormControl>
                           <FormMessage />
-                          {selectedLga &&
-                            selectedState &&
-                            isStateCovered &&
-                            !isLgaCovered &&
-                            !isLoading("wards") && (
-                              <p className="mt-2 flex items-center gap-1 text-xs text-amber-600">
-                                <HiInformationCircle className="h-3 w-3" />
-                                {selectedLgaLabel} is outside the current pilot
-                                coverage for wards. Try{" "}
-                                {pilotState?.lgAs
-                                  .map((lga) => lga.name)
-                                  .slice(0, 4)
-                                  .join(", ")}
-                                ...
-                              </p>
-                            )}
-                          {selectedLga &&
-                            isLgaCovered &&
-                            !isLoading("wards") &&
-                            wards.length === 0 && (
-                              <p className="mt-2 flex items-center gap-1 text-xs text-amber-600">
-                                <HiInformationCircle className="h-3 w-3" />
-                                Wards for {selectedLgaLabel} are syncing. Please
-                                try another pilot LGA or check back shortly.
-                              </p>
-                            )}
                         </FormItem>
                       );
                     }}
@@ -426,30 +556,30 @@ export function LocationStep() {
                     control={form.control}
                     name="ward"
                     render={({ field }) => {
-                      const wardOptions: ComboboxSelectOption[] =
-                        wards.length > 0
-                          ? wards.map((ward) => ({
-                              value: ward.code,
-                              label: ward.name,
-                            }))
-                          : [];
-
                       return (
                         <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            Ward
-                            {isWardComplete && (
-                              <HiCheck className="h-3.5 w-3.5 text-green-600" />
-                            )}
+                          <FormLabel className="flex items-center justify-between">
+                            <span className="text-muted-foreground/80 flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
+                              Ward
+                              {isWardComplete && (
+                                <HiCheck className="text-primary h-3.5 w-3.5" />
+                              )}
+                            </span>
                           </FormLabel>
                           <FormControl>
                             <ComboboxSelect
-                              options={wardOptions}
+                              options={wards.map((ward) => ({
+                                value: ward.code,
+                                label: ward.name,
+                                indicator: isLgaCovered ? (
+                                  <div className="bg-primary group-hover:bg-secondary group-data-[selected=true]:bg-secondary h-1.5 w-1.5 rounded-full transition-colors" />
+                                ) : undefined,
+                              }))}
                               value={field.value}
+                              isLoading={isLoading("wards")}
                               onValueChange={(value) => {
                                 field.onChange(value);
                                 setSelectedWard(value);
-                                // Prefetch polling units for better UX
                                 locationData.prefetchPollingUnits(
                                   queryClient,
                                   value,
@@ -458,30 +588,18 @@ export function LocationStep() {
                               placeholder={
                                 !selectedLga
                                   ? "Select LGA first"
-                                  : isLoading("wards")
-                                    ? "Loading wards..."
-                                    : "Select your ward"
+                                  : "Select your ward"
                               }
                               searchPlaceholder="Search wards..."
                               emptyMessage={
-                                wards.length === 0
-                                  ? "Ward data not available"
-                                  : "No ward found."
+                                wardsError
+                                  ? "Error loading wards. Try re-selecting the LGA."
+                                  : "No ward found in this LGA."
                               }
-                              disabled={!selectedLga || isLoading("wards")}
+                              disabled={!selectedLga}
                             />
                           </FormControl>
                           <FormMessage />
-                          {selectedWard &&
-                            isLgaCovered &&
-                            !isLoading("pollingUnits") &&
-                            pollingUnits.length === 0 && (
-                              <p className="mt-2 flex items-center gap-1 text-xs text-amber-600">
-                                <HiInformationCircle className="h-3 w-3" />
-                                Polling units for {selectedWardLabel} are coming
-                                soon in the pilot rollout.
-                              </p>
-                            )}
                         </FormItem>
                       );
                     }}
@@ -492,43 +610,47 @@ export function LocationStep() {
                     control={form.control}
                     name="pollingUnit"
                     render={({ field }) => {
-                      const pollingUnitOptions: ComboboxSelectOption[] =
-                        pollingUnits.length > 0
-                          ? pollingUnits.map((unit) => ({
-                              value: unit.code,
-                              label: `${unit.code} - ${unit.name}`,
-                            }))
-                          : [];
-
                       return (
                         <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            Polling Unit
-                            {isPollingUnitComplete && (
-                              <HiCheck className="h-3.5 w-3.5 text-green-600" />
-                            )}
+                          <FormLabel className="flex items-center justify-between">
+                            <span className="text-muted-foreground/80 flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
+                              Polling Unit
+                              {isPollingUnitComplete && (
+                                <HiCheck className="text-primary h-3.5 w-3.5" />
+                              )}
+                            </span>
+                            {selectedWard &&
+                              isLgaCovered &&
+                              !isLoading("pollingUnits") &&
+                              pollingUnits.length === 0 && (
+                                <PilotStatusBadge
+                                  title="Rollout Update"
+                                  variant="info"
+                                  description={`Polling units for ${selectedWardLabel} are coming soon. Please try another ward in this LGA.`}
+                                />
+                              )}
                           </FormLabel>
                           <FormControl>
                             <ComboboxSelect
-                              options={pollingUnitOptions}
+                              options={pollingUnits.map((unit) => ({
+                                value: unit.code,
+                                label: `${unit.code} - ${unit.name}`,
+                              }))}
                               value={field.value}
+                              isLoading={isLoading("pollingUnits")}
                               onValueChange={field.onChange}
                               placeholder={
                                 !selectedWard
                                   ? "Select ward first"
-                                  : isLoading("pollingUnits")
-                                    ? "Loading polling units..."
-                                    : "Select your polling unit (e.g., 001, 010)"
+                                  : "Select your polling unit"
                               }
                               searchPlaceholder="Search by code (001) or name..."
                               emptyMessage={
-                                pollingUnits.length === 0
-                                  ? "Polling units not available"
+                                puError
+                                  ? "Error loading polling units. Try re-selecting the ward."
                                   : "No polling unit found."
                               }
-                              disabled={
-                                !selectedWard || isLoading("pollingUnits")
-                              }
+                              disabled={!selectedWard}
                             />
                           </FormControl>
                           <FormMessage />
@@ -555,7 +677,7 @@ export function LocationStep() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-3 pt-2">
                   <Button
                     type="button"
                     variant="outline"

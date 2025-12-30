@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Help & Support | WardWise",
+  title: "Help & Support",
   description:
     "Get help and learn how to use WardWise. Documentation, FAQs, tutorials, and contact information.",
 };

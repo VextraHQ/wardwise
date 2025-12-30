@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+import { createRegistrationMetadata } from "@/lib/metadata";
 import { ConfirmationStep } from "@/components/voter/steps/confirmation-step";
 
-export const metadata: Metadata = {
-  title: "Confirm Your Registration | WardWise Registration",
+export const metadata = createRegistrationMetadata({
+  title: "Confirm Your Registration",
   description:
     "Review and confirm your voter registration details before submitting.",
-};
+});
 
 export default function ConfirmPage() {
   return (

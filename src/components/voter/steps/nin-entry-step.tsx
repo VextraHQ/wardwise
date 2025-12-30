@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   HiCreditCard,
   HiCheckCircle,
@@ -49,22 +48,11 @@ import Link from "next/link";
 import { voterApi } from "@/lib/api/voter";
 import {
   formatNINForDisplay,
-  ninSchema,
   normalizeNINInput,
-} from "@/lib/registration-schemas";
+} from "@/lib/schemas/common-schemas";
+import { ninFormSchema, type NinFormValues } from "@/lib/schemas/voter-schemas";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { DemoIndicator } from "@/components/ui/demo-indicator";
-
-// Zod schema validation for terms and conditions check
-const ninFormSchema = z.object({
-  nin: ninSchema,
-  terms: z.boolean().refine((val) => val === true, {
-    message: "You must accept the terms and conditions",
-  }),
-});
-
-// Type for NIN form values
-type NinFormValues = z.infer<typeof ninFormSchema>;
 
 // Type for verification status
 type VerificationStatus = "idle" | "verifying" | "verified" | "error";

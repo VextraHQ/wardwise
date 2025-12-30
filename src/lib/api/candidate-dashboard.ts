@@ -16,6 +16,12 @@
  */
 
 import type { Voter } from "@/types/voter";
+import type {
+  getCandidateDashboardData,
+  getWardCoverage,
+  getSurveyAnalytics,
+  getDemographics,
+} from "@/lib/helpers/voter-analytics";
 
 // Simple helper for API calls (for real API)
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -37,18 +43,18 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   return response.json();
 }
 
-// Use mock if NEXT_PUBLIC_USE_MOCK_API is true, or in development
+// Mock mode: true if explicitly set, or default to mock in development
+// Production mode: false if explicitly set, or default in production
 const USE_MOCK =
   process.env.NEXT_PUBLIC_USE_MOCK_API === "true" ||
-  process.env.NODE_ENV === "development";
+  (!process.env.NEXT_PUBLIC_USE_MOCK_API &&
+    process.env.NODE_ENV === "development");
 
 export const dashboardApi = {
   getCandidateDashboard: async (
     candidateId: string,
   ): Promise<{
-    dashboard: ReturnType<
-      typeof import("@/lib/helpers/voter-analytics").getCandidateDashboardData
-    >;
+    dashboard: ReturnType<typeof getCandidateDashboardData>;
   }> => {
     if (USE_MOCK) {
       // MOCK: Returns dashboard data using analytics helpers
@@ -56,9 +62,8 @@ export const dashboardApi = {
         `📊 Mock: Getting dashboard data for candidate ${candidateId}`,
       );
       await new Promise((resolve) => setTimeout(resolve, 800));
-      const { getCandidateDashboardData } = await import(
-        "@/lib/helpers/voter-analytics"
-      );
+      const { getCandidateDashboardData } =
+        await import("@/lib/helpers/voter-analytics");
       const dashboard = getCandidateDashboardData(candidateId);
       return { dashboard };
     }
@@ -162,9 +167,7 @@ export const dashboardApi = {
   getCandidateWardData: async (
     candidateId: string,
   ): Promise<{
-    wardData: ReturnType<
-      typeof import("@/lib/helpers/voter-analytics").getWardCoverage
-    >;
+    wardData: ReturnType<typeof getWardCoverage>;
   }> => {
     if (USE_MOCK) {
       // MOCK: Returns ward breakdown data
@@ -182,9 +185,7 @@ export const dashboardApi = {
   getCandidateSurveyResponses: async (
     candidateId: string,
   ): Promise<{
-    surveyAnalytics: ReturnType<
-      typeof import("@/lib/helpers/voter-analytics").getSurveyAnalytics
-    >;
+    surveyAnalytics: ReturnType<typeof getSurveyAnalytics>;
   }> => {
     if (USE_MOCK) {
       // MOCK: Returns survey response analytics
@@ -192,9 +193,8 @@ export const dashboardApi = {
         `📋 Mock: Getting survey responses for candidate ${candidateId}`,
       );
       await new Promise((resolve) => setTimeout(resolve, 500));
-      const { getSurveyAnalytics } = await import(
-        "@/lib/helpers/voter-analytics"
-      );
+      const { getSurveyAnalytics } =
+        await import("@/lib/helpers/voter-analytics");
       const surveyAnalytics = getSurveyAnalytics(candidateId);
       return { surveyAnalytics };
     }
@@ -206,9 +206,7 @@ export const dashboardApi = {
   getCandidateDemographics: async (
     candidateId: string,
   ): Promise<{
-    demographics: ReturnType<
-      typeof import("@/lib/helpers/voter-analytics").getDemographics
-    >;
+    demographics: ReturnType<typeof getDemographics>;
   }> => {
     if (USE_MOCK) {
       // MOCK: Returns demographic breakdown

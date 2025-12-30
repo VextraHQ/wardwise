@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import { createRegistrationMetadata } from "@/lib/metadata";
 import { ProfileStep } from "@/components/voter/steps/profile-step";
 
-export const metadata: Metadata = {
-  title: "Tell Us About Yourself | WardWise Registration",
+export const metadata = createRegistrationMetadata({
+  title: "Tell Us About Yourself",
   description: "Complete your profile to continue with voter registration.",
-};
+});
 
 export default function ProfilePage() {
   return (

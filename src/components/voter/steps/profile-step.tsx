@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   HiUser,
   HiPhone,
@@ -43,43 +42,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useRegistrationStore } from "@/stores/registration-store";
-import { normalizeNigerianPhoneInput } from "@/lib/registration-schemas";
+import { normalizeNigerianPhoneInput } from "@/lib/schemas/common-schemas";
 import { useEffect, useMemo } from "react";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import {
   ComboboxSelect,
   type ComboboxSelectOption,
 } from "@/components/ui/combobox-select";
-import { Voter } from "@/types/voter";
-
-// Profile Form Schema Validation - Removed Role and Age Validation
-const profileSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  middleName: z.string().optional(),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  dateOfBirth: z.string().min(1, "Date of birth is required"),
-  age: z.number().int().min(1).max(120),
-  gender: z.enum(["male", "female", "other"], {
-    message: "Please select your gender",
-  }),
-  occupation: z.string().min(1, "Please select your occupation"),
-  religion: z.string().min(1, "Please select your religion"),
-  phoneNumber: z
-    .string()
-    .min(1, "Phone number is required")
-    .regex(
-      /^(\+234|0)?(7\d{2}|8\d{2}|9\d{2})\d{7}$/,
-      "Enter a valid Nigerian mobile number (e.g., 08031234567 or +2348031234567)",
-    ),
-  vin: z
-    .string()
-    .regex(/^\d{19,20}$/, "VIN must be 19-20 digits")
-    .optional()
-    .or(z.literal("")),
-});
-
-type ProfileFormValues = z.infer<typeof profileSchema>;
+import { type Voter } from "@/types/voter";
+import {
+  profileSchema,
+  type ProfileFormValues,
+} from "@/lib/schemas/voter-schemas";
 
 export function ProfileStep() {
   const router = useRouter();

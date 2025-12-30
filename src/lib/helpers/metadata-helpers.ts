@@ -1,10 +1,10 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
-
-// Get candidate name from session for metadata generation - Returns null if not authenticated or not a candidate
+/**
+ * Fetches the authenticated candidate's name for use in metadata.
+ */
 export async function getCandidateNameForMetadata(): Promise<string | null> {
   try {
     const session = await getServerSession(authOptions);
@@ -25,15 +25,16 @@ export async function getCandidateNameForMetadata(): Promise<string | null> {
   }
 }
 
-// Generate candidate-specific title for metadata - Uses candidate name as-is from database (no prefix assumptions)
+/**
+ * Generates a candidate-specific page title for metadata.
+ * Returns title without suffix - root template applies "| WardWise".
+ */
 export function generateCandidateTitle(
   pageName: string,
   candidateName: string | null,
 ): string {
   if (candidateName) {
-    // Use candidate name exactly as stored in database
-    return `${candidateName} - ${pageName} | WardWise`;
+    return `${candidateName} - ${pageName}`;
   }
-  // Fallback to generic title if no candidate name
-  return `${pageName} | WardWise`;
+  return pageName;
 }

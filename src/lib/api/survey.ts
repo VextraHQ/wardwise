@@ -38,10 +38,12 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   return response.json();
 }
 
-// Use mock if NEXT_PUBLIC_USE_MOCK_API is true, or in development
+// Mock mode: true if explicitly set, or default to mock in development
+// Production mode: false if explicitly set, or default in production
 const USE_MOCK =
   process.env.NEXT_PUBLIC_USE_MOCK_API === "true" ||
-  process.env.NODE_ENV === "development";
+  (!process.env.NEXT_PUBLIC_USE_MOCK_API &&
+    process.env.NODE_ENV === "development");
 
 export const surveyApi = {
   createCandidateSurvey: async (
@@ -70,9 +72,8 @@ export const surveyApi = {
       console.log(`📝 Mock: Creating survey for candidate ${candidateId}`);
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      const { candidateSurveys } = await import(
-        "@/lib/mock/data/candidate-surveys"
-      );
+      const { candidateSurveys } =
+        await import("@/lib/mock/data/candidate-surveys");
 
       const candidate = getCandidateByIdWithSupporters(candidateId);
       if (!candidate) {
@@ -131,9 +132,8 @@ export const surveyApi = {
       console.log(`📝 Mock: Updating survey ${surveyId}`);
       await new Promise((resolve) => setTimeout(resolve, 600));
 
-      const { candidateSurveys, getSurveyById } = await import(
-        "@/lib/mock/data/candidate-surveys"
-      );
+      const { candidateSurveys, getSurveyById } =
+        await import("@/lib/mock/data/candidate-surveys");
 
       const existingSurvey = getSurveyById(surveyId);
       if (!existingSurvey) {
@@ -172,9 +172,8 @@ export const surveyApi = {
       console.log(`📢 Mock: Publishing survey ${surveyId}`);
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      const { candidateSurveys, getSurveyById } = await import(
-        "@/lib/mock/data/candidate-surveys"
-      );
+      const { candidateSurveys, getSurveyById } =
+        await import("@/lib/mock/data/candidate-surveys");
 
       const survey = getSurveyById(surveyId);
       if (!survey) {
@@ -229,9 +228,8 @@ export const surveyApi = {
       );
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      const { candidateSurveys, getSurveyByCandidateId } = await import(
-        "@/lib/mock/data/candidate-surveys"
-      );
+      const { candidateSurveys, getSurveyByCandidateId } =
+        await import("@/lib/mock/data/candidate-surveys");
 
       const candidate = getCandidateByIdWithSupporters(candidateId);
       if (!candidate) {

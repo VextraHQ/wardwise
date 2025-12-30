@@ -100,7 +100,7 @@ export const candidates: Candidate[] = [
 
   // --- Gubernatorial Candidates ---
   {
-    id: "cand-apc-1",
+    id: "cand-gov-apc-adamawa",
     name: "Senator Aishatu Dahiru Ahmed (Binani)",
     party: "APC",
     position: "Governor",
@@ -119,7 +119,7 @@ export const candidates: Candidate[] = [
     email: "aishatu.dahiru.ahmed@wardwise.ng",
   },
   {
-    id: "cand-pdp-1",
+    id: "cand-gov-pdp-adamawa",
     name: "Dr. Ahmadu Umaru Fintiri",
     party: "PDP",
     position: "Governor",
@@ -139,7 +139,7 @@ export const candidates: Candidate[] = [
 
   // --- Senatorial Candidates ---
   {
-    id: "cand-pdp-2",
+    id: "cand-sen-pdp-adamawa-central",
     name: "Dr. Maryam Inna Ciroma",
     party: "PDP",
     position: "Senator",
@@ -161,7 +161,7 @@ export const candidates: Candidate[] = [
 
   // --- House of Representatives Candidates ---
   {
-    id: "cand-apc-2",
+    id: "cand-hr-apc-jada-ganye-mayo-belwa-toungo",
     name: "Hon. Abdulrazak Namdas",
     party: "APC",
     position: "House of Representatives",
@@ -180,7 +180,7 @@ export const candidates: Candidate[] = [
     email: "hon.abdulrazak.namdas@wardwise.ng",
   },
   {
-    id: "cand-apc-4",
+    id: "cand-hr-apc-fufore-song",
     name: "Hon. Aliyu Wakili Boya",
     party: "APC",
     position: "House of Representatives",
@@ -206,7 +206,7 @@ export const candidates: Candidate[] = [
 
   // --- Gubernatorial Candidates ---
   {
-    id: "cand-apc-bauchi-1",
+    id: "cand-gov-apc-bauchi",
     name: "Senator Bala Abdulkadir Mohammed",
     party: "APC",
     position: "Governor",
@@ -228,7 +228,7 @@ export const candidates: Candidate[] = [
 
   // --- Senatorial Candidates ---
   {
-    id: "cand-apc-bauchi-2",
+    id: "cand-sen-apc-bauchi-central",
     name: "Senator Halliru Dauda Jika",
     party: "APC",
     position: "Senator",
@@ -247,7 +247,7 @@ export const candidates: Candidate[] = [
     email: "halliru.dauda.jika@wardwise.ng",
   },
   {
-    id: "cand-pdp-bauchi-2",
+    id: "cand-sen-pdp-bauchi-south",
     name: "Dr. Fatima Binta Bello",
     party: "PDP",
     position: "Senator",
@@ -269,7 +269,7 @@ export const candidates: Candidate[] = [
 
   // --- House of Representatives Candidates ---
   {
-    id: "cand-apc-bauchi-3",
+    id: "cand-hr-apc-bauchi-federal",
     name: "Hon. Yakubu Shehu Abdullahi",
     party: "APC",
     position: "House of Representatives",
@@ -288,7 +288,7 @@ export const candidates: Candidate[] = [
     email: "yakubu.shehu.abdullahi@wardwise.ng",
   },
   {
-    id: "cand-pdp-bauchi-3",
+    id: "cand-hr-pdp-ningi-warji",
     name: "Hon. Abubakar Sadiq Ningi",
     party: "PDP",
     position: "House of Representatives",
@@ -310,7 +310,7 @@ export const candidates: Candidate[] = [
 
   // --- State Assembly Candidates ---
   {
-    id: "cand-apc-adamawa-sa-1",
+    id: "cand-sa-apc-song-adamawa",
     name: "Hon. Ibrahim Usman",
     party: "APC",
     position: "State Assembly",
@@ -330,7 +330,7 @@ export const candidates: Candidate[] = [
     email: "ibrahim.usman@wardwise.ng",
   },
   {
-    id: "cand-pdp-adamawa-sa-1",
+    id: "cand-sa-pdp-fufore-adamawa",
     name: "Hon. Fatima Bello",
     party: "PDP",
     position: "State Assembly",
@@ -350,7 +350,7 @@ export const candidates: Candidate[] = [
     email: "fatima.bello@wardwise.ng",
   },
   {
-    id: "cand-apc-bauchi-sa-1",
+    id: "cand-sa-apc-bauchi-central",
     name: "Hon. Mohammed Sani",
     party: "APC",
     position: "State Assembly",
@@ -370,7 +370,7 @@ export const candidates: Candidate[] = [
     email: "mohammed.sani@wardwise.ng",
   },
   {
-    id: "cand-pdp-bauchi-sa-1",
+    id: "cand-sa-pdp-bauchi-south",
     name: "Hon. Aisha Mohammed",
     party: "PDP",
     position: "State Assembly",

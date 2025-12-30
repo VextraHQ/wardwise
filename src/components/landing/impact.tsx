@@ -21,14 +21,14 @@ export function ImpactSection() {
       id="impact"
       className="bg-muted text-foreground relative overflow-hidden py-16 sm:py-20 lg:py-24"
     >
-      <div
+      {/* <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(70,194,167,0.2),transparent_52%),radial-gradient(circle_at_88%_22%,rgba(18,68,56,0.12),transparent_60%)]"
         aria-hidden={true}
       />
       <div
         className="absolute inset-x-0 top-1/2 h-[120%] -translate-y-1/2 bg-linear-to-b from-[#0f2b24]/5 via-transparent to-[#46C2A7]/10"
         aria-hidden={true}
-      />
+      /> */}
       <div className="relative mx-auto flex max-w-7xl flex-col gap-14 px-6">
         <div className="max-w-3xl space-y-5">
           <p className="text-accent text-xs font-semibold tracking-[0.32em] uppercase">

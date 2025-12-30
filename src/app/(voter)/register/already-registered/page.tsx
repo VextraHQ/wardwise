@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import { createRegistrationMetadata } from "@/lib/metadata";
 import { AlreadyRegisteredStep } from "@/components/voter/steps/already-registered-step";
 
-export const metadata: Metadata = {
-  title: "You're Already Registered | WardWise Registration",
+export const metadata = createRegistrationMetadata({
+  title: "You're Already Registered",
   description: "You're already registered in our system.",
-};
+});
 
 export default function AlreadyRegisteredPage() {
   return (

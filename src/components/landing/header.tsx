@@ -14,6 +14,7 @@ import {
   HiViewGrid,
   HiUserGroup,
   HiChevronDown,
+  HiDeviceMobile,
 } from "react-icons/hi";
 import { useSession } from "next-auth/react";
 
@@ -46,7 +47,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 12);
+      setScrolled(window.scrollY > 40);
     };
 
     handleScroll();
@@ -140,25 +141,25 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                     className="text-muted-foreground hover:text-foreground border-border hover:border-primary/50 hover:bg-primary/10 flex items-center gap-1.5 text-sm font-medium transition-colors"
                   >
                     <HiUserGroup className="h-3.5 w-3.5" />
-                    Login
+                    Access Portal
                     <HiChevronDown className="h-3 w-3 opacity-60" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="bg-card border-border text-card-foreground"
+                  className="bg-card border-border text-card-foreground p-1"
                 >
                   <DropdownMenuItem asChild>
                     <Link
                       href="/voter-login"
-                      className="focus:bg-muted flex w-full cursor-pointer items-center gap-3"
+                      className="focus:bg-muted flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors"
                     >
                       <HiUserGroup className="text-muted-foreground h-4 w-4" />
                       <div className="flex flex-col gap-0.5">
                         <span className="text-foreground text-sm font-medium">
                           Voter Login
                         </span>
-                        <span className="text-muted-foreground text-xs">
+                        <span className="text-muted-foreground text-[10px]">
                           Access your profile
                         </span>
                       </div>
@@ -166,16 +167,32 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link
-                      href="/login"
-                      className="focus:bg-muted flex w-full cursor-pointer items-center gap-3"
+                      href="/canvassers"
+                      className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors focus:bg-orange-500/10"
                     >
-                      <HiUserGroup className="text-muted-foreground h-4 w-4" />
+                      <HiDeviceMobile className="h-4 w-4 text-orange-600" />
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-foreground text-sm font-medium">
+                        <span className="text-foreground text-sm font-medium group-hover:text-orange-600">
+                          Canvasser Access
+                        </span>
+                        <span className="text-muted-foreground text-[10px]">
+                          Field agent sync
+                        </span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/login"
+                      className="focus:bg-primary/10 flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors"
+                    >
+                      <HiUserGroup className="text-primary h-4 w-4" />
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-foreground group-hover:text-primary text-sm font-medium">
                           Candidate Login
                         </span>
-                        <span className="text-muted-foreground text-xs">
-                          Access dashboard
+                        <span className="text-muted-foreground text-[10px]">
+                          Strategy dashboard
                         </span>
                       </div>
                     </Link>
@@ -280,8 +297,15 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                     Voter Login
                   </Link>
                   <Link
+                    href="/canvassers"
+                    className="rounded-lg border border-orange-500/30 px-4 py-2.5 text-center text-sm font-medium text-orange-600 transition-colors duration-200 hover:bg-orange-500/5"
+                    onClick={() => setIsMobileOpen(false)}
+                  >
+                    Canvasser Access
+                  </Link>
+                  <Link
                     href="/login"
-                    className="border-border text-foreground hover:bg-muted rounded-lg border px-4 py-2.5 text-center text-sm font-medium transition-colors duration-200"
+                    className="border-primary/30 text-primary hover:bg-primary/5 rounded-lg border px-4 py-2.5 text-center text-sm font-medium transition-colors duration-200"
                     onClick={() => setIsMobileOpen(false)}
                   >
                     Candidate Login

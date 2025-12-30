@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import { createRegistrationMetadata } from "@/lib/metadata";
 import { ResumeRegistrationStep } from "@/components/voter/steps/resume-registration-step";
 
-export const metadata: Metadata = {
-  title: "Resume Your Registration | WardWise Registration",
+export const metadata = createRegistrationMetadata({
+  title: "Resume Your Registration",
   description: "Continue your incomplete voter registration.",
-};
+});
 
 export default function ResumePage() {
   return (

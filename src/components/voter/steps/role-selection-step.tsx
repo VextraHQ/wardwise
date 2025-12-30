@@ -31,7 +31,7 @@ import {
 import { useRegistrationStore } from "@/stores/registration-store";
 import { useEffect, useMemo } from "react";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
-import { Voter } from "@/types/voter";
+import { type Voter } from "@/types/voter";
 import { Spinner } from "@/components/ui/spinner";
 
 // Role Selection Schema

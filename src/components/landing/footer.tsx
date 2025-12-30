@@ -12,7 +12,7 @@ import {
   HiMail,
 } from "react-icons/hi";
 import { HiArrowUpRight } from "react-icons/hi2";
-
+import { HiDeviceMobile } from "react-icons/hi";
 import { nigeriaGradient } from "@/lib/landing-data";
 import { Button } from "@/components/ui/button";
 
@@ -22,6 +22,27 @@ const platformLinks = [
   { label: "Platform", href: "#platform-pillars", icon: HiGlobeAlt },
   { label: "Impact", href: "#impact", icon: HiChartBar },
   { label: "Security", href: "#security", icon: HiLockClosed },
+];
+
+const roleLinks = [
+  {
+    label: "Voter Portal",
+    href: "/voter-login",
+    icon: HiViewGrid,
+    color: "text-primary",
+  },
+  {
+    label: "Canvasser Field App",
+    href: "/canvassers",
+    icon: HiDeviceMobile,
+    color: "text-orange-600",
+  },
+  {
+    label: "Candidate Dashboard",
+    href: "/login",
+    icon: HiChartBar,
+    color: "text-emerald-600",
+  },
 ];
 
 const companyLinks = [
@@ -38,17 +59,8 @@ const legalLinks = [
 
 export function SiteFooter() {
   return (
-    <footer className="bg-muted text-foreground border-border/50 relative overflow-hidden border-t">
-      {/* Subtle background layers */}
-      <div
-        className={`absolute inset-0 ${nigeriaGradient} opacity-[0.08]`}
-        aria-hidden={true}
-      />
-      <div
-        className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(70,194,167,0.05),transparent_55%),radial-gradient(circle_at_bottom,rgba(15,43,36,0.08),transparent_62%)]"
-        aria-hidden={true}
-      />
-      <div className="relative mx-auto max-w-7xl px-6 py-16 sm:px-8 lg:py-20">
+    <footer className="bg-muted/30 border-border/40 relative overflow-hidden border-t py-16">
+      <div className="relative mx-auto max-w-7xl px-6 sm:px-8">
         {/* Main footer content */}
         <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
           {/* Brand section */}
@@ -58,25 +70,22 @@ export function SiteFooter() {
               className="group flex items-center gap-3"
               aria-label="WardWise home"
             >
-              <span className="relative flex size-12 items-center justify-center">
-                <span className="border-border bg-card absolute inset-0 rounded-full border transition-transform duration-300 group-hover:scale-110" />
-                <span className="from-primary relative flex size-9 items-center justify-center rounded-full bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
-                  <HiMap className="h-5 w-5" />
-                </span>
-              </span>
+              <div className="border-primary/20 bg-primary/5 text-primary flex h-12 w-12 items-center justify-center rounded-2xl border transition-transform duration-300 group-hover:scale-105">
+                <HiMap className="h-7 w-7" />
+              </div>
               <div className="flex flex-col leading-tight">
-                <span className="text-foreground text-lg font-semibold tracking-[0.14em] uppercase">
+                <span className="text-foreground text-xl font-black tracking-tight">
                   WardWise
                 </span>
-                <span className="text-muted-foreground text-[11px] font-medium">
-                  Civic Intelligence Platform
+                <span className="text-muted-foreground text-xs font-bold tracking-widest uppercase opacity-80">
+                  Civic Intelligence
                 </span>
               </div>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Nigeria&apos;s first polling-unit precise civic intelligence
-              platform. Ward-level insights help campaigns and civic leaders act
-              with confidence.
+              Nigeria&apos;s leading civic intelligence infrastructure. Briding
+              the gap between the field and the dashboard with ward-level
+              accuracy.
             </p>
             {/* CTA Button */}
             <Button
@@ -92,83 +101,93 @@ export function SiteFooter() {
           </div>
 
           {/* Links grid */}
-          <div className="grid gap-8 text-sm sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
+          <div className="grid grid-cols-2 gap-12 text-sm sm:grid-cols-3 lg:gap-16">
             {/* Platform Links */}
-            <div>
-              <h3 className="text-foreground text-xs font-semibold tracking-[0.32em] uppercase">
+            <div className="space-y-6">
+              <h3 className="text-foreground text-[11px] font-black tracking-[0.2em] uppercase">
                 Platform
               </h3>
-              <ul className="mt-5 space-y-3">
-                {platformLinks.map((link) => {
-                  const Icon = link.icon;
-                  return (
-                    <li key={link.label}>
-                      <Link
-                        href={link.href}
-                        className="group text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors duration-200"
-                      >
-                        <Icon className="h-3.5 w-3.5 opacity-60 transition-opacity duration-200 group-hover:opacity-100" />
-                        <span>{link.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
+              <ul className="space-y-4">
+                {platformLinks.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-muted-foreground hover:text-primary font-medium transition-colors duration-200"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
 
-            {/* Company Links */}
-            <div>
-              <h3 className="text-foreground text-xs font-semibold tracking-[0.32em] uppercase">
-                Company
+            {/* Roles Section */}
+            <div className="space-y-6">
+              <h3 className="text-foreground text-[11px] font-black tracking-[0.2em] uppercase">
+                Access
               </h3>
-              <ul className="mt-5 space-y-3">
-                {companyLinks.map((link) => {
-                  const Icon = link.icon;
-                  return (
-                    <li key={link.label}>
-                      <Link
-                        href={link.href}
-                        className="group text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors duration-200"
-                      >
-                        <Icon className="h-3.5 w-3.5 opacity-60 transition-opacity duration-200 group-hover:opacity-100" />
-                        <span>{link.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
+              <ul className="space-y-4">
+                <li>
+                  <Link
+                    href="/voter-login"
+                    className="text-muted-foreground hover:text-primary font-medium transition-colors"
+                  >
+                    Voter Portal
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/canvassers"
+                    className="text-muted-foreground font-medium transition-colors hover:text-orange-600"
+                  >
+                    Canvasser Field App
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/login"
+                    className="text-muted-foreground font-medium transition-colors hover:text-emerald-600"
+                  >
+                    Candidate Dashboard
+                  </Link>
+                </li>
               </ul>
             </div>
 
             {/* Legal Links */}
-            <div>
-              <h3 className="text-foreground text-xs font-semibold tracking-[0.32em] uppercase">
+            <div className="space-y-6">
+              <h3 className="text-foreground text-[11px] font-black tracking-[0.2em] uppercase">
                 Legal
               </h3>
-              <ul className="mt-5 space-y-3">
-                {legalLinks.map((link) => {
-                  const Icon = link.icon;
-                  return (
-                    <li key={link.label}>
-                      <Link
-                        href={link.href}
-                        className="group text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors duration-200"
-                      >
-                        <Icon className="h-3.5 w-3.5 opacity-60 transition-opacity duration-200 group-hover:opacity-100" />
-                        <span>{link.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
+              <ul className="space-y-4">
+                {legalLinks.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-muted-foreground hover:text-primary font-medium transition-colors duration-200"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="border-border/50 mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row">
-          <p className="text-muted-foreground text-xs tracking-[0.25em] uppercase">
-            © {new Date().getFullYear()} WardWise. All rights reserved.
+        <div className="border-border/40 mt-8 flex flex-col items-center justify-between gap-6 border-t pt-10 sm:flex-row">
+          <p className="text-muted-foreground text-[11px] font-bold tracking-widest uppercase">
+            © {new Date().getFullYear()} WardWise. Built for Nigeria.
           </p>
+          <Link
+            href="mailto:info@wardwise.ng"
+            className="group border-border bg-background/50 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary flex items-center gap-2 rounded-full border px-4 py-2 transition-all"
+          >
+            <HiMail className="h-4 w-4" />
+            <span className="text-xs font-semibold">Get in Touch</span>
+            <HiArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </Link>
         </div>
       </div>
     </footer>

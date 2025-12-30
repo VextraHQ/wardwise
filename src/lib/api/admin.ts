@@ -148,16 +148,12 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   }
 }
 
-/**
- * Mock API Configuration
- *
- * Use mock API ONLY if explicitly set to "true" in environment variable.
- * By default, uses real API calls to /api/admin/* routes.
- *
- * To use mock API: Set NEXT_PUBLIC_USE_MOCK_API=true in .env.local
- * To use real API: Don't set the variable or set it to "false"
- */
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_API === "true";
+// Mock mode: true if explicitly set, or default to mock in development
+// Production mode: false if explicitly set, or default in production
+const USE_MOCK =
+  process.env.NEXT_PUBLIC_USE_MOCK_API === "true" ||
+  (!process.env.NEXT_PUBLIC_USE_MOCK_API &&
+    process.env.NODE_ENV === "development");
 
 /**
  * Generate professional email from candidate name

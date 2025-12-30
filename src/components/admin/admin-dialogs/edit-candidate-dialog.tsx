@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -20,9 +21,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { HiOutlineCheckCircle } from "react-icons/hi";
 import type { Candidate } from "@/types/candidate";
 import type { CandidateWithUser } from "@/lib/api/admin";
+import {
+  updateCandidateSchema,
+  type UpdateCandidateFormValues,
+} from "@/lib/schemas/admin-schemas";
 
 const POSITIONS: Candidate["position"][] = [
   "Governor",
@@ -58,158 +71,215 @@ function EditCandidateForm({
   isLoading: boolean;
   onCancel: () => void;
 }) {
-  const [formData, setFormData] = useState({
-    name: candidate.name,
-    email: candidate.user.email,
-    party: candidate.party,
-    position: candidate.position,
-    constituency: candidate.constituency ?? "",
-    description: candidate.description || "",
+  const form = useForm<UpdateCandidateFormValues>({
+    resolver: zodResolver(updateCandidateSchema),
+    defaultValues: {
+      id: candidate.id,
+      name: candidate.name,
+      email: candidate.user.email,
+      party: candidate.party,
+      position: POSITIONS.includes(candidate.position)
+        ? candidate.position
+        : "",
+      constituency: candidate.constituency ?? "",
+      description: candidate.description || "",
+    },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.position) return;
-    onSubmit({
+  // Update form when candidate changes
+  useEffect(() => {
+    form.reset({
       id: candidate.id,
-      name: formData.name,
-      email: formData.email,
-      party: formData.party,
-      position: formData.position,
-      constituency: formData.constituency,
-      description: formData.description,
+      name: candidate.name,
+      email: candidate.user.email,
+      party: candidate.party,
+      position: POSITIONS.includes(candidate.position)
+        ? candidate.position
+        : "",
+      constituency: candidate.constituency ?? "",
+      description: candidate.description || "",
+    });
+  }, [candidate, form]);
+
+  const handleSubmit = (data: UpdateCandidateFormValues) => {
+    // Ensure all required fields are provided
+    if (
+      !data.name ||
+      !data.email ||
+      !data.party ||
+      !data.position ||
+      !data.constituency
+    ) {
+      return;
+    }
+
+    onSubmit({
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      party: data.party,
+      position: data.position as Candidate["position"],
+      constituency: data.constituency,
+      description: data.description || "",
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="edit-name" className="text-sm font-medium">
-            Candidate Name *
-          </Label>
-          <Input
-            id="edit-name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-            disabled={isLoading}
-            className="border-border/50"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">
+                  Candidate Name *
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    disabled={isLoading}
+                    className="border-border/50"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">
+                  Email Address *
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    disabled={isLoading}
+                    className="border-border/50"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="party"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">
+                  Political Party *
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    disabled={isLoading}
+                    className="border-border/50"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="position"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">
+                  Position *
+                </FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || ""}
+                  disabled={isLoading}
+                >
+                  <FormControl>
+                    <SelectTrigger className="border-border/50">
+                      <SelectValue placeholder="Select position" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {POSITIONS.map((pos) => (
+                      <SelectItem key={pos} value={pos}>
+                        {pos}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="edit-email" className="text-sm font-medium">
-            Email Address *
-          </Label>
-          <Input
-            id="edit-email"
-            type="email"
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-            required
-            disabled={isLoading}
-            className="border-border/50"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="edit-party" className="text-sm font-medium">
-            Political Party *
-          </Label>
-          <Input
-            id="edit-party"
-            value={formData.party}
-            onChange={(e) =>
-              setFormData({ ...formData, party: e.target.value })
-            }
-            required
-            disabled={isLoading}
-            className="border-border/50"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="edit-position" className="text-sm font-medium">
-            Position *
-          </Label>
-          <Select
-            value={formData.position}
-            onValueChange={(value) =>
-              setFormData({
-                ...formData,
-                position: value as Candidate["position"],
-              })
-            }
-            disabled={isLoading}
-          >
-            <SelectTrigger id="edit-position" className="border-border/50">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {POSITIONS.map((pos) => (
-                <SelectItem key={pos} value={pos}>
-                  {pos}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="edit-constituency" className="text-sm font-medium">
-          Constituency *
-        </Label>
-        <Input
-          id="edit-constituency"
-          value={formData.constituency}
-          onChange={(e) =>
-            setFormData({ ...formData, constituency: e.target.value })
-          }
-          required
-          disabled={isLoading}
-          className="border-border/50"
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="edit-description" className="text-sm font-medium">
-          Description
-        </Label>
-        <Textarea
-          id="edit-description"
-          value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-          rows={3}
-          disabled={isLoading}
-          className="border-border/50"
-        />
-      </div>
-      <DialogFooter>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isLoading}
-          className="border-border/50"
-        >
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              Updating...
-            </>
-          ) : (
-            <>
-              <HiOutlineCheckCircle className="mr-2 h-4 w-4" />
-              Update Candidate
-            </>
+        <FormField
+          control={form.control}
+          name="constituency"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium">
+                Constituency *
+              </FormLabel>
+              <FormControl>
+                <Input
+                  disabled={isLoading}
+                  className="border-border/50"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
-        </Button>
-      </DialogFooter>
-    </form>
+        />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium">Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  rows={3}
+                  disabled={isLoading}
+                  className="border-border/50"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isLoading}
+            className="border-border/50"
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Updating...
+              </>
+            ) : (
+              <>
+                <HiOutlineCheckCircle className="mr-2 h-4 w-4" />
+                Update Candidate
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </form>
+    </Form>
   );
 }
 

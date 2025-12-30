@@ -10,13 +10,13 @@ export function HowItWorksSection() {
       id="how-it-works"
       className="from-background via-muted to-background relative overflow-hidden bg-linear-to-b py-24"
     >
-      <div
+      {/* <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(70,194,167,0.15),transparent_55%),radial-gradient(circle_at_80%_0%,rgba(15,43,36,0.12),transparent_55%)]"
         aria-hidden={true}
-      />
+      /> */}
       <div className="text-foreground mx-auto flex max-w-7xl flex-col gap-12 px-6">
         <div className="max-w-2xl">
-          <p className="text-accent text-xs font-semibold tracking-[0.3em] uppercase">
+          <p className="text-primary text-xs font-semibold tracking-[0.3em] uppercase">
             How it works
           </p>
           <h2 className="text-foreground mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -24,9 +24,10 @@ export function HowItWorksSection() {
             steps.
           </h2>
           <p className="text-muted-foreground mt-4 text-base leading-relaxed">
-            WardWise synchronises citizen input with Nigeria&apos;s electoral
-            geography so campaign teams see exactly who supports them, what they
-            care about, and where to focus ground operations.
+            WardWise synchronises citizen input and canvasser verification with
+            Nigeria&apos;s electoral geography. Campaign teams see exactly who
+            supports them, what they care about, and where to focus field
+            operations.
           </p>
         </div>
         <div className="grid gap-6 md:grid-cols-3">
@@ -43,13 +44,13 @@ export function HowItWorksSection() {
               }}
               className="group border-border bg-card/90 hover:border-primary/50 relative flex flex-col gap-5 overflow-hidden rounded-3xl border p-8 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
             >
-              <div className="from-primary/8 to-accent/8 absolute inset-0 bg-linear-to-br via-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
+              <div className="from-primary/8 absolute inset-0 bg-linear-to-br via-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
               <div className="relative flex items-center gap-4">
-                <div className="border-primary/30 bg-primary/12 text-accent flex size-12 items-center justify-center rounded-2xl border shadow-inner">
+                <div className="border-primary/30 bg-primary/12 text-primary flex size-12 items-center justify-center rounded-2xl border shadow-inner">
                   <step.icon className="size-6" aria-hidden={true} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-accent text-xs font-semibold tracking-[0.28em] uppercase">
+                  <span className="text-primary text-xs font-semibold tracking-[0.28em] uppercase">
                     Step {step.number}
                   </span>
                   <h3 className="text-foreground text-lg font-semibold tracking-tight">

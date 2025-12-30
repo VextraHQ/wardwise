@@ -31,7 +31,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useRegistrationStore } from "@/stores/registration-store";
-import { generateRegistrationId } from "@/lib/registration-schemas";
+import { generateRegistrationId } from "@/lib/schemas/registration-schemas";
 import { toast } from "sonner";
 import { voterApi } from "@/lib/api/voter";
 import { candidateApi } from "@/lib/api/candidate";

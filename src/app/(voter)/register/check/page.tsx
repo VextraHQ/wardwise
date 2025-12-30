@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import { createRegistrationMetadata } from "@/lib/metadata";
 import { DuplicateCheckStep } from "@/components/voter/steps/duplicate-check-step";
 
-export const metadata: Metadata = {
-  title: "Checking Your Registration | WardWise Registration",
+export const metadata = createRegistrationMetadata({
+  title: "Checking Your Registration",
   description: "Checking if you're already registered in the system.",
-};
+});
 
 export default function CheckPage() {
   return (

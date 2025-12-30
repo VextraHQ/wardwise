@@ -40,6 +40,8 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-canvasser: var(--canvasser);
+  --color-victory: var(--victory);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -76,6 +78,11 @@
   --border: #d4ddd8;
   --input: #e2ebe6;
   --ring: #1f6b5e;
+
+  /* Role-based tokens */
+  --canvasser: #f97316; /* Professional Orange */
+  --victory: #10b981; /* Emerald */
+
   --chart-1: #1f6b5e;
   --chart-2: #1b4332;
   --chart-3: #4a5d56;
@@ -110,6 +117,11 @@
   --border: rgba(255, 255, 255, 0.06);
   --input: rgba(255, 255, 255, 0.08);
   --ring: #2a8a7a;
+
+  /* Role-based tokens (Dark) */
+  --canvasser: #fb923c;
+  --victory: #34d399;
+
   --chart-1: #2a8a7a;
   --chart-2: #4a9d8e;
   --chart-3: #6bb0a2;

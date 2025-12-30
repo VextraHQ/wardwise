@@ -41,10 +41,12 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   return response.json();
 }
 
-// Use mock if NEXT_PUBLIC_USE_MOCK_API is true, or in development
+// Mock mode: true if explicitly set, or default to mock in development
+// Production mode: false if explicitly set, or default in production
 const USE_MOCK =
   process.env.NEXT_PUBLIC_USE_MOCK_API === "true" ||
-  process.env.NODE_ENV === "development";
+  (!process.env.NEXT_PUBLIC_USE_MOCK_API &&
+    process.env.NODE_ENV === "development");
 
 export const candidateApi = {
   getCandidates: async (
@@ -89,6 +91,10 @@ export const candidateApi = {
 
           // House of Representatives: match if constituency contains the LGA
           if (candidate.position === "House of Representatives") {
+            // Skip if constituency is null
+            if (!candidate.constituency) {
+              return false;
+            }
             // Normalize by converting to lowercase and replacing spaces/hyphens with a common delimiter
             const normalize = (str: string) =>
               str.toLowerCase().replace(/[\s-]/g, "-");
@@ -107,6 +113,10 @@ export const candidateApi = {
           // State Assembly: match if constituency contains the LGA or ward
           // State Assembly constituencies are typically based on LGAs or combinations of wards
           if (candidate.position === "State Assembly") {
+            // Skip if constituency is null
+            if (!candidate.constituency) {
+              return false;
+            }
             const normalize = (str: string) =>
               str.toLowerCase().replace(/[\s-]/g, "-");
             const constituencyNormalized = normalize(candidate.constituency);
@@ -191,9 +201,8 @@ export const candidateApi = {
       // MOCK: Returns survey by ID from static data
       console.log(`📋 Mock: Getting survey ${surveyId}`);
       await new Promise((resolve) => setTimeout(resolve, 500));
-      const { getSurveyById } = await import(
-        "@/lib/mock/data/candidate-surveys"
-      );
+      const { getSurveyById } =
+        await import("@/lib/mock/data/candidate-surveys");
       const survey = getSurveyById(surveyId);
       return { survey: survey || null };
     }

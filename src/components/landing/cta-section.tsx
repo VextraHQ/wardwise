@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { HiArrowRight, HiShieldCheck } from "react-icons/hi";
+import { HiArrowRight, HiDeviceMobile, HiShieldCheck } from "react-icons/hi";
 import { HiUsers, HiMapPin } from "react-icons/hi2";
 
 import { Button } from "@/components/ui/button";
@@ -40,7 +40,7 @@ export function CallToActionSection() {
         aria-hidden={true}
       />
       <div
-        className="bg-accent absolute -right-20 bottom-1/4 h-64 w-64 rounded-full opacity-[0.04] blur-3xl"
+        className="absolute -right-20 bottom-1/4 h-64 w-64 rounded-full bg-orange-500 opacity-[0.04] blur-3xl"
         aria-hidden={true}
       />
 
@@ -52,11 +52,11 @@ export function CallToActionSection() {
               <div className="border-primary/20 bg-primary/5 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 sm:gap-2 sm:px-4 sm:py-2">
                 <div className="flex gap-1">
                   <span className="bg-primary h-1.5 w-1.5 rounded-full" />
-                  <span className="bg-primary/60 h-1.5 w-1.5 rounded-full" />
-                  <span className="bg-primary/30 h-1.5 w-1.5 rounded-full" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 </div>
                 <span className="text-foreground/80 text-[10px] font-semibold tracking-wider uppercase sm:text-xs">
-                  Unite citizens, campaigns, and governance
+                  Voters • Canvassers • Candidates
                 </span>
               </div>
 
@@ -73,10 +73,9 @@ export function CallToActionSection() {
                   ?
                 </h2>
                 <p className="text-muted-foreground mx-auto max-w-2xl text-base leading-relaxed sm:text-lg">
-                  WardWise helps campaigns, governments, civil groups, and
-                  partners understand Nigerians at scale. Launch in a single
-                  state or coordinate nationwide—every supporter interaction
-                  stays verified and actionable.
+                  WardWise helps campaigns, canvassers, and civic groups
+                  understand Nigerians at scale. Bridge the gap between field
+                  energy and strategic command with verfied data.
                 </p>
               </div>
 
@@ -95,12 +94,12 @@ export function CallToActionSection() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="border-border bg-card text-foreground hover:border-primary hover:bg-primary/5 h-12 rounded-xl border-2 px-8 text-base font-semibold transition-all duration-200 sm:h-14"
+                  className="bg-card h-12 rounded-xl border-2 border-orange-500/30 px-8 text-base font-semibold text-orange-600 transition-all duration-200 hover:bg-orange-500/5 sm:h-14"
                   asChild
                 >
-                  <Link href="/voter-login" className="flex items-center gap-2">
-                    <HiUsers className="h-4 w-4" />
-                    Voter Login
+                  <Link href="/canvassers" className="flex items-center gap-2">
+                    <HiDeviceMobile className="h-4 w-4" />
+                    Canvasser Access
                   </Link>
                 </Button>
                 <Button
@@ -120,12 +119,12 @@ export function CallToActionSection() {
                   <span className="font-medium">Secure & verified</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <HiUsers className="text-primary h-4 w-4" />
-                  <span className="font-medium">10,000+ supporters</span>
+                  <HiUsers className="h-4 w-4 text-orange-600" />
+                  <span className="font-medium">Active Field Agents</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <HiMapPin className="text-primary h-4 w-4" />
-                  <span className="font-medium">420 polling units</span>
+                  <HiMapPin className="h-4 w-4 text-emerald-600" />
+                  <span className="font-medium">Ward-Level Insights</span>
                 </div>
               </div>
             </div>

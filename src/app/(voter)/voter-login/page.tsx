@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import { createVoterMetadata } from "@/lib/metadata";
 import { VoterLogin } from "@/components/voter/voter-login";
 
-export const metadata: Metadata = {
-  title: "Voter Login | WardWise",
+export const metadata = createVoterMetadata({
+  title: "Voter Login",
   description: "Login to access your voter profile and registration details.",
-};
+});
 
 export default function VoterLoginPage() {
   return (

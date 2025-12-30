@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { RegistrationPayload } from "@/lib/registration-schemas";
+import { type RegistrationPayload } from "@/lib/schemas/registration-schemas";
 import type { RegistrationStep } from "@/types/voter";
 import { orderedSteps } from "@/lib/helpers/registration-helpers";
 

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Campaign Reports | WardWise",
+  title: "Campaign Reports",
   description:
     "View and download campaign reports including supporter lists, analytics summaries, and ward breakdowns.",
 };

@@ -1,10 +1,10 @@
-import { Metadata } from "next";
+import { createRegistrationMetadata } from "@/lib/metadata";
 import { RoleSelectionStep } from "@/components/voter/steps/role-selection-step";
 
-export const metadata: Metadata = {
-  title: "Select Role | WardWise Registration",
+export const metadata = createRegistrationMetadata({
+  title: "Select Role",
   description: "Choose your role as a Voter or Supporter.",
-};
+});
 
 export default function RoleSelectionPage() {
   return (

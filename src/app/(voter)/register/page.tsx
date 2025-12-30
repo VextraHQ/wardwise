@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+import { createRegistrationMetadata } from "@/lib/metadata";
 import { NinEntryStep } from "@/components/voter/steps/nin-entry-step";
 
-export const metadata: Metadata = {
-  title: "Enter Your NIN | WardWise Registration",
+export const metadata = createRegistrationMetadata({
+  title: "Enter Your NIN",
   description:
     "Start your voter registration by entering your National Identification Number (NIN). We'll verify it with NIMC.",
-};
+});
 
 export default function RegisterPage() {
   return (

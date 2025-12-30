@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { Toaster as Sonner, ToasterProps } from "sonner";
+import { Toaster as Sonner, type ToasterProps } from "sonner";
 // import { CheckCircle2, XCircle, Info, AlertTriangle } from "lucide-react";
 
 const Toaster = ({ ...props }: ToasterProps) => {
