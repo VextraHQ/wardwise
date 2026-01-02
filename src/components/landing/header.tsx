@@ -57,172 +57,174 @@ export function SiteHeader({ className }: SiteHeaderProps) {
   }, []);
 
   return (
-    <header className={cn("sticky top-0 z-50 w-full", className)}>
-      <div
-        className={cn(
-          "bg-background/80 backdrop-blur-md transition-all duration-300",
-          scrolled
-            ? "border-border bg-card/95 border-b"
-            : "border-b border-transparent",
-        )}
-      >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
-          <Link
-            href="/"
-            className="flex items-center gap-2 sm:gap-2.5"
-            aria-label="WardWise home"
-          >
-            <span className="relative flex size-9 items-center justify-center sm:size-10">
-              <span className="border-border bg-card absolute inset-0 rounded-full border" />
-              <span className="from-primary relative flex size-6 items-center justify-center rounded-full bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white sm:size-7">
-                <HiMap className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </span>
-            </span>
-            <div className="flex min-w-0 flex-col leading-tight">
-              <span className="text-foreground truncate text-sm font-semibold tracking-[0.18em] uppercase sm:text-[15px]">
-                WardWise
-              </span>
-              <span className="text-muted-foreground truncate text-[10px] font-medium sm:text-[10.5px]">
-                Civic Intelligence Platform
-              </span>
-            </div>
-          </Link>
-          <nav className="text-accent hidden items-center gap-3 text-sm font-medium lg:flex lg:gap-4">
-            {navigationLinks.map((link) => (
-              <a
-                key={link.section}
-                href={`#${link.section}`}
-                className="group hover:text-foreground focus-visible:ring-primary relative inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-              >
-                {link.section === "how-it-works" && (
-                  <HiViewGrid className="text-primary h-3.5 w-3.5" />
-                )}
-                {link.section === "features" && (
-                  <HiChip className="text-primary h-3.5 w-3.5" />
-                )}
-                {link.section === "platform-pillars" && (
-                  <HiGlobeAlt className="text-primary h-3.5 w-3.5" />
-                )}
-                {link.section === "impact" && (
-                  <HiChartBar className="text-primary h-3.5 w-3.5" />
-                )}
-                {link.section === "security" && (
-                  <HiLockClosed className="text-primary h-3.5 w-3.5" />
-                )}
-                <span>{link.label}</span>
-                <span className="bg-primary absolute -bottom-1 left-0 h-[2px] w-0 transition-all duration-300 group-hover:w-full" />
-              </a>
-            ))}
-          </nav>
-          <div className="hidden items-center gap-3 lg:flex">
-            {status === "authenticated" && session?.user ? (
-              <Link
-                href={
-                  session.user.role === "candidate"
-                    ? "/dashboard"
-                    : session.user.role === "admin"
-                      ? "/admin"
-                      : "/login"
-                }
-                className="text-secondary-foreground hover:text-foreground flex items-center gap-1.5 text-sm font-semibold transition-colors duration-200"
-              >
-                <HiUserGroup className="h-3.5 w-3.5" />
-                {session.user.role === "candidate"
-                  ? "Dashboard"
-                  : session.user.role === "admin"
-                    ? "Admin Dashboard"
-                    : "Login"}
-              </Link>
-            ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="text-muted-foreground hover:text-foreground border-border hover:border-primary/50 hover:bg-primary/10 flex items-center gap-1.5 text-sm font-medium transition-colors"
-                  >
-                    <HiUserGroup className="h-3.5 w-3.5" />
-                    Access Portal
-                    <HiChevronDown className="h-3 w-3 opacity-60" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="bg-card border-border text-card-foreground p-1"
-                >
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/voter-login"
-                      className="focus:bg-muted flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors"
-                    >
-                      <HiUserGroup className="text-muted-foreground h-4 w-4" />
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-foreground text-sm font-medium">
-                          Voter Login
-                        </span>
-                        <span className="text-muted-foreground text-[10px]">
-                          Access your profile
-                        </span>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/canvassers"
-                      className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors focus:bg-orange-500/10"
-                    >
-                      <HiDeviceMobile className="h-4 w-4 text-orange-600" />
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-foreground text-sm font-medium group-hover:text-orange-600">
-                          Canvasser Access
-                        </span>
-                        <span className="text-muted-foreground text-[10px]">
-                          Field agent sync
-                        </span>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/login"
-                      className="focus:bg-primary/10 flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors"
-                    >
-                      <HiUserGroup className="text-primary h-4 w-4" />
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-foreground group-hover:text-primary text-sm font-medium">
-                          Candidate Login
-                        </span>
-                        <span className="text-muted-foreground text-[10px]">
-                          Strategy dashboard
-                        </span>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-            <Button
-              size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 text-sm font-semibold transition-all duration-200"
-              asChild
+    <div className="sticky top-0 z-50 w-full">
+      <header className={cn("relative w-full", className)}>
+        <div
+          className={cn(
+            "relative z-50 transition-all duration-300",
+            scrolled || isMobileOpen
+              ? "border-border bg-card border-b backdrop-blur-md"
+              : "bg-background/80 border-b border-transparent backdrop-blur-md",
+          )}
+        >
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+            <Link
+              href="/"
+              className="flex items-center gap-2 sm:gap-2.5"
+              aria-label="WardWise home"
             >
-              <Link href="/register">Support a Candidate</Link>
-            </Button>
+              <span className="relative flex size-9 items-center justify-center sm:size-10">
+                <span className="border-border bg-card absolute inset-0 rounded-full border" />
+                <span className="from-primary relative flex size-6 items-center justify-center rounded-full bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white sm:size-7">
+                  <HiMap className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                </span>
+              </span>
+              <div className="flex min-w-0 flex-col leading-tight">
+                <span className="text-foreground truncate text-sm font-semibold tracking-[0.18em] uppercase sm:text-[15px]">
+                  WardWise
+                </span>
+                <span className="text-muted-foreground truncate text-[10px] font-medium sm:text-[10.5px]">
+                  Civic Intelligence Platform
+                </span>
+              </div>
+            </Link>
+            <nav className="text-accent hidden items-center gap-3 text-sm font-medium lg:flex lg:gap-4">
+              {navigationLinks.map((link) => (
+                <a
+                  key={link.section}
+                  href={`#${link.section}`}
+                  className="group hover:text-foreground focus-visible:ring-primary relative inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                >
+                  {link.section === "how-it-works" && (
+                    <HiViewGrid className="text-primary h-3.5 w-3.5" />
+                  )}
+                  {link.section === "features" && (
+                    <HiChip className="text-primary h-3.5 w-3.5" />
+                  )}
+                  {link.section === "platform-pillars" && (
+                    <HiGlobeAlt className="text-primary h-3.5 w-3.5" />
+                  )}
+                  {link.section === "impact" && (
+                    <HiChartBar className="text-primary h-3.5 w-3.5" />
+                  )}
+                  {link.section === "security" && (
+                    <HiLockClosed className="text-primary h-3.5 w-3.5" />
+                  )}
+                  <span>{link.label}</span>
+                  <span className="bg-primary absolute -bottom-1 left-0 h-[2px] w-0 transition-all duration-300 group-hover:w-full" />
+                </a>
+              ))}
+            </nav>
+            <div className="hidden items-center gap-3 lg:flex">
+              {status === "authenticated" && session?.user ? (
+                <Link
+                  href={
+                    session.user.role === "candidate"
+                      ? "/dashboard"
+                      : session.user.role === "admin"
+                        ? "/admin"
+                        : "/login"
+                  }
+                  className="text-secondary-foreground hover:text-foreground flex items-center gap-1.5 text-sm font-semibold transition-colors duration-200"
+                >
+                  <HiUserGroup className="h-3.5 w-3.5" />
+                  {session.user.role === "candidate"
+                    ? "Dashboard"
+                    : session.user.role === "admin"
+                      ? "Admin Dashboard"
+                      : "Login"}
+                </Link>
+              ) : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="text-muted-foreground hover:text-foreground border-border hover:border-primary/50 hover:bg-primary/10 flex items-center gap-1.5 text-sm font-medium transition-colors"
+                    >
+                      <HiUserGroup className="h-3.5 w-3.5" />
+                      Access Portal
+                      <HiChevronDown className="h-3 w-3 opacity-60" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="bg-card border-border text-card-foreground p-1"
+                  >
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/voter-login"
+                        className="focus:bg-muted flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors"
+                      >
+                        <HiUserGroup className="text-muted-foreground h-4 w-4" />
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-foreground text-sm font-medium">
+                            Voter Login
+                          </span>
+                          <span className="text-muted-foreground text-[10px]">
+                            Access your profile
+                          </span>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/canvassers"
+                        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors focus:bg-orange-500/10"
+                      >
+                        <HiDeviceMobile className="h-4 w-4 text-orange-600" />
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-foreground text-sm font-medium group-hover:text-orange-600">
+                            Canvasser Access
+                          </span>
+                          <span className="text-muted-foreground text-[10px]">
+                            Field agent sync
+                          </span>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/login"
+                        className="focus:bg-primary/10 flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors"
+                      >
+                        <HiUserGroup className="text-primary h-4 w-4" />
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-foreground group-hover:text-primary text-sm font-medium">
+                            Candidate Login
+                          </span>
+                          <span className="text-muted-foreground text-[10px]">
+                            Strategy dashboard
+                          </span>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              <Button
+                size="lg"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 text-sm font-semibold transition-all duration-200"
+                asChild
+              >
+                <Link href="/register">Support a Candidate</Link>
+              </Button>
+            </div>
+            <button
+              className="border-border bg-card/90 text-foreground hover:border-primary hover:text-primary inline-flex items-center justify-center rounded-lg border p-2 transition-colors duration-200 lg:hidden"
+              type="button"
+              onClick={() => setIsMobileOpen((prev) => !prev)}
+              aria-label="Toggle navigation"
+              ref={toggleRef}
+            >
+              {isMobileOpen ? (
+                <HiX className="h-5 w-5" />
+              ) : (
+                <HiMenu className="h-5 w-5" />
+              )}
+            </button>
           </div>
-          <button
-            className="border-border bg-card/90 text-foreground hover:border-primary hover:text-primary inline-flex items-center justify-center rounded-lg border p-2 transition-colors duration-200 lg:hidden"
-            type="button"
-            onClick={() => setIsMobileOpen((prev) => !prev)}
-            aria-label="Toggle navigation"
-            ref={toggleRef}
-          >
-            {isMobileOpen ? (
-              <HiX className="h-5 w-5" />
-            ) : (
-              <HiMenu className="h-5 w-5" />
-            )}
-          </button>
         </div>
-      </div>
+      </header>
       {/* Backdrop overlay */}
       <Transition
         show={isMobileOpen}
@@ -235,7 +237,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
         leaveTo="opacity-0"
       >
         <div
-          className="bg-foreground/40 fixed inset-x-0 top-[73px] bottom-0 z-40 backdrop-blur-sm sm:top-[81px] lg:hidden"
+          className="bg-foreground/40 absolute inset-x-0 top-full z-30 h-[200vh] lg:hidden"
           onClick={() => setIsMobileOpen(false)}
           aria-hidden={true}
         />
@@ -251,9 +253,9 @@ export function SiteHeader({ className }: SiteHeaderProps) {
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 -translate-y-3"
       >
-        <div className="relative z-50 lg:hidden">
+        <div className="absolute inset-x-0 top-full z-40 lg:hidden">
           <div
-            className="border-border bg-card/95 border-b px-6 pt-4 pb-6 backdrop-blur-sm"
+            className="border-border bg-card/95 border-b px-6 pt-4 pb-6"
             ref={mobileMenuRef}
           >
             <nav className="text-accent flex flex-col gap-1 text-base">
@@ -325,6 +327,6 @@ export function SiteHeader({ className }: SiteHeaderProps) {
           </div>
         </div>
       </Transition>
-    </header>
+    </div>
   );
 }

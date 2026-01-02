@@ -91,7 +91,7 @@ export const candidates: Candidate[] = [
       "Building a knowledge-based economy through quality education, infrastructure development, and good governance",
     createdAt: "2025-01-10T08:00:00Z",
     updatedAt: "2025-10-10T08:00:00Z",
-    email: "rabiu.musa.kwankwaso@wardwise.ng",
+    email: "rabiu.kwankwaso@wardwise.ng",
   },
 
   // ============================================================================
@@ -116,7 +116,7 @@ export const candidates: Candidate[] = [
       "Creating an Adamawa State where everyone has access to quality education and healthcare",
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
-    email: "aishatu.dahiru.ahmed@wardwise.ng",
+    email: "aishatu.binani@wardwise.ng",
   },
   {
     id: "cand-gov-pdp-adamawa",
@@ -134,7 +134,7 @@ export const candidates: Candidate[] = [
     vision: "Building a safer and more prosperous Adamawa State",
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
-    email: "dr.ahmadu.umaru.fintiri@wardwise.ng",
+    email: "ahmadu.fintiri@wardwise.ng",
   },
 
   // --- Senatorial Candidates ---
@@ -156,7 +156,7 @@ export const candidates: Candidate[] = [
       "Ensuring every community in Adamawa Central has access to quality healthcare",
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
-    email: "dr.maryam.inna.ciroma@wardwise.ng",
+    email: "maryam.ciroma@wardwise.ng",
   },
 
   // --- House of Representatives Candidates ---
@@ -177,7 +177,7 @@ export const candidates: Candidate[] = [
       "Transforming Jada/Ganye/Mayo-Belwa/Toungo through youth-driven development",
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
-    email: "hon.abdulrazak.namdas@wardwise.ng",
+    email: "abdulrazak.namdas@wardwise.ng",
   },
   {
     id: "cand-hr-apc-fufore-song",
@@ -197,7 +197,7 @@ export const candidates: Candidate[] = [
       "Transforming Fufore/Song through infrastructure and economic development",
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
-    email: "aliyu.wakili.boya@wardwise.ng",
+    email: "aliyu.boya@wardwise.ng",
   },
 
   // ============================================================================
@@ -223,7 +223,7 @@ export const candidates: Candidate[] = [
       "Transforming Bauchi into a hub of commerce and sustainable development",
     createdAt: "2025-01-20T09:00:00Z",
     updatedAt: "2025-10-20T09:00:00Z",
-    email: "senator.bala.abdulkadir.mohammed@wardwise.ng",
+    email: "bala.mohammed@wardwise.ng",
   },
 
   // --- Senatorial Candidates ---
@@ -244,7 +244,7 @@ export const candidates: Candidate[] = [
     vision: "Making Bauchi Central the economic powerhouse of Northern Nigeria",
     createdAt: "2025-01-20T09:00:00Z",
     updatedAt: "2025-10-20T09:00:00Z",
-    email: "halliru.dauda.jika@wardwise.ng",
+    email: "halliru.jika@wardwise.ng",
   },
   {
     id: "cand-sen-pdp-bauchi-south",
@@ -285,7 +285,7 @@ export const candidates: Candidate[] = [
     vision: "Bringing electricity and modern amenities to every community",
     createdAt: "2025-01-20T09:00:00Z",
     updatedAt: "2025-10-20T09:00:00Z",
-    email: "yakubu.shehu.abdullahi@wardwise.ng",
+    email: "yakubu.abdullahi@wardwise.ng",
   },
   {
     id: "cand-hr-pdp-ningi-warji",
@@ -305,7 +305,7 @@ export const candidates: Candidate[] = [
       "Empowering our farmers and ensuring food security for Bauchi State",
     createdAt: "2025-01-20T09:00:00Z",
     updatedAt: "2025-10-20T09:00:00Z",
-    email: "abubakar.sadiq.ningi@wardwise.ng",
+    email: "abubakar.ningi@wardwise.ng",
   },
 
   // --- State Assembly Candidates ---

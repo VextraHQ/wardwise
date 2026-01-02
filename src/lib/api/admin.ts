@@ -290,9 +290,7 @@ export const adminApi = {
           (c) => c.user.email.toLowerCase() === emailLower,
         );
         if (existingCandidate) {
-          console.warn(
-            `Mock: Candidate with email ${data.email} already exists`,
-          );
+          throw new Error(`Email already exists: ${data.email}`);
         }
 
         const candidateId = `cand-${Date.now()}`;
@@ -341,6 +339,18 @@ export const adminApi = {
         // MOCK: Updates candidate data
         console.log("📝 Mock: Updating candidate", data);
         await new Promise((resolve) => setTimeout(resolve, 600));
+
+        // Check for duplicate email if being changed
+        if (data.email) {
+          const emailLower = data.email.toLowerCase();
+          const existingCandidate = mockCreatedCandidates.find(
+            (c) =>
+              c.user.email.toLowerCase() === emailLower && c.id !== data.id,
+          );
+          if (existingCandidate) {
+            throw new Error(`Email already exists: ${data.email}`);
+          }
+        }
 
         // Check in created candidates first
         const createdIndex = mockCreatedCandidates.findIndex(

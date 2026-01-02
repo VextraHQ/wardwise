@@ -1,6 +1,10 @@
+import { config } from "dotenv";
 import { PrismaClient, Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import type { Candidate } from "@/types/candidate";
+
+// Load environment variables from .env file
+config();
 // TODO: Refactor to use mock data imports for consistency
 // import { candidates as mockCandidates } from "@/lib/mock/data/candidates";
 // import { voters as mockVoters } from "@/lib/mock/data/voters";
@@ -223,7 +227,7 @@ async function main() {
       constituency: "Adamawa State",
       description: "Progressive leader committed to education and healthcare.",
       supporters: 1250,
-      email: "aishatu.dahiru.ahmed@wardwise.ng",
+      email: "aishatu.binani@wardwise.ng",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
@@ -240,7 +244,7 @@ async function main() {
       description:
         "Healthcare professional dedicated to women's empowerment and community welfare.",
       supporters: 650,
-      email: "dr.maryam.inna.ciroma@wardwise.ng",
+      email: "maryam.ciroma@wardwise.ng",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
@@ -256,7 +260,7 @@ async function main() {
       constituency: "Jada/Ganye/Mayo-Belwa/Toungo",
       description: "Youth advocate and infrastructure development champion.",
       supporters: 750,
-      email: "hon.abdulrazak.namdas@wardwise.ng",
+      email: "abdulrazak.namdas@wardwise.ng",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
@@ -272,7 +276,7 @@ async function main() {
       description:
         "Former ALGON Chairman and Executive Chairman of Fufore LGA. Currently serving first term in 10th National Assembly.",
       supporters: 850,
-      email: "aliyu.wakili.boya@wardwise.ng",
+      email: "aliyu.boya@wardwise.ng",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
