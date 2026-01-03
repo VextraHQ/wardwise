@@ -9,11 +9,8 @@ export function SecuritySection() {
       id="security"
       className="border-border/40 text-foreground relative overflow-hidden border-b bg-slate-50/40 py-16 sm:py-20 lg:py-24"
     >
-      {/* <div
-        className="absolute inset-0 bg-[radial-gradient(circle_at_84%_82%,rgba(70,194,167,0.14),transparent_55%),radial-gradient(circle_at_14%_88%,rgba(18,68,56,0.1),transparent_65%)]"
-        aria-hidden={true}
-      /> */}
-      <div className="relative mx-auto flex max-w-7xl flex-col gap-8 px-6">
+      <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-6">
+        {/* Centered Header (Restoring Section Rhythm: Centered/Split Alternation) */}
         <div className="relative mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -23,10 +20,10 @@ export function SecuritySection() {
           >
             <div className="flex items-center gap-3">
               <span className="text-primary border-primary/30 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
-                Protocols
+                Privacy Guard
               </span>
               <span className="text-muted-foreground/30 font-mono text-[9px] tracking-widest uppercase">
-                ENC_V1.0
+                SEC_STABLE
               </span>
             </div>
             <div className="bg-primary/20 mt-4 h-px w-12" />
@@ -39,9 +36,9 @@ export function SecuritySection() {
             transition={{ delay: 0.1 }}
             className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.15]"
           >
-            Privacy-first architecture <br />
+            Incorruptible protection for <br />
             <span className="text-primary font-serif italic">
-              tailored for Nigeria.
+              your campaign's inner circle.
             </span>
           </motion.h2>
 
@@ -52,28 +49,97 @@ export function SecuritySection() {
             transition={{ delay: 0.2 }}
             className="text-muted-foreground mx-auto mt-8 max-w-2xl text-base leading-relaxed font-medium sm:text-lg"
           >
-            WardWise protects supporter data with bank-grade encryption,
-            hosting, and role-based access built specifically for large-scale
-            field operations.
+            Campaign strategies are won on secrets. WardWise creates a
+            "Sovereign Vault" ensuring your field data is visible only to those
+            you trust, and invisible to the competition.
           </motion.p>
         </div>
-        <div className="grid gap-6 md:grid-cols-2">
-          {securityHighlights.map((item) => (
-            <article
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {securityHighlights.map((item, i) => (
+            <motion.article
               key={item.title}
-              className="border-border bg-card/70 hover:border-primary/50 hover:bg-card relative flex h-full flex-col gap-4 rounded-3xl border p-7 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="group border-border/80 bg-card/80 hover:border-primary/50 relative flex flex-col overflow-hidden rounded-4xl border p-8 transition-all duration-300"
             >
-              <div className="border-primary/30 bg-primary/12 text-accent flex size-10 items-center justify-center rounded-full border">
-                <item.icon className="size-5" aria-hidden={true} />
+              {/* Trust Stamp Header */}
+              <div className="mb-8 flex items-start justify-between">
+                <div className="bg-primary/5 text-primary border-primary/20 flex size-12 items-center justify-center rounded-2xl border shadow-inner">
+                  <item.icon className="size-6" aria-hidden={true} />
+                </div>
+                <div className="text-right">
+                  <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
+                    Guard Level
+                  </p>
+                  <p className="text-foreground text-[10px] font-black">
+                    Military Grade
+                  </p>
+                </div>
               </div>
-              <h3 className="text-foreground text-lg font-semibold tracking-tight">
-                {item.title}
-              </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {item.description}
-              </p>
-            </article>
+
+              <div className="flex flex-1 flex-col space-y-3">
+                <h3 className="text-foreground text-lg font-black tracking-tight uppercase">
+                  {item.title}
+                </h3>
+                <p className="text-muted-foreground text-[13px] leading-relaxed font-medium">
+                  {item.description}
+                </p>
+              </div>
+
+              {/* Humanity-First Security Footer */}
+              <div className="border-border/40 mt-8 border-t pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="size-1.5 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                    <span className="text-muted-foreground font-mono text-[8px] font-black tracking-[0.2em] uppercase">
+                      Verified Agent
+                    </span>
+                  </div>
+                  <span className="text-muted-foreground/30 font-mono text-[8px] font-black uppercase">
+                    VAULT_STABLE
+                  </span>
+                </div>
+              </div>
+
+              {/* Subtle metallic bevel effect on hover */}
+              <div className="group-hover:border-primary/10 pointer-events-none absolute inset-0 rounded-4xl border-2 border-transparent transition-colors" />
+            </motion.article>
           ))}
+        </div>
+
+        {/* Bottom Trust Notation - Translated to Human Policy terms */}
+        <div className="mt-6 flex flex-col items-center justify-center gap-4 text-center">
+          <div className="bg-muted/40 border-border/60 flex flex-col items-center gap-6 rounded-2xl border px-8 py-4 sm:flex-row">
+            <div className="flex flex-col items-center sm:items-start sm:px-4">
+              <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
+                Privacy Protocol
+              </p>
+              <p className="text-foreground text-xs font-black">
+                STRATEGY_SHIELD
+              </p>
+            </div>
+            <div className="bg-border h-px w-full sm:h-6 sm:w-px" />
+            <div className="flex flex-col items-center sm:items-start sm:px-4">
+              <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
+                In-Country Hosting
+              </p>
+              <p className="text-foreground text-xs font-black">
+                SOVEREIGN_RESERVE
+              </p>
+            </div>
+            <div className="bg-border h-px w-full sm:h-6 sm:w-px" />
+            <div className="flex flex-col items-center sm:items-start sm:px-4">
+              <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
+                Field Integrity
+              </p>
+              <p className="text-foreground text-xs font-black">
+                ZERO_FRAUD_PROTOCOL
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

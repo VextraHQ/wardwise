@@ -9,14 +9,6 @@ export function PlatformPillarsSection() {
       id="platform-pillars"
       className="border-border/40 text-foreground relative overflow-hidden border-b bg-slate-50/40 py-16 sm:py-20 lg:py-24"
     >
-      {/* <div
-        className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(70,194,167,0.18),transparent_52%),radial-gradient(circle_at_88%_12%,rgba(12,39,32,0.12),transparent_58%)]"
-        aria-hidden={true}
-      />
-      <div
-        className="from-primary/0 via-primary/30 absolute inset-x-1/2 top-0 h-[120%] w-px -translate-x-1/2 bg-linear-to-b to-transparent"
-        aria-hidden={true}
-      /> */}
       <div className="relative mx-auto flex max-w-7xl flex-col gap-16 px-6">
         <div className="relative mx-auto max-w-4xl text-center">
           <motion.div
@@ -62,82 +54,120 @@ export function PlatformPillarsSection() {
           </motion.div>
         </div>
 
-        <div className="relative flex flex-col gap-6 md:flex-row md:items-stretch md:justify-between">
-          <div
-            className="from-primary/0 via-primary/30 pointer-events-none absolute top-0 left-[6%] hidden h-full w-px bg-linear-to-b to-transparent md:block"
-            aria-hidden={true}
-          />
-          <div
-            className="from-primary/0 via-primary/20 pointer-events-none absolute top-0 left-[38%] hidden h-full w-px bg-linear-to-b to-transparent lg:block"
-            aria-hidden={true}
-          />
-          <div
-            className="from-primary/0 via-primary/20 pointer-events-none absolute top-0 left-[68%] hidden h-full w-px bg-linear-to-b to-transparent xl:block"
-            aria-hidden={true}
-          />
-
-          <div className="flex flex-1 flex-col gap-6 md:gap-8">
-            {platformPillars.map((pillar, index) => (
-              <article
-                key={pillar.title}
-                className="group border-border/60 bg-card/80 hover:border-primary/50 relative flex h-full flex-col gap-4 rounded-2xl border p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:gap-5 sm:p-6 md:gap-6 md:p-8 lg:rounded-3xl lg:p-9"
-              >
-                <span
-                  className="bg-primary/20 absolute top-10 -left-10 hidden size-16 rounded-full mix-blend-screen blur-2xl md:block"
-                  aria-hidden={true}
-                />
-                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-                  <span className="border-primary/30 bg-primary/10 text-accent inline-flex w-fit items-center rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.28em] uppercase">
+        <div className="grid gap-6 md:grid-cols-3">
+          {platformPillars.map((pillar, index) => (
+            <motion.article
+              key={pillar.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="group border-border/60 bg-card hover:border-primary/50 relative flex flex-col overflow-hidden rounded-4xl border shadow-sm transition-all duration-300 hover:shadow-sm"
+            >
+              {/* Module Header Area */}
+              <div className="border-border/60 bg-muted/30 flex items-center justify-between border-b px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-primary/40 font-mono text-[10px] font-black tracking-widest uppercase">
+                    MOD_CORE_0{index + 1}
+                  </span>
+                  <div className="bg-primary/20 h-3 w-px" />
+                  <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
                     {pillar.focus}
                   </span>
-                  <div className="text-primary/80 flex items-center gap-2 text-xs font-semibold tracking-[0.26em] uppercase">
-                    Step 0{index + 1}
-                    <span
-                      className="bg-primary size-1.5 animate-pulse rounded-full"
-                      aria-hidden={true}
-                    />
+                </div>
+                <div
+                  className={`flex items-center gap-1.5 rounded-full border px-2 py-0.5 ${index === 2 ? "border-orange-500/20 bg-orange-500/10" : "border-primary/20 bg-primary/10"}`}
+                >
+                  <div
+                    className={`size-1 animate-pulse rounded-full ${index === 2 ? "bg-orange-500" : "bg-primary"}`}
+                  />
+                  <span
+                    className={`text-[8px] font-bold uppercase ${index === 2 ? "text-orange-600" : "text-primary"}`}
+                  >
+                    {index === 2 ? "Active" : "Ready"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Main Content Area */}
+              <div className="flex flex-1 flex-col p-8">
+                <div className="mb-6 flex items-start justify-between">
+                  <div className="border-primary/20 text-primary flex size-12 items-center justify-center rounded-2xl border bg-linear-to-br from-white to-slate-50 text-3xl font-black">
+                    {index + 1}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
+                      System Priority
+                    </p>
+                    <p className="text-foreground text-xs font-bold">
+                      Critical_Path
+                    </p>
                   </div>
                 </div>
 
-                <div className="space-y-2 sm:space-y-3">
-                  <h3 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl">
+                <div className="space-y-4">
+                  <h3 className="text-foreground text-2xl font-bold tracking-tight">
                     {pillar.title}
                   </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed sm:text-base">
+                  <p className="text-muted-foreground text-base leading-relaxed">
                     {pillar.description}
                   </p>
                 </div>
 
-                <div className="text-foreground/80 relative flex flex-col gap-3 rounded-xl border border-white/10 bg-white/5 p-4 text-sm backdrop-blur sm:gap-4 sm:rounded-2xl sm:p-5">
-                  <p className="text-primary/80 text-[11px] font-semibold tracking-[0.26em] uppercase">
-                    Activation signal
-                  </p>
-                  <p>{pillar.signal}</p>
-                  <div className="text-primary/70 flex flex-col gap-2 text-[11px] font-semibold tracking-[0.26em] uppercase sm:flex-row sm:items-center sm:gap-3">
-                    <span className="border-primary/30 bg-primary/10 text-primary inline-flex w-fit items-center gap-1 rounded-full border px-2 py-1 text-[10px]">
-                      {pillar.metric.label}
-                      <span className="bg-primary/90 rounded-full px-1 text-[10px] text-white">
-                        {pillar.metric.value}
-                      </span>
-                    </span>
-                    <span className="text-primary/80">
-                      {pillar.metric.context}
-                    </span>
+                {/* Activation Signal - Dashboard Detail */}
+                <div className="mt-auto space-y-6 pt-8">
+                  <div className="bg-muted/40 border-border/60 flex min-h-[140px] flex-col justify-between rounded-2xl border p-5">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-primary/70 text-[9px] font-black tracking-widest uppercase">
+                          Activation Signal
+                        </span>
+                        <div className="flex gap-1.5">
+                          {[1, 2, 3, 4].map((i) => (
+                            <div
+                              key={i}
+                              className={`h-1 w-3 rounded-full ${i <= index + 2 ? "bg-primary" : "bg-primary/10"}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-foreground text-sm leading-relaxed font-semibold">
+                        {pillar.signal}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div
-                  className="absolute inset-y-0 -right-10 hidden w-10 items-center justify-center md:flex"
-                  aria-hidden={true}
-                >
-                  <div className="from-primary/0 via-primary/40 relative h-16 w-px rounded-full bg-linear-to-b to-transparent sm:h-20 lg:h-24">
-                    <span className="bg-primary/80 absolute -top-3 left-1/2 size-2 -translate-x-1/2 rounded-full border border-white/40 shadow-lg sm:-top-4 sm:size-3" />
-                    <span className="bg-primary/40 absolute -bottom-3 left-1/2 size-2 -translate-x-1/2 rounded-full border border-white/40 sm:-bottom-4 sm:size-3" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-muted/30 border-border/40 hover:bg-muted/50 flex flex-col items-center justify-center rounded-xl border p-3 text-center transition-colors">
+                      <p className="text-muted-foreground mb-1 text-[8px] font-black tracking-[0.2em] uppercase">
+                        Efficiency
+                      </p>
+                      <p
+                        className={`text-sm font-black tracking-tight ${index === 2 ? "text-orange-500" : "text-primary"}`}
+                      >
+                        {pillar.metric.value}
+                      </p>
+                    </div>
+                    <div className="bg-muted/30 border-border/40 hover:bg-muted/50 flex flex-col items-center justify-center rounded-xl border p-3 text-center transition-colors">
+                      <p className="text-muted-foreground mb-1 text-[8px] font-black tracking-[0.2em] uppercase">
+                        Metric
+                      </p>
+                      <p className="text-foreground/80 text-[10px] font-black tracking-tight uppercase">
+                        {pillar.metric.label}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </article>
-            ))}
-          </div>
+              </div>
+
+              {/* Module Footer Area */}
+              <div className="border-border/40 bg-muted/20 flex items-center justify-center border-t py-3">
+                <span className="text-muted-foreground/40 font-mono text-[8px] font-bold tracking-widest uppercase">
+                  Integrity_Check_OK • Latency_14ms
+                </span>
+              </div>
+            </motion.article>
+          ))}
         </div>
       </div>
     </section>

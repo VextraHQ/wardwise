@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { HiArrowRight, HiDeviceMobile, HiShieldCheck } from "react-icons/hi";
-import { HiUsers, HiMapPin } from "react-icons/hi2";
-
+import { HiArrowRight } from "react-icons/hi";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 
 export function CallToActionSection() {
@@ -14,118 +13,125 @@ export function CallToActionSection() {
     isAuthenticated && session.user.role === "candidate"
       ? "/dashboard"
       : isAuthenticated && session.user.role === "admin"
-        ? "/admin"
+        ? "/canvasser"
         : "/login";
+
   const loginText =
     isAuthenticated && session.user.role === "candidate"
-      ? "Dashboard"
+      ? "Control Panel"
       : isAuthenticated && session.user.role === "admin"
-        ? "Admin Dashboard"
+        ? "Field Portal"
         : "Candidate Login";
 
   return (
-    <section className="relative overflow-hidden bg-linear-to-b from-white via-[#f8fbfa] to-white py-16 sm:py-20 lg:py-24">
-      {/* Subtle grid pattern */}
+    <section className="bg-background relative overflow-hidden py-24 lg:py-40">
+      {/* Structural Anchor Line */}
       <div
-        className="absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231D453A' fill-opacity='1'%3E%3Cpath d='M0 0h1v1H0V0zm40 40h1v1h-1v-1z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}
-        aria-hidden={true}
+        className="bg-border/40 absolute top-0 left-1/2 hidden h-full w-px -translate-x-1/2 lg:block"
+        aria-hidden="true"
       />
 
-      {/* Accent elements */}
-      <div
-        className="bg-primary absolute top-1/4 -left-20 h-64 w-64 rounded-full opacity-[0.06] blur-3xl"
-        aria-hidden={true}
-      />
-      <div
-        className="absolute -right-20 bottom-1/4 h-64 w-64 rounded-full bg-orange-500 opacity-[0.04] blur-3xl"
-        aria-hidden={true}
-      />
+      <div className="relative mx-auto max-w-6xl px-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.99 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="border-border/60 bg-background relative border px-8 py-16 sm:px-12 sm:py-24 lg:px-20"
+        >
+          {/* Corner Precision Markers */}
+          <div className="border-primary absolute -top-px -left-px size-3 border-t-2 border-l-2" />
+          <div className="border-primary absolute -top-px -right-px size-3 border-t-2 border-r-2" />
+          <div className="border-primary absolute -bottom-px -left-px size-3 border-b-2 border-l-2" />
+          <div className="border-primary absolute -right-px -bottom-px size-3 border-r-2 border-b-2" />
 
-      <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="border-border bg-card relative overflow-hidden rounded-3xl border backdrop-blur-sm">
-          <div className="px-6 py-16 sm:py-20 lg:px-8">
-            <div className="mx-auto max-w-3xl space-y-8 text-center sm:space-y-10">
-              {/* Badge */}
-              <div className="border-primary/20 bg-primary/5 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 sm:gap-2 sm:px-4 sm:py-2">
-                <div className="flex gap-1">
-                  <span className="bg-primary h-1.5 w-1.5 rounded-full" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                </div>
-                <span className="text-foreground/80 text-[10px] font-semibold tracking-wider uppercase sm:text-xs">
-                  Voters • Canvassers • Candidates
+          {/* Metadata Overlay */}
+          <div className="text-muted-foreground/30 absolute top-6 left-6 hidden rotate-90 font-mono text-[8px] font-black tracking-widest sm:block">
+            DEPLOY_READY_V2.04
+          </div>
+          <div className="text-muted-foreground/30 absolute right-6 bottom-6 hidden font-mono text-[8px] font-black tracking-widest sm:block">
+            NGA_VOTES_SYNC
+          </div>
+
+          <div className="flex flex-col items-center text-center">
+            {/* Minimalist Legend */}
+            <div className="mb-10 flex items-center gap-6">
+              <span className="text-primary font-mono text-[9px] font-black tracking-[0.4em] uppercase">
+                Phase_04
+              </span>
+              <div className="bg-border/60 h-px w-8" />
+              <span className="text-muted-foreground font-mono text-[9px] font-black tracking-[0.4em] uppercase">
+                Vict_Mapping
+              </span>
+            </div>
+
+            <div className="max-w-4xl space-y-8">
+              <h2 className="text-foreground text-4xl leading-[1.1] font-extrabold tracking-tighter sm:text-6xl lg:text-7xl">
+                Secure your path to <br />
+                <span className="text-primary font-serif font-normal italic">
+                  systematic victory.
                 </span>
-              </div>
+              </h2>
 
-              {/* Heading */}
-              <div className="space-y-4 sm:space-y-5">
-                <h2 className="text-foreground text-3xl leading-tight font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-                  Ready to activate your movement with <br />
-                  <span className="text-primary font-serif italic">
-                    ward-level accuracy?
-                  </span>
-                </h2>
-                <p className="text-muted-foreground mx-auto max-w-2xl text-base leading-relaxed font-medium sm:text-lg">
-                  WardWise helps campaigns, canvassers, and civic groups
-                  understand Nigerians at scale. Bridge the gap between field
-                  energy and strategic command with verified data.
-                </p>
-              </div>
+              <p className="text-muted-foreground mx-auto max-w-xl text-base leading-relaxed font-medium sm:text-lg">
+                Join Nigeria's most trusted digital infrastructure for
+                grassroots campaigns. Transform field-level energy into
+                high-fidelity strategic command.
+              </p>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
+              <div className="flex flex-col items-center justify-center gap-6 pt-6 sm:flex-row">
                 <Button
                   size="lg"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl px-8 text-base font-semibold transition-all duration-200 hover:shadow-lg sm:h-14"
+                  className="group bg-primary text-primary-foreground hover:bg-primary/95 relative h-14 rounded-full px-10 text-xs font-black tracking-widest uppercase transition-all"
                   asChild
                 >
-                  <Link href="/register" className="flex items-center gap-2">
-                    Register as Voter
-                    <HiArrowRight className="h-5 w-5" />
+                  <Link href="/register">
+                    Support a Candidate
+                    <HiArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="bg-card h-12 rounded-xl border-2 border-orange-500/30 px-8 text-base font-semibold text-orange-600 transition-all duration-200 hover:bg-orange-500/5 sm:h-14"
-                  asChild
-                >
-                  <Link href="/canvassers" className="flex items-center gap-2">
-                    <HiDeviceMobile className="h-4 w-4" />
-                    Canvasser Access
-                  </Link>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-border bg-card text-foreground hover:border-primary hover:bg-primary/5 h-12 rounded-xl border-2 px-8 text-base font-semibold transition-all duration-200 sm:h-14"
-                  asChild
-                >
-                  <Link href={loginHref}>{loginText}</Link>
-                </Button>
-              </div>
 
-              {/* Trust indicators */}
-              <div className="border-border/50 text-muted-foreground flex flex-wrap items-center justify-center gap-6 border-t pt-6 text-xs sm:pt-8">
-                <div className="flex items-center gap-2">
-                  <HiShieldCheck className="text-primary h-4 w-4" />
-                  <span className="font-medium">Secure & verified</span>
+                <Link
+                  href={loginHref}
+                  className="border-foreground/10 text-foreground hover:border-primary/40 hover:text-primary border-b-2 pb-1 font-mono text-[10px] font-black tracking-widest uppercase transition-all"
+                >
+                  {loginText}
+                </Link>
+              </div>
+            </div>
+
+            {/* Architectural Blueprint Footer */}
+            <div className="border-border/40 mt-20 w-full max-w-4xl border-t pt-10">
+              <div className="flex flex-col items-center justify-between gap-8 text-left sm:flex-row">
+                <div className="flex flex-col items-center sm:items-start">
+                  <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
+                    Data Sovereignty
+                  </p>
+                  <p className="text-foreground text-[10px] font-bold uppercase">
+                    De-Duplication: Active
+                  </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <HiUsers className="h-4 w-4 text-orange-600" />
-                  <span className="font-medium">Active Field Agents</span>
+                <div className="bg-border hidden h-6 w-px sm:block" />
+                <div className="flex flex-col items-center sm:items-start">
+                  <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
+                    Network status
+                  </p>
+                  <p className="text-foreground text-[10px] font-bold uppercase">
+                    Verified Wards Only
+                  </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <HiMapPin className="h-4 w-4 text-emerald-600" />
-                  <span className="font-medium">Ward-Level Insights</span>
+                <div className="bg-border hidden h-6 w-px sm:block" />
+                <div className="flex flex-col items-center sm:items-start">
+                  <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
+                    Compliance
+                  </p>
+                  <p className="text-foreground text-[10px] font-bold uppercase">
+                    Federal Hub Ready
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

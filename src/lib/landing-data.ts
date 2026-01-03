@@ -270,6 +270,28 @@ export const platformPillars = [
   },
 ];
 
+export type CoreStat = {
+  label: string;
+  value: string;
+  delta: string;
+  caption: string;
+};
+
+export const coreStats: CoreStat[] = [
+  {
+    label: "Growth Momentum",
+    value: "12,305",
+    delta: "+12%",
+    caption: "Verified Voter Profiles",
+  },
+  {
+    label: "Field Capacity",
+    value: "420",
+    delta: "+38",
+    caption: "Active Canvassers",
+  },
+];
+
 export const impactHighlights = [
   {
     title: "Built for nationwide rollout",
@@ -299,27 +321,27 @@ export const trustIndicators = [
 
 export const securityHighlights = [
   {
-    title: "Verified identities",
+    title: "Unique Voter Identity",
     description:
-      "Phone OTP verification, agent-facilitated attestations, and field-agent validation keep registrations real.",
+      "Advanced de-duplication ensures one voter, one record. Prevent over-registration and identify rigging attempts instantly.",
     icon: HiCheckCircle,
   },
   {
     title: "Secure Field Access",
     description:
-      "Canvassers use limited-access agent codes and location-locked registration to prevent fraud.",
+      "Canvassers use location-locked codes and GPS-verified registration to ensure field data is coming from the right ward.",
     icon: HiLockClosed,
   },
   {
-    title: "Role-based access",
+    title: "Role-Based Integrity",
     description:
-      "Candidates, canvassers, and analysts get tailored workspaces with auditable access trails.",
+      "Segmented access controls ensure that field agents only see what they need, while strategists hold the complete picture.",
     icon: HiShieldCheck,
   },
   {
-    title: "Data Protection",
+    title: "Privacy Sovereignty",
     description:
-      "All voter information is encrypted and stored according to strict privacy standards.",
+      "All voter information is protected by federal-grade encryption and stored in secure, auditable environments.",
     icon: HiArrowDown,
   },
 ];

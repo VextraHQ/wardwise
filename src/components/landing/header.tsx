@@ -6,12 +6,9 @@ import { Transition } from "@headlessui/react";
 import {
   HiMenu,
   HiX,
-  HiChartBar,
   HiChip,
-  HiGlobeAlt,
   HiLockClosed,
   HiMap,
-  HiViewGrid,
   HiUserGroup,
   HiChevronDown,
   HiDeviceMobile,
@@ -85,34 +82,24 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                 </span>
               </div>
             </Link>
-            <nav className="text-accent hidden items-center gap-3 text-sm font-medium lg:flex lg:gap-4">
-              {navigationLinks.map((link) => (
+            <nav className="hidden items-center gap-1 lg:flex">
+              {navigationLinks.map((link, i) => (
                 <a
                   key={link.section}
                   href={`#${link.section}`}
-                  className="group hover:text-foreground focus-visible:ring-primary relative inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  className="group relative flex flex-col items-center px-4 py-2"
                 >
-                  {link.section === "how-it-works" && (
-                    <HiViewGrid className="text-primary h-3.5 w-3.5" />
-                  )}
-                  {link.section === "features" && (
-                    <HiChip className="text-primary h-3.5 w-3.5" />
-                  )}
-                  {link.section === "platform-pillars" && (
-                    <HiGlobeAlt className="text-primary h-3.5 w-3.5" />
-                  )}
-                  {link.section === "impact" && (
-                    <HiChartBar className="text-primary h-3.5 w-3.5" />
-                  )}
-                  {link.section === "security" && (
-                    <HiLockClosed className="text-primary h-3.5 w-3.5" />
-                  )}
-                  <span>{link.label}</span>
-                  <span className="bg-primary absolute -bottom-1 left-0 h-[2px] w-0 transition-all duration-300 group-hover:w-full" />
+                  <span className="text-muted-foreground/40 group-hover:text-primary/60 font-mono text-[8px] font-black tracking-[0.3em] transition-colors">
+                    0{i + 1}
+                  </span>
+                  <span className="text-muted-foreground group-hover:text-foreground font-mono text-[10.5px] font-black tracking-widest uppercase transition-colors">
+                    {link.label}
+                  </span>
+                  <div className="bg-primary absolute -bottom-1 h-1 w-1 rounded-full opacity-0 transition-opacity group-hover:opacity-100" />
                 </a>
               ))}
             </nav>
-            <div className="hidden items-center gap-3 lg:flex">
+            <div className="hidden items-center gap-6 lg:flex">
               {status === "authenticated" && session?.user ? (
                 <Link
                   href={
@@ -122,9 +109,9 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                         ? "/admin"
                         : "/login"
                   }
-                  className="text-secondary-foreground hover:text-foreground flex items-center gap-1.5 text-sm font-semibold transition-colors duration-200"
+                  className="text-muted-foreground hover:text-foreground flex items-center gap-2 font-mono text-[10px] font-black tracking-widest uppercase transition-colors"
                 >
-                  <HiUserGroup className="h-3.5 w-3.5" />
+                  <div className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
                   {session.user.role === "candidate"
                     ? "Dashboard"
                     : session.user.role === "admin"
@@ -138,14 +125,14 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                       variant="ghost"
                       className="text-muted-foreground hover:text-foreground border-border hover:border-primary/50 hover:bg-primary/10 flex items-center gap-1.5 text-sm font-medium transition-colors"
                     >
-                      <HiUserGroup className="h-3.5 w-3.5" />
+                      <HiLockClosed className="h-3.5 w-3.5" />
                       Access Portal
                       <HiChevronDown className="h-3 w-3 opacity-60" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="bg-card border-border text-card-foreground p-1"
+                    className="border-border bg-card text-card-foreground p-1"
                   >
                     <DropdownMenuItem asChild>
                       <Link
@@ -158,19 +145,19 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                             Voter Login
                           </span>
                           <span className="text-muted-foreground text-[10px]">
-                            Access your profile
+                            Profile Verification
                           </span>
                         </div>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
-                        href="/canvassers"
+                        href="/canvasser"
                         className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors focus:bg-orange-500/10"
                       >
                         <HiDeviceMobile className="h-4 w-4 text-orange-600" />
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-foreground text-sm font-medium group-hover:text-orange-600">
+                          <span className="text-foreground text-sm font-medium">
                             Canvasser Access
                           </span>
                           <span className="text-muted-foreground text-[10px]">
@@ -184,9 +171,9 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                         href="/login"
                         className="focus:bg-primary/10 flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors"
                       >
-                        <HiUserGroup className="text-primary h-4 w-4" />
+                        <HiChip className="text-primary h-4 w-4" />
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-foreground group-hover:text-primary text-sm font-medium">
+                          <span className="text-foreground text-sm font-medium">
                             Candidate Login
                           </span>
                           <span className="text-muted-foreground text-[10px]">
@@ -200,7 +187,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
               )}
               <Button
                 size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 text-sm font-semibold transition-all duration-200"
+                className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 rounded-full px-6 text-[11px] font-black tracking-widest uppercase transition-all active:scale-95"
                 asChild
               >
                 <Link href="/register">Support a Candidate</Link>
@@ -296,7 +283,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                     Voter Login
                   </Link>
                   <Link
-                    href="/canvassers"
+                    href="/canvasser"
                     className="rounded-lg border border-orange-500/30 px-4 py-2.5 text-center text-sm font-medium text-orange-600 transition-colors duration-200 hover:bg-orange-500/5"
                     onClick={() => setIsMobileOpen(false)}
                   >

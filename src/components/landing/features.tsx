@@ -212,10 +212,13 @@ export function FeaturesSection() {
               initial={{ opacity: 0, x: -10 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="mb-6"
+              className="mb-8 flex items-center gap-2"
             >
               <span className="text-primary border-primary/30 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
                 Infrastructure
+              </span>
+              <span className="text-muted-foreground/30 font-mono text-[9px] tracking-widest uppercase">
+                SYS_ARCH
               </span>
             </motion.div>
 
