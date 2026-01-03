@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  HiMap,
-  HiUsers,
-  HiHome,
-  HiClipboardList,
-  HiMenu,
-  HiX,
-} from "react-icons/hi";
+import { HiUsers, HiHome, HiClipboardList, HiMenu } from "react-icons/hi";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -51,20 +44,17 @@ export function CanvasserHeader() {
           <div className="flex items-center gap-8">
             <Link
               href="/canvasser"
-              className="flex items-center gap-3"
+              className="group flex items-center gap-3"
               aria-label="WardWise Canvasser Home"
             >
-              <span className="relative flex size-12 items-center justify-center">
-                <span className="border-border bg-card absolute inset-0 rounded-full border" />
-                <span className="relative flex size-9 items-center justify-center rounded-full bg-linear-to-br from-amber-500 via-amber-600 to-amber-700 text-white">
-                  <HiUsers className="size-5" />
-                </span>
-              </span>
-              <div className="flex flex-col leading-none">
-                <span className="text-foreground text-base font-semibold tracking-[0.18em] uppercase">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/5 text-amber-600 transition-transform duration-300 group-hover:scale-105 sm:h-11 sm:w-11">
+                <HiUsers className="h-6 w-6" />
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="text-foreground text-lg font-black tracking-tight sm:text-xl">
                   WardWise
                 </span>
-                <span className="text-muted-foreground text-[11px] font-medium">
+                <span className="truncate text-[10px] font-medium text-amber-600/80 sm:text-[10.5px]">
                   Canvasser Portal
                 </span>
               </div>

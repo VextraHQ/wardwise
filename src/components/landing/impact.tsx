@@ -1,4 +1,7 @@
+"use client";
+
 import { impactHighlights } from "@/lib/landing-data";
+import { motion } from "motion/react";
 
 const coreStats = [
   {
@@ -19,7 +22,7 @@ export function ImpactSection() {
   return (
     <section
       id="impact"
-      className="bg-muted text-foreground relative overflow-hidden py-16 sm:py-20 lg:py-24"
+      className="bg-background text-foreground border-border/40 relative overflow-hidden border-b py-16 sm:py-20 lg:py-24"
     >
       {/* <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(70,194,167,0.2),transparent_52%),radial-gradient(circle_at_88%_22%,rgba(18,68,56,0.12),transparent_60%)]"
@@ -29,18 +32,51 @@ export function ImpactSection() {
         className="absolute inset-x-0 top-1/2 h-[120%] -translate-y-1/2 bg-linear-to-b from-[#0f2b24]/5 via-transparent to-[#46C2A7]/10"
         aria-hidden={true}
       /> */}
-      <div className="relative mx-auto flex max-w-7xl flex-col gap-14 px-6">
-        <div className="max-w-3xl space-y-5">
-          <p className="text-accent text-xs font-semibold tracking-[0.32em] uppercase">
-            Impact
-          </p>
-          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
-            WardWise connects national ambition with polling-unit reality.
-          </h2>
-          <p className="text-muted-foreground text-base leading-relaxed sm:text-lg">
-            We are building WardWise to scale across Nigeria, giving campaigns,
-            civic groups, and governments the same precise voter intelligence.
-          </p>
+      <div className="relative mx-auto flex max-w-7xl flex-col gap-10 px-6">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-end lg:gap-8">
+          <div className="lg:col-span-7">
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="mb-6"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-primary border-primary/30 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
+                  Impact
+                </span>
+                <span className="text-muted-foreground/30 font-mono text-[9px] tracking-widest uppercase">
+                  TRK_GEN_08
+                </span>
+              </div>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.15]"
+            >
+              National ambition meets <br />
+              <span className="text-primary font-serif italic">
+                polling-unit reality.
+              </span>
+            </motion.h2>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="lg:col-span-5"
+          >
+            <p className="text-muted-foreground border-border border-l pl-6 text-sm leading-relaxed font-medium sm:text-base">
+              Scaling across all 36 states, WardWise provides campaigns and
+              governments with precise, polling-unit level intelligence.
+            </p>
+          </motion.div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-end">

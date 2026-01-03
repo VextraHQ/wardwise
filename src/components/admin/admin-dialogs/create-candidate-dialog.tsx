@@ -36,6 +36,7 @@ import {
 } from "@/lib/schemas/admin-schemas";
 
 const POSITIONS: Candidate["position"][] = [
+  "President",
   "Governor",
   "Senator",
   "House of Representatives",
@@ -51,6 +52,8 @@ interface CreateCandidateDialogProps {
     party: string;
     position: Candidate["position"];
     constituency: string;
+    state?: string;
+    lga?: string;
     description: string;
   }) => void;
   isLoading?: boolean;
@@ -70,10 +73,16 @@ export function CreateCandidateDialog({
       party: "",
       position: "",
       constituency: "",
+      state: "",
+      lga: "",
       description: "",
     },
     mode: "onChange", // Validate on change for better UX
   });
+
+  // Watch position to make form dynamic
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const selectedPosition = form.watch("position");
 
   const handleSubmit = (data: CreateCandidateFormValues) => {
     onSubmit({
@@ -82,11 +91,28 @@ export function CreateCandidateDialog({
       party: data.party,
       position: data.position as Candidate["position"],
       constituency: data.constituency,
+      state: data.state || undefined,
+      lga: data.lga || undefined,
       description: data.description || "",
     });
     // Reset form on successful submission
     form.reset();
   };
+
+  // Get placeholder and help text based on position
+  const getConstituencyPlaceholder = () => {
+    if (selectedPosition === "President") return "Federal Republic of Nigeria";
+    if (selectedPosition === "Governor") return "e.g., Adamawa State";
+    if (selectedPosition === "Senator") return "e.g., Adamawa Central";
+    if (selectedPosition === "House of Representatives")
+      return "e.g., Fufore/Song Federal Constituency";
+    if (selectedPosition === "State Assembly")
+      return "e.g., Song State Constituency";
+    return "Enter constituency";
+  };
+
+  const showStateField = selectedPosition && selectedPosition !== "President";
+  const showLgaField = selectedPosition && selectedPosition !== "President";
 
   const handleOpenChange = (newOpen: boolean) => {
     onOpenChange(newOpen);
@@ -203,6 +229,54 @@ export function CreateCandidateDialog({
                 )}
               />
             </div>
+
+            {showStateField && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">
+                        State *
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., Adamawa State"
+                          disabled={isLoading}
+                          className="border-border/50"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {showLgaField && (
+                  <FormField
+                    control={form.control}
+                    name="lga"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">
+                          LGA *
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., Song"
+                            disabled={isLoading}
+                            className="border-border/50"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </div>
+            )}
+
             <FormField
               control={form.control}
               name="constituency"
@@ -213,7 +287,7 @@ export function CreateCandidateDialog({
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Song & Fufore Federal Constituency"
+                      placeholder={getConstituencyPlaceholder()}
                       disabled={isLoading}
                       className="border-border/50"
                       {...field}

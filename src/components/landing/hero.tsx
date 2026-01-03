@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { HiCheckCircle, HiArrowRight } from "react-icons/hi";
+import { HiArrowRight } from "react-icons/hi";
+import { motion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
-import { heroSupportingCopy, trustIndicators } from "@/lib/landing-data";
+import { heroSupportingCopy } from "@/lib/landing-data";
 import { HiArrowUpRight } from "react-icons/hi2";
 
 const benefitPoints = [
@@ -31,205 +32,244 @@ export function HeroSection() {
         : "Login to dashboard";
 
   return (
-    <section className="bg-background border-border relative overflow-hidden border-b py-10 sm:py-12 lg:py-16">
-      {/* Subtle background pattern */}
+    <section className="bg-background border-border relative overflow-hidden border-b py-8 sm:py-10 lg:py-12">
+      {/* Subtle blueprint grid */}
       <div
-        className="absolute inset-0 opacity-[0.02]"
+        className="absolute inset-0 opacity-[0.03]"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231f6b5e' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundImage: `linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px)`,
+          backgroundSize: "40px 40px",
         }}
         aria-hidden={true}
       />
 
-      {/* Accent shapes */}
-      {/* <div
-        className="bg-primary absolute -top-24 -right-24 h-96 w-96 rounded-full opacity-[0.08] blur-3xl"
-        aria-hidden={true}
-      />
-      <div
-        className="absolute -bottom-32 -left-32 h-80 w-80 rounded-full bg-orange-500 opacity-[0.05] blur-3xl"
-        aria-hidden={true}
-      /> */}
-
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20">
-          {/* Left column - Content */}
-          <div className="flex flex-col justify-center space-y-7 sm:space-y-8">
-            <div className="inline-flex">
-              <span className="border-primary/20 bg-primary/5 text-foreground/80 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold tracking-wider uppercase">
-                <span className="bg-primary h-1.5 w-1.5 rounded-full" />
-                Civic Insight Platform
-                <span className="text-muted-foreground/30 mx-1">•</span>
-                <span className="text-orange-600/80">Canvasser Verified</span>
-              </span>
-            </div>
+        <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-12">
+          {/* Left: Campaign Strategy */}
+          <div className="flex flex-col justify-center space-y-6">
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="inline-flex"
+            >
+              <div className="border-primary/40 flex items-center gap-3 border-l-2 pl-4">
+                <span className="text-primary text-[10px] font-black tracking-[0.4em] uppercase">
+                  Campaign Intelligence
+                </span>
+                <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
+                <span className="text-muted-foreground/50 font-mono text-[9px] font-bold tracking-widest uppercase">
+                  STAGED_SYNC_V1
+                </span>
+              </div>
+            </motion.div>
 
-            <div className="space-y-5 sm:space-y-6">
-              <h1 className="text-foreground text-4xl leading-[1.1] font-bold tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
-                From Ward
-                <br />
-                <span className="text-primary">to Victory</span>
-              </h1>
-              <p className="text-muted-foreground max-w-xl text-base leading-relaxed sm:text-lg">
+            <div className="space-y-4">
+              <motion.h1
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-foreground text-5xl leading-[1.1] font-extrabold tracking-tight sm:text-6xl lg:text-7xl"
+              >
+                From Ward <br />
+                <span className="text-primary font-serif italic">
+                  to Victory.
+                </span>
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-muted-foreground max-w-xl text-base leading-relaxed font-medium sm:text-lg"
+              >
                 {heroSupportingCopy}
-              </p>
+              </motion.p>
             </div>
 
-            <ul className="space-y-3.5 sm:space-y-4">
-              {benefitPoints.map((benefit, idx) => (
-                <li key={benefit} className="flex items-start gap-3">
-                  <div
-                    className={`${idx === 1 ? "bg-orange-500" : "bg-primary"} mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors duration-500`}
-                  >
-                    <HiCheckCircle className="text-primary-foreground h-3 w-3" />
+            {/* Campaign Proof Points */}
+            <motion.ul
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="space-y-2.5"
+            >
+              {benefitPoints.map((point, i) => (
+                <li key={i} className="flex items-center gap-3">
+                  <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-orange-500/10">
+                    <div className="size-1.5 rounded-full bg-orange-500" />
                   </div>
-                  <span className="text-foreground text-sm leading-relaxed sm:text-base">
-                    {benefit}
+                  <span className="text-foreground/80 text-sm font-bold tracking-tight">
+                    {point}
                   </span>
                 </li>
               ))}
-            </ul>
+            </motion.ul>
 
-            <div className="space-y-4">
-              {/* Primary CTA - Full width on mobile, auto on desktop */}
-              <div className="flex flex-col gap-3 sm:flex-row">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="space-y-5 pt-2"
+            >
+              <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
                 <Button
                   size="lg"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 w-full rounded-lg px-8 text-base font-semibold transition-all duration-200 hover:shadow-lg sm:w-auto"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 h-13 min-w-[200px] rounded-xl px-10 text-base font-black transition-all duration-300"
                   asChild
                 >
                   <Link
                     href="/register"
-                    className="flex items-center justify-center gap-2"
+                    className="flex items-center justify-center gap-3"
                   >
-                    Register as Voter
-                    <HiArrowRight className="h-4 w-4" />
+                    Support a Candidate
+                    <HiArrowRight className="size-5" />
                   </Link>
                 </Button>
-                <div className="group relative">
-                  <div className="absolute -inset-0.5 animate-pulse rounded-lg bg-orange-500/20 opacity-0 blur transition group-hover:opacity-100" />
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="relative h-12 w-full rounded-lg border-orange-500/30 px-8 text-base font-semibold text-orange-600 hover:bg-orange-500/5 sm:w-auto"
-                    asChild
-                  >
-                    <Link
-                      href="/canvassers"
-                      className="flex items-center justify-center gap-2"
-                    >
+
+                <Link
+                  href="/canvasser"
+                  className="group border-border bg-muted/30 hover:bg-muted/50 flex h-13 items-center justify-center gap-3 rounded-xl border px-6 transition-all duration-300"
+                >
+                  <div className="flex flex-col items-start leading-none">
+                    <span className="text-muted-foreground mb-1 text-[8px] font-black tracking-widest uppercase">
+                      Personnel Portal
+                    </span>
+                    <span className="text-foreground text-sm font-bold">
                       Canvasser Access
-                      <HiArrowUpRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
+                    </span>
+                  </div>
+                  <HiArrowUpRight className="text-muted-foreground group-hover:text-primary size-4 transition-colors" />
+                </Link>
               </div>
 
-              {/* Secondary links */}
-              <div className="flex flex-col gap-2.5 text-sm md:flex-row">
-                <div className="text-muted-foreground">
-                  Already registered?{" "}
+              {/* Secondary Access Points */}
+              <div className="flex flex-col gap-3 text-xs sm:flex-row sm:items-center">
+                <div className="bg-muted/50 border-border inline-flex items-center gap-2 rounded-lg border px-3 py-2">
+                  <span className="text-muted-foreground font-medium">
+                    Already Registered?
+                  </span>
                   <Link
                     href="/voter-login"
-                    className="text-foreground decoration-primary/30 hover:decoration-primary font-semibold underline decoration-2 underline-offset-4 transition-colors"
+                    className="text-primary hover:text-primary/80 font-bold transition-colors"
                   >
-                    Access profile
+                    Voter Login
                   </Link>
                 </div>
-                <span className="text-muted-foreground hidden sm:inline">
-                  •
-                </span>
-                <div className="text-muted-foreground">
-                  For candidates:{" "}
+                <div className="bg-muted/50 border-border inline-flex items-center gap-2 rounded-lg border px-3 py-2">
+                  <span className="text-muted-foreground font-medium">
+                    For Admin & Candidates
+                  </span>
                   <Link
                     href={loginHref}
-                    className="text-foreground decoration-primary/30 hover:decoration-primary font-semibold underline decoration-2 underline-offset-4 transition-colors"
+                    className="text-primary hover:text-primary/80 font-bold transition-colors"
                   >
                     {loginText}
                   </Link>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="border-border/50 flex flex-wrap items-center gap-4 border-t pt-6 sm:pt-8">
-              {trustIndicators.map((item) => (
-                <div
-                  key={item}
-                  className="text-muted-foreground flex items-center gap-2 text-xs font-medium"
-                >
-                  <div className="bg-primary h-1 w-1 rounded-full" />
-                  {item}
-                </div>
-              ))}
+            {/* Sub-Header Trust Indicators */}
+            <div className="border-border/60 flex flex-wrap items-center gap-8 border-t pt-8">
+              <div className="flex flex-col gap-1.5">
+                <span className="text-muted-foreground text-[10px] font-black tracking-[0.2em] uppercase">
+                  Platform Foundation
+                </span>
+                <span className="text-foreground text-xs font-bold">
+                  WardWise Strategic V1.0
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-5">
+                {["Encrypted Data", "Real-Time Sync", "Field-Optimized"].map(
+                  (item) => (
+                    <div key={item} className="flex items-center gap-2.5">
+                      <div className="size-1.5 rounded-full bg-orange-500" />
+                      <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                        {item}
+                      </span>
+                    </div>
+                  ),
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Right column - Dashboard preview */}
-          <div className="relative flex items-center justify-center lg:justify-end">
-            <div className="relative w-full max-w-lg">
-              {/* Dashboard card */}
-              <div className="border-border bg-card overflow-hidden rounded-2xl border shadow-2xl">
-                {/* Header */}
-                <div className="border-border from-muted/50 to-card flex items-center justify-between border-b bg-linear-to-br px-6 py-4">
+          {/* Right: Live Metrics Board */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="relative lg:justify-end"
+          >
+            <div className="relative mx-auto w-full max-w-md">
+              {/* Central Dashboard Card */}
+              <div className="border-border bg-card overflow-hidden rounded-4xl border shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)]">
+                {/* Board Header */}
+                <div className="border-border bg-muted/30 flex items-center justify-between border-b px-6 py-4">
                   <div>
-                    <p className="text-foreground/80 text-xs font-semibold tracking-wider uppercase">
+                    <p className="text-foreground/80 text-[10px] font-black tracking-widest uppercase">
                       Live Ward Metrics
                     </p>
-                    <p className="text-muted-foreground mt-0.5 text-[11px]">
-                      Updated across all polling units
+                    <p className="text-muted-foreground mt-0.5 text-[9px]">
+                      State-Wide Command Centre
                     </p>
                   </div>
-                  <span className="border-primary/20 bg-primary/10 text-primary rounded-full border px-3 py-1 text-xs font-medium">
-                    State Wide
-                  </span>
+                  <div className="border-primary/20 bg-primary/10 flex items-center gap-2 rounded-full border px-3 py-1">
+                    <div className="bg-primary size-1.5 animate-pulse rounded-full" />
+                    <span className="text-primary text-[9px] font-bold tracking-widest uppercase">
+                      Active Data
+                    </span>
+                  </div>
                 </div>
 
-                {/* Main content */}
-                <div className="from-accent relative bg-linear-to-br via-[#0f2b24] to-[#0b1e1a] p-6">
-                  {/* Decorative elements */}
-                  <div className="bg-primary absolute top-0 left-0 h-32 w-32 rounded-full opacity-10 blur-2xl" />
-                  <div className="absolute right-0 bottom-0 h-24 w-24 rounded-full bg-orange-500 opacity-10 blur-2xl" />
-
-                  <div className="relative space-y-4">
-                    <div className="flex items-center justify-between text-[10px] font-medium tracking-wider text-white/60 uppercase">
+                {/* Primary Stats Area */}
+                <div className="from-accent relative bg-linear-to-br via-[#0d2620] to-[#091a16] p-8">
+                  <div className="relative space-y-5">
+                    <div className="flex items-center justify-between font-mono text-[9px] font-bold tracking-[0.2em] text-white/40 uppercase">
                       <span>Adamawa Overview</span>
-                      <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1">
-                        Live Data
+                      <span className="rounded border border-white/10 bg-white/5 px-2 py-0.5 text-[8px] text-emerald-400">
+                        Sync: Jimeta • Ward 08
                       </span>
                     </div>
 
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
-                        <span className="text-sm text-white/70">
-                          Polling units mapped
-                        </span>
-                        <span className="text-xl font-bold text-white">
-                          420
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
-                        <span className="text-sm text-white/70">
-                          Supporters verified
-                        </span>
-                        <span className="text-xl font-bold text-white">
-                          10k+
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
-                        <span className="text-sm text-white/70">
-                          Active Canvassers
-                        </span>
-                        <span className="text-xl font-bold text-orange-400">
-                          128
-                        </span>
-                      </div>
+                      {[
+                        {
+                          label: "Polling Units Mapped",
+                          val: "420",
+                          highlight: false,
+                        },
+                        {
+                          label: "Supporters Verified",
+                          val: "10,244",
+                          highlight: false,
+                        },
+                        {
+                          label: "Active Canvassers",
+                          val: "128",
+                          highlight: true,
+                        },
+                      ].map((item, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 backdrop-blur-sm transition-colors hover:bg-white/10"
+                        >
+                          <span className="text-sm font-medium text-white/60">
+                            {item.label}
+                          </span>
+                          <span
+                            className={`text-xl font-black ${item.highlight ? "text-orange-400" : "text-white"}`}
+                          >
+                            {item.val}
+                          </span>
+                        </div>
+                      ))}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 pt-2">
-                      {["State", "LGA", "Ward"].map((label) => (
+                    <div className="grid grid-cols-4 gap-2 pt-1">
+                      {["State", "LGA", "Ward", "P.U"].map((label) => (
                         <div
                           key={label}
-                          className="rounded-lg border border-white/10 bg-white/5 py-2 text-center text-xs font-medium text-white/70 backdrop-blur-sm"
+                          className="rounded-lg border border-white/10 bg-white/5 py-1.5 text-center text-[9px] font-bold text-white/50 backdrop-blur-sm"
                         >
                           {label}
                         </div>
@@ -238,51 +278,48 @@ export function HeroSection() {
                   </div>
                 </div>
 
-                {/* Footer */}
-                <div className="border-border from-card to-muted/30 space-y-3 border-t bg-linear-to-br px-6 py-5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">
-                      Latest field sync
-                    </span>
-                    <span className="text-foreground font-semibold">
-                      Jimeta • Ward 08
-                    </span>
+                {/* Strategy Snapshot Footer */}
+                <div className="border-border bg-background grid grid-cols-2 divide-x border-t">
+                  <div className="space-y-1 p-5 text-center">
+                    <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
+                      Verification
+                    </p>
+                    <p className="text-foreground text-sm font-black">
+                      84% Complete
+                    </p>
                   </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">
-                      Verification throughput
-                    </span>
-                    <span className="font-semibold text-orange-600">
-                      84% verified
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">
-                      Targeted outreach
-                    </span>
-                    <span className="text-foreground font-semibold">
-                      312 scheduled
-                    </span>
+                  <div className="space-y-1 p-5 text-center">
+                    <p
+                      className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase"
+                      title="Daily Goal"
+                    >
+                      Outreach
+                    </p>
+                    <p className="text-sm font-black text-orange-400">
+                      312 Scheduled
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* Floating accent card */}
-              <div className="bg-card absolute -bottom-6 -left-6 rounded-xl border border-orange-500/20 p-4 shadow-xl">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10">
-                    <HiArrowUpRight className="h-5 w-5 text-orange-600" />
+              {/* Victory Metric Overlay */}
+              <div className="bg-card absolute -bottom-12 -left-12 rounded-2xl border border-orange-500/20 p-4 shadow-xl backdrop-blur-md">
+                <div className="flex items-center gap-4">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-orange-500/10">
+                    <HiArrowUpRight className="size-5 text-orange-400" />
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs font-medium">
+                    <p className="text-muted-foreground text-[8px] font-black tracking-widest uppercase">
                       Field Growth
                     </p>
-                    <p className="text-lg font-bold text-orange-600">+24%</p>
+                    <p className="text-lg font-black tracking-tight text-orange-400">
+                      +24%
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

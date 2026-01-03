@@ -38,6 +38,7 @@ import {
 } from "@/lib/schemas/admin-schemas";
 
 const POSITIONS: Candidate["position"][] = [
+  "President",
   "Governor",
   "Senator",
   "House of Representatives",
@@ -55,6 +56,8 @@ interface EditCandidateDialogProps {
     party: string;
     position: Candidate["position"];
     constituency: string;
+    state?: string;
+    lga?: string;
     description: string;
   }) => void;
   isLoading?: boolean;
@@ -82,9 +85,15 @@ function EditCandidateForm({
         ? candidate.position
         : "",
       constituency: candidate.constituency ?? "",
+      state: candidate.state || "",
+      lga: candidate.lga || "",
       description: candidate.description || "",
     },
   });
+
+  // Watch position to make form dynamic
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const selectedPosition = form.watch("position");
 
   // Update form when candidate changes
   useEffect(() => {
@@ -97,9 +106,24 @@ function EditCandidateForm({
         ? candidate.position
         : "",
       constituency: candidate.constituency ?? "",
+      state: candidate.state || "",
+      lga: candidate.lga || "",
       description: candidate.description || "",
     });
   }, [candidate, form]);
+
+  // Get placeholder and help text based on position
+  const getConstituencyPlaceholder = () => {
+    if (selectedPosition === "President") return "Federal Republic of Nigeria";
+    if (selectedPosition === "Governor") return "e.g., Adamawa State";
+    if (selectedPosition === "Senator") return "e.g., Adamawa Central";
+    if (selectedPosition === "House of Representatives") return "e.g., Fufore/Song Federal Constituency";
+    if (selectedPosition === "State Assembly") return "e.g., Song State Constituency";
+    return "Enter constituency";
+  };
+
+  const showStateField = selectedPosition && selectedPosition !== "President";
+  const showLgaField = selectedPosition && selectedPosition !== "President";
 
   const handleSubmit = (data: UpdateCandidateFormValues) => {
     // Ensure all required fields are provided
@@ -120,6 +144,8 @@ function EditCandidateForm({
       party: data.party,
       position: data.position as Candidate["position"],
       constituency: data.constituency,
+      state: data.state || undefined,
+      lga: data.lga || undefined,
       description: data.description || "",
     });
   };
@@ -217,6 +243,54 @@ function EditCandidateForm({
             )}
           />
         </div>
+
+        {showStateField && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="state"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">
+                    State *
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., Adamawa State"
+                      disabled={isLoading}
+                      className="border-border/50"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {showLgaField && (
+              <FormField
+                control={form.control}
+                name="lga"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      LGA *
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., Song"
+                        disabled={isLoading}
+                        className="border-border/50"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="constituency"
@@ -227,6 +301,7 @@ function EditCandidateForm({
               </FormLabel>
               <FormControl>
                 <Input
+                  placeholder={getConstituencyPlaceholder()}
                   disabled={isLoading}
                   className="border-border/50"
                   {...field}

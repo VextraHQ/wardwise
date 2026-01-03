@@ -19,20 +19,17 @@ export function VoterFooter() {
           <div className="max-w-sm space-y-3">
             <Link
               href="/"
-              className="flex items-center gap-3"
+              className="group flex items-center gap-3"
               aria-label="WardWise home"
             >
-              <span className="relative flex size-12 items-center justify-center">
-                <span className="border-border bg-card absolute inset-0 rounded-full border" />
-                <span className="from-primary relative flex size-9 items-center justify-center rounded-full bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
-                  <HiMap className="size-5" />
-                </span>
-              </span>
-              <div className="flex flex-col leading-none">
-                <span className="text-foreground text-base font-semibold tracking-[0.18em] uppercase">
+              <div className="border-primary/20 bg-primary/5 text-primary flex h-10 w-10 items-center justify-center rounded-2xl border transition-transform duration-300 group-hover:scale-105 sm:h-11 sm:w-11">
+                <HiMap className="h-6 w-6" />
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="text-foreground text-lg font-black tracking-tight sm:text-xl">
                   WardWise
                 </span>
-                <span className="text-muted-foreground text-[11px] font-medium">
+                <span className="text-muted-foreground truncate text-[10px] font-medium sm:text-[10.5px]">
                   Civic Intelligence Platform
                 </span>
               </div>

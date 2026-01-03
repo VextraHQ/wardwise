@@ -3,6 +3,7 @@ import { emailSchema, phoneSchema } from "@/lib/schemas/common-schemas";
 
 // Candidate position enum
 export const candidatePositionSchema = z.enum([
+  "President",
   "Governor",
   "Senator",
   "House of Representatives",
@@ -10,58 +11,20 @@ export const candidatePositionSchema = z.enum([
 ]);
 
 // Create Candidate Schema
-export const createCandidateSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Candidate name must be at least 2 characters")
-    .max(100, "Candidate name must not exceed 100 characters")
-    .trim(),
-  email: emailSchema,
-  party: z
-    .string()
-    .min(2, "Political party must be at least 2 characters")
-    .max(50, "Political party must not exceed 50 characters")
-    .trim(),
-  position: z.string().refine(
-    (val) => {
-      if (!val || val === "") return false;
-      return candidatePositionSchema.safeParse(val).success;
-    },
-    {
-      message: "Please select a position",
-    },
-  ),
-  constituency: z
-    .string()
-    .min(2, "Constituency must be at least 2 characters")
-    .max(200, "Constituency must not exceed 200 characters")
-    .trim(),
-  description: z
-    .string()
-    .max(1000, "Description must not exceed 1000 characters")
-    .optional()
-    .or(z.literal("")),
-});
-
-// Update Candidate Schema (all fields optional except id)
-export const updateCandidateSchema = z.object({
-  id: z.string().min(1, "Candidate ID is required"),
-  name: z
-    .string()
-    .min(2, "Candidate name must be at least 2 characters")
-    .max(100, "Candidate name must not exceed 100 characters")
-    .trim()
-    .optional(),
-  email: emailSchema.optional(),
-  party: z
-    .string()
-    .min(2, "Political party must be at least 2 characters")
-    .max(50, "Political party must not exceed 50 characters")
-    .trim()
-    .optional(),
-  position: z
-    .string()
-    .refine(
+export const createCandidateSchema = z
+  .object({
+    name: z
+      .string()
+      .min(2, "Candidate name must be at least 2 characters")
+      .max(100, "Candidate name must not exceed 100 characters")
+      .trim(),
+    email: emailSchema,
+    party: z
+      .string()
+      .min(2, "Political party must be at least 2 characters")
+      .max(50, "Political party must not exceed 50 characters")
+      .trim(),
+    position: z.string().refine(
       (val) => {
         if (!val || val === "") return false;
         return candidatePositionSchema.safeParse(val).success;
@@ -69,20 +32,132 @@ export const updateCandidateSchema = z.object({
       {
         message: "Please select a position",
       },
-    )
-    .optional(),
-  constituency: z
-    .string()
-    .min(2, "Constituency must be at least 2 characters")
-    .max(200, "Constituency must not exceed 200 characters")
-    .trim()
-    .optional(),
-  description: z
-    .string()
-    .max(1000, "Description must not exceed 1000 characters")
-    .optional()
-    .or(z.literal("")),
-});
+    ),
+    constituency: z
+      .string()
+      .min(2, "Constituency must be at least 2 characters")
+      .max(200, "Constituency must not exceed 200 characters")
+      .trim(),
+    state: z
+      .string()
+      .max(100, "State must not exceed 100 characters")
+      .optional()
+      .or(z.literal("")),
+    lga: z
+      .string()
+      .max(100, "LGA must not exceed 100 characters")
+      .optional()
+      .or(z.literal("")),
+    description: z
+      .string()
+      .max(1000, "Description must not exceed 1000 characters")
+      .optional()
+      .or(z.literal("")),
+  })
+  .refine(
+    (data) => {
+      // State is required for all positions except President
+      if (data.position && data.position !== "President") {
+        return data.state && data.state.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: "State is required for this position",
+      path: ["state"],
+    },
+  )
+  .refine(
+    (data) => {
+      // LGA is required for all positions except President
+      if (data.position && data.position !== "President") {
+        return data.lga && data.lga.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: "LGA is required for this position",
+      path: ["lga"],
+    },
+  );
+
+// Update Candidate Schema (all fields optional except id)
+export const updateCandidateSchema = z
+  .object({
+    id: z.string().min(1, "Candidate ID is required"),
+    name: z
+      .string()
+      .min(2, "Candidate name must be at least 2 characters")
+      .max(100, "Candidate name must not exceed 100 characters")
+      .trim()
+      .optional(),
+    email: emailSchema.optional(),
+    party: z
+      .string()
+      .min(2, "Political party must be at least 2 characters")
+      .max(50, "Political party must not exceed 50 characters")
+      .trim()
+      .optional(),
+    position: z
+      .string()
+      .refine(
+        (val) => {
+          if (!val || val === "") return false;
+          return candidatePositionSchema.safeParse(val).success;
+        },
+        {
+          message: "Please select a position",
+        },
+      )
+      .optional(),
+    constituency: z
+      .string()
+      .min(2, "Constituency must be at least 2 characters")
+      .max(200, "Constituency must not exceed 200 characters")
+      .trim()
+      .optional(),
+    state: z
+      .string()
+      .max(100, "State must not exceed 100 characters")
+      .optional()
+      .or(z.literal("")),
+    lga: z
+      .string()
+      .max(100, "LGA must not exceed 100 characters")
+      .optional()
+      .or(z.literal("")),
+    description: z
+      .string()
+      .max(1000, "Description must not exceed 1000 characters")
+      .optional()
+      .or(z.literal("")),
+  })
+  .refine(
+    (data) => {
+      // State is required for all positions except President
+      if (data.position && data.position !== "President") {
+        return data.state && data.state.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: "State is required for this position",
+      path: ["state"],
+    },
+  )
+  .refine(
+    (data) => {
+      // LGA is required for all positions except President
+      if (data.position && data.position !== "President") {
+        return data.lga && data.lga.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: "LGA is required for this position",
+      path: ["lga"],
+    },
+  );
 
 // Create Canvasser Schema
 export const createCanvasserSchema = z.object({

@@ -877,6 +877,8 @@ export function AdminDashboard() {
     party: string;
     position: Candidate["position"];
     constituency: string;
+    state?: string;
+    lga?: string;
     description: string;
   }) => {
     createCandidateMutation.mutate(data);
@@ -889,6 +891,8 @@ export function AdminDashboard() {
     party: string;
     position: Candidate["position"];
     constituency: string;
+    state?: string;
+    lga?: string;
     description: string;
   }) => {
     updateCandidateMutation.mutate(data);

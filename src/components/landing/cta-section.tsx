@@ -62,20 +62,16 @@ export function CallToActionSection() {
 
               {/* Heading */}
               <div className="space-y-4 sm:space-y-5">
-                <h2 className="text-foreground text-3xl leading-tight font-bold tracking-tight sm:text-4xl lg:text-5xl">
-                  Ready to activate your movement with{" "}
-                  <span className="relative inline-block">
-                    <span className="text-primary relative z-10">
-                      ward-level accuracy
-                    </span>
-                    <span className="bg-primary/20 absolute bottom-1 left-0 h-3 w-full" />
+                <h2 className="text-foreground text-3xl leading-tight font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+                  Ready to activate your movement with <br />
+                  <span className="text-primary font-serif italic">
+                    ward-level accuracy?
                   </span>
-                  ?
                 </h2>
-                <p className="text-muted-foreground mx-auto max-w-2xl text-base leading-relaxed sm:text-lg">
+                <p className="text-muted-foreground mx-auto max-w-2xl text-base leading-relaxed font-medium sm:text-lg">
                   WardWise helps campaigns, canvassers, and civic groups
                   understand Nigerians at scale. Bridge the gap between field
-                  energy and strategic command with verfied data.
+                  energy and strategic command with verified data.
                 </p>
               </div>
 

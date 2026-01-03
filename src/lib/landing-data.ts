@@ -75,24 +75,24 @@ export type ProcessStep = {
 
 export const processSteps: ProcessStep[] = [
   {
-    name: "Citizens Share Their Voice",
+    name: "Citizen Engagement",
     number: "01",
     description:
-      "Voters complete a guided survey about their priorities, concerns, and candidate support from any device.",
+      "Voters register and share their priorities through guided surveys, creating a direct line to leadership.",
     icon: HiViewGrid,
   },
   {
-    name: "Geographic Precision",
+    name: "Field Verification",
     number: "02",
     description:
-      "Responses organize automatically by State → LGA → Ward → Polling Unit for unrivaled accuracy.",
+      "Canvassers deploy with ward-level precision to verify voters and synchronize real-time ground data.",
     icon: HiLocationMarker,
   },
   {
-    name: "Actionable Insights",
+    name: "Strategic Command",
     number: "03",
     description:
-      "Candidates view real-time dashboards surfacing support strength, sentiment, and policy priorities.",
+      "Candidates harness deep ward-level insights to optimize resources and drive an informed path to victory.",
     icon: HiChartBar,
   },
 ];

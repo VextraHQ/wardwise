@@ -70,17 +70,14 @@ export function SiteHeader({ className }: SiteHeaderProps) {
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
             <Link
               href="/"
-              className="flex items-center gap-2 sm:gap-2.5"
+              className="group flex items-center gap-3"
               aria-label="WardWise home"
             >
-              <span className="relative flex size-9 items-center justify-center sm:size-10">
-                <span className="border-border bg-card absolute inset-0 rounded-full border" />
-                <span className="from-primary relative flex size-6 items-center justify-center rounded-full bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white sm:size-7">
-                  <HiMap className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                </span>
-              </span>
-              <div className="flex min-w-0 flex-col leading-tight">
-                <span className="text-foreground truncate text-sm font-semibold tracking-[0.18em] uppercase sm:text-[15px]">
+              <div className="border-primary/20 bg-primary/5 text-primary flex h-10 w-10 items-center justify-center rounded-2xl border transition-transform duration-300 group-hover:scale-105 sm:h-11 sm:w-11">
+                <HiMap className="h-6 w-6" />
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="text-foreground text-lg font-black tracking-tight sm:text-xl">
                   WardWise
                 </span>
                 <span className="text-muted-foreground truncate text-[10px] font-medium sm:text-[10.5px]">

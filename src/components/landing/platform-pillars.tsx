@@ -1,10 +1,13 @@
+"use client";
+
 import { platformPillars } from "@/lib/landing-data";
+import { motion } from "motion/react";
 
 export function PlatformPillarsSection() {
   return (
     <section
       id="platform-pillars"
-      className="bg-background text-foreground relative overflow-hidden py-16 sm:py-20 lg:py-24"
+      className="border-border/40 text-foreground relative overflow-hidden border-b bg-slate-50/40 py-16 sm:py-20 lg:py-24"
     >
       {/* <div
         className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(70,194,167,0.18),transparent_52%),radial-gradient(circle_at_88%_12%,rgba(12,39,32,0.12),transparent_58%)]"
@@ -15,18 +18,48 @@ export function PlatformPillarsSection() {
         aria-hidden={true}
       /> */}
       <div className="relative mx-auto flex max-w-7xl flex-col gap-16 px-6">
-        <div className="max-w-3xl space-y-5">
-          <p className="text-accent text-xs font-semibold tracking-[0.32em] uppercase">
-            Platform pillars
-          </p>
-          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
-            An end-to-end civic intelligence engine for modern campaigns.
-          </h2>
-          <p className="text-muted-foreground text-base leading-relaxed sm:text-lg">
-            WardWise unifies field registration, data validation, analytics, and
-            campaign activation so candidates, governments, and civic leaders
-            can move in sync.
-          </p>
+        <div className="relative mx-auto max-w-4xl text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-8 flex flex-col items-center"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-primary border-primary/30 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
+                Ecosystem
+              </span>
+              <span className="text-muted-foreground/30 font-mono text-[9px] tracking-widest uppercase">
+                MOD_CORE
+              </span>
+            </div>
+            <div className="bg-primary/20 mt-4 h-px w-12" />
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.15]"
+          >
+            An end-to-end <br />
+            <span className="text-primary font-serif italic">
+              civic intelligence engine.
+            </span>
+          </motion.h2>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+          >
+            <p className="text-muted-foreground mx-auto mt-8 max-w-2xl text-base leading-relaxed font-medium sm:text-lg">
+              WardWise unifies field registration, data validation, and campaign
+              activation so candidates and civic leaders can move in sync.
+            </p>
+          </motion.div>
         </div>
 
         <div className="relative flex flex-col gap-6 md:flex-row md:items-stretch md:justify-between">
