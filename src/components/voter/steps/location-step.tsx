@@ -12,12 +12,9 @@ import {
   HiArrowLeft,
   HiCheck,
   HiInformationCircle,
-  HiExclamationCircle,
 } from "react-icons/hi";
 import { MapPin, AlertCircle } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Popover,
   PopoverContent,
@@ -41,10 +38,7 @@ import { useRegistrationStore } from "@/stores/registration-store";
 import { useLocationData } from "@/hooks/use-location-data";
 import { useQueryClient } from "@tanstack/react-query";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
-import {
-  ComboboxSelect,
-  type ComboboxSelectOption,
-} from "@/components/ui/combobox-select";
+import { ComboboxSelect } from "@/components/ui/combobox-select";
 
 const locationSchema = z.object({
   state: z.string().min(1, "Please select your state"),
@@ -191,6 +185,8 @@ export function LocationStep() {
   const wardsError = wardsQuery.isError;
   const puError = pollingUnitsQuery.isError;
 
+  // Get human-readable names for selected locations
+  // These are used in status badges to provide context-aware messaging
   const selectedStateName =
     states.find((state) => state.code === selectedState)?.name || "";
   const selectedLgaName =
@@ -198,10 +194,14 @@ export function LocationStep() {
   const selectedWardName =
     wards.find((ward) => ward.code === selectedWard)?.name || "";
 
+  // Fallback labels for when names aren't available yet
+  // Provides better UX than showing empty strings in error messages
   const selectedStateLabel = selectedStateName || "this state";
   const selectedLgaLabel = selectedLgaName || "this LGA";
   const selectedWardLabel = selectedWardName || "this ward";
 
+  // Check if selected locations are within pilot coverage areas
+  // This determines whether to show full data or limited availability warnings
   const pilotState = pilotCoverage.find(
     (state) => state.code === selectedState,
   );
@@ -398,6 +398,7 @@ export function LocationStep() {
                                 <HiCheck className="text-primary h-3.5 w-3.5" />
                               )}
                             </span>
+                            {/* Show warning badge when state is selected but not in pilot coverage */}
                             {selectedState &&
                               !isStateCovered &&
                               !locationData.statesLoading && (
@@ -487,16 +488,18 @@ export function LocationStep() {
                                 <HiCheck className="text-primary h-3.5 w-3.5" />
                               )}
                             </span>
+                            {/* Show warning when LGA is selected in a pilot state but the specific LGA isn't covered
+                                Uses selectedLgaLabel to show the actual LGA name in the message */}
                             {selectedLga &&
                               selectedState &&
                               isStateCovered &&
                               !isLgaCovered &&
-                              !isLoading("wards") && (
+                              !isLoading("lgas") && (
                                 <PilotStatusBadge
                                   title="Limited Demo"
                                   description={
                                     <>
-                                      Selected area is outside active
+                                      {selectedLgaLabel} is outside active
                                       digitization. Try{" "}
                                       <span className="text-foreground font-bold">
                                         {pilotState?.lgAs
@@ -565,12 +568,26 @@ export function LocationStep() {
                                 <HiCheck className="text-primary h-3.5 w-3.5" />
                               )}
                             </span>
+                            {/* Ward-level status badge - shows when ward data is unavailable
+                                Could be extended to show coverage status similar to LGA if needed
+                                Currently only shows when no wards are available in a covered LGA */}
+                            {selectedLga &&
+                              isLgaCovered &&
+                              !isLoading("wards") &&
+                              wards.length === 0 && (
+                                <PilotStatusBadge
+                                  title="Rollout Update"
+                                  variant="info"
+                                  description={`Wards for ${selectedLgaLabel} are coming soon. Please try another LGA in this state.`}
+                                />
+                              )}
                           </FormLabel>
                           <FormControl>
                             <ComboboxSelect
                               options={wards.map((ward) => ({
                                 value: ward.code,
                                 label: ward.name,
+                                // Show indicator dot for wards in covered LGAs
                                 indicator: isLgaCovered ? (
                                   <div className="bg-primary group-hover:bg-secondary group-data-[selected=true]:bg-secondary h-1.5 w-1.5 rounded-full transition-colors" />
                                 ) : undefined,
@@ -619,6 +636,8 @@ export function LocationStep() {
                                 <HiCheck className="text-primary h-3.5 w-3.5" />
                               )}
                             </span>
+                            {/* Show info badge when ward is selected but no polling units available
+                                Uses selectedWardLabel to provide specific ward name in the message */}
                             {selectedWard &&
                               isLgaCovered &&
                               !isLoading("pollingUnits") &&

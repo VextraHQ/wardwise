@@ -4,16 +4,11 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  HiUsers,
-  HiArrowRight,
-  HiArrowLeft,
-  HiInformationCircle,
-} from "react-icons/hi";
+import { HiArrowRight, HiArrowLeft, HiInformationCircle } from "react-icons/hi";
 import { Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { StepProgress } from "@/components/ui/step-progress";
 import { RegistrationStepHeader } from "../registration-step-header";
 import {

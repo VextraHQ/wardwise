@@ -33,7 +33,7 @@ export function HeroSection() {
         : "Login to dashboard";
 
   return (
-    <section className="bg-background border-border relative overflow-hidden border-b py-8 sm:py-10 lg:py-12">
+    <section className="bg-background border-border/40 relative overflow-hidden border-b py-8 sm:py-10 lg:py-16">
       {/* Subtle blueprint grid */}
       <div
         className="absolute inset-0 opacity-[0.03]"
