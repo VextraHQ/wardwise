@@ -7,7 +7,7 @@ export function SecuritySection() {
   return (
     <section
       id="security"
-      className="border-border/40 text-foreground relative overflow-hidden border-b bg-slate-50/40 py-16 sm:py-20 lg:py-24"
+      className="border-border/40 text-foreground bg-muted relative overflow-hidden border-b py-16 sm:py-20 lg:py-24"
     >
       <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-6">
         {/* Centered Header (Restoring Section Rhythm: Centered/Split Alternation) */}
@@ -112,7 +112,7 @@ export function SecuritySection() {
 
         {/* Bottom Trust Notation - Translated to Human Policy terms */}
         <div className="mt-6 flex flex-col items-center justify-center gap-4 text-center">
-          <div className="bg-muted/40 border-border/60 flex flex-col items-center gap-6 rounded-2xl border px-8 py-4 sm:flex-row">
+          <div className="border-border/60 flex flex-col items-center gap-6 rounded-2xl border bg-slate-50/40 px-8 py-4 sm:flex-row">
             <div className="flex flex-col items-center sm:items-start sm:px-4">
               <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
                 Privacy Protocol

@@ -48,7 +48,7 @@ export function SiteFooter() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-muted/30 border-border/40 relative overflow-hidden border-t py-16">
+    <footer className="bg-muted border-border/40 relative overflow-hidden border-t py-16">
       <div className="relative mx-auto max-w-7xl px-6 sm:px-8">
         {/* Main footer content */}
         <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
@@ -118,15 +118,15 @@ export function SiteFooter() {
 
         {/* Bottom bar */}
         <div className="border-border/40 mt-8 flex flex-col items-center justify-between gap-6 border-t pt-10 sm:flex-row">
-          <p className="text-muted-foreground text-[11px] font-bold tracking-widest uppercase">
-            © {currentYear} WardWise. Built for Nigeria.
+          <p className="text-muted-foreground text-[11px] font-semibold tracking-widest">
+            © {currentYear} WardWise. All rights reserved.
           </p>
           <Link
             href="mailto:info@wardwise.ng"
             className="group border-border bg-background/50 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary flex items-center gap-2 rounded-full border px-4 py-2 transition-all"
           >
             <HiMail className="h-4 w-4" />
-            <span className="text-xs font-semibold">Get in Touch</span>
+            <span className="text-xs font-medium">Get in Touch</span>
             <HiArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         </div>

@@ -7,7 +7,7 @@ export function PlatformPillarsSection() {
   return (
     <section
       id="platform-pillars"
-      className="border-border/40 text-foreground relative overflow-hidden border-b bg-slate-50/40 py-16 sm:py-20 lg:py-24"
+      className="border-border/40 text-foreground bg-muted relative overflow-hidden border-b py-16 sm:py-20 lg:py-24"
     >
       <div className="relative mx-auto flex max-w-7xl flex-col gap-16 px-6">
         <div className="relative mx-auto max-w-4xl text-center">

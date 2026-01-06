@@ -29,7 +29,7 @@ export function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="border-border/40 relative border-y bg-slate-50/40 py-20 lg:py-28"
+      className="border-border/40 bg-muted relative border-y py-20 lg:py-28"
     >
       <div className="relative mx-auto max-w-7xl px-6">
         <div className="relative mx-auto mb-16 max-w-4xl text-center">
