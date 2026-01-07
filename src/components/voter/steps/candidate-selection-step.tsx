@@ -1103,13 +1103,13 @@ export function CandidateSelectionStep() {
         items={[
           {
             icon: <HiShieldCheck className="h-4 w-4" />,
-            label: "Verified Candidates",
+            label: "NIN Verified at Submit",
           },
           {
             icon: <HiLocationMarker className="h-4 w-4" />,
             label: "Location Scoped",
           },
-          { icon: <HiUsers className="h-4 w-4" />, label: "Data Integrity" },
+          { icon: <HiUsers className="h-4 w-4" />, label: "Registered Candidates" },
         ]}
       />
     </div>

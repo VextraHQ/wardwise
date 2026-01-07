@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { StepProgress } from "@/components/ui/step-progress";
-import { RegistrationStepHeader } from "../registration-step-header";
+import { RegistrationStepHeader } from "@/components/voter/registration-step-header";
 import {
   Form,
   FormControl,

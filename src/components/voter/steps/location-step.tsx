@@ -700,7 +700,7 @@ export function LocationStep() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => router.push("/register/profile")}
+                    onClick={() => router.push("/register/role")}
                     className="h-10 flex-1"
                   >
                     <HiArrowLeft className="mr-2 h-4 w-4" />

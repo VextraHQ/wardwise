@@ -17,14 +17,12 @@ import type { RegistrationStep } from "@/types/voter";
  */
 export const orderedSteps: RegistrationStep[] = [
   "nin",
-  "role",
   "profile",
+  "role",
   "location",
   "candidate",
   "confirm",
-];
-
-/**
+];/**
  * Compute registration status from lastCompletedStep
  * Single source of truth - no redundancy
  *

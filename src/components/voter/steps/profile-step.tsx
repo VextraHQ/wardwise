@@ -21,10 +21,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Badge } from "@/components/ui/badge";
 import { StepProgress } from "@/components/ui/step-progress";
 import { Separator } from "@/components/ui/separator";
-import { RegistrationStepHeader } from "../registration-step-header";
+import { RegistrationStepHeader } from "@/components/voter/registration-step-header";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -41,9 +40,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
 import { useRegistrationStore } from "@/stores/registration-store";
 import { normalizeNigerianPhoneInput } from "@/lib/schemas/common-schemas";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import {
   ComboboxSelect,
@@ -58,6 +64,7 @@ import {
 export function ProfileStep() {
   const router = useRouter();
   const { update, payload, hasHydrated } = useRegistrationStore();
+  const [isDobOpen, setIsDobOpen] = useState(false);
 
   // Get role from store payload (set in previous step)
   const userRole = payload.basic?.role || "voter";
@@ -118,14 +125,15 @@ export function ProfileStep() {
       phone: normalizeNigerianPhoneInput(data.phoneNumber),
     });
     toast.success("Profile information saved!");
-    router.push("/register/location");
+    router.push("/register/role");
   };
 
   // Calculate Age from Date of Birth
   const calculateAge = (dateOfBirth: string) => {
     if (!dateOfBirth) return undefined;
     const today = new Date();
-    const birthDate = new Date(dateOfBirth);
+    const birthDate = getDateFromString(dateOfBirth);
+    if (!birthDate) return undefined;
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
     if (
@@ -144,7 +152,7 @@ export function ProfileStep() {
     // Remove restriction since age validation is handled in previous step
     // But keep a reasonable upper bound if needed, or just let it be
     maxDate.setFullYear(today.getFullYear() - 10); // Example: min age 10 for supporters
-    return maxDate.toISOString().split("T")[0];
+    return format(maxDate, "yyyy-MM-dd");
   };
 
   // Get min date (120 years ago from today)
@@ -152,20 +160,56 @@ export function ProfileStep() {
     const today = new Date();
     const minDate = new Date(today);
     minDate.setFullYear(today.getFullYear() - 120);
-    return minDate.toISOString().split("T")[0];
+    return format(minDate, "yyyy-MM-dd");
   };
 
   // Handle Date of Birth Change
-  const handleDateChange = (date: string) => {
-    form.setValue("dateOfBirth", date);
-    const age = calculateAge(date);
+  const handleDateChange = (date: Date | undefined) => {
+    if (!date) return;
+    const dateString = format(date, "yyyy-MM-dd");
+    const age = calculateAge(dateString);
     if (age !== undefined) {
       form.setValue("age", age);
     }
   };
 
-  // Autofilled Information
-  const isAutoFilled = payload.basic?.firstName && payload.basic?.lastName;
+  // Function to parse YYYY-MM-DD date string to Date object
+  const parseYmdToLocalDate = (dateString: string | undefined) => {
+    if (!dateString) return undefined;
+    const parts = dateString.split("-");
+    if (parts.length !== 3) return undefined;
+    const [y, m, d] = parts.map((v) => Number(v));
+    if (!y || !m || !d) return undefined;
+    const date = new Date(y, m - 1, d);
+    return isNaN(date.getTime()) ? undefined : date;
+  };
+
+  // Format date for display
+  const formatDateForDisplay = (dateString: string | undefined) => {
+    if (!dateString) return "";
+    try {
+      const date = parseYmdToLocalDate(dateString);
+      if (!date) return "";
+      if (isNaN(date.getTime())) return "";
+      return format(date, "PPP"); // e.g., "January 1, 2000"
+    } catch {
+      return "";
+    }
+  };
+
+  // Convert date string to Date object
+  const getDateFromString = (
+    dateString: string | undefined,
+  ): Date | undefined => {
+    if (!dateString) return undefined;
+    try {
+      const date = parseYmdToLocalDate(dateString);
+      if (!date) return undefined;
+      return date;
+    } catch {
+      return undefined;
+    }
+  };
 
   const occupationOptions: ComboboxSelectOption[] = [
     { value: "civil-servant", label: "Civil Servant" },
@@ -214,7 +258,7 @@ export function ProfileStep() {
     return (
       <div className="space-y-6">
         <StepProgress
-          currentStep={3}
+          currentStep={2}
           totalSteps={6}
           stepTitle="Personal Information"
         />
@@ -238,7 +282,7 @@ export function ProfileStep() {
     <div className="space-y-6">
       {/* Reusable Progress Component */}
       <StepProgress
-        currentStep={3}
+        currentStep={2}
         totalSteps={6}
         stepTitle="Personal Information"
       />
@@ -250,12 +294,22 @@ export function ProfileStep() {
         title="Tell Us About Yourself"
         description="We need some basic information to complete your registration"
       />
-      {isAutoFilled && (
-        <Badge variant="secondary" className="mx-auto -mt-4 mb-6 flex w-fit">
-          <HiInformationCircle className="mr-1 h-3 w-3" />
-          Some information was auto-filled from NIN verification
-        </Badge>
-      )}
+
+      {/* Verification Info Banner */}
+      <div className="mx-auto w-full max-w-2xl">
+        <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/30 dark:bg-blue-950/20">
+          <HiInformationCircle className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+              Your information will be verified at the final step
+            </p>
+            <p className="text-xs text-blue-700 dark:text-blue-300">
+              Please enter accurate details. We'll verify your NIN matches this
+              information when you complete registration.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Main Card */}
       <div className="mx-auto w-full max-w-2xl">
@@ -293,85 +347,43 @@ export function ProfileStep() {
                     <FormField
                       control={form.control}
                       name="firstName"
-                      render={({ field }) => {
-                        const isDisabled = Boolean(
-                          isAutoFilled && field.value && field.value !== "",
-                        );
-                        return (
-                          <FormItem>
-                            <FormLabel className="flex items-center gap-2">
-                              First Name
-                              {isAutoFilled && field.value && (
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-primary/10 text-primary border-primary/20 text-xs"
-                                >
-                                  <HiCheckCircle className="mr-1 h-3 w-3" />
-                                  Auto-filled
-                                </Badge>
-                              )}
-                            </FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <HiUser className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
-                                <Input
-                                  {...field}
-                                  placeholder="Enter your first name"
-                                  className={cn(
-                                    "border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background h-12 pl-11 transition-all",
-                                    isDisabled &&
-                                      "cursor-not-allowed opacity-60",
-                                  )}
-                                  disabled={isDisabled}
-                                />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        );
-                      }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <HiUser className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+                              <Input
+                                {...field}
+                                placeholder="Enter your first name"
+                                className="border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background h-12 pl-11 transition-all"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
 
                     <FormField
                       control={form.control}
                       name="lastName"
-                      render={({ field }) => {
-                        const isDisabled = Boolean(
-                          isAutoFilled && field.value && field.value !== "",
-                        );
-                        return (
-                          <FormItem>
-                            <FormLabel className="flex items-center gap-2">
-                              Last Name
-                              {isAutoFilled && field.value && (
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-primary/10 text-primary border-primary/20 text-xs"
-                                >
-                                  <HiCheckCircle className="mr-1 h-3 w-3" />
-                                  Auto-filled
-                                </Badge>
-                              )}
-                            </FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <HiUser className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
-                                <Input
-                                  {...field}
-                                  placeholder="Enter your last name"
-                                  className={cn(
-                                    "border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background h-12 pl-11 transition-all",
-                                    isDisabled &&
-                                      "cursor-not-allowed opacity-60",
-                                  )}
-                                  disabled={isDisabled}
-                                />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        );
-                      }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <HiUser className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+                              <Input
+                                {...field}
+                                placeholder="Enter your last name"
+                                className="border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background h-12 pl-11 transition-all"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
 
@@ -446,42 +458,71 @@ export function ProfileStep() {
                       control={form.control}
                       name="dateOfBirth"
                       render={({ field }) => {
-                        const isDisabled = Boolean(
-                          isAutoFilled && field.value && field.value !== "",
-                        );
+                        const selectedDate = getDateFromString(field.value);
+                        const maxDate = getDateFromString(getMaxDate())!;
+                        const minDate = getDateFromString(getMinDate())!;
+
                         return (
                           <FormItem>
-                            <FormLabel className="flex items-center gap-2">
-                              Date of Birth
-                              {isAutoFilled && field.value && (
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-primary/10 text-primary border-primary/20 text-xs"
-                                >
-                                  <HiCheckCircle className="mr-1 h-3 w-3" />
-                                  Auto-filled
-                                </Badge>
-                              )}
-                            </FormLabel>
+                            <FormLabel>Date of Birth</FormLabel>
                             <FormControl>
-                              <div className="relative">
-                                <HiCalendar className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
-                                <Input
-                                  {...field}
-                                  type="date"
-                                  placeholder="Select your date of birth"
-                                  max={getMaxDate()}
-                                  min={getMinDate()}
-                                  className={cn(
-                                    "border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background h-12 pl-11 transition-all",
-                                    isDisabled &&
-                                      "cursor-not-allowed opacity-60",
-                                  )}
-                                  onChange={(e) =>
-                                    handleDateChange(e.target.value)
-                                  }
-                                  disabled={isDisabled}
-                                />
+                              <div className="relative w-full">
+                                <HiCalendar className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 z-10 h-5 w-5 -translate-y-1/2" />
+                                <Popover
+                                  open={isDobOpen}
+                                  onOpenChange={setIsDobOpen}
+                                >
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      className={cn(
+                                        "border-border/60 bg-background/50 focus:border-primary/60 focus:bg-background h-12 w-full justify-start pl-11 text-left font-normal transition-all",
+                                        !field.value && "text-muted-foreground",
+                                      )}
+                                    >
+                                      {field.value
+                                        ? formatDateForDisplay(field.value)
+                                        : "Select your date of birth"}
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent
+                                    className="w-auto p-0"
+                                    align="start"
+                                  >
+                                    <Calendar
+                                      mode="single"
+                                      selected={selectedDate}
+                                      onSelect={(date) => {
+                                        const nextValue = date
+                                          ? format(date, "yyyy-MM-dd")
+                                          : "";
+                                        field.onChange(nextValue);
+                                        handleDateChange(date);
+                                        setIsDobOpen(false);
+                                      }}
+                                      captionLayout="dropdown" // Essential for DOB to allow year selection
+                                      startMonth={
+                                        new Date(
+                                          minDate.getFullYear(),
+                                          minDate.getMonth(),
+                                          1,
+                                        )
+                                      }
+                                      endMonth={
+                                        new Date(
+                                          maxDate.getFullYear(),
+                                          maxDate.getMonth(),
+                                          1,
+                                        )
+                                      }
+                                      disabled={(date) =>
+                                        date > maxDate || date < minDate
+                                      }
+                                      autoFocus
+                                    />
+                                  </PopoverContent>
+                                </Popover>
                               </div>
                             </FormControl>
                             <FormMessage />
@@ -494,49 +535,28 @@ export function ProfileStep() {
                     <FormField
                       control={form.control}
                       name="age"
-                      render={({ field }) => {
-                        const isDisabled = Boolean(
-                          isAutoFilled && field.value !== undefined,
-                        );
-                        return (
-                          <FormItem>
-                            <FormLabel className="flex items-center gap-2">
-                              Age
-                              {isAutoFilled && field.value && (
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-primary/10 text-primary border-primary/20 text-xs"
-                                >
-                                  <HiCheckCircle className="mr-1 h-3 w-3" />
-                                  Auto-calculated
-                                </Badge>
-                              )}
-                            </FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Input
-                                  {...field}
-                                  type="number"
-                                  inputMode="numeric"
-                                  placeholder="Auto-calculated"
-                                  className={cn(
-                                    "border-border/60 bg-muted/30 focus:border-primary/60 h-12 transition-all",
-                                    isDisabled &&
-                                      "cursor-not-allowed opacity-60",
-                                  )}
-                                  value={field.value ?? ""}
-                                  readOnly
-                                  disabled={isDisabled}
-                                />
-                                <div className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 text-xs">
-                                  years
-                                </div>
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Age</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                {...field}
+                                type="number"
+                                inputMode="numeric"
+                                placeholder="Auto-calculated"
+                                className="border-border/60 bg-muted/30 focus:border-primary/60 h-12 transition-all"
+                                value={field.value ?? ""}
+                                readOnly
+                              />
+                              <div className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 text-xs">
+                                years
                               </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        );
-                      }}
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
                 </div>
@@ -782,9 +802,6 @@ export function ProfileStep() {
                         <FormItem>
                           <FormLabel className="flex items-center gap-2">
                             VIN/PVC Number (Optional)
-                            <Badge variant="secondary" className="text-xs">
-                              Become Verified
-                            </Badge>
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
@@ -797,16 +814,10 @@ export function ProfileStep() {
                               />
                             </div>
                           </FormControl>
-                          <div className="text-muted-foreground space-y-1 text-sm">
-                            <span className="block font-medium">
-                              Benefits of adding your VIN:
-                            </span>
-                            <ul className="ml-4 list-disc text-xs">
-                              <li>Show commitment to your candidates</li>
-                              <li>Get verified voter badge</li>
-                              <li>Receive priority updates</li>
-                            </ul>
-                          </div>
+                          <FormDescription className="text-xs">
+                            Your Voter Identification Number from your PVC card
+                            (optional)
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -821,7 +832,7 @@ export function ProfileStep() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => router.push("/register/role")}
+                    onClick={() => router.push("/register")}
                     className="h-10 flex-1"
                   >
                     <HiArrowLeft className="mr-2 h-4 w-4" />
@@ -845,8 +856,14 @@ export function ProfileStep() {
       <TrustIndicators
         items={[
           { icon: <HiUser className="h-4 w-4" />, label: "Data Privacy" },
-          { icon: <HiCalendar className="h-4 w-4" />, label: "Age Verified" },
-          { icon: <HiPhone className="h-4 w-4" />, label: "Contact Verified" },
+          {
+            icon: <HiShieldCheck className="h-4 w-4" />,
+            label: "Secure & Encrypted",
+          },
+          {
+            icon: <HiCheckCircle className="h-4 w-4" />,
+            label: "Verified at Submit",
+          },
         ]}
       />
     </div>

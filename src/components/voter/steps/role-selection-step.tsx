@@ -81,14 +81,14 @@ export function RoleSelectionStep() {
         role: data.role as Voter["role"],
       },
     });
-    router.push("/register/profile");
+    router.push("/register/location");
   };
 
   if (!hasHydrated) {
     return (
       <div className="space-y-6">
         <StepProgress
-          currentStep={2}
+          currentStep={3}
           totalSteps={6}
           stepTitle="Role Selection"
         />
@@ -115,7 +115,7 @@ export function RoleSelectionStep() {
 
   return (
     <div className="space-y-6">
-      <StepProgress currentStep={2} totalSteps={6} stepTitle="Role Selection" />
+      <StepProgress currentStep={3} totalSteps={6} stepTitle="Role Selection" />
 
       {/* Hero Section with Badge */}
       <RegistrationStepHeader
@@ -204,7 +204,7 @@ export function RoleSelectionStep() {
                               Voter
                             </div>
                             <div className="text-muted-foreground mb-2 text-xs sm:text-sm">
-                              I have a PVC and want to vote
+                              I want to vote in elections
                             </div>
                             <Badge
                               variant="outline"
@@ -298,7 +298,7 @@ export function RoleSelectionStep() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push("/register")}
+                  onClick={() => router.push("/register/profile")}
                   className="h-10 flex-1"
                 >
                   <HiArrowLeft className="mr-2 h-4 w-4" />

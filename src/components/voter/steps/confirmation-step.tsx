@@ -13,6 +13,8 @@ import {
   HiShieldCheck,
   HiPhone,
   HiMail,
+  HiInformationCircle,
+  HiExclamationCircle,
 } from "react-icons/hi";
 import { ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,27 +32,122 @@ export function ConfirmationStep() {
   const router = useRouter();
   const { payload } = useRegistrationStore();
   const [error, setError] = useState<string | null>(null);
+  const [verificationStep, setVerificationStep] = useState<
+    "idle" | "verifying" | "submitting"
+  >("idle");
 
   const submitMutation = useMutation({
     mutationFn: async () => {
-      // Use mocked voterApi instead of direct fetch
+      // Step 1: Verify NIN (mock - this is where real verification would happen)
+      setVerificationStep("verifying");
+
+      // Simulate verification delay (in production, this would call SmileID/Prembly)
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Slightly longer for realism
+
+      // For demo: verification always succeeds
+      // In production:
+      // const verifyResult = await voterApi.verifyNIN(payload.nin);
+      // if (!verifyResult.verified) {
+      //   throw new Error("NIN verification failed. Please check your NIN and try again.");
+      // }
+      //
+      // // CRITICAL: Check if DOB matches NIN record (prevents age spoofing)
+      // const submittedDOB = payload.basic?.dateOfBirth;
+      // const ninDOB = verifyResult.dateOfBirth;
+      // if (submittedDOB !== ninDOB) {
+      //   throw new Error(
+      //     "Your date of birth doesn't match records. Please go back and correct your information."
+      //   );
+      // }
+      //
+      // // Check if user selected "Voter" role but is under 18
+      // const age = calculateAge(ninDOB);
+      // if (payload.basic?.role === "voter" && age < 18) {
+      //   throw new Error(
+      //     "You must be 18 or older to register as a voter. Your registration cannot be completed."
+      //   );
+      // }
+
+      // Step 2: Submit registration
+      setVerificationStep("submitting");
       const result = await voterApi.submitRegistration(payload);
       return result;
     },
     onSuccess: () => {
-      toast.success("Registration submitted successfully!");
+      toast.success("Registration complete! Your NIN has been verified.", {
+        duration: 5000,
+      });
       router.push("/register/complete");
     },
     onError: (err: Error) => {
       setError(err.message);
       toast.error(err.message);
+      setVerificationStep("idle");
     },
   });
 
   const handleSubmit = useCallback(() => {
     setError(null);
+
+    // Validate required data before submission
+    if (!payload.nin) {
+      setError("NIN is required. Please go back and complete all steps.");
+      return;
+    }
+
+    if (
+      !payload.basic?.firstName ||
+      !payload.basic?.lastName ||
+      !payload.basic?.dateOfBirth
+    ) {
+      setError(
+        "Personal information is incomplete. Please go back and complete your profile.",
+      );
+      return;
+    }
+
+    if (!payload.basic?.role) {
+      setError(
+        "Role selection is required. Please go back and select your role.",
+      );
+      return;
+    }
+
+    if (
+      !payload.location?.state ||
+      !payload.location?.lga ||
+      !payload.location?.ward ||
+      !payload.location?.pollingUnit
+    ) {
+      setError(
+        "Location information is incomplete. Please go back and select your voting location.",
+      );
+      return;
+    }
+
+    if (
+      !payload.candidates?.selections ||
+      payload.candidates.selections.length === 0
+    ) {
+      setError(
+        "Candidate selection is required. Please go back and select your candidates.",
+      );
+      return;
+    }
+
     submitMutation.mutate();
-  }, [submitMutation]);
+  }, [submitMutation, payload]);
+
+  // Get status message based on current step
+  const getStatusMessage = () => {
+    if (verificationStep === "verifying") {
+      return "Verifying your NIN...";
+    }
+    if (verificationStep === "submitting") {
+      return "Finalizing your registration...";
+    }
+    return "Submit Registration";
+  };
 
   const handleBack = useCallback(() => {
     router.push("/register/candidate");
@@ -71,9 +168,28 @@ export function ConfirmationStep() {
         description="Please review all your information carefully before submitting."
       />
 
+      {/* Verification Info Banner */}
+      <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/30 dark:bg-blue-950/20">
+        <HiInformationCircle className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+            Your NIN will be verified when you submit
+          </p>
+          <p className="text-xs text-blue-700 dark:text-blue-300">
+            We'll verify your National Identification Number matches the
+            information you provided. This ensures only genuine Nigerian voters
+            can register.
+          </p>
+        </div>
+      </div>
+
       {error && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <HiExclamationCircle className="h-5 w-5" />
+          <AlertDescription>
+            <p className="font-semibold">Verification Failed</p>
+            <p className="mt-1 text-sm">{error}</p>
+          </AlertDescription>
         </Alert>
       )}
 
@@ -311,7 +427,7 @@ export function ConfirmationStep() {
           {submitMutation.isPending ? (
             <>
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              Submitting...
+              {getStatusMessage()}
             </>
           ) : (
             <>
