@@ -18,11 +18,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+// import {
+//   Collapsible,
+//   CollapsibleContent,
+//   CollapsibleTrigger,
+// } from "@/components/ui/collapsible";
 import {
   Tooltip,
   TooltipContent,
@@ -38,19 +38,19 @@ import {
   formatNINForDisplay,
 } from "@/lib/schemas/common-schemas";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
-import { DemoIndicator } from "@/components/ui/demo-indicator";
-import { Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
+// import { DemoIndicator } from "@/components/ui/demo-indicator";
+// import { Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { RegistrationStepHeader } from "@/components/voter/registration-step-header";
 
 // Demo credentials for testing
-const DEMO_CREDENTIALS = [
-  { nin: "12345678901", name: "Aliyu Mohammed" },
-  { nin: "98765432109", name: "Hauwa Bello" },
-  { nin: "11223344556", name: "Musa Ahmad Tukur" },
-  { nin: "22334455667", name: "Aisha Mohammed" },
-  { nin: "33445566778", name: "Ibrahim Aliyu" },
-  { nin: "44556677889", name: "Fatima Usman" },
-];
+// const DEMO_CREDENTIALS = [
+//   { nin: "12345678901", name: "Aliyu Mohammed" },
+//   { nin: "98765432109", name: "Hauwa Bello" },
+//   { nin: "11223344556", name: "Musa Ahmad Tukur" },
+//   { nin: "22334455667", name: "Aisha Mohammed" },
+//   { nin: "33445566778", name: "Ibrahim Aliyu" },
+//   { nin: "44556677889", name: "Fatima Usman" },
+// ];
 
 export function VoterLogin() {
   const router = useRouter();
@@ -58,8 +58,8 @@ export function VoterLogin() {
   const [rawNin, setRawNin] = useState("");
   const [isOffline, setIsOffline] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
-  const [copiedNin, setCopiedNin] = useState<string | null>(null);
-  const [isCredentialsOpen, setIsCredentialsOpen] = useState<boolean>(false);
+  // const [copiedNin, setCopiedNin] = useState<string | null>(null);
+  // const [isCredentialsOpen, setIsCredentialsOpen] = useState<boolean>(false);
 
   // Check online status
   useEffect(() => {
@@ -212,24 +212,24 @@ export function VoterLogin() {
   };
 
   // Handle copying NIN to clipboard
-  const handleCopyNIN = async (nin: string) => {
-    try {
-      await navigator.clipboard.writeText(nin);
-      setCopiedNin(nin);
-      setTimeout(() => setCopiedNin(null), 2000);
-      toast.success("NIN copied to clipboard");
-    } catch (error) {
-      console.error(error);
-      toast.error(`Failed to copy NIN: ${error}`);
-    }
-  };
+  // const handleCopyNIN = async (nin: string) => {
+  //   try {
+  //     await navigator.clipboard.writeText(nin);
+  //     setCopiedNin(nin);
+  //     setTimeout(() => setCopiedNin(null), 2000);
+  //     toast.success("NIN copied to clipboard");
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast.error(`Failed to copy NIN: ${error}`);
+  //   }
+  // };
 
   // Handle using demo NIN
-  const handleUseDemoNIN = (nin: string) => {
-    const formatted = formatNINForDisplay(nin);
-    setRawNin(formatted);
-    toast.info("Demo NIN filled in");
-  };
+  // const handleUseDemoNIN = (nin: string) => {
+  //   const formatted = formatNINForDisplay(nin);
+  //   setRawNin(formatted);
+  //   toast.info("Demo NIN filled in");
+  // };
 
   return (
     <div className="space-y-6">
@@ -418,7 +418,7 @@ export function VoterLogin() {
             </div>
 
             {/* Demo Credentials Section */}
-            <Collapsible
+            {/* <Collapsible
               open={isCredentialsOpen}
               onOpenChange={setIsCredentialsOpen}
             >
@@ -501,7 +501,7 @@ export function VoterLogin() {
                   </div>
                 </CollapsibleContent>
               </div>
-            </Collapsible>
+            </Collapsible> */}
           </CardContent>
         </Card>
       </div>
@@ -515,7 +515,7 @@ export function VoterLogin() {
           },
           {
             icon: <HiCreditCard className="h-4 w-4" />,
-            label: "NIMC Verified",
+            label: "Identity Protected",
           },
           {
             icon: <HiCheckCircle className="h-4 w-4" />,
