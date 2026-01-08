@@ -18,16 +18,12 @@ function renderIcon(
   icon: LucideIcon | IconType | React.ReactNode,
 ): React.ReactNode {
   if (React.isValidElement(icon)) {
-    const element = icon as React.ReactElement<{ className?: string }>;
-    return React.cloneElement(element, {
-      ...element.props,
-      className: "h-3.5 w-3.5",
-    });
+    return icon;
   }
 
-  if (icon && typeof icon === "function") {
-    const IconComponent = icon as React.ComponentType<{ className?: string }>;
-    return <IconComponent className="h-3.5 w-3.5" />;
+  if (icon) {
+    const IconComponent = icon as React.ElementType;
+    return <IconComponent size={16} className="h-4 w-4" />;
   }
 
   return null;
@@ -41,16 +37,22 @@ export function RegistrationStepHeader({
   className,
 }: RegistrationStepHeaderProps) {
   return (
-    <div className={cn("mb-8 space-y-4 text-center", className)}>
+    <div className={cn("mb-10 space-y-5 text-center", className)}>
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
         className="flex justify-center"
       >
-        <div className="border-primary/20 bg-primary/10 text-primary inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold shadow-sm backdrop-blur-sm">
-          {renderIcon(Icon)}
-          <span>{badge}</span>
+        <div className="bg-muted/30 border-border/60 flex items-center gap-3 rounded-full border py-1.5 pr-4 pl-1.5 backdrop-blur-sm">
+          <div className="bg-background border-border/40 text-primary flex h-8 w-8 items-center justify-center rounded-full border shadow-sm">
+            {renderIcon(Icon)}
+          </div>
+          <div className="flex flex-col text-left">
+            <p className="text-foreground text-[10px] font-black tracking-widest uppercase">
+              {badge}
+            </p>
+          </div>
         </div>
       </motion.div>
 
@@ -58,12 +60,21 @@ export function RegistrationStepHeader({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="space-y-2"
+        className="space-y-2.5"
       >
-        <h1 className="text-foreground from-foreground to-foreground/70 bg-linear-to-r bg-clip-text text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-          {title}
+        <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl">
+          {title.includes(" ") ? (
+            <>
+              {title.split(" ").slice(0, -1).join(" ")}{" "}
+              <span className="text-primary font-serif font-normal italic">
+                {title.split(" ").slice(-1)}
+              </span>
+            </>
+          ) : (
+            title
+          )}
         </h1>
-        <p className="text-muted-foreground mx-auto max-w-lg text-sm sm:text-base">
+        <p className="text-muted-foreground mx-auto max-w-lg text-sm leading-relaxed font-medium sm:text-base">
           {description}
         </p>
       </motion.div>

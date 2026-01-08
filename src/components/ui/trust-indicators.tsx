@@ -18,13 +18,18 @@ export function TrustIndicators({ items, className }: TrustIndicatorsProps) {
 
   return (
     <div className={cn("mx-auto max-w-2xl", className)}>
-      <div className="text-muted-foreground/80 flex flex-wrap items-center justify-center gap-6 text-xs sm:gap-8">
+      <div className="text-muted-foreground/80 flex flex-wrap items-center justify-center gap-6 text-xs">
         {items.map((item, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <span className="text-primary inline-flex h-4 w-4 items-center justify-center">
+          <div key={index} className="flex items-center gap-2.5">
+            <div className="text-primary size-3.5 shrink-0 opacity-70">
               {item.icon}
+            </div>
+            <span className="text-muted-foreground font-mono text-[8px] font-bold tracking-widest uppercase">
+              {item.label}
             </span>
-            <span className="font-medium whitespace-nowrap">{item.label}</span>
+            {index < items.length - 1 && (
+              <div className="bg-border ml-4 hidden h-2.5 w-px sm:block" />
+            )}
           </div>
         ))}
       </div>

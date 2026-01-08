@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -14,12 +14,9 @@ import {
 } from "react-icons/hi";
 import { Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Badge } from "@/components/ui/badge";
 import { StepProgress } from "@/components/ui/step-progress";
 import { RegistrationStepHeader } from "../registration-step-header";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import {
   Form,
@@ -33,8 +30,8 @@ import { useEffect, useMemo } from "react";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { type Voter } from "@/types/voter";
 import { Spinner } from "@/components/ui/spinner";
+import { motion } from "motion/react";
 
-// Role Selection Schema
 const roleSchema = z.object({
   role: z.enum(["voter", "supporter"]),
 });
@@ -45,17 +42,12 @@ export function RoleSelectionStep() {
   const router = useRouter();
   const { update, payload, hasHydrated } = useRegistrationStore();
 
-  // Get age from payload (from NIN verification)
   const age = payload.basic?.age || 0;
   const isUnder18 = age < 18;
 
-  // Get initial values
   const initialValues = useMemo((): RoleFormValues => {
     if (!hasHydrated) return { role: "voter" };
-
-    // If under 18, force supporter
     if (isUnder18) return { role: "supporter" };
-
     return {
       role: (payload.basic?.role as Voter["role"]) ?? "voter",
     };
@@ -66,13 +58,12 @@ export function RoleSelectionStep() {
     defaultValues: initialValues,
   });
 
-  // Update form when hydration completes or conditions change
   useEffect(() => {
     if (!hasHydrated) return;
     form.reset(initialValues);
   }, [hasHydrated, initialValues, form]);
 
-  const role = useWatch({ control: form.control, name: "role" });
+  // const roleValue = useWatch({ control: form.control, name: "role" });
 
   const onSubmit = (data: RoleFormValues) => {
     update({
@@ -86,70 +77,56 @@ export function RoleSelectionStep() {
 
   if (!hasHydrated) {
     return (
-      <div className="space-y-6">
+      <div className="mx-auto w-full max-w-2xl space-y-10 py-8">
         <StepProgress
           currentStep={3}
           totalSteps={6}
           stepTitle="Role Selection"
         />
-        <Card className="border-border/60 bg-card/95 backdrop-blur-sm">
-          <CardContent className="flex min-h-[400px] items-center justify-center">
-            <div className="space-y-4 text-center">
-              <div className="border-primary/30 bg-primary/10 mx-auto flex h-12 w-12 items-center justify-center rounded-full border">
-                <Spinner className="h-6 w-6" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-foreground text-sm font-medium">
-                  Loading your information...
-                </p>
-                <p className="text-muted-foreground text-xs">
-                  Preparing role selection options
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="border-border/60 bg-card/50 flex min-h-[400px] flex-col items-center justify-center rounded-4xl border backdrop-blur-sm">
+          <Spinner className="text-primary size-7" />
+          <p className="text-muted-foreground mt-4 font-mono text-[9px] font-bold tracking-widest uppercase">
+            Loading your information...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-2xl space-y-10 py-8">
       <StepProgress currentStep={3} totalSteps={6} stepTitle="Role Selection" />
 
-      {/* Hero Section with Badge */}
       <RegistrationStepHeader
         icon={Users}
-        badge="Choose Your Participation"
+        badge="Role Assignment"
         title="Select Your Role"
-        description="Choose how you want to participate in the election process"
+        description="Choose your participation level. Voter eligibility is determined by your verified age."
       />
 
-      <Card className="border-border/60 bg-card/95 backdrop-blur-sm">
-        <CardHeader className="border-border border-b">
-          <div className="flex items-center justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="border-border/60 bg-card relative overflow-hidden rounded-4xl border shadow-[0_20px_40px_-12px_rgba(0,0,0,0.04)]"
+      >
+        <div className="border-primary/30 absolute top-0 left-0 size-5 border-t border-l" />
+        <div className="border-primary/30 absolute top-0 right-0 size-5 border-t border-r" />
+
+        <div className="p-7 sm:p-10">
+          <div className="mb-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div className="space-y-1">
-              <h2 className="text-foreground text-lg font-semibold tracking-tight">
-                Registration Type
+              <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
+                Participation Tier
               </h2>
-              <p className="text-muted-foreground text-sm">
-                Based on your age ({age} years old)
+              <p className="text-muted-foreground font-mono text-[8px] font-bold tracking-widest uppercase">
+                Verified Age: {age} Years •{" "}
+                {isUnder18 ? "Supporter Only" : "Eligible Voter"}
               </p>
             </div>
-            {isUnder18 && (
-              <Badge
-                variant="secondary"
-                className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20"
-              >
-                Under 18
-              </Badge>
-            )}
           </div>
-        </CardHeader>
 
-        <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
                 name="role"
@@ -166,17 +143,13 @@ export function RoleSelectionStep() {
                         <label
                           htmlFor="voter"
                           className={cn(
-                            "relative flex w-full cursor-pointer flex-col gap-3 rounded-lg border-2 p-4 transition-all",
+                            "group border-border/60 bg-muted/20 relative flex w-full cursor-pointer flex-col gap-5 rounded-xl border p-5 transition-all duration-300",
                             field.value === "voter"
-                              ? "border-primary bg-primary/5 ring-primary/20 ring-2 ring-offset-1"
-                              : "border-border hover:border-primary/50 hover:bg-accent/5",
-                            isUnder18 && "cursor-not-allowed opacity-50",
+                              ? "border-primary bg-primary/5 shadow-inner"
+                              : "hover:border-primary/30 hover:bg-muted/30",
+                            isUnder18 &&
+                              "cursor-not-allowed opacity-40 grayscale",
                           )}
-                          onClick={(e) => {
-                            if (isUnder18) {
-                              e.preventDefault();
-                            }
-                          }}
                         >
                           <RadioGroupItem
                             value="voter"
@@ -184,34 +157,38 @@ export function RoleSelectionStep() {
                             className="sr-only"
                             disabled={isUnder18}
                           />
-                          <div className="flex items-center justify-between">
+
+                          <div className="flex items-start justify-between">
                             <div
                               className={cn(
-                                "flex h-10 w-10 items-center justify-center rounded-full transition-colors",
+                                "flex size-9 items-center justify-center rounded-lg border transition-all",
                                 field.value === "voter"
-                                  ? "bg-primary text-primary-foreground"
-                                  : "bg-muted text-muted-foreground",
+                                  ? "bg-primary border-primary text-primary-foreground"
+                                  : "bg-background border-border text-muted-foreground",
                               )}
                             >
-                              <HiShieldCheck className="h-5 w-5" />
+                              <HiShieldCheck className="size-4.5" />
                             </div>
                             {field.value === "voter" && (
-                              <HiCheckCircle className="text-primary h-5 w-5" />
+                              <div className="bg-primary flex size-4.5 items-center justify-center rounded-full shadow-[0_0_8px_rgba(31,107,94,0.3)]">
+                                <HiCheckCircle className="size-4.5 text-white" />
+                              </div>
                             )}
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="mb-1 text-base font-semibold">
-                              Voter
+
+                          <div className="space-y-1">
+                            <h3 className="text-foreground text-[13px] font-bold tracking-widest uppercase">
+                              General Voter
+                            </h3>
+                            <p className="text-muted-foreground text-[10px] leading-relaxed font-medium">
+                              Full participation in Ward-level polling and
+                              verification.
+                            </p>
+                            <div className="pt-1.5">
+                              <div className="border-border/60 bg-background inline-flex rounded-md border px-2 py-0.5 font-mono text-[8px] font-bold tracking-tight uppercase">
+                                Age: 18+ Years
+                              </div>
                             </div>
-                            <div className="text-muted-foreground mb-2 text-xs sm:text-sm">
-                              I want to vote in elections
-                            </div>
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] font-normal"
-                            >
-                              Must be 18+ years old
-                            </Badge>
                           </div>
                         </label>
 
@@ -219,10 +196,10 @@ export function RoleSelectionStep() {
                         <label
                           htmlFor="supporter"
                           className={cn(
-                            "relative flex w-full cursor-pointer flex-col gap-3 rounded-lg border-2 p-4 transition-all",
+                            "group border-border/60 bg-muted/20 relative flex w-full cursor-pointer flex-col gap-5 rounded-xl border p-5 transition-all duration-300",
                             field.value === "supporter"
-                              ? "border-primary bg-primary/5 ring-primary/20 ring-2 ring-offset-1"
-                              : "border-border hover:border-primary/50 hover:bg-accent/5",
+                              ? "border-primary bg-primary/5 shadow-inner"
+                              : "hover:border-primary/30 hover:bg-muted/30",
                           )}
                         >
                           <RadioGroupItem
@@ -230,34 +207,38 @@ export function RoleSelectionStep() {
                             id="supporter"
                             className="sr-only"
                           />
-                          <div className="flex items-center justify-between">
+
+                          <div className="flex items-start justify-between">
                             <div
                               className={cn(
-                                "flex h-10 w-10 items-center justify-center rounded-full transition-colors",
+                                "flex size-9 items-center justify-center rounded-lg border transition-all",
                                 field.value === "supporter"
-                                  ? "bg-primary text-primary-foreground"
-                                  : "bg-muted text-muted-foreground",
+                                  ? "bg-primary border-primary text-primary-foreground"
+                                  : "bg-background border-border text-muted-foreground",
                               )}
                             >
-                              <HiUser className="h-5 w-5" />
+                              <HiUser className="size-4.5" />
                             </div>
                             {field.value === "supporter" && (
-                              <HiCheckCircle className="text-primary h-5 w-5" />
+                              <div className="bg-primary flex size-4.5 items-center justify-center rounded-full shadow-[0_0_8px_rgba(31,107,94,0.3)]">
+                                <HiCheckCircle className="size-4.5 text-white" />
+                              </div>
                             )}
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="mb-1 text-base font-semibold">
+
+                          <div className="space-y-1">
+                            <h3 className="text-foreground text-[13px] font-bold tracking-widest uppercase">
                               Supporter
+                            </h3>
+                            <p className="text-muted-foreground text-[10px] leading-relaxed font-medium">
+                              Advocate for community leadership and track
+                              movement progress.
+                            </p>
+                            <div className="pt-1.5">
+                              <div className="border-border/60 bg-background inline-flex rounded-md border px-2 py-0.5 font-mono text-[8px] font-bold tracking-tight uppercase">
+                                Age: All Ages
+                              </div>
                             </div>
-                            <div className="text-muted-foreground mb-2 text-xs sm:text-sm">
-                              I want to support candidates
-                            </div>
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] font-normal"
-                            >
-                              Open to all ages
-                            </Badge>
                           </div>
                         </label>
                       </RadioGroup>
@@ -267,63 +248,57 @@ export function RoleSelectionStep() {
                 )}
               />
 
-              {/* Messages based on selection/state */}
-              {isUnder18 && (
-                <Alert
-                  variant="default"
-                  className="border-amber-500/20 bg-amber-500/10 text-amber-800 dark:text-amber-200"
-                >
-                  <HiExclamationCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                  <AlertTitle>Age Restriction</AlertTitle>
-                  <AlertDescription>
-                    Since you are under 18 ({age} years old), you can only
-                    register as a Supporter. You will be able to follow
-                    campaigns but cannot vote.
-                  </AlertDescription>
-                </Alert>
-              )}
+              <div className="space-y-4">
+                {isUnder18 && (
+                  <div className="flex gap-3 rounded-xl border border-orange-500/20 bg-orange-500/5 p-4">
+                    <HiExclamationCircle className="size-4 shrink-0 text-orange-600" />
+                    <div className="space-y-0.5">
+                      <p className="text-[9px] font-bold tracking-widest text-orange-600 uppercase">
+                        Eligibility Restriction
+                      </p>
+                      <p className="text-muted-foreground text-[10px] leading-relaxed font-medium">
+                        Based on NIN data, you are ineligible for Voter status.
+                        Registration is restricted to the Supporter role.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
-              {role === "voter" && !isUnder18 && (
-                <Alert className="bg-primary/5 border-primary/10">
-                  <HiCheckCircle className="text-primary h-4 w-4" />
-                  <AlertTitle>Voter Verification</AlertTitle>
-                  <AlertDescription>
-                    As a voter, you will be asked to provide your VIN (Voter
-                    Identification Number) in the next step for verification.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.push("/register/profile")}
-                  className="h-10 flex-1"
-                >
-                  <HiArrowLeft className="mr-2 h-4 w-4" />
-                  Back
-                </Button>
-                <Button
-                  type="submit"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground h-10 flex-1 font-semibold transition-all duration-200"
-                >
-                  Continue
-                  <HiArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.push("/register/profile")}
+                    className="border-border/60 bg-background hover:bg-muted h-11 flex-1 rounded-xl text-[10px] font-bold tracking-[0.15em] uppercase transition-all"
+                  >
+                    <HiArrowLeft className="mr-2 size-3.5" />
+                    Back
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 flex-1 rounded-xl text-[10px] font-bold tracking-[0.15em] uppercase transition-all active:scale-95"
+                  >
+                    Continue
+                    <HiArrowRight className="ml-2 size-3.5" />
+                  </Button>
+                </div>
               </div>
             </form>
           </Form>
-        </CardContent>
-      </Card>
+        </div>
+      </motion.div>
 
       <TrustIndicators
+        className="pt-2"
         items={[
           {
-            icon: <HiShieldCheck className="h-4 w-4" />,
-            label: "Role Based Access",
+            icon: <HiShieldCheck />,
+            label: "SECURE_PROTOCOL",
           },
-          { icon: <HiUser className="h-4 w-4" />, label: "Age Verified" },
+          {
+            icon: <HiUser />,
+            label: "IDENTITY_CONFIRMED",
+          },
         ]}
       />
     </div>

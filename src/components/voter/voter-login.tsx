@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import {
   HiCreditCard,
-  HiCheckCircle,
   HiShieldCheck,
   HiExclamationCircle,
   HiInformationCircle,
@@ -16,13 +15,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-// import {
-//   Collapsible,
-//   CollapsibleContent,
-//   CollapsibleTrigger,
-// } from "@/components/ui/collapsible";
 import {
   Tooltip,
   TooltipContent,
@@ -38,19 +31,8 @@ import {
   formatNINForDisplay,
 } from "@/lib/schemas/common-schemas";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
-// import { DemoIndicator } from "@/components/ui/demo-indicator";
-// import { Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { RegistrationStepHeader } from "@/components/voter/registration-step-header";
-
-// Demo credentials for testing
-// const DEMO_CREDENTIALS = [
-//   { nin: "12345678901", name: "Aliyu Mohammed" },
-//   { nin: "98765432109", name: "Hauwa Bello" },
-//   { nin: "11223344556", name: "Musa Ahmad Tukur" },
-//   { nin: "22334455667", name: "Aisha Mohammed" },
-//   { nin: "33445566778", name: "Ibrahim Aliyu" },
-//   { nin: "44556677889", name: "Fatima Usman" },
-// ];
+import { motion } from "motion/react";
 
 export function VoterLogin() {
   const router = useRouter();
@@ -58,8 +40,6 @@ export function VoterLogin() {
   const [rawNin, setRawNin] = useState("");
   const [isOffline, setIsOffline] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
-  // const [copiedNin, setCopiedNin] = useState<string | null>(null);
-  // const [isCredentialsOpen, setIsCredentialsOpen] = useState<boolean>(false);
 
   // Check online status
   useEffect(() => {
@@ -87,13 +67,11 @@ export function VoterLogin() {
 
   const loginMutation = useMutation({
     mutationFn: async (nin: string) => {
-      // Check if offline
       if (isOffline) {
         throw new Error(
           "You're currently offline. Please check your internet connection.",
         );
       }
-      // Use mock API to check registration
       return await voterApi.checkRegistration(nin, 2025);
     },
     onSuccess: (data) => {
@@ -101,9 +79,7 @@ export function VoterLogin() {
         const voter = data.voter;
         const status = data.status || "complete";
 
-        // Handle incomplete registrations
         if (status === "incomplete") {
-          // Populate partial registration state
           update({
             nin: voter.nin,
             phone: voter.phoneNumber,
@@ -140,7 +116,6 @@ export function VoterLogin() {
           return;
         }
 
-        // Complete registration - populate full state
         update({
           nin: voter.nin,
           phone: voter.phoneNumber,
@@ -167,12 +142,11 @@ export function VoterLogin() {
             ? { selections: voter.candidateSelections }
             : undefined,
         });
-        toast.success("Login successful - redirecting to profile");
+        toast.success("Login successful");
         router.push("/voter/profile");
       } else {
-        // User doesn't exist - redirect to registration
         toast.info("Account not found - redirecting to registration");
-        update({ nin: formattedNin }); // Save NIN for registration flow
+        update({ nin: formattedNin });
         router.push("/register");
       }
     },
@@ -189,337 +163,194 @@ export function VoterLogin() {
       return;
     }
     if (loginAttempts >= 3) {
-      toast.error("Maximum login attempts reached. Please contact support.");
+      toast.error("Maximum login attempts reached.");
       return;
     }
     loginMutation.mutate(formattedNin);
   };
 
-  const handleRetryLogin = () => {
-    if (loginAttempts >= 3) {
-      toast.error("Maximum login attempts reached. Please contact support.");
-      return;
-    }
-    if (isValidNin) {
-      loginMutation.mutate(formattedNin);
-    }
-  };
-
-  // Get character count for NIN input
   const getCharacterCount = () => {
     const digits = rawNin.replace(/\D/g, "");
     return `${digits.length}/11`;
   };
 
-  // Handle copying NIN to clipboard
-  // const handleCopyNIN = async (nin: string) => {
-  //   try {
-  //     await navigator.clipboard.writeText(nin);
-  //     setCopiedNin(nin);
-  //     setTimeout(() => setCopiedNin(null), 2000);
-  //     toast.success("NIN copied to clipboard");
-  //   } catch (error) {
-  //     console.error(error);
-  //     toast.error(`Failed to copy NIN: ${error}`);
-  //   }
-  // };
-
-  // Handle using demo NIN
-  // const handleUseDemoNIN = (nin: string) => {
-  //   const formatted = formatNINForDisplay(nin);
-  //   setRawNin(formatted);
-  //   toast.info("Demo NIN filled in");
-  // };
-
   return (
-    <div className="space-y-6">
-      {/* Hero Section */}
+    <div className="mx-auto w-full max-w-lg space-y-10 py-10">
       <RegistrationStepHeader
         icon={HiUserCircle}
-        badge="Returning Voter"
-        title="Welcome Back"
-        description="Access your voter profile using your registered NIN"
+        badge="Account Access"
+        title="Voter Login"
+        description="Verify your identity using your National Identification Number (NIN) to access your secure profile."
       />
-      {/* Main Card */}
-      <div className="mx-auto w-full max-w-2xl">
-        <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="border-border border-b">
+
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="border-border/60 bg-card relative overflow-hidden rounded-4xl border shadow-[0_20px_40px_-12px_rgba(0,0,0,0.04)]"
+      >
+        {/* Architectural Markers */}
+        <div className="border-primary/30 absolute top-0 left-0 size-5 border-t border-l" />
+        <div className="border-primary/30 absolute top-0 right-0 size-5 border-t border-r" />
+
+        <div className="p-7 sm:p-10">
+          <div className="mb-8 flex items-center justify-between">
             <div className="space-y-1">
-              <h2 className="text-foreground text-xl font-semibold">
-                Login to Your Account
+              <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
+                Secure Verification
               </h2>
-              <p className="text-muted-foreground text-sm">
-                Enter your registered NIN to access your profile
+              <p className="text-muted-foreground font-mono text-[8px] font-bold tracking-widest uppercase">
+                STATUS: READY_FOR_AUTH
               </p>
             </div>
-          </CardHeader>
+            <div className="bg-primary/5 text-primary border-primary/20 flex size-9 items-center justify-center rounded-lg border">
+              <HiShieldCheck className="size-4.5" />
+            </div>
+          </div>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* NIN Input Section */}
-              <div className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
                 <Label
                   htmlFor="nin"
-                  className="text-foreground flex items-center gap-2 text-sm font-medium"
+                  className="text-foreground text-[10px] font-bold tracking-widest uppercase"
                 >
-                  National Identification Number (NIN)
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HiInformationCircle className="text-muted-foreground h-4 w-4 cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>
-                          Your 11-digit NIN is found on your NIMC ID card or
-                          National ID slip
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  National ID (NIN)
                 </Label>
-                <div className="relative">
-                  <HiCreditCard className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
-                  <Input
-                    id="nin"
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="off"
-                    placeholder="Enter your 11-digit NIN"
-                    className={cn(
-                      "border-border/60 focus:border-primary focus:ring-primary disabled:bg-muted/50 h-12 pr-16 pl-12 text-base tracking-wider transition-all duration-200 placeholder:text-sm",
-                      rawNin.length > 0 &&
-                        !isValidNin &&
-                        "border-destructive focus:border-destructive focus:ring-destructive",
-                      loginAttempts > 0 &&
-                        loginAttempts < 3 &&
-                        "border-orange-500 bg-orange-50/50",
-                      loginAttempts >= 3 && "border-red-500 bg-red-50/50",
-                    )}
-                    value={rawNin}
-                    onChange={(e) => handleNINChange(e.target.value)}
-                    maxLength={13}
-                    disabled={loginMutation.isPending || loginAttempts >= 3}
-                  />
-                  {/* Digit Counter */}
-                  {loginMutation.isIdle && (
-                    <div className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 font-mono text-xs">
-                      {getCharacterCount()}
-                    </div>
-                  )}
-                </div>
-                {rawNin.length > 0 && !isValidNin && (
-                  <p className="text-destructive text-xs">
-                    Enter a valid 11-digit NIN
-                  </p>
-                )}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HiInformationCircle className="text-muted-foreground h-4 w-4 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        Your 11-digit NIN is found on your NIMC ID card or
+                        National ID slip
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
 
-              {/* Loading State */}
-              {loginMutation.isPending && (
-                <div className="flex flex-col items-center justify-center gap-3">
-                  <div className="border-primary/30 bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full border">
-                    <Loader2 className="text-primary h-6 w-6 animate-spin" />
-                  </div>
-                  <div className="space-y-1 text-center">
-                    <p className="text-foreground text-sm font-medium">
-                      Verifying your account
-                    </p>
-                    <p className="text-muted-foreground text-xs">
-                      Checking registration status...
-                    </p>
-                  </div>
+              <div className="relative">
+                <div className="border-border/60 bg-muted/30 absolute top-1/2 left-2.5 flex size-7 -translate-y-1/2 items-center justify-center rounded-md border">
+                  <HiCreditCard className="text-muted-foreground size-3.5" />
                 </div>
+                <Input
+                  id="nin"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder="0000 0000 000"
+                  className={cn(
+                    "border-border/60 bg-muted/5 focus:border-primary focus:ring-primary h-12 pr-14 pl-12 font-mono text-base font-bold tracking-[0.15em] transition-all",
+                    rawNin.length > 0 &&
+                      !isValidNin &&
+                      "border-destructive focus:border-destructive focus:ring-destructive",
+                    loginAttempts >= 3 && "opacity-50",
+                  )}
+                  value={rawNin}
+                  onChange={(e) => handleNINChange(e.target.value)}
+                  maxLength={13}
+                  disabled={loginMutation.isPending || loginAttempts >= 3}
+                />
+                <div className="text-muted-foreground absolute top-1/2 right-3.5 -translate-y-1/2 font-mono text-[9px] font-bold uppercase">
+                  {getCharacterCount()}
+                </div>
+              </div>
+              {rawNin.length > 0 && !isValidNin && (
+                <p className="text-destructive font-mono text-[8px] font-bold tracking-wide uppercase">
+                  Invalid NIN format. Please check your card.
+                </p>
               )}
+            </div>
 
-              {/* Error States */}
-              {loginAttempts > 0 && loginMutation.isError && (
-                <div className="space-y-3">
-                  <div className="bg-destructive/10 border-destructive/20 flex gap-3 rounded-lg border p-4">
-                    <HiExclamationCircle className="text-destructive mt-0.5 h-5 w-5 shrink-0" />
-                    <div className="flex-1 space-y-1">
-                      <p className="text-destructive text-sm font-semibold">
-                        {loginAttempts >= 3
-                          ? "Maximum Login Attempts Reached"
-                          : "Login Failed"}
+            {loginMutation.isPending ? (
+              <div className="bg-primary/5 border-primary/20 flex flex-col items-center justify-center gap-3 rounded-xl border py-6">
+                <Loader2 className="text-primary size-5 animate-spin" />
+                <div className="text-center">
+                  <p className="text-foreground text-[10px] font-bold tracking-wider uppercase">
+                    Verifying Identity
+                  </p>
+                  <p className="text-muted-foreground font-mono text-[8px] font-bold tracking-widest uppercase">
+                    Checking secure database...
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {loginAttempts > 0 && loginMutation.isError && (
+                  <div className="bg-destructive/5 border-destructive/20 flex gap-3 rounded-xl border p-4">
+                    <HiExclamationCircle className="text-destructive size-4 shrink-0" />
+                    <div className="space-y-0.5">
+                      <p className="text-destructive text-[9px] font-bold tracking-widest uppercase">
+                        Login Failed
                       </p>
-                      <p className="text-destructive/80 text-xs">
+                      <p className="text-muted-foreground text-[10px] leading-relaxed font-medium">
                         {loginAttempts >= 3
-                          ? "Please contact support or try again later."
-                          : `Login attempt ${loginAttempts}/3 failed. Please check your NIN and try again.`}
+                          ? "Maximum attempts exceeded. Please contact support."
+                          : "NIN not found. Please verify your number and try again."}
                       </p>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Offline State */}
-              {isOffline && (
-                <div className="flex gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4">
-                  <HiExclamationCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange-700" />
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-semibold text-orange-900">
-                      Offline Mode
-                    </p>
-                    <p className="text-xs text-orange-700">
-                      You're currently offline. Please check your internet
-                      connection.
-                    </p>
+                {isOffline && (
+                  <div className="flex gap-3 rounded-xl border border-orange-500/20 bg-orange-500/5 p-4">
+                    <HiExclamationCircle className="size-4 shrink-0 text-orange-600" />
+                    <div className="space-y-0.5">
+                      <p className="text-[9px] font-bold tracking-widest text-orange-600 uppercase">
+                        Offline Status
+                      </p>
+                      <p className="text-muted-foreground text-[10px] leading-relaxed font-medium">
+                        Internet connection lost. Please check your network.
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Action Buttons */}
-              {!loginMutation.isPending && (
-                <div className="flex gap-3 pt-2">
-                  {loginAttempts > 0 &&
-                    loginAttempts < 3 &&
-                    loginMutation.isError && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleRetryLogin}
-                        disabled={!isValidNin || isOffline}
-                        className="h-10 flex-1"
-                      >
-                        Try Again
-                      </Button>
-                    )}
-                  <Button
-                    type="submit"
-                    disabled={
-                      !isValidNin ||
-                      loginMutation.isPending ||
-                      isOffline ||
-                      loginAttempts >= 3
-                    }
-                    className={cn(
-                      "from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 bg-linear-to-r font-semibold transition-all duration-200 disabled:opacity-50",
-                      loginAttempts > 0 && loginAttempts < 3
-                        ? "flex-1"
-                        : "w-full",
-                    )}
-                  >
-                    <HiShieldCheck className="mr-2 h-4 w-4" />
-                    Login
-                  </Button>
-                </div>
-              )}
-            </form>
+                <Button
+                  type="submit"
+                  disabled={
+                    !isValidNin ||
+                    loginMutation.isPending ||
+                    isOffline ||
+                    loginAttempts >= 3
+                  }
+                  className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 w-full rounded-xl text-[10px] font-bold tracking-[0.15em] uppercase transition-all active:scale-95 disabled:grayscale"
+                >
+                  Login
+                </Button>
+              </div>
+            )}
+          </form>
 
-            {/* Registration Link */}
-            <div className="text-muted-foreground mt-6 text-center text-sm">
-              Don't have an account?{" "}
+          <div className="mt-6 text-center">
+            <p className="text-muted-foreground text-[10px] font-medium tracking-widest uppercase">
+              Don&apos;t have an account?{" "}
               <Link
                 href="/register"
-                className="text-primary font-medium hover:underline"
+                className="text-primary font-bold underline-offset-4 hover:underline"
               >
                 Register here
               </Link>
-            </div>
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
-            {/* Demo Credentials Section */}
-            {/* <Collapsible
-              open={isCredentialsOpen}
-              onOpenChange={setIsCredentialsOpen}
-            >
-              <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50/50">
-                <CollapsibleTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-amber-50"
-                  >
-                    <div className="flex items-center gap-2">
-                      <HiInformationCircle className="h-4 w-4 text-amber-700" />
-                      <div>
-                        <h3 className="text-sm font-semibold text-amber-900">
-                          Demo Credentials
-                        </h3>
-                        <p className="text-xs text-amber-700">
-                          {isCredentialsOpen
-                            ? "Click to collapse"
-                            : `${DEMO_CREDENTIALS.length} demo credentials available`}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <DemoIndicator variant="inline" />
-                      {isCredentialsOpen ? (
-                        <ChevronUp className="h-4 w-4 text-amber-700" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4 text-amber-700" />
-                      )}
-                    </div>
-                  </button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="space-y-3 border-t border-amber-200 p-4 pt-3">
-                    <p className="text-xs text-amber-800">
-                      Use any of these registered NINs to test the login
-                      functionality:
-                    </p>
-                    <div className="space-y-2">
-                      {DEMO_CREDENTIALS.map((cred) => (
-                        <div
-                          key={cred.nin}
-                          className="flex items-center justify-between rounded-md border border-amber-200 bg-white px-3 py-2 text-xs"
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono font-medium text-amber-900">
-                                {formatNINForDisplay(cred.nin)}
-                              </span>
-                            </div>
-                            <p className="mt-0.5 text-amber-700">{cred.name}</p>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleUseDemoNIN(cred.nin)}
-                              className="h-7 px-2 text-[10px]"
-                            >
-                              Use
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleCopyNIN(cred.nin)}
-                              className="h-7 w-7 p-0"
-                            >
-                              {copiedNin === cred.nin ? (
-                                <Check className="h-3.5 w-3.5 text-green-600" />
-                              ) : (
-                                <Copy className="h-3.5 w-3.5" />
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CollapsibleContent>
-              </div>
-            </Collapsible> */}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Trust Indicators */}
       <TrustIndicators
         items={[
           {
-            icon: <HiShieldCheck className="h-4 w-4" />,
-            label: "Secure & Encrypted",
+            icon: <HiShieldCheck />,
+            label: "SECURE_ENCRYPTION",
           },
           {
-            icon: <HiCreditCard className="h-4 w-4" />,
-            label: "Identity Protected",
+            icon: <HiCreditCard />,
+            label: "IDENTITY_VERIFIED",
           },
           {
-            icon: <HiCheckCircle className="h-4 w-4" />,
-            label: "Trusted Platform",
+            icon: <HiShieldCheck />,
+            label: "PRIVACY_GUARANTEED",
           },
         ]}
       />
