@@ -24,7 +24,7 @@ export function TrustIndicators({ items, className }: TrustIndicatorsProps) {
             <div className="text-primary size-3.5 shrink-0 opacity-70">
               {item.icon}
             </div>
-            <span className="text-muted-foreground font-mono text-[8px] font-bold tracking-widest uppercase">
+            <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
               {item.label}
             </span>
             {index < items.length - 1 && (

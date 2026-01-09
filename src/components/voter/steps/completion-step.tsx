@@ -24,16 +24,16 @@ import { PartyPopper } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { motion } from "motion/react";
 import { useRegistrationStore } from "@/stores/registration-store";
 import { candidateApi } from "@/lib/api/candidate";
 import { HiExclamationCircle } from "react-icons/hi";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import type { Candidate } from "@/types/candidate";
-import { RegistrationStepHeader } from "../registration-step-header";
+import { RegistrationStepHeader } from "@/components/voter/registration-step-header";
 
 export function CompletionStep() {
   const router = useRouter();
@@ -265,16 +265,20 @@ Important: You can update your information once within 7 days.
     return (
       <div className="space-y-6">
         <div className="mx-auto max-w-2xl">
-          <Card className="border-border/60 bg-card/95 backdrop-blur-sm">
-            <CardContent className="flex min-h-[400px] items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="border-border/60 bg-card border p-10"
+          >
+            <div className="flex min-h-[400px] items-center justify-center">
               <div className="space-y-4 text-center">
                 <div className="text-primary mx-auto h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-sm font-medium">
                   Loading your registration...
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
         </div>
       </div>
     );
@@ -285,16 +289,20 @@ Important: You can update your information once within 7 days.
     return (
       <div className="space-y-6">
         <div className="mx-auto max-w-2xl">
-          <Card className="border-destructive/30 bg-destructive/5 border">
-            <CardContent className="flex min-h-[400px] flex-col items-center justify-center gap-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="border-destructive/30 bg-destructive/5 border p-10"
+          >
+            <div className="flex min-h-[400px] flex-col items-center justify-center gap-6 text-center">
               <div className="bg-destructive/10 text-destructive flex h-12 w-12 items-center justify-center rounded-full">
                 <HiExclamationCircle className="h-6 w-6" />
               </div>
               <div className="space-y-2">
-                <h2 className="text-foreground text-xl font-semibold">
+                <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
                   Incomplete Registration
                 </h2>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-xs leading-relaxed">
                   Your registration appears to be incomplete. Please complete
                   all required steps to finish your registration.
                 </p>
@@ -302,13 +310,13 @@ Important: You can update your information once within 7 days.
               <Button
                 onClick={() => router.push("/register")}
                 variant="default"
-                className="gap-2"
+                className="h-11 gap-2 rounded-xl text-xs font-bold tracking-widest uppercase"
               >
                 Complete Registration
                 <HiCheckCircle className="h-4 w-4" />
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
         </div>
       </div>
     );
@@ -347,10 +355,10 @@ Important: You can update your information once within 7 days.
             asChild
             size="default"
             variant="outline"
-            className="border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 h-10 px-5 text-sm font-medium transition-colors"
+            className="border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 h-11 rounded-xl px-5 text-xs font-bold tracking-widest uppercase transition-colors"
           >
             <Link href="/voter/profile" aria-label="View my profile">
-              <HiUser className="h-3.5 w-3.5" />
+              <HiUser className="mr-2 h-3.5 w-3.5" />
               View My Profile
             </Link>
           </Button>
@@ -358,46 +366,58 @@ Important: You can update your information once within 7 days.
             asChild
             size="default"
             variant="outline"
-            className="border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/50 h-10 gap-1.5 px-4 text-sm font-normal transition-colors"
+            className="border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/50 h-11 rounded-xl px-5 text-xs font-bold tracking-widest uppercase transition-colors"
           >
             <Link href="/" aria-label="Return to home">
-              <HiHome className="h-3.5 w-3.5" />
+              <HiHome className="mr-2 h-3.5 w-3.5" />
               Return Home
             </Link>
           </Button>
           <Button
             size="default"
             variant="outline"
-            className="border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/50 h-10 gap-1.5 px-4 text-sm font-normal transition-colors"
+            className="border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/50 h-11 rounded-xl px-5 text-xs font-bold tracking-widest uppercase transition-colors"
             onClick={() => {
               reset();
               router.push("/register");
             }}
             aria-label="Start a new registration"
           >
-            <HiUserAdd className="h-3.5 w-3.5" />
+            <HiUserAdd className="mr-2 h-3.5 w-3.5" />
             New Registration
           </Button>
         </div>
       </nav>
 
       {/* Summary Card */}
-      <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="border-border border-b">
-          <div className="flex items-start justify-between gap-4">
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="border-border/60 bg-card relative overflow-hidden border shadow-[0_20px_40px_-12px_rgba(0,0,0,0.04)]"
+      >
+        {/* Architectural Markers */}
+        <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
+        <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
+
+        <div className="space-y-8 p-7 sm:p-10">
+          <div className="border-border/40 flex items-start justify-between gap-4 border-b pb-6">
             <div className="space-y-1">
-              <h2 className="text-foreground text-xl font-semibold">
+              <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
                 Your Registration Summary
               </h2>
-              <p className="text-muted-foreground text-sm">
-                Here's a summary of your registration information
-              </p>
+              <div className="flex items-center gap-2">
+                <div className="bg-primary/60 size-1.5 rounded-[1px]" />
+                <p className="text-muted-foreground font-mono text-[10px] font-medium tracking-widest uppercase">
+                  System Status <span className="text-primary/40 mx-1">|</span>{" "}
+                  <span className="text-foreground font-bold">Complete</span>
+                </p>
+              </div>
             </div>
             <Button
               variant="outline"
               size="sm"
               onClick={handleExport}
-              className="h-9 gap-1.5 px-3"
+              className="h-9 gap-1.5 rounded-lg px-3 text-xs font-bold tracking-widest uppercase"
               aria-label="Export registration summary"
             >
               <HiDownload className="h-3.5 w-3.5" />
@@ -405,342 +425,357 @@ Important: You can update your information once within 7 days.
             </Button>
           </div>
           {registrationRef && (
-            <div className="mt-3">
+            <div className="-mt-4">
               <div className="bg-muted/50 border-border/60 inline-flex items-center gap-2 rounded-md border px-3 py-1.5">
-                <span className="text-muted-foreground text-xs font-medium">
+                <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
                   Registration Reference:
                 </span>
-                <span className="text-foreground font-mono text-xs font-semibold">
+                <span className="text-foreground font-mono text-xs font-bold tracking-wider">
                   {registrationRef}
                 </span>
               </div>
             </div>
           )}
-        </CardHeader>
 
-        <CardContent className="space-y-6">
-          {/* Personal Info */}
-          <div className="space-y-3">
-            <div className="text-primary flex items-center gap-2 text-sm font-semibold">
-              <HiUser className="h-4 w-4" />
-              <span>Personal Information</span>
-            </div>
-            <div className="bg-muted/50 rounded-lg p-4">
-              <dl className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <dt className="text-muted-foreground text-xs font-medium">
-                    Full Name
-                  </dt>
-                  <dd className="text-foreground mt-1 text-sm font-semibold">
-                    {fullName || "Not provided"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground text-xs font-medium">
-                    Email
-                  </dt>
-                  <dd className="text-foreground mt-1 text-sm font-semibold">
-                    {payload.basic?.email || "Not provided"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground text-xs font-medium">
-                    Role
-                  </dt>
-                  <dd className="mt-1">
-                    <Badge
-                      variant={
-                        payload.basic?.role === "voter"
-                          ? "default"
-                          : "secondary"
-                      }
-                      className="capitalize"
-                    >
-                      {payload.basic?.role || "Not specified"}
-                    </Badge>
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground text-xs font-medium">
-                    Age
-                  </dt>
-                  <dd className="text-foreground mt-1 text-sm font-semibold">
-                    {payload.basic?.age
-                      ? `${payload.basic.age} years`
-                      : "Not provided"}
-                  </dd>
-                </div>
-                {payload.basic?.vin && (
-                  <div className="sm:col-span-2">
-                    <dt className="text-muted-foreground text-xs font-medium">
-                      VIN Status
+          <div className="space-y-8">
+            {/* Personal Info */}
+            <div className="space-y-4">
+              <div className="text-primary flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
+                <HiUser className="h-4 w-4" />
+                <span>Personal Information</span>
+              </div>
+              <div className="bg-muted/5 border-border/60 rounded-xl border p-5">
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                      Full Name
+                    </dt>
+                    <dd className="text-foreground mt-1 text-sm font-bold uppercase">
+                      {fullName || "Not provided"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                      Email
+                    </dt>
+                    <dd className="text-foreground mt-1 text-sm font-medium">
+                      {payload.basic?.email || "Not provided"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                      Role
                     </dt>
                     <dd className="mt-1">
-                      <Badge variant="default" className="gap-1.5">
-                        <HiShieldCheck className="h-3 w-3" />
-                        Verified Voter
+                      <Badge
+                        variant={
+                          payload.basic?.role === "voter"
+                            ? "default"
+                            : "secondary"
+                        }
+                        className="rounded-md px-2 py-0.5 text-[10px] font-bold tracking-widest uppercase"
+                      >
+                        {payload.basic?.role || "Not specified"}
                       </Badge>
                     </dd>
                   </div>
-                )}
-                {payload.canvasser?.canvasserCode && (
-                  <div className="sm:col-span-2">
-                    <dt className="text-muted-foreground text-xs font-medium">
-                      Referred by Canvasser
+                  <div>
+                    <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                      Age
                     </dt>
-                    <dd className="text-foreground mt-1 text-sm font-semibold">
-                      Code: {payload.canvasser.canvasserCode}
+                    <dd className="text-foreground mt-1 text-sm font-medium">
+                      {payload.basic?.age
+                        ? `${payload.basic.age} years`
+                        : "Not provided"}
                     </dd>
                   </div>
-                )}
-                <div>
-                  <dt className="text-muted-foreground text-xs font-medium">
-                    Gender
-                  </dt>
-                  <dd className="text-foreground mt-1 text-sm font-semibold capitalize">
-                    {payload.basic?.gender || "Not provided"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground text-xs font-medium">
-                    Occupation
-                  </dt>
-                  <dd className="text-foreground mt-1 text-sm font-semibold capitalize">
-                    {payload.basic?.occupation
-                      ? payload.basic.occupation.replace(/-/g, " ")
-                      : "Not provided"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground text-xs font-medium">
-                    Religion
-                  </dt>
-                  <dd className="text-foreground mt-1 text-sm font-semibold capitalize">
-                    {payload.basic?.religion || "Not provided"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground text-xs font-medium">
-                    Phone
-                  </dt>
-                  <dd className="text-foreground mt-1 text-sm font-semibold">
-                    {payload.phone || "Not provided"}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Location */}
-          <div className="space-y-3">
-            <div className="text-primary flex items-center gap-2 text-sm font-semibold">
-              <HiLocationMarker className="h-4 w-4" />
-              <span>Voting Location</span>
-            </div>
-            <div className="bg-muted/50 rounded-lg p-4">
-              <dl className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <dt className="text-muted-foreground text-xs font-medium">
-                    State
-                  </dt>
-                  <dd className="text-foreground mt-1 text-sm font-semibold">
-                    {payload.location?.state || "Not provided"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground text-xs font-medium">
-                    LGA
-                  </dt>
-                  <dd className="text-foreground mt-1 text-sm font-semibold">
-                    {payload.location?.lga || "Not provided"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground text-xs font-medium">
-                    Ward
-                  </dt>
-                  <dd className="text-foreground mt-1 text-sm font-semibold">
-                    {payload.location?.ward || "Not provided"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground text-xs font-medium">
-                    Polling Unit
-                  </dt>
-                  <dd className="text-foreground mt-1 text-sm font-semibold">
-                    {payload.location?.pollingUnit || "Not provided"}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Candidate Support */}
-          <div className="space-y-3">
-            <div className="text-primary flex items-center gap-2 text-sm font-semibold">
-              <HiUsers className="h-4 w-4" />
-              <span>Your Selected Candidates</span>
-            </div>
-            <div className="bg-muted/50 space-y-4 rounded-lg p-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <HiUsers className="text-muted-foreground h-4 w-4" />
-                  <span className="text-muted-foreground text-xs font-medium">
-                    {isMultiCandidateMode
-                      ? "Positions Selected"
-                      : "Candidate Selected"}
-                  </span>
-                </div>
-                {hasCandidates ? (
-                  <div className="ml-6 space-y-3">
-                    {isLoadingAnyCandidate ? (
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-32" />
-                        <Skeleton className="h-3 w-24" />
-                      </div>
-                    ) : hasCandidateError ? (
-                      <div className="flex items-center gap-2">
-                        <HiExclamationCircle className="text-destructive h-4 w-4 shrink-0" />
-                        <p className="text-destructive text-xs">
-                          Failed to load some candidate details
-                        </p>
-                      </div>
-                    ) : (
-                      // Group by position for better organization
-                      Object.entries(candidatesData)
-                        .sort(([a], [b]) => {
-                          // Sort positions: President, Governor, Senator, House of Reps, State Assembly
-                          const order = [
-                            "President",
-                            "Governor",
-                            "Senator",
-                            "House of Representatives",
-                            "State Assembly",
-                          ];
-                          return (
-                            (order.indexOf(a) === -1 ? 999 : order.indexOf(a)) -
-                            (order.indexOf(b) === -1 ? 999 : order.indexOf(b))
-                          );
-                        })
-                        .map(([position, candidates]) => (
-                          <div key={position} className="space-y-2">
-                            {isMultiCandidateMode && (
-                              <p className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-                                {getPositionLabel(position)}
-                              </p>
-                            )}
-                            {candidates.map(({ candidate }) => (
-                              <div
-                                key={candidate.id}
-                                className="bg-background/50 border-border/60 rounded-md border p-2.5"
-                              >
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="min-w-0 flex-1">
-                                    <p className="text-foreground text-xs font-semibold">
-                                      {candidate.name}
-                                    </p>
-                                    <p className="text-muted-foreground mt-0.5 text-xs">
-                                      {candidate.party}
-                                      {!isMultiCandidateMode &&
-                                        candidate.position && (
-                                          <>
-                                            {" "}
-                                            •{" "}
-                                            {getPositionLabel(
-                                              candidate.position,
-                                            )}
-                                          </>
-                                        )}
-                                    </p>
-                                  </div>
-                                  {isMultiCandidateMode && (
-                                    <Badge
-                                      variant="outline"
-                                      className="bg-primary/5 text-primary border-primary/20 shrink-0 text-[10px]"
-                                    >
-                                      {getPositionLabel(position)}
-                                    </Badge>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ))
-                    )}
-                  </div>
-                ) : (
-                  !isLoadingAnyCandidate && (
-                    <div className="bg-muted/30 border-border/60 ml-6 rounded-md border p-2.5">
-                      <p className="text-muted-foreground text-xs">
-                        No candidate selected
-                      </p>
+                  {payload.basic?.vin && (
+                    <div className="sm:col-span-2">
+                      <dt className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
+                        VIN Status
+                      </dt>
+                      <dd className="mt-1">
+                        <Badge
+                          variant="default"
+                          className="gap-1.5 rounded-md px-2 py-0.5 text-[9px] font-bold tracking-widest uppercase"
+                        >
+                          <HiShieldCheck className="h-3 w-3" />
+                          Verified Voter
+                        </Badge>
+                      </dd>
                     </div>
-                  )
-                )}
+                  )}
+                  {payload.canvasser?.canvasserCode && (
+                    <div className="sm:col-span-2">
+                      <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                        Referred by Canvasser
+                      </dt>
+                      <dd className="text-foreground mt-1 font-mono text-sm font-bold tracking-wider">
+                        Code: {payload.canvasser.canvasserCode}
+                      </dd>
+                    </div>
+                  )}
+                  <div>
+                    <dt className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
+                      Gender
+                    </dt>
+                    <dd className="text-foreground mt-1 text-sm font-medium capitalize">
+                      {payload.basic?.gender || "Not provided"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
+                      Occupation
+                    </dt>
+                    <dd className="text-foreground mt-1 text-sm font-medium capitalize">
+                      {payload.basic?.occupation
+                        ? payload.basic.occupation.replace(/-/g, " ")
+                        : "Not provided"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
+                      Religion
+                    </dt>
+                    <dd className="text-foreground mt-1 text-sm font-medium capitalize">
+                      {payload.basic?.religion || "Not provided"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
+                      Phone
+                    </dt>
+                    <dd className="text-foreground mt-1 font-mono text-sm font-medium tracking-wide">
+                      {payload.phone || "Not provided"}
+                    </dd>
+                  </div>
+                </dl>
               </div>
             </div>
-          </div>
 
-          {/* Important Notice */}
-          <div className="flex gap-3 rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-amber-900 dark:text-amber-100">
-            <HiShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
-            <div className="space-y-1">
-              <p className="text-sm font-semibold">
-                Important: 7-Day Update Window
-              </p>
-              <p className="text-xs leading-relaxed opacity-90">
-                You can update your information once within 7 days. After that,
-                your registration is locked to maintain election integrity.
-              </p>
+            <Separator className="bg-border/60" />
+
+            {/* Location */}
+            <div className="space-y-4">
+              <div className="text-primary flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
+                <HiLocationMarker className="h-4 w-4" />
+                <span>Voting Location</span>
+              </div>
+              <div className="bg-muted/5 border-border/60 rounded-xl border p-5">
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                      State
+                    </dt>
+                    <dd className="text-foreground mt-1 text-sm font-medium">
+                      {payload.location?.state || "Not provided"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                      LGA
+                    </dt>
+                    <dd className="text-foreground mt-1 text-sm font-medium">
+                      {payload.location?.lga || "Not provided"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                      Ward
+                    </dt>
+                    <dd className="text-foreground mt-1 text-sm font-medium">
+                      {payload.location?.ward || "Not provided"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                      Polling Unit
+                    </dt>
+                    <dd className="text-foreground mt-1 text-sm font-medium">
+                      {payload.location?.pollingUnit || "Not provided"}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+
+            <Separator className="bg-border/60" />
+
+            {/* Candidate Support */}
+            <div className="space-y-4">
+              <div className="text-primary flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
+                <HiUsers className="h-4 w-4" />
+                <span>Your Selected Candidates</span>
+              </div>
+              <div className="bg-muted/5 border-border/60 space-y-4 rounded-xl border p-5">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <HiUsers className="text-muted-foreground h-4 w-4" />
+                    <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                      {isMultiCandidateMode
+                        ? "Positions Selected"
+                        : "Candidate Selected"}
+                    </span>
+                  </div>
+                  {hasCandidates ? (
+                    <div className="ml-6 space-y-3">
+                      {isLoadingAnyCandidate ? (
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                      ) : hasCandidateError ? (
+                        <div className="flex items-center gap-2">
+                          <HiExclamationCircle className="text-destructive h-4 w-4 shrink-0" />
+                          <p className="text-destructive text-xs">
+                            Failed to load some candidate details
+                          </p>
+                        </div>
+                      ) : (
+                        // Group by position for better organization
+                        Object.entries(candidatesData)
+                          .sort(([a], [b]) => {
+                            // Sort positions: President, Governor, Senator, House of Reps, State Assembly
+                            const order = [
+                              "President",
+                              "Governor",
+                              "Senator",
+                              "House of Representatives",
+                              "State Assembly",
+                            ];
+                            return (
+                              (order.indexOf(a) === -1
+                                ? 999
+                                : order.indexOf(a)) -
+                              (order.indexOf(b) === -1 ? 999 : order.indexOf(b))
+                            );
+                          })
+                          .map(([position, candidates]) => (
+                            <div key={position} className="space-y-2">
+                              {isMultiCandidateMode && (
+                                <p className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
+                                  {getPositionLabel(position)}
+                                </p>
+                              )}
+                              {candidates.map(({ candidate }) => (
+                                <div
+                                  key={candidate.id}
+                                  className="bg-background/50 border-border/60 rounded-md border p-3"
+                                >
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-foreground text-xs font-bold tracking-wide uppercase">
+                                        {candidate.name}
+                                      </p>
+                                      <p className="text-muted-foreground mt-0.5 text-[10px] font-medium uppercase">
+                                        {candidate.party}
+                                        {!isMultiCandidateMode &&
+                                          candidate.position && (
+                                            <>
+                                              {" "}
+                                              •{" "}
+                                              {getPositionLabel(
+                                                candidate.position,
+                                              )}
+                                            </>
+                                          )}
+                                      </p>
+                                    </div>
+                                    {isMultiCandidateMode && (
+                                      <Badge
+                                        variant="outline"
+                                        className="bg-primary/5 text-primary border-primary/20 shrink-0 text-[8px] font-bold tracking-wider uppercase"
+                                      >
+                                        {getPositionLabel(position)}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ))
+                      )}
+                    </div>
+                  ) : (
+                    !isLoadingAnyCandidate && (
+                      <div className="bg-muted/30 border-border/60 ml-6 rounded-md border p-2.5">
+                        <p className="text-muted-foreground text-xs">
+                          No candidate selected
+                        </p>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Important Notice */}
+            <div className="flex gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-amber-900 dark:text-amber-100">
+              <HiShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+              <div className="space-y-1">
+                <p className="text-xs font-bold tracking-widest uppercase">
+                  Important: 7-Day Update Window
+                </p>
+                <p className="text-xs leading-relaxed opacity-90">
+                  You can update your information once within 7 days. After
+                  that, your registration is locked to maintain election
+                  integrity.
+                </p>
+              </div>
+            </div>
+
+            {/* What Happens Next */}
+            <div className="bg-muted/30 border-border rounded-xl border p-5">
+              <h3 className="text-foreground mb-3 text-xs font-bold tracking-widest uppercase">
+                What Happens Next?
+              </h3>
+              <ul className="space-y-2 text-xs">
+                <li className="text-muted-foreground flex items-start gap-2 text-xs leading-relaxed">
+                  <span className="text-primary mt-0.5 shrink-0">•</span>
+                  <span>
+                    You'll receive a confirmation email with your registration
+                    details
+                  </span>
+                </li>
+                <li className="text-muted-foreground flex items-start gap-2 text-xs leading-relaxed">
+                  <span className="text-primary mt-0.5 shrink-0">•</span>
+                  <span>
+                    Your registration will be verified by WardWise system
+                  </span>
+                </li>
+                <li className="text-muted-foreground flex items-start gap-2 text-xs leading-relaxed">
+                  <span className="text-primary mt-0.5 shrink-0">•</span>
+                  <span>
+                    Visit your profile to track your registration status
+                  </span>
+                </li>
+              </ul>
             </div>
           </div>
-
-          {/* What Happens Next */}
-          <div className="bg-muted/30 border-border rounded-lg border p-4">
-            <h3 className="text-foreground mb-2.5 text-sm font-semibold">
-              What Happens Next?
-            </h3>
-            <ul className="space-y-2 text-xs">
-              <li className="text-muted-foreground flex items-start gap-2 leading-relaxed">
-                <span className="text-primary mt-0.5 shrink-0">•</span>
-                <span>
-                  You'll receive a confirmation email with your registration
-                  details
-                </span>
-              </li>
-              <li className="text-muted-foreground flex items-start gap-2 leading-relaxed">
-                <span className="text-primary mt-0.5 shrink-0">•</span>
-                <span>
-                  Your registration will be verified by WardWise system
-                </span>
-              </li>
-              <li className="text-muted-foreground flex items-start gap-2 leading-relaxed">
-                <span className="text-primary mt-0.5 shrink-0">•</span>
-                <span>
-                  Visit your profile to track your registration status
-                </span>
-              </li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </motion.div>
 
       {/* Share WardWise Card */}
-      <Card className="border-border/60 bg-card/80 backdrop-blur-sm">
-        <CardContent className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="border-border/60 bg-card/80 relative overflow-hidden border p-6 backdrop-blur-sm"
+      >
+        {/* Architectural Markers */}
+        <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
+        <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
+
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
             <div className="border-primary/30 bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border">
               <HiShare className="text-primary h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-foreground text-base font-semibold">
+              <h3 className="text-foreground text-sm font-bold tracking-widest uppercase">
                 Share WardWise
               </h3>
-              <p className="text-muted-foreground text-xs">
+              <p className="text-muted-foreground text-xs font-medium">
                 Spread the word with your network
               </p>
             </div>
@@ -749,7 +784,7 @@ Important: You can update your information once within 7 days.
             <Button
               variant="outline"
               size="sm"
-              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 px-3"
+              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 rounded-lg px-3 text-[10px] font-bold tracking-widest uppercase"
               onClick={handleWhatsAppShare}
               aria-label="Share on WhatsApp"
             >
@@ -759,7 +794,7 @@ Important: You can update your information once within 7 days.
             <Button
               variant="outline"
               size="sm"
-              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 px-3"
+              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 rounded-lg px-3 text-[10px] font-bold tracking-widest uppercase"
               onClick={handleEmailShare}
               aria-label="Share via Email"
             >
@@ -769,7 +804,7 @@ Important: You can update your information once within 7 days.
             <Button
               variant="outline"
               size="sm"
-              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 px-3"
+              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 rounded-lg px-3 text-[10px] font-bold tracking-widest uppercase"
               onClick={handleSMSShare}
               aria-label="Share via SMS"
             >
@@ -779,7 +814,7 @@ Important: You can update your information once within 7 days.
             <Button
               variant="outline"
               size="sm"
-              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 px-3"
+              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 rounded-lg px-3 text-[10px] font-bold tracking-widest uppercase"
               onClick={handleCopyLink}
               aria-label="Copy share link"
             >
@@ -787,20 +822,20 @@ Important: You can update your information once within 7 days.
               <span>Copy link</span>
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </motion.div>
 
       {/* Subtle Trust Indicators */}
       <TrustIndicators
         items={[
           {
             icon: <HiShieldCheck className="h-4 w-4" />,
-            label: "Verified Registration",
+            label: "VERIFIED_REGISTRATION",
           },
-          { icon: <HiLockClosed className="h-4 w-4" />, label: "Secure Data" },
+          { icon: <HiLockClosed className="h-4 w-4" />, label: "SECURE_DATA" },
           {
             icon: <HiCheckCircle className="h-4 w-4" />,
-            label: "Ready to Participate",
+            label: "READY_TO_PARTICIPATE",
           },
         ]}
       />

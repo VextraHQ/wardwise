@@ -21,11 +21,11 @@ export function StepProgress({
       <div className="flex items-end justify-between px-0.5">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2.5">
-            <span className="text-primary text-[10px] font-extrabold tracking-widest uppercase">
+            <span className="text-primary text-xs font-extrabold tracking-widest uppercase">
               Step {currentStep} of {totalSteps}
             </span>
             <div className="bg-border h-3 w-px" />
-            <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase opacity-50">
+            <span className="text-muted-foreground text-xs font-bold tracking-widest">
               Registration Progress
             </span>
           </div>

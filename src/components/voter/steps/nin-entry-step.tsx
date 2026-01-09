@@ -105,11 +105,11 @@ export function NinEntryStep() {
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className="border-border/60 bg-card relative overflow-hidden rounded-4xl border shadow-[0_20px_40px_-12px_rgba(0,0,0,0.04)]"
+        className="border-border/60 bg-card relative overflow-hidden border shadow-[0_20px_40px_-12px_rgba(0,0,0,0.04)]"
       >
         {/* Architectural Markers */}
-        <div className="border-primary/30 absolute top-0 left-0 size-5 border-t border-l" />
-        <div className="border-primary/30 absolute top-0 right-0 size-5 border-t border-r" />
+        <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
+        <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
 
         <div className="p-7 sm:p-10">
           <div className="mb-8 flex items-center justify-between">
@@ -117,36 +117,35 @@ export function NinEntryStep() {
               <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
                 Identification
               </h2>
-              <p className="text-muted-foreground font-mono text-[8px] font-bold tracking-widest uppercase">
-                SYSLOG: INITIALIZING_PROTOCOL
-              </p>
+              <div className="flex items-center gap-2">
+                <div className="bg-primary/60 size-1.5 rounded-[1px]" />
+                <p className="text-muted-foreground font-mono text-[10px] font-medium tracking-widest uppercase">
+                  Identity Check <span className="text-primary/40 mx-1">|</span>{" "}
+                  <span className="text-foreground font-bold">Required</span>
+                </p>
+              </div>
             </div>
           </div>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
                   <Label
                     htmlFor="nin"
-                    className="text-foreground text-[10px] font-bold tracking-widest uppercase"
+                    className="text-foreground text-xs font-bold tracking-widest uppercase"
                   >
                     National ID (NIN)
                   </Label>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          className="text-muted-foreground hover:text-primary transition-colors"
-                        >
-                          <HiInformationCircle className="size-3.5" />
-                        </button>
+                        <HiInformationCircle className="text-muted-foreground hover:text-primary h-4 w-4 cursor-help transition-colors duration-300" />
                       </TooltipTrigger>
-                      <TooltipContent className="border-border bg-card text-xs">
+                      <TooltipContent>
                         <p>
                           Your 11-digit NIN is found on your NIMC ID card or
-                          slip.
+                          National ID slip
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -176,7 +175,7 @@ export function NinEntryStep() {
                   </div>
                 </div>
                 {form.formState.errors.nin && (
-                  <p className="text-destructive font-mono text-[8px] font-bold tracking-wide uppercase">
+                  <p className="text-destructive font-mono text-xs font-medium tracking-wide uppercase">
                     {form.formState.errors.nin.message}
                   </p>
                 )}
@@ -186,10 +185,10 @@ export function NinEntryStep() {
               <div className="border-primary/20 bg-primary/5 flex gap-3 rounded-xl border p-4">
                 <HiInformationCircle className="text-primary mt-0.5 size-4 shrink-0" />
                 <div className="space-y-0.5">
-                  <p className="text-primary text-[9px] font-bold tracking-widest uppercase">
+                  <p className="text-primary text-xs font-bold tracking-widest uppercase">
                     Verification notice
                   </p>
-                  <p className="text-muted-foreground text-[10px] leading-relaxed font-medium">
+                  <p className="text-muted-foreground text-xs leading-relaxed font-medium">
                     Final identity confirmation occurs at the final step. Ensure
                     all data matches your official records for successful
                     registration.
@@ -212,7 +211,7 @@ export function NinEntryStep() {
                           />
                         </FormControl>
                         <div className="space-y-0.5">
-                          <FormLabel className="text-foreground block cursor-pointer text-[10px] leading-relaxed font-bold tracking-tight uppercase">
+                          <FormLabel className="text-foreground block cursor-pointer text-xs leading-relaxed font-bold tracking-tight uppercase">
                             I verify that my information is accurate and I
                             accept the{" "}
                             <Link
@@ -235,7 +234,7 @@ export function NinEntryStep() {
               <Button
                 type="submit"
                 disabled={!isNINComplete() || !termsAccepted}
-                className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 w-full rounded-xl text-[10px] font-bold tracking-[0.15em] uppercase transition-all active:scale-95 disabled:grayscale"
+                className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 w-full rounded-xl text-xs font-bold tracking-widest uppercase transition-all active:scale-95 disabled:grayscale"
               >
                 Continue to Profile
               </Button>
@@ -243,7 +242,7 @@ export function NinEntryStep() {
           </Form>
 
           <div className="mt-6 text-center">
-            <p className="text-muted-foreground text-[10px] font-medium tracking-widest uppercase">
+            <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
               Already registered?{" "}
               <Link
                 href="/voter-login"

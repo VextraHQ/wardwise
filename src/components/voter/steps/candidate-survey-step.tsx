@@ -21,8 +21,8 @@ import { ClipboardList } from "lucide-react";
 import { PiSpinnerGapBold } from "react-icons/pi";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StepProgress } from "@/components/ui/step-progress";
+import { motion } from "motion/react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -32,7 +32,7 @@ import type { CandidateSurvey, SurveyQuestion } from "@/types/survey";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
-import { RegistrationStepHeader } from "../registration-step-header";
+import { RegistrationStepHeader } from "@/components/voter/registration-step-header";
 
 export function CandidateSurveyStep() {
   const router = useRouter();
@@ -421,21 +421,25 @@ export function CandidateSurveyStep() {
         </div>
 
         <div className="mx-auto w-full max-w-2xl">
-          <Card>
-            <CardContent className="flex min-h-[300px] items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="border-border/60 bg-card border p-10"
+          >
+            <div className="flex min-h-[300px] items-center justify-center">
               <div className="flex flex-col items-center justify-center gap-3 text-center">
                 <PiSpinnerGapBold className="text-primary h-8 w-8 animate-spin" />
                 <div className="space-y-1">
-                  <p className="text-foreground text-sm font-medium">
+                  <p className="text-foreground text-sm font-medium tracking-widest uppercase">
                     Loading candidate survey...
                   </p>
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-muted-foreground text-[10px] uppercase">
                     This may take a few moments
                   </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
         </div>
       </div>
     );
@@ -462,15 +466,19 @@ export function CandidateSurveyStep() {
         </div>
 
         <div className="mx-auto w-full max-w-md">
-          <Card>
-            <CardContent className="flex min-h-[300px] flex-col items-center justify-center space-y-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="border-border/60 bg-card border p-10"
+          >
+            <div className="flex min-h-[300px] flex-col items-center justify-center space-y-6">
               <HiQuestionMarkCircle className="text-muted-foreground h-16 w-16" />
               <div className="space-y-4 text-center">
                 <div className="space-y-2">
-                  <p className="text-foreground text-lg font-semibold">
+                  <p className="text-foreground text-lg font-bold tracking-tight uppercase">
                     Survey Not Found
                   </p>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-xs leading-relaxed uppercase">
                     This candidate hasn't created a survey yet. Please select a
                     different candidate or contact support if you believe this
                     is an error.
@@ -480,15 +488,15 @@ export function CandidateSurveyStep() {
                   <Button
                     onClick={() => router.push("/register/candidate")}
                     variant="outline"
-                    className="h-10 flex-1"
+                    className="h-11 flex-1 rounded-xl text-[10px] font-bold tracking-[0.15em] uppercase"
                   >
-                    <HiArrowLeft className="mr-2 h-4 w-4" />
+                    <HiArrowLeft className="mr-2 h-3 w-3" />
                     Select Different Candidate
                   </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
         </div>
       </div>
     );
@@ -607,327 +615,341 @@ export function CandidateSurveyStep() {
 
         {/* Main Survey Card */}
         <div className="mx-auto w-full max-w-2xl">
-          <Card className="border-border/60 bg-card/95 backdrop-blur-sm">
-            <CardHeader className="border-border border-b">
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <div className="flex items-center gap-2">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="border-border/60 bg-card relative overflow-hidden border shadow-[0_20px_40px_-12px_rgba(0,0,0,0.04)]"
+          >
+            {/* Architectural Markers */}
+            <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
+            <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
+
+            <div className="p-7 sm:p-10">
+              <div className="border-border/40 mb-8 border-b pb-6">
+                <div className="space-y-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
+                          QUESTION {currentQuestionIndex + 1}/
+                          {survey.questions.length}
+                        </span>
+                      </div>
+                      <h2 className="text-foreground text-lg leading-tight font-bold tracking-tight uppercase sm:text-xl">
+                        {currentQuestion.question}
+                      </h2>
+                    </div>
+                    {hasAnswer && (
+                      <div>
+                        <HiCheckCircle className="text-primary h-5 w-5 shrink-0" />
+                      </div>
+                    )}
+                  </div>
+                  {currentQuestion.description && (
+                    <p className="text-muted-foreground text-xs leading-relaxed font-medium">
+                      {currentQuestion.description}
+                    </p>
+                  )}
+
+                  {/* Social Proof - Show anonymized stats */}
+                  {currentQuestion.responseStats &&
+                    currentQuestion.responseStats.topAnswer && (
+                      <div className="bg-primary/5 border-primary/20 flex items-start gap-3 rounded-lg border p-3">
+                        <HiTrendingUp className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <p className="text-foreground text-[10px] font-bold tracking-widest uppercase">
+                            Community Insight
+                          </p>
+                          <p className="text-muted-foreground text-[10px] leading-relaxed">
+                            <span className="text-foreground font-bold">
+                              {
+                                currentQuestion.responseStats.topAnswer
+                                  .percentage
+                              }
+                              %
+                            </span>{" "}
+                            of{" "}
+                            {currentQuestion.responseStats.totalResponses.toLocaleString()}{" "}
+                            voters chose:{" "}
+                            <span className="text-foreground font-bold uppercase">
+                              {currentQuestion.responseStats.topAnswer.label}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                </div>
+              </div>
+
+              <div>
+                {/* Single Choice */}
+                {currentQuestion.type === "single" &&
+                  currentQuestion.options && (
+                    <div
+                      className={cn(
+                        "space-y-3",
+                        currentQuestion.options.length > 5 &&
+                          "max-h-[400px] overflow-y-auto px-1 sm:max-h-[500px]",
+                      )}
+                    >
+                      <RadioGroup
+                        value={
+                          typeof currentAnswer === "string" ? currentAnswer : ""
+                        }
+                        onValueChange={handleSingleChoice}
+                      >
+                        {currentQuestion.options.map((option) => {
+                          const isSelected = currentAnswer === option.id;
+                          const showOtherInput =
+                            option.allowOther && isSelected;
+                          return (
+                            <div key={option.id} className="space-y-2">
+                              <div className="relative">
+                                <RadioGroupItem
+                                  value={option.id}
+                                  id={option.id}
+                                  className="peer sr-only"
+                                />
+                                <Label
+                                  htmlFor={option.id}
+                                  className={cn(
+                                    "bg-muted/5 block h-full cursor-pointer rounded-xl border p-4 transition-all duration-200",
+                                    isSelected
+                                      ? "border-primary bg-primary/5 ring-primary/20 ring-2 ring-offset-1"
+                                      : "border-border/60 hover:bg-muted/50 hover:border-primary/30",
+                                  )}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    {option.icon && (
+                                      <span className="shrink-0 text-xl">
+                                        {option.icon}
+                                      </span>
+                                    )}
+                                    <div
+                                      className={cn(
+                                        "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                                        isSelected
+                                          ? "border-primary bg-primary"
+                                          : "border-muted-foreground/30",
+                                      )}
+                                    >
+                                      {isSelected && (
+                                        <div className="bg-primary-foreground h-1.5 w-1.5 rounded-full" />
+                                      )}
+                                    </div>
+                                    <span
+                                      className={cn(
+                                        "flex-1 text-sm font-medium transition-colors",
+                                        isSelected
+                                          ? "text-foreground"
+                                          : "text-muted-foreground",
+                                      )}
+                                    >
+                                      {option.label}
+                                    </span>
+                                  </div>
+                                </Label>
+                              </div>
+                              {showOtherInput && (
+                                <div className="pl-7">
+                                  <Input
+                                    placeholder="PLEASE SPECIFY..."
+                                    value={otherTexts[currentQuestion.id] || ""}
+                                    onChange={(e) => {
+                                      setOtherTexts((prev) => ({
+                                        ...prev,
+                                        [currentQuestion.id]: e.target.value,
+                                      }));
+                                    }}
+                                    className="focus:border-primary bg-muted/5 font-medium uppercase placeholder:text-[10px] placeholder:tracking-wider placeholder:uppercase"
+                                    autoFocus
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </RadioGroup>
+                    </div>
+                  )}
+
+                {/* Multiple Choice */}
+                {currentQuestion.type === "multiple" &&
+                  currentQuestion.options && (
+                    <div
+                      className={cn(
+                        "space-y-3",
+                        currentQuestion.options.length > 5 &&
+                          "max-h-[400px] overflow-y-auto px-1 sm:max-h-[500px]",
+                      )}
+                    >
+                      {currentQuestion.options.map((option) => {
+                        const currentAnswerArray =
+                          (currentAnswer as string[]) || [];
+                        const isChecked = currentAnswerArray.includes(
+                          option.id,
+                        );
+                        const showOtherInput = option.allowOther && isChecked;
+                        return (
+                          <div key={option.id} className="space-y-2">
+                            <div className="relative">
+                              <Label
+                                htmlFor={option.id}
+                                className={cn(
+                                  "bg-muted/5 block h-full cursor-pointer rounded-xl border p-4 transition-all duration-200",
+                                  isChecked
+                                    ? "border-primary bg-primary/5 ring-primary/20 ring-2 ring-offset-1"
+                                    : "border-border/60 hover:bg-muted/50 hover:border-primary/30",
+                                )}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <Checkbox
+                                    id={option.id}
+                                    checked={isChecked}
+                                    onCheckedChange={(checked) =>
+                                      handleMultipleChoice(
+                                        option.id,
+                                        checked as boolean,
+                                      )
+                                    }
+                                    className="shrink-0"
+                                  />
+                                  {option.icon && (
+                                    <span className="shrink-0 text-xl">
+                                      {option.icon}
+                                    </span>
+                                  )}
+                                  <span
+                                    className={cn(
+                                      "flex-1 text-sm font-bold tracking-wide uppercase transition-colors",
+                                      isChecked
+                                        ? "text-foreground"
+                                        : "text-muted-foreground",
+                                    )}
+                                  >
+                                    {option.label}
+                                  </span>
+                                </div>
+                              </Label>
+                            </div>
+                            {showOtherInput && (
+                              <div className="pl-7">
+                                <Input
+                                  placeholder="Please specify..."
+                                  value={otherTexts[currentQuestion.id] || ""}
+                                  onChange={(e) => {
+                                    setOtherTexts((prev) => ({
+                                      ...prev,
+                                      [currentQuestion.id]: e.target.value,
+                                    }));
+                                  }}
+                                  className="focus:border-primary"
+                                  autoFocus
+                                />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                {/* Scale/Slider */}
+                {currentQuestion.type === "scale" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
                       <span className="text-muted-foreground text-xs font-medium">
-                        Question {currentQuestionIndex + 1} of{" "}
-                        {survey.questions.length}
+                        {currentQuestion.minLabel || "Not at all"}
+                      </span>
+                      <span className="text-muted-foreground text-xs font-medium">
+                        {currentQuestion.maxLabel || "Very much"}
                       </span>
                     </div>
-                    <h2 className="text-foreground text-lg leading-tight font-semibold tracking-tight sm:text-xl">
-                      {currentQuestion.question}
-                    </h2>
-                  </div>
-                  {hasAnswer && (
-                    <div>
-                      <HiCheckCircle className="text-primary h-5 w-5 shrink-0" />
-                    </div>
-                  )}
-                </div>
-                {currentQuestion.description && (
-                  <p className="text-muted-foreground text-sm">
-                    {currentQuestion.description}
-                  </p>
-                )}
-
-                {/* Social Proof - Show anonymized stats */}
-                {currentQuestion.responseStats &&
-                  currentQuestion.responseStats.topAnswer && (
-                    <div className="bg-primary/5 border-primary/20 flex items-start gap-2 rounded-lg border p-3">
-                      <HiTrendingUp className="text-primary mt-0.5 h-4 w-4 shrink-0" />
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <p className="text-foreground text-xs font-semibold">
-                          Community Insight
-                        </p>
-                        <p className="text-muted-foreground text-xs leading-relaxed">
-                          <span className="text-foreground font-semibold">
-                            {currentQuestion.responseStats.topAnswer.percentage}
-                            %
-                          </span>{" "}
-                          of{" "}
-                          {currentQuestion.responseStats.totalResponses.toLocaleString()}{" "}
-                          voters chose:{" "}
-                          <span className="text-foreground font-medium">
-                            {currentQuestion.responseStats.topAnswer.label}
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                  )}
-              </div>
-            </CardHeader>
-
-            <CardContent>
-              {/* Single Choice */}
-              {currentQuestion.type === "single" && currentQuestion.options && (
-                <div
-                  className={cn(
-                    "space-y-3",
-                    currentQuestion.options.length > 5 &&
-                      "max-h-[400px] overflow-y-auto px-1 sm:max-h-[500px]",
-                  )}
-                >
-                  <RadioGroup
-                    value={
-                      typeof currentAnswer === "string" ? currentAnswer : ""
-                    }
-                    onValueChange={handleSingleChoice}
-                  >
-                    {currentQuestion.options.map((option) => {
-                      const isSelected = currentAnswer === option.id;
-                      const showOtherInput = option.allowOther && isSelected;
-                      return (
-                        <div key={option.id} className="space-y-2">
-                          <div className="relative">
-                            <RadioGroupItem
-                              value={option.id}
-                              id={option.id}
-                              className="peer sr-only"
-                            />
-                            <Label
-                              htmlFor={option.id}
-                              className={cn(
-                                "block h-full cursor-pointer rounded-lg border p-4 transition-all duration-200",
-                                isSelected
-                                  ? "border-primary bg-primary/5 ring-primary/20 ring-2 ring-offset-1"
-                                  : "border-border hover:bg-muted/50 hover:border-primary/30",
-                              )}
-                            >
-                              <div className="flex items-center gap-3">
-                                {option.icon && (
-                                  <span className="shrink-0 text-xl">
-                                    {option.icon}
-                                  </span>
-                                )}
-                                <div
-                                  className={cn(
-                                    "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-                                    isSelected
-                                      ? "border-primary bg-primary"
-                                      : "border-muted-foreground/30",
-                                  )}
-                                >
-                                  {isSelected && (
-                                    <div className="bg-primary-foreground h-1.5 w-1.5 rounded-full" />
-                                  )}
-                                </div>
-                                <span
-                                  className={cn(
-                                    "flex-1 text-sm font-medium transition-colors",
-                                    isSelected
-                                      ? "text-foreground"
-                                      : "text-muted-foreground",
-                                  )}
-                                >
-                                  {option.label}
-                                </span>
-                              </div>
-                            </Label>
-                          </div>
-                          {showOtherInput && (
-                            <div className="pl-7">
-                              <Input
-                                placeholder="Please specify..."
-                                value={otherTexts[currentQuestion.id] || ""}
-                                onChange={(e) => {
-                                  setOtherTexts((prev) => ({
-                                    ...prev,
-                                    [currentQuestion.id]: e.target.value,
-                                  }));
-                                }}
-                                className="focus:border-primary"
-                                autoFocus
-                              />
-                            </div>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((score) => (
+                        <button
+                          key={score}
+                          onClick={() => handleScaleChange(String(score))}
+                          className={cn(
+                            "flex-1 rounded-lg border py-3 font-semibold transition-all duration-200",
+                            currentAnswer === String(score)
+                              ? "border-primary bg-primary text-primary-foreground ring-primary/20 ring-2 ring-offset-1"
+                              : "border-border bg-card hover:border-primary/50 hover:bg-muted/50",
                           )}
-                        </div>
-                      );
-                    })}
-                  </RadioGroup>
-                </div>
-              )}
-
-              {/* Multiple Choice */}
-              {currentQuestion.type === "multiple" &&
-                currentQuestion.options && (
-                  <div
-                    className={cn(
-                      "space-y-3",
-                      currentQuestion.options.length > 5 &&
-                        "max-h-[400px] overflow-y-auto px-1 sm:max-h-[500px]",
-                    )}
-                  >
-                    {currentQuestion.options.map((option) => {
-                      const currentAnswerArray =
-                        (currentAnswer as string[]) || [];
-                      const isChecked = currentAnswerArray.includes(option.id);
-                      const showOtherInput = option.allowOther && isChecked;
-                      return (
-                        <div key={option.id} className="space-y-2">
-                          <div className="relative">
-                            <Label
-                              htmlFor={option.id}
-                              className={cn(
-                                "block h-full cursor-pointer rounded-lg border p-4 transition-all duration-200",
-                                isChecked
-                                  ? "border-primary bg-primary/5 ring-primary/20 ring-2 ring-offset-1"
-                                  : "border-border hover:bg-muted/50 hover:border-primary/30",
-                              )}
-                            >
-                              <div className="flex items-center gap-3">
-                                <Checkbox
-                                  id={option.id}
-                                  checked={isChecked}
-                                  onCheckedChange={(checked) =>
-                                    handleMultipleChoice(
-                                      option.id,
-                                      checked as boolean,
-                                    )
-                                  }
-                                  className="shrink-0"
-                                />
-                                {option.icon && (
-                                  <span className="shrink-0 text-xl">
-                                    {option.icon}
-                                  </span>
-                                )}
-                                <span
-                                  className={cn(
-                                    "flex-1 text-sm font-medium transition-colors",
-                                    isChecked
-                                      ? "text-foreground"
-                                      : "text-muted-foreground",
-                                  )}
-                                >
-                                  {option.label}
-                                </span>
-                              </div>
-                            </Label>
-                          </div>
-                          {showOtherInput && (
-                            <div className="pl-7">
-                              <Input
-                                placeholder="Please specify..."
-                                value={otherTexts[currentQuestion.id] || ""}
-                                onChange={(e) => {
-                                  setOtherTexts((prev) => ({
-                                    ...prev,
-                                    [currentQuestion.id]: e.target.value,
-                                  }));
-                                }}
-                                className="focus:border-primary"
-                                autoFocus
-                              />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                        >
+                          {score}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
-              {/* Scale/Slider */}
-              {currentQuestion.type === "scale" && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-xs font-medium">
-                      {currentQuestion.minLabel || "Not at all"}
-                    </span>
-                    <span className="text-muted-foreground text-xs font-medium">
-                      {currentQuestion.maxLabel || "Very much"}
-                    </span>
+                {/* Text Input */}
+                {currentQuestion.type === "text" && (
+                  <div className="space-y-2">
+                    <Textarea
+                      placeholder="Share your thoughts..."
+                      value={(currentAnswer as string) || ""}
+                      onChange={(e) => handleTextChange(e.target.value)}
+                      maxLength={500}
+                      className="focus:border-primary min-h-32 resize-y rounded-lg border p-3 transition-all"
+                    />
+                    <div className="text-muted-foreground flex justify-between text-xs">
+                      <span>
+                        {wordCount((currentAnswer as string) || "")} words
+                      </span>
+                      <span>
+                        {((currentAnswer as string) || "").length}/{500}{" "}
+                        characters
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map((score) => (
-                      <button
-                        key={score}
-                        onClick={() => handleScaleChange(String(score))}
-                        className={cn(
-                          "flex-1 rounded-lg border py-3 font-semibold transition-all duration-200",
-                          currentAnswer === String(score)
-                            ? "border-primary bg-primary text-primary-foreground ring-primary/20 ring-2 ring-offset-1"
-                            : "border-border bg-card hover:border-primary/50 hover:bg-muted/50",
-                        )}
-                      >
-                        {score}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+                )}
 
-              {/* Text Input */}
-              {currentQuestion.type === "text" && (
-                <div className="space-y-2">
-                  <Textarea
-                    placeholder="Share your thoughts..."
-                    value={(currentAnswer as string) || ""}
-                    onChange={(e) => handleTextChange(e.target.value)}
-                    maxLength={500}
-                    className="focus:border-primary min-h-32 resize-y rounded-lg border p-3 transition-all"
-                  />
-                  <div className="text-muted-foreground flex justify-between text-xs">
-                    <span>
-                      {wordCount((currentAnswer as string) || "")} words
-                    </span>
-                    <span>
-                      {((currentAnswer as string) || "").length}/{500}{" "}
-                      characters
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {/* TODO: Ranking Question Type */}
-              {/* Implement drag-and-drop ranking with @dnd-kit/core or react-beautiful-dnd */}
-              {/* {currentQuestion.type === "ranking" && currentQuestion.options && (
+                {/* TODO: Ranking Question Type */}
+                {/* Implement drag-and-drop ranking with @dnd-kit/core or react-beautiful-dnd */}
+                {/* {currentQuestion.type === "ranking" && currentQuestion.options && (
                 <RankingQuestion
                   options={currentQuestion.options}
                   value={rankingOrder[currentQuestion.id] || []}
                   onChange={(order) => setRankingOrder(prev => ({ ...prev, [currentQuestion.id]: order }))}
                 />
               )} */}
+              </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-4 pt-6">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleBack}
-                  className="h-10 flex-1"
+                  className="hover:bg-muted/10 h-11 flex-1 rounded-xl text-[10px] font-bold tracking-[0.15em] uppercase"
                 >
-                  <HiArrowLeft className="mr-2 h-4 w-4" />
+                  <HiArrowLeft className="mr-2 h-3 w-3" />
                   {currentQuestionIndex > 0 ? "Previous" : "Back"}
                 </Button>
                 <Button
                   onClick={handleNext}
                   disabled={!hasAnswer || isSubmitting}
                   className={cn(
-                    "bg-primary hover:bg-primary/90 text-primary-foreground h-10 flex-1 font-semibold transition-all duration-300 ease-in-out disabled:opacity-50",
-                    hasAnswer &&
-                      !isSubmitting &&
-                      "hover:bg-primary/90 hover:text-primary-foreground",
+                    "bg-primary text-primary-foreground hover:bg-primary/95 h-11 flex-1 rounded-xl text-[10px] font-bold tracking-[0.15em] uppercase shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] transition-all active:scale-95 disabled:opacity-50",
                   )}
                 >
                   {isLastQuestion ? (
                     <>
-                      <HiSparkles className="mr-2 h-4 w-4" />
+                      <HiSparkles className="mr-2 h-3 w-3" />
                       Complete Survey
                     </>
                   ) : (
                     <>
                       Next Question
-                      <HiArrowRight className="ml-2 h-4 w-4" />
+                      <HiArrowRight className="ml-2 h-3 w-3" />
                     </>
                   )}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
         </div>
 
         {/* Question Navigator */}
@@ -972,15 +994,15 @@ export function CandidateSurveyStep() {
           items={[
             {
               icon: <HiShieldCheck className="h-4 w-4" />,
-              label: "Secure Survey",
+              label: "SECURE_SURVEY",
             },
             {
               icon: <HiClipboardList className="h-4 w-4" />,
-              label: "Policy-Guided",
+              label: "POLICY_GUIDED",
             },
             {
               icon: <HiUsers className="h-4 w-4" />,
-              label: "Anonymous Aggregation",
+              label: "ANONYMOUS_AGGREGATION",
             },
           ]}
         />

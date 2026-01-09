@@ -14,31 +14,31 @@ interface RegistrationStepHeaderProps {
   className?: string;
 }
 
-function renderIcon(
-  icon: LucideIcon | IconType | React.ReactNode,
-): React.ReactNode {
-  if (React.isValidElement(icon)) {
-    return icon;
-  }
+// function renderIcon(
+//   icon: LucideIcon | IconType | React.ReactNode,
+// ): React.ReactNode {
+//   if (React.isValidElement(icon)) {
+//     return icon;
+//   }
 
-  if (icon) {
-    const IconComponent = icon as React.ElementType;
-    return <IconComponent size={16} className="h-4 w-4" />;
-  }
+//   if (icon) {
+//     const IconComponent = icon as React.ElementType;
+//     return <IconComponent size={16} className="h-4 w-4" />;
+//   }
 
-  return null;
-}
+//   return null;
+// }
 
 export function RegistrationStepHeader({
-  icon: Icon,
-  badge,
+  // icon: Icon,
+  // badge,
   title,
   description,
   className,
 }: RegistrationStepHeaderProps) {
   return (
     <div className={cn("mb-10 space-y-5 text-center", className)}>
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
@@ -54,7 +54,7 @@ export function RegistrationStepHeader({
             </p>
           </div>
         </div>
-      </motion.div>
+      </motion.div> */}
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}

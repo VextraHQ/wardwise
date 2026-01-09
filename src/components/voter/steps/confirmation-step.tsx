@@ -18,7 +18,7 @@ import {
 } from "react-icons/hi";
 import { ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { motion } from "motion/react";
 import { StepProgress } from "@/components/ui/step-progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -26,7 +26,7 @@ import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { useRegistrationStore } from "@/stores/registration-store";
 import { voterApi } from "@/lib/api/voter";
 import { toast } from "sonner";
-import { RegistrationStepHeader } from "../registration-step-header";
+import { RegistrationStepHeader } from "@/components/voter/registration-step-header";
 
 export function ConfirmationStep() {
   const router = useRouter();
@@ -193,245 +193,227 @@ export function ConfirmationStep() {
         </Alert>
       )}
 
-      {/* Personal Information */}
-      <Card>
-        <CardHeader className="border-b">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-full">
-              <HiUser className="h-5 w-5" />
+      {/* Architectural Review Container */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="border-border/60 bg-card relative overflow-hidden border shadow-[0_20px_40px_-12px_rgba(0,0,0,0.04)]"
+      >
+        {/* Architectural Markers */}
+        <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
+        <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
+
+        <div className="space-y-8 p-7 sm:p-10">
+          <div className="border-border/40 border-b pb-6">
+            <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
+              Registration Summary
+            </h2>
+            <div className="mt-1 flex items-center gap-2">
+              <div className="bg-primary/60 size-1.5 rounded-[1px]" />
+              <p className="text-muted-foreground font-mono text-[10px] font-medium tracking-widest uppercase">
+                Final Review <span className="text-primary/40 mx-1">|</span>{" "}
+                <span className="text-foreground font-bold">
+                  Pending Submission
+                </span>
+              </p>
             </div>
-            <div>
-              <h2 className="text-foreground text-lg font-semibold">
+          </div>
+
+          {/* Personal Information */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/5 text-primary border-primary/20 flex h-8 w-8 items-center justify-center rounded-lg border">
+                <HiUser className="h-4 w-4" />
+              </div>
+              <h3 className="text-foreground text-xs font-bold tracking-widest uppercase">
                 Personal Information
-              </h2>
-              <p className="text-muted-foreground text-xs">
-                Your basic details
-              </p>
+              </h3>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                Full Name
-              </dt>
-              <dd className="text-foreground mt-1 text-base font-medium">
-                {payload.basic?.firstName} {payload.basic?.middleName || ""}{" "}
-                {payload.basic?.lastName}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                National ID (NIN)
-              </dt>
-              <dd className="text-foreground mt-1 text-base font-medium">
-                {payload.nin}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                Email
-              </dt>
-              <dd className="text-foreground mt-1 text-base font-medium">
-                {payload.basic?.email}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                Phone Number
-              </dt>
-              <dd className="text-foreground mt-1 text-base font-medium">
-                {payload.phone}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                Date of Birth
-              </dt>
-              <dd className="text-foreground mt-1 text-base font-medium">
-                {payload.basic?.dateOfBirth}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                Gender
-              </dt>
-              <dd className="text-foreground mt-1 text-base font-medium capitalize">
-                {payload.basic?.gender}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                Occupation
-              </dt>
-              <dd className="text-foreground mt-1 text-base font-medium capitalize">
-                {payload.basic?.occupation?.replace("-", " ")}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                Religion
-              </dt>
-              <dd className="text-foreground mt-1 text-base font-medium capitalize">
-                {payload.basic?.religion}
-              </dd>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Location Information */}
-      <Card>
-        <CardHeader className="border-b">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-full">
-              <HiLocationMarker className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-foreground text-lg font-semibold">
-                Voting Location
-              </h2>
-              <p className="text-muted-foreground text-xs">
-                Where you'll cast your vote
-              </p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                State
-              </dt>
-              <dd className="text-foreground mt-1 text-base font-medium">
-                {payload.location?.state}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                Local Government Area
-              </dt>
-              <dd className="text-foreground mt-1 text-base font-medium">
-                {payload.location?.lga}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                Ward
-              </dt>
-              <dd className="text-foreground mt-1 text-base font-medium">
-                {payload.location?.ward}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                Polling Unit
-              </dt>
-              <dd className="text-foreground mt-1 text-base font-medium">
-                {payload.location?.pollingUnit}
-              </dd>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Candidate Selections */}
-      <Card>
-        <CardHeader className="border-b">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-full">
-              <HiUsers className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-foreground text-lg font-semibold">
-                Candidate Selections
-              </h2>
-              <p className="text-muted-foreground text-xs">
-                Your chosen candidates for all 5 positions
-              </p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {payload.candidates?.selections?.map((selection, index) => (
-            <div
-              key={index}
-              className="border-border/60 flex items-center justify-between rounded-lg border p-4"
-            >
-              <div className="space-y-1">
-                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                  {selection.position}
+            <div className="bg-muted/5 border-border/60 grid gap-4 rounded-xl border p-5 sm:grid-cols-2">
+              <div>
+                <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                  Full Name
                 </dt>
-                <dd className="text-foreground text-base font-semibold">
-                  {selection.candidateName}
+                <dd className="text-foreground mt-1 text-sm font-medium">
+                  {payload.basic?.firstName} {payload.basic?.middleName || ""}{" "}
+                  {payload.basic?.lastName}
                 </dd>
               </div>
-              <Badge variant="outline" className="text-xs">
-                {selection.candidateParty}
-              </Badge>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      {/* Canvasser Code (if provided) */}
-      {payload.canvasser?.canvasserCode && (
-        <Card>
-          <CardHeader className="border-b">
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-full">
-                <HiIdentification className="h-5 w-5" />
+              <div>
+                <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                  National ID (NIN)
+                </dt>
+                <dd className="text-foreground mt-1 font-mono text-sm font-bold tracking-wider">
+                  {payload.nin}
+                </dd>
               </div>
               <div>
-                <h2 className="text-foreground text-lg font-semibold">
-                  Canvasser Referral
-                </h2>
-                <p className="text-muted-foreground text-xs">
-                  Your referral code
-                </p>
+                <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                  Email
+                </dt>
+                <dd className="text-foreground mt-1 text-sm font-medium">
+                  {payload.basic?.email}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                  Phone Number
+                </dt>
+                <dd className="text-foreground mt-1 font-mono text-sm font-medium">
+                  {payload.phone}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                  Date of Birth
+                </dt>
+                <dd className="text-foreground mt-1 text-sm font-medium">
+                  {payload.basic?.dateOfBirth}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                  Gender
+                </dt>
+                <dd className="text-foreground mt-1 text-sm font-medium capitalize">
+                  {payload.basic?.gender}
+                </dd>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="py-4">
-            <div>
-              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                Canvasser Code
-              </dt>
-              <dd className="text-foreground mt-1 text-base font-medium">
-                {payload.canvasser.canvasserCode}
-              </dd>
+          </div>
+
+          {/* Location Information */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/5 text-primary border-primary/20 flex h-8 w-8 items-center justify-center rounded-lg border">
+                <HiLocationMarker className="h-4 w-4" />
+              </div>
+              <h3 className="text-foreground text-xs font-bold tracking-widest uppercase">
+                Voting Location
+              </h3>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <div className="bg-muted/5 border-border/60 grid gap-4 rounded-xl border p-5 sm:grid-cols-2">
+              <div>
+                <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                  State
+                </dt>
+                <dd className="text-foreground mt-1 text-sm font-medium">
+                  {payload.location?.state}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                  Local Government Area
+                </dt>
+                <dd className="text-foreground mt-1 text-sm font-medium">
+                  {payload.location?.lga}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                  Ward
+                </dt>
+                <dd className="text-foreground mt-1 text-sm font-medium">
+                  {payload.location?.ward}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                  Polling Unit
+                </dt>
+                <dd className="text-foreground mt-1 text-sm font-medium">
+                  {payload.location?.pollingUnit}
+                </dd>
+              </div>
+            </div>
+          </div>
+
+          {/* Candidate Selections */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/5 text-primary border-primary/20 flex h-8 w-8 items-center justify-center rounded-lg border">
+                <HiUsers className="h-4 w-4" />
+              </div>
+              <h3 className="text-foreground text-xs font-bold tracking-widest uppercase">
+                Candidate Selections
+              </h3>
+            </div>
+            <div className="bg-muted/5 border-border/60 space-y-3 rounded-xl border p-5">
+              {payload.candidates?.selections?.map((selection, index) => (
+                <div
+                  key={index}
+                  className="bg-background border-border/60 flex items-center justify-between rounded-lg border p-3"
+                >
+                  <div className="space-y-1">
+                    <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                      {selection.position}
+                    </dt>
+                    <dd className="text-foreground text-sm font-bold tracking-wide uppercase">
+                      {selection.candidateName}
+                    </dd>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="bg-muted/20 text-[9px] font-bold tracking-wider uppercase"
+                  >
+                    {selection.candidateParty}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Canvasser Code (if provided) */}
+          {payload.canvasser?.canvasserCode && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/5 text-primary border-primary/20 flex h-8 w-8 items-center justify-center rounded-lg border">
+                  <HiIdentification className="h-4 w-4" />
+                </div>
+                <h3 className="text-foreground text-xs font-bold tracking-widest uppercase">
+                  Canvasser Referral
+                </h3>
+              </div>
+              <div className="bg-muted/5 border-border/60 rounded-xl border p-5">
+                <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                  Canvasser Code
+                </dt>
+                <dd className="text-foreground mt-1 font-mono text-sm font-medium tracking-wider">
+                  {payload.canvasser.canvasserCode}
+                </dd>
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
 
       {/* Action Buttons */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+      {/* Action Buttons */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
         <Button
           onClick={handleBack}
           variant="outline"
           size="lg"
-          className="gap-2"
+          className="hover:bg-muted/10 hover:text-foreground h-12 rounded-xl border-2 px-8 text-xs font-bold tracking-widest uppercase"
           disabled={submitMutation.isPending}
         >
-          <HiArrowLeft className="h-5 w-5" />
-          Back to Previous Step
+          <HiArrowLeft className="mr-2 h-4 w-4" />
+          Back to Candidates
         </Button>
         <Button
           onClick={handleSubmit}
           size="lg"
-          className="gap-2"
+          className="bg-primary text-primary-foreground hover:bg-primary/95 h-12 flex-1 rounded-xl text-xs font-bold tracking-widest uppercase shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] transition-all active:scale-95"
           disabled={submitMutation.isPending}
         >
           {submitMutation.isPending ? (
             <>
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
               {getStatusMessage()}
             </>
           ) : (
             <>
-              <HiCheckCircle className="h-5 w-5" />
+              <HiCheckCircle className="mr-2 h-4 w-4" />
               Submit Registration
             </>
           )}
@@ -442,15 +424,15 @@ export function ConfirmationStep() {
         items={[
           {
             icon: <HiShieldCheck className="h-4 w-4" />,
-            label: "Secure submission",
+            label: "SECURE_SUBMISSION",
           },
           {
             icon: <HiPhone className="h-4 w-4" />,
-            label: "SMS confirmation",
+            label: "SMS_CONFIRMATION",
           },
           {
             icon: <HiMail className="h-4 w-4" />,
-            label: "Email receipt",
+            label: "EMAIL_RECEIPT",
           },
         ]}
       />

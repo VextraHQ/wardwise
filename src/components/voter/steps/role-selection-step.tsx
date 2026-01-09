@@ -16,7 +16,7 @@ import { Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { StepProgress } from "@/components/ui/step-progress";
-import { RegistrationStepHeader } from "../registration-step-header";
+import { RegistrationStepHeader } from "@/components/voter/registration-step-header";
 import { cn } from "@/lib/utils";
 import {
   Form,
@@ -83,9 +83,9 @@ export function RoleSelectionStep() {
           totalSteps={6}
           stepTitle="Role Selection"
         />
-        <div className="border-border/60 bg-card/50 flex min-h-[400px] flex-col items-center justify-center rounded-4xl border backdrop-blur-sm">
+        <div className="border-border/60 bg-card/50 flex min-h-[400px] flex-col items-center justify-center border backdrop-blur-sm">
           <Spinner className="text-primary size-7" />
-          <p className="text-muted-foreground mt-4 font-mono text-[9px] font-bold tracking-widest uppercase">
+          <p className="text-muted-foreground mt-4 text-sm font-medium">
             Loading your information...
           </p>
         </div>
@@ -107,10 +107,10 @@ export function RoleSelectionStep() {
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className="border-border/60 bg-card relative overflow-hidden rounded-4xl border shadow-[0_20px_40px_-12px_rgba(0,0,0,0.04)]"
+        className="border-border/60 bg-card relative overflow-hidden border shadow-[0_20px_40px_-12px_rgba(0,0,0,0.04)]"
       >
-        <div className="border-primary/30 absolute top-0 left-0 size-5 border-t border-l" />
-        <div className="border-primary/30 absolute top-0 right-0 size-5 border-t border-r" />
+        <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
+        <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
 
         <div className="p-7 sm:p-10">
           <div className="mb-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
@@ -118,10 +118,16 @@ export function RoleSelectionStep() {
               <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
                 Participation Tier
               </h2>
-              <p className="text-muted-foreground font-mono text-[8px] font-bold tracking-widest uppercase">
-                Verified Age: {age} Years •{" "}
-                {isUnder18 ? "Supporter Only" : "Eligible Voter"}
-              </p>
+              <div className="flex items-center gap-2">
+                <div className="bg-primary/60 size-1.5 rounded-[1px]" />
+                <p className="text-muted-foreground font-mono text-[10px] font-medium tracking-widest uppercase">
+                  Eligibility Check{" "}
+                  <span className="text-primary/40 mx-1">|</span>{" "}
+                  <span className="text-foreground font-bold">
+                    {age} Years • {isUnder18 ? "Supporter" : "Eligible"}
+                  </span>
+                </p>
+              </div>
             </div>
           </div>
 
@@ -180,12 +186,12 @@ export function RoleSelectionStep() {
                             <h3 className="text-foreground text-[13px] font-bold tracking-widest uppercase">
                               General Voter
                             </h3>
-                            <p className="text-muted-foreground text-[10px] leading-relaxed font-medium">
+                            <p className="text-muted-foreground text-xs leading-relaxed">
                               Full participation in Ward-level polling and
                               verification.
                             </p>
                             <div className="pt-1.5">
-                              <div className="border-border/60 bg-background inline-flex rounded-md border px-2 py-0.5 font-mono text-[8px] font-bold tracking-tight uppercase">
+                              <div className="border-border/60 bg-background inline-flex rounded-md border px-2 py-0.5 font-mono text-[10px] font-bold tracking-tight uppercase">
                                 Age: 18+ Years
                               </div>
                             </div>
@@ -230,12 +236,12 @@ export function RoleSelectionStep() {
                             <h3 className="text-foreground text-[13px] font-bold tracking-widest uppercase">
                               Supporter
                             </h3>
-                            <p className="text-muted-foreground text-[10px] leading-relaxed font-medium">
+                            <p className="text-muted-foreground text-xs leading-relaxed">
                               Advocate for community leadership and track
                               movement progress.
                             </p>
                             <div className="pt-1.5">
-                              <div className="border-border/60 bg-background inline-flex rounded-md border px-2 py-0.5 font-mono text-[8px] font-bold tracking-tight uppercase">
+                              <div className="border-border/60 bg-background inline-flex rounded-md border px-2 py-0.5 font-mono text-[10px] font-bold tracking-tight uppercase">
                                 Age: All Ages
                               </div>
                             </div>
@@ -256,7 +262,7 @@ export function RoleSelectionStep() {
                       <p className="text-[9px] font-bold tracking-widest text-orange-600 uppercase">
                         Eligibility Restriction
                       </p>
-                      <p className="text-muted-foreground text-[10px] leading-relaxed font-medium">
+                      <p className="text-muted-foreground text-xs leading-relaxed">
                         Based on NIN data, you are ineligible for Voter status.
                         Registration is restricted to the Supporter role.
                       </p>
@@ -269,14 +275,14 @@ export function RoleSelectionStep() {
                     type="button"
                     variant="outline"
                     onClick={() => router.push("/register/profile")}
-                    className="border-border/60 bg-background hover:bg-muted h-11 flex-1 rounded-xl text-[10px] font-bold tracking-[0.15em] uppercase transition-all"
+                    className="border-border/60 bg-background hover:bg-muted h-11 flex-1 rounded-xl text-xs font-bold tracking-widest uppercase transition-all"
                   >
                     <HiArrowLeft className="mr-2 size-3.5" />
                     Back
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 flex-1 rounded-xl text-[10px] font-bold tracking-[0.15em] uppercase transition-all active:scale-95"
+                    className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 flex-1 rounded-xl text-xs font-bold tracking-widest uppercase transition-all active:scale-95"
                   >
                     Continue
                     <HiArrowRight className="ml-2 size-3.5" />

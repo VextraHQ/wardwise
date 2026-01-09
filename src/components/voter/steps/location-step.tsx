@@ -22,8 +22,6 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { StepProgress } from "@/components/ui/step-progress";
 import { RegistrationStepHeader } from "@/components/voter/registration-step-header";
 import {
@@ -39,6 +37,7 @@ import { useLocationData } from "@/hooks/use-location-data";
 import { useQueryClient } from "@tanstack/react-query";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { ComboboxSelect } from "@/components/ui/combobox-select";
+import { motion } from "motion/react";
 
 const locationSchema = z.object({
   state: z.string().min(1, "Please select your state"),
@@ -129,7 +128,7 @@ function PilotStatusBadge({
           </h4>
         </div>
         <div className="bg-white p-4">
-          <p className="text-muted-foreground text-xs leading-relaxed font-medium">
+          <p className="text-muted-foreground text-xs leading-relaxed">
             {description}
           </p>
         </div>
@@ -285,57 +284,72 @@ export function LocationStep() {
       />
 
       {/* Pilot Coverage Notice */}
-      <Card className="border-border/70 bg-card/80 border-dashed backdrop-blur-sm">
-        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-start">
-          <div className="text-primary">
-            <HiInformationCircle className="h-6 w-6" />
+      <div className="border-primary/20 bg-primary/5 rounded-xl border p-4 backdrop-blur-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <div className="text-primary mt-1">
+            <HiInformationCircle className="h-5 w-5" />
           </div>
           <div className="space-y-3 text-left">
             <div>
-              <p className="text-foreground text-sm font-semibold">
+              <p className="text-foreground text-xs font-bold tracking-widest uppercase">
                 Pilot availability
               </p>
-              <p className="text-muted-foreground text-xs">
+              <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
                 All states and LGAs are selectable, but wards & polling units
                 are only digitized in the pilot corridors below.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               {pilotCoverage.map((state) => (
-                <Badge
+                <div
                   key={state.code}
-                  variant="secondary"
-                  className="gap-1 text-xs font-medium"
+                  className="bg-background/50 border-border/60 flex items-center gap-1.5 rounded-md border px-2 py-1"
                 >
-                  <HiLocationMarker className="h-3 w-3" />
-                  {state.name.replace(" State", "")}
-                </Badge>
+                  <HiLocationMarker className="text-primary h-3 w-3" />
+                  <span className="text-[9px] font-bold tracking-widest uppercase">
+                    {state.name.replace(" State", "")}
+                  </span>
+                </div>
               ))}
             </div>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-muted-foreground/80 text-xs italic">
               Choose LGAs like Yola North, Fufore, Jama'are or Bauchi to explore
-              the end-to-end demo experience. Other areas will show limited ward
-              data for now.
+              the end-to-end demo experience.
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Main Card */}
-      <div className="mx-auto w-full max-w-2xl">
-        <Card className="border-border/60 bg-card/95 backdrop-blur-sm">
-          <CardHeader className="border-border border-b">
-            <div className="space-y-2">
-              <h2 className="text-foreground text-lg font-semibold tracking-tight">
-                Polling Unit Location
-              </h2>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-muted-foreground text-sm">
-                  Select your voting location details
-                </p>
-                <div className="flex items-center gap-2">
-                  <div className="text-muted-foreground text-xs">
-                    {completedFields}/4 completed
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="border-border/60 bg-card relative overflow-hidden border shadow-[0_20px_40px_-12px_rgba(0,0,0,0.04)]"
+      >
+        {/* Architectural Markers */}
+        <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
+        <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
+
+        <div className="p-7 sm:p-10">
+          <div className="border-border/40 mb-8 border-b pb-6">
+            <div className="space-y-4">
+              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                <div className="space-y-1">
+                  <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
+                    Polling Unit Location
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <div className="bg-primary/60 size-1.5 rounded-[1px]" />
+                    <p className="text-muted-foreground font-mono text-[10px] font-medium tracking-widest uppercase">
+                      Location Finder{" "}
+                      <span className="text-primary/40 mx-1">|</span>{" "}
+                      <span className="text-foreground font-bold">Active</span>
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
+                    {completedFields}/4 FIELDS
                   </div>
                   <div className="bg-muted h-1.5 w-16 overflow-hidden rounded-full">
                     <div
@@ -346,9 +360,9 @@ export function LocationStep() {
                 </div>
               </div>
             </div>
-          </CardHeader>
+          </div>
 
-          <CardContent>
+          <div>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -392,7 +406,7 @@ export function LocationStep() {
                       return (
                         <FormItem>
                           <FormLabel className="flex items-center justify-between">
-                            <span className="text-muted-foreground/80 flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
+                            <span className="text-foreground flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
                               State
                               {isStateComplete && (
                                 <HiCheck className="text-primary h-3.5 w-3.5" />
@@ -429,7 +443,7 @@ export function LocationStep() {
                               }
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-[9px] tracking-wide uppercase" />
                         </FormItem>
                       );
                     }}
@@ -482,7 +496,7 @@ export function LocationStep() {
                       return (
                         <FormItem>
                           <FormLabel className="flex items-center justify-between">
-                            <span className="text-muted-foreground/80 flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
+                            <span className="text-foreground flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
                               Local Government (LGA)
                               {isLgaComplete && (
                                 <HiCheck className="text-primary h-3.5 w-3.5" />
@@ -548,7 +562,7 @@ export function LocationStep() {
                               disabled={!selectedState}
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-[9px] tracking-wide uppercase" />
                         </FormItem>
                       );
                     }}
@@ -562,7 +576,7 @@ export function LocationStep() {
                       return (
                         <FormItem>
                           <FormLabel className="flex items-center justify-between">
-                            <span className="text-muted-foreground/80 flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
+                            <span className="text-foreground flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
                               Ward
                               {isWardComplete && (
                                 <HiCheck className="text-primary h-3.5 w-3.5" />
@@ -616,7 +630,7 @@ export function LocationStep() {
                               disabled={!selectedLga}
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-[9px] tracking-wide uppercase" />
                         </FormItem>
                       );
                     }}
@@ -630,7 +644,7 @@ export function LocationStep() {
                       return (
                         <FormItem>
                           <FormLabel className="flex items-center justify-between">
-                            <span className="text-muted-foreground/80 flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
+                            <span className="text-foreground flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
                               Polling Unit
                               {isPollingUnitComplete && (
                                 <HiCheck className="text-primary h-3.5 w-3.5" />
@@ -672,7 +686,7 @@ export function LocationStep() {
                               disabled={!selectedWard}
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-[9px] tracking-wide uppercase" />
                         </FormItem>
                       );
                     }}
@@ -680,14 +694,14 @@ export function LocationStep() {
                 </div>
 
                 {/* Help Section */}
-                <div className="border-border bg-muted/50 rounded-lg border p-4">
+                <div className="border-border bg-muted/20 mt-4 rounded-xl border p-4">
                   <div className="flex items-start gap-3">
-                    <HiQuestionMarkCircle className="text-primary mt-0.5 h-5 w-5 shrink-0" />
-                    <div className="space-y-2">
-                      <p className="text-foreground text-sm font-medium">
-                        Need help finding your location details?
+                    <HiQuestionMarkCircle className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="space-y-1">
+                      <p className="text-foreground text-xs font-bold tracking-wider uppercase">
+                        Need help finding your location?
                       </p>
-                      <p className="text-muted-foreground text-xs">
+                      <p className="text-muted-foreground text-xs leading-relaxed">
                         You can find your polling unit on your voter's card or
                         contact INEC for assistance.
                       </p>
@@ -696,40 +710,40 @@ export function LocationStep() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3 pt-2">
+                <div className="flex gap-4">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => router.push("/register/role")}
-                    className="h-10 flex-1"
+                    className="hover:bg-muted/10 h-11 rounded-xl px-8 text-xs font-bold tracking-widest uppercase"
                   >
                     <HiArrowLeft className="mr-2 h-4 w-4" />
                     Back
                   </Button>
                   <Button
                     type="submit"
-                    className="from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground h-10 flex-1 bg-linear-to-r font-semibold transition-all duration-200"
+                    className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 flex-1 rounded-xl text-xs font-bold tracking-widest uppercase shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] transition-all active:scale-95"
                   >
-                    Continue
+                    Continue to Candidates
                     <HiArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               </form>
             </Form>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Subtle Trust Indicators */}
       <TrustIndicators
         items={[
           {
             icon: <HiLocationMarker className="h-4 w-4" />,
-            label: "Accurate Location",
+            label: "ACCURATE_LOCATION",
           },
           {
             icon: <HiQuestionMarkCircle className="h-4 w-4" />,
-            label: "Help Available",
+            label: "HELP_AVAILABLE",
           },
         ]}
       />
