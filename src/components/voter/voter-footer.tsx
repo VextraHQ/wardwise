@@ -8,7 +8,7 @@ export function VoterFooter() {
     <footer className="border-border/40 bg-background relative border-t pt-12 pb-10">
       {/* Structural Anchor Line */}
       <div
-        className="bg-border/20 absolute top-0 left-1/2 hidden h-full w-px -translate-x-1/2 lg:block"
+        className="bg-border/50 absolute top-0 left-1/2 hidden h-full w-px -translate-x-1/2 lg:block"
         aria-hidden="true"
       />
 
