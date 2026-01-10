@@ -77,7 +77,7 @@ export function RoleSelectionStep() {
 
   if (!hasHydrated) {
     return (
-      <div className="mx-auto w-full max-w-2xl space-y-10 py-8">
+      <div className="space-y-10">
         <StepProgress
           currentStep={3}
           totalSteps={6}
@@ -94,7 +94,7 @@ export function RoleSelectionStep() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-10 py-8">
+    <div className="space-y-10">
       <StepProgress currentStep={3} totalSteps={6} stepTitle="Role Selection" />
 
       <RegistrationStepHeader

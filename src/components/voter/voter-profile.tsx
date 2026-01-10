@@ -398,7 +398,7 @@ export function VoterProfile() {
 
   // 3. Main Profile View
   return (
-    <div className="mx-auto max-w-4xl space-y-4 px-4 pt-4 pb-24 sm:space-y-5 sm:px-6 sm:pt-6 sm:pb-6">
+    <div className="space-y-4 sm:space-y-5">
       {/* Profile Header */}
       <ProfileHeader
         fullName={fullName || "Voter"}

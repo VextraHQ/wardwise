@@ -88,7 +88,7 @@ export function NinEntryStep() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-10 py-8">
+    <div className="space-y-10">
       <StepProgress
         currentStep={1}
         totalSteps={6}

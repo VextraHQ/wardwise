@@ -175,7 +175,7 @@ export function VoterLogin() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-lg space-y-10 py-10">
+    <div className="space-y-10">
       <RegistrationStepHeader
         icon={HiUserCircle}
         badge="Account Access"

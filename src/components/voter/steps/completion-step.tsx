@@ -42,7 +42,7 @@ export function CompletionStep() {
   // Share URL and text
   const shareUrl =
     typeof window !== "undefined" ? window.location.origin + "/register" : "";
-  const shareText = `I just registered with WardWise to participate in Adamawa State elections! Join me in making your voice heard. Register now: ${shareUrl}`;
+  const shareText = `I just registered with WardWise to participate in upcoming elections! Join me in making your voice heard. Register now: ${shareUrl}`;
 
   // Copy link to clipboard
   const handleCopyLink = async () => {

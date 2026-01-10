@@ -154,7 +154,7 @@ export function ConfirmationStep() {
   }, [router]);
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6 py-8">
+    <div className="space-y-6">
       <StepProgress
         currentStep={6}
         totalSteps={6}
