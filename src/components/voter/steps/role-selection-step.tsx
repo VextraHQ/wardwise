@@ -295,7 +295,6 @@ export function RoleSelectionStep() {
       </motion.div>
 
       <TrustIndicators
-        className="pt-2"
         items={[
           {
             icon: <HiShieldCheck />,

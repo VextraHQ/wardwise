@@ -869,13 +869,13 @@ export function ProfileStep() {
       {/* Subtle Trust Indicators */}
       <TrustIndicators
         items={[
-          { icon: <HiUser className="h-4 w-4" />, label: "DATA_PRIVACY" },
+          { icon: <HiUser />, label: "DATA_PRIVACY" },
           {
-            icon: <HiShieldCheck className="h-4 w-4" />,
+            icon: <HiShieldCheck />,
             label: "SECURE_ENCRYPTION",
           },
           {
-            icon: <HiCheckCircle className="h-4 w-4" />,
+            icon: <HiCheckCircle />,
             label: "VERIFIED_ON_SUBMIT",
           },
         ]}

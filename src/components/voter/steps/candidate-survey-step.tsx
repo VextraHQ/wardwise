@@ -993,15 +993,15 @@ export function CandidateSurveyStep() {
         <TrustIndicators
           items={[
             {
-              icon: <HiShieldCheck className="h-4 w-4" />,
+              icon: <HiShieldCheck />,
               label: "SECURE_SURVEY",
             },
             {
-              icon: <HiClipboardList className="h-4 w-4" />,
+              icon: <HiClipboardList />,
               label: "POLICY_GUIDED",
             },
             {
-              icon: <HiUsers className="h-4 w-4" />,
+              icon: <HiUsers />,
               label: "ANONYMOUS_AGGREGATION",
             },
           ]}

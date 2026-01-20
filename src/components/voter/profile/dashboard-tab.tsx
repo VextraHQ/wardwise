@@ -234,14 +234,6 @@ export function DashboardTab({
           <p className="text-muted-foreground mt-1 max-w-[200px] text-xs">
             Complete your registration to select your preferred candidates.
           </p>
-          {canEdit && (
-            <Button
-              onClick={handleChangeCandidates}
-              className="mt-4 h-9 gap-2 rounded-lg text-[10px] font-bold tracking-widest uppercase"
-            >
-              Select Candidates
-            </Button>
-          )}
         </motion.div>
       )}
 

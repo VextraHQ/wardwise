@@ -378,15 +378,15 @@ export function ResumeRegistrationStep() {
       <TrustIndicators
         items={[
           {
-            icon: <HiShieldCheck className="h-4 w-4" />,
+            icon: <HiShieldCheck />,
             label: "IDENTITY_VERIFIED",
           },
           {
-            icon: <HiLockClosed className="h-4 w-4" />,
+            icon: <HiLockClosed />,
             label: "SECURELY_STORED",
           },
           {
-            icon: <HiClock className="h-4 w-4" />,
+            icon: <HiClock />,
             label: "RESUME_ANYTIME",
           },
         ]}

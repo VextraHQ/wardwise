@@ -215,10 +215,10 @@ export function DuplicateCheckStep() {
       {/* Subtle Trust Indicators */}
       <TrustIndicators
         items={[
-          { icon: <HiShieldCheck className="h-4 w-4" />, label: "FRAUD_CHECK" },
-          { icon: <HiDatabase className="h-4 w-4" />, label: "DE_DUPLICATION" },
+          { icon: <HiShieldCheck />, label: "FRAUD_CHECK" },
+          { icon: <HiDatabase />, label: "DE_DUPLICATION" },
           {
-            icon: <HiOutlineClock className="h-4 w-4" />,
+            icon: <HiOutlineClock />,
             label: "QUICK_&_PRIVATE",
           },
         ]}

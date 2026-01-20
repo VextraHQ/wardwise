@@ -829,12 +829,12 @@ Important: You can update your information once within 7 days.
       <TrustIndicators
         items={[
           {
-            icon: <HiShieldCheck className="h-4 w-4" />,
+            icon: <HiShieldCheck />,
             label: "VERIFIED_REGISTRATION",
           },
-          { icon: <HiLockClosed className="h-4 w-4" />, label: "SECURE_DATA" },
+          { icon: <HiLockClosed />, label: "SECURE_DATA" },
           {
-            icon: <HiCheckCircle className="h-4 w-4" />,
+            icon: <HiCheckCircle />,
             label: "READY_TO_PARTICIPATE",
           },
         ]}

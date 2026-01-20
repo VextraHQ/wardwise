@@ -5,6 +5,7 @@ interface StepProgressProps {
   totalSteps: number;
   stepTitle: string;
   className?: string;
+  canvasser?: boolean;
 }
 
 export function StepProgress({
@@ -12,6 +13,7 @@ export function StepProgress({
   totalSteps,
   stepTitle,
   className,
+  canvasser,
 }: StepProgressProps) {
   const percentage = Math.round((currentStep / totalSteps) * 100);
 
@@ -21,7 +23,12 @@ export function StepProgress({
       <div className="flex items-end justify-between px-0.5">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2.5">
-            <span className="text-primary text-xs font-extrabold tracking-widest uppercase">
+            <span
+              className={cn(
+                "text-[11px] font-extrabold tracking-widest uppercase sm:text-xs",
+                canvasser ? "text-amber-600" : "text-primary",
+              )}
+            >
               Step {currentStep} of {totalSteps}
             </span>
             <div className="bg-border h-3 w-px" />
@@ -55,11 +62,20 @@ export function StepProgress({
               key={i}
               className={cn(
                 "relative h-full flex-1 transition-all duration-500",
-                isActive ? "bg-primary" : "bg-muted-foreground/15",
+                !isActive
+                  ? "bg-muted-foreground/15"
+                  : canvasser
+                    ? "bg-amber-600"
+                    : "bg-primary",
               )}
             >
               {isCurrent && (
-                <div className="bg-primary/30 absolute inset-0 animate-pulse" />
+                <div
+                  className={cn(
+                    "absolute inset-0 animate-pulse",
+                    canvasser ? "bg-amber-600" : "bg-primary/30",
+                  )}
+                />
               )}
             </div>
           );

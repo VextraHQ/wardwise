@@ -11,9 +11,14 @@ type TrustItem = {
 type TrustIndicatorsProps = {
   items: TrustItem[];
   className?: string;
+  canvasser?: boolean;
 };
 
-export function TrustIndicators({ items, className }: TrustIndicatorsProps) {
+export function TrustIndicators({
+  items,
+  className,
+  canvasser,
+}: TrustIndicatorsProps) {
   if (!items || items.length === 0) return null;
 
   return (
@@ -21,7 +26,12 @@ export function TrustIndicators({ items, className }: TrustIndicatorsProps) {
       <div className="text-muted-foreground/80 flex flex-wrap items-center justify-center gap-6 text-xs">
         {items.map((item, index) => (
           <div key={index} className="flex items-center gap-2.5">
-            <div className="text-primary size-3.5 shrink-0 opacity-70">
+            <div
+              className={cn(
+                "size-3.5 shrink-0 opacity-70",
+                canvasser ? "text-amber-600" : "text-primary",
+              )}
+            >
               {item.icon}
             </div>
             <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">

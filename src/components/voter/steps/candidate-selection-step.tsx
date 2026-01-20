@@ -1133,15 +1133,15 @@ export function CandidateSelectionStep() {
       <TrustIndicators
         items={[
           {
-            icon: <HiShieldCheck className="h-4 w-4" />,
+            icon: <HiShieldCheck />,
             label: "NIN_VERIFIED_AT_SUBMIT",
           },
           {
-            icon: <HiLocationMarker className="h-4 w-4" />,
+            icon: <HiLocationMarker />,
             label: "LOCATION_SCOPED",
           },
           {
-            icon: <HiUsers className="h-4 w-4" />,
+            icon: <HiUsers />,
             label: "REGISTERED_CANDIDATES",
           },
         ]}

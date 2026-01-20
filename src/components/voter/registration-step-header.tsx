@@ -12,40 +12,47 @@ interface RegistrationStepHeaderProps {
   title: string;
   description: string;
   className?: string;
+  canvasser?: boolean;
 }
 
-// function renderIcon(
-//   icon: LucideIcon | IconType | React.ReactNode,
-// ): React.ReactNode {
-//   if (React.isValidElement(icon)) {
-//     return icon;
-//   }
+function renderIcon(
+  icon: LucideIcon | IconType | React.ReactNode,
+): React.ReactNode {
+  if (React.isValidElement(icon)) {
+    return icon;
+  }
 
-//   if (icon) {
-//     const IconComponent = icon as React.ElementType;
-//     return <IconComponent size={16} className="h-4 w-4" />;
-//   }
+  if (icon) {
+    const IconComponent = icon as React.ElementType;
+    return <IconComponent size={16} className="h-4 w-4" />;
+  }
 
-//   return null;
-// }
+  return null;
+}
 
 export function RegistrationStepHeader({
-  // icon: Icon,
-  // badge,
+  icon: Icon,
+  badge,
   title,
   description,
   className,
+  canvasser,
 }: RegistrationStepHeaderProps) {
   return (
     <div className={cn("mb-10 space-y-5 text-center", className)}>
-      {/* <motion.div
+      <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
         className="flex justify-center"
       >
         <div className="bg-muted/30 border-border/60 flex items-center gap-3 rounded-full border py-1.5 pr-4 pl-1.5 backdrop-blur-sm">
-          <div className="bg-background border-border/40 text-primary flex h-8 w-8 items-center justify-center rounded-full border shadow-sm">
+          <div
+            className={cn(
+              "bg-background border-border/40 flex h-8 w-8 items-center justify-center rounded-full border shadow-sm",
+              canvasser ? "text-amber-600" : "text-primary",
+            )}
+          >
             {renderIcon(Icon)}
           </div>
           <div className="flex flex-col text-left">
@@ -54,7 +61,7 @@ export function RegistrationStepHeader({
             </p>
           </div>
         </div>
-      </motion.div> */}
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -66,7 +73,12 @@ export function RegistrationStepHeader({
           {title.includes(" ") ? (
             <>
               {title.split(" ").slice(0, -1).join(" ")}{" "}
-              <span className="text-primary font-serif font-normal italic">
+              <span
+                className={cn(
+                  "font-serif font-normal italic",
+                  canvasser ? "text-amber-600" : "text-primary",
+                )}
+              >
                 {title.split(" ").slice(-1)}
               </span>
             </>

@@ -2,8 +2,9 @@
 
 import { type ReactNode } from "react";
 import { CanvasserHeader } from "@/components/canvasser/canvasser-header";
+import { CanvasserNavigation } from "@/components/canvasser/canvasser-mobile-navigation";
+import { CanvasserFooter } from "@/components/canvasser/canvasser-footer";
 import { DemoBanner } from "@/components/landing/demo-banner";
-import { VoterFooter } from "@/components/voter/voter-footer";
 
 export default function CanvasserLayout({ children }: { children: ReactNode }) {
   return (
@@ -18,8 +19,13 @@ export default function CanvasserLayout({ children }: { children: ReactNode }) {
         }
       />
       <CanvasserHeader />
-      <main className="flex-1">{children}</main>
-      <VoterFooter />
+      <main className="flex-1 pb-20 sm:pb-0">{children}</main>
+      {/* Mobile Bottom Navigation */}
+      <CanvasserNavigation />
+      {/* Desktop Footer - hidden on mobile since we have bottom nav */}
+      <div className="hidden sm:block">
+        <CanvasserFooter />
+      </div>
     </div>
   );
 }

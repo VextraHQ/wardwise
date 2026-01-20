@@ -738,11 +738,11 @@ export function LocationStep() {
       <TrustIndicators
         items={[
           {
-            icon: <HiLocationMarker className="h-4 w-4" />,
+            icon: <HiLocationMarker />,
             label: "ACCURATE_LOCATION",
           },
           {
-            icon: <HiQuestionMarkCircle className="h-4 w-4" />,
+            icon: <HiQuestionMarkCircle />,
             label: "HELP_AVAILABLE",
           },
         ]}

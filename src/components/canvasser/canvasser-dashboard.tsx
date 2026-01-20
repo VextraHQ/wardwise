@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "motion/react";
 import {
   HiUsers,
   HiTrendingUp,
@@ -8,306 +9,468 @@ import {
   HiClock,
   HiCheckCircle,
   HiPlus,
+  HiCalendar,
+  HiLightningBolt,
+  HiArrowRight,
 } from "react-icons/hi";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
+import { CanvasserProfileCard } from "@/components/canvasser/canvasser-profile-header";
+import { CanvasserStatCard } from "@/components/canvasser/canvasser-stat-card";
 
-// Mock data for demo
+/**
+ * TODO: [BACKEND] Dashboard API endpoints
+ * - GET /api/canvassers/:code/dashboard - Aggregated dashboard data
+ * - GET /api/canvassers/:code/recent-voters - Recent registrations
+ * - GET /api/canvassers/:code/ward-coverage - Coverage by ward
+ */
+
+/**
+ * TODO: [SYNC] Real-time updates
+ * - WebSocket connection for live voter verification status
+ * - Push notifications when voters complete candidate selection
+ */
+
+// Production mock data - matches Ahmadu Umaru Fintiri campaign
+const mockCanvasserProfile = {
+  name: "Chioma Okonkwo",
+  phone: "08012345671",
+  canvasserCode: "FINT-A001",
+  candidateName: "Ahmadu Umaru Fintiri",
+  candidateParty: "APC",
+  candidatePosition: "Governor, Adamawa State",
+  territory: {
+    state: "Adamawa",
+    lga: "Yola North",
+    wards: ["Karewa Ward", "Doubeli Ward", "Jimeta Ward", "Alkalawa Ward"],
+  },
+  stats: {
+    totalVoters: 147,
+    verified: 139,
+    pending: 8,
+    verificationRate: 95,
+  },
+};
+
 const mockStats = {
   totalVoters: 147,
+  todayRegistrations: 5,
+  todayTarget: 10,
   thisWeek: 23,
   thisMonth: 67,
   targetProgress: 73,
   targetTotal: 200,
   rank: 1,
   totalCanvassers: 15,
+  verificationRate: 95,
+  activeDays: 21,
 };
 
 const mockRecentVoters = [
   {
     id: "1",
     name: "Aliyu Mohammed",
-    ward: "Song Ward 1",
+    ward: "Karewa Ward",
     time: "2 hours ago",
     verified: true,
   },
   {
     id: "2",
     name: "Hauwa Bello",
-    ward: "Malabu Ward",
+    ward: "Doubeli Ward",
     time: "5 hours ago",
     verified: true,
   },
   {
     id: "3",
     name: "Ibrahim Tukur",
-    ward: "Song Ward 2",
+    ward: "Karewa Ward",
     time: "Yesterday",
     verified: false,
   },
   {
     id: "4",
     name: "Fatima Usman",
-    ward: "Doubeli",
+    ward: "Jimeta Ward",
     time: "Yesterday",
     verified: true,
   },
   {
     id: "5",
     name: "Musa Ahmad",
-    ward: "Jambutu",
+    ward: "Alkalawa Ward",
     time: "2 days ago",
     verified: true,
   },
 ];
 
 const mockWardCoverage = [
-  { ward: "Song Ward 1", voters: 45, target: 50, percentage: 90 },
-  { ward: "Malabu Ward", voters: 32, target: 50, percentage: 64 },
-  { ward: "Song Ward 2", voters: 28, target: 50, percentage: 56 },
-  { ward: "Doubeli", voters: 24, target: 50, percentage: 48 },
-  { ward: "Jambutu", voters: 18, target: 50, percentage: 36 },
+  { ward: "Karewa Ward", voters: 45, target: 50, percentage: 90 },
+  { ward: "Doubeli Ward", voters: 38, target: 50, percentage: 76 },
+  { ward: "Jimeta Ward", voters: 36, target: 50, percentage: 72 },
+  { ward: "Alkalawa Ward", voters: 28, target: 50, percentage: 56 },
 ];
+
+interface CanvasserPanelProps {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+function CanvasserPanel({ title, icon, children }: CanvasserPanelProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className="border-border/60 bg-card relative overflow-hidden border"
+    >
+      <div className="border-amber-500/40 absolute top-0 left-0 size-3 border-t border-l" />
+      <div className="p-4">
+        <div className="mb-3 flex items-center gap-2">
+          {icon && (
+            <div className="bg-amber-500/5 text-amber-700 border-amber-500/30 flex size-7 items-center justify-center rounded-lg border sm:size-8">
+              {icon}
+            </div>
+          )}
+          <h3 className="text-foreground text-[11px] font-bold tracking-tight uppercase sm:text-xs">
+            {title}
+          </h3>
+        </div>
+        {children}
+      </div>
+    </motion.div>
+  );
+}
 
 export function CanvasserDashboard() {
   return (
-    <div className="container mx-auto space-y-6 px-4 py-8">
-      {/* Welcome Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold sm:text-3xl">
-            Welcome back, Chioma! 👋
-          </h1>
-          <p className="text-muted-foreground">
-            You&apos;re doing great! Keep up the momentum.
-          </p>
-        </div>
-        <Button asChild size="lg">
+    <div className="mx-auto max-w-5xl space-y-4 px-4 py-4 sm:space-y-5 sm:py-6">
+      {/* Profile Card */}
+      <CanvasserProfileCard
+        name={mockCanvasserProfile.name}
+        phone={mockCanvasserProfile.phone}
+        canvasserCode={mockCanvasserProfile.canvasserCode}
+        candidateName={mockCanvasserProfile.candidateName}
+        candidateParty={mockCanvasserProfile.candidateParty}
+        candidatePosition={mockCanvasserProfile.candidatePosition}
+        territory={mockCanvasserProfile.territory}
+        stats={mockCanvasserProfile.stats}
+      />
+
+      {/* Quick Actions - More polished buttons */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+      >
+        <Button
+          asChild
+          size="lg"
+          className="group h-14 gap-3 rounded-xl bg-amber-600 text-white transition-all hover:bg-amber-700 sm:h-12"
+        >
           <Link href="/canvasser/register">
-            <HiPlus className="mr-2 h-5 w-5" />
-            Register New Voter
+            <div className="flex size-8 items-center justify-center rounded-lg bg-white/20 sm:size-7">
+              <HiPlus className="size-5 sm:size-4" />
+            </div>
+            <span className="text-sm font-bold sm:text-xs sm:tracking-wide sm:uppercase">
+              Register New Voter
+            </span>
+            <HiArrowRight className="ml-auto size-4 opacity-60 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </Button>
-      </div>
+        <Button
+          asChild
+          variant="outline"
+          size="lg"
+          className="group h-14 gap-3 rounded-xl border border-amber-500 transition-all hover:border-amber-500/50 hover:bg-amber-500/5 sm:h-12"
+        >
+          <Link href="/canvasser/voters">
+            <div className="bg-muted flex size-8 items-center justify-center rounded-lg sm:size-7">
+              <HiUsers className="size-5 text-amber-600 sm:size-4" />
+            </div>
+            <span className="text-sm font-bold sm:text-xs sm:tracking-wide sm:uppercase">
+              View All Voters
+            </span>
+            <HiArrowRight className="ml-auto size-4 opacity-40 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </Button>
+      </motion.div>
+
+      {/* Today's Performance Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        className="border-border/60 bg-card relative overflow-hidden border"
+      >
+        <div className="absolute top-0 left-0 size-3 border-t border-l border-amber-500" />
+        <div className="p-4 sm:p-5">
+          <div className="flex items-center gap-2">
+            <div className="flex size-7 items-center justify-center rounded-lg border border-amber-500/20 bg-amber-500/5 sm:size-8">
+              <HiLightningBolt className="size-4 text-amber-600" />
+            </div>
+            <h3 className="text-foreground text-xs font-bold tracking-tight uppercase sm:text-sm">
+              Today's Performance
+            </h3>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-foreground text-3xl font-black sm:text-4xl">
+                {mockStats.todayRegistrations}
+                <span className="text-muted-foreground ml-1 text-base font-medium">
+                  / {mockStats.todayTarget}
+                </span>
+              </p>
+              <p className="text-muted-foreground mt-1 text-xs font-medium">
+                Registrations today
+              </p>
+            </div>
+            <div className="text-right">
+              <Badge
+                className={`h-6 px-2 text-xs font-bold ${
+                  mockStats.todayRegistrations >= mockStats.todayTarget
+                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                    : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+                }`}
+              >
+                {Math.round(
+                  (mockStats.todayRegistrations / mockStats.todayTarget) * 100,
+                )}
+                % of target
+              </Badge>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div className="mt-3">
+            <Progress
+              value={
+                (mockStats.todayRegistrations / mockStats.todayTarget) * 100
+              }
+              className="h-2"
+            />
+          </div>
+        </div>
+      </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">Total Voters</p>
-                <p className="text-3xl font-bold">{mockStats.totalVoters}</p>
-              </div>
-              <div className="bg-primary/10 rounded-full p-3">
-                <HiUsers className="text-primary h-6 w-6" />
-              </div>
-            </div>
-            <p className="text-muted-foreground mt-2 text-xs">
-              +{mockStats.thisWeek} this week
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">Monthly Target</p>
-                <p className="text-3xl font-bold">
-                  {mockStats.targetProgress}%
-                </p>
-              </div>
-              <div className="rounded-full bg-green-500/10 p-3">
-                <HiTrendingUp className="h-6 w-6 text-green-500" />
-              </div>
-            </div>
-            <Progress value={mockStats.targetProgress} className="mt-2" />
-            <p className="text-muted-foreground mt-1 text-xs">
-              {mockStats.totalVoters} / {mockStats.targetTotal} voters
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">Your Rank</p>
-                <p className="text-3xl font-bold">#{mockStats.rank}</p>
-              </div>
-              <div className="rounded-full bg-amber-500/10 p-3">
-                <span className="text-2xl">🥇</span>
-              </div>
-            </div>
-            <p className="text-muted-foreground mt-2 text-xs">
-              Out of {mockStats.totalCanvassers} canvassers
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">Wards Covered</p>
-                <p className="text-3xl font-bold">5</p>
-              </div>
-              <div className="rounded-full bg-blue-500/10 p-3">
-                <HiLocationMarker className="h-6 w-6 text-blue-500" />
-              </div>
-            </div>
-            <p className="text-muted-foreground mt-2 text-xs">
-              Song LGA, Adamawa State
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+        <CanvasserStatCard
+          label="Total Voters"
+          value={mockStats.totalVoters}
+          subValue={`+${mockStats.thisWeek} this week`}
+          icon={<HiUsers className="size-5" />}
+          delay={0}
+        />
+        <CanvasserStatCard
+          label="Monthly Target"
+          value={`${mockStats.targetProgress}%`}
+          icon={<HiTrendingUp className="size-5" />}
+          iconBgColor="bg-green-500/10"
+          iconColor="text-green-600"
+          progress={{
+            current: mockStats.totalVoters,
+            total: mockStats.targetTotal,
+          }}
+          delay={1}
+        />
+        <CanvasserStatCard
+          label="Your Rank"
+          value={`#${mockStats.rank}`}
+          subValue={`Out of ${mockStats.totalCanvassers} canvassers`}
+          icon={<span className="text-lg">🥇</span>}
+          delay={2}
+        />
+        <CanvasserStatCard
+          label="Active Days"
+          value={mockStats.activeDays}
+          subValue="Days with registrations"
+          icon={<HiCalendar className="size-5" />}
+          iconBgColor="bg-blue-500/10"
+          iconColor="text-blue-600"
+          delay={3}
+        />
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
         {/* Recent Registrations */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div>
-              <h3 className="font-semibold">Recent Registrations</h3>
-              <p className="text-muted-foreground text-sm">
-                Voters you&apos;ve registered
-              </p>
-            </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/canvasser/voters">View All</Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {mockRecentVoters.map((voter) => (
-                <div
-                  key={voter.id}
-                  className="flex items-center justify-between rounded-lg border p-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-full">
-                      <span className="text-sm font-medium">
-                        {voter.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-medium">{voter.name}</p>
-                      <p className="text-muted-foreground text-xs">
-                        {voter.ward}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {voter.verified ? (
-                      <Badge
-                        variant="secondary"
-                        className="bg-green-500/10 text-green-600"
-                      >
-                        <HiCheckCircle className="mr-1 h-3 w-3" />
-                        Verified
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline">
-                        <HiClock className="mr-1 h-3 w-3" />
-                        Pending
-                      </Badge>
-                    )}
-                    <span className="text-muted-foreground text-xs">
-                      {voter.time}
+        <CanvasserPanel
+          title="Recent Registrations"
+          icon={<HiClipboardList className="size-4" />}
+        >
+          <div className="divide-border/40 -mx-4 -mb-4 divide-y">
+            {mockRecentVoters.map((voter, index) => (
+              <motion.div
+                key={voter.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + index * 0.05 }}
+                className="hover:bg-muted/30 flex items-center justify-between gap-3 px-4 py-3 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400">
+                    <span className="text-xs font-bold">
+                      {voter.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
                     </span>
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Ward Coverage */}
-        <Card>
-          <CardHeader className="pb-2">
-            <h3 className="font-semibold">Ward Coverage</h3>
-            <p className="text-muted-foreground text-sm">
-              Your progress by ward
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {mockWardCoverage.map((ward) => (
-                <div key={ward.ward} className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">{ward.ward}</span>
-                    <span className="text-muted-foreground">
-                      {ward.voters}/{ward.target}
-                    </span>
+                  <div className="min-w-0">
+                    <p className="text-foreground truncate text-sm font-bold">
+                      {voter.name}
+                    </p>
+                    <div className="text-muted-foreground flex items-center gap-1 text-[10px]">
+                      <HiLocationMarker className="size-3" />
+                      <span>{voter.ward}</span>
+                    </div>
                   </div>
-                  <Progress value={ward.percentage} className="h-2" />
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader className="pb-2">
-          <h3 className="font-semibold">Quick Actions</h3>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  {voter.verified ? (
+                    <Badge
+                      variant="secondary"
+                      className="h-5 gap-1 bg-green-100 px-1.5 text-[9px] font-bold text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                    >
+                      <HiCheckCircle className="size-2.5" />
+                      Verified
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      className="h-5 gap-1 px-1.5 text-[9px] font-bold"
+                    >
+                      <HiClock className="size-2.5" />
+                      Pending
+                    </Badge>
+                  )}
+                  <span className="text-muted-foreground text-[10px]">
+                    {voter.time}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          <div className="border-border/40 -mx-4 mt-3 -mb-4 border-t px-4 pt-3 pb-4">
             <Button
-              variant="outline"
-              className="h-auto flex-col gap-2 py-4"
+              variant="ghost"
+              size="sm"
               asChild
+              className="h-8 w-full gap-1.5 text-[10px] font-bold tracking-widest uppercase"
             >
-              <Link href="/canvasser/register">
-                <HiClipboardList className="h-6 w-6" />
-                <span>Register Voter</span>
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-auto flex-col gap-2 py-4"
-              asChild
-            >
-              <Link href="/canvasser/voters">
-                <HiUsers className="h-6 w-6" />
-                <span>View My Voters</span>
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-auto flex-col gap-2 py-4"
-              disabled
-            >
-              <HiLocationMarker className="h-6 w-6" />
-              <span>Ward Map</span>
-              <Badge variant="secondary" className="text-[10px]">
-                Coming Soon
-              </Badge>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-auto flex-col gap-2 py-4"
-              disabled
-            >
-              <HiTrendingUp className="h-6 w-6" />
-              <span>Leaderboard</span>
-              <Badge variant="secondary" className="text-[10px]">
-                Coming Soon
-              </Badge>
+              <Link href="/canvasser/voters">View All Voters</Link>
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </CanvasserPanel>
+
+        {/* Ward Coverage */}
+        <CanvasserPanel
+          title="Ward Coverage"
+          icon={<HiLocationMarker className="size-4" />}
+        >
+          <div className="space-y-3">
+            {mockWardCoverage.map((ward, index) => (
+              <motion.div
+                key={ward.ward}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.35 + index * 0.05 }}
+                className="space-y-1.5"
+              >
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-foreground font-bold">{ward.ward}</span>
+                  <span className="text-muted-foreground font-mono text-[10px]">
+                    {ward.voters}/{ward.target}
+                  </span>
+                </div>
+                <div className="bg-muted h-1.5 overflow-hidden rounded-full">
+                  <motion.div
+                    className="h-full rounded-full bg-amber-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${ward.percentage}%` }}
+                    transition={{ duration: 0.8, delay: 0.4 + index * 0.1 }}
+                  />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </CanvasserPanel>
+      </div>
+
+      {/* Quick Actions Grid */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="border-border/60 bg-card relative overflow-hidden border"
+      >
+        <div className="absolute top-0 left-0 size-3 border-t border-l border-amber-500" />
+
+        <div className="p-4 sm:p-5">
+          <h3 className="text-foreground mb-3 text-xs font-bold tracking-tight uppercase sm:text-sm">
+            Quick Actions
+          </h3>
+
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+            <Link
+              href="/canvasser/register"
+              className="group border-border/60 bg-card flex flex-col items-center gap-2 rounded-xl border p-4 transition-all hover:border-amber-500 hover:bg-amber-500/5 active:scale-[0.98]"
+            >
+              <div className="flex size-10 items-center justify-center rounded-xl bg-amber-500/10 transition-transform group-hover:scale-105">
+                <HiClipboardList className="size-5 text-amber-600" />
+              </div>
+              <span className="text-foreground text-[10px] font-bold tracking-wide uppercase">
+                Register Voter
+              </span>
+            </Link>
+            <Link
+              href="/canvasser/voters"
+              className="group border-border/60 bg-card flex flex-col items-center gap-2 rounded-xl border p-4 transition-all hover:border-blue-500/30 hover:bg-blue-500/5 active:scale-[0.98]"
+            >
+              <div className="flex size-10 items-center justify-center rounded-xl bg-blue-500/10 transition-transform group-hover:scale-105">
+                <HiUsers className="size-5 text-blue-600" />
+              </div>
+              <span className="text-foreground text-[10px] font-bold tracking-wide uppercase">
+                My Voters
+              </span>
+            </Link>
+            <div className="border-border/40 bg-muted/30 flex flex-col items-center gap-2 rounded-xl border p-4 opacity-60">
+              <div className="bg-muted flex size-10 items-center justify-center rounded-xl">
+                <HiLocationMarker className="text-muted-foreground size-5" />
+              </div>
+              <span className="text-muted-foreground text-[10px] font-bold tracking-wide uppercase">
+                Ward Map
+              </span>
+              <Badge
+                variant="secondary"
+                className="h-4 px-1.5 text-[7px] font-bold"
+              >
+                Soon
+              </Badge>
+            </div>
+            <div className="border-border/40 bg-muted/30 flex flex-col items-center gap-2 rounded-xl border p-4 opacity-60">
+              <div className="bg-muted flex size-10 items-center justify-center rounded-xl">
+                <HiTrendingUp className="text-muted-foreground size-5" />
+              </div>
+              <span className="text-muted-foreground text-[10px] font-bold tracking-wide uppercase">
+                Leaderboard
+              </span>
+              <Badge
+                variant="secondary"
+                className="h-4 px-1.5 text-[7px] font-bold"
+              >
+                Soon
+              </Badge>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

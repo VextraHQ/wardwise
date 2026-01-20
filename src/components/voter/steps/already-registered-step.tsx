@@ -147,15 +147,15 @@ export function AlreadyRegisteredStep() {
       <TrustIndicators
         items={[
           {
-            icon: <HiShieldCheck className="h-4 w-4" />,
+            icon: <HiShieldCheck />,
             label: "VERIFIED_ACCOUNT",
           },
           {
-            icon: <HiCheckCircle className="h-4 w-4" />,
+            icon: <HiCheckCircle />,
             label: "ACTIVE_REGISTRATION",
           },
           {
-            icon: <HiLockClosed className="h-4 w-4" />,
+            icon: <HiLockClosed />,
             label: "DATA_PROTECTED",
           },
         ]}

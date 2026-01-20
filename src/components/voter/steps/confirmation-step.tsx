@@ -423,15 +423,15 @@ export function ConfirmationStep() {
       <TrustIndicators
         items={[
           {
-            icon: <HiShieldCheck className="h-4 w-4" />,
+            icon: <HiShieldCheck />,
             label: "SECURE_SUBMISSION",
           },
           {
-            icon: <HiPhone className="h-4 w-4" />,
+            icon: <HiPhone />,
             label: "SMS_CONFIRMATION",
           },
           {
-            icon: <HiMail className="h-4 w-4" />,
+            icon: <HiMail />,
             label: "EMAIL_RECEIPT",
           },
         ]}
