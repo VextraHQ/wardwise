@@ -210,9 +210,9 @@ export default function LoginPage() {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="admin@wardwise.com"
+                      placeholder="example@email.com"
                       disabled={isLoading}
-                      className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary h-12 pl-12 font-mono text-sm font-medium tracking-wide transition-all"
+                      className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary h-12 pl-12 font-mono text-sm font-medium transition-all"
                       {...register("email")}
                     />
                   </div>
@@ -247,7 +247,7 @@ export default function LoginPage() {
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••••••"
                       disabled={isLoading}
-                      className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary h-12 pr-12 pl-12 font-mono text-sm font-medium tracking-wide transition-all"
+                      className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary h-12 pr-12 pl-12 font-mono text-sm font-medium transition-all"
                       {...register("password")}
                     />
                     <button
@@ -293,10 +293,10 @@ export default function LoginPage() {
                   {isLoading ? (
                     <>
                       <div className="mr-2 size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                      Authenticating...
+                      Logging in...
                     </>
                   ) : (
-                    "Authorize Access"
+                    "Login"
                   )}
                 </Button>
               </form>

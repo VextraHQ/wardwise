@@ -169,14 +169,14 @@ export function CanvasserDashboard() {
       >
         <Button
           asChild
-          size="lg"
-          className="group h-14 gap-3 rounded-xl bg-amber-600 text-white transition-all hover:bg-amber-700 sm:h-12"
+          size="default"
+          className="group h-12 gap-3 rounded-xl bg-amber-600 text-white transition-all hover:bg-amber-700"
         >
           <Link href="/canvasser/register">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-white/20 sm:size-7">
-              <HiPlus className="size-5 sm:size-4" />
+            <div className="flex size-7 items-center justify-center rounded-lg bg-white/20">
+              <HiPlus className="size-5" />
             </div>
-            <span className="text-sm font-bold sm:text-xs sm:tracking-wide sm:uppercase">
+            <span className="text-sm font-bold">
               Register New Voter
             </span>
             <HiArrowRight className="ml-auto size-4 opacity-60 transition-transform group-hover:translate-x-0.5" />
@@ -185,14 +185,14 @@ export function CanvasserDashboard() {
         <Button
           asChild
           variant="outline"
-          size="lg"
-          className="group h-14 gap-3 rounded-xl border border-amber-500 transition-all hover:border-amber-500/50 hover:bg-amber-500/5 sm:h-12"
+          size="default"
+          className="group h-12 gap-3 rounded-xl border border-amber-500 transition-all hover:border-amber-500/50 hover:bg-amber-500/5"
         >
           <Link href="/canvasser/voters">
-            <div className="bg-muted flex size-8 items-center justify-center rounded-lg sm:size-7">
-              <HiUsers className="size-5 text-amber-600 sm:size-4" />
+            <div className="bg-muted flex size-7 items-center justify-center rounded-lg">
+              <HiUsers className="size-5 text-amber-600" />
             </div>
-            <span className="text-sm font-bold sm:text-xs sm:tracking-wide sm:uppercase">
+            <span className="text-sm font-bold">
               View All Voters
             </span>
             <HiArrowRight className="ml-auto size-4 opacity-40 transition-transform group-hover:translate-x-0.5" />

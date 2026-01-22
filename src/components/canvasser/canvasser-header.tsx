@@ -136,7 +136,7 @@ export function CanvasserHeader() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="relative hidden size-9 sm:flex"
+                  className="relative hidden hover:bg-amber-700/70 size-9 sm:flex"
                 >
                   <HiBell className="size-5" />
                   {pendingCount > 0 && (

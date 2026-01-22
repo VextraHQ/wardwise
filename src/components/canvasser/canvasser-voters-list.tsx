@@ -259,7 +259,7 @@ export function CanvasserVotersList() {
             <Button
               asChild
               size="sm"
-              className="h-9 gap-1.5 rounded-lg text-[10px] font-bold tracking-widest uppercase"
+              className="h-9 gap-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-700 text-[10px] font-bold tracking-widest uppercase"
             >
               <Link href="/canvasser/register">
                 <HiPlus className="size-4" />
