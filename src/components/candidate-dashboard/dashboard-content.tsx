@@ -15,7 +15,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
-import { IconArrowRight, IconClipboardList } from "@tabler/icons-react";
+import {
+  IconArrowRight,
+  IconClipboardList,
+  IconShieldCheck,
+  IconFingerprint,
+  IconUsers,
+} from "@tabler/icons-react";
 
 export function DashboardContent() {
   const { data: dashboardData, isLoading, error } = useCandidateDashboard();
@@ -166,6 +172,73 @@ export function DashboardContent() {
                 </CardContent>
               </Card>
             )}
+            {/* Verification Stats Card */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Verification Status</CardTitle>
+                    <CardDescription>
+                      Voter identity verification overview
+                    </CardDescription>
+                  </div>
+                  <Link
+                    href="/dashboard/verification"
+                    className="text-primary hover:text-primary/80 flex items-center gap-1 text-sm font-medium"
+                  >
+                    Manage
+                    <IconArrowRight className="size-4" />
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg border p-3 text-center">
+                      <div className="text-primary mx-auto mb-1 flex size-8 items-center justify-center rounded-lg bg-green-500/10">
+                        <IconUsers className="size-4 text-green-600" />
+                      </div>
+                      <p className="text-foreground text-xl font-bold">
+                        {dashboardData?.overview?.totalSupporters?.toLocaleString() ||
+                          "0"}
+                      </p>
+                      <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide">
+                        Registered
+                      </p>
+                    </div>
+                    <div className="rounded-lg border p-3 text-center">
+                      <div className="mx-auto mb-1 flex size-8 items-center justify-center rounded-lg bg-amber-500/10">
+                        <IconFingerprint className="size-4 text-amber-600" />
+                      </div>
+                      <p className="text-foreground text-xl font-bold">0</p>
+                      <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide">
+                        NIN Verified
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Verification Rate
+                      </span>
+                      <span className="font-medium">0%</span>
+                    </div>
+                    <Progress value={0} className="h-1.5" />
+                  </div>
+                  <div className="bg-primary/5 flex items-center gap-3 rounded-lg border p-3">
+                    <IconShieldCheck className="text-primary size-5 shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-foreground text-xs font-medium">
+                        Start verifying voters
+                      </p>
+                      <p className="text-muted-foreground text-[10px]">
+                        Upgrade to Premium for NIN identity verification
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
           {tableData.length > 0 && <DataTable data={tableData} />}
         </div>

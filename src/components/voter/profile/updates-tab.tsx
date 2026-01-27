@@ -57,8 +57,8 @@ const initialNotifications: Notification[] = [
   {
     id: "2",
     type: "system",
-    title: "Profile Verified",
-    message: "Your voter registration has been verified successfully.",
+    title: "Registration Complete",
+    message: "Your voter registration has been completed successfully.",
     date: "Yesterday",
     read: false,
   },

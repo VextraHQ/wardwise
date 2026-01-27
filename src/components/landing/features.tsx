@@ -84,7 +84,7 @@ const features = [
     tag: "OPERATIONAL",
     title: "Field Synchronization",
     description:
-      "Proprietary low-latency sync protocols allow canvassers to register voters in offline wards and auto-verify upon reconnection.",
+      "Proprietary low-latency sync protocols allow canvassers to register voters in offline wards and auto-sync upon reconnection.",
     visual: (
       <div className="bg-muted/10 relative flex h-full w-full flex-col justify-center px-12">
         <div className="mb-3 flex items-center justify-between">
@@ -231,7 +231,7 @@ export function FeaturesSection() {
             >
               Precision tools for a <br />
               <span className="text-primary font-serif italic">
-                verified integrated campaign.
+                data-driven campaign.
               </span>
             </motion.h2>
           </div>
@@ -310,7 +310,7 @@ export function FeaturesSection() {
         >
           <div className="flex-1">
             <h4 className="text-foreground mb-4 text-xl font-bold tracking-tight">
-              Integrity-First Verification
+              Integrity-First Architecture
             </h4>
             <p className="text-muted-foreground max-w-lg text-base leading-relaxed">
               Unlike generic survey tools, WardWise is architected to handle the

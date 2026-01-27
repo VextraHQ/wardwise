@@ -1,0 +1,387 @@
+"use client";
+
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  IconCheck,
+  IconCrown,
+  IconShieldCheck,
+  IconUsers,
+  IconPhone,
+  IconMail,
+  IconMessageCircle,
+  IconFingerprint,
+  IconReportAnalytics,
+  IconHeadset,
+  IconMapPin,
+  IconDatabase,
+  IconStar,
+  IconChevronDown,
+  IconChevronUp,
+} from "@tabler/icons-react";
+import { toast } from "sonner";
+
+/**
+ * TODO: [BACKEND] Pricing & Subscription API
+ * - GET /api/subscriptions/plans - Available plans
+ * - POST /api/subscriptions/subscribe - Create subscription
+ * - GET /api/subscriptions/current - Current plan details
+ * - Integration with Paystack/Flutterwave for payments
+ */
+
+interface PlanFeature {
+  text: string;
+  icon: React.ReactNode;
+  included: boolean;
+}
+
+interface PricingPlan {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  priceDetail: string;
+  badge?: string;
+  highlighted?: boolean;
+  features: PlanFeature[];
+  cta: string;
+  ctaVariant: "default" | "outline" | "secondary";
+  currentPlan?: boolean;
+}
+
+const PLANS: PricingPlan[] = [
+  {
+    id: "starter",
+    name: "Starter",
+    description: "Database access with voter registration data",
+    price: "\u20A650,000",
+    priceDetail: "per month, per LGA",
+    currentPlan: true,
+    features: [
+      {
+        text: "Voter names & demographics",
+        icon: <IconUsers className="size-4" />,
+        included: true,
+      },
+      {
+        text: "Location data (State, LGA, Ward)",
+        icon: <IconMapPin className="size-4" />,
+        included: true,
+      },
+      {
+        text: "Candidate preferences",
+        icon: <IconDatabase className="size-4" />,
+        included: true,
+      },
+      {
+        text: "Registration date & status",
+        icon: <IconReportAnalytics className="size-4" />,
+        included: true,
+      },
+      {
+        text: "Phone & email contact info",
+        icon: <IconPhone className="size-4" />,
+        included: false,
+      },
+      {
+        text: "SMS/email outreach tools",
+        icon: <IconMessageCircle className="size-4" />,
+        included: false,
+      },
+      {
+        text: "NIN identity verification",
+        icon: <IconFingerprint className="size-4" />,
+        included: false,
+      },
+    ],
+    cta: "Current Plan",
+    ctaVariant: "secondary",
+  },
+  {
+    id: "standard",
+    name: "Standard",
+    description: "Contact access with outreach capabilities",
+    price: "\u20A6150,000",
+    priceDetail: "per month, per LGA + \u20A610/SMS",
+    features: [
+      {
+        text: "Everything in Starter",
+        icon: <IconCheck className="size-4" />,
+        included: true,
+      },
+      {
+        text: "Phone numbers & email addresses",
+        icon: <IconPhone className="size-4" />,
+        included: true,
+      },
+      {
+        text: "Email outreach tools",
+        icon: <IconMail className="size-4" />,
+        included: true,
+      },
+      {
+        text: "SMS campaign tools",
+        icon: <IconMessageCircle className="size-4" />,
+        included: true,
+      },
+      {
+        text: "Phone OTP verification",
+        icon: <IconShieldCheck className="size-4" />,
+        included: true,
+      },
+      {
+        text: "NIN identity verification",
+        icon: <IconFingerprint className="size-4" />,
+        included: false,
+      },
+      {
+        text: "Deduplication report",
+        icon: <IconReportAnalytics className="size-4" />,
+        included: false,
+      },
+    ],
+    cta: "Upgrade to Standard",
+    ctaVariant: "outline",
+  },
+  {
+    id: "premium",
+    name: "Premium",
+    description: "Full identity verification with deduplication",
+    price: "\u20A6300,000",
+    priceDetail: "per month, per LGA + \u20A6500/verification",
+    badge: "Recommended",
+    highlighted: true,
+    features: [
+      {
+        text: "Everything in Standard",
+        icon: <IconCheck className="size-4" />,
+        included: true,
+      },
+      {
+        text: "NIN identity verification",
+        icon: <IconFingerprint className="size-4" />,
+        included: true,
+      },
+      {
+        text: "Deduplication report",
+        icon: <IconReportAnalytics className="size-4" />,
+        included: true,
+      },
+      {
+        text: "Verified voter badge",
+        icon: <IconShieldCheck className="size-4" />,
+        included: true,
+      },
+      {
+        text: "Priority support",
+        icon: <IconHeadset className="size-4" />,
+        included: true,
+      },
+      {
+        text: "Advanced analytics",
+        icon: <IconReportAnalytics className="size-4" />,
+        included: true,
+      },
+      {
+        text: "Custom verification campaigns",
+        icon: <IconCrown className="size-4" />,
+        included: true,
+      },
+    ],
+    cta: "Upgrade to Premium",
+    ctaVariant: "default",
+  },
+];
+
+const FAQ_ITEMS = [
+  {
+    question: "How does voter verification work?",
+    answer:
+      "Verification is a tiered process. At the Starter level, you get access to voter registration data. Standard adds phone OTP verification to confirm contact details. Premium includes NIN identity verification through NIMC, confirming each voter's identity against national records.",
+  },
+  {
+    question: "What's included in each plan?",
+    answer:
+      "Each plan builds on the previous tier. Starter gives you database access with names, locations, and candidate preferences. Standard adds contact information and outreach tools. Premium adds full identity verification and deduplication reports.",
+  },
+  {
+    question: "Can I change plans at any time?",
+    answer:
+      "Yes, you can upgrade or downgrade your plan at any time. When upgrading, the price difference is prorated for the remainder of your billing cycle. Downgrades take effect at the start of your next billing cycle.",
+  },
+  {
+    question: "How is verification billed?",
+    answer:
+      "Verification costs are per-voter on top of your monthly subscription. Phone OTP verification (Standard) costs \u20A610 per verification. NIN identity verification (Premium) costs \u20A6500 per verification. You only pay for verifications you initiate.",
+  },
+];
+
+export function PricingContent() {
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+
+  const handleUpgrade = (planId: string) => {
+    toast.info("Payment integration coming soon", {
+      description: `Upgrade to ${planId} plan will be available when payment processing is connected.`,
+    });
+  };
+
+  return (
+    <div className="flex flex-1 flex-col gap-6 p-4 md:gap-8 md:p-6">
+      {/* Header */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Plans & Pricing
+          </h1>
+          <Badge variant="outline" className="text-xs font-medium">
+            Demo Pricing
+          </Badge>
+        </div>
+        <p className="text-muted-foreground text-sm">
+          Choose the right plan for your campaign. Access voter data, contact
+          information, and identity verification based on your needs.
+        </p>
+      </div>
+
+      {/* Pricing Cards */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {PLANS.map((plan) => (
+          <Card
+            key={plan.id}
+            className={`relative flex flex-col ${
+              plan.highlighted
+                ? "border-primary ring-primary/20 ring-2"
+                : "border-border"
+            }`}
+          >
+            {plan.badge && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <Badge className="bg-primary text-primary-foreground gap-1 px-3 py-1 text-xs font-bold">
+                  <IconStar className="size-3" />
+                  {plan.badge}
+                </Badge>
+              </div>
+            )}
+            <CardHeader className={plan.badge ? "pt-6" : ""}>
+              <CardTitle className="text-lg">{plan.name}</CardTitle>
+              <CardDescription>{plan.description}</CardDescription>
+              <div className="pt-2">
+                <span className="text-foreground text-3xl font-bold">
+                  {plan.price}
+                </span>
+                <span className="text-muted-foreground ml-1 text-sm">
+                  /{" "}
+                  {plan.priceDetail}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="flex flex-1 flex-col">
+              <div className="flex-1 space-y-3">
+                {plan.features.map((feature, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div
+                      className={`flex size-5 shrink-0 items-center justify-center rounded-full ${
+                        feature.included
+                          ? "bg-primary/10 text-primary"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {feature.included ? (
+                        <IconCheck className="size-3" />
+                      ) : (
+                        <span className="text-[10px]">&mdash;</span>
+                      )}
+                    </div>
+                    <span
+                      className={`text-sm ${
+                        feature.included
+                          ? "text-foreground"
+                          : "text-muted-foreground line-through"
+                      }`}
+                    >
+                      {feature.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6">
+                <Button
+                  variant={plan.ctaVariant}
+                  className="w-full"
+                  disabled={plan.currentPlan}
+                  onClick={() => handleUpgrade(plan.id)}
+                >
+                  {plan.cta}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Enterprise Callout */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="flex flex-col items-center gap-4 py-6 sm:flex-row sm:justify-between">
+          <div>
+            <h3 className="text-foreground font-semibold">
+              Need custom volume pricing?
+            </h3>
+            <p className="text-muted-foreground mt-1 text-sm">
+              For campaigns covering multiple LGAs or states, contact us for
+              enterprise pricing with volume discounts.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            className="shrink-0"
+            onClick={() =>
+              toast.info("Contact sales at enterprise@wardwise.ng")
+            }
+          >
+            Contact Sales
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* FAQ Section */}
+      <div>
+        <h2 className="mb-4 text-lg font-semibold tracking-tight">
+          Frequently Asked Questions
+        </h2>
+        <div className="space-y-2">
+          {FAQ_ITEMS.map((item, i) => (
+            <Card key={i} className="overflow-hidden">
+              <button
+                type="button"
+                className="hover:bg-muted/50 flex w-full items-center justify-between px-4 py-3 text-left transition-colors"
+                onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
+              >
+                <span className="text-foreground text-sm font-medium">
+                  {item.question}
+                </span>
+                {expandedFaq === i ? (
+                  <IconChevronUp className="text-muted-foreground size-4 shrink-0" />
+                ) : (
+                  <IconChevronDown className="text-muted-foreground size-4 shrink-0" />
+                )}
+              </button>
+              {expandedFaq === i && (
+                <div className="border-border border-t px-4 py-3">
+                  <p className="text-muted-foreground text-sm">{item.answer}</p>
+                </div>
+              )}
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

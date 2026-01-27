@@ -263,7 +263,7 @@ export function RoleSelectionStep() {
                         Eligibility Restriction
                       </p>
                       <p className="text-muted-foreground text-xs leading-relaxed">
-                        Based on NIN data, you are ineligible for Voter status.
+                        Based on your date of birth, you are ineligible for Voter status.
                         Registration is restricted to the Supporter role.
                       </p>
                     </div>
@@ -302,7 +302,7 @@ export function RoleSelectionStep() {
           },
           {
             icon: <HiUser />,
-            label: "IDENTITY_CONFIRMED",
+            label: "PROFILE_CONFIRMED",
           },
         ]}
       />

@@ -92,14 +92,14 @@ export function NinEntryStep() {
       <StepProgress
         currentStep={1}
         totalSteps={6}
-        stepTitle="Identity Verification"
+        stepTitle="NIN Registration"
       />
 
       <RegistrationStepHeader
         icon={IdCard}
         badge="Citizen Onboarding"
         title="Start Your Registration"
-        description="Provide your National Identification Number (NIN) to begin your voter enrollment process."
+        description="Provide your National Identification Number (NIN) to register. Your NIN ensures you are uniquely identified in the system."
       />
 
       <motion.div
@@ -120,7 +120,7 @@ export function NinEntryStep() {
               <div className="flex items-center gap-2">
                 <div className="bg-primary/60 size-1.5 rounded-[1px]" />
                 <p className="text-muted-foreground font-mono text-[10px] font-medium tracking-widest uppercase">
-                  Identity Check <span className="text-primary/40 mx-1">|</span>{" "}
+                  Registration <span className="text-primary/40 mx-1">|</span>{" "}
                   <span className="text-foreground font-bold">Required</span>
                 </p>
               </div>
@@ -186,12 +186,12 @@ export function NinEntryStep() {
                 <HiInformationCircle className="text-primary mt-0.5 size-4 shrink-0" />
                 <div className="space-y-0.5">
                   <p className="text-primary text-xs font-bold tracking-widest uppercase">
-                    Verification notice
+                    Registration Notice
                   </p>
                   <p className="text-muted-foreground text-xs leading-relaxed font-medium">
-                    Final identity confirmation occurs at the final step. Ensure
-                    all data matches your official records for successful
-                    registration.
+                    Your NIN uniquely identifies you in the database and
+                    prevents duplicate registrations. Please ensure your NIN is
+                    correct.
                   </p>
                 </div>
               </div>
@@ -263,7 +263,7 @@ export function NinEntryStep() {
           },
           {
             icon: <HiCreditCard />,
-            label: "NIMC_VERIFIED",
+            label: "UNIQUE_ID",
           },
           {
             icon: <HiShieldCheck />,

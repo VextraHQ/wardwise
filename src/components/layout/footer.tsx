@@ -1,11 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { HiShieldCheck, HiEye, HiLockClosed, HiMap } from "react-icons/hi";
+import { HiShieldCheck, HiEye, HiLockClosed } from "react-icons/hi";
+import { Logo } from "./logo";
+import { cn } from "@/lib/utils";
 
-export function VoterFooter() {
+export interface FooterProps {
+  /** Additional classes */
+  className?: string;
+}
+
+/**
+ * Footer - Simple, reusable footer with logo, trust modules, and legal links.
+ */
+export function Footer({ className }: FooterProps) {
   return (
-    <footer className="border-border/40 bg-background relative border-t pt-12 pb-10">
+    <footer
+      className={cn(
+        "border-border/40 bg-background relative border-t pt-12 pb-10",
+        className,
+      )}
+    >
       {/* Structural Anchor Line */}
       <div
         className="bg-border/50 absolute top-0 left-1/2 hidden h-full w-px -translate-x-1/2 lg:block"
@@ -16,23 +31,7 @@ export function VoterFooter() {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
           {/* Brand Identity */}
           <div className="space-y-5">
-            <Link
-              href="/"
-              className="group flex items-center gap-3.5"
-              aria-label="WardWise home"
-            >
-              <div className="border-primary/20 bg-primary/5 text-primary flex h-10 w-10 items-center justify-center rounded-2xl border transition-transform duration-300 group-hover:scale-105 sm:h-11 sm:w-11">
-                <HiMap className="h-6 w-6" />
-              </div>
-              <div className="flex flex-col leading-tight">
-                <span className="text-foreground text-lg font-black tracking-tight sm:text-xl">
-                  WardWise
-                </span>
-                <span className="text-muted-foreground truncate text-[10px] font-medium sm:text-[10.5px]">
-                  Civic Intelligence Platform
-                </span>
-              </div>
-            </Link>
+            <Logo />
             <p className="text-muted-foreground max-w-xs text-[12px] leading-relaxed font-medium">
               National infrastructure for ward-level democratic participation.
               Built for secure identity and campaign integrity.
@@ -65,11 +64,9 @@ export function VoterFooter() {
 
         {/* Legal & Status Bar */}
         <div className="border-border/60 mt-8 flex flex-col items-center justify-between gap-6 border-t pt-8 sm:flex-row">
-          <div className="flex items-center gap-5">
-            <p className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
-              © {new Date().getFullYear()} WardWise. All rights reserved.
-            </p>
-          </div>
+          <p className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
+            © {new Date().getFullYear()} WardWise. All rights reserved.
+          </p>
 
           <div className="flex flex-wrap items-center justify-center gap-6">
             {[

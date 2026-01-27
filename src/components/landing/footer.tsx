@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { HiMap, HiArrowRight, HiMail } from "react-icons/hi";
+import { HiArrowRight, HiMail } from "react-icons/hi";
+import { Logo } from "@/components/layout/logo";
 import { HiArrowUpRight } from "react-icons/hi2";
 import { Button } from "@/components/ui/button";
 
@@ -54,23 +55,7 @@ export function SiteFooter() {
         <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
           {/* Brand section */}
           <div className="max-w-sm space-y-5">
-            <Link
-              href="/"
-              className="group flex items-center gap-3"
-              aria-label="WardWise home"
-            >
-              <div className="border-primary/20 bg-primary/5 text-primary flex h-12 w-12 items-center justify-center rounded-2xl border transition-transform duration-300 group-hover:scale-105">
-                <HiMap className="h-7 w-7" />
-              </div>
-              <div className="flex flex-col leading-tight">
-                <span className="text-foreground text-xl font-black tracking-tight">
-                  WardWise
-                </span>
-                <span className="text-muted-foreground truncate text-[10px] font-medium sm:text-[10.5px]">
-                  Civic Intelligence Platform
-                </span>
-              </div>
-            </Link>
+            <Logo size="lg" />
             <p className="text-muted-foreground text-sm leading-relaxed">
               Nigeria&apos;s leading civic intelligence infrastructure. Briding
               the gap between the field and the dashboard with ward-level

@@ -74,7 +74,7 @@ import {
 type Step = "nin" | "details" | "location" | "confirm";
 
 const steps: { id: Step; label: string }[] = [
-  { id: "nin", label: "NIN Verification" },
+  { id: "nin", label: "NIN Entry" },
   { id: "details", label: "Personal Details" },
   { id: "location", label: "Location" },
   { id: "confirm", label: "Confirm" },
@@ -248,7 +248,7 @@ export function CanvasserRegisterForm() {
     setVerifiedData(mockData);
     detailsForm.setValue("phone", mockData.phone);
     setIsVerifying(false);
-    toast.success("NIN verified successfully!");
+    toast.success("NIN recorded successfully!");
     setCurrentStep("details");
   };
 
@@ -301,7 +301,7 @@ export function CanvasserRegisterForm() {
   const getStepBadge = () => {
     switch (currentStep) {
       case "nin":
-        return "Identity Verification";
+        return "Registration";
       case "details":
         return "Personal Information";
       case "location":
@@ -316,7 +316,7 @@ export function CanvasserRegisterForm() {
   const getStepTitle = () => {
     switch (currentStep) {
       case "nin":
-        return "Verify Voter's NIN";
+        return "Enter Voter's NIN";
       case "details":
         return "Confirm Voter Details";
       case "location":
@@ -331,9 +331,9 @@ export function CanvasserRegisterForm() {
   const getStepDescription = () => {
     switch (currentStep) {
       case "nin":
-        return "Enter the voter's National Identification Number to verify their identity.";
+        return "Enter the voter's National Identification Number for registration.";
       case "details":
-        return "Review and confirm the voter's personal information retrieved from NIN.";
+        return "Review and confirm the voter's personal information.";
       case "location":
         return "Select the voter's preferred voting location within your assigned territory.";
       case "confirm":
@@ -388,7 +388,7 @@ export function CanvasserRegisterForm() {
                     <div className="flex items-center gap-2">
                       <div className="size-1.5 rounded-[1px] bg-amber-500/60" />
                       <p className="text-muted-foreground font-mono text-[10px] font-medium tracking-widest uppercase">
-                        Identity Check{" "}
+                        Registration{" "}
                         <span className="mx-1 text-amber-500/40">|</span>{" "}
                         <span className="text-foreground font-bold">
                           Required
@@ -520,11 +520,11 @@ export function CanvasserRegisterForm() {
                       {isVerifying ? (
                         <>
                           <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                          Verifying NIN...
+                          Recording NIN...
                         </>
                       ) : (
                         <>
-                          Verify NIN
+                          Record NIN
                           <HiArrowRight className="size-4" />
                         </>
                       )}
@@ -545,7 +545,7 @@ export function CanvasserRegisterForm() {
                     <div className="flex items-center gap-2">
                       <div className="size-1.5 rounded-[1px] bg-green-500/60" />
                       <p className="text-muted-foreground font-mono text-[10px] font-medium tracking-widest uppercase">
-                        NIN Verified{" "}
+                        NIN Recorded{" "}
                         <span className="mx-1 text-green-500/40">|</span>{" "}
                         <span className="font-bold text-green-600">
                           Confirmed
@@ -555,7 +555,7 @@ export function CanvasserRegisterForm() {
                   </div>
                   <Badge className="h-6 gap-1 bg-green-100 px-2 text-[10px] font-bold text-green-700 dark:bg-green-900/30 dark:text-green-300">
                     <HiCheckCircle className="size-3" />
-                    Verified
+                    Recorded
                   </Badge>
                 </div>
 
@@ -1088,7 +1088,7 @@ export function CanvasserRegisterForm() {
           },
           {
             icon: <HiCreditCard />,
-            label: "NIMC_VERIFIED",
+            label: "NIN_RECORDED",
           },
           {
             icon: <HiShieldCheck />,

@@ -23,8 +23,8 @@ export function DemoBanner({
   const defaultMessage = (
     <>
       <span className="font-semibold">Demo Environment:</span> This is a
-      demonstration of WardWise. NIN verification and data are mocked for
-      testing purposes.
+      demonstration of WardWise. All data is simulated for demonstration
+      purposes.
     </>
   );
 

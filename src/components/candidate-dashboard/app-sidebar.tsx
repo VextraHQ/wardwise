@@ -3,12 +3,14 @@
 import * as React from "react";
 import {
   IconChartBar,
+  IconCreditCard,
   IconDashboard,
   IconFileDescription,
   IconHelp,
   IconMapPin,
   IconReport,
   IconSettings,
+  IconShieldCheck,
   IconUsers,
   IconPlus,
   IconClipboardList,
@@ -63,6 +65,16 @@ const data = {
       title: "Wards",
       url: "/dashboard/wards",
       icon: IconMapPin,
+    },
+    {
+      title: "Verification",
+      url: "/dashboard/verification",
+      icon: IconShieldCheck,
+    },
+    {
+      title: "Plans & Pricing",
+      url: "/dashboard/pricing",
+      icon: IconCreditCard,
     },
   ],
   quickActions: [

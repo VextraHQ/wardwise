@@ -26,7 +26,14 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconUsers,
+  IconLock,
+  IconArrowRight,
+  IconShieldCheck,
 } from "@tabler/icons-react";
+import Link from "next/link";
+
+// Mock tier — in production, fetch from subscription API
+const CURRENT_TIER: "starter" | "standard" | "premium" = "starter";
 
 export function SupportersContent() {
   const [page, setPage] = useState(1);
@@ -99,6 +106,32 @@ export function SupportersContent() {
         </div>
       </div>
 
+      {/* Tier Upgrade Banner */}
+      {CURRENT_TIER === "starter" && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="flex items-center gap-4 py-4">
+            <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
+              <IconLock className="size-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-foreground text-sm font-medium">
+                Upgrade to see contact information
+              </p>
+              <p className="text-muted-foreground text-xs">
+                Standard plan includes phone numbers and email addresses.
+                Premium adds NIN verification status.
+              </p>
+            </div>
+            <Button variant="outline" size="sm" asChild className="shrink-0">
+              <Link href="/dashboard/pricing">
+                View Plans
+                <IconArrowRight className="ml-1 size-3" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -127,9 +160,18 @@ export function SupportersContent() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>NIN</TableHead>
                     <TableHead>Location</TableHead>
                     <TableHead>Ward</TableHead>
+                    {(CURRENT_TIER === "standard" ||
+                      CURRENT_TIER === "premium") && (
+                      <>
+                        <TableHead>Phone</TableHead>
+                        <TableHead>Email</TableHead>
+                      </>
+                    )}
+                    {CURRENT_TIER === "premium" && (
+                      <TableHead>NIN</TableHead>
+                    )}
                     <TableHead>Registered</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
@@ -141,9 +183,6 @@ export function SupportersContent() {
                         {supporter.firstName} {supporter.middleName || ""}{" "}
                         {supporter.lastName}
                       </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {supporter.nin}
-                      </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="text-sm">{supporter.lga}</span>
@@ -153,17 +192,46 @@ export function SupportersContent() {
                         </div>
                       </TableCell>
                       <TableCell>{supporter.ward}</TableCell>
+                      {(CURRENT_TIER === "standard" ||
+                        CURRENT_TIER === "premium") && (
+                        <>
+                          <TableCell className="text-sm">
+                            {supporter.phone || "\u2014"}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {supporter.email || "\u2014"}
+                          </TableCell>
+                        </>
+                      )}
+                      {CURRENT_TIER === "premium" && (
+                        <TableCell className="font-mono text-xs">
+                          {supporter.nin
+                            ? `${supporter.nin.slice(0, 3)}****${supporter.nin.slice(-3)}`
+                            : "\u2014"}
+                        </TableCell>
+                      )}
                       <TableCell>
                         {new Date(
                           supporter.registrationDate,
                         ).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">
-                          {Object.keys(supporter.surveyAnswers || {}).length > 0
-                            ? "Survey Complete"
-                            : "Registered"}
-                        </Badge>
+                        {CURRENT_TIER === "premium" ? (
+                          <Badge
+                            variant="outline"
+                            className="gap-1"
+                          >
+                            <IconShieldCheck className="size-3" />
+                            Registered
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">
+                            {Object.keys(supporter.surveyAnswers || {})
+                              .length > 0
+                              ? "Survey Complete"
+                              : "Registered"}
+                          </Badge>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

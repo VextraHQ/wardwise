@@ -198,13 +198,13 @@ export function CanvasserVotersList() {
   const filteredVoters = mockVoters.filter((voter) => {
     const matchesSearch =
       voter.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      voter.nin.includes(searchTerm) ||
+      voter.phone.includes(searchTerm) ||
       voter.phone.includes(searchTerm);
     const matchesWard = wardFilter === "all" || voter.ward === wardFilter;
     const matchesStatus =
       statusFilter === "all" ||
-      (statusFilter === "verified" && voter.verified) ||
-      (statusFilter === "pending" && !voter.verified) ||
+      (statusFilter === "registered" && voter.verified) ||
+      (statusFilter === "incomplete" && !voter.verified) ||
       (statusFilter === "complete" && voter.completedCandidates) ||
       (statusFilter === "incomplete" && !voter.completedCandidates);
 
@@ -285,7 +285,7 @@ export function CanvasserVotersList() {
             <div className="relative flex-1">
               <HiSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
               <Input
-                placeholder="Search by name, NIN, or phone..."
+                placeholder="Search by name or phone..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="h-10 rounded-lg pl-9 text-sm"
@@ -315,8 +315,8 @@ export function CanvasserVotersList() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="verified">Verified</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="registered">Registered</SelectItem>
+                <SelectItem value="incomplete">Incomplete</SelectItem>
                 <SelectItem value="complete">Candidates Selected</SelectItem>
                 <SelectItem value="incomplete">Awaiting Selection</SelectItem>
               </SelectContent>
@@ -345,7 +345,7 @@ export function CanvasserVotersList() {
             {verifiedCount}
           </p>
           <p className="text-muted-foreground text-[8px] font-bold tracking-widest uppercase sm:text-[9px]">
-            Verified
+            Registered
           </p>
         </div>
         <div className="bg-card p-3 text-center">
@@ -361,7 +361,7 @@ export function CanvasserVotersList() {
             {pendingCount}
           </p>
           <p className="text-muted-foreground text-[8px] font-bold tracking-widest uppercase sm:text-[9px]">
-            Pending
+            Incomplete
           </p>
         </div>
       </motion.div>
@@ -461,7 +461,7 @@ export function CanvasserVotersList() {
                             className="h-5 gap-1 bg-green-100 px-1.5 text-[9px] font-bold text-green-700 dark:bg-green-900/30 dark:text-green-300"
                           >
                             <HiCheckCircle className="size-2.5" />
-                            Verified
+                            Registered
                           </Badge>
                         ) : (
                           <Badge
@@ -469,7 +469,7 @@ export function CanvasserVotersList() {
                             className="h-5 gap-1 border-amber-300 bg-amber-50 px-1.5 text-[9px] font-bold text-amber-700 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
                           >
                             <HiClock className="size-2.5" />
-                            Pending
+                            Incomplete
                           </Badge>
                         )}
                         {voter.completedCandidates ? (

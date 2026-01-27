@@ -146,7 +146,7 @@ export function ProfileHeader({
             </TooltipTrigger>
             <TooltipContent side="right">
               <p className="text-xs">
-                {role === "voter" ? "Verified Voter" : "Registered Supporter"}
+                {role === "voter" ? "Registered Voter" : "Registered Supporter"}
               </p>
             </TooltipContent>
           </Tooltip>
@@ -164,12 +164,12 @@ export function ProfileHeader({
                 <TooltipTrigger asChild>
                   <span className="flex cursor-default items-center gap-1 text-xs font-bold text-green-600">
                     <HiShieldCheck className="size-3" />
-                    NIN Verified
+                    Registered
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="text-xs">
-                    Your identity was verified via NIN (National ID)
+                    Registered with NIN (National ID)
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -187,7 +187,7 @@ export function ProfileHeader({
               <TooltipContent side="left">
                 <div className="max-w-[200px] space-y-1">
                   <p className="text-xs font-bold">Priority Voter</p>
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-xs">
                     You provided your VIN (Voter ID Number), giving you priority
                     status.
                   </p>
@@ -288,7 +288,7 @@ export function ProfileHeader({
               <TooltipContent>
                 <p className="text-xs">
                   {role === "voter"
-                    ? "Registered voter with verified identity"
+                    ? "Registered voter"
                     : "Registered supporter (non-voter)"}
                 </p>
               </TooltipContent>

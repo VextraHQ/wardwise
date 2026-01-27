@@ -13,7 +13,6 @@ import {
   HiShieldCheck,
   HiPhone,
   HiMail,
-  HiInformationCircle,
   HiExclamationCircle,
 } from "react-icons/hi";
 import { ClipboardCheck } from "lucide-react";
@@ -33,48 +32,18 @@ export function ConfirmationStep() {
   const { payload } = useRegistrationStore();
   const [error, setError] = useState<string | null>(null);
   const [verificationStep, setVerificationStep] = useState<
-    "idle" | "verifying" | "submitting"
+    "idle" | "submitting"
   >("idle");
 
   const submitMutation = useMutation({
     mutationFn: async () => {
-      // Step 1: Verify NIN (mock - this is where real verification would happen)
-      setVerificationStep("verifying");
-
-      // Simulate verification delay (in production, this would call SmileID/Prembly)
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Slightly longer for realism
-
-      // For demo: verification always succeeds
-      // In production:
-      // const verifyResult = await voterApi.verifyNIN(payload.nin);
-      // if (!verifyResult.verified) {
-      //   throw new Error("NIN verification failed. Please check your NIN and try again.");
-      // }
-      //
-      // // CRITICAL: Check if DOB matches NIN record (prevents age spoofing)
-      // const submittedDOB = payload.basic?.dateOfBirth;
-      // const ninDOB = verifyResult.dateOfBirth;
-      // if (submittedDOB !== ninDOB) {
-      //   throw new Error(
-      //     "Your date of birth doesn't match records. Please go back and correct your information."
-      //   );
-      // }
-      //
-      // // Check if user selected "Voter" role but is under 18
-      // const age = calculateAge(ninDOB);
-      // if (payload.basic?.role === "voter" && age < 18) {
-      //   throw new Error(
-      //     "You must be 18 or older to register as a voter. Your registration cannot be completed."
-      //   );
-      // }
-
-      // Step 2: Submit registration
+      // Submit registration directly (no NIN verification — that's a paid tier feature)
       setVerificationStep("submitting");
       const result = await voterApi.submitRegistration(payload);
       return result;
     },
     onSuccess: () => {
-      toast.success("Registration complete! Your NIN has been verified.", {
+      toast.success("Registration complete! Your data has been saved.", {
         duration: 5000,
       });
       router.push("/register/complete");
@@ -90,11 +59,6 @@ export function ConfirmationStep() {
     setError(null);
 
     // Validate required data before submission
-    if (!payload.nin) {
-      setError("NIN is required. Please go back and complete all steps.");
-      return;
-    }
-
     if (
       !payload.basic?.firstName ||
       !payload.basic?.lastName ||
@@ -140,9 +104,6 @@ export function ConfirmationStep() {
 
   // Get status message based on current step
   const getStatusMessage = () => {
-    if (verificationStep === "verifying") {
-      return "Verifying your NIN...";
-    }
     if (verificationStep === "submitting") {
       return "Finalizing your registration...";
     }
@@ -167,21 +128,6 @@ export function ConfirmationStep() {
         title="Review and Confirm Your Registration"
         description="Please review all your information carefully before submitting."
       />
-
-      {/* Verification Info Banner */}
-      <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/30 dark:bg-blue-950/20">
-        <HiInformationCircle className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-            Your NIN will be verified when you submit
-          </p>
-          <p className="text-xs text-blue-700 dark:text-blue-300">
-            We'll verify your National Identification Number matches the
-            information you provided. This ensures only genuine Nigerian voters
-            can register.
-          </p>
-        </div>
-      </div>
 
       {error && (
         <Alert variant="destructive">
@@ -241,7 +187,7 @@ export function ConfirmationStep() {
               </div>
               <div>
                 <dt className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
-                  National ID (NIN)
+                  NIN (Registration ID)
                 </dt>
                 <dd className="text-foreground mt-1 font-mono text-sm font-bold tracking-wider">
                   {payload.nin}

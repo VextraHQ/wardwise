@@ -13,6 +13,7 @@ import {
   HiOfficeBuilding,
   HiExternalLink,
 } from "react-icons/hi";
+import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -75,23 +76,7 @@ export function CanvasserHeader() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-4 sm:gap-6">
             {/* Logo */}
-            <Link
-              href="/canvasser"
-              className="group flex items-center gap-3"
-              aria-label="WardWise Canvasser Home"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/5 text-amber-600 transition-transform duration-300 group-hover:scale-105 sm:h-11 sm:w-11">
-                <HiUsers className="h-6 w-6" />
-              </div>
-              <div className="flex flex-col leading-tight">
-                <span className="text-foreground text-lg font-black tracking-tight sm:text-xl">
-                  WardWise
-                </span>
-                <span className="truncate text-[10px] font-medium text-amber-600/80 sm:text-[10.5px]">
-                  Civic Intelligence Platform
-                </span>
-              </div>
-            </Link>
+            <Logo href="/canvasser" variant="amber" icon={HiUsers} />
 
             {/* Desktop Nav */}
             <nav className="hidden items-center gap-1 md:flex">
@@ -136,7 +121,7 @@ export function CanvasserHeader() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="relative hidden hover:bg-amber-700/70 size-9 sm:flex"
+                  className="relative hidden size-9 hover:bg-amber-700/70 sm:flex"
                 >
                   <HiBell className="size-5" />
                   {pendingCount > 0 && (
@@ -285,7 +270,7 @@ export function CanvasserHeader() {
                             {pendingCount} pending
                           </p>
                           <p className="text-muted-foreground text-[10px]">
-                            Awaiting verification
+                            Awaiting completion
                           </p>
                         </div>
                       </div>

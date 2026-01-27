@@ -30,9 +30,8 @@ export function DemoIndicator({
     <div className="space-y-1.5 text-xs">
       <p className="font-semibold">Demo Environment</p>
       <p>
-        NIN verification is currently mocked for demonstration purposes. In
-        production, this will connect to the real NIMC database for secure
-        identity verification.
+        This is a demonstration environment. Data is mocked for testing
+        purposes. Production will connect to live databases.
       </p>
     </div>
   );
@@ -47,8 +46,8 @@ export function DemoIndicator({
       >
         <HiInformationCircle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
         <span>
-          <span className="font-semibold">Demo Mode:</span> NIN verification is
-          mocked. Production will use real NIMC database.
+          <span className="font-semibold">Demo Mode:</span> Using sample data for
+          demonstration purposes.
         </span>
       </div>
     );

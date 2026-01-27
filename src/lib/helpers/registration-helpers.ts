@@ -76,7 +76,7 @@ export function canProceedToStep(
  */
 export function getStepLabel(step: RegistrationStep): string {
   const labels: Record<RegistrationStep, string> = {
-    nin: "NIN Verification",
+    nin: "NIN Entry",
     role: "Role Selection",
     profile: "Personal Information",
     location: "Voting Location",

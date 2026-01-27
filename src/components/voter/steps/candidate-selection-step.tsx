@@ -1134,7 +1134,7 @@ export function CandidateSelectionStep() {
         items={[
           {
             icon: <HiShieldCheck />,
-            label: "NIN_VERIFIED_AT_SUBMIT",
+            label: "SECURE_SUBMISSION",
           },
           {
             icon: <HiLocationMarker />,

@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 
 const coreStats = [
   {
-    label: "Supporters verified",
+    label: "Supporters registered",
     value: "10,284",
     delta: "+12%",
     caption: "Past 30 days",

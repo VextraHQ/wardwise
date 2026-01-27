@@ -1,5 +1,5 @@
-import { VoterHeader } from "@/components/voter/voter-header";
-import { VoterFooter } from "@/components/voter/voter-footer";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 
 // Note: Voter pages use createVoterMetadata() from @/lib/metadata
 // to apply the "| WardWise" template via absolute titles.
@@ -11,9 +11,9 @@ export default function VoterLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <VoterHeader />
+      <Header badge="Voter Portal" />
       <main className="flex-1">{children}</main>
-      <VoterFooter />
+      <Footer />
     </div>
   );
 }

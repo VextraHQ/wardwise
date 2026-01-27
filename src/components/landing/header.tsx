@@ -8,11 +8,11 @@ import {
   HiX,
   HiChip,
   HiLockClosed,
-  HiMap,
   HiUserGroup,
   HiChevronDown,
   HiDeviceMobile,
 } from "react-icons/hi";
+import { Logo } from "@/components/layout/logo";
 import { useSession } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
@@ -65,23 +65,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
           )}
         >
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
-            <Link
-              href="/"
-              className="group flex items-center gap-3"
-              aria-label="WardWise home"
-            >
-              <div className="border-primary/20 bg-primary/5 text-primary flex h-10 w-10 items-center justify-center rounded-2xl border transition-transform duration-300 group-hover:scale-105 sm:h-11 sm:w-11">
-                <HiMap className="h-6 w-6" />
-              </div>
-              <div className="flex flex-col leading-tight">
-                <span className="text-foreground text-lg font-black tracking-tight sm:text-xl">
-                  WardWise
-                </span>
-                <span className="text-muted-foreground truncate text-[10px] font-medium sm:text-[10.5px]">
-                  Civic Intelligence Platform
-                </span>
-              </div>
-            </Link>
+            <Logo />
             <nav className="hidden items-center gap-1 lg:flex">
               {navigationLinks.map((link, i) => (
                 <a

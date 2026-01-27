@@ -27,7 +27,7 @@ import { RegistrationStepHeader } from "@/components/voter/registration-step-hea
 import type { RegistrationStep } from "@/types/voter";
 
 const stepLabels: Record<RegistrationStep, string> = {
-  nin: "NIN Verification",
+  nin: "NIN Entry",
   role: "Role Selection",
   profile: "Profile Information",
   location: "Voting Location",
@@ -362,7 +362,7 @@ export function ResumeRegistrationStep() {
                 Need a quick refresh?
               </h3>
               <ul className="text-muted-foreground list-disc space-y-1.5 pl-4 text-xs leading-relaxed">
-                <li>Your NIN is securely linked to this saved progress.</li>
+                <li>Your data is securely linked to this saved progress.</li>
                 <li>
                   We validate each step when you continue, so nothing is lost.
                 </li>
@@ -379,7 +379,7 @@ export function ResumeRegistrationStep() {
         items={[
           {
             icon: <HiShieldCheck />,
-            label: "IDENTITY_VERIFIED",
+            label: "DATA_SECURED",
           },
           {
             icon: <HiLockClosed />,

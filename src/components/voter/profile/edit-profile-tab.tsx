@@ -351,10 +351,10 @@ export function EditProfileTab({
             </div>
             <div>
               <h3 className="text-foreground text-xs font-bold tracking-tight uppercase sm:text-sm">
-                Verified Information
+                Registration Information
               </h3>
               <p className="text-muted-foreground font-mono text-xs font-medium tracking-widest uppercase">
-                NIN Verified • Contact support to modify
+                Registered • Contact support to modify
               </p>
             </div>
           </div>
@@ -451,12 +451,12 @@ export function EditProfileTab({
 
               <p className="text-muted-foreground mt-3 flex items-center gap-1 text-xs">
                 <HiCheckCircle className="size-3 text-green-600" />
-                Verified via National Identification Number (NIN)
+                Registered with National Identification Number (NIN)
               </p>
             </>
           ) : (
             <div className="text-muted-foreground py-4 text-center text-sm">
-              No verified information available
+              No registration information available
             </div>
           )}
         </div>

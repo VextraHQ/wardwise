@@ -29,7 +29,7 @@ import { CanvasserStatCard } from "@/components/canvasser/canvasser-stat-card";
 
 /**
  * TODO: [SYNC] Real-time updates
- * - WebSocket connection for live voter verification status
+ * - WebSocket connection for live voter registration status
  * - Push notifications when voters complete candidate selection
  */
 
@@ -48,9 +48,9 @@ const mockCanvasserProfile = {
   },
   stats: {
     totalVoters: 147,
-    verified: 139,
-    pending: 8,
-    verificationRate: 95,
+    registered: 139,
+    incomplete: 8,
+    completionRate: 95,
   },
 };
 
@@ -64,7 +64,7 @@ const mockStats = {
   targetTotal: 200,
   rank: 1,
   totalCanvassers: 15,
-  verificationRate: 95,
+  completionRate: 95,
   activeDays: 21,
 };
 
@@ -74,35 +74,35 @@ const mockRecentVoters = [
     name: "Aliyu Mohammed",
     ward: "Karewa Ward",
     time: "2 hours ago",
-    verified: true,
+    registered: true,
   },
   {
     id: "2",
     name: "Hauwa Bello",
     ward: "Doubeli Ward",
     time: "5 hours ago",
-    verified: true,
+    registered: true,
   },
   {
     id: "3",
     name: "Ibrahim Tukur",
     ward: "Karewa Ward",
     time: "Yesterday",
-    verified: false,
+    registered: false,
   },
   {
     id: "4",
     name: "Fatima Usman",
     ward: "Jimeta Ward",
     time: "Yesterday",
-    verified: true,
+    registered: true,
   },
   {
     id: "5",
     name: "Musa Ahmad",
     ward: "Alkalawa Ward",
     time: "2 days ago",
-    verified: true,
+    registered: true,
   },
 ];
 
@@ -333,13 +333,13 @@ export function CanvasserDashboard() {
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1">
-                  {voter.verified ? (
+                  {voter.registered ? (
                     <Badge
                       variant="secondary"
                       className="h-5 gap-1 bg-green-100 px-1.5 text-[9px] font-bold text-green-700 dark:bg-green-900/30 dark:text-green-300"
                     >
                       <HiCheckCircle className="size-2.5" />
-                      Verified
+                      Registered
                     </Badge>
                   ) : (
                     <Badge
@@ -347,7 +347,7 @@ export function CanvasserDashboard() {
                       className="h-5 gap-1 px-1.5 text-[9px] font-bold"
                     >
                       <HiClock className="size-2.5" />
-                      Pending
+                      Incomplete
                     </Badge>
                   )}
                   <span className="text-muted-foreground text-[10px]">

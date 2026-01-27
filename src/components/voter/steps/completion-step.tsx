@@ -343,7 +343,7 @@ Important: You can update your information once within 7 days.
             icon={PartyPopper}
             badge="Registration Complete"
             title={`You're all set, ${firstName}!`}
-            description="Your registration has been saved securely and is ready for verification"
+            description="Your registration has been saved securely"
           />
         </div>
       </section>
@@ -500,7 +500,7 @@ Important: You can update your information once within 7 days.
                           className="gap-1.5 rounded-md px-2 py-0.5 text-[9px] font-bold tracking-widest uppercase"
                         >
                           <HiShieldCheck className="h-3 w-3" />
-                          Verified Voter
+                          Registered Voter
                         </Badge>
                       </dd>
                     </div>
@@ -740,7 +740,7 @@ Important: You can update your information once within 7 days.
                 <li className="text-muted-foreground flex items-start gap-2 text-xs leading-relaxed">
                   <span className="text-primary mt-0.5 shrink-0">•</span>
                   <span>
-                    Your registration will be verified by WardWise system
+                    Your registration is saved in the WardWise system
                   </span>
                 </li>
                 <li className="text-muted-foreground flex items-start gap-2 text-xs leading-relaxed">
@@ -830,7 +830,7 @@ Important: You can update your information once within 7 days.
         items={[
           {
             icon: <HiShieldCheck />,
-            label: "VERIFIED_REGISTRATION",
+            label: "COMPLETE_REGISTRATION",
           },
           { icon: <HiLockClosed />, label: "SECURE_DATA" },
           {

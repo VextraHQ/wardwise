@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 const benefitPoints = [
   "Supporters share what matters most in their community",
-  "Canvassers verify voters with ward-level precision",
+  "Canvassers register voters with ward-level precision",
   "Candidates drive strategy with real-time field data",
 ];
 
@@ -235,7 +235,7 @@ export function HeroSection() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                          Verification Progress
+                          Registration Progress
                         </p>
                         <p className="text-4xl font-black tracking-tighter text-slate-900">
                           84.2%
@@ -301,9 +301,9 @@ export function HeroSection() {
                           subtitle: "Fully Mapped",
                         },
                         {
-                          label: "Verified Voters",
+                          label: "Registered Voters",
                           val: "10,244",
-                          subtitle: "Valid ID Check",
+                          subtitle: "Unique Records",
                         },
                       ].map((stat, i) => (
                         <div key={i} className="space-y-0.5">
@@ -330,7 +330,7 @@ export function HeroSection() {
                       {[
                         {
                           ward: "Ward 04",
-                          act: "+42 Voters Verified",
+                          act: "+42 Voters Registered",
                           time: "2m ago",
                           status: "success",
                         },

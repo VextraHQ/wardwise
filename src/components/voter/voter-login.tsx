@@ -32,7 +32,7 @@ import {
 } from "@/lib/schemas/common-schemas";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { RegistrationStepHeader } from "@/components/voter/registration-step-header";
-import { motion } from "motion/react";
+import { AuthCard } from "@/components/auth/auth-card";
 
 export function VoterLogin() {
   const router = useRouter();
@@ -180,172 +180,148 @@ export function VoterLogin() {
         icon={HiUserCircle}
         badge="Account Access"
         title="Voter Login"
-        description="Verify your identity using your National Identification Number (NIN) to access your secure profile."
+        description="Access your profile using your National Identification Number (NIN)."
       />
 
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="border-border/60 bg-card relative overflow-hidden border shadow-[0_20px_40px_-12px_rgba(0,0,0,0.04)]"
+      <AuthCard
+        title="Secure Login"
+        subtitle="Secure Connection"
+        status="Active"
+        icon={HiShieldCheck}
       >
-        {/* Architectural Markers */}
-        <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
-        <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-1.5">
+              <Label
+                htmlFor="nin"
+                className="text-foreground text-xs font-bold tracking-widest uppercase"
+              >
+                National ID (NIN)
+              </Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HiInformationCircle className="text-muted-foreground hover:text-primary h-4 w-4 cursor-help transition-colors duration-300" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>
+                      Your 11-digit NIN is found on your NIMC ID card or
+                      National ID slip
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
 
-        <div className="p-7 sm:p-10">
-          <div className="mb-8 flex items-center justify-between">
-            <div className="space-y-1">
-              <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
-                Secure Verification
-              </h2>
-              <div className="flex items-center gap-2">
-                <div className="bg-primary/60 size-1.5 rounded-[1px]" />
-                <p className="text-muted-foreground font-mono text-[10px] font-medium tracking-widest uppercase">
-                  Secure Connection{" "}
-                  <span className="text-primary/40 mx-1">|</span>{" "}
-                  <span className="text-foreground font-bold">Active</span>
-                </p>
+            <div className="relative">
+              <div className="border-border/60 bg-muted/30 absolute top-1/2 left-2.5 flex size-7 -translate-y-1/2 items-center justify-center rounded-md border">
+                <HiCreditCard className="text-muted-foreground size-3.5" />
+              </div>
+              <Input
+                id="nin"
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="0000 0000 000"
+                className={cn(
+                  "border-border/60 bg-muted/5 focus:border-primary focus:ring-primary h-12 pr-14 pl-12 font-mono text-base font-bold tracking-[0.15em] transition-all",
+                  rawNin.length > 0 &&
+                    !isValidNin &&
+                    "border-destructive focus:border-destructive focus:ring-destructive",
+                  loginAttempts >= 3 && "opacity-50",
+                )}
+                value={rawNin}
+                onChange={(e) => handleNINChange(e.target.value)}
+                maxLength={13}
+                disabled={loginMutation.isPending || loginAttempts >= 3}
+              />
+              <div className="text-muted-foreground absolute top-1/2 right-3.5 -translate-y-1/2 font-mono text-[9px] font-bold uppercase">
+                {getCharacterCount()}
               </div>
             </div>
-            <div className="bg-primary/5 text-primary border-primary/20 flex size-9 items-center justify-center rounded-lg border">
-              <HiShieldCheck className="size-4.5" />
-            </div>
+            {rawNin.length > 0 && !isValidNin && (
+              <p className="text-destructive font-mono text-xs font-medium tracking-wide uppercase">
+                Invalid NIN format. Please check your card.
+              </p>
+            )}
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-1.5">
-                <Label
-                  htmlFor="nin"
-                  className="text-foreground text-xs font-bold tracking-widest uppercase"
-                >
-                  National ID (NIN)
-                </Label>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HiInformationCircle className="text-muted-foreground hover:text-primary h-4 w-4 cursor-help transition-colors duration-300" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        Your 11-digit NIN is found on your NIMC ID card or
-                        National ID slip
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-
-              <div className="relative">
-                <div className="border-border/60 bg-muted/30 absolute top-1/2 left-2.5 flex size-7 -translate-y-1/2 items-center justify-center rounded-md border">
-                  <HiCreditCard className="text-muted-foreground size-3.5" />
-                </div>
-                <Input
-                  id="nin"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="off"
-                  placeholder="0000 0000 000"
-                  className={cn(
-                    "border-border/60 bg-muted/5 focus:border-primary focus:ring-primary h-12 pr-14 pl-12 font-mono text-base font-bold tracking-[0.15em] transition-all",
-                    rawNin.length > 0 &&
-                      !isValidNin &&
-                      "border-destructive focus:border-destructive focus:ring-destructive",
-                    loginAttempts >= 3 && "opacity-50",
-                  )}
-                  value={rawNin}
-                  onChange={(e) => handleNINChange(e.target.value)}
-                  maxLength={13}
-                  disabled={loginMutation.isPending || loginAttempts >= 3}
-                />
-                <div className="text-muted-foreground absolute top-1/2 right-3.5 -translate-y-1/2 font-mono text-[9px] font-bold uppercase">
-                  {getCharacterCount()}
-                </div>
-              </div>
-              {rawNin.length > 0 && !isValidNin && (
-                <p className="text-destructive font-mono text-xs font-medium tracking-wide uppercase">
-                  Invalid NIN format. Please check your card.
+          {loginMutation.isPending ? (
+            <div className="bg-primary/5 border-primary/20 flex flex-col items-center justify-center gap-3 rounded-xl border py-6">
+              <Loader2 className="text-primary size-5 animate-spin" />
+              <div className="text-center">
+                <p className="text-foreground text-xs font-bold tracking-wider uppercase">
+                  Looking Up Account
                 </p>
-              )}
-            </div>
-
-            {loginMutation.isPending ? (
-              <div className="bg-primary/5 border-primary/20 flex flex-col items-center justify-center gap-3 rounded-xl border py-6">
-                <Loader2 className="text-primary size-5 animate-spin" />
-                <div className="text-center">
-                  <p className="text-foreground text-xs font-bold tracking-wider uppercase">
-                    Verifying Identity
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  <div className="bg-primary/60 size-1.5 animate-pulse rounded-[1px]" />
+                  <p className="text-muted-foreground font-mono text-[10px] font-medium tracking-widest uppercase">
+                    Database Check{" "}
+                    <span className="text-primary/40 mx-1">|</span> Scanning
                   </p>
-                  <div className="flex items-center justify-center gap-2 pt-1">
-                    <div className="bg-primary/60 size-1.5 animate-pulse rounded-[1px]" />
-                    <p className="text-muted-foreground font-mono text-[10px] font-medium tracking-widest uppercase">
-                      Database Check{" "}
-                      <span className="text-primary/40 mx-1">|</span> Scanning
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {loginAttempts > 0 && loginMutation.isError && (
+                <div className="bg-destructive/5 border-destructive/20 flex gap-3 rounded-xl border p-4">
+                  <HiExclamationCircle className="text-destructive size-4 shrink-0" />
+                  <div className="space-y-0.5">
+                    <p className="text-destructive text-xs font-bold tracking-widest uppercase">
+                      Login Failed
+                    </p>
+                    <p className="text-muted-foreground text-xs leading-relaxed font-medium">
+                      {loginAttempts >= 3
+                        ? "Maximum attempts exceeded. Please contact support."
+                        : "NIN not found. Please verify your number and try again."}
                     </p>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {loginAttempts > 0 && loginMutation.isError && (
-                  <div className="bg-destructive/5 border-destructive/20 flex gap-3 rounded-xl border p-4">
-                    <HiExclamationCircle className="text-destructive size-4 shrink-0" />
-                    <div className="space-y-0.5">
-                      <p className="text-destructive text-xs font-bold tracking-widest uppercase">
-                        Login Failed
-                      </p>
-                      <p className="text-muted-foreground text-xs leading-relaxed font-medium">
-                        {loginAttempts >= 3
-                          ? "Maximum attempts exceeded. Please contact support."
-                          : "NIN not found. Please verify your number and try again."}
-                      </p>
-                    </div>
+              )}
+
+              {isOffline && (
+                <div className="flex gap-3 rounded-xl border border-orange-500/20 bg-orange-500/5 p-4">
+                  <HiExclamationCircle className="size-4 shrink-0 text-orange-600" />
+                  <div className="space-y-0.5">
+                    <p className="text-xs font-bold tracking-widest text-orange-600 uppercase">
+                      Offline Status
+                    </p>
+                    <p className="text-muted-foreground text-xs leading-relaxed font-medium">
+                      Internet connection lost. Please check your network.
+                    </p>
                   </div>
-                )}
+                </div>
+              )}
 
-                {isOffline && (
-                  <div className="flex gap-3 rounded-xl border border-orange-500/20 bg-orange-500/5 p-4">
-                    <HiExclamationCircle className="size-4 shrink-0 text-orange-600" />
-                    <div className="space-y-0.5">
-                      <p className="text-xs font-bold tracking-widest text-orange-600 uppercase">
-                        Offline Status
-                      </p>
-                      <p className="text-muted-foreground text-xs leading-relaxed font-medium">
-                        Internet connection lost. Please check your network.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                <Button
-                  type="submit"
-                  disabled={
-                    !isValidNin ||
-                    loginMutation.isPending ||
-                    isOffline ||
-                    loginAttempts >= 3
-                  }
-                  className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 w-full rounded-xl text-xs font-bold tracking-widest uppercase transition-all active:scale-95 disabled:grayscale"
-                >
-                  Login
-                </Button>
-              </div>
-            )}
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/register"
-                className="text-primary font-bold underline-offset-4 hover:underline"
+              <Button
+                type="submit"
+                disabled={
+                  !isValidNin ||
+                  loginMutation.isPending ||
+                  isOffline ||
+                  loginAttempts >= 3
+                }
+                className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 w-full rounded-xl text-xs font-bold tracking-widest uppercase transition-all active:scale-95 disabled:grayscale"
               >
-                Register here
-              </Link>
-            </p>
-          </div>
+                Login
+              </Button>
+            </div>
+          )}
+        </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/register"
+              className="text-primary font-bold underline-offset-4 hover:underline"
+            >
+              Register here
+            </Link>
+          </p>
         </div>
-      </motion.div>
+      </AuthCard>
 
       <TrustIndicators
         items={[
@@ -355,7 +331,7 @@ export function VoterLogin() {
           },
           {
             icon: <HiCreditCard />,
-            label: "IDENTITY_VERIFIED",
+            label: "IDENTITY_CONFIRMED",
           },
           {
             icon: <HiShieldCheck />,

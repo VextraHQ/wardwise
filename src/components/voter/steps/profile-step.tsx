@@ -264,22 +264,6 @@ export function ProfileStep() {
         description="We need some basic information to complete your registration"
       />
 
-      {/* Verification Info Banner */}
-      <div className="mx-auto w-full max-w-2xl">
-        <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/30 dark:bg-blue-950/20">
-          <HiInformationCircle className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-              Your information will be verified at the final step
-            </p>
-            <p className="text-xs text-blue-700 dark:text-blue-300">
-              Please enter accurate details. We'll verify your NIN matches this
-              information when you complete registration.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -876,7 +860,7 @@ export function ProfileStep() {
           },
           {
             icon: <HiCheckCircle />,
-            label: "VERIFIED_ON_SUBMIT",
+            label: "SECURE_REGISTRATION",
           },
         ]}
       />

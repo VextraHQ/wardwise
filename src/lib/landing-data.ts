@@ -82,10 +82,10 @@ export const processSteps: ProcessStep[] = [
     icon: HiViewGrid,
   },
   {
-    name: "Field Verification",
+    name: "Field Registration",
     number: "02",
     description:
-      "Canvassers deploy with ward-level precision to verify voters and synchronize real-time ground data.",
+      "Canvassers deploy with ward-level precision to register voters and synchronize real-time ground data.",
     icon: HiLocationMarker,
   },
   {
@@ -121,7 +121,7 @@ export const featureCards: FeatureCard[] = [
   {
     title: "Canvasser Field Portal",
     description:
-      "Empower your boots on the ground with a mobile-optimized interface for real-time verification.",
+      "Empower your boots on the ground with a mobile-optimized interface for real-time data collection.",
     icon: HiDeviceMobile,
     metricLabel: "Active Canvassers",
     metricValue: "420+",
@@ -133,15 +133,15 @@ export const featureCards: FeatureCard[] = [
     description:
       "Choose the candidate you believe in—your support routes straight to their dashboard.",
     icon: HiCheckCircle,
-    metricLabel: "Verified Choices",
+    metricLabel: "Registered Choices",
     metricValue: "12,305",
     metricTrend: "+12%",
     color: "emerald",
   },
   {
-    title: "Secure Verification",
+    title: "Secure Registration",
     description:
-      "OTP verification and unique agent codes ensure every voter is real and uniquely registered.",
+      "Unique agent codes and NIN-based deduplication ensure every voter is uniquely registered.",
     icon: HiLockClosed,
     metricLabel: "Security Uptime",
     metricValue: "100%",
@@ -208,9 +208,9 @@ export const ecosystemRoles: EcosystemRole[] = [
     role: "Canvassers",
     title: "Activate the Field",
     description:
-      "Securely register and verify voters house-to-house with real-time sync.",
+      "Securely register voters house-to-house with real-time sync.",
     color: "orange",
-    features: ["Field-Ready Mobile App", "Agent Codes", "Instant Verification"],
+    features: ["Field-Ready Mobile App", "Agent Codes", "Real-Time Sync"],
     icon: HiDeviceMobile,
   },
   {
@@ -232,12 +232,12 @@ export const platformPillars = [
   {
     title: "Connected Field Network",
     description:
-      "Local canvassers, digital forms, and automated lookups ensure voter registrations are verified at the polling-unit level without friction.",
+      "Local canvassers, digital forms, and automated lookups ensure voter registrations are recorded at the polling-unit level without friction.",
     focus: "Field Operations",
     signal:
-      "Polling-unit canvassers sync with verification bots to confirm identity records before campaigns go live.",
+      "Polling-unit canvassers sync with registration data to confirm records before campaigns go live.",
     metric: {
-      label: "Verification speed",
+      label: "Registration speed",
       value: "12m",
       context: "Avg. per ward",
     },
@@ -282,7 +282,7 @@ export const coreStats: CoreStat[] = [
     label: "Growth Momentum",
     value: "12,305",
     delta: "+12%",
-    caption: "Verified Voter Profiles",
+    caption: "Registered Voter Profiles",
   },
   {
     label: "Field Capacity",
@@ -315,7 +315,7 @@ export const impactHighlights = [
 
 export const trustIndicators = [
   "Validated by field agents and campaign strategists",
-  "Verified polling-unit mapping and validation",
+  "Polling-unit mapping and data validation",
   "Secure infrastructure with end-to-end encryption",
 ];
 
@@ -329,7 +329,7 @@ export const securityHighlights = [
   {
     title: "Secure Field Access",
     description:
-      "Canvassers use location-locked codes and GPS-verified registration to ensure field data is coming from the right ward.",
+      "Canvassers use location-locked codes and GPS-tracked registration to ensure field data is coming from the right ward.",
     icon: HiLockClosed,
   },
   {

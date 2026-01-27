@@ -40,9 +40,9 @@ interface CanvasserProfileCardProps {
   };
   stats?: {
     totalVoters: number;
-    verified: number;
-    pending: number;
-    verificationRate: number;
+    registered: number;
+    incomplete: number;
+    completionRate: number;
   };
   isLoading?: boolean;
 }
@@ -306,23 +306,23 @@ export function CanvasserProfileCard({
             </div>
             <div className="p-2 text-center">
               <p className="text-lg font-black text-green-600 sm:text-xl">
-                {stats.verified}
+                {stats.registered}
               </p>
               <p className="text-muted-foreground text-[8px] font-bold tracking-widest uppercase sm:text-[9px]">
-                Verified
+                Registered
               </p>
             </div>
             <div className="p-2 text-center">
               <p className="text-lg font-black text-amber-600 sm:text-xl">
-                {stats.pending}
+                {stats.incomplete}
               </p>
               <p className="text-muted-foreground text-[8px] font-bold tracking-widest uppercase sm:text-[9px]">
-                Pending
+                Incomplete
               </p>
             </div>
             <div className="p-2 text-center">
               <p className="text-lg font-black text-blue-600 sm:text-xl">
-                {stats.verificationRate}%
+                {stats.completionRate}%
               </p>
               <p className="text-muted-foreground text-[8px] font-bold tracking-widest uppercase sm:text-[9px]">
                 Rate
