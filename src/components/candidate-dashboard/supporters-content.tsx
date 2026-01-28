@@ -196,7 +196,7 @@ export function SupportersContent() {
                         CURRENT_TIER === "premium") && (
                         <>
                           <TableCell className="text-sm">
-                            {supporter.phone || "\u2014"}
+                            {supporter.phoneNumber || "\u2014"}
                           </TableCell>
                           <TableCell className="text-sm">
                             {supporter.email || "\u2014"}

@@ -233,7 +233,7 @@ export function VoterProfile() {
   // Derived values
   const fullName = `${
     payload.basic?.firstName || ""
-  } ${payload.basic?.lastName || ""}`.trim();
+  } ${payload.basic?.middleName || ""} ${payload.basic?.lastName || ""}`.trim();
 
   const actualRegistrationDate =
     voterData?.registrationDate || payload.basic?.dateOfBirth;

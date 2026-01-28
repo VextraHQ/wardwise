@@ -62,7 +62,10 @@ function getIncompleteFromStorage(nin: string): Voter | null {
         canvasserCode: payload.canvasser?.canvasserCode,
         candidateSelections: payload.candidates?.selections || [],
         surveyAnswers: {},
-        verifiedAt: new Date().toISOString(),
+        ninVerifiedAt: undefined, // Not verified yet (incomplete registration)
+        phoneVerifiedAt: undefined,
+        ninVerificationStatus: undefined,
+        phoneVerificationStatus: undefined,
         registrationDate: new Date().toISOString().split("T")[0],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

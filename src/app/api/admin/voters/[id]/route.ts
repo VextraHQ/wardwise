@@ -29,7 +29,8 @@ export async function GET(
       voter: {
         ...voter,
         dateOfBirth: voter.dateOfBirth.toISOString(),
-        verifiedAt: voter.verifiedAt?.toISOString() || null,
+        ninVerifiedAt: voter.ninVerifiedAt?.toISOString() || null,
+        phoneVerifiedAt: voter.phoneVerifiedAt?.toISOString() || null,
         registrationDate: voter.registrationDate.toISOString(),
         createdAt: voter.createdAt.toISOString(),
         updatedAt: voter.updatedAt.toISOString(),

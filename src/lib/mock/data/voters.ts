@@ -18,7 +18,7 @@
  * - Keep only for registered users that demonstrate full profiles
  * - Will be used when building candidate dashboards to show survey response analytics
  *
- * NOTE on registrationDate, createdAt, updatedAt, verifiedAt:
+ * NOTE on registrationDate, createdAt, updatedAt, ninVerifiedAt:
  * - These timestamps are collected but not currently analyzed
  * - Will be used for registration trend charts (daily/weekly/monthly growth)
  * - Useful for tracking campaign progress over time
@@ -99,7 +99,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Peace",
     vin: "E15D F76A 5EED AAD7",
-    verifiedAt: "2025-01-02T10:05:00Z",
+    ninVerifiedAt: "2025-01-02T10:05:00Z",
   },
   {
     id: "voter-2025-002",
@@ -320,7 +320,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Garba",
     vin: "7ABD 29F8 3592 D6C1",
-    verifiedAt: "2025-10-27T10:05:00Z",
+    ninVerifiedAt: "2025-10-27T10:05:00Z",
     canvasserCode: "CAN-373",
   },
   {
@@ -487,7 +487,7 @@ export const voters: Voter[] = [
       },
     ],
     vin: "04D0 44A8 BCC0 CB62",
-    verifiedAt: "2025-09-08T10:05:00Z",
+    ninVerifiedAt: "2025-09-08T10:05:00Z",
   },
   {
     id: "voter-2025-009",
@@ -544,7 +544,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Aliyu",
     vin: "CC6F F870 B983 274D",
-    verifiedAt: "2025-01-10T10:05:00Z",
+    ninVerifiedAt: "2025-01-10T10:05:00Z",
     canvasserCode: "CAN-352",
   },
   {
@@ -601,7 +601,7 @@ export const voters: Voter[] = [
       },
     ],
     vin: "B30D BBFE 7389 05B6",
-    verifiedAt: "2025-11-12T10:05:00Z",
+    ninVerifiedAt: "2025-11-12T10:05:00Z",
   },
   {
     id: "voter-2025-011",
@@ -658,7 +658,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Garba",
     vin: "D519 07AE 95E2 FD9A",
-    verifiedAt: "2025-03-17T10:05:00Z",
+    ninVerifiedAt: "2025-03-17T10:05:00Z",
   },
   {
     id: "voter-2025-012",
@@ -715,7 +715,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Umar",
     vin: "82A1 5040 FE74 DD8B",
-    verifiedAt: "2025-06-27T10:05:00Z",
+    ninVerifiedAt: "2025-06-27T10:05:00Z",
   },
   {
     id: "voter-2025-013",
@@ -991,7 +991,7 @@ export const voters: Voter[] = [
       },
     ],
     vin: "5447 5810 A336 74A2",
-    verifiedAt: "2025-02-12T10:05:00Z",
+    ninVerifiedAt: "2025-02-12T10:05:00Z",
   },
   {
     id: "voter-2025-018",
@@ -1103,7 +1103,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Garba",
     vin: "BB1D DEC2 721C A70D",
-    verifiedAt: "2025-04-09T10:05:00Z",
+    ninVerifiedAt: "2025-04-09T10:05:00Z",
   },
   {
     id: "voter-2025-020",
@@ -1159,7 +1159,7 @@ export const voters: Voter[] = [
       },
     ],
     vin: "33DE AEA2 2DAE 9B70",
-    verifiedAt: "2025-02-12T10:05:00Z",
+    ninVerifiedAt: "2025-02-12T10:05:00Z",
   },
   {
     id: "voter-2025-021",
@@ -1215,7 +1215,7 @@ export const voters: Voter[] = [
       },
     ],
     vin: "F2FD 88B4 961B F88F",
-    verifiedAt: "2025-07-02T10:05:00Z",
+    ninVerifiedAt: "2025-07-02T10:05:00Z",
   },
   {
     id: "voter-2025-022",
@@ -1325,7 +1325,7 @@ export const voters: Voter[] = [
       },
     ],
     vin: "B74D 6D4E 193E BA47",
-    verifiedAt: "2025-10-08T10:05:00Z",
+    ninVerifiedAt: "2025-10-08T10:05:00Z",
   },
   {
     id: "voter-2025-024",
@@ -1381,7 +1381,7 @@ export const voters: Voter[] = [
       },
     ],
     vin: "7FE0 D200 4F06 9D4C",
-    verifiedAt: "2025-07-09T10:05:00Z",
+    ninVerifiedAt: "2025-07-09T10:05:00Z",
     canvasserCode: "CAN-710",
   },
   {
@@ -1495,7 +1495,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Chioma",
     vin: "510A 0530 C522 78BE",
-    verifiedAt: "2025-11-22T10:05:00Z",
+    ninVerifiedAt: "2025-11-22T10:05:00Z",
     canvasserCode: "CAN-568",
   },
   {
@@ -1662,7 +1662,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Peace",
     vin: "A9DE EE95 5CA6 C659",
-    verifiedAt: "2025-11-03T10:05:00Z",
+    ninVerifiedAt: "2025-11-03T10:05:00Z",
   },
   {
     id: "voter-2025-030",
@@ -1775,7 +1775,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Sunday",
     vin: "DEBB 8E05 8EA5 4199",
-    verifiedAt: "2025-01-11T10:05:00Z",
+    ninVerifiedAt: "2025-01-11T10:05:00Z",
   },
   {
     id: "voter-2025-032",
@@ -1832,7 +1832,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Sunday",
     vin: "ACC6 1C8F 2BCB 06FB",
-    verifiedAt: "2025-08-21T10:05:00Z",
+    ninVerifiedAt: "2025-08-21T10:05:00Z",
   },
   {
     id: "voter-2025-033",
@@ -1888,7 +1888,7 @@ export const voters: Voter[] = [
       },
     ],
     vin: "3D75 FD25 AE40 16E0",
-    verifiedAt: "2025-05-08T10:05:00Z",
+    ninVerifiedAt: "2025-05-08T10:05:00Z",
   },
   {
     id: "voter-2025-034",
@@ -2710,7 +2710,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Patience",
     vin: "4A6E C0DB 11D1 0A45",
-    verifiedAt: "2025-11-06T10:05:00Z",
+    ninVerifiedAt: "2025-11-06T10:05:00Z",
   },
   {
     id: "voter-2025-049",
@@ -2985,7 +2985,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Usman",
     vin: "63CA A9DA AE68 6D93",
-    verifiedAt: "2025-08-16T10:05:00Z",
+    ninVerifiedAt: "2025-08-16T10:05:00Z",
   },
   {
     id: "voter-2025-054",
@@ -3042,7 +3042,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Aliyu",
     vin: "3CAA 864E 9B9C 8EA5",
-    verifiedAt: "2025-06-08T10:05:00Z",
+    ninVerifiedAt: "2025-06-08T10:05:00Z",
   },
   {
     id: "voter-2025-055",
@@ -3099,7 +3099,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Hope",
     vin: "4CE7 7D40 7FEB AA55",
-    verifiedAt: "2025-10-21T10:05:00Z",
+    ninVerifiedAt: "2025-10-21T10:05:00Z",
   },
   {
     id: "voter-2025-056",
@@ -3156,7 +3156,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Sani",
     vin: "7956 E781 6A6D 1124",
-    verifiedAt: "2025-11-26T10:05:00Z",
+    ninVerifiedAt: "2025-11-26T10:05:00Z",
   },
   {
     id: "voter-2025-057",
@@ -3267,7 +3267,7 @@ export const voters: Voter[] = [
       },
     ],
     vin: "BE15 C991 4184 E8B8",
-    verifiedAt: "2025-09-22T10:05:00Z",
+    ninVerifiedAt: "2025-09-22T10:05:00Z",
     canvasserCode: "CAN-907",
   },
   {
@@ -3380,7 +3380,7 @@ export const voters: Voter[] = [
     ],
     middleName: "Tunde",
     vin: "72A2 D87E 6805 9E4F",
-    verifiedAt: "2025-05-04T10:05:00Z",
+    ninVerifiedAt: "2025-05-04T10:05:00Z",
   },
 ];
 

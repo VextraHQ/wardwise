@@ -99,7 +99,7 @@ export function NinEntryStep() {
         icon={IdCard}
         badge="Citizen Onboarding"
         title="Start Your Registration"
-        description="Provide your National Identification Number (NIN) to register. Your NIN ensures you are uniquely identified in the system."
+        description="Provide your National Identification Number (NIN) to register. Your NIN helps prevent duplicate registrations in the database."
       />
 
       <motion.div
@@ -143,9 +143,10 @@ export function NinEntryStep() {
                         <HiInformationCircle className="text-muted-foreground hover:text-primary h-4 w-4 cursor-help transition-colors duration-300" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>
+                        <p className="max-w-xs">
                           Your 11-digit NIN is found on your NIMC ID card or
-                          National ID slip
+                          National ID slip. Make sure to enter it correctly—it
+                          cannot be changed later.
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -186,12 +187,13 @@ export function NinEntryStep() {
                 <HiInformationCircle className="text-primary mt-0.5 size-4 shrink-0" />
                 <div className="space-y-0.5">
                   <p className="text-primary text-xs font-bold tracking-widest uppercase">
-                    Registration Notice
+                    How We Use Your NIN
                   </p>
                   <p className="text-muted-foreground text-xs leading-relaxed font-medium">
-                    Your NIN uniquely identifies you in the database and
-                    prevents duplicate registrations. Please ensure your NIN is
-                    correct.
+                    Your NIN is used to prevent duplicate registrations in our
+                    database. We do not verify your identity at this stage.
+                    Verification is optional and handled separately by campaign
+                    organizers.
                   </p>
                 </div>
               </div>

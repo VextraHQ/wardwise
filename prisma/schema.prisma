@@ -72,6 +72,8 @@ model Candidate {
   user         User?
   voterSelections VoterCandidateSelection[]
   canvassers   Canvasser[]
+  subscriptions Subscription[]
+  verificationCampaigns VerificationCampaign[]
 }
 
 model Voter {
@@ -92,10 +94,13 @@ model Voter {
   ward               String
   pollingUnit        String
   role               String     @default("voter")
-  vin                String?
+  vin                String?    // Legacy VIN field - optional, may not be populated
   canvasserCode      String?
   surveyAnswers      Json?
-  verifiedAt         DateTime?
+  ninVerifiedAt      DateTime?  // When NIN was verified via paid verification campaign
+  phoneVerifiedAt    DateTime?  // When phone was verified via SMS OTP
+  ninVerificationStatus String? // "verified" | "failed" | "pending"
+  phoneVerificationStatus String? // "verified" | "failed" | "pending"
   registrationDate   DateTime   @default(now())
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
@@ -138,4 +143,71 @@ model Canvasser {
 
   @@index([candidateId])
   @@index([code])
+}
+
+model Subscription {
+  id                String   @id @default(cuid())
+  candidateId       String
+  tier              String   // "starter" | "standard" | "premium"
+  status            String   @default("active") // "active" | "cancelled" | "expired"
+  startDate         DateTime @default(now())
+  endDate           DateTime?
+  monthlyPrice      Int      // In kobo (₦50,000 = 5000000)
+  verificationCredits Int    @default(0) // Number of NIN verifications available
+  smsCredits        Int      @default(0) // Number of SMS available
+  autoRenew         Boolean  @default(true)
+  paymentProvider   String?  // "paystack" | "flutterwave"
+  paymentReference  String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  candidate         Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@index([candidateId])
+  @@index([status])
+}
+
+model VerificationCampaign {
+  id                String   @id @default(cuid())
+  candidateId       String
+  name              String   // e.g., "Lagos West NIN Verification - Jan 2026"
+  type              String   // "nin" | "phone" | "both"
+  status            String   @default("pending") // "pending" | "running" | "completed" | "failed"
+  targetCount       Int      // How many voters to verify
+  completedCount    Int      @default(0)
+  successCount      Int      @default(0)
+  failedCount       Int      @default(0)
+  costPerCheck      Int      // In kobo (₦500 = 50000)
+  totalCost         Int      @default(0)
+  filters           Json?    // Store ward/LGA/state filters
+  startedAt         DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  candidate         Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  verificationRecords VerificationRecord[]
+
+  @@index([candidateId])
+  @@index([status])
+}
+
+model VerificationRecord {
+  id                String   @id @default(cuid())
+  campaignId        String
+  voterId           String
+  verificationType  String   // "nin" | "phone"
+  status            String   // "success" | "failed" | "pending"
+  provider          String?  // "smileid" | "nimc" | "termii"
+  providerResponse  Json?    // Raw API response
+  errorMessage      String?
+  cost              Int      // In kobo
+  verifiedAt        DateTime?
+  createdAt         DateTime @default(now())
+
+  campaign          VerificationCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@index([voterId])
+  @@index([status])
 }

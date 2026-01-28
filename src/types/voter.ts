@@ -22,7 +22,10 @@ export type Voter = {
   canvasserCode?: string; // Optional canvasser referral code
   candidateSelections?: CandidateSelection[]; // Multi-candidate selections
   surveyAnswers?: Record<string, string | string[]>; // JSON structure (optional)
-  verifiedAt?: string; // ISO datetime string
+  ninVerifiedAt?: string; // ISO datetime string (NIN verification timestamp)
+  phoneVerifiedAt?: string; // ISO datetime string (Phone verification timestamp)
+  ninVerificationStatus?: string; // "verified" | "failed" | "pending"
+  phoneVerificationStatus?: string; // "verified" | "failed" | "pending"
   registrationDate: string; // ISO date string
   createdAt: string; // ISO datetime string
   updatedAt: string; // ISO datetime string

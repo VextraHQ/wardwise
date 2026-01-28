@@ -155,7 +155,7 @@ export function CompletionStep() {
   // First name and full name
   const firstName = payload.basic?.firstName || "Voter";
   const fullName =
-    `${payload.basic?.firstName || ""} ${payload.basic?.lastName || ""}`.trim();
+    `${payload.basic?.firstName || ""} ${payload.basic?.middleName || ""} ${payload.basic?.lastName || ""}`.trim();
 
   // Get position labels for display
   const getPositionLabel = (position: string) => {
@@ -739,9 +739,7 @@ Important: You can update your information once within 7 days.
                 </li>
                 <li className="text-muted-foreground flex items-start gap-2 text-xs leading-relaxed">
                   <span className="text-primary mt-0.5 shrink-0">•</span>
-                  <span>
-                    Your registration is saved in the WardWise system
-                  </span>
+                  <span>Your registration is saved in the WardWise system</span>
                 </li>
                 <li className="text-muted-foreground flex items-start gap-2 text-xs leading-relaxed">
                   <span className="text-primary mt-0.5 shrink-0">•</span>

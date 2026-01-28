@@ -199,7 +199,7 @@ export function DashboardContent() {
                         <IconUsers className="size-4 text-green-600" />
                       </div>
                       <p className="text-foreground text-xl font-bold">
-                        {dashboardData?.overview?.totalSupporters?.toLocaleString() ||
+                        {dashboardData?.totalSupporters?.toLocaleString() ||
                           "0"}
                       </p>
                       <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide">
