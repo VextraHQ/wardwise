@@ -34,9 +34,10 @@ const roleLinks = [
 ];
 
 const legalLinks = [
-  { label: "Privacy Policy", href: "#" },
-  { label: "Terms of Service", href: "#" },
-  { label: "Security", href: "#security" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms of Service", href: "/terms" },
+  { label: "Cookie Policy", href: "/cookies" },
+  { label: "Support", href: "/support" },
 ];
 
 const footerSections = [
@@ -57,7 +58,7 @@ export function SiteFooter() {
           <div className="max-w-sm space-y-5">
             <Logo size="lg" />
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Nigeria&apos;s leading civic intelligence infrastructure. Briding
+              Nigeria&apos;s leading civic intelligence infrastructure. Bridging
               the gap between the field and the dashboard with ward-level
               accuracy.
             </p>
@@ -76,11 +77,11 @@ export function SiteFooter() {
           {/* Links grid */}
           <div className="grid grid-cols-2 gap-12 text-sm sm:grid-cols-3 lg:gap-16">
             {footerSections.map((section) => (
-              <div key={section.title} className="space-y-6">
+              <div key={section.title} className="space-y-5">
                 <h3 className="text-foreground text-[11px] font-black tracking-[0.2em] uppercase">
                   {section.title}
                 </h3>
-                <ul className="space-y-4">
+                <ul className="space-y-3">
                   {section.links.map((link) => (
                     <li key={link.label}>
                       <Link
@@ -102,12 +103,18 @@ export function SiteFooter() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-border/40 mt-8 flex flex-col items-center justify-between gap-6 border-t pt-10 sm:flex-row">
-          <p className="text-muted-foreground text-[11px] font-semibold tracking-widest">
-            © {currentYear} WardWise. All rights reserved.
-          </p>
+        <div className="border-border/40 mt-12 flex flex-col items-center justify-between gap-6 border-t pt-8 sm:flex-row">
+          <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
+            <p className="text-muted-foreground text-xs font-semibold tracking-wider">
+              © {currentYear} WardWise. All rights reserved.
+            </p>
+            <span className="text-muted-foreground/40 hidden sm:inline">·</span>
+            <p className="text-muted-foreground/70 font-mono text-[10px]">
+              A Product of Vextra Limited
+            </p>
+          </div>
           <Link
-            href="mailto:info@wardwise.ng"
+            href="mailto:support@wardwise.ng"
             className="group border-border bg-background/50 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary flex items-center gap-2 rounded-full border px-4 py-2 transition-all"
           >
             <HiMail className="h-4 w-4" />
