@@ -12,6 +12,24 @@
 // COMPANY & PLATFORM INFO
 // Note: Update this when legal/company details change
 // ============================================================================
+
+/**
+ * Date when legal documents were last updated.
+ * Update this whenever you modify the legal content.
+ */
+export const LEGAL_LAST_UPDATED = new Date("2026-01-28");
+
+/**
+ * Format a date for display (e.g., "January 28, 2026")
+ */
+export function formatLegalDate(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 export const COMPANY_INFO = {
   /** Product/Platform name */
   name: "WardWise",
@@ -27,7 +45,6 @@ export const COMPANY_INFO = {
   address: "Abuja, Nigeria",
   /** Platform URL */
   website: "https://wardwise.ng",
-  lastUpdated: "January 28, 2026",
 } as const;
 
 export interface LegalSection {

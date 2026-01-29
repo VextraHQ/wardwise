@@ -1,23 +1,12 @@
-"use client";
+import type { Metadata } from "next";
+import { CookiesContent } from "@/components/legal/cookies-content";
 
-import { HiCog } from "react-icons/hi";
-import {
-  LegalPageLayout,
-  LegalSectionContent,
-} from "@/components/layout/legal-page-layout";
-import { cookiePolicySections } from "@/lib/data/legal-data";
+export const metadata: Metadata = {
+  title: "Cookie Policy",
+  description:
+    "Understand how WardWise uses cookies and similar technologies to enhance your experience.",
+};
 
 export default function CookiePolicyPage() {
-  return (
-    <LegalPageLayout
-      title="Cookie Policy"
-      subtitle="How we use cookies and similar technologies"
-      systemCode="LEGAL_COOK_001"
-      icon={HiCog}
-      variant="primary"
-      activePage="/cookies"
-    >
-      <LegalSectionContent sections={cookiePolicySections} />
-    </LegalPageLayout>
-  );
+  return <CookiesContent />;
 }

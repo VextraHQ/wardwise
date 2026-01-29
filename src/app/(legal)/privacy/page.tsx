@@ -1,23 +1,12 @@
-"use client";
+import type { Metadata } from "next";
+import { PrivacyContent } from "@/components/legal/privacy-content";
 
-import { HiShieldCheck } from "react-icons/hi";
-import {
-  LegalPageLayout,
-  LegalSectionContent,
-} from "@/components/layout/legal-page-layout";
-import { privacyPolicySections } from "@/lib/data/legal-data";
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description:
+    "Learn how WardWise collects, uses, and protects your personal information on our civic intelligence platform.",
+};
 
 export default function PrivacyPolicyPage() {
-  return (
-    <LegalPageLayout
-      title="Privacy Policy"
-      subtitle="How we collect, use, and protect your information"
-      systemCode="LEGAL_PRIV_001"
-      icon={HiShieldCheck}
-      variant="primary"
-      activePage="/privacy"
-    >
-      <LegalSectionContent sections={privacyPolicySections} />
-    </LegalPageLayout>
-  );
+  return <PrivacyContent />;
 }

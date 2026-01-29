@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { HiArrowRight, HiMail } from "react-icons/hi";
-import { Logo } from "@/components/layout/logo";
 import { HiArrowUpRight } from "react-icons/hi2";
+import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
+import { legalNavigation, COMPANY_INFO } from "@/lib/data/legal-data";
 
 // Footer link data
 const platformLinks = [
@@ -33,17 +34,17 @@ const roleLinks = [
   },
 ];
 
-const legalLinks = [
-  { label: "Privacy Policy", href: "/privacy" },
-  { label: "Terms of Service", href: "/terms" },
-  { label: "Cookie Policy", href: "/cookies" },
-  { label: "Support", href: "/support" },
-];
-
+// Use centralized legal navigation from legal-data.ts
 const footerSections = [
   { title: "Platform", links: platformLinks },
   { title: "Access", links: roleLinks },
-  { title: "Legal", links: legalLinks },
+  {
+    title: "Legal",
+    links: legalNavigation.map((item) => ({
+      label: item.label,
+      href: item.href,
+    })),
+  },
 ];
 
 export function SiteFooter() {
@@ -106,15 +107,15 @@ export function SiteFooter() {
         <div className="border-border/40 mt-12 flex flex-col items-center justify-between gap-6 border-t pt-8 sm:flex-row">
           <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
             <p className="text-muted-foreground text-xs font-semibold tracking-wider">
-              © {currentYear} WardWise. All rights reserved.
+              © {currentYear} {COMPANY_INFO.name}. All rights reserved.
             </p>
             <span className="text-muted-foreground/40 hidden sm:inline">·</span>
             <p className="text-muted-foreground/70 font-mono text-[10px]">
-              A Product of Vextra Limited
+              A Product of {COMPANY_INFO.legalName}
             </p>
           </div>
           <Link
-            href="mailto:support@wardwise.ng"
+            href={`mailto:${COMPANY_INFO.supportEmail}`}
             className="group border-border bg-background/50 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary flex items-center gap-2 rounded-full border px-4 py-2 transition-all"
           >
             <HiMail className="h-4 w-4" />

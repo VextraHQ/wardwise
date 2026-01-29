@@ -1,23 +1,12 @@
-"use client";
+import type { Metadata } from "next";
+import { TermsContent } from "@/components/legal/terms-content";
 
-import { HiDocumentText } from "react-icons/hi";
-import {
-  LegalPageLayout,
-  LegalSectionContent,
-} from "@/components/layout/legal-page-layout";
-import { termsOfServiceSections } from "@/lib/data/legal-data";
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description:
+    "Review the terms and conditions for using WardWise civic intelligence platform.",
+};
 
 export default function TermsOfServicePage() {
-  return (
-    <LegalPageLayout
-      title="Terms of Service"
-      subtitle="Rules and guidelines for using WardWise"
-      systemCode="LEGAL_TOS_001"
-      icon={HiDocumentText}
-      variant="primary"
-      activePage="/terms"
-    >
-      <LegalSectionContent sections={termsOfServiceSections} />
-    </LegalPageLayout>
-  );
+  return <TermsContent />;
 }
