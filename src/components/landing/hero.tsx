@@ -6,6 +6,7 @@ import { HiArrowRight } from "react-icons/hi";
 import { motion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { heroSupportingCopy } from "@/lib/landing-data";
 import { HiArrowUpRight } from "react-icons/hi2";
 import { cn } from "@/lib/utils";
@@ -380,12 +381,44 @@ export function HeroSection() {
                 <div className="flex items-center justify-between border-t border-slate-100 bg-white/40 px-6 py-3">
                   <div className="flex items-center gap-3">
                     <div className="flex -space-x-2">
-                      {[1, 2, 3].map((i) => (
-                        <div
+                      {[
+                        {
+                          src: "/images/avatars/agent-1.png",
+                          alt: "Field Agent Adewale",
+                          initials: "AO",
+                        },
+                        {
+                          src: "/images/avatars/agent-2.png",
+                          alt: "Field Agent Ngozi",
+                          initials: "NE",
+                        },
+                        {
+                          src: "/images/avatars/agent-3.png",
+                          alt: "Field Agent Chukwudi",
+                          initials: "CB",
+                        },
+                        {
+                          src: "/images/avatars/agent-4.png",
+                          alt: "Field Agent Amina",
+                          initials: "AM",
+                        },
+                      ].map((agent, i) => (
+                        <Avatar
                           key={i}
-                          className="size-8 rounded-full border-2 border-white bg-slate-200"
-                        />
+                          className="size-8 border-2 border-white shadow-sm"
+                        >
+                          <AvatarImage src={agent.src} alt={agent.alt} />
+                          <AvatarFallback className="bg-slate-200 text-[10px] font-bold text-slate-600">
+                            {agent.initials}
+                          </AvatarFallback>
+                        </Avatar>
                       ))}
+                      {/* Additional agents indicator */}
+                      <Avatar className="size-8 border-2 border-white shadow-sm">
+                        <AvatarFallback className="bg-primary text-[9px] font-bold text-white">
+                          99+
+                        </AvatarFallback>
+                      </Avatar>
                     </div>
                     <p className="text-[11px] font-bold text-slate-600">
                       Active Field Agents:{" "}
