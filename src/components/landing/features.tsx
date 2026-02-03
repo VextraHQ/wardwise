@@ -252,7 +252,7 @@ export function FeaturesSection() {
         </div>
 
         {/* Feature Matrix - Advanced Grid */}
-        <div className="bg-border border-border mx-auto grid max-w-6xl gap-px overflow-hidden rounded-[3rem] border shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+        <div className="bg-border border-border mx-auto grid max-w-7xl gap-px overflow-hidden rounded-[3rem] border shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
           {features.map((feature, index) => (
             <motion.div
               key={feature.id}
