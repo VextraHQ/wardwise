@@ -6,13 +6,9 @@ import { Logo } from "./logo";
 import { cn } from "@/lib/utils";
 
 export interface FooterProps {
-  /** Additional classes */
   className?: string;
 }
 
-/**
- * Footer - Simple, reusable footer with logo, trust modules, and legal links.
- */
 export function Footer({ className }: FooterProps) {
   return (
     <footer

@@ -105,13 +105,21 @@ export function SiteFooter() {
 
         {/* Bottom bar */}
         <div className="border-border/40 mt-12 flex flex-col items-center justify-between gap-6 border-t pt-8 sm:flex-row">
-          <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
+          <div className="flex flex-col items-center justify-center gap-2 sm:flex-row">
             <p className="text-muted-foreground text-xs font-semibold tracking-wider">
               © {currentYear} {COMPANY_INFO.name}. All rights reserved.
             </p>
             <span className="text-muted-foreground/40 hidden sm:inline">·</span>
             <p className="text-muted-foreground/70 font-mono text-[10px]">
-              A Product of {COMPANY_INFO.legalName}
+              A Product of{" "}
+              <Link
+                href={COMPANY_INFO.companyWebsite}
+                className="text-primary hover:text-primary/80 font-medium transition-colors duration-200 hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {COMPANY_INFO.legalName}
+              </Link>
             </p>
           </div>
           <Link
