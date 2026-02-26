@@ -21,7 +21,7 @@ export function PlatformPillarsSection() {
               <span className="text-primary border-primary/30 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
                 Ecosystem
               </span>
-              <span className="text-muted-foreground/30 font-mono text-[9px] tracking-widest uppercase">
+              <span className="text-muted-foreground font-mono text-[9px] tracking-widest uppercase">
                 MOD_CORE
               </span>
             </div>

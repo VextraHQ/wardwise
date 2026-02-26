@@ -43,7 +43,7 @@ export function HowItWorksSection() {
               <span className="border-primary text-primary border-l-2 pl-4 font-mono text-[9px] font-black tracking-[0.4em] uppercase">
                 Methodology
               </span>
-              <span className="text-muted-foreground/30 font-mono text-[8px] tracking-widest uppercase">
+              <span className="text-muted-foreground font-mono text-[8px] tracking-widest uppercase">
                 PROC_FLOW_V1.4
               </span>
             </div>
