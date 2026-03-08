@@ -42,8 +42,7 @@ const MOCK_VERIFICATION_SUMMARY = {
   totalRegistered: 2847,
   ninCollected: 2689,
   ninMissing: 158,
-  phoneVerified: 0,
-  identityVerified: 0,
+  phoneCollected: 2847,
   dataQualityScore: 87,
 };
 
@@ -120,7 +119,7 @@ export function ReportsContent() {
             Campaign Reports
           </h1>
           <p className="text-muted-foreground text-sm">
-            Verification summaries, data quality analysis, and coverage
+            Registration summaries, data quality analysis, and coverage
             breakdowns
           </p>
         </div>
@@ -139,9 +138,9 @@ export function ReportsContent() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Verification Summary</CardTitle>
+              <CardTitle>Registration Summary</CardTitle>
               <CardDescription>
-                Registration and verification breakdown
+                Registration and data collection breakdown
               </CardDescription>
             </div>
             <Button
@@ -216,31 +215,14 @@ export function ReportsContent() {
                   <IconShieldCheck className="size-4 text-blue-600" />
                 </div>
                 <span className="text-muted-foreground text-xs font-medium">
-                  Phone Verified
+                  Phone Collected
                 </span>
               </div>
               <p className="text-foreground text-2xl font-bold">
-                {MOCK_VERIFICATION_SUMMARY.phoneVerified}
+                {MOCK_VERIFICATION_SUMMARY.phoneCollected.toLocaleString()}
               </p>
               <p className="text-muted-foreground mt-1 text-xs">
-                Requires Standard plan
-              </p>
-            </div>
-
-            <div className="rounded-lg border p-4">
-              <div className="mb-2 flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-purple-500/10">
-                  <IconFingerprint className="size-4 text-purple-600" />
-                </div>
-                <span className="text-muted-foreground text-xs font-medium">
-                  Identity Verified
-                </span>
-              </div>
-              <p className="text-foreground text-2xl font-bold">
-                {MOCK_VERIFICATION_SUMMARY.identityVerified}
-              </p>
-              <p className="text-muted-foreground mt-1 text-xs">
-                Requires Premium plan
+                Primary contact channel
               </p>
             </div>
 

@@ -18,7 +18,6 @@
  * - /api/admin/candidates/[id] - GET, PUT, DELETE
  * - /api/admin/voters - GET (all with filters)
  * - /api/admin/voters/[id] - GET, DELETE
- * - /api/admin/voters/nin/[nin] - GET
  * - /api/admin/canvassers - GET (all with filters), POST (create)
  * - /api/admin/canvassers/[id] - GET, PUT, DELETE
  * - /api/admin/canvassers/code/[code] - GET
@@ -462,12 +461,10 @@ export const adminApi = {
         await new Promise((resolve) => setTimeout(resolve, 600));
         let filteredVoters = voters;
 
+        // In production, voters are linked to candidates through canvassers.
+        // In mock mode, all voters belong to the demo candidate.
         if (params?.candidateId) {
-          filteredVoters = voters.filter((v) =>
-            v.candidateSelections?.some(
-              (sel) => sel.candidateId === params.candidateId,
-            ),
-          ) as Voter[];
+          filteredVoters = [...voters];
         }
 
         return {
@@ -504,23 +501,6 @@ export const adminApi = {
 
       // Real API call to /api/admin/voters/[id]
       const data = await apiCall<{ voter: Voter }>(`/voters/${id}`);
-      return data.voter;
-    },
-
-    /**
-     * Get voter by NIN
-     * MOCK: Returns from static data | PRODUCTION: API call
-     */
-    getByNIN: async (nin: string): Promise<Voter | null> => {
-      if (USE_MOCK) {
-        // MOCK: Returns voter from static data
-        console.log(`🆔 Mock: Getting voter by NIN ${nin}`);
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        return voters.find((v) => v.nin === nin) || null;
-      }
-
-      // Real API call to /api/admin/voters/nin/[nin]
-      const data = await apiCall<{ voter: Voter | null }>(`/voters/nin/${nin}`);
       return data.voter;
     },
 

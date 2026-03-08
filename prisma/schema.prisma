@@ -70,60 +70,44 @@ model Candidate {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   user         User?
-  voterSelections VoterCandidateSelection[]
   canvassers   Canvasser[]
   subscriptions Subscription[]
-  verificationCampaigns VerificationCampaign[]
 }
 
 model Voter {
   id                 String     @id @default(cuid())
-  nin                String     @unique
+  nin                String?    @unique   // Optional — canvasser can register without NIN if person doesn't know it
   firstName          String
   middleName         String?
   lastName           String
-  dateOfBirth        DateTime
-  email              String     @unique
-  phoneNumber        String
+  dateOfBirth        DateTime?  // Made optional for field registration
+  yearOfBirth        Int?       // Simpler alternative to dateOfBirth for field capture
+  email              String?    // Not collected in field — optional, no unique constraint
+  phoneNumber        String     // Primary contact channel & secondary dedup key
   gender             String?
-  occupation         String?
-  religion           String?
-  age                Int
+  occupation         String?    // Keep optional (Phase 2 field)
+  religion           String?    // Keep optional (Phase 2 field)
+  age                Int?       // Derived from yearOfBirth, made optional
   state              String
   lga                String
   ward               String
   pollingUnit        String
   role               String     @default("voter")
-  vin                String?    // Legacy VIN field - optional, may not be populated
+  vin                String?    // Legacy VIN field — optional
   canvasserCode      String?
-  surveyAnswers      Json?
-  ninVerifiedAt      DateTime?  // When NIN was verified via paid verification campaign
-  phoneVerifiedAt    DateTime?  // When phone was verified via SMS OTP
-  ninVerificationStatus String? // "verified" | "failed" | "pending"
-  phoneVerificationStatus String? // "verified" | "failed" | "pending"
+
+  // New fields for canvasser workflow
+  supportLevel       String?    // "strong" | "leaning" | "undecided"
+  contactOutcome     String?    // "spoke_to" | "not_home" | "refused"
+  gpsLatitude        Float?     // Silent GPS auto-capture
+  gpsLongitude       Float?     // Silent GPS auto-capture
+  consentGiven       Boolean    @default(false) // NDPA compliance
+  notes              String?    // Canvasser notes about the voter
+
   registrationDate   DateTime   @default(now())
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
-  lastCompletedStep  String?    // "nin" | "profile" | "location" | "candidate" | "canvasser" | "confirm"
-  surveyCompleted    Boolean?   @default(false)
-  candidateSelections VoterCandidateSelection[]
   canvasser          Canvasser? @relation(fields: [canvasserCode], references: [code])
-}
-
-model VoterCandidateSelection {
-  id          String    @id @default(cuid())
-  voterId     String
-  candidateId String
-  position    String
-  createdAt   DateTime  @default(now())
-
-  voter       Voter     @relation(fields: [voterId], references: [id], onDelete: Cascade)
-  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-
-  @@unique([voterId, position])
-  @@index([voterId])
-  @@index([candidateId])
-  @@index([position])
 }
 
 model Canvasser {
@@ -153,8 +137,6 @@ model Subscription {
   startDate         DateTime @default(now())
   endDate           DateTime?
   monthlyPrice      Int      // In kobo (₦50,000 = 5000000)
-  verificationCredits Int    @default(0) // Number of NIN verifications available
-  smsCredits        Int      @default(0) // Number of SMS available
   autoRenew         Boolean  @default(true)
   paymentProvider   String?  // "paystack" | "flutterwave"
   paymentReference  String?
@@ -164,50 +146,5 @@ model Subscription {
   candidate         Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
 
   @@index([candidateId])
-  @@index([status])
-}
-
-model VerificationCampaign {
-  id                String   @id @default(cuid())
-  candidateId       String
-  name              String   // e.g., "Lagos West NIN Verification - Jan 2026"
-  type              String   // "nin" | "phone" | "both"
-  status            String   @default("pending") // "pending" | "running" | "completed" | "failed"
-  targetCount       Int      // How many voters to verify
-  completedCount    Int      @default(0)
-  successCount      Int      @default(0)
-  failedCount       Int      @default(0)
-  costPerCheck      Int      // In kobo (₦500 = 50000)
-  totalCost         Int      @default(0)
-  filters           Json?    // Store ward/LGA/state filters
-  startedAt         DateTime?
-  completedAt       DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  candidate         Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-  verificationRecords VerificationRecord[]
-
-  @@index([candidateId])
-  @@index([status])
-}
-
-model VerificationRecord {
-  id                String   @id @default(cuid())
-  campaignId        String
-  voterId           String
-  verificationType  String   // "nin" | "phone"
-  status            String   // "success" | "failed" | "pending"
-  provider          String?  // "smileid" | "nimc" | "termii"
-  providerResponse  Json?    // Raw API response
-  errorMessage      String?
-  cost              Int      // In kobo
-  verifiedAt        DateTime?
-  createdAt         DateTime @default(now())
-
-  campaign          VerificationCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-
-  @@index([campaignId])
-  @@index([voterId])
   @@index([status])
 }

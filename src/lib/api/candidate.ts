@@ -2,7 +2,6 @@
  * Candidate API Client
  *
  * Handles candidate data retrieval and filtering by location.
- * Also manages candidate surveys (get by candidate ID or survey ID).
  *
  * MOCK vs PRODUCTION:
  * - Mock: Uses static data from @/lib/mock/data/candidates
@@ -16,9 +15,7 @@
  */
 
 import type { Candidate } from "@/types/candidate";
-import type { CandidateSurvey } from "@/types/survey";
 import { candidates } from "@/lib/mock/data/candidates";
-import { getSurveyByCandidateId } from "@/lib/mock/data/candidate-surveys";
 import { getCandidateByIdWithSupporters } from "@/lib/helpers/candidate-helpers";
 
 // Simple helper for API calls (for real API)
@@ -177,37 +174,5 @@ export const candidateApi = {
 
     // PRODUCTION: Replace with real API call
     return apiCall(`/candidates/batch?ids=${candidateIds.join(",")}`);
-  },
-
-  getCandidateSurvey: async (
-    candidateId: string,
-  ): Promise<{ survey: CandidateSurvey | null }> => {
-    if (USE_MOCK) {
-      // MOCK: Returns survey for candidate from static data
-      console.log(`📋 Mock: Getting survey for candidate ${candidateId}`);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const survey = getSurveyByCandidateId(candidateId);
-      return { survey: survey || null };
-    }
-
-    // PRODUCTION: Replace with real API call
-    return apiCall(`/candidates/${candidateId}/survey`);
-  },
-
-  getSurveyById: async (
-    surveyId: string,
-  ): Promise<{ survey: CandidateSurvey | null }> => {
-    if (USE_MOCK) {
-      // MOCK: Returns survey by ID from static data
-      console.log(`📋 Mock: Getting survey ${surveyId}`);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const { getSurveyById } =
-        await import("@/lib/mock/data/candidate-surveys");
-      const survey = getSurveyById(surveyId);
-      return { survey: survey || null };
-    }
-
-    // PRODUCTION: Replace with real API call
-    return apiCall(`/surveys/${surveyId}`);
   },
 };

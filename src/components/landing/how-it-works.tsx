@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const stepRoleInfo = {
   "01": {
-    actor: "Voters",
+    actor: "Community",
     theme: "primary",
     accent: "bg-primary",
     textClass: "text-primary",
@@ -141,7 +141,7 @@ export function HowItWorksSection() {
                               Verified Profile
                             </span>
                             <span className="border-primary/20 bg-primary/5 text-primary rounded-sm border px-2 py-0.5 text-[9px] font-black tracking-wider uppercase">
-                              Sentiment Map
+                              Voter Record
                             </span>
                           </>
                         )}

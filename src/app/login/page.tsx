@@ -259,7 +259,7 @@ export default function LoginPage() {
             </Link>
 
             <Link
-              href="/voter-login"
+              href="/contact"
               className="group border-border/60 bg-card/50 hover:border-primary/20 hover:bg-primary/5 flex items-center gap-3 rounded-xl border px-5 py-3 transition-all hover:shadow-[0_4px_14px_0_rgba(0,0,0,0.05)] active:scale-95"
             >
               <div className="bg-muted/50 group-hover:bg-primary/10 group-hover:text-primary flex size-6 items-center justify-center rounded-md transition-colors">
@@ -267,7 +267,7 @@ export default function LoginPage() {
               </div>
               <div className="text-left">
                 <span className="text-muted-foreground group-hover:text-foreground block text-[10px] font-bold tracking-widest uppercase transition-colors">
-                  Voter Login
+                  Contact Us
                 </span>
               </div>
             </Link>

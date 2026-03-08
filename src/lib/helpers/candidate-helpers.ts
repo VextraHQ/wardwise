@@ -14,9 +14,7 @@
  */
 
 import type { Candidate } from "@/types/candidate";
-import type { CandidateSurvey } from "@/types/survey";
 import { candidates } from "@/lib/mock/data/candidates";
-import { candidateSurveys } from "@/lib/mock/data/candidate-surveys";
 import { getSupportersCount } from "@/lib/helpers/voter-analytics";
 
 // ============================================================================
@@ -427,85 +425,4 @@ export function sortCandidatesBy(
     if (aVal > bVal) return order === "asc" ? 1 : -1;
     return 0;
   });
-}
-
-// ============================================================================
-// SURVEY HELPER FUNCTIONS
-// ============================================================================
-// NOTE: These functions filter surveys by candidate metadata (state/party/position)
-// Different from candidate-surveys.ts functions which are data accessors
-// 🔮 Future Use: Admin dashboards, survey filtering/analytics
-
-/**
- * Get surveys by state
- * 🔮 Future Use: Admin dashboards, survey filtering
- * Returns all surveys for candidates from a specific state
- * @param state - The state name (e.g., "Adamawa State", "Bauchi State")
- * @returns Array of surveys for candidates from the specified state
- *
- * @example
- * // Get all surveys for Bauchi State candidates
- * const bauchiSurveys = getSurveysByState("Bauchi State")
- */
-export function getSurveysByState(state: string): CandidateSurvey[] {
-  return candidateSurveys.filter((survey) => {
-    const candidate = getCandidateById(survey.candidateId);
-    return candidate?.state === state;
-  });
-}
-
-/**
- * Get surveys by party
- * 🔮 Future Use: Admin dashboards, survey filtering
- * Returns all surveys for candidates from a specific party
- * @param party - The party abbreviation (e.g., "APC", "PDP")
- * @returns Array of surveys for candidates from the specified party
- *
- * @example
- * // Get all surveys for APC candidates
- * const apcSurveys = getSurveysByParty("APC")
- */
-export function getSurveysByParty(party: string): CandidateSurvey[] {
-  return candidateSurveys.filter((survey) => {
-    const candidate = getCandidateById(survey.candidateId);
-    return candidate?.party === party;
-  });
-}
-
-/**
- * Get surveys by position
- * 🔮 Future Use: Admin dashboards, survey filtering
- * Returns all surveys for candidates running for a specific position
- * @param position - The position (e.g., "Governor", "Senator", "House of Representatives")
- * @returns Array of surveys for candidates running for the specified position
- *
- * @example
- * // Get all surveys for gubernatorial candidates
- * const governorSurveys = getSurveysByPosition("Governor")
- */
-export function getSurveysByPosition(
-  position: Candidate["position"],
-): CandidateSurvey[] {
-  return candidateSurveys.filter((survey) => {
-    const candidate = getCandidateById(survey.candidateId);
-    return candidate?.position === position;
-  });
-}
-
-/**
- * Get candidate information for a survey
- * 🔮 Future Use: Survey display components, admin views
- * Convenience function to get candidate details when you have a survey
- * @param survey - The survey object
- * @returns The candidate object or undefined if not found
- *
- * @example
- * const survey = getSurveyByCandidateId("cand-apc-1")
- * const candidate = getCandidateForSurvey(survey)
- * console.log(candidate?.party) // "APC"
- */
-export function getCandidateForSurvey(
-  survey: CandidateSurvey,
-): Candidate | undefined {
-  return getCandidateById(survey.candidateId);
 }

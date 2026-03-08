@@ -565,17 +565,8 @@ async function main() {
       role: "voter",
       vin: "90123456789012345678",
       canvasserCode: "FINT-A001",
-      lastCompletedStep: "confirm",
-      candidateSelections: [
-        { position: "President", candidateId: "cand-president-apc" },
-        { position: "Governor", candidateId: "cand-gov-pdp-adamawa" },
-        { position: "Senator", candidateId: "cand-sen-apc-adamawa" },
-        {
-          position: "House of Representatives",
-          candidateId: "cand-hr-apc-jada-ganye-mayo-belwa-toungo",
-        },
-        { position: "State Assembly", candidateId: "cand-sa-apc-song-adamawa" },
-      ],
+      consentGiven: true,
+      supportLevel: "strong",
     },
     {
       nin: "98765432109",
@@ -596,17 +587,8 @@ async function main() {
       role: "voter",
       vin: "80987654321098765432",
       canvasserCode: "AHMED-B002",
-      lastCompletedStep: "confirm",
-      candidateSelections: [
-        { position: "President", candidateId: "cand-president-pdp" },
-        { position: "Governor", candidateId: "cand-gov-pdp-adamawa" },
-        { position: "Senator", candidateId: "cand-sen-pdp-adamawa-central" },
-        {
-          position: "House of Representatives",
-          candidateId: "cand-hr-pdp-adamawa",
-        },
-        { position: "State Assembly", candidateId: "cand-sa-pdp-adamawa" },
-      ],
+      consentGiven: true,
+      supportLevel: "leaning",
     },
     {
       nin: "11223344556",
@@ -627,17 +609,8 @@ async function main() {
       role: "voter",
       vin: "70112233445566778899",
       canvasserCode: "FINT-A003",
-      lastCompletedStep: "confirm",
-      candidateSelections: [
-        { position: "President", candidateId: "cand-president-labour" },
-        { position: "Governor", candidateId: "cand-gov-pdp-adamawa" },
-        { position: "Senator", candidateId: "cand-sen-apc-adamawa" },
-        {
-          position: "House of Representatives",
-          candidateId: "cand-hr-apc-jada-ganye-mayo-belwa-toungo",
-        },
-        { position: "State Assembly", candidateId: "cand-sa-apc-song-adamawa" },
-      ],
+      consentGiven: true,
+      supportLevel: "strong",
     },
     {
       nin: "22334455667",
@@ -656,19 +629,10 @@ async function main() {
       ward: "Nassarawo",
       pollingUnit: "Nassarawo Primary School - 004",
       role: "voter",
-      vin: null, // Voter without VIN (not verified)
+      vin: null,
       canvasserCode: null,
-      lastCompletedStep: "confirm",
-      candidateSelections: [
-        { position: "President", candidateId: "cand-president-pdp" },
-        { position: "Governor", candidateId: "cand-gov-pdp-adamawa" },
-        { position: "Senator", candidateId: "cand-sen-pdp-adamawa-central" },
-        {
-          position: "House of Representatives",
-          candidateId: "cand-hr-pdp-adamawa",
-        },
-        { position: "State Assembly", candidateId: "cand-sa-pdp-adamawa" },
-      ],
+      consentGiven: true,
+      supportLevel: "undecided",
     },
     {
       nin: "33445566778",
@@ -676,7 +640,6 @@ async function main() {
       middleName: "Musa",
       lastName: "Aliyu",
       dateOfBirth: new Date("2007-06-15"),
-      email: "ibrahim.aliyu@example.com",
       phoneNumber: "08033445566",
       gender: "Male",
       age: 17,
@@ -684,20 +647,11 @@ async function main() {
       lga: "Yola North",
       ward: "Karewa Ward",
       pollingUnit: "Karewa Primary School - 001",
-      role: "supporter", // Under 18 - registered as supporter
+      role: "voter",
       vin: null,
       canvasserCode: "FINT-A001",
-      lastCompletedStep: "confirm",
-      candidateSelections: [
-        { position: "President", candidateId: "cand-president-apc" },
-        { position: "Governor", candidateId: "cand-gov-pdp-adamawa" },
-        { position: "Senator", candidateId: "cand-sen-apc-adamawa" },
-        {
-          position: "House of Representatives",
-          candidateId: "cand-hr-apc-jada-ganye-mayo-belwa-toungo",
-        },
-        { position: "State Assembly", candidateId: "cand-sa-apc-song-adamawa" },
-      ],
+      consentGiven: true,
+      supportLevel: "leaning",
     },
     {
       nin: "44556677889",
@@ -718,35 +672,24 @@ async function main() {
       role: "voter",
       vin: "60445566778899001122",
       canvasserCode: "AHMED-B001",
-      lastCompletedStep: "confirm",
-      candidateSelections: [
-        { position: "President", candidateId: "cand-president-nnpp" },
-        { position: "Governor", candidateId: "cand-gov-pdp-adamawa" },
-        { position: "Senator", candidateId: "cand-sen-pdp-adamawa-central" },
-        {
-          position: "House of Representatives",
-          candidateId: "cand-hr-pdp-adamawa",
-        },
-        { position: "State Assembly", candidateId: "cand-sa-pdp-adamawa" },
-      ],
+      consentGiven: true,
+      supportLevel: "strong",
     },
   ];
 
   for (const voterData of demoVoters) {
     try {
-      const { candidateSelections, ...voterFields } = voterData;
-
       // Validate canvasser code if provided
-      if (voterFields.canvasserCode) {
+      if (voterData.canvasserCode) {
         const canvasser = await prisma.canvasser.findUnique({
-          where: { code: voterFields.canvasserCode },
+          where: { code: voterData.canvasserCode },
         });
         if (!canvasser) {
           console.warn(
-            `  ⚠️  Voter ${voterData.firstName} ${voterData.lastName}: Canvasser code ${voterFields.canvasserCode} not found`,
+            `  ⚠️  Voter ${voterData.firstName} ${voterData.lastName}: Canvasser code ${voterData.canvasserCode} not found`,
           );
           // Remove invalid canvasser code
-          (voterFields as { canvasserCode?: string }).canvasserCode = undefined;
+          (voterData as { canvasserCode?: string | null }).canvasserCode = null;
         }
       }
 
@@ -757,46 +700,16 @@ async function main() {
       const voter = existing
         ? await prisma.voter.update({
             where: { nin: voterData.nin },
-            data: voterFields as Prisma.VoterUncheckedUpdateInput,
+            data: voterData as Prisma.VoterUncheckedUpdateInput,
           })
         : await prisma.voter.create({
-            data: voterFields as Prisma.VoterUncheckedCreateInput,
+            data: voterData as Prisma.VoterUncheckedCreateInput,
           });
-
-      // Update candidate selections (validate candidate exists)
-      for (const selection of candidateSelections) {
-        const candidate = await prisma.candidate.findUnique({
-          where: { id: selection.candidateId },
-        });
-        if (!candidate) {
-          console.warn(
-            `  ⚠️  Skipping selection: Candidate ${selection.candidateId} for position ${selection.position} not found`,
-          );
-          continue;
-        }
-
-        await prisma.voterCandidateSelection.upsert({
-          where: {
-            voterId_position: {
-              voterId: voter.id,
-              position: selection.position,
-            },
-          },
-          update: {
-            candidateId: selection.candidateId,
-          },
-          create: {
-            voterId: voter.id,
-            candidateId: selection.candidateId,
-            position: selection.position,
-          },
-        });
-      }
 
       // Only log on creation
       if (!existing) {
         console.log(
-          `  ✨ Created ${voterData.role}: ${voterData.firstName} ${voterData.lastName} (${candidateSelections.length} selections)`,
+          `  ✨ Created ${voterData.role}: ${voterData.firstName} ${voterData.lastName}`,
         );
       }
       // Silently update if exists
@@ -821,8 +734,8 @@ async function main() {
 
   for (const candidateId of allCandidateIds) {
     try {
-      const supporterCount = await prisma.voterCandidateSelection.count({
-        where: { candidateId },
+      const supporterCount = await prisma.voter.count({
+        where: { canvasserCode: { not: null } },
       });
 
       const candidate = await prisma.candidate.findUnique({
@@ -896,8 +809,8 @@ async function main() {
   console.log(`   - ${presidentialCandidates.length} Presidential candidates`);
   console.log(`   - ${adamawaCandidates.length} State/LGA candidates`);
   console.log(`   - ${canvassers.length} Canvassers`);
-  console.log(`   - ${demoVoters.length} Demo voters/supporters`);
-  console.log(`   - All with multi-candidate selections\n`);
+  console.log(`   - ${demoVoters.length} Demo voters`);
+  console.log(`   - 1 Admin account\n`);
 }
 
 main()

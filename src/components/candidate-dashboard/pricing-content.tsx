@@ -12,13 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   IconCheck,
-  IconCrown,
   IconShieldCheck,
   IconUsers,
   IconPhone,
   IconMail,
   IconMessageCircle,
-  IconFingerprint,
   IconReportAnalytics,
   IconHeadset,
   IconMapPin,
@@ -77,7 +75,7 @@ const PLANS: PricingPlan[] = [
         included: true,
       },
       {
-        text: "Candidate preferences",
+        text: "Supporter preferences",
         icon: <IconDatabase className="size-4" />,
         included: true,
       },
@@ -94,11 +92,6 @@ const PLANS: PricingPlan[] = [
       {
         text: "SMS/email outreach tools",
         icon: <IconMessageCircle className="size-4" />,
-        included: false,
-      },
-      {
-        text: "NIN identity verification",
-        icon: <IconFingerprint className="size-4" />,
         included: false,
       },
     ],
@@ -133,16 +126,6 @@ const PLANS: PricingPlan[] = [
         included: true,
       },
       {
-        text: "Phone OTP verification",
-        icon: <IconShieldCheck className="size-4" />,
-        included: true,
-      },
-      {
-        text: "NIN identity verification",
-        icon: <IconFingerprint className="size-4" />,
-        included: false,
-      },
-      {
         text: "Deduplication report",
         icon: <IconReportAnalytics className="size-4" />,
         included: false,
@@ -154,9 +137,9 @@ const PLANS: PricingPlan[] = [
   {
     id: "premium",
     name: "Premium",
-    description: "Full identity verification with deduplication",
+    description: "Full analytics with advanced field insights",
     price: "\u20A6300,000",
-    priceDetail: "per month, per LGA + \u20A6500/verification",
+    priceDetail: "per month, per LGA",
     badge: "Recommended",
     highlighted: true,
     features: [
@@ -166,17 +149,12 @@ const PLANS: PricingPlan[] = [
         included: true,
       },
       {
-        text: "NIN identity verification",
-        icon: <IconFingerprint className="size-4" />,
-        included: true,
-      },
-      {
         text: "Deduplication report",
         icon: <IconReportAnalytics className="size-4" />,
         included: true,
       },
       {
-        text: "Verified voter badge",
+        text: "GPS field tracking",
         icon: <IconShieldCheck className="size-4" />,
         included: true,
       },
@@ -190,11 +168,6 @@ const PLANS: PricingPlan[] = [
         icon: <IconReportAnalytics className="size-4" />,
         included: true,
       },
-      {
-        text: "Custom verification campaigns",
-        icon: <IconCrown className="size-4" />,
-        included: true,
-      },
     ],
     cta: "Upgrade to Premium",
     ctaVariant: "default",
@@ -203,14 +176,9 @@ const PLANS: PricingPlan[] = [
 
 const FAQ_ITEMS = [
   {
-    question: "How does voter verification work?",
-    answer:
-      "Verification is a tiered process. At the Starter level, you get access to voter registration data. Standard adds phone OTP verification to confirm contact details. Premium includes NIN identity verification through NIMC, confirming each voter's identity against national records.",
-  },
-  {
     question: "What's included in each plan?",
     answer:
-      "Each plan builds on the previous tier. Starter gives you database access with names, locations, and candidate preferences. Standard adds contact information and outreach tools. Premium adds full identity verification and deduplication reports.",
+      "Each plan builds on the previous tier. Starter gives you database access with names, locations, and candidate preferences. Standard adds contact information and outreach tools. Premium adds deduplication reports and advanced analytics.",
   },
   {
     question: "Can I change plans at any time?",
@@ -218,9 +186,9 @@ const FAQ_ITEMS = [
       "Yes, you can upgrade or downgrade your plan at any time. When upgrading, the price difference is prorated for the remainder of your billing cycle. Downgrades take effect at the start of your next billing cycle.",
   },
   {
-    question: "How is verification billed?",
+    question: "How does billing work?",
     answer:
-      "Verification costs are per-voter on top of your monthly subscription. Phone OTP verification (Standard) costs \u20A610 per verification. NIN identity verification (Premium) costs \u20A6500 per verification. You only pay for verifications you initiate.",
+      "Plans are billed monthly per LGA. SMS outreach (Standard and above) is billed per message at \u20A610 each. You only pay for outreach you initiate.",
   },
 ];
 
@@ -246,8 +214,8 @@ export function PricingContent() {
           </Badge>
         </div>
         <p className="text-muted-foreground text-sm">
-          Choose the right plan for your campaign. Access voter data, contact
-          information, and identity verification based on your needs.
+          Choose the right plan for your campaign. Access supporter data,
+          contact information, and advanced analytics based on your needs.
         </p>
       </div>
 
@@ -278,8 +246,7 @@ export function PricingContent() {
                   {plan.price}
                 </span>
                 <span className="text-muted-foreground ml-1 text-sm">
-                  /{" "}
-                  {plan.priceDetail}
+                  / {plan.priceDetail}
                 </span>
               </div>
             </CardHeader>

@@ -4,7 +4,7 @@ import { NotificationsContent } from "@/components/candidate-dashboard/notificat
 export const metadata: Metadata = {
   title: "Notifications",
   description:
-    "Stay updated with campaign activities, new supporters, survey responses, and campaign updates.",
+    "Stay updated with campaign activities, new supporters, canvasser updates, and campaign progress.",
 };
 
 export default function NotificationsPage() {

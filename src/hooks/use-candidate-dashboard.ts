@@ -27,7 +27,7 @@ function useCandidateId(): string | null {
 
 /**
  * Hook to get comprehensive dashboard data for the logged-in candidate
- * Includes all key metrics: supporters, ward coverage, demographics, trends, surveys
+ * Includes all key metrics: supporters, ward coverage, demographics, trends, field data
  */
 export function useCandidateDashboard() {
   const candidateId = useCandidateId();
@@ -104,25 +104,6 @@ export function useCandidateWardData() {
 }
 
 /**
- * Hook to get survey response analytics
- */
-export function useCandidateSurveyResponses() {
-  const candidateId = useCandidateId();
-
-  return useQuery({
-    queryKey: ["candidate-survey-responses", candidateId],
-    queryFn: async () => {
-      if (!candidateId) throw new Error("No candidate ID");
-      const result =
-        await dashboardApi.getCandidateSurveyResponses(candidateId);
-      return result.surveyAnalytics;
-    },
-    enabled: !!candidateId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-}
-
-/**
  * Hook to get demographic breakdown
  */
 export function useCandidateDemographics() {
@@ -155,40 +136,6 @@ export function useCandidateProfile() {
     },
     enabled: !!candidateId,
     staleTime: 1000 * 60 * 10, // 10 minutes
-  });
-}
-
-/**
- * Hook to get candidate survey
- */
-export function useCandidateSurvey() {
-  const candidateId = useCandidateId();
-
-  return useQuery({
-    queryKey: ["candidate-survey", candidateId],
-    queryFn: async () => {
-      if (!candidateId) throw new Error("No candidate ID");
-      const result = await candidateApi.getCandidateSurvey(candidateId);
-      return result.survey;
-    },
-    enabled: !!candidateId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-}
-
-/**
- * Hook to get survey by survey ID
- */
-export function useSurveyById(surveyId: string | null) {
-  return useQuery({
-    queryKey: ["survey", surveyId],
-    queryFn: async () => {
-      if (!surveyId) throw new Error("No survey ID");
-      const result = await candidateApi.getSurveyById(surveyId);
-      return result.survey;
-    },
-    enabled: !!surveyId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
 

@@ -2,7 +2,7 @@
  * Dashboard API Client
  *
  * Handles all candidate dashboard analytics: supporters list, ward data,
- * survey responses, and demographic breakdowns.
+ * and demographic breakdowns.
  *
  * MOCK vs PRODUCTION:
  * - Mock: Uses analytics helpers from @/lib/helpers/voter-analytics
@@ -19,7 +19,6 @@ import type { Voter } from "@/types/voter";
 import type {
   getCandidateDashboardData,
   getWardCoverage,
-  getSurveyAnalytics,
   getDemographics,
 } from "@/lib/helpers/voter-analytics";
 
@@ -114,7 +113,7 @@ export const dashboardApi = {
           (v) =>
             v.firstName.toLowerCase().includes(searchLower) ||
             v.lastName.toLowerCase().includes(searchLower) ||
-            v.nin.includes(searchLower) ||
+            v.nin?.includes(searchLower) ||
             v.phoneNumber?.toLowerCase().includes(searchLower) ||
             v.email?.toLowerCase().includes(searchLower),
         );
@@ -180,27 +179,6 @@ export const dashboardApi = {
 
     // PRODUCTION: Replace with real API call
     return apiCall(`/candidates/${candidateId}/ward-data`);
-  },
-
-  getCandidateSurveyResponses: async (
-    candidateId: string,
-  ): Promise<{
-    surveyAnalytics: ReturnType<typeof getSurveyAnalytics>;
-  }> => {
-    if (USE_MOCK) {
-      // MOCK: Returns survey response analytics
-      console.log(
-        `📋 Mock: Getting survey responses for candidate ${candidateId}`,
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const { getSurveyAnalytics } =
-        await import("@/lib/helpers/voter-analytics");
-      const surveyAnalytics = getSurveyAnalytics(candidateId);
-      return { surveyAnalytics };
-    }
-
-    // PRODUCTION: Replace with real API call
-    return apiCall(`/candidates/${candidateId}/survey-responses`);
   },
 
   getCandidateDemographics: async (

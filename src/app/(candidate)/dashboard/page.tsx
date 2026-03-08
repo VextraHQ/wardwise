@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description:
-      "View your campaign analytics, supporter insights, ward coverage, and survey responses.",
+      "View your campaign analytics, supporter insights, ward coverage, and field data.",
   };
 }
 

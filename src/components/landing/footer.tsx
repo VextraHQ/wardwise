@@ -18,19 +18,14 @@ const platformLinks = [
 
 const roleLinks = [
   {
-    label: "Voter Portal",
-    href: "/voter-login",
-    hoverColor: "hover:text-primary",
-  },
-  {
-    label: "Canvasser Field App",
-    href: "/canvassers",
-    hoverColor: "hover:text-orange-600",
-  },
-  {
     label: "Candidate Dashboard",
     href: "/login",
     hoverColor: "hover:text-emerald-600",
+  },
+  {
+    label: "Contact Us",
+    href: "/contact",
+    hoverColor: "hover:text-orange-600",
   },
 ];
 
@@ -68,8 +63,8 @@ export function SiteFooter() {
               className="bg-primary text-primary-foreground hover:bg-primary/90 mt-4 w-full rounded-lg px-6 text-sm font-semibold transition-all duration-200 sm:w-auto"
               asChild
             >
-              <Link href="/register" className="flex items-center gap-2">
-                Support a Candidate
+              <Link href="/login" className="flex items-center gap-2">
+                Candidate Login
                 <HiArrowRight className="h-4 w-4" />
               </Link>
             </Button>

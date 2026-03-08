@@ -13,7 +13,7 @@ export function CallToActionSection() {
     isAuthenticated && session.user.role === "candidate"
       ? "/dashboard"
       : isAuthenticated && session.user.role === "admin"
-        ? "/canvasser"
+        ? "/admin"
         : "/login";
 
   const loginText =
@@ -84,8 +84,8 @@ export function CallToActionSection() {
                   className="group bg-primary text-primary-foreground hover:bg-primary/95 relative h-14 rounded-full px-10 text-xs font-black tracking-widest uppercase transition-all"
                   asChild
                 >
-                  <Link href="/register">
-                    Support a Candidate
+                  <Link href="/login">
+                    Get Started
                     <HiArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>

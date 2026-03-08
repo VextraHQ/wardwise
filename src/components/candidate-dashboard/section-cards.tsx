@@ -19,7 +19,7 @@ import {
  * - Total Supporters: Calculated from actual voters
  * - Ward Coverage: Unique wards with supporters / total wards
  * - Polling Units: Unique polling units with supporters
- * - Support Strength: Survey completion rate as engagement metric
+ * - Support Strength: Registration coverage as engagement metric
  */
 
 interface SectionCardsProps {

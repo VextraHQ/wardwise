@@ -29,8 +29,8 @@ export function ExportContent() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground text-sm">
-            This page will allow exporting supporter lists, survey responses,
-            and analytics data in various formats (CSV, Excel, PDF).
+            This page will allow exporting supporter lists, field reports, and
+            analytics data in various formats (CSV, Excel, PDF).
           </p>
           <div className="flex gap-2">
             <Button disabled>

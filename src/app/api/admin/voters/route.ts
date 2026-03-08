@@ -24,10 +24,8 @@ export async function GET(request: NextRequest) {
     const where: Prisma.VoterWhereInput = {};
 
     if (candidateId) {
-      where.candidateSelections = {
-        some: {
-          candidateId,
-        },
+      where.canvasser = {
+        candidateId,
       };
     }
 
@@ -52,9 +50,7 @@ export async function GET(request: NextRequest) {
     // Convert dates to ISO strings for JSON serialization
     const votersWithDates = voters.map((voter) => ({
       ...voter,
-      dateOfBirth: voter.dateOfBirth.toISOString(),
-      ninVerifiedAt: voter.ninVerifiedAt?.toISOString() || null,
-      phoneVerifiedAt: voter.phoneVerifiedAt?.toISOString() || null,
+      dateOfBirth: voter.dateOfBirth?.toISOString() || null,
       registrationDate: voter.registrationDate.toISOString(),
       createdAt: voter.createdAt.toISOString(),
       updatedAt: voter.updatedAt.toISOString(),

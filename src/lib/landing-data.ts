@@ -75,10 +75,10 @@ export type ProcessStep = {
 
 export const processSteps: ProcessStep[] = [
   {
-    name: "Citizen Engagement",
+    name: "Community Outreach",
     number: "01",
     description:
-      "Voters register and share their priorities through guided surveys, creating a direct line to leadership.",
+      "Canvassers identify and register voters in the field, building a verified supporter base with ward-level precision.",
     icon: HiViewGrid,
   },
   {
@@ -141,7 +141,7 @@ export const featureCards: FeatureCard[] = [
   {
     title: "Secure Registration",
     description:
-      "Unique agent codes and NIN-based deduplication ensure every voter is uniquely registered.",
+      "Unique agent codes and NIN and phone-based deduplication ensure every voter is uniquely registered.",
     icon: HiLockClosed,
     metricLabel: "Security Uptime",
     metricValue: "100%",
@@ -151,7 +151,7 @@ export const featureCards: FeatureCard[] = [
   {
     title: "Candidate Insights",
     description:
-      "Dashboards surface demographics, sentiment, and issue trends in real time for strategic decisions.",
+      "Dashboards surface demographics and field trends in real time for strategic decisions.",
     icon: HiChartBar,
     metricLabel: "Insights Generated",
     metricValue: "740",
@@ -183,7 +183,7 @@ export const heroPlaceholder = {
 };
 
 export const heroSupportingCopy =
-  "Empowering citizens, canvassers, and candidates with ward-level precision. From field-verified data to strategic victory, WardWise is Nigeria's premier civic engagement ecosystem.";
+  "Empowering canvassers and candidates with ward-level precision. From field-verified data to strategic victory, WardWise is Nigeria's premier campaign intelligence platform.";
 
 export type EcosystemRole = {
   role: string;
@@ -196,19 +196,22 @@ export type EcosystemRole = {
 
 export const ecosystemRoles: EcosystemRole[] = [
   {
-    role: "Voters",
-    title: "Voice Your Priorities",
+    role: "Registered Voters",
+    title: "The People You Serve",
     description:
-      "Support candidates and share community needs directly from your device.",
+      "Voters registered by canvassers in the field, with ward-level precision and verified records.",
     color: "teal",
-    features: ["Quick Registration", "Issue Reporting", "Candidate Support"],
+    features: [
+      "Field Registration",
+      "Ward-Level Precision",
+      "Community Engagement",
+    ],
     icon: HiCheckCircle,
   },
   {
     role: "Canvassers",
     title: "Activate the Field",
-    description:
-      "Securely register voters house-to-house with real-time sync.",
+    description: "Securely register voters house-to-house with real-time sync.",
     color: "orange",
     features: ["Field-Ready Mobile App", "Agent Codes", "Real-Time Sync"],
     icon: HiDeviceMobile,
@@ -221,7 +224,7 @@ export const ecosystemRoles: EcosystemRole[] = [
     color: "emerald",
     features: [
       "Strategic Dashboards",
-      "Sentiment Analysis",
+      "Field Analytics",
       "Resource Allocation",
     ],
     icon: HiChartBar,
@@ -248,7 +251,7 @@ export const platformPillars = [
       "Dashboards, segmentation tools, and exportable dossiers give candidates a command centre for every supporter touchpoint.",
     focus: "Decision Tools",
     signal:
-      "Custom dashboards surface sentiment trends, issue priorities, and supporter journeys for rapid decision-making.",
+      "Custom dashboards surface field trends, demographic insights, and supporter journeys for rapid decision-making.",
     metric: {
       label: "Insights refreshed",
       value: "Hourly",
@@ -323,7 +326,7 @@ export const securityHighlights = [
   {
     title: "Unique Voter Identity",
     description:
-      "Advanced de-duplication ensures one voter, one record. Prevent over-registration and identify rigging attempts instantly.",
+      "NIN and phone-based deduplication ensures one voter, one record. Prevent over-registration and identify rigging attempts instantly.",
     icon: HiCheckCircle,
   },
   {

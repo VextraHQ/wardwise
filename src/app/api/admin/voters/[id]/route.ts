@@ -28,9 +28,7 @@ export async function GET(
     return NextResponse.json({
       voter: {
         ...voter,
-        dateOfBirth: voter.dateOfBirth.toISOString(),
-        ninVerifiedAt: voter.ninVerifiedAt?.toISOString() || null,
-        phoneVerifiedAt: voter.phoneVerifiedAt?.toISOString() || null,
+        dateOfBirth: voter.dateOfBirth?.toISOString() || null,
         registrationDate: voter.registrationDate.toISOString(),
         createdAt: voter.createdAt.toISOString(),
         updatedAt: voter.updatedAt.toISOString(),

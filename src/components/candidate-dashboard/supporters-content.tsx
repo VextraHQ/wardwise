@@ -28,7 +28,6 @@ import {
   IconUsers,
   IconLock,
   IconArrowRight,
-  IconShieldCheck,
 } from "@tabler/icons-react";
 import Link from "next/link";
 
@@ -119,7 +118,6 @@ export function SupportersContent() {
               </p>
               <p className="text-muted-foreground text-xs">
                 Standard plan includes phone numbers and email addresses.
-                Premium adds NIN verification status.
               </p>
             </div>
             <Button variant="outline" size="sm" asChild className="shrink-0">
@@ -151,7 +149,7 @@ export function SupportersContent() {
               <p className="text-muted-foreground text-sm">
                 {search
                   ? "Try adjusting your search terms"
-                  : "Supporters will appear here once voters register and select you as their candidate"}
+                  : "Supporters will appear here once canvassers register voters in the field"}
               </p>
             </div>
           ) : (
@@ -169,9 +167,7 @@ export function SupportersContent() {
                         <TableHead>Email</TableHead>
                       </>
                     )}
-                    {CURRENT_TIER === "premium" && (
-                      <TableHead>NIN</TableHead>
-                    )}
+
                     <TableHead>Registered</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
@@ -203,35 +199,14 @@ export function SupportersContent() {
                           </TableCell>
                         </>
                       )}
-                      {CURRENT_TIER === "premium" && (
-                        <TableCell className="font-mono text-xs">
-                          {supporter.nin
-                            ? `${supporter.nin.slice(0, 3)}****${supporter.nin.slice(-3)}`
-                            : "\u2014"}
-                        </TableCell>
-                      )}
+
                       <TableCell>
                         {new Date(
                           supporter.registrationDate,
                         ).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        {CURRENT_TIER === "premium" ? (
-                          <Badge
-                            variant="outline"
-                            className="gap-1"
-                          >
-                            <IconShieldCheck className="size-3" />
-                            Registered
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline">
-                            {Object.keys(supporter.surveyAnswers || {})
-                              .length > 0
-                              ? "Survey Complete"
-                              : "Registered"}
-                          </Badge>
-                        )}
+                        <Badge variant="outline">Registered</Badge>
                       </TableCell>
                     </TableRow>
                   ))}

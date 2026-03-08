@@ -3,18 +3,18 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { HiArrowRight } from "react-icons/hi";
+import { HiArrowUpRight } from "react-icons/hi2";
 import { motion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { heroSupportingCopy } from "@/lib/landing-data";
-import { HiArrowUpRight } from "react-icons/hi2";
 import { cn } from "@/lib/utils";
 
 const benefitPoints = [
-  "Supporters share what matters most in their community",
-  "Canvassers register voters with ward-level precision",
+  "Canvassers register supporters with ward-level precision",
   "Candidates drive strategy with real-time field data",
+  "Every interaction tracked from ward to dashboard",
 ];
 
 export function HeroSection() {
@@ -119,43 +119,32 @@ export function HeroSection() {
                   asChild
                 >
                   <Link
-                    href="/register"
+                    href="/login"
                     className="flex items-center justify-center gap-3"
                   >
-                    Support a Candidate
+                    Candidate Login
                     <HiArrowRight className="size-5" />
                   </Link>
                 </Button>
 
                 <Link
-                  href="/canvasser"
+                  href="/contact"
                   className="group border-border bg-muted/30 hover:bg-muted/50 flex h-13 items-center justify-center gap-3 rounded-xl border px-6 transition-all duration-300"
                 >
                   <div className="flex flex-col items-start leading-none">
                     <span className="text-muted-foreground mb-1 text-[8px] font-black tracking-widest uppercase">
-                      Personnel Portal
+                      Have Questions?
                     </span>
                     <span className="text-foreground text-sm font-bold">
-                      Canvasser Access
+                      Contact Us
                     </span>
                   </div>
-                  <HiArrowUpRight className="text-muted-foreground group-hover:text-primary size-4 transition-colors" />
+                  <HiArrowRight className="text-muted-foreground group-hover:text-primary size-4 transition-colors" />
                 </Link>
               </div>
 
               {/* Secondary Access Points */}
               <div className="flex flex-col gap-3 text-xs sm:flex-row sm:items-center">
-                <div className="bg-muted/50 border-border inline-flex items-center gap-2 rounded-lg border px-3 py-2">
-                  <span className="text-muted-foreground font-medium">
-                    Already Registered?
-                  </span>
-                  <Link
-                    href="/voter-login"
-                    className="text-primary hover:text-primary/80 font-bold transition-colors"
-                  >
-                    Voter Login
-                  </Link>
-                </div>
                 <div className="bg-muted/50 border-border inline-flex items-center gap-2 rounded-lg border px-3 py-2">
                   <span className="text-muted-foreground font-medium">
                     For Admin & Candidates

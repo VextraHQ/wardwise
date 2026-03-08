@@ -313,7 +313,7 @@ export function FeaturesSection() {
               Integrity-First Architecture
             </h4>
             <p className="text-muted-foreground max-w-lg text-base leading-relaxed">
-              Unlike generic survey tools, WardWise is architected to handle the
+              Unlike generic field tools, WardWise is architected to handle the
               complexity of large-scale field operations with absolute data
               transparency.
             </p>
