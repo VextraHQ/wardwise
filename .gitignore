@@ -41,7 +41,8 @@ yarn-error.log*
 next-env.d.ts
 
 # documentation (keep README.md in root, ignore docs folder)
-/docs/
+/docs/*
+!/docs/wardwise-collect-spec.md
 !README.md
 
 # Cursor
