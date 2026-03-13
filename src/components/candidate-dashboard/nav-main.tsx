@@ -2,7 +2,7 @@
 
 import { IconCirclePlusFilled, type Icon } from "@tabler/icons-react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +34,6 @@ export function NavMain({
   }[];
 }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   return (
     <SidebarGroup>
@@ -71,17 +70,13 @@ export function NavMain({
         )}
         <SidebarMenu>
           {items.map((item) => {
-            // Check if URL matches pathname exactly, or if it's a query param match
             const urlPath = item.url.split("?")[0];
-            const urlParams = new URLSearchParams(item.url.split("?")[1] || "");
-            const currentTab = searchParams?.get("tab");
-            const itemTab = urlParams.get("tab");
-
+            const matchesNestedRoute =
+              urlPath !== "/" &&
+              urlPath !== "/admin" &&
+              pathname.startsWith(`${urlPath}/`);
             const isActive =
-              pathname === item.url ||
-              (pathname === urlPath &&
-                ((itemTab && currentTab === itemTab) ||
-                  (!itemTab && !currentTab && pathname === urlPath)));
+              item.url !== "#" && (pathname === urlPath || matchesNestedRoute);
 
             return (
               <SidebarMenuItem key={item.title}>

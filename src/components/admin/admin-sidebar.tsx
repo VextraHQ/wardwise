@@ -35,7 +35,7 @@ const adminNavItems = [
   },
   {
     title: "Candidates",
-    url: "/admin?tab=candidates",
+    url: "/admin/candidates",
     icon: IconUsers,
   },
   {

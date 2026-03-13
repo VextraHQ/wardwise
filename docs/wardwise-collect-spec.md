@@ -7,18 +7,22 @@
 - Collect v1 is not implemented yet. This document defines the aligned plan after the admin cleanup pass.
 
 ## Current Branch Workflow
-- Cleanup branch: `codex/admin-cleanup`
-- Integration target: `develop`
-- Collect build branch after cleanup: `codex/feature-collect`
+- Cleanup work has been merged into `develop`.
+- Active implementation base is now the cleaned `develop` branch.
+- `codex/feature-collect` has not been created yet and should not be created until the next implementation phase is explicitly started.
 
 Branch rules:
 - Do not build Collect on `pre-scope-reduction`.
-- Do not continue active feature work directly on `develop`.
-- Use the cleaned `develop` branch as the base for `codex/feature-collect`.
+- Do not reopen `pre-scope-reduction` as a polishing branch.
+- Use the cleaned `develop` branch as the source of truth for current admin behavior.
+- When Collect implementation starts, create `codex/feature-collect` from the current cleaned `develop` baseline.
 
 ## What Was Corrected Before Collect
-- Active Super Admin is candidate-management-first.
+- Active Super Admin now has separate overview and management surfaces.
+- `/admin` is the dashboard / operational overview page.
+- `/admin/candidates` is the dedicated candidate-management page.
 - Exposed `Voters` and `Canvassers` were removed from the active admin UI.
+- Unused tab-era voter and canvasser admin components were removed from the active admin code path.
 - Mock-mode behavior was removed from active admin and location clients that the live product and Collect will rely on.
 - Archived or future-scope voter/canvasser code remains in the repo for reference but is not part of the current live admin scope.
 
@@ -63,9 +67,18 @@ Branch rules:
 - Audience: Hassan / Vextra
 - Authentication: existing admin auth only
 
+Current admin shell baseline before Collect:
+- `/admin` is not the candidate list anymore.
+- `/admin` is reserved for dashboard-level summary, recent activity, and quick actions.
+- `/admin/candidates` owns candidate search, filters, pagination, and create/edit/delete flows.
+- Summary widgets belong to the dashboard surface, not the candidates management surface.
+- Collect should be added into this admin shell as a peer section, not folded into the candidates page.
+
 ## Admin Scope for v1
 - Add a new `Collect` section to the existing admin shell.
-- Preserve current candidate-management admin behavior.
+- Preserve the cleaned admin routing split:
+  - dashboard at `/admin`
+  - candidates at `/admin/candidates`
 - Do not reintroduce archived voter/canvasser management into the active admin as part of Collect.
 
 Collect admin capabilities:
@@ -196,7 +209,11 @@ API rules:
 ### Admin
 - Reuse existing shadcn/ui stack
 - Reuse existing admin layout shell
-- Keep sidebar change minimal: add `Collect`
+- Keep sidebar structure aligned with the cleaned baseline:
+  - `Dashboard`
+  - `Candidates`
+  - `Collect`
+- Do not reintroduce tab-query routing for candidate management
 - Use charts already supported by the repo for overview analytics
 - Keep campaign detail split into:
   - Overview
@@ -212,8 +229,8 @@ API rules:
 - Use existing button, form, toggle, badge, sheet, and chart primitives where possible
 
 ## Launch Preconditions
-- Admin cleanup merged into `develop`
-- `codex/feature-collect` created from cleaned `develop`
+- Admin cleanup remains the active baseline on `develop`
+- `codex/feature-collect` is created only when Collect implementation is explicitly started
 - Geo foundation decision explicitly made
 - Real Girei data supplied if MGM remains a launch campaign
 - `NEXT_PUBLIC_COLLECT_BASE_URL` configured
@@ -235,6 +252,7 @@ API rules:
 - If new decisions are made, update this file first.
 - Do not maintain a separate competing plan document.
 - Claude should be told:
+  - active admin now uses separate pages for dashboard and candidates
   - admin cleanup is already part of the active baseline
   - `pre-scope-reduction` is archive/reference only
   - Collect v1 is admin-only

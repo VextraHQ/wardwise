@@ -1,46 +1,32 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import {
   HiExclamationCircle,
+  HiOutlineArrowRight,
   HiOutlineBriefcase,
-  HiOutlineUserAdd,
   HiOutlineUserGroup,
   HiOutlineUsers,
 } from "react-icons/hi";
-import { adminApi, type CandidateWithUser } from "@/lib/api/admin";
-import type { Candidate } from "@/types/candidate";
+import { adminApi } from "@/lib/api/admin";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs } from "@/components/ui/tabs";
-import { AdminSearchBar } from "@/components/admin/admin-search-bar";
-import { CandidateFilters } from "@/components/admin/admin-filters/candidate-filters";
-import { CandidatesTab } from "@/components/admin/admin-tabs/candidates-tab";
-import { CreateCandidateDialog } from "@/components/admin/admin-dialogs/create-candidate-dialog";
-import { EditCandidateDialog } from "@/components/admin/admin-dialogs/edit-candidate-dialog";
-import { DeleteCandidateDialog } from "@/components/admin/admin-dialogs/delete-candidate-dialog";
-import { StatCardSkeleton } from "@/components/admin/admin-skeletons";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  CandidateCardSkeleton,
+  StatCardSkeleton,
+} from "@/components/admin/admin-skeletons";
 
 export function AdminDashboard() {
-  const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [partyFilter, setPartyFilter] = useState("all");
-  const [positionFilter, setPositionFilter] = useState("all");
-  const [candidateSort, setCandidateSort] = useState<
-    "name" | "supporters" | "date"
-  >("name");
-  const [candidatePage, setCandidatePage] = useState(1);
-  const [candidatePageSize, setCandidatePageSize] = useState(10);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingCandidate, setEditingCandidate] =
-    useState<CandidateWithUser | null>(null);
-  const [deletingCandidateId, setDeletingCandidateId] = useState<string | null>(
-    null,
-  );
-
   const {
     data: candidates = [],
     isLoading,
@@ -52,54 +38,6 @@ export function AdminDashboard() {
     refetchOnWindowFocus: false,
   });
 
-  const createCandidateMutation = useMutation({
-    mutationFn: adminApi.candidates.create,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["admin"] });
-      setIsCreateDialogOpen(false);
-      toast.success("Candidate account created");
-    },
-    onError: (mutationError) => {
-      toast.error(
-        mutationError instanceof Error
-          ? mutationError.message
-          : "Failed to create candidate",
-      );
-    },
-  });
-
-  const updateCandidateMutation = useMutation({
-    mutationFn: adminApi.candidates.update,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["admin"] });
-      setEditingCandidate(null);
-      toast.success("Candidate account updated");
-    },
-    onError: (mutationError) => {
-      toast.error(
-        mutationError instanceof Error
-          ? mutationError.message
-          : "Failed to update candidate",
-      );
-    },
-  });
-
-  const deleteCandidateMutation = useMutation({
-    mutationFn: adminApi.candidates.delete,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["admin"] });
-      setDeletingCandidateId(null);
-      toast.success("Candidate account deleted");
-    },
-    onError: (mutationError) => {
-      toast.error(
-        mutationError instanceof Error
-          ? mutationError.message
-          : "Failed to delete candidate",
-      );
-    },
-  });
-
   const uniqueParties = useMemo(
     () =>
       Array.from(
@@ -107,77 +45,6 @@ export function AdminDashboard() {
       ).sort(),
     [candidates],
   );
-
-  const uniquePositions = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          candidates
-            .map((candidate) => candidate.position)
-            .filter(Boolean),
-        ),
-      ).sort() as Candidate["position"][],
-    [candidates],
-  );
-
-  const filteredCandidates = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-
-    const filtered = candidates.filter((candidate) => {
-      if (partyFilter !== "all" && candidate.party !== partyFilter) {
-        return false;
-      }
-
-      if (positionFilter !== "all" && candidate.position !== positionFilter) {
-        return false;
-      }
-
-      if (!query) {
-        return true;
-      }
-
-      const searchableFields = [
-        candidate.name,
-        candidate.party,
-        candidate.position,
-        candidate.constituency,
-        candidate.user?.email,
-      ];
-
-      return searchableFields.some((value) =>
-        value?.toLowerCase().includes(query),
-      );
-    });
-
-    filtered.sort((left, right) => {
-      if (candidateSort === "name") {
-        return left.name.localeCompare(right.name);
-      }
-
-      if (candidateSort === "supporters") {
-        return right.supporters - left.supporters;
-      }
-
-      return (
-        new Date(right.user.createdAt).getTime() -
-        new Date(left.user.createdAt).getTime()
-      );
-    });
-
-    return filtered;
-  }, [candidates, searchQuery, partyFilter, positionFilter, candidateSort]);
-
-  const candidateTotalPages = Math.max(
-    1,
-    Math.ceil(filteredCandidates.length / candidatePageSize),
-  );
-
-  const safeCandidatePage = Math.min(candidatePage, candidateTotalPages);
-
-  const paginatedCandidates = useMemo(() => {
-    const startIndex = (safeCandidatePage - 1) * candidatePageSize;
-    return filteredCandidates.slice(startIndex, startIndex + candidatePageSize);
-  }, [filteredCandidates, safeCandidatePage, candidatePageSize]);
 
   const totalSupporters = useMemo(
     () =>
@@ -193,43 +60,40 @@ export function AdminDashboard() {
     [candidates],
   );
 
-  const activeFilters =
-    searchQuery.length > 0 ||
-    partyFilter !== "all" ||
-    positionFilter !== "all" ||
-    candidateSort !== "name";
+  const latestCandidates = useMemo(
+    () =>
+      [...candidates]
+        .sort(
+          (left, right) =>
+            new Date(right.user.createdAt).getTime() -
+            new Date(left.user.createdAt).getTime(),
+        )
+        .slice(0, 5),
+    [candidates],
+  );
 
-  const deletingCandidateName =
-    candidates.find((candidate) => candidate.id === deletingCandidateId)?.name ||
-    undefined;
+  const topPositions = useMemo(() => {
+    const counts = candidates.reduce<Record<string, number>>(
+      (acc, candidate) => {
+        acc[candidate.position] = (acc[candidate.position] ?? 0) + 1;
+        return acc;
+      },
+      {},
+    );
 
-  const loadingActions =
-    updateCandidateMutation.isPending || deleteCandidateMutation.isPending;
+    return Object.entries(counts)
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 4);
+  }, [candidates]);
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-2">
-          <p className="text-primary text-xs font-bold tracking-[0.2em] uppercase">
-            Super Admin Workspace
-          </p>
-          <div className="space-y-1">
-            <h2 className="text-2xl font-semibold tracking-tight">
-              Candidate Management
-            </h2>
-            <p className="text-muted-foreground max-w-2xl text-sm">
-              Manage candidate accounts, review platform readiness, and prepare
-              the admin base for the upcoming Collect rollout.
-            </p>
-          </div>
-        </div>
-
-        <Button
-          onClick={() => setIsCreateDialogOpen(true)}
-          className="w-full gap-2 lg:w-auto"
-        >
-          <HiOutlineUserAdd className="h-4 w-4" />
-          <span>Create Candidate</span>
+      <div className="flex justify-end">
+        <Button asChild className="w-full gap-2 sm:w-auto">
+          <Link href="/admin/candidates">
+            <span>Manage Candidates</span>
+            <HiOutlineArrowRight className="h-4 w-4" />
+          </Link>
         </Button>
       </div>
 
@@ -248,9 +112,10 @@ export function AdminDashboard() {
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         {isLoading ? (
           <>
+            <StatCardSkeleton />
             <StatCardSkeleton />
             <StatCardSkeleton />
             <StatCardSkeleton />
@@ -304,13 +169,33 @@ export function AdminDashboard() {
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="text-2xl font-semibold">
-                  {uniqueParties.length} parties
+                  {uniqueParties.length}
                 </div>
                 <p className="text-muted-foreground mt-1 text-xs">
-                  {nationalCandidates} national candidate
+                  Distinct parties represented in candidate records
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-muted-foreground text-sm font-medium">
+                  National Coverage
+                </CardTitle>
+                <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-lg">
+                  <HiOutlineBriefcase className="text-primary h-5 w-5" />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-2xl font-semibold">
+                  {nationalCandidates}
+                </div>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  National candidate
                   {nationalCandidates === 1 ? "" : "s"} and{" "}
                   {candidates.length - nationalCandidates} constituency-linked
-                  accounts
+                  account
+                  {candidates.length - nationalCandidates === 1 ? "" : "s"}
                 </p>
               </CardContent>
             </Card>
@@ -318,93 +203,137 @@ export function AdminDashboard() {
         )}
       </div>
 
-      <div className="flex flex-col gap-4">
-        <AdminSearchBar
-          value={searchQuery}
-          onChange={(value) => {
-            setSearchQuery(value);
-            setCandidatePage(1);
-          }}
-          onClear={() => setCandidatePage(1)}
-          placeholder="Search candidates by name, email, party, position, or constituency"
-        />
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.35fr_1fr]">
+        <Card className="border-border/50">
+          <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <div className="space-y-1">
+              <CardTitle>Recent Candidate Accounts</CardTitle>
+              <CardDescription>
+                Newly added candidate records across the current admin workspace.
+              </CardDescription>
+            </div>
+            <Button variant="outline" asChild className="shrink-0">
+              <Link href="/admin/candidates">View All</Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-4">
+                <CandidateCardSkeleton />
+                <CandidateCardSkeleton />
+              </div>
+            ) : latestCandidates.length === 0 ? (
+              <div className="py-10 text-center">
+                <HiOutlineUserGroup className="text-muted-foreground mx-auto mb-3 h-12 w-12" />
+                <p className="text-muted-foreground mb-1 font-medium">
+                  No candidates available yet
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  Candidate accounts will appear here once they are created.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {latestCandidates.map((candidate) => (
+                  <div
+                    key={candidate.id}
+                    className="border-border/40 bg-card/50 flex flex-col gap-2 rounded-xl border p-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-semibold tracking-tight">
+                        {candidate.name}
+                      </h3>
+                      <Badge variant="secondary">{candidate.party}</Badge>
+                    </div>
+                    <p className="text-muted-foreground text-sm">
+                      {candidate.user.email}
+                    </p>
+                    <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                      <span>{candidate.position}</span>
+                      {candidate.constituency && (
+                        <span>{candidate.constituency}</span>
+                      )}
+                      <span>
+                        Added{" "}
+                        {new Date(candidate.user.createdAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-        <CandidateFilters
-          partyFilter={partyFilter}
-          positionFilter={positionFilter}
-          sort={candidateSort}
-          uniqueParties={uniqueParties}
-          uniquePositions={uniquePositions}
-          onFilterChange={({ party, position, sort }) => {
-            if (party !== undefined) setPartyFilter(party);
-            if (position !== undefined) setPositionFilter(position);
-            if (sort !== undefined) setCandidateSort(sort);
-            setCandidatePage(1);
-          }}
-          onReset={() => {
-            setSearchQuery("");
-            setPartyFilter("all");
-            setPositionFilter("all");
-            setCandidateSort("name");
-            setCandidatePage(1);
-          }}
-          hasFilters={activeFilters}
-        />
+        <Card className="border-border/50">
+          <CardHeader>
+            <CardTitle>Coverage Snapshot</CardTitle>
+            <CardDescription>
+              A quick read on how the current candidate base is distributed.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">
+                  Constituency-linked candidates
+                </span>
+                <span className="font-medium">
+                  {candidates.length - nationalCandidates}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">
+                  National candidates
+                </span>
+                <span className="font-medium">{nationalCandidates}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Distinct parties</span>
+                <span className="font-medium">{uniqueParties.length}</span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium">Top Positions</h3>
+                <Badge variant="outline">{topPositions.length} tracked</Badge>
+              </div>
+              {topPositions.length === 0 ? (
+                <p className="text-muted-foreground text-sm">
+                  Position data will appear here once candidate accounts exist.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {topPositions.map(([position, count]) => (
+                    <div key={position} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">{position}</span>
+                        <span className="font-medium">{count}</span>
+                      </div>
+                      <div className="bg-muted h-2 rounded-full">
+                        <div
+                          className="bg-primary h-2 rounded-full"
+                          style={{
+                            width: `${(count / Math.max(candidates.length, 1)) * 100}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
-
-      <Tabs value="candidates" className="flex flex-1 flex-col">
-        <CandidatesTab
-          candidates={candidates}
-          filteredCandidates={filteredCandidates}
-          paginatedCandidates={paginatedCandidates}
-          isLoading={isLoading}
-          error={error instanceof Error ? error : null}
-          searchQuery={searchQuery}
-          currentPage={safeCandidatePage}
-          pageSize={candidatePageSize}
-          totalPages={candidateTotalPages}
-          onEdit={setEditingCandidate}
-          onDelete={setDeletingCandidateId}
-          onPageChange={setCandidatePage}
-          onPageSizeChange={(size) => {
-            setCandidatePageSize(size);
-            setCandidatePage(1);
-          }}
-          isLoadingActions={loadingActions}
-        />
-      </Tabs>
-
-      <CreateCandidateDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        onSubmit={(data) => createCandidateMutation.mutate(data)}
-        isLoading={createCandidateMutation.isPending}
-      />
-
-      <EditCandidateDialog
-        candidate={editingCandidate}
-        open={editingCandidate !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setEditingCandidate(null);
-          }
-        }}
-        onSubmit={(data) => updateCandidateMutation.mutate(data)}
-        isLoading={updateCandidateMutation.isPending}
-      />
-
-      <DeleteCandidateDialog
-        candidateId={deletingCandidateId}
-        candidateName={deletingCandidateName}
-        open={deletingCandidateId !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDeletingCandidateId(null);
-          }
-        }}
-        onConfirm={(candidateId) => deleteCandidateMutation.mutate(candidateId)}
-        isLoading={deleteCandidateMutation.isPending}
-      />
     </div>
   );
 }

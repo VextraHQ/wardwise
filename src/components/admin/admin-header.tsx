@@ -12,12 +12,11 @@ import {
 } from "react-icons/hi";
 import Link from "next/link";
 import { toast } from "sonner";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export function AdminHeader() {
   const queryClient = useQueryClient();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ["admin"] });
@@ -27,19 +26,30 @@ export function AdminHeader() {
   // Check if any queries are fetching
   const isRefreshing = queryClient.isFetching({ queryKey: ["admin"] }) > 0;
 
-  // Get breadcrumb title based on pathname
   const getBreadcrumbTitle = () => {
-    const activeTab = searchParams?.get("tab");
-    if (pathname === "/admin" && activeTab === "candidates") {
+    if (pathname.startsWith("/admin/candidates")) {
       return "Candidates";
     }
-    if (pathname === "/admin") return "Candidate Management";
+    if (pathname === "/admin") return "Dashboard";
+    if (pathname.startsWith("/admin/collect")) return "Collect";
     if (pathname.includes("/analytics")) return "Analytics";
     if (pathname.includes("/activity")) return "Activity Logs";
     if (pathname.includes("/settings")) return "Settings";
     if (pathname.includes("/help")) return "Help & Documentation";
     if (pathname.includes("/export")) return "Export Data";
     return "Candidate Management";
+  };
+
+  const getDescription = () => {
+    if (pathname === "/admin") {
+      return "Platform overview for candidate coverage, readiness, and upcoming Collect operations";
+    }
+
+    if (pathname.startsWith("/admin/candidates")) {
+      return "Dedicated candidate account management with search, filters, and account actions";
+    }
+
+    return "Administrative controls and management";
   };
 
   return (
@@ -64,9 +74,7 @@ export function AdminHeader() {
             </Badge>
           </div>
           <p className="text-muted-foreground hidden truncate text-xs sm:block">
-            {pathname === "/admin"
-              ? "Create and manage candidate accounts from the Super Admin workspace"
-              : "Administrative controls and management"}
+            {getDescription()}
           </p>
         </div>
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
