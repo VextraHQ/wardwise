@@ -12,11 +12,12 @@ import {
 } from "react-icons/hi";
 import Link from "next/link";
 import { toast } from "sonner";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 export function AdminHeader() {
   const queryClient = useQueryClient();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ["admin"] });
@@ -28,13 +29,17 @@ export function AdminHeader() {
 
   // Get breadcrumb title based on pathname
   const getBreadcrumbTitle = () => {
-    if (pathname === "/admin") return "Dashboard";
+    const activeTab = searchParams?.get("tab");
+    if (pathname === "/admin" && activeTab === "candidates") {
+      return "Candidates";
+    }
+    if (pathname === "/admin") return "Candidate Management";
     if (pathname.includes("/analytics")) return "Analytics";
     if (pathname.includes("/activity")) return "Activity Logs";
     if (pathname.includes("/settings")) return "Settings";
     if (pathname.includes("/help")) return "Help & Documentation";
     if (pathname.includes("/export")) return "Export Data";
-    return "Admin Dashboard";
+    return "Candidate Management";
   };
 
   return (
@@ -60,7 +65,7 @@ export function AdminHeader() {
           </div>
           <p className="text-muted-foreground hidden truncate text-xs sm:block">
             {pathname === "/admin"
-              ? "Manage all users, candidates, and platform settings"
+              ? "Create and manage candidate accounts from the Super Admin workspace"
               : "Administrative controls and management"}
           </p>
         </div>

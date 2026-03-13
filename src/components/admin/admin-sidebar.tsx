@@ -5,13 +5,11 @@ import { Suspense } from "react";
 import {
   IconDashboard,
   IconUsers,
-  IconUserCircle,
   IconSettings,
   IconHome,
   IconChartBar,
   IconHistory,
   IconHelp,
-  IconUserCheck,
 } from "@tabler/icons-react";
 import { NavMain } from "@/components/candidate-dashboard/nav-main";
 import { NavSecondary } from "@/components/candidate-dashboard/nav-secondary";
@@ -39,16 +37,6 @@ const adminNavItems = [
     title: "Candidates",
     url: "/admin?tab=candidates",
     icon: IconUsers,
-  },
-  {
-    title: "Voters",
-    url: "/admin?tab=voters",
-    icon: IconUserCircle,
-  },
-  {
-    title: "Canvassers",
-    url: "/admin?tab=canvassers",
-    icon: IconUserCheck,
   },
   {
     title: "Analytics",
