@@ -58,7 +58,7 @@ export function CandidatesTab({
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
   return (
-    <TabsContent value="candidates" className="flex-1 space-y-4 px-4 lg:px-6">
+    <TabsContent value="candidates" className="flex-1 space-y-4">
       <Card className="border-border/50 flex-1">
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
