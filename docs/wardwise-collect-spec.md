@@ -1,23 +1,27 @@
 # WardWise Collect Canonical Spec
 
 ## Status
+
 - This document is the working source of truth for WardWise Collect.
 - `pre-scope-reduction` is reference-only and must not be treated as the active implementation branch.
 - Active admin cleanup is part of the current product baseline and is expected before Collect implementation starts.
 - Collect v1 is not implemented yet. This document defines the aligned plan after the admin cleanup pass.
 
 ## Current Branch Workflow
+
 - Cleanup work has been merged into `develop`.
 - Active implementation base is now the cleaned `develop` branch.
-- `codex/feature-collect` has not been created yet and should not be created until the next implementation phase is explicitly started.
+- `feature/collect` has not been created yet and should not be created until the next implementation phase is explicitly started.
 
 Branch rules:
+
 - Do not build Collect on `pre-scope-reduction`.
 - Do not reopen `pre-scope-reduction` as a polishing branch.
 - Use the cleaned `develop` branch as the source of truth for current admin behavior.
-- When Collect implementation starts, create `codex/feature-collect` from the current cleaned `develop` baseline.
+- When Collect implementation starts, create `feature/collect` from the current cleaned `develop` baseline.
 
 ## What Was Corrected Before Collect
+
 - Active Super Admin now has separate overview and management surfaces.
 - `/admin` is the dashboard / operational overview page.
 - `/admin/candidates` is the dedicated candidate-management page.
@@ -29,15 +33,18 @@ Branch rules:
 ## Locked Product Decisions
 
 ### Collect Role Scope
+
 - Collect v1 is admin-only on the management side.
 - Hassan / Vextra is the only admin role in scope for v1.
 - Candidate self-service access to Collect data is explicitly out of scope for v1.
 
 ### Campaign Ownership
+
 - A Collect campaign links to an existing `Candidate` record.
 - A Collect campaign also stores its own campaign snapshot/config fields so public form copy and campaign behavior are not tightly coupled to future edits on the core candidate record.
 
 ### Form Configuration
+
 - APC Membership Number and VIN must use enum-style field modes:
   - `hidden`
   - `optional`
@@ -47,6 +54,7 @@ Branch rules:
 - Both custom questions render on the public form and store answers per submission.
 
 ### Geography and Launch Safety
+
 - Fake seed geography is not acceptable for production launch.
 - Generated placeholder wards or polling units are not acceptable for launch campaigns.
 - Real Girei geography is required before the MGM campaign can launch.
@@ -58,16 +66,19 @@ Branch rules:
 ## Product Surfaces
 
 ### Public
+
 - URL pattern: `collect.wardwise.ng/c/[slug]`
 - Audience: registrants / supporters
 - Authentication: none
 
 ### Admin
+
 - URL pattern: `collect.wardwise.ng/admin/collect`
 - Audience: Hassan / Vextra
 - Authentication: existing admin auth only
 
 Current admin shell baseline before Collect:
+
 - `/admin` is not the candidate list anymore.
 - `/admin` is reserved for dashboard-level summary, recent activity, and quick actions.
 - `/admin/candidates` owns candidate search, filters, pagination, and create/edit/delete flows.
@@ -75,6 +86,7 @@ Current admin shell baseline before Collect:
 - Collect should be added into this admin shell as a peer section, not folded into the candidates page.
 
 ## Admin Scope for v1
+
 - Add a new `Collect` section to the existing admin shell.
 - Preserve the cleaned admin routing split:
   - dashboard at `/admin`
@@ -82,6 +94,7 @@ Current admin shell baseline before Collect:
 - Do not reintroduce archived voter/canvasser management into the active admin as part of Collect.
 
 Collect admin capabilities:
+
 - Create campaign
 - Edit campaign
 - Pause / resume / close campaign
@@ -98,6 +111,7 @@ Collect admin capabilities:
 ## Public Registration Experience
 
 ### Core Flow
+
 - Campaign splash screen
 - Step 1: personal details
 - Step 2: location
@@ -107,6 +121,7 @@ Collect admin capabilities:
 - Confirmation screen
 
 ### Persistence
+
 - Save in-progress form state to local storage using a campaign-scoped key.
 - On return, offer:
   - continue
@@ -114,6 +129,7 @@ Collect admin capabilities:
 - Clear persisted state after successful submission.
 
 ### Validation Expectations
+
 - Full server-side validation with Zod
 - Nigerian phone validation
 - Campaign-scoped duplicate prevention on phone
@@ -121,6 +137,7 @@ Collect admin capabilities:
 - Conditional APC/VIN validation based on field mode
 
 ### Required Edge Cases
+
 - invalid slug
 - draft campaign access
 - paused campaign
@@ -132,7 +149,9 @@ Collect admin capabilities:
 ## Data Model Direction
 
 ### Campaign
+
 Campaign fields must cover:
+
 - candidate relation
 - slug
 - candidate title
@@ -148,7 +167,9 @@ Campaign fields must cover:
 - timestamps
 
 ### Submission
+
 Submission fields must cover:
+
 - campaign relation
 - full name
 - phone
@@ -170,9 +191,11 @@ Submission fields must cover:
 - timestamps
 
 Constraint:
+
 - prevent duplicate phone per campaign
 
 Important:
+
 - exact location field shape depends on the geo foundation decision
 - if file-backed geography is kept, store stable location codes
 - if geography is normalized, store relational foreign keys
@@ -180,6 +203,7 @@ Important:
 ## API Direction
 
 ### Public API
+
 - fetch campaign config by slug
 - fetch enabled LGAs for campaign
 - fetch wards by LGA
@@ -187,6 +211,7 @@ Important:
 - submit registration
 
 ### Admin API
+
 - list campaigns
 - create campaign
 - get campaign detail
@@ -199,6 +224,7 @@ Important:
 - list canvasser aggregates
 
 API rules:
+
 - use existing Next.js app router route conventions
 - use existing admin auth guard patterns
 - serialize dates to ISO strings
@@ -207,6 +233,7 @@ API rules:
 ## UI Implementation Direction
 
 ### Admin
+
 - Reuse existing shadcn/ui stack
 - Reuse existing admin layout shell
 - Keep sidebar structure aligned with the cleaned baseline:
@@ -222,6 +249,7 @@ API rules:
   - Settings
 
 ### Public
+
 - Mobile-first layout
 - Max width around 480px on desktop
 - One step per screen
@@ -229,13 +257,15 @@ API rules:
 - Use existing button, form, toggle, badge, sheet, and chart primitives where possible
 
 ## Launch Preconditions
+
 - Admin cleanup remains the active baseline on `develop`
-- `codex/feature-collect` is created only when Collect implementation is explicitly started
+- `feature/collect` is created only when Collect implementation is explicitly started
 - Geo foundation decision explicitly made
 - Real Girei data supplied if MGM remains a launch campaign
 - `NEXT_PUBLIC_COLLECT_BASE_URL` configured
 
 ## Validation Checklist
+
 - admin auth still protects `/admin`
 - candidate CRUD still works after admin cleanup
 - active admin has no exposed voter/canvasser UI
@@ -248,6 +278,7 @@ API rules:
 - build, lint, and typecheck pass
 
 ## Working Agreement With Claude
+
 - Use this file as the canonical plan.
 - If new decisions are made, update this file first.
 - Do not maintain a separate competing plan document.
