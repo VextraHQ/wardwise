@@ -44,7 +44,7 @@ export function ChartAreaInteractive({
   };
 }) {
   const isMobile = useIsMobile();
-  const [timeRange, setTimeRange] = React.useState("90d");
+  const [timeRange, setTimeRange] = React.useState("7d");
 
   React.useEffect(() => {
     if (isMobile) {
@@ -80,14 +80,16 @@ export function ChartAreaInteractive({
       : [];
 
   return (
-    <Card className="@container/card">
+    <Card className="border-border/60 @container/card rounded-sm shadow-none">
       <CardHeader>
-        <CardTitle>Registration Trends</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-sm font-semibold tracking-tight">
+          Registration Trends
+        </CardTitle>
+        <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
           <span className="hidden @[540px]/card:block">
-            Voter registrations over time
+            Voter Registrations Over Time
           </span>
-          <span className="@[540px]/card:hidden">Registration trends</span>
+          <span className="@[540px]/card:hidden">Registration Trends</span>
         </CardDescription>
         <CardAction>
           <ToggleGroup
@@ -95,29 +97,38 @@ export function ChartAreaInteractive({
             value={timeRange}
             onValueChange={setTimeRange}
             variant="outline"
-            className="hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex"
+            className="hidden *:data-[slot=toggle-group-item]:rounded-sm *:data-[slot=toggle-group-item]:px-4! *:data-[slot=toggle-group-item]:font-mono *:data-[slot=toggle-group-item]:text-[11px] *:data-[slot=toggle-group-item]:tracking-widest *:data-[slot=toggle-group-item]:uppercase @[767px]/card:flex"
           >
-            <ToggleGroupItem value="90d">Last 3 months</ToggleGroupItem>
-            <ToggleGroupItem value="30d">Last 30 days</ToggleGroupItem>
-            <ToggleGroupItem value="7d">Last 7 days</ToggleGroupItem>
+            <ToggleGroupItem value="7d">7 Days</ToggleGroupItem>
+            <ToggleGroupItem value="30d">30 Days</ToggleGroupItem>
+            <ToggleGroupItem value="90d">90 Days</ToggleGroupItem>
           </ToggleGroup>
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger
-              className="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
+              className="flex w-32 rounded-sm font-mono text-[11px] tracking-widest uppercase **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
               size="sm"
               aria-label="Select a value"
             >
-              <SelectValue placeholder="Last 3 months" />
+              <SelectValue placeholder="90 Days" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value="90d" className="rounded-lg">
-                Last 3 months
+            <SelectContent className="rounded-sm">
+              <SelectItem
+                value="7d"
+                className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+              >
+                7 Days
               </SelectItem>
-              <SelectItem value="30d" className="rounded-lg">
-                Last 30 days
+              <SelectItem
+                value="30d"
+                className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+              >
+                30 Days
               </SelectItem>
-              <SelectItem value="7d" className="rounded-lg">
-                Last 7 days
+              <SelectItem
+                value="90d"
+                className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+              >
+                90 Days
               </SelectItem>
             </SelectContent>
           </Select>

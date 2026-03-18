@@ -100,10 +100,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:p-0!"
             >
               <Link href="/">
-                <div className="from-primary flex size-8 items-center justify-center rounded-lg bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
+                <div className="from-primary flex size-8 items-center justify-center rounded-sm bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
                   <HiMap className="h-4 w-4" />
                 </div>
-                <span className="text-base font-semibold">WardWise</span>
+                <span className="text-base font-bold tracking-tight">WardWise</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

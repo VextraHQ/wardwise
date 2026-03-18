@@ -13,6 +13,7 @@ import {
 import {
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -21,6 +22,7 @@ import {
 export function NavMain({
   items,
   quickActions,
+  label,
 }: {
   items: {
     title: string;
@@ -32,11 +34,17 @@ export function NavMain({
     url: string;
     icon: Icon;
   }[];
+  label?: string;
 }) {
   const pathname = usePathname();
 
   return (
     <SidebarGroup>
+      {label && (
+        <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+          {label}
+        </SidebarGroupLabel>
+      )}
       <SidebarGroupContent className="flex flex-col gap-2">
         {quickActions && quickActions.length > 0 && (
           <SidebarMenu>
@@ -48,7 +56,9 @@ export function NavMain({
                     className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground w-full duration-200 ease-linear"
                   >
                     <IconCirclePlusFilled />
-                    <span>Quick Actions</span>
+                    <span className="mt-0.5 font-mono text-[11px] font-bold tracking-widest uppercase">
+                      Quick Actions
+                    </span>
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56">
@@ -71,9 +81,13 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => {
             const urlPath = item.url.split("?")[0];
+            const isExactMatchOnly =
+              urlPath === "/" ||
+              urlPath === "/admin" ||
+              urlPath === "/dashboard";
             const matchesNestedRoute =
+              !isExactMatchOnly &&
               urlPath !== "/" &&
-              urlPath !== "/admin" &&
               pathname.startsWith(`${urlPath}/`);
             const isActive =
               item.url !== "#" && (pathname === urlPath || matchesNestedRoute);

@@ -12,10 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  IconMapPin,
-  IconUsers,
-} from "@tabler/icons-react";
+import { IconMapPin, IconUsers } from "@tabler/icons-react";
 
 export function DashboardContent() {
   const { data: dashboardData, isLoading, error } = useCandidateDashboard();
@@ -25,11 +22,14 @@ export function DashboardContent() {
       <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
         <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-32" />
+            <Skeleton
+              key={i}
+              className="border-border/50 bg-muted/20 h-32 rounded-sm border"
+            />
           ))}
         </div>
-        <Skeleton className="mx-4 h-64 lg:mx-6" />
-        <Skeleton className="h-96" />
+        <Skeleton className="border-border/50 bg-muted/20 mx-4 h-64 rounded-sm border lg:mx-6" />
+        <Skeleton className="border-border/50 bg-muted/20 mx-4 h-96 rounded-sm border lg:mx-6" />
       </div>
     );
   }
@@ -74,13 +74,15 @@ export function DashboardContent() {
           </div>
           <div className="grid gap-4 px-4 md:grid-cols-2 lg:px-6">
             {/* Ward Coverage Card */}
-            <Card>
+            <Card className="border-border/60 rounded-sm shadow-none">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Ward Coverage</CardTitle>
-                    <CardDescription>
-                      Registration activity across your wards
+                  <div className="space-y-1">
+                    <CardTitle className="text-sm font-semibold tracking-tight">
+                      Ward Coverage
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+                      Registration Activity
                     </CardDescription>
                   </div>
                 </div>
@@ -88,26 +90,27 @@ export function DashboardContent() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-lg border p-3 text-center">
-                      <div className="mx-auto mb-1 flex size-8 items-center justify-center rounded-lg bg-green-500/10">
-                        <IconUsers className="size-4 text-green-600" />
+                    <div className="border-border/40 bg-muted/10 hover:bg-muted/20 hover:border-border/60 rounded-sm border p-3 text-center transition-all">
+                      <div className="bg-primary/10 border-primary/20 mx-auto mb-2 flex size-8 items-center justify-center rounded-sm border">
+                        <IconUsers className="text-primary size-4" />
                       </div>
-                      <p className="text-foreground text-xl font-bold">
+                      <p className="text-foreground font-mono text-xl font-bold tracking-tight">
                         {dashboardData?.totalSupporters?.toLocaleString() ||
                           "0"}
                       </p>
-                      <p className="text-muted-foreground text-[10px] font-medium tracking-wide uppercase">
+                      <p className="text-muted-foreground mt-1 text-[10px] font-bold tracking-widest uppercase">
                         Registered
                       </p>
                     </div>
-                    <div className="rounded-lg border p-3 text-center">
-                      <div className="mx-auto mb-1 flex size-8 items-center justify-center rounded-lg bg-blue-500/10">
-                        <IconMapPin className="size-4 text-blue-600" />
+                    <div className="border-border/40 bg-muted/10 hover:bg-muted/20 hover:border-border/60 rounded-sm border p-3 text-center transition-all">
+                      <div className="mx-auto mb-2 flex size-8 items-center justify-center rounded-sm border border-orange-500/20 bg-orange-500/10">
+                        <IconMapPin className="size-4 text-orange-600" />
                       </div>
-                      <p className="text-foreground text-xl font-bold">
-                        {dashboardData?.wardCoverage?.wardDetails?.length || "0"}
+                      <p className="text-foreground font-mono text-xl font-bold tracking-tight">
+                        {dashboardData?.wardCoverage?.wardDetails?.length ||
+                          "0"}
                       </p>
-                      <p className="text-muted-foreground text-[10px] font-medium tracking-wide uppercase">
+                      <p className="text-muted-foreground mt-1 text-[10px] font-bold tracking-widest uppercase">
                         Active Wards
                       </p>
                     </div>

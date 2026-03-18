@@ -209,7 +209,10 @@ export function PricingContent() {
           <h1 className="text-2xl font-semibold tracking-tight">
             Plans & Pricing
           </h1>
-          <Badge variant="outline" className="text-xs font-medium">
+          <Badge
+            variant="outline"
+            className="rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
+          >
             Demo Pricing
           </Badge>
         </div>
@@ -224,28 +227,32 @@ export function PricingContent() {
         {PLANS.map((plan) => (
           <Card
             key={plan.id}
-            className={`relative flex flex-col ${
+            className={`relative flex flex-col rounded-sm shadow-none ${
               plan.highlighted
                 ? "border-primary ring-primary/20 ring-2"
-                : "border-border"
+                : "border-border/60"
             }`}
           >
             {plan.badge && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground gap-1 px-3 py-1 text-xs font-bold">
+                <Badge className="bg-primary text-primary-foreground gap-1 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase">
                   <IconStar className="size-3" />
                   {plan.badge}
                 </Badge>
               </div>
             )}
-            <CardHeader className={plan.badge ? "pt-6" : ""}>
-              <CardTitle className="text-lg">{plan.name}</CardTitle>
-              <CardDescription>{plan.description}</CardDescription>
+            <CardHeader className={plan.badge ? "pt-6 pb-3" : "pb-3"}>
+              <CardTitle className="text-sm font-semibold tracking-tight">
+                {plan.name}
+              </CardTitle>
+              <CardDescription className="text-muted-foreground mt-1 text-sm">
+                {plan.description}
+              </CardDescription>
               <div className="pt-2">
-                <span className="text-foreground text-3xl font-bold">
+                <span className="text-foreground font-mono text-3xl font-bold tracking-tight">
                   {plan.price}
                 </span>
-                <span className="text-muted-foreground ml-1 text-sm">
+                <span className="text-muted-foreground ml-1 font-mono text-[11px] tracking-widest uppercase">
                   / {plan.priceDetail}
                 </span>
               </div>
@@ -264,7 +271,7 @@ export function PricingContent() {
                       {feature.included ? (
                         <IconCheck className="size-3" />
                       ) : (
-                        <span className="text-[10px]">&mdash;</span>
+                        <span className="text-[11px]">&mdash;</span>
                       )}
                     </div>
                     <span
@@ -282,7 +289,7 @@ export function PricingContent() {
               <div className="mt-6">
                 <Button
                   variant={plan.ctaVariant}
-                  className="w-full"
+                  className="w-full rounded-sm font-mono text-[11px] tracking-widest uppercase"
                   disabled={plan.currentPlan}
                   onClick={() => handleUpgrade(plan.id)}
                 >
@@ -295,8 +302,8 @@ export function PricingContent() {
       </div>
 
       {/* Enterprise Callout */}
-      <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="flex flex-col items-center gap-4 py-6 sm:flex-row sm:justify-between">
+      <Card className="border-primary/20 bg-primary/5 rounded-sm shadow-none">
+        <CardContent className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
           <div>
             <h3 className="text-foreground font-semibold">
               Need custom volume pricing?
@@ -308,7 +315,7 @@ export function PricingContent() {
           </div>
           <Button
             variant="outline"
-            className="shrink-0"
+            className="shrink-0 rounded-sm font-mono text-[11px] tracking-widest uppercase"
             onClick={() =>
               toast.info("Contact sales at enterprise@wardwise.ng")
             }
@@ -325,7 +332,10 @@ export function PricingContent() {
         </h2>
         <div className="space-y-2">
           {FAQ_ITEMS.map((item, i) => (
-            <Card key={i} className="overflow-hidden">
+            <Card
+              key={i}
+              className="border-border/60 overflow-hidden rounded-sm shadow-none"
+            >
               <button
                 type="button"
                 className="hover:bg-muted/50 flex w-full items-center justify-between px-4 py-3 text-left transition-colors"

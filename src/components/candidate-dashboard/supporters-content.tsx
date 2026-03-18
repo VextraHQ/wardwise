@@ -21,10 +21,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   IconSearch,
   IconChevronLeft,
   IconChevronRight,
+  IconChevronsLeft,
+  IconChevronsRight,
   IconUsers,
   IconLock,
   IconArrowRight,
@@ -37,7 +47,7 @@ const CURRENT_TIER: "starter" | "standard" | "premium" = "starter";
 export function SupportersContent() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const pageSize = 25;
+  const [pageSize, setPageSize] = useState(25);
 
   const {
     data: supportersData,
@@ -53,10 +63,10 @@ export function SupportersContent() {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
         <div className="flex items-center justify-between">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-10 w-64" />
+          <Skeleton className="bg-muted/20 h-10 w-48 rounded-sm" />
+          <Skeleton className="bg-muted/20 h-10 w-64 rounded-sm" />
         </div>
-        <Skeleton className="h-96" />
+        <Skeleton className="bg-muted/20 h-96 rounded-sm" />
       </div>
     );
   }
@@ -64,9 +74,11 @@ export function SupportersContent() {
   if (error) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <Card className="w-full max-w-md">
+        <Card className="border-border/60 w-full max-w-md rounded-sm shadow-none">
           <CardHeader>
-            <CardTitle>Error Loading Supporters</CardTitle>
+            <CardTitle className="text-sm font-semibold tracking-tight">
+              Error Loading Supporters
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-sm">
@@ -100,16 +112,16 @@ export function SupportersContent() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-64 pl-9"
+            className="w-64 rounded-sm pl-9 text-sm shadow-none focus-visible:ring-1"
           />
         </div>
       </div>
 
       {/* Tier Upgrade Banner */}
       {CURRENT_TIER === "starter" && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="flex items-center gap-4 py-4">
-            <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
+        <Card className="border-primary/20 bg-primary/5 rounded-sm shadow-none">
+          <CardContent className="flex items-center gap-4">
+            <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-sm">
               <IconLock className="size-5" />
             </div>
             <div className="flex-1">
@@ -120,7 +132,12 @@ export function SupportersContent() {
                 Standard plan includes phone numbers and email addresses.
               </p>
             </div>
-            <Button variant="outline" size="sm" asChild className="shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="shrink-0 rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            >
               <Link href="/dashboard/pricing">
                 View Plans
                 <IconArrowRight className="ml-1 size-3" />
@@ -130,20 +147,24 @@ export function SupportersContent() {
         </Card>
       )}
 
-      <Card>
+      <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>All Supporters</CardTitle>
-              <CardDescription>{total} total supporters</CardDescription>
+              <CardTitle className="text-sm font-semibold tracking-tight">
+                All Supporters
+              </CardTitle>
+              <CardDescription className="text-muted-foreground mt-1 text-sm">
+                {total} total supporters
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           {supporters.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="border-border/60 flex flex-col items-center justify-center rounded-sm border border-dashed py-12 text-center">
               <IconUsers className="text-muted-foreground mb-4 size-12" />
-              <h3 className="mb-2 text-lg font-semibold">
+              <h3 className="mb-2 text-sm font-semibold tracking-tight">
                 {search ? "No supporters found" : "No supporters yet"}
               </h3>
               <p className="text-muted-foreground text-sm">
@@ -154,22 +175,37 @@ export function SupportersContent() {
             </div>
           ) : (
             <>
-              <Table>
-                <TableHeader>
+              <div className="border-border/60 overflow-hidden rounded-sm border">
+                <Table>
+                <TableHeader className="bg-muted/30 border-border/60 sticky top-0 z-10 border-b">
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Ward</TableHead>
+                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Name
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Location
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Ward
+                    </TableHead>
                     {(CURRENT_TIER === "standard" ||
                       CURRENT_TIER === "premium") && (
                       <>
-                        <TableHead>Phone</TableHead>
-                        <TableHead>Email</TableHead>
+                        <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                          Phone
+                        </TableHead>
+                        <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                          Email
+                        </TableHead>
                       </>
                     )}
 
-                    <TableHead>Registered</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Registered
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Status
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -206,43 +242,93 @@ export function SupportersContent() {
                         ).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">Registered</Badge>
+                        <Badge
+                          variant="outline"
+                          className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                        >
+                          Registered
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
+              </div>
 
               {totalPages > 1 && (
                 <div className="mt-4 flex items-center justify-between">
-                  <p className="text-muted-foreground text-sm">
+                  <div className="text-muted-foreground hidden flex-1 font-mono text-[11px] tracking-wider lg:flex">
                     Showing {(page - 1) * pageSize + 1} to{" "}
                     {Math.min(page * pageSize, total)} of {total} supporters
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                    >
-                      <IconChevronLeft className="size-4" />
-                      Previous
-                    </Button>
-                    <span className="text-muted-foreground text-sm">
+                  </div>
+                  <div className="flex w-full items-center gap-8 lg:w-fit">
+                    <div className="hidden items-center gap-2 lg:flex">
+                      <Label className="font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground">
+                        Rows per page
+                      </Label>
+                      <Select
+                        value={`${pageSize}`}
+                        onValueChange={(value) => {
+                          setPageSize(Number(value));
+                          setPage(1);
+                        }}
+                      >
+                        <SelectTrigger size="sm" className="w-20 rounded-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent side="top">
+                          {[10, 20, 25, 50].map((size) => (
+                            <SelectItem key={size} value={`${size}`}>
+                              {size}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex w-fit items-center justify-center font-mono text-[11px] font-medium tracking-wider">
                       Page {page} of {totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      disabled={page === totalPages}
-                    >
-                      Next
-                      <IconChevronRight className="size-4" />
-                    </Button>
+                    </div>
+                    <div className="ml-auto flex items-center gap-2 lg:ml-0">
+                      <Button
+                        variant="outline"
+                        className="hidden h-8 w-8 rounded-sm p-0 lg:flex"
+                        onClick={() => setPage(1)}
+                        disabled={page === 1}
+                      >
+                        <span className="sr-only">Go to first page</span>
+                        <IconChevronsLeft />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="size-8 rounded-sm"
+                        size="icon"
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                      >
+                        <span className="sr-only">Go to previous page</span>
+                        <IconChevronLeft />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="size-8 rounded-sm"
+                        size="icon"
+                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={page === totalPages}
+                      >
+                        <span className="sr-only">Go to next page</span>
+                        <IconChevronRight />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="hidden size-8 rounded-sm lg:flex"
+                        size="icon"
+                        onClick={() => setPage(totalPages)}
+                        disabled={page === totalPages}
+                      >
+                        <span className="sr-only">Go to last page</span>
+                        <IconChevronsRight />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}

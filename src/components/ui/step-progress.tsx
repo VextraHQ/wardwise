@@ -6,6 +6,7 @@ interface StepProgressProps {
   stepTitle: string;
   className?: string;
   canvasser?: boolean;
+  contextLabel?: string;
 }
 
 export function StepProgress({
@@ -14,6 +15,7 @@ export function StepProgress({
   stepTitle,
   className,
   canvasser,
+  contextLabel = "Registration Progress",
 }: StepProgressProps) {
   const percentage = Math.round((currentStep / totalSteps) * 100);
 
@@ -33,7 +35,7 @@ export function StepProgress({
             </span>
             <div className="bg-border h-3 w-px" />
             <span className="text-muted-foreground text-xs font-bold tracking-widest">
-              Registration Progress
+              {contextLabel}
             </span>
           </div>
           <h3 className="text-foreground text-sm font-bold tracking-widest uppercase">

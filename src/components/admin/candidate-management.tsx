@@ -121,9 +121,7 @@ export function CandidateManagement() {
     () =>
       Array.from(
         new Set(
-          candidates
-            .map((candidate) => candidate.position)
-            .filter(Boolean),
+          candidates.map((candidate) => candidate.position).filter(Boolean),
         ),
       ).sort() as Candidate["position"][],
     [candidates],
@@ -195,8 +193,8 @@ export function CandidateManagement() {
     candidateSort !== "name";
 
   const deletingCandidateName =
-    candidates.find((candidate) => candidate.id === deletingCandidateId)?.name ||
-    undefined;
+    candidates.find((candidate) => candidate.id === deletingCandidateId)
+      ?.name || undefined;
 
   const loadingActions =
     updateCandidateMutation.isPending || deleteCandidateMutation.isPending;
@@ -234,7 +232,7 @@ export function CandidateManagement() {
 
           <Button
             onClick={() => setIsCreateDialogOpen(true)}
-            className="w-full gap-2 lg:w-auto"
+            className="w-full gap-2 rounded-sm font-mono text-[11px] tracking-widest uppercase lg:w-auto"
           >
             <HiOutlineUserAdd className="h-4 w-4" />
             <span>Create Candidate</span>
@@ -264,25 +262,27 @@ export function CandidateManagement() {
         />
       </div>
 
-      <Card className="border-border/50 flex-1">
+      <Card className="border-border/60 flex-1 rounded-sm shadow-none">
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>Candidate Accounts</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-sm font-semibold tracking-tight">
+                Candidate Accounts
+              </CardTitle>
+              <CardDescription className="text-muted-foreground mt-1 text-sm">
                 {filteredCandidates.length === candidates.length
                   ? `Manage ${candidates.length} candidate account${candidates.length !== 1 ? "s" : ""}`
                   : `Showing ${filteredCandidates.length} of ${candidates.length} candidates`}
               </CardDescription>
             </div>
-            <div className="border-border/60 bg-muted/30 hidden items-center rounded-lg border p-0.5 sm:flex">
+            <div className="border-border/60 bg-muted/30 hidden items-center rounded-sm border p-0.5 sm:flex">
               <button
                 type="button"
                 onClick={() => setViewMode("list")}
                 className={cn(
-                  "rounded-md p-1.5 transition-colors",
+                  "rounded-sm p-1.5 transition-colors",
                   viewMode === "list"
-                    ? "bg-background text-foreground shadow-sm"
+                    ? "bg-background text-foreground"
                     : "text-muted-foreground hover:text-foreground",
                 )}
                 aria-label="List view"
@@ -293,9 +293,9 @@ export function CandidateManagement() {
                 type="button"
                 onClick={() => setViewMode("grid")}
                 className={cn(
-                  "rounded-md p-1.5 transition-colors",
+                  "rounded-sm p-1.5 transition-colors",
                   viewMode === "grid"
-                    ? "bg-background text-foreground shadow-sm"
+                    ? "bg-background text-foreground"
                     : "text-muted-foreground hover:text-foreground",
                 )}
                 aria-label="Grid view"
@@ -323,7 +323,7 @@ export function CandidateManagement() {
               </p>
             </div>
           ) : filteredCandidates.length === 0 ? (
-            <div className="py-12 text-center">
+            <div className="border-border/60 rounded-sm border border-dashed py-12 text-center">
               <HiOutlineUserGroup className="text-muted-foreground mx-auto mb-3 h-12 w-12" />
               <p className="text-muted-foreground mb-1 font-medium">
                 {searchQuery
@@ -364,18 +364,20 @@ export function CandidateManagement() {
                 </div>
               )}
 
-              <AdminPagination
-                currentPage={safeCandidatePage}
-                totalPages={candidateTotalPages}
-                pageSize={candidatePageSize}
-                totalItems={filteredCandidates.length}
-                itemLabel="candidates"
-                onPageChange={setCandidatePage}
-                onPageSizeChange={(size) => {
-                  setCandidatePageSize(size);
-                  setCandidatePage(1);
-                }}
-              />
+              <div className="pt-4">
+                <AdminPagination
+                  currentPage={safeCandidatePage}
+                  totalPages={candidateTotalPages}
+                  pageSize={candidatePageSize}
+                  totalItems={filteredCandidates.length}
+                  itemLabel="candidates"
+                  onPageChange={setCandidatePage}
+                  onPageSizeChange={(size) => {
+                    setCandidatePageSize(size);
+                    setCandidatePage(1);
+                  }}
+                />
+              </div>
             </>
           )}
         </CardContent>

@@ -36,12 +36,11 @@ const contactFormSchema = z.object({
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 const contactReasons = [
+  { value: "demo", label: "Request a Demo" },
   { value: "general", label: "General Inquiry" },
   { value: "support", label: "Technical Support" },
-  { value: "account", label: "Account Issues" },
   { value: "partnership", label: "Partnership Opportunities" },
   { value: "press", label: "Press & Media" },
-  { value: "legal", label: "Legal Inquiry" },
 ] as const;
 
 type FormStatus = "idle" | "loading" | "success" | "error";
@@ -54,7 +53,7 @@ export function ContactContent() {
     defaultValues: {
       name: "",
       email: "",
-      reason: "general",
+      reason: "demo",
       message: "",
     },
   });
@@ -82,8 +81,8 @@ export function ContactContent() {
         {/* Contact Form */}
         <div className="lg:col-span-3">
           {formStatus === "success" && (
-            <div className="mb-6 flex items-center gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
-              <HiCheckCircle className="size-5 shrink-0 text-emerald-600" />
+            <div className="mb-6 flex items-center gap-3 rounded-sm border border-primary/30 bg-primary/10 p-4">
+              <HiCheckCircle className="text-primary size-5 shrink-0" />
               <div>
                 <p className="text-foreground font-semibold">
                   Message Sent Successfully!
@@ -96,8 +95,8 @@ export function ContactContent() {
           )}
 
           {formStatus === "error" && (
-            <div className="mb-6 flex items-center gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
-              <HiExclamation className="size-5 shrink-0 text-red-600" />
+            <div className="mb-6 flex items-center gap-3 rounded-sm border border-destructive/30 bg-destructive/10 p-4">
+              <HiExclamation className="text-destructive size-5 shrink-0" />
               <div>
                 <p className="text-foreground font-semibold">
                   Something went wrong
@@ -120,7 +119,7 @@ export function ContactContent() {
                     <FormControl>
                       <Input
                         placeholder="Enter your name"
-                        className="h-11"
+                        className="h-11 rounded-sm border-border/60"
                         {...field}
                       />
                     </FormControl>
@@ -139,7 +138,7 @@ export function ContactContent() {
                       <Input
                         type="email"
                         placeholder="you@example.com"
-                        className="h-11"
+                        className="h-11 rounded-sm border-border/60"
                         {...field}
                       />
                     </FormControl>
@@ -159,7 +158,7 @@ export function ContactContent() {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-11 w-full">
+                        <SelectTrigger className="h-11 w-full rounded-sm border-border/60">
                           <SelectValue placeholder="Select a reason" />
                         </SelectTrigger>
                       </FormControl>
@@ -186,7 +185,7 @@ export function ContactContent() {
                       <Textarea
                         placeholder="Tell us how we can help..."
                         rows={5}
-                        className="resize-none"
+                        className="resize-none rounded-sm border-border/60"
                         {...field}
                       />
                     </FormControl>
@@ -199,7 +198,7 @@ export function ContactContent() {
                 type="submit"
                 size="lg"
                 disabled={formStatus === "loading" || formStatus === "success"}
-                className="w-full"
+                className="w-full rounded-sm font-mono text-[11px] tracking-widest uppercase"
               >
                 {formStatus === "loading" ? (
                   <span className="flex items-center gap-2">
@@ -223,9 +222,9 @@ export function ContactContent() {
         <div className="space-y-4 lg:col-span-2">
           <h3 className="text-foreground font-semibold">Quick Contact</h3>
 
-          <div className="border-border bg-muted/30 relative space-y-3 overflow-hidden rounded-xl border p-4">
+          <div className="border-border/60 bg-muted/30 relative space-y-3 overflow-hidden rounded-sm border p-4 shadow-none">
             <div className="flex items-center gap-3">
-              <div className="bg-primary/10 text-primary flex size-9 items-center justify-center rounded-lg">
+              <div className="bg-primary/10 text-primary flex size-9 items-center justify-center rounded-sm">
                 <HiMail className="size-4" />
               </div>
               <div>
@@ -242,7 +241,7 @@ export function ContactContent() {
             </div>
           </div>
 
-          <div className="border-primary/30 bg-primary/5 relative overflow-hidden rounded-xl border p-4">
+          <div className="border-primary/30 bg-primary/5 relative overflow-hidden rounded-sm border p-4 shadow-none">
             <h4 className="text-foreground mb-2 font-semibold">
               Response Time
             </h4>

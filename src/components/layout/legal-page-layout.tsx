@@ -64,8 +64,8 @@ export function LegalPageLayout({
           {/* Desktop Sidebar Navigation (hidden when printing) */}
           <aside className="hidden shrink-0 lg:block lg:w-56 print:hidden">
             <nav className="sticky top-24">
-              <div className="border-border bg-card overflow-hidden rounded-lg border">
-                <div className="border-border bg-muted/50 border-b px-4 py-3">
+              <div className="border-border/60 bg-card overflow-hidden rounded-sm border shadow-none">
+                <div className="border-border/60 bg-muted/30 border-b px-4 py-3">
                   <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
                     Legal & Support
                   </span>
@@ -76,9 +76,9 @@ export function LegalPageLayout({
                       <Link
                         href={item.href}
                         className={cn(
-                          "block rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                          "block rounded-sm px-3 py-2 text-sm font-medium transition-colors",
                           pathname === item.href
-                            ? "bg-primary/10 text-primary"
+                            ? "bg-primary/10 text-primary border-primary border-l-[3px]"
                             : "text-muted-foreground hover:bg-muted hover:text-foreground",
                         )}
                       >
@@ -100,7 +100,7 @@ export function LegalPageLayout({
               className="print:transform-none! print:opacity-100!"
             >
               {/* Page Header */}
-              <div className="border-border bg-card relative overflow-hidden border print:border-none print:bg-transparent">
+              <div className="border-border/60 bg-card relative overflow-hidden border shadow-none print:border-none print:bg-transparent">
                 {/* Corner Markers (hidden when printing) */}
                 <div className="border-primary absolute top-0 left-0 size-5 border-t border-l print:hidden" />
                 <div className="border-primary absolute top-0 right-0 size-5 border-t border-r print:hidden" />
@@ -115,7 +115,7 @@ export function LegalPageLayout({
 
                 <div className="p-5 sm:p-6 print:p-0">
                   <div className="flex items-start gap-4">
-                    <div className="bg-primary/10 text-primary border-primary/20 flex size-11 shrink-0 items-center justify-center rounded-xl border print:hidden">
+                    <div className="bg-primary/10 text-primary border-primary/20 flex size-11 shrink-0 items-center justify-center rounded-sm border print:hidden">
                       <Icon className="size-5" />
                     </div>
                     <div className="min-w-0 flex-1 space-y-1">
@@ -139,11 +139,11 @@ export function LegalPageLayout({
               </div>
 
               {/* Content */}
-              <div className="border-border bg-card mt-4 overflow-hidden border print:mt-6 print:border-none print:bg-transparent">
+              <div className="border-border/60 bg-card mt-4 overflow-hidden rounded-sm border shadow-none print:mt-6 print:border-none print:bg-transparent">
                 <div className="p-5 sm:p-6 print:p-0">{children}</div>
 
                 {/* Content Footer (hidden when printing) */}
-                <div className="border-border bg-muted/30 flex flex-wrap items-center justify-between gap-3 border-t px-5 py-3 print:hidden">
+                <div className="border-border/60 bg-muted/30 flex flex-wrap items-center justify-between gap-3 border-t px-5 py-3 print:hidden">
                   <span className="text-muted-foreground font-mono text-[10px]">
                     {systemCode} :: {COMPANY_INFO.name}
                   </span>
@@ -236,10 +236,10 @@ export function LegalPageLayout({
                   </li>
                   <li>
                     <Link
-                      href="/register"
+                      href="/contact"
                       className="text-muted-foreground hover:text-primary font-medium transition-colors"
                     >
-                      Get Started
+                      Request a Demo
                     </Link>
                   </li>
                 </ul>
@@ -263,7 +263,7 @@ export function LegalPageLayout({
             </div>
             <Link
               href={`mailto:${COMPANY_INFO.supportEmail}`}
-              className="group border-border bg-background/50 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary flex items-center gap-2 rounded-full border px-4 py-2 transition-all"
+              className="group border-border/60 bg-background/50 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary flex items-center gap-2 rounded-sm border px-4 py-2 transition-all"
             >
               <HiMail className="size-4" />
               <span className="text-xs font-medium">Get in Touch</span>

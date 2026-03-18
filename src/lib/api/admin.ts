@@ -228,9 +228,7 @@ export const adminApi = {
       return data.canvasser;
     },
 
-    getByCode: async (
-      code: string,
-    ): Promise<CanvasserWithCandidate | null> => {
+    getByCode: async (code: string): Promise<CanvasserWithCandidate | null> => {
       const data = await apiCall<{ canvasser: CanvasserWithCandidate | null }>(
         `/canvassers/code/${code}`,
       );

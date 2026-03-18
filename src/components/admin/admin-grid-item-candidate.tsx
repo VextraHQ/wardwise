@@ -28,7 +28,7 @@ export function AdminGridItemCandidate({
   isLoading = false,
 }: AdminGridItemCandidateProps) {
   return (
-    <Card className="border-border/40 bg-card/50 hover:bg-card hover:border-primary/20 group flex h-full flex-col transition-all">
+    <Card className="border-border/60 bg-card/50 hover:bg-card hover:border-primary/20 group flex h-full flex-col rounded-sm shadow-none transition-all">
       <CardContent className="flex flex-1 flex-col">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="space-y-1.5">
@@ -38,7 +38,7 @@ export function AdminGridItemCandidate({
             <div className="flex flex-wrap gap-2">
               <Badge
                 variant="secondary"
-                className="bg-secondary/50 text-secondary-foreground rounded-md px-1.5 py-0 text-[10px] font-medium sm:text-xs"
+                className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
               >
                 {candidate.party}
               </Badge>
@@ -55,7 +55,7 @@ export function AdminGridItemCandidate({
               size="icon"
               onClick={() => onEdit(candidate)}
               disabled={isLoading}
-              className="text-muted-foreground hover:text-foreground hover:bg-secondary/80 h-8 w-8"
+              className="text-muted-foreground hover:text-foreground hover:bg-secondary/80 h-8 w-8 rounded-sm"
               title="Edit Candidate"
             >
               <HiOutlinePencil className="h-4 w-4" />
@@ -65,7 +65,7 @@ export function AdminGridItemCandidate({
               size="icon"
               onClick={() => onDelete(candidate.id)}
               disabled={isLoading}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8 rounded-sm"
               title="Delete Candidate"
             >
               <HiOutlineTrash className="h-4 w-4" />
@@ -93,7 +93,7 @@ export function AdminGridItemCandidate({
           <div className="text-muted-foreground flex items-center justify-between pt-1 text-xs">
             <div className="flex items-center gap-1.5" title="Supporters">
               <HiOutlineUsers className="h-3.5 w-3.5" />
-              <span className="text-foreground font-medium">
+              <span className="text-foreground font-medium font-mono tabular-nums">
                 {candidate.supporters.toLocaleString()}
               </span>
             </div>

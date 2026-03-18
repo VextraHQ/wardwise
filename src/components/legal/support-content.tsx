@@ -65,8 +65,8 @@ function FAQAccordion({
             <AccordionPrimitive.Header>
               <AccordionPrimitive.Trigger
                 className={cn(
-                  "flex w-full items-center justify-between gap-3 rounded-lg border px-4 py-2.5 text-left transition-all",
-                  "border-border bg-card hover:border-primary/30 hover:bg-muted/50",
+                  "flex w-full items-center justify-between gap-3 rounded-sm border px-4 py-2.5 text-left transition-all",
+                  "border-border/60 bg-card hover:border-primary/30 hover:bg-muted/50",
                   "data-[state=open]:border-primary/50 data-[state=open]:bg-primary/5",
                   "text-foreground text-sm font-medium",
                 )}
@@ -81,7 +81,7 @@ function FAQAccordion({
                 "data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
               )}
             >
-              <div className="border-primary/20 bg-primary/5 text-muted-foreground mt-1.5 ml-1 rounded-lg border-l-2 py-2.5 pr-4 pl-4 text-sm leading-relaxed">
+              <div className="border-primary/20 bg-primary/5 text-muted-foreground mt-1.5 ml-1 rounded-sm border-l-2 py-2.5 pr-4 pl-4 text-sm leading-relaxed">
                 {faq.answer}
               </div>
             </AccordionPrimitive.Content>
@@ -120,9 +120,9 @@ export function SupportContent() {
             <Link
               key={channel.name}
               href={channel.href}
-              className="border-border bg-card hover:border-primary/40 hover:bg-primary/5 group flex items-start gap-3 rounded-lg border p-4 transition-all"
+              className="border-border/60 bg-card hover:border-primary/40 hover:bg-primary/5 group flex items-start gap-3 rounded-sm border p-4 shadow-none transition-all"
             >
-              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-sm">
                 <HiMail className="size-4" />
               </div>
               <div className="min-w-0 flex-1">
@@ -157,15 +157,15 @@ export function SupportContent() {
       </div>
 
       {/* Still Need Help? */}
-      <div className="border-border bg-muted/50 mt-10 rounded-lg border p-5 text-center">
-        <h3 className="text-foreground mb-1.5 font-semibold">
+      <div className="border-border/60 bg-muted/30 mt-10 rounded-sm border p-5 text-center shadow-none">
+        <h3 className="text-foreground mb-1.5 text-sm font-semibold tracking-tight">
           Still Need Help?
         </h3>
         <p className="text-muted-foreground mb-4 text-sm">
           Can&apos;t find what you&apos;re looking for? Our support team is
           ready to assist.
         </p>
-        <Button asChild size="sm">
+        <Button asChild size="sm" className="rounded-sm font-mono text-[11px] tracking-widest uppercase">
           <Link href="/contact" className="gap-2">
             <HiMail className="size-4" />
             Contact Us

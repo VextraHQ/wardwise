@@ -48,21 +48,21 @@ export function SectionCards({ dashboardData }: SectionCardsProps) {
   const supportStrength = dashboardData?.supportStrength || 0;
 
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      <Card className="@container/card">
+    <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+      <Card className="@container/card rounded-sm border-border/60 shadow-none">
         <CardHeader>
-          <CardDescription>Total Supporters</CardDescription>
+          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] uppercase tracking-widest">Total Supporters</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {totalSupporters.toLocaleString()}
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
-              className={
+              className={`font-mono text-[11px] uppercase tracking-widest rounded-sm py-0 ${
                 totalSupporters > 0
                   ? "border-primary/30 text-primary"
-                  : "border-muted text-muted-foreground"
-              }
+                  : "border-red-500/30 text-red-500"
+              }`}
             >
               {totalSupporters > 0 ? <IconTrendingUp /> : <IconTrendingDown />}
               {totalSupporters > 0 ? "Active" : "None"}
@@ -86,20 +86,20 @@ export function SectionCards({ dashboardData }: SectionCardsProps) {
         </CardFooter>
       </Card>
 
-      <Card className="@container/card">
+      <Card className="@container/card rounded-sm border-border/60 shadow-none">
         <CardHeader>
-          <CardDescription>Ward Coverage</CardDescription>
+          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] uppercase tracking-widest">Ward Coverage</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {wardCoverage.coveredWards}/{wardCoverage.totalWards}
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
-              className={
+              className={`font-mono text-[11px] uppercase tracking-widest rounded-sm py-0 ${
                 wardCoverage.coveragePercentage >= 50
                   ? "border-primary/30 text-primary"
-                  : "border-muted text-muted-foreground"
-              }
+                  : "border-red-500/30 text-red-500"
+              }`}
             >
               {wardCoverage.coveragePercentage >= 50 ? (
                 <IconTrendingUp />
@@ -129,20 +129,20 @@ export function SectionCards({ dashboardData }: SectionCardsProps) {
         </CardFooter>
       </Card>
 
-      <Card className="@container/card">
+      <Card className="@container/card rounded-sm border-border/60 shadow-none">
         <CardHeader>
-          <CardDescription>Polling Units</CardDescription>
+          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] uppercase tracking-widest">Polling Units</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {pollingUnits}
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
-              className={
+              className={`font-mono text-[11px] uppercase tracking-widest rounded-sm py-0 ${
                 pollingUnits > 0
                   ? "border-primary/30 text-primary"
-                  : "border-muted text-muted-foreground"
-              }
+                  : "border-red-500/30 text-red-500"
+              }`}
             >
               {pollingUnits > 0 ? <IconTrendingUp /> : <IconTrendingDown />}
               {pollingUnits > 0 ? "Active" : "None"}
@@ -168,20 +168,20 @@ export function SectionCards({ dashboardData }: SectionCardsProps) {
         </CardFooter>
       </Card>
 
-      <Card className="@container/card">
+      <Card className="@container/card rounded-sm border-border/60 shadow-none">
         <CardHeader>
-          <CardDescription>Support Strength</CardDescription>
+          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] uppercase tracking-widest">Support Strength</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {supportStrength}%
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
-              className={
+              className={`font-mono text-[11px] uppercase tracking-widest rounded-sm py-0 ${
                 supportStrength >= 50
                   ? "border-primary/30 text-primary"
-                  : "border-muted text-muted-foreground"
-              }
+                  : "border-red-500/30 text-red-500"
+              }`}
             >
               {supportStrength >= 50 ? (
                 <IconTrendingUp />

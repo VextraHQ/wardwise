@@ -963,6 +963,15 @@ export const nigeriaLGAs: LGAData[] = [
 ];
 
 // Helper functions
+export function stateNameToCode(stateName: string): string | null {
+  if (!stateName) return null;
+  const normalized = stateName.trim().toLowerCase().replace(/\s*state$/i, "");
+  const match = nigeriaStates.find((s) =>
+    s.name.toLowerCase().replace(/\s*state$/i, "").startsWith(normalized),
+  );
+  return match?.code ?? null;
+}
+
 export function getStateByCode(code: string): StateData | undefined {
   return nigeriaStates.find((state) => state.code === code);
 }

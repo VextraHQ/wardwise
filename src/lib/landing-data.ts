@@ -40,6 +40,10 @@ export const navigationLinks: NavigationLink[] = [
     label: "Security",
     section: "security",
   },
+  {
+    label: "Collect",
+    section: "collect",
+  },
 ];
 
 export type StatHighlight = {
@@ -75,10 +79,10 @@ export type ProcessStep = {
 
 export const processSteps: ProcessStep[] = [
   {
-    name: "Community Outreach",
+    name: "Target Identification",
     number: "01",
     description:
-      "Canvassers identify and register voters in the field, building a verified supporter base with ward-level precision.",
+      "Campaigns define objectives and assign coverage zones to ensure canvassers engage constituents with ward-level precision.",
     icon: HiViewGrid,
   },
   {
@@ -159,9 +163,9 @@ export const featureCards: FeatureCard[] = [
     color: "emerald",
   },
   {
-    title: "Community Outreach",
+    title: "Field Deployment",
     description:
-      "Identify gaps in coverage and coordinate field efforts at the polling-unit level.",
+      "Identify gaps in geographic coverage and coordinate field efforts precisely at the polling-unit level.",
     icon: HiSpeakerphone,
     metricLabel: "Reach Extension",
     metricValue: "85%",
@@ -197,14 +201,14 @@ export type EcosystemRole = {
 export const ecosystemRoles: EcosystemRole[] = [
   {
     role: "Registered Voters",
-    title: "The People You Serve",
+    title: "The Constituents",
     description:
-      "Voters registered by canvassers in the field, with ward-level precision and verified records.",
+      "Voters registered securely in the field by your deployed team, tagged with precise polling-unit coordinates.",
     color: "teal",
     features: [
-      "Field Registration",
-      "Ward-Level Precision",
-      "Community Engagement",
+      "Geolocation Tagging",
+      "Demographic Profiling",
+      "Sentiment Tracking",
     ],
     icon: HiCheckCircle,
   },

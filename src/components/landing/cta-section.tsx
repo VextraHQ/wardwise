@@ -66,16 +66,14 @@ export function CallToActionSection() {
 
             <div className="max-w-4xl space-y-8">
               <h2 className="text-foreground text-4xl leading-[1.1] font-extrabold tracking-tighter sm:text-6xl lg:text-7xl">
-                Secure your path to <br />
+                Ready to command your <br />
                 <span className="text-primary font-serif font-normal italic">
-                  systematic victory.
+                  next campaign?
                 </span>
               </h2>
 
               <p className="text-muted-foreground mx-auto max-w-xl text-base leading-relaxed font-medium sm:text-lg">
-                Join Nigeria's most trusted digital infrastructure for
-                grassroots campaigns. Transform field-level energy into
-                high-fidelity strategic command.
+                Join Nigeria's most trusted digital infrastructure for grassroots campaigns. Request an invite to onboard your team today.
               </p>
 
               <div className="flex flex-col items-center justify-center gap-6 pt-6 sm:flex-row">
@@ -84,8 +82,8 @@ export function CallToActionSection() {
                   className="group bg-primary text-primary-foreground hover:bg-primary/95 relative h-14 rounded-full px-10 text-xs font-black tracking-widest uppercase transition-all"
                   asChild
                 >
-                  <Link href="/login">
-                    Get Started
+                  <Link href="/contact">
+                    Request a Demo
                     <HiArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>

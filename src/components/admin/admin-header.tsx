@@ -32,6 +32,7 @@ export function AdminHeader() {
     }
     if (pathname === "/admin") return "Dashboard";
     if (pathname.startsWith("/admin/collect")) return "Collect";
+    if (pathname.startsWith("/admin/geo")) return "Geo Data";
     if (pathname.includes("/analytics")) return "Analytics";
     if (pathname.includes("/activity")) return "Activity Logs";
     if (pathname.includes("/settings")) return "Settings";
@@ -49,6 +50,10 @@ export function AdminHeader() {
       return "Dedicated candidate account management with search, filters, and account actions";
     }
 
+    if (pathname.startsWith("/admin/geo")) {
+      return "Browse and manage geographic data across Nigeria";
+    }
+
     return "Administrative controls and management";
   };
 
@@ -62,18 +67,24 @@ export function AdminHeader() {
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h1 className="truncate text-sm font-semibold sm:text-base">
+            <span className="text-muted-foreground/50 hidden font-mono text-[10px] font-black tracking-[0.2em] uppercase sm:inline-block">
+              Admin
+            </span>
+            <span className="text-muted-foreground/30 hidden font-mono text-xs sm:inline-block">
+              {"//"}
+            </span>
+            <h1 className="truncate text-sm font-bold tracking-tight">
               {getBreadcrumbTitle()}
             </h1>
             <Badge
-              variant="default"
-              className="bg-primary/10 text-primary border-primary/20 hidden items-center gap-1 sm:inline-flex"
+              variant="outline"
+              className="bg-primary/10 text-primary border-primary/20 hidden items-center gap-1 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase sm:inline-flex"
             >
               <HiOutlineShieldCheck className="h-3 w-3" />
               <span>Super Admin</span>
             </Badge>
           </div>
-          <p className="text-muted-foreground hidden truncate text-xs sm:block">
+          <p className="text-muted-foreground hidden truncate font-mono text-[11px] tracking-wider uppercase sm:block">
             {getDescription()}
           </p>
         </div>
@@ -83,17 +94,22 @@ export function AdminHeader() {
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="gap-1.5"
+            className="gap-1.5 rounded-sm font-mono text-[11px] tracking-widest uppercase"
           >
             <HiOutlineRefresh
               className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
             />
             <span className="hidden sm:inline">Refresh</span>
           </Button>
-          <Button variant="outline" asChild size="sm" className="gap-1.5">
+          <Button
+            variant="ghost"
+            asChild
+            size="sm"
+            className="text-muted-foreground gap-1.5 rounded-sm font-mono text-[11px] tracking-widest uppercase hover:text-gray-200"
+          >
             <Link href="/" aria-label="Home">
               <HiOutlineHome className="size-4" />
-              <span className="hidden sm:inline">Home</span>
+              <span className="hidden sm:inline">Exit</span>
             </Link>
           </Button>
         </div>

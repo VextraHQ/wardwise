@@ -25,10 +25,12 @@ export default function HelpPage() {
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Help Center</CardTitle>
-          <CardDescription>
+      <Card className="border-border/60 rounded-sm shadow-none">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold tracking-tight">
+            Help Center
+          </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-sm">
             Help and support resources will be available here
           </CardDescription>
         </CardHeader>

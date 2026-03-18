@@ -125,7 +125,7 @@ export function ReportsContent() {
         </div>
         <Button
           variant="outline"
-          className="gap-2"
+          className="gap-2 rounded-sm font-mono text-[11px] tracking-widest uppercase"
           onClick={() => handleExport("Full Report")}
         >
           <IconDownload className="size-4" />
@@ -134,19 +134,19 @@ export function ReportsContent() {
       </div>
 
       {/* Verification Summary */}
-      <Card>
-        <CardHeader>
+      <Card className="border-border/60 rounded-sm shadow-none">
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Registration Summary</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-sm font-semibold tracking-tight">Registration Summary</CardTitle>
+              <CardDescription className="text-muted-foreground mt-1 text-sm">
                 Registration and data collection breakdown
               </CardDescription>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-xs"
+              className="gap-1.5 rounded-sm font-mono text-[10px] tracking-widest uppercase"
               onClick={() => handleExport("Verification Summary")}
             >
               <IconDownload className="size-3.5" />
@@ -156,86 +156,86 @@ export function ReportsContent() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-            <div className="rounded-lg border p-4">
+            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20">
               <div className="mb-2 flex items-center gap-2">
-                <div className="bg-primary/10 text-primary flex size-8 items-center justify-center rounded-lg">
+                <div className="bg-primary/10 text-primary flex size-8 items-center justify-center rounded-sm">
                   <IconUsers className="size-4" />
                 </div>
-                <span className="text-muted-foreground text-xs font-medium">
+                <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
                   Total Registered
                 </span>
               </div>
-              <p className="text-foreground text-2xl font-bold">
+              <p className="text-foreground font-mono text-2xl font-bold tracking-tight">
                 {MOCK_VERIFICATION_SUMMARY.totalRegistered.toLocaleString()}
               </p>
             </div>
 
-            <div className="rounded-lg border p-4">
+            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20">
               <div className="mb-2 flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-green-500/10">
+                <div className="flex size-8 items-center justify-center rounded-sm bg-green-500/10">
                   <IconFingerprint className="size-4 text-green-600" />
                 </div>
-                <span className="text-muted-foreground text-xs font-medium">
+                <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
                   NIN Collected
                 </span>
               </div>
-              <p className="text-foreground text-2xl font-bold">
+              <p className="text-foreground font-mono text-2xl font-bold tracking-tight">
                 {MOCK_VERIFICATION_SUMMARY.ninCollected.toLocaleString()}
               </p>
-              <p className="text-muted-foreground mt-1 text-xs">
+              <p className="text-muted-foreground mt-1 font-mono text-[10px] font-bold tracking-widest uppercase">
                 {Math.round(
                   (MOCK_VERIFICATION_SUMMARY.ninCollected /
                     MOCK_VERIFICATION_SUMMARY.totalRegistered) *
-                    100
+                    100,
                 )}
                 % of registrations
               </p>
             </div>
 
-            <div className="rounded-lg border p-4">
+            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20">
               <div className="mb-2 flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-amber-500/10">
+                <div className="flex size-8 items-center justify-center rounded-sm bg-amber-500/10">
                   <IconAlertTriangle className="size-4 text-amber-600" />
                 </div>
-                <span className="text-muted-foreground text-xs font-medium">
+                <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
                   NIN Missing
                 </span>
               </div>
-              <p className="text-foreground text-2xl font-bold">
+              <p className="text-foreground font-mono text-2xl font-bold tracking-tight">
                 {MOCK_VERIFICATION_SUMMARY.ninMissing}
               </p>
-              <p className="text-muted-foreground mt-1 text-xs">
+              <p className="text-muted-foreground mt-1 font-mono text-[10px] font-bold tracking-widest uppercase">
                 Registrations without NIN
               </p>
             </div>
 
-            <div className="rounded-lg border p-4">
+            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20">
               <div className="mb-2 flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500/10">
+                <div className="flex size-8 items-center justify-center rounded-sm bg-blue-500/10">
                   <IconShieldCheck className="size-4 text-blue-600" />
                 </div>
-                <span className="text-muted-foreground text-xs font-medium">
+                <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
                   Phone Collected
                 </span>
               </div>
-              <p className="text-foreground text-2xl font-bold">
+              <p className="text-foreground font-mono text-2xl font-bold tracking-tight">
                 {MOCK_VERIFICATION_SUMMARY.phoneCollected.toLocaleString()}
               </p>
-              <p className="text-muted-foreground mt-1 text-xs">
+              <p className="text-muted-foreground mt-1 font-mono text-[10px] font-bold tracking-widest uppercase">
                 Primary contact channel
               </p>
             </div>
 
-            <div className="rounded-lg border p-4">
+            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20">
               <div className="mb-2 flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-500/10">
+                <div className="flex size-8 items-center justify-center rounded-sm bg-emerald-500/10">
                   <IconChartBar className="size-4 text-emerald-600" />
                 </div>
-                <span className="text-muted-foreground text-xs font-medium">
+                <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
                   Data Quality Score
                 </span>
               </div>
-              <p className="text-foreground text-2xl font-bold">
+              <p className="text-foreground font-mono text-2xl font-bold tracking-tight">
                 {MOCK_VERIFICATION_SUMMARY.dataQualityScore}%
               </p>
               <Progress
@@ -248,19 +248,19 @@ export function ReportsContent() {
       </Card>
 
       {/* Deduplication Report */}
-      <Card>
-        <CardHeader>
+      <Card className="border-border/60 rounded-sm shadow-none">
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Deduplication Report</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-sm font-semibold tracking-tight">Deduplication Report</CardTitle>
+              <CardDescription className="text-muted-foreground mt-1 text-sm">
                 NIN-based voter uniqueness analysis
               </CardDescription>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-xs"
+              className="gap-1.5 rounded-sm font-mono text-[10px] tracking-widest uppercase"
               onClick={() => handleExport("Deduplication Report")}
             >
               <IconDownload className="size-3.5" />
@@ -271,30 +271,30 @@ export function ReportsContent() {
         <CardContent className="space-y-6">
           {/* Summary Stats */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="rounded-lg border p-4 text-center">
-              <p className="text-foreground text-2xl font-bold">
+            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20 text-center">
+              <p className="text-foreground font-mono text-2xl font-bold tracking-tight">
                 {MOCK_DEDUP_REPORT.uniqueVoters.toLocaleString()}
               </p>
-              <p className="text-muted-foreground text-xs font-medium">
+              <p className="text-muted-foreground mt-1 font-mono text-[10px] font-bold tracking-widest uppercase">
                 Unique Voters
               </p>
             </div>
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-center dark:border-amber-800 dark:bg-amber-950/30">
+            <div className="rounded-sm border border-amber-200 bg-amber-50 p-4 text-center transition-all hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/30 dark:hover:bg-amber-900/40">
               <div className="flex items-center justify-center gap-1">
                 <IconCopy className="size-4 text-amber-600" />
-                <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">
+                <p className="font-mono text-2xl font-bold tracking-tight text-amber-700 dark:text-amber-300">
                   {MOCK_DEDUP_REPORT.duplicateNins}
                 </p>
               </div>
-              <p className="text-xs font-medium text-amber-600">
+              <p className="mt-1 font-mono text-[10px] font-bold tracking-widest uppercase text-amber-600">
                 Duplicate NINs
               </p>
             </div>
-            <div className="rounded-lg border p-4 text-center">
-              <p className="text-foreground text-2xl font-bold">
+            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20 text-center">
+              <p className="text-foreground font-mono text-2xl font-bold tracking-tight">
                 {MOCK_DEDUP_REPORT.duplicateRate}%
               </p>
-              <p className="text-muted-foreground text-xs font-medium">
+              <p className="text-muted-foreground mt-1 font-mono text-[10px] font-bold tracking-widest uppercase">
                 Duplicate Rate
               </p>
             </div>
@@ -303,17 +303,13 @@ export function ReportsContent() {
           {/* Top Duplicates */}
           {MOCK_DEDUP_REPORT.topDuplicates.length > 0 && (
             <div>
-              <h3 className="mb-3 text-sm font-medium">
-                Top Duplicate NINs
-              </h3>
+              <h3 className="mb-3 font-mono text-[11px] font-bold tracking-widest uppercase text-muted-foreground">Top Duplicate NINs</h3>
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-muted/30 border-b border-border/60">
                   <TableRow>
-                    <TableHead>NIN (Masked)</TableHead>
-                    <TableHead className="text-right">
-                      Registrations
-                    </TableHead>
-                    <TableHead>Wards</TableHead>
+                    <TableHead className="font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">NIN (Masked)</TableHead>
+                    <TableHead className="text-right font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Registrations</TableHead>
+                    <TableHead className="font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Wards</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -343,19 +339,19 @@ export function ReportsContent() {
       </Card>
 
       {/* Coverage Report */}
-      <Card>
-        <CardHeader>
+      <Card className="border-border/60 rounded-sm shadow-none">
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Ward Coverage Report</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-sm font-semibold tracking-tight">Ward Coverage Report</CardTitle>
+              <CardDescription className="text-muted-foreground mt-1 text-sm">
                 Voter registrations and polling unit coverage by ward
               </CardDescription>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-xs"
+              className="gap-1.5 rounded-sm font-mono text-[10px] tracking-widest uppercase"
               onClick={() => handleExport("Coverage Report")}
             >
               <IconDownload className="size-3.5" />
@@ -365,13 +361,13 @@ export function ReportsContent() {
         </CardHeader>
         <CardContent>
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-muted/30 border-b border-border/60">
               <TableRow>
-                <TableHead>Ward</TableHead>
-                <TableHead className="text-right">Registered</TableHead>
-                <TableHead className="text-right">Polling Units</TableHead>
-                <TableHead className="text-right">Covered</TableHead>
-                <TableHead>Coverage</TableHead>
+                <TableHead className="font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Ward</TableHead>
+                <TableHead className="text-right font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Registered</TableHead>
+                <TableHead className="text-right font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Polling Units</TableHead>
+                <TableHead className="text-right font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Covered</TableHead>
+                <TableHead className="font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Coverage</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -394,10 +390,7 @@ export function ReportsContent() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Progress
-                        value={ward.coverage}
-                        className="h-1.5 w-16"
-                      />
+                      <Progress value={ward.coverage} className="h-1.5 w-16" />
                       <span
                         className={`text-xs font-medium ${
                           ward.coverage >= 75

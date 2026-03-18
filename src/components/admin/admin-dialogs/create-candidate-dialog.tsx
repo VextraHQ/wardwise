@@ -124,7 +124,7 @@ export function CreateCandidateDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto rounded-sm">
         <DialogHeader>
           <DialogTitle>Create New Candidate</DialogTitle>
           <DialogDescription>
@@ -149,7 +149,7 @@ export function CreateCandidateDialog({
                       <Input
                         placeholder="Hon. John Doe"
                         disabled={isLoading}
-                        className="border-border/50"
+                        className="border-border/60 rounded-sm"
                         {...field}
                       />
                     </FormControl>
@@ -170,7 +170,7 @@ export function CreateCandidateDialog({
                         type="email"
                         placeholder="john.doe@wardwise.ng"
                         disabled={isLoading}
-                        className="border-border/50"
+                        className="border-border/60 rounded-sm"
                         {...field}
                       />
                     </FormControl>
@@ -190,7 +190,7 @@ export function CreateCandidateDialog({
                       <Input
                         placeholder="APC, PDP, LP..."
                         disabled={isLoading}
-                        className="border-border/50"
+                        className="border-border/60 rounded-sm"
                         {...field}
                       />
                     </FormControl>
@@ -212,7 +212,7 @@ export function CreateCandidateDialog({
                       disabled={isLoading}
                     >
                       <FormControl>
-                        <SelectTrigger className="border-border/50">
+                        <SelectTrigger className="border-border/60 rounded-sm">
                           <SelectValue placeholder="Select position" />
                         </SelectTrigger>
                       </FormControl>
@@ -244,7 +244,7 @@ export function CreateCandidateDialog({
                         <Input
                           placeholder="e.g., Adamawa State"
                           disabled={isLoading}
-                          className="border-border/50"
+                          className="border-border/60 rounded-sm"
                           {...field}
                         />
                       </FormControl>
@@ -265,7 +265,7 @@ export function CreateCandidateDialog({
                           <Input
                             placeholder="e.g., Song"
                             disabled={isLoading}
-                            className="border-border/50"
+                            className="border-border/60 rounded-sm"
                             {...field}
                           />
                         </FormControl>
@@ -289,7 +289,7 @@ export function CreateCandidateDialog({
                     <Input
                       placeholder={getConstituencyPlaceholder()}
                       disabled={isLoading}
-                      className="border-border/50"
+                      className="border-border/60 rounded-sm"
                       {...field}
                     />
                   </FormControl>
@@ -310,7 +310,7 @@ export function CreateCandidateDialog({
                       placeholder="Brief description of the candidate"
                       rows={3}
                       disabled={isLoading}
-                      className="border-border/50"
+                      className="border-border/60 rounded-sm"
                       {...field}
                     />
                   </FormControl>
@@ -324,14 +324,14 @@ export function CreateCandidateDialog({
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
                 disabled={isLoading}
-                className="border-border/50"
+                className="border-border/60 rounded-sm"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className="rounded-sm font-mono text-[11px] tracking-widest uppercase">
                 {isLoading ? (
                   <>
-                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-sm border-2 border-current border-t-transparent" />
                     Creating...
                   </>
                 ) : (

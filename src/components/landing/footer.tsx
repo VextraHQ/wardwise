@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { HiArrowRight, HiMail } from "react-icons/hi";
+import { HiMail } from "react-icons/hi";
 import { HiArrowUpRight } from "react-icons/hi2";
 import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
@@ -18,13 +18,18 @@ const platformLinks = [
 
 const roleLinks = [
   {
-    label: "Candidate Dashboard",
+    label: "Candidate Login",
     href: "/login",
     hoverColor: "hover:text-emerald-600",
   },
   {
-    label: "Contact Us",
-    href: "/contact",
+    label: "Admin Portal",
+    href: "/admin",
+    hoverColor: "hover:text-primary",
+  },
+  {
+    label: "WardWise Collect",
+    href: "#collect",
     hoverColor: "hover:text-orange-600",
   },
 ];
@@ -60,12 +65,12 @@ export function SiteFooter() {
             </p>
             <Button
               size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 mt-4 w-full rounded-lg px-6 text-sm font-semibold transition-all duration-200 sm:w-auto"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 mt-4 w-full rounded-full px-6 text-sm font-semibold transition-all duration-200 sm:w-auto"
               asChild
             >
-              <Link href="/login" className="flex items-center gap-2">
-                Candidate Login
-                <HiArrowRight className="h-4 w-4" />
+              <Link href="/contact" className="flex items-center gap-2">
+                Request a Demo
+                <HiArrowUpRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>

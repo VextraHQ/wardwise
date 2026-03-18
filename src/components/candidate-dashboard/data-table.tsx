@@ -178,7 +178,10 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "LGA",
     cell: ({ row }) => (
       <div className="w-32">
-        <Badge variant="outline" className="text-muted-foreground px-1.5">
+        <Badge
+          variant="outline"
+          className="text-muted-foreground rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+        >
           {row.original.type}
         </Badge>
       </div>
@@ -192,12 +195,12 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
       return (
         <Badge
           variant={isActive ? "default" : "outline"}
-          className="px-2 py-0.5"
+          className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
         >
           {isActive ? (
-            <IconCircleCheckFilled className="mr-1 size-3 fill-green-500 dark:fill-green-400" />
+            <IconCircleCheckFilled className="mr-1.5 size-3" />
           ) : (
-            <IconLoader className="mr-1 size-3 animate-spin" />
+            <IconLoader className="mr-1.5 size-3 animate-spin" />
           )}
           {row.original.status}
         </Badge>
@@ -226,7 +229,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
           <div className="flex items-center justify-end gap-2">
             <IconUsers className="text-muted-foreground size-4" />
             <Input
-              className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+              className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right font-mono text-sm shadow-none focus-visible:border dark:bg-transparent"
               defaultValue={count}
               id={`${row.original.id}-supporters`}
               type="number"
@@ -249,7 +252,10 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
             : "outline";
       return (
         <div className="flex justify-end">
-          <Badge variant={variant} className="px-2 py-0.5">
+          <Badge
+            variant={variant}
+            className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+          >
             {priority}
           </Badge>
         </div>
@@ -401,22 +407,42 @@ export function DataTable({
           </SelectContent>
         </Select>
         <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
-          <TabsTrigger value="coverage">Ward Coverage</TabsTrigger>
-          <TabsTrigger value="analytics">
+          <TabsTrigger
+            className="font-mono text-[10px] font-bold tracking-widest uppercase"
+            value="coverage"
+          >
+            Ward Coverage
+          </TabsTrigger>
+          <TabsTrigger
+            className="font-mono text-[10px] font-bold tracking-widest uppercase"
+            value="analytics"
+          >
             Analytics <Badge variant="secondary">3</Badge>
           </TabsTrigger>
-          <TabsTrigger value="targets">
+          <TabsTrigger
+            className="font-mono text-[10px] font-bold tracking-widest uppercase"
+            value="targets"
+          >
             Targets <Badge variant="secondary">2</Badge>
           </TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger
+            className="font-mono text-[10px] font-bold tracking-widest uppercase"
+            value="reports"
+          >
+            Reports
+          </TabsTrigger>
         </TabsList>
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
                 <IconLayoutColumns />
-                <span className="hidden lg:inline">Customize Columns</span>
-                <span className="lg:hidden">Columns</span>
+                <span className="hidden font-mono text-[10px] font-bold tracking-widest uppercase lg:inline">
+                  Customize Columns
+                </span>
+                <span className="font-mono text-[10px] font-bold tracking-widest uppercase lg:hidden">
+                  Columns
+                </span>
                 <IconChevronDown />
               </Button>
             </DropdownMenuTrigger>
@@ -454,7 +480,9 @@ export function DataTable({
           </DropdownMenu>
           <Button variant="outline" size="sm">
             <IconPlus />
-            <span className="hidden lg:inline">Add Ward</span>
+            <span className="hidden font-mono text-[10px] font-bold tracking-widest uppercase lg:inline">
+              Add Ward
+            </span>
           </Button>
         </div>
       </div>
@@ -462,7 +490,7 @@ export function DataTable({
         value="coverage"
         className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
       >
-        <div className="overflow-hidden rounded-lg border">
+        <div className="border-border/60 overflow-hidden rounded-sm border">
           <DndContext
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis]}
@@ -471,12 +499,16 @@ export function DataTable({
             id={sortableId}
           >
             <Table>
-              <TableHeader className="bg-muted sticky top-0 z-10">
+              <TableHeader className="bg-muted/30 border-border/60 sticky top-0 z-10 border-b">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id} colSpan={header.colSpan}>
+                        <TableHead
+                          key={header.id}
+                          colSpan={header.colSpan}
+                          className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase"
+                        >
                           {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -514,13 +546,13 @@ export function DataTable({
           </DndContext>
         </div>
         <div className="flex items-center justify-between px-4">
-          <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+          <div className="text-muted-foreground hidden flex-1 font-mono text-[11px] tracking-wider lg:flex">
             {table.getFilteredSelectedRowModel().rows.length} of{" "}
             {table.getFilteredRowModel().rows.length} ward(s) selected.
           </div>
           <div className="flex w-full items-center gap-8 lg:w-fit">
             <div className="hidden items-center gap-2 lg:flex">
-              <Label htmlFor="rows-per-page" className="text-sm font-medium">
+              <Label htmlFor="rows-per-page" className="font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground">
                 Rows per page
               </Label>
               <Select
@@ -529,7 +561,7 @@ export function DataTable({
                   table.setPageSize(Number(value));
                 }}
               >
-                <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+                <SelectTrigger size="sm" className="w-20 rounded-sm" id="rows-per-page">
                   <SelectValue
                     placeholder={table.getState().pagination.pageSize}
                   />
@@ -543,14 +575,14 @@ export function DataTable({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex w-fit items-center justify-center text-sm font-medium">
+            <div className="flex w-fit items-center justify-center font-mono text-[11px] font-medium tracking-wider">
               Page {table.getState().pagination.pageIndex + 1} of{" "}
               {table.getPageCount()}
             </div>
             <div className="ml-auto flex items-center gap-2 lg:ml-0">
               <Button
                 variant="outline"
-                className="hidden h-8 w-8 p-0 lg:flex"
+                className="hidden h-8 w-8 rounded-sm p-0 lg:flex"
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
               >
@@ -559,7 +591,7 @@ export function DataTable({
               </Button>
               <Button
                 variant="outline"
-                className="size-8"
+                className="size-8 rounded-sm"
                 size="icon"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
@@ -569,7 +601,7 @@ export function DataTable({
               </Button>
               <Button
                 variant="outline"
-                className="size-8"
+                className="size-8 rounded-sm"
                 size="icon"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
@@ -579,7 +611,7 @@ export function DataTable({
               </Button>
               <Button
                 variant="outline"
-                className="hidden size-8 lg:flex"
+                className="hidden size-8 rounded-sm lg:flex"
                 size="icon"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
@@ -592,7 +624,7 @@ export function DataTable({
         </div>
       </TabsContent>
       <TabsContent value="analytics" className="flex flex-col px-4 lg:px-6">
-        <div className="flex aspect-video w-full flex-1 items-center justify-center rounded-lg border border-dashed">
+        <div className="flex aspect-video w-full flex-1 items-center justify-center rounded-sm border border-dashed">
           <div className="text-center">
             <p className="text-muted-foreground text-sm">Ward Analytics</p>
             <p className="text-muted-foreground mt-1 text-xs">
@@ -602,7 +634,7 @@ export function DataTable({
         </div>
       </TabsContent>
       <TabsContent value="targets" className="flex flex-col px-4 lg:px-6">
-        <div className="flex aspect-video w-full flex-1 items-center justify-center rounded-lg border border-dashed">
+        <div className="flex aspect-video w-full flex-1 items-center justify-center rounded-sm border border-dashed">
           <div className="text-center">
             <p className="text-muted-foreground text-sm">Target Wards</p>
             <p className="text-muted-foreground mt-1 text-xs">
@@ -612,7 +644,7 @@ export function DataTable({
         </div>
       </TabsContent>
       <TabsContent value="reports" className="flex flex-col px-4 lg:px-6">
-        <div className="flex aspect-video w-full flex-1 items-center justify-center rounded-lg border border-dashed">
+        <div className="flex aspect-video w-full flex-1 items-center justify-center rounded-sm border border-dashed">
           <div className="text-center">
             <p className="text-muted-foreground text-sm">Coverage Reports</p>
             <p className="text-muted-foreground mt-1 text-xs">
@@ -672,7 +704,7 @@ function WardCellViewer({ item }: { item: z.infer<typeof schema> }) {
             <>
               <div className="space-y-4">
                 <div>
-                  <h3 className="mb-2 text-sm font-medium">Supporter Trend</h3>
+                  <h3 className="mb-2 font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground">Supporter Trend</h3>
                   <ChartContainer config={chartConfig}>
                     <AreaChart
                       accessibilityLayer
@@ -736,7 +768,7 @@ function WardCellViewer({ item }: { item: z.infer<typeof schema> }) {
               <div className="flex flex-col gap-3">
                 <Label htmlFor="status">Status</Label>
                 <Select defaultValue={item.status}>
-                  <SelectTrigger id="status" className="w-full">
+                  <SelectTrigger id="status" className="w-full rounded-sm">
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -748,7 +780,7 @@ function WardCellViewer({ item }: { item: z.infer<typeof schema> }) {
               <div className="flex flex-col gap-3">
                 <Label htmlFor="priority">Priority Level</Label>
                 <Select defaultValue={item.limit}>
-                  <SelectTrigger id="priority" className="w-full">
+                  <SelectTrigger id="priority" className="w-full rounded-sm">
                     <SelectValue placeholder="Select priority" />
                   </SelectTrigger>
                   <SelectContent>
@@ -762,7 +794,7 @@ function WardCellViewer({ item }: { item: z.infer<typeof schema> }) {
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <Label htmlFor="supporters">Current Supporters</Label>
-                <span className="text-muted-foreground text-xs">
+                <span className="text-muted-foreground font-mono text-[11px] tracking-wider">
                   {supporterCount} supporters
                 </span>
               </div>
@@ -780,15 +812,15 @@ function WardCellViewer({ item }: { item: z.infer<typeof schema> }) {
                 Target: 20 supporters per ward
               </p>
             </div>
-            <div className="rounded-lg border p-4">
-              <h4 className="mb-2 text-sm font-medium">Coverage Summary</h4>
+            <div className="rounded-sm border border-border/60 p-4">
+              <h4 className="mb-2 font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground">Coverage Summary</h4>
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div>
-                  <p className="text-muted-foreground">Status</p>
+                  <p className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">Status</p>
                   <p className="mt-1 font-medium">{item.reviewer}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Priority</p>
+                  <p className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">Priority</p>
                   <p className="mt-1 font-medium">{item.limit}</p>
                 </div>
               </div>
@@ -797,6 +829,7 @@ function WardCellViewer({ item }: { item: z.infer<typeof schema> }) {
         </div>
         <DrawerFooter>
           <Button
+            className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
             onClick={() => {
               toast.promise(
                 new Promise((resolve) => setTimeout(resolve, 1000)),
@@ -811,7 +844,7 @@ function WardCellViewer({ item }: { item: z.infer<typeof schema> }) {
             Save Changes
           </Button>
           <DrawerClose asChild>
-            <Button variant="outline">Close</Button>
+            <Button variant="outline" className="rounded-sm font-mono text-[11px] tracking-widest uppercase">Close</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

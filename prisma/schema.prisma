@@ -70,8 +70,9 @@ model Candidate {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   user         User?
-  canvassers   Canvasser[]
+  canvassers    Canvasser[]
   subscriptions Subscription[]
+  campaigns     Campaign[]
 }
 
 model Voter {
@@ -147,4 +148,105 @@ model Subscription {
 
   @@index([candidateId])
   @@index([status])
+}
+
+// === Collect: Geo Models (database-backed) ===
+
+model Lga {
+  id          Int      @id @default(autoincrement())
+  name        String
+  stateCode   String   @default("AD")
+  wards       Ward[]
+  submissions CollectSubmission[]
+
+  @@unique([name, stateCode])
+  @@index([stateCode])
+}
+
+model Ward {
+  id           Int           @id @default(autoincrement())
+  name         String
+  lgaId        Int
+  lga          Lga           @relation(fields: [lgaId], references: [id])
+  pollingUnits PollingUnit[]
+  submissions  CollectSubmission[]
+
+  @@unique([name, lgaId])
+}
+
+model PollingUnit {
+  id          Int    @id @default(autoincrement())
+  code        String @default("")
+  name        String
+  wardId      Int
+  ward        Ward   @relation(fields: [wardId], references: [id])
+  submissions CollectSubmission[]
+
+  @@unique([name, wardId])
+  @@index([wardId])
+  @@index([code])
+}
+
+// === Collect: Campaign & Submission Models ===
+
+model Campaign {
+  id               String   @id @default(uuid())
+  candidateId      String
+  candidate        Candidate @relation(fields: [candidateId], references: [id])
+  slug             String   @unique
+  candidateName    String
+  candidateTitle   String?
+  party            String
+  constituency     String
+  constituencyType String   // "federal" | "state" | "lga"
+  enabledLgaIds    Int[]
+  requireApcReg    String   @default("optional")  // "required" | "optional" | "hidden"
+  requireVoterId   String   @default("optional")
+  customQuestion1  String?
+  customQuestion2  String?
+  status           String   @default("draft")     // "draft" | "active" | "paused" | "closed"
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  submissions      CollectSubmission[]
+}
+
+model CollectSubmission {
+  id               String   @id @default(uuid())
+  campaignId       String
+  campaign         Campaign @relation(fields: [campaignId], references: [id])
+  fullName         String
+  phone            String
+  email            String?
+  sex              String
+  age              Int
+  occupation       String
+  maritalStatus    String
+  lgaId            Int?
+  lga              Lga?        @relation(fields: [lgaId], references: [id])
+  lgaName          String
+  wardId           Int?
+  ward             Ward?       @relation(fields: [wardId], references: [id])
+  wardName         String
+  pollingUnitId    Int?
+  pollingUnit      PollingUnit? @relation(fields: [pollingUnitId], references: [id])
+  pollingUnitName  String
+  apcRegNumber     String?
+  voterIdNumber    String?
+  isVerified       Boolean  @default(false)
+  role             String   // "women_leader" | "coordinator" | "youth_leader" | "member"
+  customAnswer1    String?
+  customAnswer2    String?
+  canvasserName    String?
+  canvasserPhone   String?
+  isFlagged        Boolean  @default(false)
+  adminNotes       String?
+  createdAt        DateTime @default(now())
+
+  @@unique([campaignId, phone])
+  @@unique([campaignId, voterIdNumber])
+  @@index([campaignId])
+  @@index([createdAt])
+  @@index([lgaId])
+  @@index([wardId])
+  @@index([pollingUnitId])
 }

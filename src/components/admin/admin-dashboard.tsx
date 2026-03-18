@@ -7,10 +7,12 @@ import {
   HiExclamationCircle,
   HiOutlineArrowRight,
   HiOutlineBriefcase,
+  HiOutlineClipboardList,
   HiOutlineUserGroup,
   HiOutlineUsers,
 } from "react-icons/hi";
 import { adminApi } from "@/lib/api/admin";
+import { adminCollectApi } from "@/lib/api/collect";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -38,6 +40,16 @@ export function AdminDashboard() {
     refetchOnWindowFocus: false,
   });
 
+  const { data: campaigns = [] } = useQuery({
+    queryKey: ["admin-campaigns"],
+    queryFn: async () => {
+      const res = await adminCollectApi.getCampaigns();
+      return res.campaigns;
+    },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
   const uniqueParties = useMemo(
     () =>
       Array.from(
@@ -58,6 +70,16 @@ export function AdminDashboard() {
   const nationalCandidates = useMemo(
     () => candidates.filter((candidate) => candidate.isNational).length,
     [candidates],
+  );
+
+  const totalCollectSubmissions = useMemo(
+    () => campaigns.reduce((sum, c) => sum + (c._count?.submissions ?? 0), 0),
+    [campaigns],
+  );
+
+  const activeCampaigns = useMemo(
+    () => campaigns.filter((c) => c.status === "active").length,
+    [campaigns],
   );
 
   const latestCandidates = useMemo(
@@ -88,8 +110,21 @@ export function AdminDashboard() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      <div className="flex justify-end">
-        <Button asChild className="w-full gap-2 sm:w-auto">
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button
+          asChild
+          variant="outline"
+          className="gap-2 rounded-sm font-mono text-[11px] tracking-widest uppercase"
+        >
+          <Link href="/admin/collect">
+            <HiOutlineClipboardList className="h-4 w-4" />
+            <span>Collect Campaigns</span>
+          </Link>
+        </Button>
+        <Button
+          asChild
+          className="gap-2 rounded-sm font-mono text-[11px] tracking-widest uppercase"
+        >
           <Link href="/admin/candidates">
             <span>Manage Candidates</span>
             <HiOutlineArrowRight className="h-4 w-4" />
@@ -112,9 +147,10 @@ export function AdminDashboard() {
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {isLoading ? (
           <>
+            <StatCardSkeleton />
             <StatCardSkeleton />
             <StatCardSkeleton />
             <StatCardSkeleton />
@@ -122,80 +158,98 @@ export function AdminDashboard() {
           </>
         ) : (
           <>
-            <Card className="border-border/50">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-muted-foreground text-sm font-medium">
+            <Card className="border-border/60 rounded-sm shadow-none">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
                   Total Candidates
                 </CardTitle>
-                <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-lg">
+                <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
                   <HiOutlineUserGroup className="text-primary h-5 w-5" />
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="text-2xl font-semibold">{candidates.length}</div>
+                <div className="font-mono text-2xl font-semibold tabular-nums">
+                  {candidates.length}
+                </div>
                 <p className="text-muted-foreground mt-1 text-xs">
-                  Candidate accounts available in the platform
+                  Candidate accounts
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-border/50">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-muted-foreground text-sm font-medium">
+            <Card className="border-border/60 rounded-sm shadow-none">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
                   Total Supporters
                 </CardTitle>
-                <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-lg">
+                <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
                   <HiOutlineUsers className="text-primary h-5 w-5" />
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="text-2xl font-semibold">
+                <div className="font-mono text-2xl font-semibold tabular-nums">
                   {totalSupporters.toLocaleString()}
                 </div>
                 <p className="text-muted-foreground mt-1 text-xs">
-                  Supporters currently attributed across candidates
+                  Across all candidates
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-border/50">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-muted-foreground text-sm font-medium">
-                  Coverage Snapshot
+            <Card className="border-border/60 rounded-sm shadow-none">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Coverage
                 </CardTitle>
-                <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-lg">
+                <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
                   <HiOutlineBriefcase className="text-primary h-5 w-5" />
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="text-2xl font-semibold">
-                  {uniqueParties.length}
+                <div className="font-mono text-2xl font-semibold tabular-nums">
+                  {uniqueParties.length} parties
                 </div>
                 <p className="text-muted-foreground mt-1 text-xs">
-                  Distinct parties represented in candidate records
+                  {nationalCandidates} national,{" "}
+                  {candidates.length - nationalCandidates} constituency
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-border/50">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-muted-foreground text-sm font-medium">
-                  National Coverage
+            <Card className="border-border/60 rounded-sm shadow-none">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Collect Campaigns
                 </CardTitle>
-                <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-lg">
-                  <HiOutlineBriefcase className="text-primary h-5 w-5" />
+                <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
+                  <HiOutlineClipboardList className="text-primary h-5 w-5" />
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="text-2xl font-semibold">
-                  {nationalCandidates}
+                <div className="font-mono text-2xl font-semibold tabular-nums">
+                  {campaigns.length}
                 </div>
                 <p className="text-muted-foreground mt-1 text-xs">
-                  National candidate
-                  {nationalCandidates === 1 ? "" : "s"} and{" "}
-                  {candidates.length - nationalCandidates} constituency-linked
-                  account
-                  {candidates.length - nationalCandidates === 1 ? "" : "s"}
+                  {activeCampaigns} active
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/60 rounded-sm shadow-none">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Collect Registrations
+                </CardTitle>
+                <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
+                  <HiOutlineUsers className="text-primary h-5 w-5" />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="font-mono text-2xl font-semibold tabular-nums">
+                  {totalCollectSubmissions.toLocaleString()}
+                </div>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  Total supporter registrations
                 </p>
               </CardContent>
             </Card>
@@ -204,15 +258,22 @@ export function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.35fr_1fr]">
-        <Card className="border-border/50">
+        <Card className="border-border/60 rounded-sm shadow-none">
           <CardHeader className="flex flex-row items-start justify-between gap-4">
             <div className="space-y-1">
-              <CardTitle>Recent Candidate Accounts</CardTitle>
-              <CardDescription>
-                Newly added candidate records across the current admin workspace.
+              <CardTitle className="text-sm font-semibold tracking-tight">
+                Recent Candidate Accounts
+              </CardTitle>
+              <CardDescription className="text-muted-foreground mt-1 text-sm">
+                Newly added candidate records across the current admin
+                workspace.
               </CardDescription>
             </div>
-            <Button variant="outline" asChild className="shrink-0">
+            <Button
+              variant="outline"
+              asChild
+              className="shrink-0 rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            >
               <Link href="/admin/candidates">View All</Link>
             </Button>
           </CardHeader>
@@ -223,7 +284,7 @@ export function AdminDashboard() {
                 <CandidateCardSkeleton />
               </div>
             ) : latestCandidates.length === 0 ? (
-              <div className="py-10 text-center">
+              <div className="border-border/60 rounded-sm border border-dashed py-10 text-center">
                 <HiOutlineUserGroup className="text-muted-foreground mx-auto mb-3 h-12 w-12" />
                 <p className="text-muted-foreground mb-1 font-medium">
                   No candidates available yet
@@ -237,13 +298,18 @@ export function AdminDashboard() {
                 {latestCandidates.map((candidate) => (
                   <div
                     key={candidate.id}
-                    className="border-border/40 bg-card/50 flex flex-col gap-2 rounded-xl border p-4"
+                    className="border-border/60 bg-card/50 flex flex-col gap-2 rounded-sm border p-4"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-semibold tracking-tight">
                         {candidate.name}
                       </h3>
-                      <Badge variant="secondary">{candidate.party}</Badge>
+                      <Badge
+                        variant="secondary"
+                        className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                      >
+                        {candidate.party}
+                      </Badge>
                     </div>
                     <p className="text-muted-foreground text-sm">
                       {candidate.user.email}
@@ -272,10 +338,12 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/50">
+        <Card className="border-border/60 rounded-sm shadow-none">
           <CardHeader>
-            <CardTitle>Coverage Snapshot</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-sm font-semibold tracking-tight">
+              Coverage Snapshot
+            </CardTitle>
+            <CardDescription className="text-muted-foreground mt-1 text-sm">
               A quick read on how the current candidate base is distributed.
             </CardDescription>
           </CardHeader>
@@ -285,7 +353,7 @@ export function AdminDashboard() {
                 <span className="text-muted-foreground">
                   Constituency-linked candidates
                 </span>
-                <span className="font-medium">
+                <span className="font-mono font-medium tabular-nums">
                   {candidates.length - nationalCandidates}
                 </span>
               </div>
@@ -293,18 +361,29 @@ export function AdminDashboard() {
                 <span className="text-muted-foreground">
                   National candidates
                 </span>
-                <span className="font-medium">{nationalCandidates}</span>
+                <span className="font-mono font-medium tabular-nums">
+                  {nationalCandidates}
+                </span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Distinct parties</span>
-                <span className="font-medium">{uniqueParties.length}</span>
+                <span className="font-mono font-medium tabular-nums">
+                  {uniqueParties.length}
+                </span>
               </div>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium">Top Positions</h3>
-                <Badge variant="outline">{topPositions.length} tracked</Badge>
+                <h3 className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Top Positions
+                </h3>
+                <Badge
+                  variant="outline"
+                  className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                >
+                  {topPositions.length} tracked
+                </Badge>
               </div>
               {topPositions.length === 0 ? (
                 <p className="text-muted-foreground text-sm">
@@ -315,12 +394,16 @@ export function AdminDashboard() {
                   {topPositions.map(([position, count]) => (
                     <div key={position} className="space-y-1.5">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{position}</span>
-                        <span className="font-medium">{count}</span>
+                        <span className="text-muted-foreground">
+                          {position}
+                        </span>
+                        <span className="font-mono font-medium tabular-nums">
+                          {count}
+                        </span>
                       </div>
-                      <div className="bg-muted h-2 rounded-full">
+                      <div className="bg-muted h-2 rounded-sm">
                         <div
-                          className="bg-primary h-2 rounded-full"
+                          className="bg-primary h-2 rounded-sm"
                           style={{
                             width: `${(count / Math.max(candidates.length, 1)) * 100}%`,
                           }}

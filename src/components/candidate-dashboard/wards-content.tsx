@@ -18,9 +18,11 @@ export function WardsContent() {
   if (error) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <Card className="w-full max-w-md">
+        <Card className="border-border/60 w-full max-w-md rounded-sm shadow-none">
           <CardHeader>
-            <CardTitle>Error Loading Ward Data</CardTitle>
+            <CardTitle className="text-sm font-semibold tracking-tight">
+              Error Loading Ward Data
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground text-sm">
@@ -67,10 +69,12 @@ export function WardsContent() {
         </div>
       </div>
 
-      <Card>
+      <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>
-          <CardTitle>Ward Coverage Overview</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-sm font-semibold tracking-tight">
+            Ward Coverage Overview
+          </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-sm">
             {coveredWards} of {totalWards} wards have active supporters
           </CardDescription>
         </CardHeader>
@@ -86,21 +90,27 @@ export function WardsContent() {
               <Progress value={coveragePercentage} className="h-2" />
             </div>
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-lg border p-4">
-                <div className="text-2xl font-bold">{coveredWards}</div>
-                <div className="text-muted-foreground text-sm">
+              <div className="border-border/40 bg-muted/10 hover:bg-muted/20 rounded-sm border p-4 transition-all">
+                <div className="font-mono text-2xl font-bold tracking-tight">
+                  {coveredWards}
+                </div>
+                <div className="text-muted-foreground mt-1 text-[10px] font-bold tracking-widest uppercase">
                   Covered Wards
                 </div>
               </div>
-              <div className="rounded-lg border p-4">
-                <div className="text-2xl font-bold">{totalWards}</div>
-                <div className="text-muted-foreground text-sm">Total Wards</div>
+              <div className="border-border/40 bg-muted/10 hover:bg-muted/20 rounded-sm border p-4 transition-all">
+                <div className="font-mono text-2xl font-bold tracking-tight">
+                  {totalWards}
+                </div>
+                <div className="text-muted-foreground mt-1 text-[10px] font-bold tracking-widest uppercase">
+                  Total Wards
+                </div>
               </div>
-              <div className="rounded-lg border p-4">
-                <div className="text-2xl font-bold">
+              <div className="border-border/40 bg-muted/10 hover:bg-muted/20 rounded-sm border p-4 transition-all">
+                <div className="font-mono text-2xl font-bold tracking-tight">
                   {totalWards - coveredWards}
                 </div>
-                <div className="text-muted-foreground text-sm">
+                <div className="text-muted-foreground mt-1 text-[10px] font-bold tracking-widest uppercase">
                   Remaining Wards
                 </div>
               </div>
@@ -112,15 +122,13 @@ export function WardsContent() {
       <div>
         <h2 className="mb-4 text-lg font-semibold">Ward Details</h2>
         {wardDetails.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <h3 className="mb-2 text-lg font-semibold">No Ward Data Yet</h3>
-              <p className="text-muted-foreground text-center text-sm">
-                No ward data available yet. Supporters will appear here once
-                they register.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="border-border/60 flex flex-col items-center justify-center rounded-sm border border-dashed py-12">
+            <h3 className="mb-2 text-sm font-semibold tracking-tight">No Ward Data Yet</h3>
+            <p className="text-muted-foreground text-center text-sm">
+              No ward data available yet. Supporters will appear here once
+              they register.
+            </p>
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {(() => {
@@ -133,18 +141,22 @@ export function WardsContent() {
               return wardDetails
                 .sort((a, b) => b.supporterCount - a.supporterCount)
                 .map((ward) => (
-                  <Card key={ward.ward}>
+                  <Card
+                    key={ward.ward}
+                    className="border-border/60 rounded-sm shadow-none"
+                  >
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div>
-                          <CardTitle className="text-base">
+                          <CardTitle className="text-sm font-semibold tracking-tight">
                             {ward.ward}
                           </CardTitle>
-                          <CardDescription className="mt-1">
+                          <CardDescription className="text-muted-foreground mt-1 text-sm">
                             {ward.lga}
                           </CardDescription>
                         </div>
                         <Badge
+                          className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
                           variant={
                             ward.supporterCount > 5
                               ? "default"
@@ -163,11 +175,11 @@ export function WardsContent() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center justify-between font-mono text-[11px] tracking-widest uppercase">
                           <span className="text-muted-foreground">
                             Supporters
                           </span>
-                          <span className="text-lg font-semibold">
+                          <span className="text-foreground font-sans text-lg font-bold tracking-tight">
                             {ward.supporterCount}
                           </span>
                         </div>

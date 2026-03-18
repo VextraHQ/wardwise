@@ -17,11 +17,7 @@
  * Date when legal documents were last updated.
  * Update this whenever you modify the legal content.
  */
-export const LEGAL_LAST_UPDATED = new Date("2026-01-28");
-
-/**
- * Format a date for display (e.g., "January 28, 2026")
- */
+export const LEGAL_LAST_UPDATED = new Date("2026-03-17");
 export function formatLegalDate(date: Date): string {
   return date.toLocaleDateString("en-US", {
     year: "numeric",
@@ -69,8 +65,8 @@ export const privacyPolicySections: LegalSection[] = [
     id: "information-we-collect",
     title: "Information We Collect",
     content: [
-      "**Personal Information:** When you register, we collect your National Identification Number (NIN), name, phone number, email address, and location data (state, LGA, ward, polling unit).",
-      "**Survey Responses:** Your responses to civic surveys about community priorities and candidate preferences.",
+      "**Account Information:** When you request a demo or register for an account, we collect your name, email address, phone number, and organization details.",
+      "**Field Data:** Information securely uploaded or collected via the WardWise Collect module by your authorized canvassers and field agents, which may include demographic data, political affiliation (e.g., APC status), Permanent Voter Card (PVC) details, Voter Identification Number (VIN), and National Identification Number (NIN).",
       "**Usage Data:** Information about how you interact with our platform, including access times, pages viewed, and referring URLs.",
       "**Device Information:** Browser type, operating system, device identifiers, and IP address for security and analytics purposes.",
     ],
@@ -79,10 +75,10 @@ export const privacyPolicySections: LegalSection[] = [
     id: "how-we-use-your-information",
     title: "How We Use Your Information",
     content: [
-      "**Voter Verification:** To verify your identity and eligibility using NIN validation through authorized government APIs.",
-      "**Platform Services:** To provide, maintain, and improve our civic engagement services.",
-      "**Aggregated Insights:** To generate anonymized, aggregate data insights for candidates and political campaigns. Individual responses are never shared.",
-      "**Communication:** To send important updates about the platform, your account, and civic activities in your area.",
+      "**Platform Services:** To provide, maintain, and improve our civic intelligence and campaign management services.",
+      "**Account Management:** To manage your organization's platform access, user access roles, and billing.",
+      "**Data Processing:** To securely process, deduplicate, and store the field data collected by your campaign.",
+      "**Communication:** To send important updates about the platform, security notices, and feature releases.",
       "**Security:** To detect, prevent, and address technical issues, fraud, or security breaches.",
     ],
   },
@@ -144,16 +140,15 @@ export const termsOfServiceSections: LegalSection[] = [
     title: "Acceptance of Terms",
     content: [
       `By accessing or using WardWise ("the Platform"), you agree to be bound by these Terms of Service. If you do not agree to all terms, you must not use the Platform.`,
-      "These terms apply to all users, including voters, canvassers, candidates, and administrators.",
+      "These terms apply to all authorized users, including campaign administrators, candidates, and field agents.",
     ],
   },
   {
     id: "eligibility",
     title: "Eligibility",
     content: [
-      "You must be at least 18 years old and a Nigerian citizen to use this Platform.",
-      "You must possess a valid National Identification Number (NIN) to register as a voter.",
-      "By registering, you confirm that all information provided is accurate and truthful.",
+      "You must be an authorized representative of a recognized political campaign, civic organization, or agency to use this Platform.",
+      "You are responsible for ensuring your organization's use of the Platform complies with all local electoral laws and data privacy regulations.",
     ],
   },
   {
@@ -170,8 +165,8 @@ export const termsOfServiceSections: LegalSection[] = [
     id: "acceptable-use",
     title: "Acceptable Use Policy",
     content: [
-      "**You Agree To:** Use the Platform only for lawful civic engagement purposes; provide accurate information in surveys and registrations; respect other users and their opinions.",
-      "**You Agree NOT To:** Submit false or misleading information; attempt to manipulate poll results or surveys; impersonate others or create fake registrations; access the Platform through automated means (bots, scrapers); attempt to breach security measures.",
+      "**You Agree To:** Use the Platform only for lawful civic intelligence purposes; ensure your field agents have obtained proper consent before recording data; respect data privacy laws.",
+      "**You Agree NOT To:** Use the platform to distribute malicious software; attempt to bypass security or encryption protocols; resell the platform access to unauthorized third parties.",
     ],
   },
   {
@@ -275,56 +270,58 @@ export const faqItems: FAQItem[] = [
   {
     question: "What is WardWise?",
     answer:
-      "WardWise is Nigeria's civic intelligence platform that bridges the gap between voters and political candidates. We help citizens voice their priorities and enable candidates to understand community needs at the ward level.",
+      "WardWise is Nigeria's premier campaign intelligence platform that empowers strategic teams with real-time field data. We help campaigns make geographic-based decisions organized precisely by Ward and Polling Unit.",
     category: "general",
   },
   {
     question: "Is WardWise affiliated with any political party?",
     answer:
-      "No. WardWise is a non-partisan platform. We provide services to voters and candidates across all political parties equally.",
+      "No. WardWise is an independent, non-partisan technology provider. We provide platform infrastructure to verified campaigns, candidates, and civic monitoring teams.",
     category: "general",
   },
   {
-    question: "How does my data help candidates?",
+    question: "How does the platform assist canvassers?",
     answer:
-      "Your survey responses are aggregated and anonymized at the ward level. Candidates see community trends and priorities, not individual responses. This helps them understand what matters most to voters in specific areas.",
+      "Canvassers use our mobile-optimized portal to securely collect constituent data. This includes validating voters via Permanent Voter Card (PVC), VIN, or National Identity Number (NIN) credentials directly in the field, ensuring instant deduplication.",
     category: "general",
   },
   // Account
   {
-    question: "How do I register as a voter?",
+    question: "How do I onboard on WardWise?",
     answer:
-      "Visit our registration page and enter your NIN. We'll verify your identity through secure government APIs, then guide you through selecting your ward and polling unit.",
+      "After completing a demo and setting up your workspace, Administrators can invite operators via email and generate unique access codes for field canvassers.",
     category: "account",
   },
+
   {
-    question: "Can I change my registered ward or polling unit?",
-    answer:
-      "Core verified information (like NIN-linked data) cannot be changed without support approval. Contact our support team if you need to update your location details.",
-    category: "account",
-  },
-  {
-    question: "How do I delete my account?",
-    answer: `Contact our support team at ${COMPANY_INFO.supportEmail} to request account deletion. We'll process your request within 7-14 business days.`,
+    question: "How do I cancel our platform access?",
+    answer: `Contact your dedicated account manager at ${COMPANY_INFO.supportEmail} to discuss adjusting or sunsetting your workspace infrastructure.`,
     category: "account",
   },
   // Privacy
   {
-    question: "Is my NIN safe with WardWise?",
+    question:
+      "Is the constituent's NIN, VIN, or PVC number safe with WardWise?",
     answer:
-      "Yes. Your NIN is used only for verification and is stored securely with encryption. We never share your NIN with candidates or third parties.",
+      "Yes. Any NIN, VIN, or PVC number collected in the field by canvassers is encrypted and used purely to verify uniqueness and valid polling unit registration. We ensure the strictest data privacy and never distribute this raw identifier data.",
     category: "privacy",
   },
   {
-    question: "Can candidates see my individual survey responses?",
+    question: "Is data transmission secure?",
     answer:
-      "No. Candidates only see aggregated, anonymized data at the ward or LGA level. Your individual responses are never linked to your identity in any data we share.",
+      "Yes. All data flowing from the field to your command center is protected by TLS/SSL encryption. We host our infrastructure on enterprise-grade cloud servers.",
     category: "privacy",
   },
   {
-    question: "How long do you keep my data?",
+    question: "Who owns the data collected by our agents?",
     answer:
-      "We retain your data for as long as your account is active. You can request deletion at any time. Some data may be retained for legal compliance purposes.",
+      "Your campaign is the sole owner of all data collected via the WardWise Collect module. We act exclusively as a data processor for your organization.",
+    category: "privacy",
+  },
+  {
+    question: "Is the platform compliant with Nigerian data laws?",
+    answer:
+      "Absolutely. Our systems enforce data privacy features compliant with the Nigerian Data Protection Act (NDPA) to ensure constituent data is securely handled.",
     category: "privacy",
   },
   // Technical
@@ -389,8 +386,8 @@ export const legalNavigation = [
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms of Service", href: "/terms" },
   { label: "Cookie Policy", href: "/cookies" },
-  { label: "Support", href: "/support" },
-  { label: "Contact", href: "/contact" },
+  { label: "Support & FAQs", href: "/support" },
+  { label: "Contact Us", href: "/contact" },
 ] as const;
 
 export type LegalPageType =

@@ -5,7 +5,7 @@ import { useCandidateProfile } from "@/hooks/use-candidate-dashboard";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Badge } from "@/components/ui/badge";
+
 import { IconHome } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
@@ -33,32 +33,40 @@ export function SiteHeader() {
               <Skeleton className="mt-1 h-4 w-32" />
             </>
           ) : (
-            <>
-              <h1 className="truncate text-sm font-semibold sm:text-base">
-                Welcome Back, {candidateName}
-              </h1>
-              <p className="text-muted-foreground hidden truncate text-xs sm:block">
-                {candidatePosition || "Candidate"}
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground/50 hidden font-mono text-[10px] font-black tracking-[0.2em] uppercase sm:inline-block">
+                  Candidate
+                </span>
+                <span className="text-muted-foreground/30 hidden font-mono text-xs sm:inline-block">
+                  {"//"}
+                </span>
+                <h1 className="truncate text-sm font-bold tracking-tight sm:text-base">
+                  {candidateName}
+                </h1>
+              </div>
+              <p className="text-muted-foreground hidden truncate font-mono text-[11px] tracking-wider uppercase sm:block">
+                Role: {candidatePosition || "Candidate"}
               </p>
-            </>
+            </div>
           )}
         </div>
-        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-          <Badge
-            variant="outline"
-            className="border-primary/30 text-primary hidden sm:inline-flex"
-          >
-            Live
-          </Badge>
+        <div className="ml-auto flex items-center gap-2 sm:gap-4">
+          <div className="border-primary/20 bg-primary/5 hidden items-center gap-1.5 rounded-sm border px-2 py-0.5 sm:flex">
+            <div className="bg-primary size-1.5 animate-pulse rounded-full" />
+            <span className="text-primary font-mono text-[10px] font-black tracking-widest uppercase">
+              Live
+            </span>
+          </div>
           <Button
             variant="ghost"
             asChild
             size="sm"
-            className="text-muted-foreground gap-1.5 hover:text-white"
+            className="text-muted-foreground gap-1.5 font-mono text-[11px] tracking-widest uppercase hover:text-gray-200"
           >
-            <Link href="/" aria-label="Home">
+            <Link href="/" aria-label="Exit to Homepage">
               <IconHome className="size-4" />
-              <span className="hidden sm:inline">Home</span>
+              <span className="hidden sm:inline">Exit</span>
             </Link>
           </Button>
         </div>

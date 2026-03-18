@@ -117,8 +117,10 @@ function EditCandidateForm({
     if (selectedPosition === "President") return "Federal Republic of Nigeria";
     if (selectedPosition === "Governor") return "e.g., Adamawa State";
     if (selectedPosition === "Senator") return "e.g., Adamawa Central";
-    if (selectedPosition === "House of Representatives") return "e.g., Fufore/Song Federal Constituency";
-    if (selectedPosition === "State Assembly") return "e.g., Song State Constituency";
+    if (selectedPosition === "House of Representatives")
+      return "e.g., Fufore/Song Federal Constituency";
+    if (selectedPosition === "State Assembly")
+      return "e.g., Song State Constituency";
     return "Enter constituency";
   };
 
@@ -165,7 +167,7 @@ function EditCandidateForm({
                 <FormControl>
                   <Input
                     disabled={isLoading}
-                    className="border-border/50"
+                    className="border-border/60 rounded-sm"
                     {...field}
                   />
                 </FormControl>
@@ -185,7 +187,7 @@ function EditCandidateForm({
                   <Input
                     type="email"
                     disabled={isLoading}
-                    className="border-border/50"
+                    className="border-border/60 rounded-sm"
                     {...field}
                   />
                 </FormControl>
@@ -204,7 +206,7 @@ function EditCandidateForm({
                 <FormControl>
                   <Input
                     disabled={isLoading}
-                    className="border-border/50"
+                    className="border-border/60 rounded-sm"
                     {...field}
                   />
                 </FormControl>
@@ -226,7 +228,7 @@ function EditCandidateForm({
                   disabled={isLoading}
                 >
                   <FormControl>
-                    <SelectTrigger className="border-border/50">
+                    <SelectTrigger className="border-border/60 rounded-sm">
                       <SelectValue placeholder="Select position" />
                     </SelectTrigger>
                   </FormControl>
@@ -251,14 +253,12 @@ function EditCandidateForm({
               name="state"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">
-                    State *
-                  </FormLabel>
+                  <FormLabel className="text-sm font-medium">State *</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="e.g., Adamawa State"
                       disabled={isLoading}
-                      className="border-border/50"
+                      className="border-border/60 rounded-sm"
                       {...field}
                     />
                   </FormControl>
@@ -272,14 +272,12 @@ function EditCandidateForm({
                 name="lga"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">
-                      LGA *
-                    </FormLabel>
+                    <FormLabel className="text-sm font-medium">LGA *</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="e.g., Song"
                         disabled={isLoading}
-                        className="border-border/50"
+                        className="border-border/60 rounded-sm"
                         {...field}
                       />
                     </FormControl>
@@ -303,7 +301,7 @@ function EditCandidateForm({
                 <Input
                   placeholder={getConstituencyPlaceholder()}
                   disabled={isLoading}
-                  className="border-border/50"
+                  className="border-border/60 rounded-sm"
                   {...field}
                 />
               </FormControl>
@@ -321,7 +319,7 @@ function EditCandidateForm({
                 <Textarea
                   rows={3}
                   disabled={isLoading}
-                  className="border-border/50"
+                  className="border-border/60 rounded-sm"
                   {...field}
                 />
               </FormControl>
@@ -335,14 +333,14 @@ function EditCandidateForm({
             variant="outline"
             onClick={onCancel}
             disabled={isLoading}
-            className="border-border/50"
+            className="border-border/60 rounded-sm"
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="rounded-sm font-mono text-[11px] tracking-widest uppercase">
             {isLoading ? (
               <>
-                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <div className="mr-2 h-4 w-4 animate-spin rounded-sm border-2 border-current border-t-transparent" />
                 Updating...
               </>
             ) : (
@@ -369,7 +367,7 @@ export function EditCandidateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto rounded-sm">
         <DialogHeader>
           <DialogTitle>Edit Candidate</DialogTitle>
           <DialogDescription>Update candidate information</DialogDescription>

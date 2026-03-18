@@ -1,4 +1,5 @@
 import { CallToActionSection } from "@/components/landing/cta-section";
+import { CollectSection } from "@/components/landing/collect-section";
 import { FeaturesSection } from "@/components/landing/features";
 import { HeroSection } from "@/components/landing/hero";
 import { HowItWorksSection } from "@/components/landing/how-it-works";
@@ -22,6 +23,7 @@ export default function Home() {
         <PlatformPillarsSection />
         <ImpactSection />
         <SecuritySection />
+        <CollectSection />
         <CallToActionSection />
       </main>
       <SiteFooter />

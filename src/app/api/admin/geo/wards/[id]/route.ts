@@ -1,0 +1,124 @@
+import { type NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+import { updateWardSchema } from "@/lib/schemas/geo-schemas";
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const numId = parseInt(id, 10);
+    if (isNaN(numId)) {
+      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    }
+
+    const body = await request.json();
+    const parsed = updateWardSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0].message },
+        { status: 400 },
+      );
+    }
+
+    const ward = await prisma.ward.update({
+      where: { id: numId },
+      data: parsed.data,
+    });
+
+    return NextResponse.json({ ward });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return NextResponse.json({ error: "Ward not found" }, { status: 404 });
+    }
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return NextResponse.json(
+        { error: "A ward with this name already exists in this LGA" },
+        { status: 409 },
+      );
+    }
+    console.error("Error updating ward:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const numId = parseInt(id, 10);
+    if (isNaN(numId)) {
+      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Nullify wardId on submissions referencing this ward
+      await tx.collectSubmission.updateMany({
+        where: { wardId: numId },
+        data: { wardId: null },
+      });
+
+      // Get all PU IDs under this ward
+      const pus = await tx.pollingUnit.findMany({
+        where: { wardId: numId },
+        select: { id: true },
+      });
+      const puIds = pus.map((pu) => pu.id);
+
+      if (puIds.length > 0) {
+        // Nullify pollingUnitId on submissions for those PUs
+        await tx.collectSubmission.updateMany({
+          where: { pollingUnitId: { in: puIds } },
+          data: { pollingUnitId: null },
+        });
+      }
+
+      // Delete all PUs under this ward
+      await tx.pollingUnit.deleteMany({
+        where: { wardId: numId },
+      });
+
+      // Delete the ward
+      await tx.ward.delete({ where: { id: numId } });
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return NextResponse.json({ error: "Ward not found" }, { status: 404 });
+    }
+    console.error("Error deleting ward:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}

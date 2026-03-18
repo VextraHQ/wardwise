@@ -5,11 +5,13 @@ import { Suspense } from "react";
 import {
   IconDashboard,
   IconUsers,
+  IconClipboardList,
   IconSettings,
   IconHome,
   IconChartBar,
   IconHistory,
   IconHelp,
+  IconMapPin,
 } from "@tabler/icons-react";
 import { NavMain } from "@/components/candidate-dashboard/nav-main";
 import { NavSecondary } from "@/components/candidate-dashboard/nav-secondary";
@@ -37,6 +39,16 @@ const adminNavItems = [
     title: "Candidates",
     url: "/admin/candidates",
     icon: IconUsers,
+  },
+  {
+    title: "Collect",
+    url: "/admin/collect",
+    icon: IconClipboardList,
+  },
+  {
+    title: "Geo Data",
+    url: "/admin/geo",
+    icon: IconMapPin,
   },
   {
     title: "Analytics",
@@ -81,10 +93,10 @@ export function AdminSidebar({
               className="data-[slot=sidebar-menu-button]:p-0!"
             >
               <Link href="/">
-                <div className="from-primary flex size-8 items-center justify-center rounded-lg bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
+                <div className="from-primary flex size-8 items-center justify-center rounded-sm bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
                   <HiMap className="h-4 w-4" />
                 </div>
-                <span className="text-base font-semibold">WardWise</span>
+                <span className="text-base font-bold tracking-tight">WardWise</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -94,13 +106,13 @@ export function AdminSidebar({
         <Suspense
           fallback={
             <div className="space-y-2 px-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full rounded-sm" />
+              <Skeleton className="h-10 w-full rounded-sm" />
+              <Skeleton className="h-10 w-full rounded-sm" />
             </div>
           }
         >
-          <NavMain items={adminNavItems} />
+          <NavMain items={adminNavItems} label="Operations" />
         </Suspense>
         <NavSecondary items={adminSecondaryItems} className="mt-auto" />
       </SidebarContent>

@@ -26,7 +26,7 @@ export function AdminListItemCandidate({
   isLoading = false,
 }: AdminListItemCandidateProps) {
   return (
-    <div className="border-border/40 bg-card/50 hover:bg-card hover:border-primary/20 group flex flex-col gap-4 rounded-xl border p-4 transition-all hover:shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
+    <div className="border-border/60 bg-card/50 hover:bg-card hover:border-primary/20 group flex flex-col gap-4 rounded-sm border p-4 transition-all sm:flex-row sm:items-center sm:justify-between sm:p-5">
       <div className="flex flex-1 flex-col gap-2">
         <div className="flex flex-wrap items-center gap-3">
           <h3 className="text-foreground text-base font-semibold tracking-tight">
@@ -34,7 +34,7 @@ export function AdminListItemCandidate({
           </h3>
           <Badge
             variant="secondary"
-            className="bg-secondary/50 text-secondary-foreground hover:bg-secondary/70 rounded-md px-2.5 py-0.5 text-xs font-medium"
+            className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
           >
             {candidate.party}
           </Badge>
@@ -57,7 +57,7 @@ export function AdminListItemCandidate({
 
           <div className="flex items-center gap-1.5" title="Supporters">
             <HiOutlineUsers className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            <span className="text-foreground font-medium">
+            <span className="text-foreground font-medium font-mono tabular-nums">
               {candidate.supporters.toLocaleString()}
             </span>
             <span>supporters</span>
@@ -85,7 +85,7 @@ export function AdminListItemCandidate({
           size="icon"
           onClick={() => onEdit(candidate)}
           disabled={isLoading}
-          className="text-muted-foreground hover:text-foreground hover:bg-secondary/80 h-8 w-8"
+          className="text-muted-foreground hover:text-foreground hover:bg-secondary/80 h-8 w-8 rounded-sm"
           title="Edit Candidate"
         >
           <HiOutlinePencil className="h-4 w-4" />
@@ -95,7 +95,7 @@ export function AdminListItemCandidate({
           size="icon"
           onClick={() => onDelete(candidate.id)}
           disabled={isLoading}
-          className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8 rounded-sm"
           title="Delete Candidate"
         >
           <HiOutlineTrash className="h-4 w-4" />

@@ -28,7 +28,7 @@ export function AdminSearchBar({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="border-border/50 w-full pl-9"
+        className="border-border/60 w-full rounded-sm pl-9"
       />
       {value && (
         <button
