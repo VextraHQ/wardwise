@@ -1,7 +1,12 @@
 "use client";
 
-import { UseFormReturn } from "react-hook-form";
-import { IconArrowLeft, IconCheck, IconLoader2, IconClipboardList } from "@tabler/icons-react";
+import type { UseFormReturn } from "react-hook-form";
+import {
+  IconArrowLeft,
+  IconCheck,
+  IconLoader2,
+  IconClipboardList,
+} from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

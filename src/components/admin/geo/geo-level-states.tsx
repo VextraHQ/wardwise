@@ -65,8 +65,8 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
     if (!ss || ss.lgasSeeded === 0) {
       return (
         <Badge
-          variant="secondary"
-          className="text-muted-foreground rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+          variant="outline"
+          className="bg-muted text-muted-foreground border-border/60 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
         >
           Not seeded
         </Badge>
@@ -74,7 +74,10 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
     }
     if (ss.lgasSeeded >= ss.lgasExpected) {
       return (
-        <Badge className="rounded-sm border-transparent bg-emerald-100 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-emerald-700 uppercase dark:bg-emerald-900/30 dark:text-emerald-400">
+        <Badge
+          variant="outline"
+          className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+        >
           <HiCheck className="mr-0.5 h-3 w-3" />
           Complete
         </Badge>
@@ -193,6 +196,9 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
             <Table>
               <TableHeader className="bg-muted/30 sticky top-0 z-10">
                 <TableRow>
+                  <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
+                    S/N
+                  </TableHead>
                   <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                     State
                   </TableHead>
@@ -217,14 +223,17 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {nigeriaStates.map((state) => {
+                {nigeriaStates.map((state, idx) => {
                   const ss = getStateStats(state.code);
                   return (
                     <TableRow
                       key={state.code}
-                      className="cursor-pointer"
+                      className="cursor-pointer transition-colors hover:bg-muted/50"
                       onClick={() => onDrillDown(state.code)}
                     >
+                      <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
+                        {idx + 1}
+                      </TableCell>
                       <TableCell className="font-medium">
                         {state.name}
                       </TableCell>

@@ -49,16 +49,18 @@ export function SectionCards({ dashboardData }: SectionCardsProps) {
 
   return (
     <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      <Card className="@container/card rounded-sm border-border/60 shadow-none">
+      <Card className="border-border/60 @container/card rounded-sm shadow-none">
         <CardHeader>
-          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] uppercase tracking-widest">Total Supporters</CardDescription>
+          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+            Total Supporters
+          </CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {totalSupporters.toLocaleString()}
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
-              className={`font-mono text-[11px] uppercase tracking-widest rounded-sm py-0 ${
+              className={`rounded-sm py-0 font-mono text-[11px] tracking-widest uppercase ${
                 totalSupporters > 0
                   ? "border-primary/30 text-primary"
                   : "border-red-500/30 text-red-500"
@@ -86,16 +88,18 @@ export function SectionCards({ dashboardData }: SectionCardsProps) {
         </CardFooter>
       </Card>
 
-      <Card className="@container/card rounded-sm border-border/60 shadow-none">
+      <Card className="border-border/60 @container/card rounded-sm shadow-none">
         <CardHeader>
-          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] uppercase tracking-widest">Ward Coverage</CardDescription>
+          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+            Ward Coverage
+          </CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {wardCoverage.coveredWards}/{wardCoverage.totalWards}
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
-              className={`font-mono text-[11px] uppercase tracking-widest rounded-sm py-0 ${
+              className={`rounded-sm py-0 font-mono text-[11px] tracking-widest uppercase ${
                 wardCoverage.coveragePercentage >= 50
                   ? "border-primary/30 text-primary"
                   : "border-red-500/30 text-red-500"
@@ -129,16 +133,18 @@ export function SectionCards({ dashboardData }: SectionCardsProps) {
         </CardFooter>
       </Card>
 
-      <Card className="@container/card rounded-sm border-border/60 shadow-none">
+      <Card className="border-border/60 @container/card rounded-sm shadow-none">
         <CardHeader>
-          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] uppercase tracking-widest">Polling Units</CardDescription>
+          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+            Polling Units
+          </CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {pollingUnits}
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
-              className={`font-mono text-[11px] uppercase tracking-widest rounded-sm py-0 ${
+              className={`rounded-sm py-0 font-mono text-[11px] tracking-widest uppercase ${
                 pollingUnits > 0
                   ? "border-primary/30 text-primary"
                   : "border-red-500/30 text-red-500"
@@ -168,16 +174,18 @@ export function SectionCards({ dashboardData }: SectionCardsProps) {
         </CardFooter>
       </Card>
 
-      <Card className="@container/card rounded-sm border-border/60 shadow-none">
+      <Card className="border-border/60 @container/card rounded-sm shadow-none">
         <CardHeader>
-          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] uppercase tracking-widest">Support Strength</CardDescription>
+          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+            Support Strength
+          </CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {supportStrength}%
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
-              className={`font-mono text-[11px] uppercase tracking-widest rounded-sm py-0 ${
+              className={`rounded-sm py-0 font-mono text-[11px] tracking-widest uppercase ${
                 supportStrength >= 50
                   ? "border-primary/30 text-primary"
                   : "border-red-500/30 text-red-500"

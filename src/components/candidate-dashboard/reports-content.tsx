@@ -138,7 +138,9 @@ export function ReportsContent() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-sm font-semibold tracking-tight">Registration Summary</CardTitle>
+              <CardTitle className="text-sm font-semibold tracking-tight">
+                Registration Summary
+              </CardTitle>
               <CardDescription className="text-muted-foreground mt-1 text-sm">
                 Registration and data collection breakdown
               </CardDescription>
@@ -156,7 +158,7 @@ export function ReportsContent() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20">
+            <div className="border-border/40 bg-muted/10 hover:bg-muted/20 rounded-sm border p-4 transition-all">
               <div className="mb-2 flex items-center gap-2">
                 <div className="bg-primary/10 text-primary flex size-8 items-center justify-center rounded-sm">
                   <IconUsers className="size-4" />
@@ -170,7 +172,7 @@ export function ReportsContent() {
               </p>
             </div>
 
-            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20">
+            <div className="border-border/40 bg-muted/10 hover:bg-muted/20 rounded-sm border p-4 transition-all">
               <div className="mb-2 flex items-center gap-2">
                 <div className="flex size-8 items-center justify-center rounded-sm bg-green-500/10">
                   <IconFingerprint className="size-4 text-green-600" />
@@ -192,7 +194,7 @@ export function ReportsContent() {
               </p>
             </div>
 
-            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20">
+            <div className="border-border/40 bg-muted/10 hover:bg-muted/20 rounded-sm border p-4 transition-all">
               <div className="mb-2 flex items-center gap-2">
                 <div className="flex size-8 items-center justify-center rounded-sm bg-amber-500/10">
                   <IconAlertTriangle className="size-4 text-amber-600" />
@@ -209,7 +211,7 @@ export function ReportsContent() {
               </p>
             </div>
 
-            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20">
+            <div className="border-border/40 bg-muted/10 hover:bg-muted/20 rounded-sm border p-4 transition-all">
               <div className="mb-2 flex items-center gap-2">
                 <div className="flex size-8 items-center justify-center rounded-sm bg-blue-500/10">
                   <IconShieldCheck className="size-4 text-blue-600" />
@@ -226,7 +228,7 @@ export function ReportsContent() {
               </p>
             </div>
 
-            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20">
+            <div className="border-border/40 bg-muted/10 hover:bg-muted/20 rounded-sm border p-4 transition-all">
               <div className="mb-2 flex items-center gap-2">
                 <div className="flex size-8 items-center justify-center rounded-sm bg-emerald-500/10">
                   <IconChartBar className="size-4 text-emerald-600" />
@@ -252,7 +254,9 @@ export function ReportsContent() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-sm font-semibold tracking-tight">Deduplication Report</CardTitle>
+              <CardTitle className="text-sm font-semibold tracking-tight">
+                Deduplication Report
+              </CardTitle>
               <CardDescription className="text-muted-foreground mt-1 text-sm">
                 NIN-based voter uniqueness analysis
               </CardDescription>
@@ -271,7 +275,7 @@ export function ReportsContent() {
         <CardContent className="space-y-6">
           {/* Summary Stats */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20 text-center">
+            <div className="border-border/40 bg-muted/10 hover:bg-muted/20 rounded-sm border p-4 text-center transition-all">
               <p className="text-foreground font-mono text-2xl font-bold tracking-tight">
                 {MOCK_DEDUP_REPORT.uniqueVoters.toLocaleString()}
               </p>
@@ -286,11 +290,11 @@ export function ReportsContent() {
                   {MOCK_DEDUP_REPORT.duplicateNins}
                 </p>
               </div>
-              <p className="mt-1 font-mono text-[10px] font-bold tracking-widest uppercase text-amber-600">
+              <p className="mt-1 font-mono text-[10px] font-bold tracking-widest text-amber-600 uppercase">
                 Duplicate NINs
               </p>
             </div>
-            <div className="rounded-sm border border-border/40 bg-muted/10 p-4 transition-all hover:bg-muted/20 text-center">
+            <div className="border-border/40 bg-muted/10 hover:bg-muted/20 rounded-sm border p-4 text-center transition-all">
               <p className="text-foreground font-mono text-2xl font-bold tracking-tight">
                 {MOCK_DEDUP_REPORT.duplicateRate}%
               </p>
@@ -303,13 +307,21 @@ export function ReportsContent() {
           {/* Top Duplicates */}
           {MOCK_DEDUP_REPORT.topDuplicates.length > 0 && (
             <div>
-              <h3 className="mb-3 font-mono text-[11px] font-bold tracking-widest uppercase text-muted-foreground">Top Duplicate NINs</h3>
+              <h3 className="text-muted-foreground mb-3 font-mono text-[11px] font-bold tracking-widest uppercase">
+                Top Duplicate NINs
+              </h3>
               <Table>
-                <TableHeader className="bg-muted/30 border-b border-border/60">
+                <TableHeader className="bg-muted/30 border-border/60 border-b">
                   <TableRow>
-                    <TableHead className="font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">NIN (Masked)</TableHead>
-                    <TableHead className="text-right font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Registrations</TableHead>
-                    <TableHead className="font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Wards</TableHead>
+                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                      NIN (Masked)
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Registrations
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Wards
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -343,7 +355,9 @@ export function ReportsContent() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-sm font-semibold tracking-tight">Ward Coverage Report</CardTitle>
+              <CardTitle className="text-sm font-semibold tracking-tight">
+                Ward Coverage Report
+              </CardTitle>
               <CardDescription className="text-muted-foreground mt-1 text-sm">
                 Voter registrations and polling unit coverage by ward
               </CardDescription>
@@ -361,18 +375,37 @@ export function ReportsContent() {
         </CardHeader>
         <CardContent>
           <Table>
-            <TableHeader className="bg-muted/30 border-b border-border/60">
+            <TableHeader className="bg-muted/30 border-border/60 border-b">
               <TableRow>
-                <TableHead className="font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Ward</TableHead>
-                <TableHead className="text-right font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Registered</TableHead>
-                <TableHead className="text-right font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Polling Units</TableHead>
-                <TableHead className="text-right font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Covered</TableHead>
-                <TableHead className="font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground h-10">Coverage</TableHead>
+                <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Ward
+                </TableHead>
+                <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Registered
+                </TableHead>
+                <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Polling Units
+                </TableHead>
+                <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Covered
+                </TableHead>
+                <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Coverage
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {MOCK_COVERAGE.map((ward) => (
-                <TableRow key={ward.ward}>
+                <TableRow
+                  key={ward.ward}
+                  className={`transition-colors ${
+                    ward.coverage < 50
+                      ? "bg-destructive/5 hover:bg-destructive/10"
+                      : ward.coverage < 75
+                        ? "bg-amber-500/5 hover:bg-amber-500/10"
+                        : "hover:bg-muted/30"
+                  }`}
+                >
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       <IconMapPin className="text-muted-foreground size-4" />

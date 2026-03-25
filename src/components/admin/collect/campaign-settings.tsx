@@ -29,11 +29,11 @@ import {
   IconFileDescription,
 } from "@tabler/icons-react";
 
-const STATUS_DOT: Record<string, string> = {
-  draft: "bg-muted-foreground",
-  active: "bg-emerald-500",
-  paused: "bg-orange-500",
-  closed: "bg-destructive",
+const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
+  draft: "bg-muted text-muted-foreground border-border/60",
+  active: "bg-primary/10 text-primary border-primary/30",
+  paused: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  closed: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
 function capitalize(s: string) {
@@ -97,12 +97,9 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
               Current status:
             </span>
             <Badge
-              variant={campaign.status === "active" ? "default" : "secondary"}
-              className="gap-1.5 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+              variant="outline"
+              className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${CAMPAIGN_STATUS_STYLES[campaign.status] ?? ""}`}
             >
-              <span
-                className={`inline-block h-1.5 w-1.5 rounded-full ${STATUS_DOT[campaign.status] ?? "bg-muted-foreground"}`}
-              />
               {capitalize(campaign.status)}
             </Badge>
           </div>
@@ -219,7 +216,16 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Created</span>
-            <span>{new Date(campaign.createdAt).toLocaleDateString()}</span>
+            <span>{new Date(campaign.createdAt).toLocaleString(
+                  "en-NG",
+                  {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  },
+                )}</span>
           </div>
         </CardContent>
       </Card>

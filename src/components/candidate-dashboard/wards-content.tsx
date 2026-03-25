@@ -122,11 +122,13 @@ export function WardsContent() {
       <div>
         <h2 className="mb-4 text-lg font-semibold">Ward Details</h2>
         {wardDetails.length === 0 ? (
-          <div className="border-border/60 flex flex-col items-center justify-center rounded-sm border border-dashed py-12">
-            <h3 className="mb-2 text-sm font-semibold tracking-tight">No Ward Data Yet</h3>
+          <div className="border-border flex flex-col items-center justify-center rounded-sm border border-dashed py-12">
+            <h3 className="mb-2 text-sm font-semibold tracking-tight">
+              No Ward Data Yet
+            </h3>
             <p className="text-muted-foreground text-center text-sm">
-              No ward data available yet. Supporters will appear here once
-              they register.
+              No ward data available yet. Supporters will appear here once they
+              register.
             </p>
           </div>
         ) : (

@@ -47,7 +47,7 @@ export function AdminPagination({
   return (
     <div className="flex items-center justify-between">
       {/* Item count */}
-      <div className="text-muted-foreground hidden flex-1 font-mono text-[11px] tracking-wider lg:flex">
+      <div className="text-foreground/60 hidden flex-1 font-mono text-[11px] tracking-wider lg:flex">
         Showing {startItem}-{endItem} of {totalItems.toLocaleString()}{" "}
         {itemLabel}
       </div>
@@ -56,7 +56,9 @@ export function AdminPagination({
       <div className="flex w-full items-center gap-8 lg:w-fit">
         {/* Rows per page */}
         <div className="hidden items-center gap-2 lg:flex">
-          <Label className="font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground">Rows per page</Label>
+          <Label className="text-foreground/60 font-mono text-[10px] font-bold tracking-widest uppercase">
+            Rows per page
+          </Label>
           <Select
             value={pageSize.toString()}
             onValueChange={(value) => onPageSizeChange(Number(value))}
@@ -75,7 +77,7 @@ export function AdminPagination({
         </div>
 
         {/* Page indicator */}
-        <div className="flex w-fit items-center justify-center font-mono text-[11px] font-medium tracking-wider">
+        <div className="text-foreground/60 flex w-fit items-center justify-center font-mono text-[11px] font-bold tracking-wider">
           Page {currentPage} of {totalPages}
         </div>
 

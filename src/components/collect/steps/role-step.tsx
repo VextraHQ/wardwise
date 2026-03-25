@@ -86,7 +86,7 @@ export function RoleStep({
                     aria-label={`Select role: ${r.label}`}
                     onClick={() => setValue("role", r.value)}
                     className={cn(
-                      "border-border bg-card hover:border-primary/50 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-sm border-2 p-4 transition-all focus-visible:ring-primary focus-visible:ring-2 focus-visible:outline-none sm:p-6",
+                      "border-border bg-card hover:border-primary/50 focus-visible:ring-primary flex cursor-pointer flex-col items-center justify-center gap-2 rounded-sm border-2 p-4 transition-all focus-visible:ring-2 focus-visible:outline-none sm:p-6",
                       selectedRole === r.value &&
                         "border-primary bg-primary/10 ring-primary/20 ring-2 ring-offset-1",
                     )}

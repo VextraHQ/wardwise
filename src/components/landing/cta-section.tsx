@@ -73,7 +73,9 @@ export function CallToActionSection() {
               </h2>
 
               <p className="text-muted-foreground mx-auto max-w-xl text-base leading-relaxed font-medium sm:text-lg">
-                Join Nigeria's most trusted digital infrastructure for grassroots campaigns. Request an invite to onboard your team today.
+                Join Nigeria's most trusted digital infrastructure for
+                grassroots campaigns. Request an invite to onboard your team
+                today.
               </p>
 
               <div className="flex flex-col items-center justify-center gap-6 pt-6 sm:flex-row">

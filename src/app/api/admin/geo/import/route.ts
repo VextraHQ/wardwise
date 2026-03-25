@@ -56,10 +56,18 @@ async function validateLgaRows(
     const stateCode = (row.statecode || "").toUpperCase();
 
     if (name.length < 2) {
-      return { status: "error", data: row, message: "Name must be at least 2 characters" };
+      return {
+        status: "error",
+        data: row,
+        message: "Name must be at least 2 characters",
+      };
     }
     if (!validStateCodes.has(stateCode)) {
-      return { status: "error", data: row, message: `Invalid state code: ${stateCode}` };
+      return {
+        status: "error",
+        data: row,
+        message: `Invalid state code: ${stateCode}`,
+      };
     }
     if (existingSet.has(`${name.toLowerCase()}|${stateCode}`)) {
       return { status: "duplicate", data: row, message: "LGA already exists" };
@@ -83,7 +91,9 @@ async function validateWardRows(
   const allLgas = await prisma.lga.findMany({
     where: {
       stateCode: {
-        in: Array.from(new Set(Array.from(lgaPairs).map((p) => p.split("|")[1]))),
+        in: Array.from(
+          new Set(Array.from(lgaPairs).map((p) => p.split("|")[1])),
+        ),
       },
     },
     select: { id: true, name: true, stateCode: true },
@@ -110,18 +120,34 @@ async function validateWardRows(
     const stateCode = (row.statecode || "").toUpperCase();
 
     if (name.length < 2) {
-      return { status: "error", data: row, message: "Name must be at least 2 characters" };
+      return {
+        status: "error",
+        data: row,
+        message: "Name must be at least 2 characters",
+      };
     }
     if (!validStateCodes.has(stateCode)) {
-      return { status: "error", data: row, message: `Invalid state code: ${stateCode}` };
+      return {
+        status: "error",
+        data: row,
+        message: `Invalid state code: ${stateCode}`,
+      };
     }
 
     const lgaId = lgaMap.get(`${lgaName}|${stateCode}`);
     if (!lgaId) {
-      return { status: "error", data: row, message: `LGA "${row.lganame}" not found in state ${stateCode}` };
+      return {
+        status: "error",
+        data: row,
+        message: `LGA "${row.lganame}" not found in state ${stateCode}`,
+      };
     }
     if (existingSet.has(`${name.toLowerCase()}|${lgaId}`)) {
-      return { status: "duplicate", data: row, message: "Ward already exists in this LGA" };
+      return {
+        status: "duplicate",
+        data: row,
+        message: "Ward already exists in this LGA",
+      };
     }
     return { status: "valid", data: { ...row, name, _lgaId: String(lgaId) } };
   });
@@ -142,7 +168,9 @@ async function validatePollingUnitRows(
   const allLgas = await prisma.lga.findMany({
     where: {
       stateCode: {
-        in: Array.from(new Set(Array.from(lgaPairs).map((p) => p.split("|")[1]))),
+        in: Array.from(
+          new Set(Array.from(lgaPairs).map((p) => p.split("|")[1])),
+        ),
       },
     },
     select: { id: true, name: true, stateCode: true },
@@ -186,23 +214,42 @@ async function validatePollingUnitRows(
       return { status: "error", data: row, message: "INEC Code is required" };
     }
     if (!validStateCodes.has(stateCode)) {
-      return { status: "error", data: row, message: `Invalid state code: ${stateCode}` };
+      return {
+        status: "error",
+        data: row,
+        message: `Invalid state code: ${stateCode}`,
+      };
     }
 
     const lgaId = lgaMap.get(`${lgaName}|${stateCode}`);
     if (!lgaId) {
-      return { status: "error", data: row, message: `LGA "${row.lganame}" not found in state ${stateCode}` };
+      return {
+        status: "error",
+        data: row,
+        message: `LGA "${row.lganame}" not found in state ${stateCode}`,
+      };
     }
 
     const wardId = wardMap.get(`${wardName}|${lgaId}`);
     if (!wardId) {
-      return { status: "error", data: row, message: `Ward "${row.wardname}" not found in LGA "${row.lganame}"` };
+      return {
+        status: "error",
+        data: row,
+        message: `Ward "${row.wardname}" not found in LGA "${row.lganame}"`,
+      };
     }
 
     if (existingSet.has(`${name.toLowerCase()}|${wardId}`)) {
-      return { status: "duplicate", data: row, message: "Polling unit already exists in this ward" };
+      return {
+        status: "duplicate",
+        data: row,
+        message: "Polling unit already exists in this ward",
+      };
     }
-    return { status: "valid", data: { ...row, code, name, _wardId: String(wardId) } };
+    return {
+      status: "valid",
+      data: { ...row, code, name, _wardId: String(wardId) },
+    };
   });
 }
 
@@ -217,7 +264,10 @@ export async function POST(request: Request) {
     const { level, rows, preview } = body;
 
     if (!level || !rows || !Array.isArray(rows)) {
-      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 },
+      );
     }
     if (rows.length === 0) {
       return NextResponse.json({ error: "No rows to import" }, { status: 400 });
@@ -260,13 +310,20 @@ export async function POST(request: Request) {
     };
 
     if (preview) {
-      return NextResponse.json({ summary, rows: results } satisfies ImportPreviewResponse);
+      return NextResponse.json({
+        summary,
+        rows: results,
+      } satisfies ImportPreviewResponse);
     }
 
     // Commit phase
     const validRows = results.filter((r) => r.status === "valid");
     if (validRows.length === 0) {
-      return NextResponse.json({ created: 0, skipped: summary.duplicates, errors: [] } satisfies ImportCommitResponse);
+      return NextResponse.json({
+        created: 0,
+        skipped: summary.duplicates,
+        errors: [],
+      } satisfies ImportCommitResponse);
     }
 
     const commitErrors: string[] = [];

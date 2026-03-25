@@ -86,7 +86,7 @@ export function NavButtons({
         onClick={onNext}
         disabled={nextDisabled || isLoading}
         aria-label={nextLabel}
-        className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 flex-1 rounded-sm text-xs font-bold tracking-widest uppercase shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] transition-all active:scale-95"
+        className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 flex-1 rounded-sm text-xs font-bold tracking-widest uppercase transition-all active:scale-95"
       >
         {isLoading ? (
           <>

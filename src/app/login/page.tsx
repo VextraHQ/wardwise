@@ -128,7 +128,7 @@ export default function LoginPage() {
               {error && (
                 <Alert
                   variant="destructive"
-                  className="border-destructive/20 bg-destructive/5"
+                  className="border-destructive/30 bg-destructive/10 rounded-sm shadow-none"
                 >
                   <AlertDescription className="font-mono text-xs font-bold tracking-wide uppercase">
                     {error}

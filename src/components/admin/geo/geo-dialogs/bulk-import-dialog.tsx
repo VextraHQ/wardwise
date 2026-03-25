@@ -196,7 +196,10 @@ export function BulkImportDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Import {LEVEL_LABELS[level]}
-            <Badge variant="outline" className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase">
+            <Badge
+              variant="outline"
+              className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+            >
               CSV
             </Badge>
           </DialogTitle>
@@ -250,16 +253,29 @@ export function BulkImportDialog({
         {(state === "preview" || state === "importing" || state === "done") && (
           <div className="space-y-4">
             <div className="flex flex-wrap gap-2 text-sm">
-              <Badge variant="default" className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase">{summary.valid} valid</Badge>
+              <Badge
+                variant="default"
+                className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+              >
+                {summary.valid} valid
+              </Badge>
               {summary.duplicates > 0 && (
-                <Badge variant="secondary" className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase">
+                <Badge
+                  variant="secondary"
+                  className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                >
                   {summary.duplicates} duplicates
                 </Badge>
               )}
               {summary.errors > 0 && (
-                <Badge variant="destructive" className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase">{summary.errors} errors</Badge>
+                <Badge
+                  variant="destructive"
+                  className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                >
+                  {summary.errors} errors
+                </Badge>
               )}
-              <span className="text-muted-foreground ml-auto text-xs leading-6 font-mono tabular-nums">
+              <span className="text-muted-foreground ml-auto font-mono text-xs leading-6 tabular-nums">
                 {summary.total} total rows
               </span>
             </div>
@@ -268,9 +284,16 @@ export function BulkImportDialog({
               <Table>
                 <TableHeader className="bg-muted/30 sticky top-0 z-10">
                   <TableRow>
-                    <TableHead className="w-20 text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">Status</TableHead>
+                    <TableHead className="text-muted-foreground h-10 w-20 font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Status
+                    </TableHead>
                     {columns.map((col) => (
-                      <TableHead key={col} className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">{col}</TableHead>
+                      <TableHead
+                        key={col}
+                        className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase"
+                      >
+                        {col}
+                      </TableHead>
                     ))}
                   </TableRow>
                 </TableHeader>
@@ -280,7 +303,10 @@ export function BulkImportDialog({
                     return (
                       <TableRow key={i}>
                         <TableCell>
-                          <Badge variant={badge.variant} className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase">
+                          <Badge
+                            variant={badge.variant}
+                            className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                          >
                             {badge.label}
                           </Badge>
                         </TableCell>
@@ -297,7 +323,7 @@ export function BulkImportDialog({
             </div>
 
             {previewResults.some((r) => r.status === "error" && r.message) && (
-              <div className="max-h-24 overflow-auto rounded-sm border border-red-200 bg-red-50 p-2 text-xs text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+              <div className="border-destructive/30 bg-destructive/10 text-destructive max-h-24 overflow-auto rounded-sm border p-2 text-xs">
                 {previewResults
                   .filter((r) => r.status === "error" && r.message)
                   .slice(0, 10)
@@ -314,22 +340,37 @@ export function BulkImportDialog({
         <DialogFooter>
           {state === "preview" && (
             <>
-              <Button variant="outline" onClick={reset} className="rounded-sm font-mono text-[11px] tracking-widest uppercase">
+              <Button
+                variant="outline"
+                onClick={reset}
+                className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+              >
                 Upload Different File
               </Button>
-              <Button onClick={handleImport} disabled={summary.valid === 0} className="rounded-sm font-mono text-[11px] tracking-widest uppercase">
+              <Button
+                onClick={handleImport}
+                disabled={summary.valid === 0}
+                className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+              >
                 Import {summary.valid} Rows
               </Button>
             </>
           )}
           {state === "importing" && (
-            <Button disabled className="rounded-sm font-mono text-[11px] tracking-widest uppercase">
+            <Button
+              disabled
+              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            >
               <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
               Importing...
             </Button>
           )}
           {state === "done" && (
-            <Button variant="outline" onClick={() => handleOpenChange(false)} className="rounded-sm font-mono text-[11px] tracking-widest uppercase">
+            <Button
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            >
               Close
             </Button>
           )}

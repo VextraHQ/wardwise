@@ -192,7 +192,7 @@ export function PersonalDetailsStep({
                         aria-label={`Select ${s}`}
                         onClick={() => setValue("sex", s)}
                         className={cn(
-                          "border-border bg-card hover:border-primary/50 flex h-12 cursor-pointer flex-row items-center justify-center gap-2 rounded-sm border-2 transition-all focus-visible:ring-primary focus-visible:ring-2 focus-visible:outline-none",
+                          "border-border bg-card hover:border-primary/50 focus-visible:ring-primary flex h-12 cursor-pointer flex-row items-center justify-center gap-2 rounded-sm border-2 transition-all focus-visible:ring-2 focus-visible:outline-none",
                           watchedSex === s &&
                             "border-primary bg-primary/10 ring-primary/20 ring-2 ring-offset-1",
                         )}

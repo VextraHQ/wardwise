@@ -165,7 +165,11 @@ export function SupportContent() {
           Can&apos;t find what you&apos;re looking for? Our support team is
           ready to assist.
         </p>
-        <Button asChild size="sm" className="rounded-sm font-mono text-[11px] tracking-widest uppercase">
+        <Button
+          asChild
+          size="sm"
+          className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+        >
           <Link href="/contact" className="gap-2">
             <HiMail className="size-4" />
             Contact Us

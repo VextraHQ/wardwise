@@ -8,6 +8,7 @@ import {
   HiOutlineTrash,
   HiDotsVertical,
   HiOutlineUpload,
+  HiOutlineMap,
 } from "react-icons/hi";
 import {
   useGeoLgas,
@@ -16,6 +17,7 @@ import {
   useDeleteLga,
 } from "@/hooks/use-geo";
 import type { GeoLga } from "@/types/geo";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -256,23 +258,29 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
               ))}
             </div>
           ) : !data || data.data.length === 0 ? (
-            <div className="py-12 text-center">
-              <p className="text-muted-foreground mb-1 font-medium">
-                {debouncedSearch
-                  ? "No LGAs match your search"
-                  : "No LGAs found for this state"}
-              </p>
-              <p className="text-muted-foreground text-sm">
-                {debouncedSearch
-                  ? "Try adjusting your search terms"
-                  : "Add an LGA using the button above"}
-              </p>
+            <div className="border-border flex flex-col items-center gap-3 rounded-sm border border-dashed py-12 text-center">
+              <HiOutlineMap className="text-muted-foreground h-10 w-10" />
+              <div>
+                <p className="text-foreground mb-1 font-medium">
+                  {debouncedSearch
+                    ? "No LGAs match your search"
+                    : "No LGAs found for this state"}
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  {debouncedSearch
+                    ? "Try adjusting your search terms"
+                    : "Add an LGA using the button above"}
+                </p>
+              </div>
             </div>
           ) : (
             <div className="overflow-x-auto rounded-sm border">
               <Table>
                 <TableHeader className="bg-muted/30 sticky top-0 z-10">
                   <TableRow>
+                    <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
+                      S/N
+                    </TableHead>
                     <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                       Name
                     </TableHead>
@@ -288,18 +296,28 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedLgas.map((lga) => (
+                  {sortedLgas.map((lga, idx) => (
                     <TableRow
                       key={lga.id}
-                      className="cursor-pointer"
+                      className={`cursor-pointer transition-colors ${
+                        lga._count.wards === 0
+                          ? "bg-orange-500/5 hover:bg-orange-500/10"
+                          : "hover:bg-muted/50"
+                      }`}
                       onClick={() => onDrillDown(lga.id, lga.name)}
                     >
+                      <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
+                        {(page - 1) * pageSize + idx + 1}
+                      </TableCell>
                       <TableCell className="font-medium">{lga.name}</TableCell>
                       <TableCell className="text-right font-mono tabular-nums">
                         {lga._count.wards === 0 ? (
-                          <span className="text-xs text-amber-600">
+                          <Badge
+                            variant="outline"
+                            className="rounded-sm border-orange-500/20 bg-orange-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-orange-600 uppercase"
+                          >
                             No wards
-                          </span>
+                          </Badge>
                         ) : (
                           lga._count.wards
                         )}

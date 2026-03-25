@@ -61,7 +61,8 @@ export function AdminDashboard() {
   const totalSupporters = useMemo(
     () =>
       candidates.reduce(
-        (runningTotal, candidate) => runningTotal + candidate.supporters,
+        (runningTotal, candidate) =>
+          runningTotal + (candidate.supporterCount ?? 0),
         0,
       ),
     [candidates],
@@ -135,11 +136,13 @@ export function AdminDashboard() {
       {error && (
         <Alert
           variant="destructive"
-          className="border-destructive/50 bg-destructive/10"
+          className="border-destructive/30 bg-destructive/10 rounded-sm shadow-none"
         >
           <HiExclamationCircle className="h-4 w-4" />
-          <AlertTitle>Failed to load candidate accounts</AlertTitle>
-          <AlertDescription>
+          <AlertTitle className="font-mono text-[11px] font-bold tracking-widest uppercase">
+            Failed to load candidate accounts
+          </AlertTitle>
+          <AlertDescription className="text-destructive/80 text-xs">
             {error instanceof Error
               ? error.message
               : "An unexpected error occurred while loading candidates."}
@@ -284,14 +287,24 @@ export function AdminDashboard() {
                 <CandidateCardSkeleton />
               </div>
             ) : latestCandidates.length === 0 ? (
-              <div className="border-border/60 rounded-sm border border-dashed py-10 text-center">
-                <HiOutlineUserGroup className="text-muted-foreground mx-auto mb-3 h-12 w-12" />
-                <p className="text-muted-foreground mb-1 font-medium">
-                  No candidates available yet
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  Candidate accounts will appear here once they are created.
-                </p>
+              <div className="border-border flex flex-col items-center gap-4 rounded-sm border border-dashed py-12 text-center">
+                <HiOutlineUserGroup className="text-muted-foreground h-10 w-10" />
+                <div className="space-y-1">
+                  <p className="font-medium">No candidates yet</p>
+                  <p className="text-muted-foreground text-sm">
+                    Add your first candidate account to get started.
+                  </p>
+                </div>
+                <Button
+                  asChild
+                  size="sm"
+                  className="rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
+                >
+                  <Link href="/admin/candidates/new">
+                    <HiOutlineUsers className="mr-1.5 h-4 w-4" />
+                    Create First Candidate
+                  </Link>
+                </Button>
               </div>
             ) : (
               <div className="space-y-3">
@@ -305,7 +318,7 @@ export function AdminDashboard() {
                         {candidate.name}
                       </h3>
                       <Badge
-                        variant="secondary"
+                        variant="outline"
                         className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
                       >
                         {candidate.party}
@@ -322,10 +335,10 @@ export function AdminDashboard() {
                       <span>
                         Added{" "}
                         {new Date(candidate.user.createdAt).toLocaleDateString(
-                          "en-US",
+                          "en-NG",
                           {
-                            month: "short",
                             day: "numeric",
+                            month: "short",
                             year: "numeric",
                           },
                         )}

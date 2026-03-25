@@ -24,7 +24,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
 } from "@/components/ui/sheet";
 import {
   Select,
@@ -132,7 +131,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="pl-9 rounded-sm"
+            className="rounded-sm pl-9"
           />
         </div>
         <Select
@@ -152,8 +151,13 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
             <SelectItem value="canvasser">Canvasser</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="outline" size="sm" onClick={handleExport} className="rounded-sm font-mono text-[11px] tracking-widest uppercase">
-          <IconDownload className="mr-1 h-4 w-4" />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExport}
+          className="h-9 rounded-sm px-4 font-mono text-[10px] font-bold tracking-widest uppercase shadow-sm"
+        >
+          <IconDownload className="mr-2 h-4 w-4" />
           Export CSV
         </Button>
       </div>
@@ -166,10 +170,8 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
           ))}
         </div>
       ) : submissions.length === 0 ? (
-        <div className="border-border/60 rounded-sm border border-dashed py-12 text-center">
-          <p className="text-muted-foreground">
-            No submissions found.
-          </p>
+        <div className="border-border rounded-sm border border-dashed py-12 text-center">
+          <p className="text-muted-foreground">No submissions found.</p>
         </div>
       ) : (
         <>
@@ -177,30 +179,54 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
             <Table>
               <TableHeader className="bg-muted/30 sticky top-0 z-10">
                 <TableRow>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase w-12 text-center">S/N</TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">Name</TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">Phone</TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase hidden 2xl:table-cell">
+                  <TableHead className="text-muted-foreground h-10 w-12 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
+                    S/N
+                  </TableHead>
+                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                    Name
+                  </TableHead>
+                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                    Phone
+                  </TableHead>
+                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase 2xl:table-cell">
                     APC/NIN
                   </TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase hidden 2xl:table-cell">VIN</TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase hidden md:table-cell">LGA</TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase hidden md:table-cell">Ward</TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase hidden xl:table-cell">
+                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase 2xl:table-cell">
+                    VIN
+                  </TableHead>
+                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
+                    LGA
+                  </TableHead>
+                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
+                    Ward
+                  </TableHead>
+                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase xl:table-cell">
                     Polling Unit
                   </TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">Role</TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">Status</TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase hidden lg:table-cell">Date</TableHead>
+                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                    Role
+                  </TableHead>
+                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                    Status
+                  </TableHead>
+                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase lg:table-cell">
+                    Date
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {submissions.map((s, idx) => (
-                  <TableRow
-                    key={s.id}
-                    className="hover:bg-muted/30 cursor-pointer"
-                    onClick={() => setSelected(s)}
-                  >
+                   <TableRow
+                     key={s.id}
+                     className={`cursor-pointer transition-colors ${
+                       s.isFlagged
+                         ? "bg-destructive/5 hover:bg-destructive/10"
+                         : s.isVerified
+                           ? "bg-emerald-500/5 hover:bg-emerald-500/10"
+                           : "hover:bg-muted/30"
+                     }`}
+                     onClick={() => setSelected(s)}
+                   >
                     <TableCell className="text-muted-foreground text-center text-xs font-medium">
                       {(page - 1) * pageSize + idx + 1}
                     </TableCell>
@@ -226,31 +252,52 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                       </code>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase">
+                      <Badge
+                        variant="outline"
+                        className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                      >
                         {roleLabels[s.role] || s.role}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
                         {s.isVerified && (
-                          <Badge variant="default" className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase">
+                          <Badge
+                            variant="outline"
+                            className="bg-primary/10 text-primary border-primary/30 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                          >
                             Verified
                           </Badge>
                         )}
                         {s.isFlagged && (
-                          <Badge variant="destructive" className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase">
+                          <Badge
+                            variant="outline"
+                            className="bg-destructive/10 text-destructive border-destructive/30 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                          >
                             Flagged
                           </Badge>
                         )}
                         {!s.isVerified && !s.isFlagged && (
-                          <Badge variant="secondary" className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase">
+                          <Badge
+                            variant="outline"
+                            className="rounded-sm border-orange-500/20 bg-orange-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-orange-600 uppercase"
+                          >
                             Pending
                           </Badge>
                         )}
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground hidden text-xs lg:table-cell">
-                      {new Date(s.createdAt).toLocaleDateString()}
+                      {new Date(s.createdAt).toLocaleString(
+                        "en-NG",
+                        {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        },
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -279,92 +326,133 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
         open={!!selected}
         onOpenChange={(open) => !open && setSelected(null)}
       >
-        <SheetContent className="overflow-y-auto sm:max-w-md rounded-sm">
-          <SheetHeader>
-            <SheetTitle>{selected?.fullName}</SheetTitle>
-            <SheetDescription>{selected?.phone}</SheetDescription>
-          </SheetHeader>
-          {selected && (
-            <div className="space-y-5 px-4 pb-6">
-              <Section label="Personal">
-                <Field label="Email" value={selected.email || "—"} />
-                <Field label="Sex" value={selected.sex} />
-                <Field label="Age" value={String(selected.age)} />
-                <Field label="Occupation" value={selected.occupation} />
-                <Field label="Marital Status" value={selected.maritalStatus} />
-              </Section>
-              <Section label="Location">
-                <Field label="LGA" value={selected.lgaName} />
-                <Field label="Ward" value={selected.wardName} />
-                <Field label="Polling Unit" value={formatPU(selected)} />
-              </Section>
-              <Section label="Verification">
-                <Field label="APC/NIN" value={selected.apcRegNumber || "—"} />
-                <Field label="VIN" value={selected.voterIdNumber || "—"} />
-              </Section>
-              <Section label="Role & Canvasser">
-                <Field
-                  label="Role"
-                  value={roleLabels[selected.role] || selected.role}
-                />
-                <Field
-                  label="Canvasser"
-                  value={selected.canvasserName || "—"}
-                />
-                <Field
-                  label="Canvasser Phone"
-                  value={selected.canvasserPhone || "—"}
-                />
-              </Section>
-              {(selected.customAnswer1 || selected.customAnswer2) && (
-                <Section label="Custom Answers">
-                  {selected.customAnswer1 && (
-                    <Field label="Q1" value={selected.customAnswer1} />
-                  )}
-                  {selected.customAnswer2 && (
-                    <Field label="Q2" value={selected.customAnswer2} />
-                  )}
-                </Section>
-              )}
-              <Section label="Admin Notes">
-                <p className="text-sm">{selected.adminNotes || "No notes."}</p>
-              </Section>
-              <div className="border-border/40 mx-4 mt-2 flex flex-wrap gap-2 border-t pt-4">
-                <Button
-                  variant={selected.isFlagged ? "outline" : "destructive"}
-                  size="sm"
-                  className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
-                  onClick={() => handleToggleFlag(selected)}
-                >
-                  {selected.isFlagged ? (
-                    <IconFlagOff className="mr-1 h-4 w-4" />
-                  ) : (
-                    <IconFlag className="mr-1 h-4 w-4" />
-                  )}
-                  {selected.isFlagged ? "Unflag" : "Flag"}
-                </Button>
-                <Button
-                  variant={selected.isVerified ? "outline" : "default"}
-                  size="sm"
-                  className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
-                  onClick={() => handleVerify(selected)}
-                >
-                  <IconShieldCheck className="mr-1 h-4 w-4" />
-                  {selected.isVerified ? "Unverify" : "Verify"}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-destructive hover:bg-destructive hover:text-destructive-foreground ml-auto rounded-sm font-mono text-[11px] tracking-widest uppercase"
-                  onClick={() => handleDelete(selected)}
-                  disabled={deleteMutation.isPending}
-                >
-                  <IconTrash className="mr-1 h-4 w-4" />
-                  Delete
-                </Button>
+        <SheetContent className="flex flex-col gap-0 p-0 sm:max-w-md">
+          <div className="bg-muted/10 border-b">
+            <SheetHeader className="space-y-1">
+              <SheetTitle className="text-lg font-extrabold tracking-tight sm:text-xl">
+                {selected?.fullName}
+              </SheetTitle>
+              <div className="flex items-center gap-2">
+                <code className="text-muted-foreground/80 bg-muted/60 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold">
+                  {selected?.phone}
+                </code>
+                {selected?.role && (
+                  <Badge
+                    variant="outline"
+                    className="bg-primary/5 border-primary/20 text-primary rounded-sm px-1.5 py-0 font-mono text-[9px] font-bold tracking-widest uppercase"
+                  >
+                    {roleLabels[selected.role] || selected.role}
+                  </Badge>
+                )}
               </div>
+            </SheetHeader>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            {selected && (
+              <div className="space-y-6 p-5 pb-24">
+                <Section label="Personal Identity">
+                  <Field label="Email" value={selected.email || "—"} />
+                  <Field label="Sex" value={selected.sex} />
+                  <Field label="Age" value={String(selected.age)} />
+                  <Field label="Occupation" value={selected.occupation} />
+                  <Field
+                    label="Marital Status"
+                    value={selected.maritalStatus}
+                  />
+                </Section>
+
+                <Section label="Location Data">
+                  <Field label="LGA" value={selected.lgaName} />
+                  <Field label="Ward" value={selected.wardName} />
+                  <Field label="Polling Unit" value={formatPU(selected)} mono />
+                </Section>
+
+                <Section label="Verification Info">
+                  <Field
+                    label="APC/NIN Num."
+                    value={selected.apcRegNumber || "—"}
+                    mono
+                  />
+                  <Field
+                    label="Voter's ID"
+                    value={selected.voterIdNumber || "—"}
+                    mono
+                  />
+                </Section>
+
+                <Section label="Source & Context">
+                  <Field
+                    label="Assigned Role"
+                    value={roleLabels[selected.role] || selected.role}
+                  />
+                  <Field
+                    label="Agent/Canv."
+                    value={selected.canvasserName || "—"}
+                  />
+                  <Field
+                    label="Agent Contact"
+                    value={selected.canvasserPhone || "—"}
+                    mono
+                  />
+                </Section>
+
+                {(selected.customAnswer1 || selected.customAnswer2) && (
+                  <Section label="Submission Specifics">
+                    {selected.customAnswer1 && (
+                      <Field label="Q1" value={selected.customAnswer1} />
+                    )}
+                    {selected.customAnswer2 && (
+                      <Field label="Q2" value={selected.customAnswer2} />
+                    )}
+                  </Section>
+                )}
+
+                <Section label="Admin Notes">
+                  <p className="text-foreground border-primary/20 border-l-2 pl-4 text-[13px] leading-relaxed font-medium italic">
+                    {selected.adminNotes || "No administrative notes provided."}
+                  </p>
+                </Section>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-background absolute right-0 bottom-0 left-0 border-t p-5 shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={selected?.isFlagged ? "outline" : "destructive"}
+                size="sm"
+                className="h-8 rounded-sm px-3 font-mono text-[9px] font-bold tracking-widest uppercase transition-all"
+                onClick={() => selected && handleToggleFlag(selected)}
+              >
+                {selected?.isFlagged ? (
+                  <IconFlagOff className="mr-2 h-3.5 w-3.5" />
+                ) : (
+                  <IconFlag className="mr-2 h-3.5 w-3.5" />
+                )}
+                {selected?.isFlagged ? "Unflag" : "Flag"}
+              </Button>
+              <Button
+                variant={selected?.isVerified ? "outline" : "default"}
+                size="sm"
+                className="h-8 rounded-sm px-3 font-mono text-[9px] font-bold tracking-widest uppercase transition-all"
+                onClick={() => selected && handleVerify(selected)}
+              >
+                <IconShieldCheck className="mr-2 h-3.5 w-3.5" />
+                {selected?.isVerified ? "Unverify" : "Verify"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto h-8 rounded-sm border-red-500/20 px-3 font-mono text-[9px] font-bold tracking-widest text-red-600 uppercase transition-all hover:bg-red-600 hover:text-white"
+                onClick={() => selected && handleDelete(selected)}
+                disabled={deleteMutation.isPending}
+              >
+                <IconTrash className="mr-1.5 h-3.5 w-3.5" />
+                Delete
+              </Button>
             </div>
-          )}
+          </div>
         </SheetContent>
       </Sheet>
     </div>
@@ -379,20 +467,35 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-2">
-      <h4 className="text-muted-foreground border-border/40 border-b pb-2 text-xs font-semibold tracking-wider uppercase">
-        {label}
-      </h4>
-      <div className="bg-muted/20 space-y-2 rounded-sm p-3">{children}</div>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <h4 className="text-foreground font-mono text-[10px] font-bold tracking-widest whitespace-nowrap uppercase">
+          {label}
+        </h4>
+        <div className="bg-border/70 h-px flex-1" />
+      </div>
+      <div className="grid gap-2.5">{children}</div>
     </div>
   );
 }
 
-function Field({ label, value }: { label: string; value: string }) {
+function Field({
+  label,
+  value,
+  mono,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
   return (
-    <div className="flex justify-between gap-4 text-sm">
-      <span className="text-muted-foreground shrink-0">{label}</span>
-      <span className="truncate text-right font-medium capitalize">
+    <div className="flex items-baseline justify-between gap-4">
+      <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+        {label}
+      </span>
+      <span
+        className={`text-foreground text-right text-sm font-bold ${mono ? "font-mono text-xs tabular-nums" : ""}`}
+      >
         {value}
       </span>
     </div>

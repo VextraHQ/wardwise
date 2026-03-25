@@ -76,7 +76,10 @@ export function CollectSection() {
             transition={{ delay: 0.2 }}
             className="text-muted-foreground mx-auto mt-4 max-w-2xl text-base leading-relaxed font-medium sm:text-lg"
           >
-            While your Dashboard handles strategy, the attached WardWise Collect Module turns supporter registration into a verified, trackable pipeline. Share a link, scan a QR code — watch your command center populate in real-time.
+            While your Dashboard handles strategy, the attached WardWise Collect
+            Module turns supporter registration into a verified, trackable
+            pipeline. Share a link, scan a QR code — watch your command center
+            populate in real-time.
           </motion.p>
         </div>
 
@@ -128,7 +131,7 @@ export function CollectSection() {
           <div className="flex flex-col items-center gap-8 md:flex-row">
             {/* Left: Simulated form steps */}
             <div className="flex-1 space-y-4">
-              <div className="text-muted-foreground/30 font-mono text-[8px] font-black tracking-widest">
+              <div className="text-muted-foreground/60 font-mono text-[8px] font-black tracking-widest">
                 FORM_FLOW_PREVIEW
               </div>
               <div className="space-y-2">

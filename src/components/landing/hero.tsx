@@ -179,40 +179,40 @@ export function HeroSection() {
           >
             <div className="relative mx-auto w-full max-w-xl">
               {/* The Command Dashboard Hub - "Silver Glass" Aesthetic */}
-              <div className="relative overflow-hidden border border-border/60 bg-card shadow-[0_48px_96px_-12px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+              <div className="border-border/60 bg-card relative overflow-hidden border shadow-[0_48px_96px_-12px_rgba(0,0,0,0.12)] backdrop-blur-xl">
                 {/* Minimal Architectural Frame */}
                 <div className="border-primary absolute top-0 left-0 h-6 w-6 border-t-2 border-l-2" />
                 <div className="border-primary absolute top-0 right-0 h-6 w-6 border-t-2 border-r-2" />
 
                 {/* Header: Project Context */}
-                <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-6 py-3.5">
+                <div className="border-border/40 bg-muted/30 flex items-center justify-between border-b px-6 py-3.5">
                   <div className="flex items-center gap-4">
                     <div>
-                      <h3 className="text-sm font-black tracking-tight text-foreground uppercase">
+                      <h3 className="text-foreground text-sm font-black tracking-tight uppercase">
                         State Command Hub
                       </h3>
-                      <p className="text-[10px] font-bold text-muted-foreground">
+                      <p className="text-muted-foreground text-[10px] font-bold">
                         Node: Adamawa Central • Northern Geo-Zone
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
-                    <span className="text-[10px] font-bold text-muted-foreground">
+                    <span className="text-muted-foreground text-[10px] font-bold">
                       LIVE
                     </span>
                   </div>
                 </div>
 
-                <div className="divide-y divide-border/20">
+                <div className="divide-border/20 divide-y">
                   {/* Section 1: Progress Overview */}
                   <div className="space-y-3 p-5">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <p className="text-[10px] font-black tracking-widest text-muted-foreground/70 uppercase">
+                        <p className="text-muted-foreground/70 text-[10px] font-black tracking-widest uppercase">
                           Registration Progress
                         </p>
-                        <p className="text-4xl font-black tracking-tighter text-foreground">
+                        <p className="text-foreground text-4xl font-black tracking-tighter">
                           84.2%
                         </p>
                       </div>
@@ -223,13 +223,13 @@ export function HeroSection() {
                             +12% this week
                           </span>
                         </div>
-                        <p className="text-[10px] font-bold text-muted-foreground/70 uppercase">
+                        <p className="text-muted-foreground/70 text-[10px] font-bold uppercase">
                           Target: Oct 2027
                         </p>
                       </div>
                     </div>
                     {/* Premium Progress Bar */}
-                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted p-0.5">
+                    <div className="bg-muted h-2.5 w-full overflow-hidden rounded-full p-0.5">
                       <motion.div
                         initial={{ width: 0 }}
                         whileInView={{ width: "84.2%" }}
@@ -243,8 +243,8 @@ export function HeroSection() {
 
                   {/* Section 2: Ward Coverage Grid & Meta */}
                   <div className="grid grid-cols-12">
-                    <div className="col-span-12 border-b border-border/40 p-5 md:col-span-7 md:border-r md:border-b-0">
-                      <p className="mb-2 text-[10px] font-black tracking-widest text-muted-foreground/70 uppercase">
+                    <div className="border-border/40 col-span-12 border-b p-5 md:col-span-7 md:border-r md:border-b-0">
+                      <p className="text-muted-foreground/70 mb-2 text-[10px] font-black tracking-widest uppercase">
                         Field Coverage Index
                       </p>
                       {/* Detailed Coverage Matrix */}
@@ -263,7 +263,7 @@ export function HeroSection() {
                           />
                         ))}
                       </div>
-                      <div className="mt-4 flex items-center justify-between text-[9px] font-bold text-muted-foreground/70 uppercase">
+                      <div className="text-muted-foreground/70 mt-4 flex items-center justify-between text-[9px] font-bold uppercase">
                         <span>LGA Core</span>
                         <span>Ward Boundary</span>
                       </div>
@@ -282,10 +282,10 @@ export function HeroSection() {
                         },
                       ].map((stat, i) => (
                         <div key={i} className="space-y-0.5">
-                          <p className="text-[9px] font-black text-muted-foreground/70 uppercase">
+                          <p className="text-muted-foreground/70 text-[9px] font-black uppercase">
                             {stat.label}
                           </p>
-                          <p className="text-2xl font-black tracking-tighter text-foreground">
+                          <p className="text-foreground text-2xl font-black tracking-tighter">
                             {stat.val}
                           </p>
                           <p className="text-[9px] font-bold text-emerald-600">
@@ -298,7 +298,7 @@ export function HeroSection() {
 
                   {/* Section 3: Live Field Activity Feed */}
                   <div className="p-5">
-                    <p className="mb-2 text-[10px] font-black tracking-widest text-muted-foreground/70 uppercase">
+                    <p className="text-muted-foreground/70 mb-2 text-[10px] font-black tracking-widest uppercase">
                       Latest Field Activity
                     </p>
                     <div className="space-y-3">
@@ -324,7 +324,7 @@ export function HeroSection() {
                       ].map((log, i) => (
                         <div
                           key={i}
-                          className="flex items-center justify-between border-b border-border/20 py-1.5 last:border-0"
+                          className="border-border/20 flex items-center justify-between border-b py-1.5 last:border-0"
                         >
                           <div className="flex items-center gap-3">
                             <div
@@ -335,14 +335,14 @@ export function HeroSection() {
                                   : "bg-orange-500",
                               )}
                             />
-                            <span className="text-xs font-black text-foreground">
+                            <span className="text-foreground text-xs font-black">
                               {log.ward}
                             </span>
-                            <span className="text-xs font-medium text-muted-foreground">
+                            <span className="text-muted-foreground text-xs font-medium">
                               {log.act}
                             </span>
                           </div>
-                          <span className="text-[10px] font-bold text-muted-foreground/70 uppercase">
+                          <span className="text-muted-foreground/70 text-[10px] font-bold uppercase">
                             {log.time}
                           </span>
                         </div>
@@ -352,7 +352,7 @@ export function HeroSection() {
                 </div>
 
                 {/* Footer: User Context */}
-                <div className="flex items-center justify-between border-t border-border/40 bg-muted/30 px-6 py-3">
+                <div className="border-border/40 bg-muted/30 flex items-center justify-between border-t px-6 py-3">
                   <div className="flex items-center gap-3">
                     <div className="flex -space-x-2">
                       {[
@@ -379,37 +379,37 @@ export function HeroSection() {
                       ].map((agent, i) => (
                         <Avatar
                           key={i}
-                          className="size-8 border-2 border-background shadow-sm"
+                          className="border-background size-8 border-2 shadow-sm"
                         >
                           <AvatarImage src={agent.src} alt={agent.alt} />
-                          <AvatarFallback className="bg-muted text-[10px] font-bold text-muted-foreground">
+                          <AvatarFallback className="bg-muted text-muted-foreground text-[10px] font-bold">
                             {agent.initials}
                           </AvatarFallback>
                         </Avatar>
                       ))}
                       {/* Additional agents indicator */}
-                      <Avatar className="size-8 border-2 border-background shadow-sm">
+                      <Avatar className="border-background size-8 border-2 shadow-sm">
                         <AvatarFallback className="bg-primary text-[9px] font-bold text-white">
                           99+
                         </AvatarFallback>
                       </Avatar>
                     </div>
-                    <p className="text-[11px] font-bold text-muted-foreground">
+                    <p className="text-muted-foreground text-[11px] font-bold">
                       Active Field Agents:{" "}
                       <span className="text-primary font-black">128</span>
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="bg-primary size-1.5 rounded-full" />
-                    <span className="text-[10px] font-black tracking-widest text-muted-foreground uppercase">
+                    <span className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
                       Sys_Nominal
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="absolute -top-8 -left-8 -z-10 h-32 w-32 rounded-full border border-border/40 opacity-60" />
-              <div className="absolute -right-12 -bottom-12 -z-10 h-48 w-48 rounded-full border border-border/40 opacity-60" />
+              <div className="border-border/40 absolute -top-8 -left-8 -z-10 h-32 w-32 rounded-full border opacity-60" />
+              <div className="border-border/40 absolute -right-12 -bottom-12 -z-10 h-48 w-48 rounded-full border opacity-60" />
             </div>
           </motion.div>
         </div>

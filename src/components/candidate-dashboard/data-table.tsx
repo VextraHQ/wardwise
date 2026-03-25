@@ -406,27 +406,27 @@ export function DataTable({
             <SelectItem value="reports">Coverage Reports</SelectItem>
           </SelectContent>
         </Select>
-        <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
+        <TabsList className="bg-muted **:data-[slot=badge]:bg-muted-foreground/30 hidden rounded-sm p-1 **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
           <TabsTrigger
-            className="font-mono text-[10px] font-bold tracking-widest uppercase"
+            className="rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
             value="coverage"
           >
             Ward Coverage
           </TabsTrigger>
           <TabsTrigger
-            className="font-mono text-[10px] font-bold tracking-widest uppercase"
+            className="rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
             value="analytics"
           >
             Analytics <Badge variant="secondary">3</Badge>
           </TabsTrigger>
           <TabsTrigger
-            className="font-mono text-[10px] font-bold tracking-widest uppercase"
+            className="rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
             value="targets"
           >
             Targets <Badge variant="secondary">2</Badge>
           </TabsTrigger>
           <TabsTrigger
-            className="font-mono text-[10px] font-bold tracking-widest uppercase"
+            className="rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
             value="reports"
           >
             Reports
@@ -552,7 +552,10 @@ export function DataTable({
           </div>
           <div className="flex w-full items-center gap-8 lg:w-fit">
             <div className="hidden items-center gap-2 lg:flex">
-              <Label htmlFor="rows-per-page" className="font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground">
+              <Label
+                htmlFor="rows-per-page"
+                className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase"
+              >
                 Rows per page
               </Label>
               <Select
@@ -561,7 +564,11 @@ export function DataTable({
                   table.setPageSize(Number(value));
                 }}
               >
-                <SelectTrigger size="sm" className="w-20 rounded-sm" id="rows-per-page">
+                <SelectTrigger
+                  size="sm"
+                  className="w-20 rounded-sm"
+                  id="rows-per-page"
+                >
                   <SelectValue
                     placeholder={table.getState().pagination.pageSize}
                   />
@@ -704,7 +711,9 @@ function WardCellViewer({ item }: { item: z.infer<typeof schema> }) {
             <>
               <div className="space-y-4">
                 <div>
-                  <h3 className="mb-2 font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground">Supporter Trend</h3>
+                  <h3 className="text-muted-foreground mb-2 font-mono text-[10px] font-bold tracking-widest uppercase">
+                    Supporter Trend
+                  </h3>
                   <ChartContainer config={chartConfig}>
                     <AreaChart
                       accessibilityLayer
@@ -812,15 +821,21 @@ function WardCellViewer({ item }: { item: z.infer<typeof schema> }) {
                 Target: 20 supporters per ward
               </p>
             </div>
-            <div className="rounded-sm border border-border/60 p-4">
-              <h4 className="mb-2 font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground">Coverage Summary</h4>
+            <div className="border-border/60 rounded-sm border p-4">
+              <h4 className="text-muted-foreground mb-2 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Coverage Summary
+              </h4>
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div>
-                  <p className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">Status</p>
+                  <p className="text-muted-foreground font-mono text-[10px] tracking-widest uppercase">
+                    Status
+                  </p>
                   <p className="mt-1 font-medium">{item.reviewer}</p>
                 </div>
                 <div>
-                  <p className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">Priority</p>
+                  <p className="text-muted-foreground font-mono text-[10px] tracking-widest uppercase">
+                    Priority
+                  </p>
                   <p className="mt-1 font-medium">{item.limit}</p>
                 </div>
               </div>
@@ -844,7 +859,12 @@ function WardCellViewer({ item }: { item: z.infer<typeof schema> }) {
             Save Changes
           </Button>
           <DrawerClose asChild>
-            <Button variant="outline" className="rounded-sm font-mono text-[11px] tracking-widest uppercase">Close</Button>
+            <Button
+              variant="outline"
+              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            >
+              Close
+            </Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

@@ -10,7 +10,6 @@ import Link from "next/link";
 
 import { useCreateCampaign } from "@/hooks/use-collect";
 import { useGeoLgas } from "@/hooks/use-geo";
-import { stateNameToCode } from "@/lib/data/state-lga-locations";
 import {
   createCampaignSchema,
   type CreateCampaignData,
@@ -34,18 +33,21 @@ type Candidate = {
   party: string;
   position: string;
   constituency: string;
-  state: string;
+  stateCode: string;
   lga: string;
 };
 
-const STEP_TITLES = [
-  "Select Candidate",
-  "LGA Coverage",
-  "Questions & Review",
-];
+const STEP_TITLES = ["Select Candidate", "LGA Coverage", "Questions & Review"];
 
 const stepFieldMap: Record<number, (keyof CreateCampaignData)[]> = {
-  0: ["candidateId", "candidateName", "slug", "party", "constituency", "constituencyType"],
+  0: [
+    "candidateId",
+    "candidateName",
+    "slug",
+    "party",
+    "constituency",
+    "constituencyType",
+  ],
   1: ["enabledLgaIds"],
   2: [],
 };
@@ -111,11 +113,8 @@ export function CampaignWizard() {
     staleTime: 1000 * 60 * 5,
   });
 
-  // Derive stateCode from candidate's state name
-  const stateCode = useMemo(
-    () => stateNameToCode(candidateState),
-    [candidateState],
-  );
+  // candidateState already holds the stateCode directly
+  const stateCode = candidateState || null;
 
   // Fetch LGAs filtered by state
   const { data: lgaResponse, isLoading: lgasLoading } = useGeoLgas(stateCode, {
@@ -179,7 +178,7 @@ export function CampaignWizard() {
       form.setValue("constituencyType", derivedType, { shouldValidate: true });
     }
 
-    setCandidateState(candidate.state || "");
+    setCandidateState(candidate.stateCode || "");
   }
 
   async function validateAndNext() {
@@ -260,21 +259,26 @@ export function CampaignWizard() {
   return (
     <div className="mx-auto w-full max-w-xl space-y-6 pb-8">
       {/* Breadcrumb */}
-      <div className="bg-muted/40 border-border/40 rounded-sm border px-4 py-2.5">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/admin/collect">Campaigns</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>New Campaign</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              asChild
+              className="text-foreground/60 hover:text-foreground font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors"
+            >
+              <Link href="/admin/collect">Campaigns</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator className="text-muted-foreground/30">
+            /
+          </BreadcrumbSeparator>
+          <BreadcrumbItem>
+            <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
+              New Campaign
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       {/* Step Progress */}
       <StepProgress

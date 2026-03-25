@@ -1,4 +1,4 @@
-import { CandidateManagement } from "@/components/admin/candidate-management";
+import { CandidateManagement } from "@/components/admin/candidates/candidate-management";
 import { createAdminMetadata } from "@/lib/metadata";
 
 export const metadata = createAdminMetadata({

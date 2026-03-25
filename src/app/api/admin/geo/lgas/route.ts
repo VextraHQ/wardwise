@@ -22,7 +22,10 @@ export async function GET(request: NextRequest) {
     }
 
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") || "20", 10)));
+    const pageSize = Math.min(
+      100,
+      Math.max(1, parseInt(searchParams.get("pageSize") || "20", 10)),
+    );
     const search = searchParams.get("search") || null;
     const offset = (page - 1) * pageSize;
 

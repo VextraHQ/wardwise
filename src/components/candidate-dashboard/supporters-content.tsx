@@ -162,7 +162,7 @@ export function SupportersContent() {
         </CardHeader>
         <CardContent>
           {supporters.length === 0 ? (
-            <div className="border-border/60 flex flex-col items-center justify-center rounded-sm border border-dashed py-12 text-center">
+            <div className="border-border flex flex-col items-center justify-center rounded-sm border border-dashed py-12 text-center">
               <IconUsers className="text-muted-foreground mb-4 size-12" />
               <h3 className="mb-2 text-sm font-semibold tracking-tight">
                 {search ? "No supporters found" : "No supporters yet"}
@@ -177,82 +177,82 @@ export function SupportersContent() {
             <>
               <div className="border-border/60 overflow-hidden rounded-sm border">
                 <Table>
-                <TableHeader className="bg-muted/30 border-border/60 sticky top-0 z-10 border-b">
-                  <TableRow>
-                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                      Name
-                    </TableHead>
-                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                      Location
-                    </TableHead>
-                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                      Ward
-                    </TableHead>
-                    {(CURRENT_TIER === "standard" ||
-                      CURRENT_TIER === "premium") && (
-                      <>
-                        <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                          Phone
-                        </TableHead>
-                        <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                          Email
-                        </TableHead>
-                      </>
-                    )}
-
-                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                      Registered
-                    </TableHead>
-                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                      Status
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {supporters.map((supporter) => (
-                    <TableRow key={supporter.id}>
-                      <TableCell className="font-medium">
-                        {supporter.firstName} {supporter.middleName || ""}{" "}
-                        {supporter.lastName}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="text-sm">{supporter.lga}</span>
-                          <span className="text-muted-foreground text-xs">
-                            {supporter.state}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{supporter.ward}</TableCell>
+                  <TableHeader className="bg-muted/30 border-border/60 sticky top-0 z-10 border-b">
+                    <TableRow>
+                      <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                        Name
+                      </TableHead>
+                      <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                        Location
+                      </TableHead>
+                      <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                        Ward
+                      </TableHead>
                       {(CURRENT_TIER === "standard" ||
                         CURRENT_TIER === "premium") && (
                         <>
-                          <TableCell className="text-sm">
-                            {supporter.phoneNumber || "\u2014"}
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {supporter.email || "\u2014"}
-                          </TableCell>
+                          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                            Phone
+                          </TableHead>
+                          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                            Email
+                          </TableHead>
                         </>
                       )}
 
-                      <TableCell>
-                        {new Date(
-                          supporter.registrationDate,
-                        ).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-                        >
-                          Registered
-                        </Badge>
-                      </TableCell>
+                      <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                        Registered
+                      </TableHead>
+                      <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                        Status
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {supporters.map((supporter) => (
+                      <TableRow key={supporter.id}>
+                        <TableCell className="font-medium">
+                          {supporter.firstName} {supporter.middleName || ""}{" "}
+                          {supporter.lastName}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="text-sm">{supporter.lga}</span>
+                            <span className="text-muted-foreground text-xs">
+                              {supporter.state}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{supporter.ward}</TableCell>
+                        {(CURRENT_TIER === "standard" ||
+                          CURRENT_TIER === "premium") && (
+                          <>
+                            <TableCell className="text-sm">
+                              {supporter.phoneNumber || "\u2014"}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {supporter.email || "\u2014"}
+                            </TableCell>
+                          </>
+                        )}
+
+                        <TableCell>
+                          {new Date(
+                            supporter.registrationDate,
+                          ).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                          >
+                            Registered
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
 
               {totalPages > 1 && (
@@ -263,7 +263,7 @@ export function SupportersContent() {
                   </div>
                   <div className="flex w-full items-center gap-8 lg:w-fit">
                     <div className="hidden items-center gap-2 lg:flex">
-                      <Label className="font-mono text-[10px] font-bold tracking-widest uppercase text-muted-foreground">
+                      <Label className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
                         Rows per page
                       </Label>
                       <Select
@@ -312,7 +312,9 @@ export function SupportersContent() {
                         variant="outline"
                         className="size-8 rounded-sm"
                         size="icon"
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        onClick={() =>
+                          setPage((p) => Math.min(totalPages, p + 1))
+                        }
                         disabled={page === totalPages}
                       >
                         <span className="sr-only">Go to next page</span>

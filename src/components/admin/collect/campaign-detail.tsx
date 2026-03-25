@@ -25,21 +25,11 @@ import { CampaignSubmissions } from "./campaign-submissions";
 import { CampaignCanvassers } from "./campaign-canvassers";
 import { CampaignSettings } from "./campaign-settings";
 
-const STATUS_VARIANT: Record<
-  string,
-  "secondary" | "default" | "outline" | "destructive"
-> = {
-  draft: "secondary",
-  active: "default",
-  paused: "outline",
-  closed: "destructive",
-};
-
-const STATUS_DOT: Record<string, string> = {
-  draft: "bg-muted-foreground",
-  active: "bg-emerald-500",
-  paused: "bg-orange-500",
-  closed: "bg-destructive",
+const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
+  draft: "bg-muted text-muted-foreground border-border/60",
+  active: "bg-primary/10 text-primary border-primary/30",
+  paused: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  closed: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
 function capitalize(s: string) {
@@ -100,67 +90,77 @@ export function CampaignDetail({
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      {/* Header */}
-      <div className="space-y-4">
-        <div className="bg-muted/40 border-border/40 rounded-sm border px-4 py-2.5">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/admin/collect">Campaigns</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{campaign.candidateName}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
+      {/* Header Zone */}
+      <header className="flex flex-col gap-2">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                asChild
+                className="text-foreground/60 hover:text-foreground font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors"
+              >
+                <Link href="/admin/collect">Campaigns</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="text-muted-foreground/30">
+              /
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
+                {campaign.candidateName}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0 space-y-1">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0 space-y-3">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
+              <h1 className="text-foreground text-2xl font-extrabold tracking-tighter sm:text-4xl">
                 {campaign.candidateName}
               </h1>
+              <Badge
+                variant="outline"
+                className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${CAMPAIGN_STATUS_STYLES[campaign.status] ?? ""}`}
+              >
+                {capitalize(campaign.status)}
+              </Badge>
+            </div>
+
+            <div className="text-muted-foreground/70 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[10px] font-bold tracking-widest uppercase">
               <div className="flex items-center gap-2">
-                <Badge
-                  variant={STATUS_VARIANT[campaign.status] ?? "secondary"}
-                  className="gap-1.5 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-                >
-                  <span
-                    className={`inline-block h-1.5 w-1.5 rounded-full ${STATUS_DOT[campaign.status] ?? "bg-muted-foreground"}`}
-                  />
-                  {capitalize(campaign.status)}
-                </Badge>
-                <span className="text-muted-foreground text-sm font-medium">
-                  {campaign.party}
-                </span>
+                <span className="bg-primary/40 size-1.5 rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
+                <span>{campaign.party}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="bg-border size-1.5 rounded-full" />
+                <span>{campaign.constituency}</span>
               </div>
             </div>
-            <p className="text-muted-foreground text-sm">
-              {campaign.constituency}
-            </p>
           </div>
 
           <Button
             variant="outline"
             size="sm"
             onClick={copyPublicLink}
-            className="shrink-0 self-start rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            className="hover:bg-muted shrink-0 rounded-sm font-mono text-[10px] tracking-widest uppercase shadow-sm transition-all"
           >
-            <IconCopy className="mr-1.5 h-4 w-4" />
+            <IconCopy className="mr-2 h-3.5 w-3.5" />
             Copy Link
           </Button>
         </div>
-      </div>
+        <div className="from-border/80 via-border/40 h-px w-full bg-linear-to-r to-transparent" />
+      </header>
 
       {/* Tabs */}
       <Tabs value={currentTab} onValueChange={handleTabChange}>
-        <TabsList>
+        <TabsList className="bg-muted rounded-sm p-1">
           {TABS.map((tab) => (
-            <TabsTrigger key={tab} value={tab} className="font-mono text-[10px] font-bold tracking-widest uppercase">
+            <TabsTrigger
+              key={tab}
+              value={tab}
+              className="rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
+            >
               {tab}
             </TabsTrigger>
           ))}

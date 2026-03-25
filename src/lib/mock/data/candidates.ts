@@ -1,6 +1,6 @@
 // Mock Candidate Data - DEMO ONLY
 //
-// NOTE: The `supporters` field in this array is hardcoded for backward compatibility.
+// NOTE: The `supporterCount` field in this array is hardcoded for demo/mock purposes.
 // For accurate, real-time supporter counts, use:
 // - getCandidateByIdWithSupporters() from @/lib/helpers/candidate-helpers
 // - getCandidatesWithSupporters() from @/lib/helpers/candidate-helpers
@@ -19,12 +19,12 @@ export const candidates: Candidate[] = [
     party: "APC",
     position: "President",
     isNational: true,
-    state: null,
+    stateCode: null,
     lga: null,
     constituency: "Federal Republic of Nigeria",
     description:
       "Former Lagos State Governor with extensive experience in governance and nation-building.",
-    supporters: 5420,
+    supporterCount: 5420,
     surveyId: "survey-president-apc",
     tagline: "Renewed Hope for Nigeria",
     vision:
@@ -32,6 +32,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-10T08:00:00Z",
     updatedAt: "2025-10-10T08:00:00Z",
     email: "bola.tinubu@wardwise.ng",
+    phone: null,
+    title: null,
+    onboardingStatus: "active",
   },
   {
     id: "cand-president-pdp",
@@ -39,12 +42,12 @@ export const candidates: Candidate[] = [
     party: "PDP",
     position: "President",
     isNational: true,
-    state: null,
+    stateCode: null,
     lga: null,
     constituency: "Federal Republic of Nigeria",
     description:
       "Former Vice President and business mogul committed to economic restructuring and job creation.",
-    supporters: 4980,
+    supporterCount: 4980,
     surveyId: "survey-president-pdp",
     tagline: "Let's Get Nigeria Working Again",
     vision:
@@ -52,6 +55,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-10T08:00:00Z",
     updatedAt: "2025-10-10T08:00:00Z",
     email: "atiku.abubakar@wardwise.ng",
+    phone: null,
+    title: null,
+    onboardingStatus: "active",
   },
   {
     id: "cand-president-labour",
@@ -59,12 +65,12 @@ export const candidates: Candidate[] = [
     party: "Labour Party",
     position: "President",
     isNational: true,
-    state: null,
+    stateCode: null,
     lga: null,
     constituency: "Federal Republic of Nigeria",
     description:
       "Former Anambra Governor and business leader focused on youth empowerment and education reform.",
-    supporters: 6150,
+    supporterCount: 6150,
     surveyId: "survey-president-labour",
     tagline: "From Consumption to Production",
     vision:
@@ -72,6 +78,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-10T08:00:00Z",
     updatedAt: "2025-10-10T08:00:00Z",
     email: "peter.obi@wardwise.ng",
+    phone: null,
+    title: null,
+    onboardingStatus: "active",
   },
   {
     id: "cand-president-nnpp",
@@ -79,12 +88,12 @@ export const candidates: Candidate[] = [
     party: "NNPP",
     position: "President",
     isNational: true,
-    state: null,
+    stateCode: null,
     lga: null,
     constituency: "Federal Republic of Nigeria",
     description:
       "Former Kano State Governor and Senator with strong track record in education and infrastructure.",
-    supporters: 3890,
+    supporterCount: 3890,
     surveyId: "survey-president-nnpp",
     tagline: "Progress Through Education",
     vision:
@@ -92,6 +101,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-10T08:00:00Z",
     updatedAt: "2025-10-10T08:00:00Z",
     email: "rabiu.kwankwaso@wardwise.ng",
+    phone: null,
+    title: null,
+    onboardingStatus: "active",
   },
 
   // ============================================================================
@@ -105,11 +117,11 @@ export const candidates: Candidate[] = [
     party: "APC",
     position: "Governor",
     isNational: false,
-    state: "Adamawa State",
+    stateCode: "AD",
     lga: "Adamawa Central",
     constituency: "Adamawa State",
     description: "Progressive leader committed to education and healthcare.",
-    supporters: 1250,
+    supporterCount: 1250,
     surveyId: "survey-apc-1",
     tagline: "Education, Healthcare, Women Empowerment",
     vision:
@@ -117,6 +129,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
     email: "aishatu.binani@wardwise.ng",
+    phone: null,
+    title: "Sen.",
+    onboardingStatus: "active",
   },
   {
     id: "cand-gov-pdp-adamawa",
@@ -124,17 +139,20 @@ export const candidates: Candidate[] = [
     party: "PDP",
     position: "Governor",
     isNational: false,
-    state: "Adamawa State",
+    stateCode: "AD",
     lga: "Adamawa Central",
     constituency: "Adamawa State",
     description: "Experienced leader focused on development and security.",
-    supporters: 980,
+    supporterCount: 980,
     surveyId: "survey-pdp-1",
     tagline: "Fresh Air: Security, Development, Progress",
     vision: "Building a safer and more prosperous Adamawa State",
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
     email: "ahmadu.fintiri@wardwise.ng",
+    phone: null,
+    title: "Dr.",
+    onboardingStatus: "active",
   },
 
   // --- Senatorial Candidates ---
@@ -144,12 +162,12 @@ export const candidates: Candidate[] = [
     party: "PDP",
     position: "Senator",
     isNational: false,
-    state: "Adamawa State",
+    stateCode: "AD",
     lga: "Adamawa Central",
     constituency: "Adamawa Central",
     description:
       "Healthcare professional dedicated to women's empowerment and community welfare.",
-    supporters: 650,
+    supporterCount: 650,
     surveyId: "survey-pdp-2",
     tagline: "Healthcare, Women's Rights, Community Welfare",
     vision:
@@ -157,6 +175,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
     email: "maryam.ciroma@wardwise.ng",
+    phone: null,
+    title: "Dr.",
+    onboardingStatus: "active",
   },
 
   // --- House of Representatives Candidates ---
@@ -166,11 +187,11 @@ export const candidates: Candidate[] = [
     party: "APC",
     position: "House of Representatives",
     isNational: false,
-    state: "Adamawa State",
+    stateCode: "AD",
     lga: "Jada/Ganye/Mayo-Belwa/Toungo",
     constituency: "Jada/Ganye/Mayo-Belwa/Toungo",
     description: "Youth advocate and infrastructure development champion.",
-    supporters: 750,
+    supporterCount: 750,
     surveyId: "survey-apc-2",
     tagline: "Youth Empowerment, Infrastructure",
     vision:
@@ -178,6 +199,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
     email: "abdulrazak.namdas@wardwise.ng",
+    phone: null,
+    title: "Hon.",
+    onboardingStatus: "active",
   },
   {
     id: "cand-hr-apc-fufore-song",
@@ -185,12 +209,12 @@ export const candidates: Candidate[] = [
     party: "APC",
     position: "House of Representatives",
     isNational: false,
-    state: "Adamawa State",
+    stateCode: "AD",
     lga: "Fufore/Song",
     constituency: "Fufore/Song Federal Constituency",
     description:
       "Former ALGON Chairman and Executive Chairman of Fufore LGA. Currently serving first term in 10th National Assembly.",
-    supporters: 850,
+    supporterCount: 850,
     surveyId: "survey-apc-4",
     tagline: "Fixing Roads, Creating Jobs, Building Communities",
     vision:
@@ -198,6 +222,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
     email: "aliyu.boya@wardwise.ng",
+    phone: null,
+    title: "Hon.",
+    onboardingStatus: "active",
   },
 
   // ============================================================================
@@ -211,12 +238,12 @@ export const candidates: Candidate[] = [
     party: "APC",
     position: "Governor",
     isNational: false,
-    state: "Bauchi State",
+    stateCode: "BA",
     lga: "Bauchi Central",
     constituency: "Bauchi State",
     description:
       "Former FCT Minister with extensive experience in urban development and infrastructure.",
-    supporters: 1420,
+    supporterCount: 1420,
     surveyId: "survey-apc-bauchi-1",
     tagline: "Infrastructure, Economic Growth, Unity",
     vision:
@@ -224,6 +251,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-20T09:00:00Z",
     updatedAt: "2025-10-20T09:00:00Z",
     email: "bala.mohammed@wardwise.ng",
+    phone: null,
+    title: "Sen.",
+    onboardingStatus: "active",
   },
 
   // --- Senatorial Candidates ---
@@ -233,18 +263,21 @@ export const candidates: Candidate[] = [
     party: "APC",
     position: "Senator",
     isNational: false,
-    state: "Bauchi State",
+    stateCode: "BA",
     lga: "Bauchi Central",
     constituency: "Bauchi Central",
     description:
       "Business leader committed to economic empowerment and job creation.",
-    supporters: 820,
+    supporterCount: 820,
     surveyId: "survey-apc-bauchi-2",
     tagline: "Jobs, Business Growth, Prosperity",
     vision: "Making Bauchi Central the economic powerhouse of Northern Nigeria",
     createdAt: "2025-01-20T09:00:00Z",
     updatedAt: "2025-10-20T09:00:00Z",
     email: "halliru.jika@wardwise.ng",
+    phone: null,
+    title: "Sen.",
+    onboardingStatus: "active",
   },
   {
     id: "cand-sen-pdp-bauchi-south",
@@ -252,12 +285,12 @@ export const candidates: Candidate[] = [
     party: "PDP",
     position: "Senator",
     isNational: false,
-    state: "Bauchi State",
+    stateCode: "BA",
     lga: "Bauchi South",
     constituency: "Bauchi South",
     description:
       "Medical doctor and public health advocate focused on rural healthcare access.",
-    supporters: 720,
+    supporterCount: 720,
     surveyId: "survey-pdp-bauchi-2",
     tagline: "Healthcare Access, Rural Development",
     vision:
@@ -265,6 +298,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-20T09:00:00Z",
     updatedAt: "2025-10-20T09:00:00Z",
     email: "fatima.binta.bello@wardwise.ng",
+    phone: null,
+    title: "Dr.",
+    onboardingStatus: "active",
   },
 
   // --- House of Representatives Candidates ---
@@ -274,18 +310,21 @@ export const candidates: Candidate[] = [
     party: "APC",
     position: "House of Representatives",
     isNational: false,
-    state: "Bauchi State",
+    stateCode: "BA",
     lga: "Bauchi Federal Constituency",
     constituency: "Bauchi Federal Constituency",
     description:
       "Former Local Government Chairman with strong grassroots support and focus on rural electrification.",
-    supporters: 680,
+    supporterCount: 680,
     surveyId: "survey-apc-bauchi-3",
     tagline: "Power to the People, Rural Development",
     vision: "Bringing electricity and modern amenities to every community",
     createdAt: "2025-01-20T09:00:00Z",
     updatedAt: "2025-10-20T09:00:00Z",
     email: "yakubu.abdullahi@wardwise.ng",
+    phone: null,
+    title: "Hon.",
+    onboardingStatus: "active",
   },
   {
     id: "cand-hr-pdp-ningi-warji",
@@ -293,12 +332,12 @@ export const candidates: Candidate[] = [
     party: "PDP",
     position: "House of Representatives",
     isNational: false,
-    state: "Bauchi State",
+    stateCode: "BA",
     lga: "Ningi/Warji Federal Constituency",
     constituency: "Ningi/Warji Federal Constituency",
     description:
       "Agricultural economist dedicated to farming communities and food security.",
-    supporters: 590,
+    supporterCount: 590,
     surveyId: "survey-pdp-bauchi-3",
     tagline: "Agriculture, Food Security, Farmers First",
     vision:
@@ -306,6 +345,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-20T09:00:00Z",
     updatedAt: "2025-10-20T09:00:00Z",
     email: "abubakar.ningi@wardwise.ng",
+    phone: null,
+    title: "Hon.",
+    onboardingStatus: "active",
   },
 
   // --- State Assembly Candidates ---
@@ -315,12 +357,12 @@ export const candidates: Candidate[] = [
     party: "APC",
     position: "State Assembly",
     isNational: false,
-    state: "Adamawa State",
+    stateCode: "AD",
     lga: "Song State Constituency",
     constituency: "Song State Constituency",
     description:
       "Grassroots leader focused on local development and community empowerment.",
-    supporters: 420,
+    supporterCount: 420,
     surveyId: "survey-apc-adamawa-sa-1",
     tagline: "Local Development, Community First",
     vision:
@@ -328,6 +370,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
     email: "ibrahim.usman@wardwise.ng",
+    phone: null,
+    title: "Hon.",
+    onboardingStatus: "active",
   },
   {
     id: "cand-sa-pdp-fufore-adamawa",
@@ -335,12 +380,12 @@ export const candidates: Candidate[] = [
     party: "PDP",
     position: "State Assembly",
     isNational: false,
-    state: "Adamawa State",
+    stateCode: "AD",
     lga: "Fufore State Constituency",
     constituency: "Fufore State Constituency",
     description:
       "Education advocate and women's rights champion at the state level.",
-    supporters: 380,
+    supporterCount: 380,
     surveyId: "survey-pdp-adamawa-sa-1",
     tagline: "Education, Women's Rights, Local Empowerment",
     vision:
@@ -348,6 +393,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-15T10:00:00Z",
     updatedAt: "2025-10-15T10:00:00Z",
     email: "fatima.bello@wardwise.ng",
+    phone: null,
+    title: "Hon.",
+    onboardingStatus: "active",
   },
   {
     id: "cand-sa-apc-bauchi-central",
@@ -355,12 +403,12 @@ export const candidates: Candidate[] = [
     party: "APC",
     position: "State Assembly",
     isNational: false,
-    state: "Bauchi State",
+    stateCode: "BA",
     lga: "Bauchi Central State Constituency",
     constituency: "Bauchi Central State Constituency",
     description:
       "Business leader and advocate for local economic development and job creation.",
-    supporters: 450,
+    supporterCount: 450,
     surveyId: "survey-apc-bauchi-sa-1",
     tagline: "Local Economy, Jobs, Development",
     vision:
@@ -368,6 +416,9 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-20T09:00:00Z",
     updatedAt: "2025-10-20T09:00:00Z",
     email: "mohammed.sani@wardwise.ng",
+    phone: null,
+    title: "Hon.",
+    onboardingStatus: "active",
   },
   {
     id: "cand-sa-pdp-bauchi-south",
@@ -375,12 +426,12 @@ export const candidates: Candidate[] = [
     party: "PDP",
     position: "State Assembly",
     isNational: false,
-    state: "Bauchi State",
+    stateCode: "BA",
     lga: "Bauchi South State Constituency",
     constituency: "Bauchi South State Constituency",
     description:
       "Healthcare professional focused on improving local health services and rural access.",
-    supporters: 390,
+    supporterCount: 390,
     surveyId: "survey-pdp-bauchi-sa-1",
     tagline: "Healthcare Access, Rural Development",
     vision:
@@ -388,5 +439,8 @@ export const candidates: Candidate[] = [
     createdAt: "2025-01-20T09:00:00Z",
     updatedAt: "2025-10-20T09:00:00Z",
     email: "aisha.mohammed@wardwise.ng",
+    phone: null,
+    title: "Hon.",
+    onboardingStatus: "active",
   },
 ];

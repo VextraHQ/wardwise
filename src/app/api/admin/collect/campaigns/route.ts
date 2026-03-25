@@ -4,14 +4,17 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const candidateId = request.nextUrl.searchParams.get("candidateId");
+
     const campaigns = await prisma.campaign.findMany({
+      where: candidateId ? { candidateId } : undefined,
       include: { _count: { select: { submissions: true } } },
       orderBy: { createdAt: "desc" },
     });

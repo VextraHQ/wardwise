@@ -38,12 +38,13 @@ export async function GET(request: NextRequest) {
       const wardIds = wards.map((w) => w.id);
 
       // Get PU IDs + count
-      const pus = wardIds.length > 0
-        ? await prisma.pollingUnit.findMany({
-            where: { wardId: { in: wardIds } },
-            select: { id: true },
-          })
-        : [];
+      const pus =
+        wardIds.length > 0
+          ? await prisma.pollingUnit.findMany({
+              where: { wardId: { in: wardIds } },
+              select: { id: true },
+            })
+          : [];
       const puIds = pus.map((pu) => pu.id);
 
       children = wardIds.length + puIds.length;

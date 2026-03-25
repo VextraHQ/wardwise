@@ -81,7 +81,7 @@ export function ContactContent() {
         {/* Contact Form */}
         <div className="lg:col-span-3">
           {formStatus === "success" && (
-            <div className="mb-6 flex items-center gap-3 rounded-sm border border-primary/30 bg-primary/10 p-4">
+            <div className="border-primary/30 bg-primary/10 mb-6 flex items-center gap-3 rounded-sm border p-4">
               <HiCheckCircle className="text-primary size-5 shrink-0" />
               <div>
                 <p className="text-foreground font-semibold">
@@ -95,7 +95,7 @@ export function ContactContent() {
           )}
 
           {formStatus === "error" && (
-            <div className="mb-6 flex items-center gap-3 rounded-sm border border-destructive/30 bg-destructive/10 p-4">
+            <div className="border-destructive/30 bg-destructive/10 mb-6 flex items-center gap-3 rounded-sm border p-4">
               <HiExclamation className="text-destructive size-5 shrink-0" />
               <div>
                 <p className="text-foreground font-semibold">
@@ -119,7 +119,7 @@ export function ContactContent() {
                     <FormControl>
                       <Input
                         placeholder="Enter your name"
-                        className="h-11 rounded-sm border-border/60"
+                        className="border-border/60 h-11 rounded-sm"
                         {...field}
                       />
                     </FormControl>
@@ -138,7 +138,7 @@ export function ContactContent() {
                       <Input
                         type="email"
                         placeholder="you@example.com"
-                        className="h-11 rounded-sm border-border/60"
+                        className="border-border/60 h-11 rounded-sm"
                         {...field}
                       />
                     </FormControl>
@@ -158,7 +158,7 @@ export function ContactContent() {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-11 w-full rounded-sm border-border/60">
+                        <SelectTrigger className="border-border/60 h-11 w-full rounded-sm">
                           <SelectValue placeholder="Select a reason" />
                         </SelectTrigger>
                       </FormControl>
@@ -185,7 +185,7 @@ export function ContactContent() {
                       <Textarea
                         placeholder="Tell us how we can help..."
                         rows={5}
-                        className="resize-none rounded-sm border-border/60"
+                        className="border-border/60 resize-none rounded-sm"
                         {...field}
                       />
                     </FormControl>

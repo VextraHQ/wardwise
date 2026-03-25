@@ -8,6 +8,7 @@ import {
   HiOutlineTrash,
   HiDotsVertical,
   HiOutlineUpload,
+  HiOutlineMap,
 } from "react-icons/hi";
 import {
   useGeoPollingUnits,
@@ -278,23 +279,29 @@ export function GeoLevelPollingUnits({
               ))}
             </div>
           ) : !data || data.data.length === 0 ? (
-            <div className="py-12 text-center">
-              <p className="text-muted-foreground mb-1 font-medium">
-                {debouncedSearch
-                  ? "No polling units match your search"
-                  : "No polling units found for this ward"}
-              </p>
-              <p className="text-muted-foreground text-sm">
-                {debouncedSearch
-                  ? "Try adjusting your search terms"
-                  : "Add a polling unit using the button above"}
-              </p>
+            <div className="border-border flex flex-col items-center gap-3 rounded-sm border border-dashed py-12 text-center">
+              <HiOutlineMap className="text-muted-foreground h-10 w-10" />
+              <div>
+                <p className="text-foreground mb-1 font-medium">
+                  {debouncedSearch
+                    ? "No polling units match your search"
+                    : "No polling units found for this ward"}
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  {debouncedSearch
+                    ? "Try adjusting your search terms"
+                    : "Add a polling unit using the button above"}
+                </p>
+              </div>
             </div>
           ) : (
             <div className="overflow-x-auto rounded-sm border">
               <Table>
                 <TableHeader className="bg-muted/30 sticky top-0 z-10">
                   <TableRow>
+                    <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
+                      S/N
+                    </TableHead>
                     <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                       INEC Code
                     </TableHead>
@@ -307,8 +314,11 @@ export function GeoLevelPollingUnits({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedPUs.map((pu) => (
+                  {sortedPUs.map((pu, idx) => (
                     <TableRow key={pu.id}>
+                      <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
+                        {(page - 1) * pageSize + idx + 1}
+                      </TableCell>
                       <TableCell className="font-mono text-sm font-medium">
                         {pu.code}
                       </TableCell>

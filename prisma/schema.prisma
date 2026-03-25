@@ -8,32 +8,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
 model User {
   id          String     @id @default(cuid())
   name        String?
@@ -43,36 +17,27 @@ model User {
   candidateId String?    @unique
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  accounts    Account[]
-  sessions    Session[]
   candidate   Candidate? @relation(fields: [candidateId], references: [id])
 }
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
-
 model Candidate {
-  id           String   @id @default(cuid())
-  name         String
-  party        String
-  position     String
-  isNational   Boolean  @default(false)
-  state        String?
-  lga          String?
-  constituency String?
-  description  String?
-  supporters   Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User?
-  canvassers    Canvasser[]
-  subscriptions Subscription[]
-  campaigns     Campaign[]
+  id               String   @id @default(cuid())
+  name             String
+  party            String
+  position         String
+  isNational       Boolean  @default(false)
+  stateCode        String?  // 2-letter code (e.g. "AD", "LA")
+  lga              String?
+  constituency     String?
+  description      String?
+  phone            String?
+  title            String?  // Honorific: Hon., Sen., Dr., Chief, Alh.
+  onboardingStatus String   @default("pending") // "pending" | "credentials_sent" | "active" | "suspended"
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User?
+  canvassers       Canvasser[]
+  campaigns        Campaign[]
 }
 
 model Voter {
@@ -128,26 +93,6 @@ model Canvasser {
 
   @@index([candidateId])
   @@index([code])
-}
-
-model Subscription {
-  id                String   @id @default(cuid())
-  candidateId       String
-  tier              String   // "starter" | "standard" | "premium"
-  status            String   @default("active") // "active" | "cancelled" | "expired"
-  startDate         DateTime @default(now())
-  endDate           DateTime?
-  monthlyPrice      Int      // In kobo (₦50,000 = 5000000)
-  autoRenew         Boolean  @default(true)
-  paymentProvider   String?  // "paystack" | "flutterwave"
-  paymentReference  String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  candidate         Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-
-  @@index([candidateId])
-  @@index([status])
 }
 
 // === Collect: Geo Models (database-backed) ===

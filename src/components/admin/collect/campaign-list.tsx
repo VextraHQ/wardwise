@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   IconPlus,
   IconEye,
@@ -9,6 +10,8 @@ import {
   IconPlayerPlay,
   IconUsers,
   IconClipboard,
+  IconDotsVertical,
+  IconCopy,
 } from "@tabler/icons-react";
 import { useCampaigns } from "@/hooks/use-collect";
 import type { CampaignSummary } from "@/types/collect";
@@ -23,29 +26,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 
-function statusVariant(status: string) {
-  switch (status) {
-    case "draft":
-      return "secondary";
-    case "active":
-      return "default";
-    case "paused":
-      return "outline";
-    case "closed":
-      return "destructive";
-    default:
-      return "secondary";
-  }
-}
-
-const STATUS_DOT: Record<string, string> = {
-  draft: "bg-muted-foreground",
-  active: "bg-emerald-500",
-  paused: "bg-orange-500",
-  closed: "bg-destructive",
+const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
+  draft: "bg-muted text-muted-foreground border-border/60",
+  active: "bg-primary/10 text-primary border-primary/30",
+  paused: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  closed: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
 function StatsBar({ campaigns }: { campaigns: CampaignSummary[] }) {
@@ -85,7 +80,7 @@ function StatsBar({ campaigns }: { campaigns: CampaignSummary[] }) {
           className="border-border/60 rounded-sm shadow-none"
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+            <CardTitle className="text-foreground/60 font-mono text-[10px] font-bold tracking-widest uppercase">
               {stat.label}
             </CardTitle>
             <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
@@ -96,7 +91,7 @@ function StatsBar({ campaigns }: { campaigns: CampaignSummary[] }) {
             <div className="font-mono text-2xl font-semibold tabular-nums">
               {stat.value}
             </div>
-            <p className="text-muted-foreground mt-1 text-xs">
+            <p className="text-foreground/50 mt-1 text-xs font-medium">
               {stat.subtitle}
             </p>
           </CardContent>
@@ -130,22 +125,22 @@ function TableSkeleton() {
     <Table>
       <TableHeader className="bg-muted/30">
         <TableRow>
-          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+          <TableHead className="text-foreground/60 h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
+            S/N
+          </TableHead>
+          <TableHead className="text-foreground/60 h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
             Candidate
           </TableHead>
-          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-            Slug
-          </TableHead>
-          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+          <TableHead className="text-foreground/60 h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
             Constituency
           </TableHead>
-          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+          <TableHead className="text-foreground/60 h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
             Status
           </TableHead>
           <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
             Submissions
           </TableHead>
-          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+          <TableHead className="text-foreground/60 h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
             Created
           </TableHead>
           <TableHead />
@@ -154,7 +149,10 @@ function TableSkeleton() {
       <TableBody>
         {Array.from({ length: 5 }).map((_, i) => (
           <TableRow key={i}>
-            {Array.from({ length: 7 }).map((_, j) => (
+            <TableCell className="text-center">
+              <Skeleton className="mx-auto h-4 w-4" />
+            </TableCell>
+            {Array.from({ length: 6 }).map((_, j) => (
               <TableCell key={j}>
                 <Skeleton className="h-4 w-24" />
               </TableCell>
@@ -168,24 +166,21 @@ function TableSkeleton() {
 
 function EmptyState() {
   return (
-    <div className="border-border/60 flex flex-col items-center justify-center gap-4 rounded-sm border border-dashed py-16">
-      <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-sm">
-        <IconClipboard className="text-muted-foreground h-7 w-7" />
-      </div>
-      <div className="space-y-1 text-center">
-        <p className="text-foreground font-medium">No campaigns yet</p>
-        <p className="text-muted-foreground text-sm">
-          Create your first campaign to start collecting registrations.
-        </p>
-      </div>
+    <div className="border-border flex flex-col items-center gap-3 rounded-sm border border-dashed py-12 text-center">
+      <IconClipboard className="text-muted-foreground h-10 w-10" />
+      <p className="text-muted-foreground text-sm">
+        No campaigns yet. Create your first campaign to start collecting
+        registrations.
+      </p>
       <Button
         asChild
+        variant="outline"
         size="sm"
-        className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+        className="mt-2 rounded-sm font-mono text-[11px] tracking-widest uppercase"
       >
         <Link href="/admin/collect/campaigns/new">
-          <IconPlus className="mr-1.5 h-4 w-4" />
-          New Campaign
+          <IconPlus className="mr-1.5 h-3.5 w-3.5" />
+          Create Campaign
         </Link>
       </Button>
     </div>
@@ -193,6 +188,7 @@ function EmptyState() {
 }
 
 export function CampaignList() {
+  const router = useRouter();
   const { data: campaigns, isLoading, error } = useCampaigns();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -205,6 +201,15 @@ export function CampaignList() {
     const start = (page - 1) * pageSize;
     return campaigns.slice(start, start + pageSize);
   }, [campaigns, page, pageSize]);
+
+  const snOffset = (page - 1) * pageSize;
+
+  const handleCopyLink = (e: React.MouseEvent, slug: string) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/c/${slug}`;
+    void navigator.clipboard.writeText(url);
+    toast.success("Campaign link copied to clipboard");
+  };
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
@@ -220,22 +225,24 @@ export function CampaignList() {
         <div>
           <h2 className="text-lg font-semibold">Campaigns</h2>
           {!isLoading && campaigns && campaigns.length > 0 && (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-foreground/60 text-sm">
               {campaigns.length} campaign{campaigns.length !== 1 ? "s" : ""}{" "}
               total
             </p>
           )}
         </div>
-        <Button
-          asChild
-          size="sm"
-          className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
-        >
-          <Link href="/admin/collect/campaigns/new">
-            <IconPlus className="mr-1.5 h-4 w-4" />
-            New Campaign
-          </Link>
-        </Button>
+        {(!campaigns || campaigns.length > 0) && (
+          <Button
+            asChild
+            size="sm"
+            className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+          >
+            <Link href="/admin/collect/campaigns/new">
+              <IconPlus className="mr-1.5 h-4 w-4" />
+              New Campaign
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Table */}
@@ -257,82 +264,115 @@ export function CampaignList() {
             <Table>
               <TableHeader className="bg-muted/30 sticky top-0 z-10">
                 <TableRow>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                  <TableHead className="text-foreground/60 h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
+                    S/N
+                  </TableHead>
+                  <TableHead className="text-foreground/60 h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                     Candidate
                   </TableHead>
-                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase sm:table-cell">
+                  <TableHead className="text-foreground/60 hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase sm:table-cell">
                     Constituency
                   </TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                  <TableHead className="text-foreground/60 h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                     Status
                   </TableHead>
-                  <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
+                  <TableHead className="text-foreground/60 h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
                     Submissions
                   </TableHead>
-                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
+                  <TableHead className="text-foreground/60 hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
                     Created
                   </TableHead>
-                  <TableHead className="text-muted-foreground h-10 w-[80px] font-mono text-[10px] font-bold tracking-widest uppercase">
-                    Actions
-                  </TableHead>
+                  <TableHead className="h-10 w-12" />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedCampaigns.map((campaign: CampaignSummary) => (
-                  <TableRow key={campaign.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{campaign.candidateName}</p>
-                        <p className="text-muted-foreground text-xs">
-                          {campaign.party} &middot;{" "}
-                          <code className="text-[11px]">
-                            /c/{campaign.slug}
-                          </code>
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      {campaign.constituency}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={statusVariant(campaign.status)}
-                        className="gap-1.5 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-                      >
-                        <span
-                          className={`inline-block h-1.5 w-1.5 rounded-full ${STATUS_DOT[campaign.status] ?? "bg-muted-foreground"}`}
-                        />
-                        {campaign.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-mono font-medium tabular-nums">
-                      {campaign._count.submissions.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground hidden md:table-cell">
-                      {new Date(campaign.createdAt).toLocaleDateString(
-                        "en-US",
-                        {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        },
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
-                      >
-                        <Link href={`/admin/collect/campaigns/${campaign.id}`}>
-                          <IconEye className="mr-1 h-4 w-4" />
-                          View
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {paginatedCampaigns.map(
+                  (campaign: CampaignSummary, idx: number) => (
+                    <TableRow
+                      key={campaign.id}
+                      className="hover:bg-muted/50 cursor-pointer transition-colors"
+                      onClick={() =>
+                        router.push(`/admin/collect/campaigns/${campaign.id}`)
+                      }
+                    >
+                      <TableCell className="text-foreground/50 text-center font-mono text-xs font-bold tabular-nums">
+                        {snOffset + idx + 1}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">
+                            {campaign.candidateName}
+                          </p>
+                          <p className="text-muted-foreground text-xs">
+                            {campaign.party} &middot;{" "}
+                            <code className="text-[11px]">
+                              /c/{campaign.slug}
+                            </code>
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        {campaign.constituency}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${CAMPAIGN_STATUS_STYLES[campaign.status] ?? ""}`}
+                        >
+                          {campaign.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-medium tabular-nums">
+                        {campaign._count.submissions.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground hidden md:table-cell">
+                        {new Date(campaign.createdAt).toLocaleDateString(
+                          "en-NG",
+                          {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          },
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            asChild
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <IconDotsVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(
+                                  `/admin/collect/campaigns/${campaign.id}`,
+                                );
+                              }}
+                            >
+                              <IconEye className="mr-2 h-4 w-4 hover:text-gray-500" />
+                              View Detail
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => handleCopyLink(e, campaign.slug)}
+                            >
+                              <IconCopy className="mr-2 h-4 w-4 hover:text-gray-500" />
+                              Copy Link
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ),
+                )}
               </TableBody>
             </Table>
           </div>

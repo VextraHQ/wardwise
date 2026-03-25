@@ -23,7 +23,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid lgaId" }, { status: 400 });
     }
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") || "20", 10)));
+    const pageSize = Math.min(
+      100,
+      Math.max(1, parseInt(searchParams.get("pageSize") || "20", 10)),
+    );
     const search = searchParams.get("search") || undefined;
 
     const where: Prisma.WardWhereInput = {

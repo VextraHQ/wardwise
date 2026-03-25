@@ -30,6 +30,7 @@ import {
   YAxis,
 } from "recharts";
 import {
+  IconChartBar,
   IconUsers,
   IconFlag,
   IconShieldCheck,
@@ -205,7 +206,8 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
                 </AreaChart>
               </ChartContainer>
             ) : (
-              <div className="border-border/60 rounded-sm border border-dashed py-8 text-center">
+              <div className="border-border flex flex-col items-center gap-2 rounded-sm border border-dashed py-12 text-center">
+                <IconChartBar className="text-muted-foreground h-8 w-8" />
                 <p className="text-muted-foreground text-sm">
                   No submissions yet
                 </p>
@@ -237,7 +239,8 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
                 </BarChart>
               </ChartContainer>
             ) : (
-              <div className="border-border/60 rounded-sm border border-dashed py-8 text-center">
+              <div className="border-border flex flex-col items-center gap-2 rounded-sm border border-dashed py-12 text-center">
+                <IconChartBar className="text-muted-foreground h-8 w-8" />
                 <p className="text-muted-foreground text-sm">
                   No submissions yet
                 </p>
@@ -307,7 +310,8 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
                 </BarChart>
               </ChartContainer>
             ) : (
-              <div className="border-border/60 rounded-sm border border-dashed py-8 text-center">
+              <div className="border-border flex flex-col items-center gap-2 rounded-sm border border-dashed py-12 text-center">
+                <IconChartBar className="text-muted-foreground h-8 w-8" />
                 <p className="text-muted-foreground text-sm">
                   No submissions yet
                 </p>
@@ -342,14 +346,16 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground text-sm">No data</p>
+              <div className="border-border flex flex-col items-center justify-center rounded-sm border border-dashed py-6 text-center">
+                <p className="text-muted-foreground text-sm">No data</p>
+              </div>
             )}
           </CardContent>
         </Card>
 
         {/* Sex Breakdown */}
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="">
+          <CardHeader>
             <CardTitle className="text-sm font-semibold tracking-tight">
               By Sex
             </CardTitle>
@@ -370,7 +376,9 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground text-sm">No data</p>
+              <div className="border-border flex flex-col items-center justify-center rounded-sm border border-dashed py-6 text-center">
+                <p className="text-muted-foreground text-sm">No data</p>
+              </div>
             )}
           </CardContent>
         </Card>

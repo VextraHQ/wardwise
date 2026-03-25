@@ -10,6 +10,13 @@ export const candidatePositionSchema = z.enum([
   "State Assembly",
 ]);
 
+// Positions that require LGA (constituency-level only)
+const CONSTITUENCY_POSITIONS = [
+  "Senator",
+  "House of Representatives",
+  "State Assembly",
+];
+
 // Create Candidate Schema
 export const createCandidateSchema = z
   .object({
@@ -29,18 +36,16 @@ export const createCandidateSchema = z
         if (!val || val === "") return false;
         return candidatePositionSchema.safeParse(val).success;
       },
-      {
-        message: "Please select a position",
-      },
+      { message: "Please select a position" },
     ),
     constituency: z
       .string()
       .min(2, "Constituency must be at least 2 characters")
       .max(200, "Constituency must not exceed 200 characters")
       .trim(),
-    state: z
+    stateCode: z
       .string()
-      .max(100, "State must not exceed 100 characters")
+      .max(5, "State code must not exceed 5 characters")
       .optional()
       .or(z.literal("")),
     lga: z
@@ -53,24 +58,30 @@ export const createCandidateSchema = z
       .max(1000, "Description must not exceed 1000 characters")
       .optional()
       .or(z.literal("")),
+    phone: phoneSchema.optional().or(z.literal("")),
+    title: z
+      .string()
+      .max(50, "Title must not exceed 50 characters")
+      .optional()
+      .or(z.literal("")),
   })
   .refine(
     (data) => {
       // State is required for all positions except President
       if (data.position && data.position !== "President") {
-        return data.state && data.state.trim().length > 0;
+        return data.stateCode && data.stateCode.trim().length > 0;
       }
       return true;
     },
     {
       message: "State is required for this position",
-      path: ["state"],
+      path: ["stateCode"],
     },
   )
   .refine(
     (data) => {
-      // LGA is required for all positions except President
-      if (data.position && data.position !== "President") {
+      // LGA is required only for constituency-level positions
+      if (data.position && CONSTITUENCY_POSITIONS.includes(data.position)) {
         return data.lga && data.lga.trim().length > 0;
       }
       return true;
@@ -105,9 +116,7 @@ export const updateCandidateSchema = z
           if (!val || val === "") return false;
           return candidatePositionSchema.safeParse(val).success;
         },
-        {
-          message: "Please select a position",
-        },
+        { message: "Please select a position" },
       )
       .optional(),
     constituency: z
@@ -116,9 +125,9 @@ export const updateCandidateSchema = z
       .max(200, "Constituency must not exceed 200 characters")
       .trim()
       .optional(),
-    state: z
+    stateCode: z
       .string()
-      .max(100, "State must not exceed 100 characters")
+      .max(5, "State code must not exceed 5 characters")
       .optional()
       .or(z.literal("")),
     lga: z
@@ -131,24 +140,31 @@ export const updateCandidateSchema = z
       .max(1000, "Description must not exceed 1000 characters")
       .optional()
       .or(z.literal("")),
+    phone: phoneSchema.optional().or(z.literal("")),
+    title: z
+      .string()
+      .max(50, "Title must not exceed 50 characters")
+      .optional()
+      .or(z.literal("")),
+    onboardingStatus: z
+      .enum(["pending", "credentials_sent", "active", "suspended"])
+      .optional(),
   })
   .refine(
     (data) => {
-      // State is required for all positions except President
       if (data.position && data.position !== "President") {
-        return data.state && data.state.trim().length > 0;
+        return data.stateCode && data.stateCode.trim().length > 0;
       }
       return true;
     },
     {
       message: "State is required for this position",
-      path: ["state"],
+      path: ["stateCode"],
     },
   )
   .refine(
     (data) => {
-      // LGA is required for all positions except President
-      if (data.position && data.position !== "President") {
+      if (data.position && CONSTITUENCY_POSITIONS.includes(data.position)) {
         return data.lga && data.lga.trim().length > 0;
       }
       return true;

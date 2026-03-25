@@ -20,7 +20,9 @@ export function SettingsContent() {
 
       <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold tracking-tight">Account Settings</CardTitle>
+          <CardTitle className="text-sm font-semibold tracking-tight">
+            Account Settings
+          </CardTitle>
           <CardDescription className="text-muted-foreground mt-1 text-sm">
             Settings functionality will be implemented here
           </CardDescription>

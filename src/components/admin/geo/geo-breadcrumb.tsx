@@ -33,35 +33,40 @@ export function GeoBreadcrumb({
   if (!stateCode) return null;
 
   return (
-    <div className="bg-muted/40 border-border/60 rounded-sm border px-4 py-2.5">
-      <Breadcrumb>
-        <BreadcrumbList>
+    <Breadcrumb>
+      <BreadcrumbList>
         <BreadcrumbItem>
           {stateCode ? (
             <BreadcrumbLink
-              className="cursor-pointer"
+              className="text-foreground/60 hover:text-foreground font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors cursor-pointer"
               onClick={() => onNavigate({})}
             >
               All States
             </BreadcrumbLink>
           ) : (
-            <BreadcrumbPage>All States</BreadcrumbPage>
+            <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
+              All States
+            </BreadcrumbPage>
           )}
         </BreadcrumbItem>
 
         {stateCode && state && (
           <>
-            <BreadcrumbSeparator />
+            <BreadcrumbSeparator className="text-muted-foreground/30">
+              /
+            </BreadcrumbSeparator>
             <BreadcrumbItem>
               {lgaId ? (
                 <BreadcrumbLink
-                  className="cursor-pointer"
+                  className="text-foreground/60 hover:text-foreground font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors cursor-pointer"
                   onClick={() => onNavigate({ state: stateCode })}
                 >
                   {state.name}
                 </BreadcrumbLink>
               ) : (
-                <BreadcrumbPage>{state.name}</BreadcrumbPage>
+                <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
+                  {state.name}
+                </BreadcrumbPage>
               )}
             </BreadcrumbItem>
           </>
@@ -69,11 +74,13 @@ export function GeoBreadcrumb({
 
         {lgaId && lgaName && (
           <>
-            <BreadcrumbSeparator />
+            <BreadcrumbSeparator className="text-muted-foreground/30">
+              /
+            </BreadcrumbSeparator>
             <BreadcrumbItem>
               {wardId ? (
                 <BreadcrumbLink
-                  className="cursor-pointer"
+                   className="text-foreground/60 hover:text-foreground font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors cursor-pointer"
                   onClick={() =>
                     onNavigate({
                       state: stateCode || "",
@@ -85,7 +92,9 @@ export function GeoBreadcrumb({
                   {lgaName}
                 </BreadcrumbLink>
               ) : (
-                <BreadcrumbPage>{lgaName}</BreadcrumbPage>
+                <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
+                  {lgaName}
+                </BreadcrumbPage>
               )}
             </BreadcrumbItem>
           </>
@@ -93,14 +102,17 @@ export function GeoBreadcrumb({
 
         {wardId && wardName && (
           <>
-            <BreadcrumbSeparator />
+            <BreadcrumbSeparator className="text-muted-foreground/30">
+              /
+            </BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbPage>{wardName}</BreadcrumbPage>
+              <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
+                {wardName}
+              </BreadcrumbPage>
             </BreadcrumbItem>
           </>
         )}
       </BreadcrumbList>
     </Breadcrumb>
-    </div>
   );
 }

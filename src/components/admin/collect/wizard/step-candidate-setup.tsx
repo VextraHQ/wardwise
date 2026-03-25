@@ -35,7 +35,7 @@ type CandidateInfo = {
   party: string;
   position: string;
   constituency: string;
-  state: string;
+  stateCode: string;
 };
 
 interface StepCandidateSetupProps {
@@ -100,7 +100,10 @@ export function StepCandidateSetup({
             <div className="bg-muted/50 space-y-1 rounded-sm border px-4 py-3">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-medium">{selectedCandidate.name}</p>
-                <Badge variant="outline" className="shrink-0 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase">
+                <Badge
+                  variant="outline"
+                  className="shrink-0 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                >
                   {selectedCandidate.party}
                 </Badge>
               </div>
@@ -108,8 +111,8 @@ export function StepCandidateSetup({
                 {selectedCandidate.position}
                 {selectedCandidate.constituency &&
                   ` · ${selectedCandidate.constituency}`}
-                {selectedCandidate.state &&
-                  ` · ${selectedCandidate.state}`}
+                {selectedCandidate.stateCode &&
+                  ` · ${selectedCandidate.stateCode}`}
               </p>
             </div>
           )}
@@ -148,13 +151,11 @@ export function StepCandidateSetup({
                   setValue("slug", value, { shouldValidate: true });
                 }}
                 placeholder="campaign-slug"
-                className="pl-11 font-mono text-sm rounded-sm"
+                className="rounded-sm pl-11 font-mono text-sm"
               />
             </div>
             {slug && (
-              <p className="text-muted-foreground text-xs">
-                URL: /c/{slug}
-              </p>
+              <p className="text-muted-foreground text-xs">URL: /c/{slug}</p>
             )}
             <FieldError error={errors.slug?.message} />
           </div>
@@ -193,11 +194,9 @@ export function StepCandidateSetup({
             <Select
               value={watch("constituencyType")}
               onValueChange={(v) =>
-                setValue(
-                  "constituencyType",
-                  v as "federal" | "state" | "lga",
-                  { shouldValidate: true }
-                )
+                setValue("constituencyType", v as "federal" | "state" | "lga", {
+                  shouldValidate: true,
+                })
               }
             >
               <SelectTrigger className="rounded-sm">

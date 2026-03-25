@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { stateNameToCode } from "@/lib/data/state-lga-locations";
 
 export async function GET(request: NextRequest) {
   try {
@@ -48,12 +47,10 @@ export async function GET(request: NextRequest) {
       // Statewide campaign (Governor): return all LGAs in candidate's state
       const candidate = await prisma.candidate.findUnique({
         where: { id: campaign.candidateId },
-        select: { state: true },
+        select: { stateCode: true },
       });
 
-      const code = candidate?.state
-        ? stateNameToCode(candidate.state)
-        : null;
+      const code = candidate?.stateCode ?? null;
 
       if (!code) {
         return NextResponse.json(

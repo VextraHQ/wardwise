@@ -37,7 +37,7 @@ export function getAllCandidates(): Candidate[] {
  * @returns Array of candidates from the specified state
  */
 export function getCandidatesByState(state: string): Candidate[] {
-  return candidates.filter((candidate) => candidate.state === state);
+  return candidates.filter((candidate) => candidate.stateCode === state);
 }
 
 /**
@@ -97,7 +97,7 @@ export function getCandidateByIdWithSupporters(
 
   return {
     ...candidate,
-    supporters: getSupportersCount(id),
+    supporterCount: getSupportersCount(id),
   };
 }
 
@@ -109,7 +109,7 @@ export function getCandidateByIdWithSupporters(
 export function getCandidatesWithSupporters(): Candidate[] {
   return candidates.map((candidate) => ({
     ...candidate,
-    supporters: getSupportersCount(candidate.id),
+    supporterCount: getSupportersCount(candidate.id),
   }));
 }
 
@@ -139,7 +139,7 @@ export function filterCandidates(filters: {
   constituency?: string;
 }): Candidate[] {
   return candidates.filter((candidate) => {
-    if (filters.state && candidate.state !== filters.state) return false;
+    if (filters.state && candidate.stateCode !== filters.state) return false;
     if (filters.party && candidate.party !== filters.party) return false;
     if (filters.position && candidate.position !== filters.position)
       return false;
@@ -183,7 +183,7 @@ export function searchCandidates(query: string): Candidate[] {
 export function groupCandidatesByState(): Record<string, Candidate[]> {
   return candidates.reduce(
     (acc, candidate) => {
-      const state = candidate.state ?? "National";
+      const state = candidate.stateCode ?? "National";
       if (!acc[state]) {
         acc[state] = [];
       }
@@ -253,7 +253,7 @@ export function getTotalCandidates(): number {
 export function getCandidateCountByState(): Record<string, number> {
   return candidates.reduce(
     (acc, candidate) => {
-      const state = candidate.state || "National";
+      const state = candidate.stateCode || "National";
       acc[state] = (acc[state] || 0) + 1;
       return acc;
     },
@@ -314,7 +314,7 @@ export function getTotalSupporters(): number {
 export function getSupportersByState(): Record<string, number> {
   return candidates.reduce(
     (acc, candidate) => {
-      const state = candidate.state || "National";
+      const state = candidate.stateCode || "National";
       acc[state] = (acc[state] || 0) + getSupportersCount(candidate.id);
       return acc;
     },
@@ -349,7 +349,7 @@ export function getSupportersByParty(): Record<string, number> {
  */
 export function getTopCandidatesBySupporters(limit: number = 10): Candidate[] {
   return getCandidatesWithSupporters()
-    .sort((a, b) => b.supporters - a.supporters)
+    .sort((a, b) => (b.supporterCount ?? 0) - (a.supporterCount ?? 0))
     .slice(0, limit);
 }
 
@@ -367,7 +367,7 @@ export function getUniqueStates(): string[] {
   return Array.from<string>(
     new Set(
       candidates
-        .map((c) => c.state ?? "National")
+        .map((c) => c.stateCode ?? "National")
         .filter((state): state is string => Boolean(state)),
     ),
   ).sort() as string[];

@@ -203,19 +203,19 @@ model PollingUnit {
 
 ### Public (no auth)
 
-| Route                          | Method | Notes                                                    |
-| ------------------------------ | ------ | -------------------------------------------------------- |
-| `/api/collect/campaign/[slug]` | GET    | 404 for draft/missing, 410 for closed                    |
+| Route                          | Method | Notes                                                                                                  |
+| ------------------------------ | ------ | ------------------------------------------------------------------------------------------------------ |
+| `/api/collect/campaign/[slug]` | GET    | 404 for draft/missing, 410 for closed                                                                  |
 | `/api/collect/lgas`            | GET    | `?campaignSlug=` → scope-aware: national (all), state (candidate's state), constituency (enabled only) |
-| `/api/collect/wards`           | GET    | `?lgaId=`                                                |
-| `/api/collect/units`           | GET    | `?wardId=` — sorted by code                              |
-| `/api/collect/submit`          | POST   | Validates, dedup check (phone + VIN), creates submission |
+| `/api/collect/wards`           | GET    | `?lgaId=`                                                                                              |
+| `/api/collect/units`           | GET    | `?wardId=` — sorted by code                                                                            |
+| `/api/collect/submit`          | POST   | Validates, dedup check (phone + VIN), creates submission                                               |
 
 ### Admin (auth required)
 
 | Route                                           | Method               | Notes                                           |
 | ----------------------------------------------- | -------------------- | ----------------------------------------------- |
-| `/api/admin/collect/campaigns`                  | GET + POST           | List with `_count`; create with slug uniqueness |
+| `/api/admin/collect/campaigns`                  | GET + POST           | List with `_count`; GET accepts `?candidateId=` filter; create with slug uniqueness |
 | `/api/admin/collect/campaigns/[id]`             | GET + PATCH + DELETE |                                                 |
 | `/api/admin/collect/campaigns/[id]/submissions` | GET                  | Paginated, filterable; includes PU code         |
 | `/api/admin/collect/campaigns/[id]/export`      | GET                  | CSV with PU code column; sanitizes `=+-@`       |

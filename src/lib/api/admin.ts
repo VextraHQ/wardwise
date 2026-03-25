@@ -12,15 +12,22 @@ export interface CandidateWithUser extends Candidate {
   };
 }
 
+export interface CreateCandidateResponse {
+  candidate: CandidateWithUser;
+  generatedPassword?: string;
+}
+
 export interface CreateCandidateData {
   name: string;
   email: string;
   party: string;
   position: Candidate["position"];
   constituency: string;
-  state?: string;
+  stateCode?: string;
   lga?: string;
   description?: string;
+  phone?: string;
+  title?: string;
 }
 
 export interface UpdateCandidateData {
@@ -30,9 +37,12 @@ export interface UpdateCandidateData {
   party?: string;
   position?: Candidate["position"];
   constituency?: string;
-  state?: string;
+  stateCode?: string;
   lga?: string;
   description?: string;
+  phone?: string;
+  title?: string;
+  onboardingStatus?: string;
 }
 
 export interface CanvasserWithCandidate extends Canvasser {
@@ -141,15 +151,22 @@ export const adminApi = {
       return data.candidate;
     },
 
-    create: async (data: CreateCandidateData): Promise<CandidateWithUser> => {
-      const result = await apiCall<{ candidate: CandidateWithUser }>(
-        "/candidates",
-        {
-          method: "POST",
-          body: JSON.stringify(data),
-        },
+    create: async (
+      data: CreateCandidateData,
+    ): Promise<CreateCandidateResponse> => {
+      return apiCall<CreateCandidateResponse>("/candidates", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+
+    resetPassword: async (
+      id: string,
+    ): Promise<{ generatedPassword: string }> => {
+      return apiCall<{ generatedPassword: string }>(
+        `/candidates/${id}/reset-password`,
+        { method: "POST" },
       );
-      return result.candidate;
     },
 
     update: async (data: UpdateCandidateData): Promise<CandidateWithUser> => {

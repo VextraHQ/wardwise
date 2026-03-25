@@ -105,22 +105,22 @@ export function AnalyticsContent() {
       </div>
 
       <Tabs defaultValue="trends" className="w-full">
-        <TabsList className="bg-muted/40 rounded-sm p-1">
+        <TabsList className="bg-muted rounded-sm p-1">
           <TabsTrigger
             value="trends"
-            className="rounded-sm font-mono text-[10px] tracking-widest uppercase"
+            className="font-mono text-[10px] font-bold tracking-widest uppercase"
           >
             Registration Trends
           </TabsTrigger>
           <TabsTrigger
             value="demographics"
-            className="rounded-sm font-mono text-[10px] tracking-widest uppercase"
+            className="font-mono text-[10px] font-bold tracking-widest uppercase"
           >
             Demographics
           </TabsTrigger>
           <TabsTrigger
             value="geographic"
-            className="rounded-sm font-mono text-[10px] tracking-widest uppercase"
+            className="font-mono text-[10px] font-bold tracking-widest uppercase"
           >
             Geographic
           </TabsTrigger>

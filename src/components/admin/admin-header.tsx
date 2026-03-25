@@ -67,10 +67,10 @@ export function AdminHeader() {
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground/50 hidden font-mono text-[10px] font-black tracking-[0.2em] uppercase sm:inline-block">
+            <span className="text-foreground/50 hidden font-mono text-[10px] font-black tracking-[0.2em] uppercase sm:inline-block">
               Admin
             </span>
-            <span className="text-muted-foreground/30 hidden font-mono text-xs sm:inline-block">
+            <span className="text-foreground/30 hidden font-mono text-xs sm:inline-block">
               {"//"}
             </span>
             <h1 className="truncate text-sm font-bold tracking-tight">
@@ -84,7 +84,7 @@ export function AdminHeader() {
               <span>Super Admin</span>
             </Badge>
           </div>
-          <p className="text-muted-foreground hidden truncate font-mono text-[11px] tracking-wider uppercase sm:block">
+          <p className="text-muted-foreground hidden truncate text-sm sm:block">
             {getDescription()}
           </p>
         </div>
@@ -94,7 +94,7 @@ export function AdminHeader() {
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="gap-1.5 rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            className="gap-1.5 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
           >
             <HiOutlineRefresh
               className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
@@ -105,7 +105,7 @@ export function AdminHeader() {
             variant="ghost"
             asChild
             size="sm"
-            className="text-muted-foreground gap-1.5 rounded-sm font-mono text-[11px] tracking-widest uppercase hover:text-gray-200"
+            className="text-foreground/50 gap-1.5 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase transition-colors hover:text-gray-200"
           >
             <Link href="/" aria-label="Home">
               <HiOutlineHome className="size-4" />

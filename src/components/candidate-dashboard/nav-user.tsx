@@ -56,7 +56,9 @@ export function NavUser() {
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold tracking-tight text-sm">{user.name}</span>
+                <span className="truncate text-sm font-semibold tracking-tight">
+                  {user.name}
+                </span>
                 <span className="text-muted-foreground truncate text-xs">
                   {user.email}
                 </span>
@@ -79,7 +81,9 @@ export function NavUser() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold tracking-tight text-sm">{user.name}</span>
+                  <span className="truncate text-sm font-semibold tracking-tight">
+                    {user.name}
+                  </span>
                   <span className="text-muted-foreground truncate text-xs">
                     {user.email}
                   </span>

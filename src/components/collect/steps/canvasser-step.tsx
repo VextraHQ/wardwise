@@ -73,7 +73,7 @@ export function CanvasserStep({
                   aria-label="Yes, I was referred by a canvasser"
                   onClick={() => setHasCanvasser(true)}
                   className={cn(
-                    "border-border bg-card hover:border-primary/50 flex cursor-pointer items-center justify-center gap-2 rounded-sm border-2 p-3 transition-all focus-visible:ring-primary focus-visible:ring-2 focus-visible:outline-none",
+                    "border-border bg-card hover:border-primary/50 focus-visible:ring-primary flex cursor-pointer items-center justify-center gap-2 rounded-sm border-2 p-3 transition-all focus-visible:ring-2 focus-visible:outline-none",
                     hasCanvasser === true &&
                       "border-primary bg-primary/10 ring-primary/20 ring-2 ring-offset-1",
                   )}
@@ -91,7 +91,7 @@ export function CanvasserStep({
                     setValue("canvasserPhone", "");
                   }}
                   className={cn(
-                    "border-border bg-card hover:border-primary/50 flex cursor-pointer items-center justify-center gap-2 rounded-sm border-2 p-3 transition-all focus-visible:ring-primary focus-visible:ring-2 focus-visible:outline-none",
+                    "border-border bg-card hover:border-primary/50 focus-visible:ring-primary flex cursor-pointer items-center justify-center gap-2 rounded-sm border-2 p-3 transition-all focus-visible:ring-2 focus-visible:outline-none",
                     hasCanvasser === false &&
                       "border-primary bg-primary/10 ring-primary/20 ring-2 ring-offset-1",
                   )}

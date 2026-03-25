@@ -137,19 +137,13 @@ export const adminGeoApi = {
     adminApiCall<{ impact: GeoImpact }>(`/impact${qs({ type, id })}`),
 
   // Bulk CSV import
-  importPreview: (data: {
-    level: string;
-    rows: Record<string, string>[];
-  }) =>
+  importPreview: (data: { level: string; rows: Record<string, string>[] }) =>
     adminApiCall<ImportPreviewResponse>("/import", {
       method: "POST",
       body: JSON.stringify({ ...data, preview: true }),
     }),
 
-  importCommit: (data: {
-    level: string;
-    rows: Record<string, string>[];
-  }) =>
+  importCommit: (data: { level: string; rows: Record<string, string>[] }) =>
     adminApiCall<ImportCommitResponse>("/import", {
       method: "POST",
       body: JSON.stringify({ ...data, preview: false }),

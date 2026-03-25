@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,6 +9,12 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   IconCheck,
   IconShieldCheck,
@@ -22,8 +27,6 @@ import {
   IconMapPin,
   IconDatabase,
   IconStar,
-  IconChevronDown,
-  IconChevronUp,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 
@@ -193,8 +196,6 @@ const FAQ_ITEMS = [
 ];
 
 export function PricingContent() {
-  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
-
   const handleUpgrade = (planId: string) => {
     toast.info("Payment integration coming soon", {
       description: `Upgrade to ${planId} plan will be available when payment processing is connected.`,
@@ -326,38 +327,30 @@ export function PricingContent() {
       </Card>
 
       {/* FAQ Section */}
-      <div>
-        <h2 className="mb-4 text-lg font-semibold tracking-tight">
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold tracking-tight">
           Frequently Asked Questions
         </h2>
-        <div className="space-y-2">
+        <Accordion
+          type="single"
+          collapsible
+          className="border-border/60 rounded-sm border"
+        >
           {FAQ_ITEMS.map((item, i) => (
-            <Card
+            <AccordionItem
               key={i}
-              className="border-border/60 overflow-hidden rounded-sm shadow-none"
+              value={`faq-${i}`}
+              className="border-border/60 px-4 last:border-b-0"
             >
-              <button
-                type="button"
-                className="hover:bg-muted/50 flex w-full items-center justify-between px-4 py-3 text-left transition-colors"
-                onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
-              >
-                <span className="text-foreground text-sm font-medium">
-                  {item.question}
-                </span>
-                {expandedFaq === i ? (
-                  <IconChevronUp className="text-muted-foreground size-4 shrink-0" />
-                ) : (
-                  <IconChevronDown className="text-muted-foreground size-4 shrink-0" />
-                )}
-              </button>
-              {expandedFaq === i && (
-                <div className="border-border border-t px-4 py-3">
-                  <p className="text-muted-foreground text-sm">{item.answer}</p>
-                </div>
-              )}
-            </Card>
+              <AccordionTrigger className="py-4 text-sm font-medium transition-all hover:no-underline!">
+                {item.question}
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4 text-sm leading-relaxed">
+                {item.answer}
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </div>
     </div>
   );

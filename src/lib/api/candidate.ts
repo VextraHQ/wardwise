@@ -62,11 +62,14 @@ export const candidateApi = {
         // State/LGA candidates should be filtered by location
         filtered = filtered.filter((candidate) => {
           // Include Presidential candidates (isNational = true, state = null)
-          if (candidate.position === "President" && candidate.state === null) {
+          if (
+            candidate.position === "President" &&
+            candidate.stateCode === null
+          ) {
             return true;
           }
           // Include candidates matching the state
-          return candidate.state === state;
+          return candidate.stateCode === state;
         });
       }
 
@@ -83,7 +86,7 @@ export const candidateApi = {
             candidate.position === "Governor" ||
             candidate.position === "Senator"
           ) {
-            return candidate.state === state;
+            return candidate.stateCode === state;
           }
 
           // House of Representatives: match if constituency contains the LGA
