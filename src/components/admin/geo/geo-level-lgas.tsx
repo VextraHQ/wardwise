@@ -277,7 +277,7 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
             <div className="overflow-x-auto rounded-sm border">
               <Table>
                 <TableHeader className="bg-muted/30 sticky top-0 z-10">
-                  <TableRow>
+                  <TableRow className="hover:bg-transparent">
                     <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
                       S/N
                     </TableHead>

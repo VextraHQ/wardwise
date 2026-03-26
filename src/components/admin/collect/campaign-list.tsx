@@ -124,23 +124,23 @@ function TableSkeleton() {
   return (
     <Table>
       <TableHeader className="bg-muted/30">
-        <TableRow>
-          <TableHead className="text-foreground/60 h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
+        <TableRow className="hover:bg-transparent">
+          <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
             S/N
           </TableHead>
-          <TableHead className="text-foreground/60 h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
             Candidate
           </TableHead>
-          <TableHead className="text-foreground/60 h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
             Constituency
           </TableHead>
-          <TableHead className="text-foreground/60 h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
             Status
           </TableHead>
           <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
             Submissions
           </TableHead>
-          <TableHead className="text-foreground/60 h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
             Created
           </TableHead>
           <TableHead />
@@ -263,23 +263,23 @@ export function CampaignList() {
           <div className="overflow-x-auto rounded-sm border">
             <Table>
               <TableHeader className="bg-muted/30 sticky top-0 z-10">
-                <TableRow>
-                  <TableHead className="text-foreground/60 h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
                     S/N
                   </TableHead>
-                  <TableHead className="text-foreground/60 h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                     Candidate
                   </TableHead>
-                  <TableHead className="text-foreground/60 hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase sm:table-cell">
+                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase sm:table-cell">
                     Constituency
                   </TableHead>
-                  <TableHead className="text-foreground/60 h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                     Status
                   </TableHead>
-                  <TableHead className="text-foreground/60 h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
+                  <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
                     Submissions
                   </TableHead>
-                  <TableHead className="text-foreground/60 hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
+                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
                     Created
                   </TableHead>
                   <TableHead className="h-10 w-12" />
