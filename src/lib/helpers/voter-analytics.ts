@@ -9,21 +9,17 @@
  * - Ward coverage and polling unit statistics
  * - Demographic breakdowns
  * - Registration trends over time
- * - Survey response analytics
  *
  * NOTE: All functions filter by candidateId to ensure data isolation.
  * Each candidate sees only their own supporters and metrics.
  *
  * These analytics can be used by:
  * - Candidates (for dashboards)
- * - Voters (for viewing community stats)
  * - Admin (for platform-wide analytics)
  */
 
 import type { Voter } from "@/types/voter";
-import type { CandidateSurvey } from "@/types/survey";
 import { getVotersByCandidateId } from "@/lib/mock/data/voters";
-import { getSurveyByCandidateId } from "@/lib/mock/data/candidate-surveys";
 
 // Get total supporter count for a candidate - Calculated from actual voters supporting the candidate
 export function getSupportersCount(candidateId: string): number {
@@ -177,20 +173,21 @@ export function getDemographics(candidateId: string): {
 
   supporters.forEach((voter) => {
     // Age grouping
+    const age = voter.age ?? 0;
     switch (true) {
-      case voter.age >= 18 && voter.age <= 25:
+      case age >= 18 && age <= 25:
         ageGroups["18-25"]++;
         break;
-      case voter.age >= 26 && voter.age <= 35:
+      case age >= 26 && age <= 35:
         ageGroups["26-35"]++;
         break;
-      case voter.age >= 36 && voter.age <= 45:
+      case age >= 36 && age <= 45:
         ageGroups["36-45"]++;
         break;
-      case voter.age >= 46 && voter.age <= 55:
+      case age >= 46 && age <= 55:
         ageGroups["46-55"]++;
         break;
-      case voter.age >= 56:
+      case age >= 56:
         ageGroups["56+"]++;
         break;
     }
@@ -299,147 +296,19 @@ export function getRegistrationTrends(
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-// Get survey analytics for a candidate - Aggregates survey responses from voters who completed the candidate's survey
-export function getSurveyAnalytics(candidateId: string): {
-  totalResponses: number;
-  completionRate: number;
-  questionBreakdown: Record<
-    string,
-    {
-      questionId: string;
-      questionText: string;
-      responseCount: number;
-      responses: Record<string, number>;
-      topAnswer?: {
-        label: string;
-        count: number;
-        percentage: number;
-      };
-    }
-  >;
-  survey: CandidateSurvey | null;
-} {
-  const supporters = getVotersByCandidateId(candidateId);
-  const survey = getSurveyByCandidateId(candidateId);
-
-  if (!survey) {
-    return {
-      totalResponses: 0,
-      completionRate: 0,
-      questionBreakdown: {},
-      survey: null,
-    };
-  }
-
-  // Count voters who have survey answers
-  const votersWithAnswers = supporters.filter(
-    (voter) =>
-      voter.surveyAnswers && Object.keys(voter.surveyAnswers).length > 0,
-  );
-
-  const totalResponses = votersWithAnswers.length;
-  const completionRate =
-    supporters.length > 0
-      ? Math.round((totalResponses / supporters.length) * 100)
-      : 0;
-
-  // Aggregate responses by question
-  const questionBreakdown: Record<
-    string,
-    {
-      questionId: string;
-      questionText: string;
-      responseCount: number;
-      responses: Record<string, number>;
-      topAnswer?: {
-        label: string;
-        count: number;
-        percentage: number;
-      };
-    }
-  > = {};
-
-  survey.questions.forEach((question) => {
-    const responses: Record<string, number> = {};
-
-    votersWithAnswers.forEach((voter) => {
-      const answer = voter.surveyAnswers?.[question.id];
-      if (answer) {
-        if (Array.isArray(answer)) {
-          // Multiple choice - count each selected option
-          answer.forEach((option) => {
-            if (!option.endsWith("_other_text")) {
-              responses[option] = (responses[option] || 0) + 1;
-            }
-          });
-        } else if (typeof answer === "string") {
-          // Single choice or text
-          if (!answer.endsWith("_other_text")) {
-            responses[answer] = (responses[answer] || 0) + 1;
-          }
-        }
-      }
-    });
-
-    // Find top answer
-    let topAnswer:
-      | { label: string; count: number; percentage: number }
-      | undefined;
-    const totalResponseCount = Object.values(responses).reduce(
-      (sum, count) => sum + count,
-      0,
-    );
-
-    if (totalResponseCount > 0) {
-      const entries = Object.entries(responses);
-      const topEntry = entries.reduce((max, [key, count]) =>
-        count > max[1] ? [key, count] : max,
-      );
-
-      // Find the label for this option
-      const option = question.options?.find((opt) => opt.id === topEntry[0]);
-      const label = option?.label || topEntry[0];
-
-      topAnswer = {
-        label,
-        count: topEntry[1],
-        percentage: Math.round((topEntry[1] / totalResponseCount) * 100),
-      };
-    }
-
-    questionBreakdown[question.id] = {
-      questionId: question.id,
-      questionText: question.question,
-      responseCount: totalResponseCount,
-      responses,
-      topAnswer,
-    };
-  });
-
-  return {
-    totalResponses,
-    completionRate,
-    questionBreakdown,
-    survey,
-  };
-}
-
-// Get support strength metric - Calculates a support strength percentage based on various factors
-// For now, uses survey completion rate as a proxy
+// Get support strength metric - Calculates a support strength percentage based on registration coverage
 export function getSupportStrength(candidateId: string): number {
   const supporters = getVotersByCandidateId(candidateId);
   if (supporters.length === 0) return 0;
 
-  const surveyAnalytics = getSurveyAnalytics(candidateId);
-  const completionRate = surveyAnalytics.completionRate;
+  const wardCoverage = getWardCoverage(candidateId);
 
-  // Support strength is based on engagement (survey completion)
+  // Support strength is based on field coverage
   // In a real system, this might include other factors like:
   // - Recency of registration
   // - Activity levels
-  // - Survey response quality
-  // For demo, we'll use completion rate as the main metric
-  return completionRate;
+  // - Ward coverage breadth
+  return wardCoverage.coveragePercentage;
 }
 
 // Get comprehensive dashboard data for a candidate - Aggregates all key metrics in one call
@@ -449,7 +318,6 @@ export function getCandidateDashboardData(candidateId: string): {
   pollingUnitStats: ReturnType<typeof getPollingUnitStats>;
   demographics: ReturnType<typeof getDemographics>;
   registrationTrends: ReturnType<typeof getRegistrationTrends>;
-  surveyAnalytics: ReturnType<typeof getSurveyAnalytics>;
   supportStrength: number;
 } {
   return {
@@ -458,7 +326,6 @@ export function getCandidateDashboardData(candidateId: string): {
     pollingUnitStats: getPollingUnitStats(candidateId),
     demographics: getDemographics(candidateId),
     registrationTrends: getRegistrationTrends(candidateId, "daily"),
-    surveyAnalytics: getSurveyAnalytics(candidateId),
     supportStrength: getSupportStrength(candidateId),
   };
 }

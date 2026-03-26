@@ -36,7 +36,7 @@ export function DeleteCandidateDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className="rounded-sm">
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
@@ -46,10 +46,15 @@ export function DeleteCandidateDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel
+            disabled={isLoading}
+            className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+          >
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
-            className="bg-destructive hover:bg-destructive/90"
+            className="bg-destructive hover:bg-destructive/90 rounded-sm font-mono text-[11px] tracking-widest uppercase"
             disabled={isLoading}
           >
             {isLoading ? (

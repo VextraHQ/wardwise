@@ -8,7 +8,7 @@ import {
   IconSettings,
 } from "@tabler/icons-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +36,6 @@ export function AdminNavUser() {
   const user = {
     name: session?.user?.name || "Admin",
     email: session?.user?.email || "admin@wardwise.ng",
-    avatar: session?.user?.image || "/avatars/admin.jpg",
   };
 
   return (
@@ -48,9 +47,8 @@ export function AdminNavUser() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="text-primary-foreground bg-primary rounded-lg">
+              <Avatar className="h-8 w-8 rounded-sm">
+                <AvatarFallback className="text-primary-foreground bg-primary rounded-sm">
                   {user.name.charAt(0)}
                 </AvatarFallback>
               </Avatar>
@@ -64,16 +62,15 @@ export function AdminNavUser() {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-sm"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">
+                <Avatar className="h-8 w-8 rounded-sm">
+                  <AvatarFallback className="rounded-sm">
                     {user.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>

@@ -151,10 +151,12 @@ export function ChartPatternsShowcase() {
       </div>
 
       {/* Area Chart - Registration Trends */}
-      <Card>
+      <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>
-          <CardTitle>Area Chart - Registration Trends</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-sm font-semibold tracking-tight">
+            Area Chart - Registration Trends
+          </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-sm">
             Use for showing trends over time with filled area
           </CardDescription>
         </CardHeader>
@@ -185,10 +187,12 @@ export function ChartPatternsShowcase() {
       </Card>
 
       {/* Bar Chart - Ward Comparison */}
-      <Card>
+      <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>
-          <CardTitle>Bar Chart - Ward Comparison</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-sm font-semibold tracking-tight">
+            Bar Chart - Ward Comparison
+          </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-sm">
             Use for comparing values across categories
           </CardDescription>
         </CardHeader>
@@ -208,10 +212,12 @@ export function ChartPatternsShowcase() {
 
       {/* Pie Chart - Demographics */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card className="border-border/60 rounded-sm shadow-none">
           <CardHeader>
-            <CardTitle>Pie Chart - Age Distribution</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-sm font-semibold tracking-tight">
+              Pie Chart - Age Distribution
+            </CardTitle>
+            <CardDescription className="text-muted-foreground mt-1 text-sm">
               Use for showing proportional distributions
             </CardDescription>
           </CardHeader>
@@ -243,10 +249,14 @@ export function ChartPatternsShowcase() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border/60 rounded-sm shadow-none">
           <CardHeader>
-            <CardTitle>Pie Chart - Gender Distribution</CardTitle>
-            <CardDescription>Simple two-category distribution</CardDescription>
+            <CardTitle className="text-sm font-semibold tracking-tight">
+              Pie Chart - Gender Distribution
+            </CardTitle>
+            <CardDescription className="text-muted-foreground mt-1 text-sm">
+              Simple two-category distribution
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer
@@ -278,10 +288,12 @@ export function ChartPatternsShowcase() {
       </div>
 
       {/* Line Chart - Survey Responses */}
-      <Card>
+      <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>
-          <CardTitle>Line Chart - Survey Response Trends</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-sm font-semibold tracking-tight">
+            Line Chart - Survey Response Trends
+          </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-sm">
             Use for showing trends without filled area
           </CardDescription>
         </CardHeader>
@@ -310,10 +322,12 @@ export function ChartPatternsShowcase() {
       </Card>
 
       {/* Composed Chart - Multiple Metrics */}
-      <Card>
+      <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>
-          <CardTitle>Composed Chart - Multiple Metrics</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-sm font-semibold tracking-tight">
+            Composed Chart - Multiple Metrics
+          </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-sm">
             Combine bars and lines for different data types
           </CardDescription>
         </CardHeader>
@@ -337,10 +351,12 @@ export function ChartPatternsShowcase() {
       </Card>
 
       {/* Radial Bar Chart - Support Strength */}
-      <Card>
+      <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>
-          <CardTitle>Radial Bar Chart - Support Strength</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-sm font-semibold tracking-tight">
+            Radial Bar Chart - Support Strength
+          </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-sm">
             Use for showing progress or percentage metrics
           </CardDescription>
         </CardHeader>

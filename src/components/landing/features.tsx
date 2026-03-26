@@ -84,7 +84,7 @@ const features = [
     tag: "OPERATIONAL",
     title: "Field Synchronization",
     description:
-      "Proprietary low-latency sync protocols allow canvassers to register voters in offline wards and auto-sync upon reconnection.",
+      "Proprietary low-latency sync protocols allow canvassers to register supporters in offline wards and auto-sync upon reconnection.",
     visual: (
       <div className="bg-muted/10 relative flex h-full w-full flex-col justify-center px-12">
         <div className="mb-3 flex items-center justify-between">
@@ -142,12 +142,12 @@ const features = [
     tag: "GOVERNANCE",
     title: "Role-Based Integrity",
     description:
-      "Every voter record is cryptographically signed and auditable, with restricted access for canvassers, analysts, and candidates.",
+      "Every constituent record is cryptographically signed and auditable, with restricted access for canvassers, analysts, and candidates.",
     visual: (
       <div className="bg-muted/20 relative flex h-full w-full flex-col justify-center gap-6 p-10 lg:p-14">
         {[
           {
-            role: "VOTER",
+            role: "MANAGER",
             color: "bg-primary",
             percentage: 100,
             access: "RW_CORE",
@@ -313,7 +313,7 @@ export function FeaturesSection() {
               Integrity-First Architecture
             </h4>
             <p className="text-muted-foreground max-w-lg text-base leading-relaxed">
-              Unlike generic survey tools, WardWise is architected to handle the
+              Unlike generic field tools, WardWise is architected to handle the
               complexity of large-scale field operations with absolute data
               transparency.
             </p>

@@ -46,8 +46,8 @@ export function DemoIndicator({
       >
         <HiInformationCircle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
         <span>
-          <span className="font-semibold">Demo Mode:</span> Using sample data for
-          demonstration purposes.
+          <span className="font-semibold">Demo Mode:</span> Using sample data
+          for demonstration purposes.
         </span>
       </div>
     );

@@ -26,15 +26,35 @@ export function AdminHeader() {
   // Check if any queries are fetching
   const isRefreshing = queryClient.isFetching({ queryKey: ["admin"] }) > 0;
 
-  // Get breadcrumb title based on pathname
   const getBreadcrumbTitle = () => {
+    if (pathname.startsWith("/admin/candidates")) {
+      return "Candidates";
+    }
     if (pathname === "/admin") return "Dashboard";
+    if (pathname.startsWith("/admin/collect")) return "Collect";
+    if (pathname.startsWith("/admin/geo")) return "Geo Data";
     if (pathname.includes("/analytics")) return "Analytics";
     if (pathname.includes("/activity")) return "Activity Logs";
     if (pathname.includes("/settings")) return "Settings";
     if (pathname.includes("/help")) return "Help & Documentation";
     if (pathname.includes("/export")) return "Export Data";
-    return "Admin Dashboard";
+    return "Candidate Management";
+  };
+
+  const getDescription = () => {
+    if (pathname === "/admin") {
+      return "Platform overview for candidate coverage, readiness, and upcoming Collect operations";
+    }
+
+    if (pathname.startsWith("/admin/candidates")) {
+      return "Dedicated candidate account management with search, filters, and account actions";
+    }
+
+    if (pathname.startsWith("/admin/geo")) {
+      return "Browse and manage geographic data across Nigeria";
+    }
+
+    return "Administrative controls and management";
   };
 
   return (
@@ -47,21 +67,25 @@ export function AdminHeader() {
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h1 className="truncate text-sm font-semibold sm:text-base">
+            <span className="text-foreground/50 hidden font-mono text-[10px] font-black tracking-[0.2em] uppercase sm:inline-block">
+              Admin
+            </span>
+            <span className="text-foreground/30 hidden font-mono text-xs sm:inline-block">
+              {"//"}
+            </span>
+            <h1 className="truncate text-sm font-bold tracking-tight">
               {getBreadcrumbTitle()}
             </h1>
             <Badge
-              variant="default"
-              className="bg-primary/10 text-primary border-primary/20 hidden items-center gap-1 sm:inline-flex"
+              variant="outline"
+              className="bg-primary/10 text-primary border-primary/20 hidden items-center gap-1 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase sm:inline-flex"
             >
               <HiOutlineShieldCheck className="h-3 w-3" />
               <span>Super Admin</span>
             </Badge>
           </div>
-          <p className="text-muted-foreground hidden truncate text-xs sm:block">
-            {pathname === "/admin"
-              ? "Manage all users, candidates, and platform settings"
-              : "Administrative controls and management"}
+          <p className="text-muted-foreground hidden truncate text-sm sm:block">
+            {getDescription()}
           </p>
         </div>
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
@@ -70,17 +94,22 @@ export function AdminHeader() {
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="gap-1.5"
+            className="gap-1.5 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
           >
             <HiOutlineRefresh
               className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
             />
             <span className="hidden sm:inline">Refresh</span>
           </Button>
-          <Button variant="outline" asChild size="sm" className="gap-1.5">
+          <Button
+            variant="ghost"
+            asChild
+            size="sm"
+            className="text-foreground/50 gap-1.5 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase transition-colors hover:text-gray-200"
+          >
             <Link href="/" aria-label="Home">
               <HiOutlineHome className="size-4" />
-              <span className="hidden sm:inline">Home</span>
+              <span className="hidden sm:inline">Exit</span>
             </Link>
           </Button>
         </div>

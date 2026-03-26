@@ -25,7 +25,9 @@ export function NavDocuments({
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Tools</SidebarGroupLabel>
+      <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+        Tools
+      </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const isActive = pathname === item.url;

@@ -27,12 +27,9 @@ export const ninSchema = z
   .refine((nin) => !/^(\d)\1{10}$/.test(nin), {
     message: "NIN cannot be all the same digit",
   })
-  .refine(
-    (nin) => nin !== "12345678901" && nin !== "01234567890",
-    {
-      message: "Please enter a valid NIN (sequential patterns not allowed)",
-    }
-  );
+  .refine((nin) => nin !== "12345678901" && nin !== "01234567890", {
+    message: "Please enter a valid NIN (sequential patterns not allowed)",
+  });
 
 // VIN (Voter Identification Number) validation - 19-20 digits
 const VIN_REGEX = /^\d{19,20}$/;

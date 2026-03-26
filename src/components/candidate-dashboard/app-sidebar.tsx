@@ -3,18 +3,12 @@
 import * as React from "react";
 import {
   IconChartBar,
-  IconCreditCard,
   IconDashboard,
   IconFileDescription,
   IconHelp,
   IconMapPin,
-  IconReport,
   IconSettings,
-  IconShieldCheck,
   IconUsers,
-  IconPlus,
-  IconClipboardList,
-  IconMessageCircle,
   IconBell,
 } from "@tabler/icons-react";
 
@@ -52,11 +46,6 @@ const data = {
       icon: IconUsers,
     },
     {
-      title: "Surveys",
-      url: "/dashboard/surveys",
-      icon: IconClipboardList,
-    },
-    {
       title: "Analytics",
       url: "/dashboard/analytics",
       icon: IconChartBar,
@@ -66,28 +55,8 @@ const data = {
       url: "/dashboard/wards",
       icon: IconMapPin,
     },
-    {
-      title: "Verification",
-      url: "/dashboard/verification",
-      icon: IconShieldCheck,
-    },
-    {
-      title: "Plans & Pricing",
-      url: "/dashboard/pricing",
-      icon: IconCreditCard,
-    },
   ],
   quickActions: [
-    {
-      title: "Create Survey",
-      url: "/dashboard/surveys/create",
-      icon: IconPlus,
-    },
-    {
-      title: "Send Message",
-      url: "/dashboard/messages",
-      icon: IconMessageCircle,
-    },
     {
       title: "Notifications",
       url: "/dashboard/notifications",
@@ -108,29 +77,14 @@ const data = {
   ],
   documents: [
     {
-      name: "Campaign Reports",
-      url: "/dashboard/reports",
-      icon: IconReport,
-    },
-    {
       name: "Export Data",
       url: "/dashboard/export",
       icon: IconFileDescription,
     },
     {
-      name: "Messages",
-      url: "/dashboard/messages",
-      icon: IconMessageCircle,
-    },
-    {
       name: "Notifications",
       url: "/dashboard/notifications",
       icon: IconBell,
-    },
-    {
-      name: "Chart Patterns",
-      url: "/dashboard/charts",
-      icon: IconChartBar,
     },
   ],
 };
@@ -146,10 +100,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:p-0!"
             >
               <Link href="/">
-                <div className="from-primary flex size-8 items-center justify-center rounded-lg bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
+                <div className="from-primary flex size-8 items-center justify-center rounded-sm bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
                   <HiMap className="h-4 w-4" />
                 </div>
-                <span className="text-base font-semibold">WardWise</span>
+                <span className="text-base font-bold tracking-tight">
+                  WardWise
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

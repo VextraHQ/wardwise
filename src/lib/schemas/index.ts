@@ -5,4 +5,3 @@ export * from "./common-schemas";
 export * from "./admin-schemas";
 export * from "./auth-schemas";
 export * from "./registration-schemas";
-export * from "./voter-schemas";

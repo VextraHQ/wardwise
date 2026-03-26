@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -11,21 +10,23 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   IconCheck,
-  IconCrown,
   IconShieldCheck,
   IconUsers,
   IconPhone,
   IconMail,
   IconMessageCircle,
-  IconFingerprint,
   IconReportAnalytics,
   IconHeadset,
   IconMapPin,
   IconDatabase,
   IconStar,
-  IconChevronDown,
-  IconChevronUp,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 
@@ -77,7 +78,7 @@ const PLANS: PricingPlan[] = [
         included: true,
       },
       {
-        text: "Candidate preferences",
+        text: "Supporter preferences",
         icon: <IconDatabase className="size-4" />,
         included: true,
       },
@@ -94,11 +95,6 @@ const PLANS: PricingPlan[] = [
       {
         text: "SMS/email outreach tools",
         icon: <IconMessageCircle className="size-4" />,
-        included: false,
-      },
-      {
-        text: "NIN identity verification",
-        icon: <IconFingerprint className="size-4" />,
         included: false,
       },
     ],
@@ -133,16 +129,6 @@ const PLANS: PricingPlan[] = [
         included: true,
       },
       {
-        text: "Phone OTP verification",
-        icon: <IconShieldCheck className="size-4" />,
-        included: true,
-      },
-      {
-        text: "NIN identity verification",
-        icon: <IconFingerprint className="size-4" />,
-        included: false,
-      },
-      {
         text: "Deduplication report",
         icon: <IconReportAnalytics className="size-4" />,
         included: false,
@@ -154,9 +140,9 @@ const PLANS: PricingPlan[] = [
   {
     id: "premium",
     name: "Premium",
-    description: "Full identity verification with deduplication",
+    description: "Full analytics with advanced field insights",
     price: "\u20A6300,000",
-    priceDetail: "per month, per LGA + \u20A6500/verification",
+    priceDetail: "per month, per LGA",
     badge: "Recommended",
     highlighted: true,
     features: [
@@ -166,17 +152,12 @@ const PLANS: PricingPlan[] = [
         included: true,
       },
       {
-        text: "NIN identity verification",
-        icon: <IconFingerprint className="size-4" />,
-        included: true,
-      },
-      {
         text: "Deduplication report",
         icon: <IconReportAnalytics className="size-4" />,
         included: true,
       },
       {
-        text: "Verified voter badge",
+        text: "GPS field tracking",
         icon: <IconShieldCheck className="size-4" />,
         included: true,
       },
@@ -190,11 +171,6 @@ const PLANS: PricingPlan[] = [
         icon: <IconReportAnalytics className="size-4" />,
         included: true,
       },
-      {
-        text: "Custom verification campaigns",
-        icon: <IconCrown className="size-4" />,
-        included: true,
-      },
     ],
     cta: "Upgrade to Premium",
     ctaVariant: "default",
@@ -203,14 +179,9 @@ const PLANS: PricingPlan[] = [
 
 const FAQ_ITEMS = [
   {
-    question: "How does voter verification work?",
-    answer:
-      "Verification is a tiered process. At the Starter level, you get access to voter registration data. Standard adds phone OTP verification to confirm contact details. Premium includes NIN identity verification through NIMC, confirming each voter's identity against national records.",
-  },
-  {
     question: "What's included in each plan?",
     answer:
-      "Each plan builds on the previous tier. Starter gives you database access with names, locations, and candidate preferences. Standard adds contact information and outreach tools. Premium adds full identity verification and deduplication reports.",
+      "Each plan builds on the previous tier. Starter gives you database access with names, locations, and candidate preferences. Standard adds contact information and outreach tools. Premium adds deduplication reports and advanced analytics.",
   },
   {
     question: "Can I change plans at any time?",
@@ -218,15 +189,13 @@ const FAQ_ITEMS = [
       "Yes, you can upgrade or downgrade your plan at any time. When upgrading, the price difference is prorated for the remainder of your billing cycle. Downgrades take effect at the start of your next billing cycle.",
   },
   {
-    question: "How is verification billed?",
+    question: "How does billing work?",
     answer:
-      "Verification costs are per-voter on top of your monthly subscription. Phone OTP verification (Standard) costs \u20A610 per verification. NIN identity verification (Premium) costs \u20A6500 per verification. You only pay for verifications you initiate.",
+      "Plans are billed monthly per LGA. SMS outreach (Standard and above) is billed per message at \u20A610 each. You only pay for outreach you initiate.",
   },
 ];
 
 export function PricingContent() {
-  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
-
   const handleUpgrade = (planId: string) => {
     toast.info("Payment integration coming soon", {
       description: `Upgrade to ${planId} plan will be available when payment processing is connected.`,
@@ -241,13 +210,16 @@ export function PricingContent() {
           <h1 className="text-2xl font-semibold tracking-tight">
             Plans & Pricing
           </h1>
-          <Badge variant="outline" className="text-xs font-medium">
+          <Badge
+            variant="outline"
+            className="rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
+          >
             Demo Pricing
           </Badge>
         </div>
         <p className="text-muted-foreground text-sm">
-          Choose the right plan for your campaign. Access voter data, contact
-          information, and identity verification based on your needs.
+          Choose the right plan for your campaign. Access supporter data,
+          contact information, and advanced analytics based on your needs.
         </p>
       </div>
 
@@ -256,30 +228,33 @@ export function PricingContent() {
         {PLANS.map((plan) => (
           <Card
             key={plan.id}
-            className={`relative flex flex-col ${
+            className={`relative flex flex-col rounded-sm shadow-none ${
               plan.highlighted
                 ? "border-primary ring-primary/20 ring-2"
-                : "border-border"
+                : "border-border/60"
             }`}
           >
             {plan.badge && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground gap-1 px-3 py-1 text-xs font-bold">
+                <Badge className="bg-primary text-primary-foreground gap-1 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase">
                   <IconStar className="size-3" />
                   {plan.badge}
                 </Badge>
               </div>
             )}
-            <CardHeader className={plan.badge ? "pt-6" : ""}>
-              <CardTitle className="text-lg">{plan.name}</CardTitle>
-              <CardDescription>{plan.description}</CardDescription>
+            <CardHeader className={plan.badge ? "pt-6 pb-3" : "pb-3"}>
+              <CardTitle className="text-sm font-semibold tracking-tight">
+                {plan.name}
+              </CardTitle>
+              <CardDescription className="text-muted-foreground mt-1 text-sm">
+                {plan.description}
+              </CardDescription>
               <div className="pt-2">
-                <span className="text-foreground text-3xl font-bold">
+                <span className="text-foreground font-mono text-3xl font-bold tracking-tight">
                   {plan.price}
                 </span>
-                <span className="text-muted-foreground ml-1 text-sm">
-                  /{" "}
-                  {plan.priceDetail}
+                <span className="text-muted-foreground ml-1 font-mono text-[11px] tracking-widest uppercase">
+                  / {plan.priceDetail}
                 </span>
               </div>
             </CardHeader>
@@ -297,7 +272,7 @@ export function PricingContent() {
                       {feature.included ? (
                         <IconCheck className="size-3" />
                       ) : (
-                        <span className="text-[10px]">&mdash;</span>
+                        <span className="text-[11px]">&mdash;</span>
                       )}
                     </div>
                     <span
@@ -315,7 +290,7 @@ export function PricingContent() {
               <div className="mt-6">
                 <Button
                   variant={plan.ctaVariant}
-                  className="w-full"
+                  className="w-full rounded-sm font-mono text-[11px] tracking-widest uppercase"
                   disabled={plan.currentPlan}
                   onClick={() => handleUpgrade(plan.id)}
                 >
@@ -328,8 +303,8 @@ export function PricingContent() {
       </div>
 
       {/* Enterprise Callout */}
-      <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="flex flex-col items-center gap-4 py-6 sm:flex-row sm:justify-between">
+      <Card className="border-primary/20 bg-primary/5 rounded-sm shadow-none">
+        <CardContent className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
           <div>
             <h3 className="text-foreground font-semibold">
               Need custom volume pricing?
@@ -341,7 +316,7 @@ export function PricingContent() {
           </div>
           <Button
             variant="outline"
-            className="shrink-0"
+            className="shrink-0 rounded-sm font-mono text-[11px] tracking-widest uppercase"
             onClick={() =>
               toast.info("Contact sales at enterprise@wardwise.ng")
             }
@@ -352,35 +327,30 @@ export function PricingContent() {
       </Card>
 
       {/* FAQ Section */}
-      <div>
-        <h2 className="mb-4 text-lg font-semibold tracking-tight">
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold tracking-tight">
           Frequently Asked Questions
         </h2>
-        <div className="space-y-2">
+        <Accordion
+          type="single"
+          collapsible
+          className="border-border/60 rounded-sm border"
+        >
           {FAQ_ITEMS.map((item, i) => (
-            <Card key={i} className="overflow-hidden">
-              <button
-                type="button"
-                className="hover:bg-muted/50 flex w-full items-center justify-between px-4 py-3 text-left transition-colors"
-                onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
-              >
-                <span className="text-foreground text-sm font-medium">
-                  {item.question}
-                </span>
-                {expandedFaq === i ? (
-                  <IconChevronUp className="text-muted-foreground size-4 shrink-0" />
-                ) : (
-                  <IconChevronDown className="text-muted-foreground size-4 shrink-0" />
-                )}
-              </button>
-              {expandedFaq === i && (
-                <div className="border-border border-t px-4 py-3">
-                  <p className="text-muted-foreground text-sm">{item.answer}</p>
-                </div>
-              )}
-            </Card>
+            <AccordionItem
+              key={i}
+              value={`faq-${i}`}
+              className="border-border/60 px-4 last:border-b-0"
+            >
+              <AccordionTrigger className="py-4 text-sm font-medium transition-all hover:no-underline!">
+                {item.question}
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4 text-sm leading-relaxed">
+                {item.answer}
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </div>
     </div>
   );

@@ -8,32 +8,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
 model User {
   id          String     @id @default(cuid())
   name        String?
@@ -43,87 +17,63 @@ model User {
   candidateId String?    @unique
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  accounts    Account[]
-  sessions    Session[]
   candidate   Candidate? @relation(fields: [candidateId], references: [id])
 }
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
-
 model Candidate {
-  id           String   @id @default(cuid())
-  name         String
-  party        String
-  position     String
-  isNational   Boolean  @default(false)
-  state        String?
-  lga          String?
-  constituency String?
-  description  String?
-  supporters   Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User?
-  voterSelections VoterCandidateSelection[]
-  canvassers   Canvasser[]
-  subscriptions Subscription[]
-  verificationCampaigns VerificationCampaign[]
+  id               String   @id @default(cuid())
+  name             String
+  party            String
+  position         String
+  isNational       Boolean  @default(false)
+  stateCode        String?  // 2-letter code (e.g. "AD", "LA")
+  lga              String?
+  constituency     String?
+  description      String?
+  phone            String?
+  title            String?  // Honorific: Hon., Sen., Dr., Chief, Alh.
+  onboardingStatus String   @default("pending") // "pending" | "credentials_sent" | "active" | "suspended"
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User?
+  canvassers       Canvasser[]
+  campaigns        Campaign[]
 }
 
 model Voter {
   id                 String     @id @default(cuid())
-  nin                String     @unique
+  nin                String?    @unique   // Optional — canvasser can register without NIN if person doesn't know it
   firstName          String
   middleName         String?
   lastName           String
-  dateOfBirth        DateTime
-  email              String     @unique
-  phoneNumber        String
+  dateOfBirth        DateTime?  // Made optional for field registration
+  yearOfBirth        Int?       // Simpler alternative to dateOfBirth for field capture
+  email              String?    // Not collected in field — optional, no unique constraint
+  phoneNumber        String     // Primary contact channel & secondary dedup key
   gender             String?
-  occupation         String?
-  religion           String?
-  age                Int
+  occupation         String?    // Keep optional (Phase 2 field)
+  religion           String?    // Keep optional (Phase 2 field)
+  age                Int?       // Derived from yearOfBirth, made optional
   state              String
   lga                String
   ward               String
   pollingUnit        String
   role               String     @default("voter")
-  vin                String?    // Legacy VIN field - optional, may not be populated
+  vin                String?    // Legacy VIN field — optional
   canvasserCode      String?
-  surveyAnswers      Json?
-  ninVerifiedAt      DateTime?  // When NIN was verified via paid verification campaign
-  phoneVerifiedAt    DateTime?  // When phone was verified via SMS OTP
-  ninVerificationStatus String? // "verified" | "failed" | "pending"
-  phoneVerificationStatus String? // "verified" | "failed" | "pending"
+
+  // New fields for canvasser workflow
+  supportLevel       String?    // "strong" | "leaning" | "undecided"
+  contactOutcome     String?    // "spoke_to" | "not_home" | "refused"
+  gpsLatitude        Float?     // Silent GPS auto-capture
+  gpsLongitude       Float?     // Silent GPS auto-capture
+  consentGiven       Boolean    @default(false) // NDPA compliance
+  notes              String?    // Canvasser notes about the voter
+
   registrationDate   DateTime   @default(now())
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
-  lastCompletedStep  String?    // "nin" | "profile" | "location" | "candidate" | "canvasser" | "confirm"
-  surveyCompleted    Boolean?   @default(false)
-  candidateSelections VoterCandidateSelection[]
   canvasser          Canvasser? @relation(fields: [canvasserCode], references: [code])
-}
-
-model VoterCandidateSelection {
-  id          String    @id @default(cuid())
-  voterId     String
-  candidateId String
-  position    String
-  createdAt   DateTime  @default(now())
-
-  voter       Voter     @relation(fields: [voterId], references: [id], onDelete: Cascade)
-  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-
-  @@unique([voterId, position])
-  @@index([voterId])
-  @@index([candidateId])
-  @@index([position])
 }
 
 model Canvasser {
@@ -145,69 +95,103 @@ model Canvasser {
   @@index([code])
 }
 
-model Subscription {
-  id                String   @id @default(cuid())
-  candidateId       String
-  tier              String   // "starter" | "standard" | "premium"
-  status            String   @default("active") // "active" | "cancelled" | "expired"
-  startDate         DateTime @default(now())
-  endDate           DateTime?
-  monthlyPrice      Int      // In kobo (₦50,000 = 5000000)
-  verificationCredits Int    @default(0) // Number of NIN verifications available
-  smsCredits        Int      @default(0) // Number of SMS available
-  autoRenew         Boolean  @default(true)
-  paymentProvider   String?  // "paystack" | "flutterwave"
-  paymentReference  String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+// === Collect: Geo Models (database-backed) ===
 
-  candidate         Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+model Lga {
+  id          Int      @id @default(autoincrement())
+  name        String
+  stateCode   String   @default("AD")
+  wards       Ward[]
+  submissions CollectSubmission[]
 
-  @@index([candidateId])
-  @@index([status])
+  @@unique([name, stateCode])
+  @@index([stateCode])
 }
 
-model VerificationCampaign {
-  id                String   @id @default(cuid())
-  candidateId       String
-  name              String   // e.g., "Lagos West NIN Verification - Jan 2026"
-  type              String   // "nin" | "phone" | "both"
-  status            String   @default("pending") // "pending" | "running" | "completed" | "failed"
-  targetCount       Int      // How many voters to verify
-  completedCount    Int      @default(0)
-  successCount      Int      @default(0)
-  failedCount       Int      @default(0)
-  costPerCheck      Int      // In kobo (₦500 = 50000)
-  totalCost         Int      @default(0)
-  filters           Json?    // Store ward/LGA/state filters
-  startedAt         DateTime?
-  completedAt       DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+model Ward {
+  id           Int           @id @default(autoincrement())
+  name         String
+  lgaId        Int
+  lga          Lga           @relation(fields: [lgaId], references: [id])
+  pollingUnits PollingUnit[]
+  submissions  CollectSubmission[]
 
-  candidate         Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-  verificationRecords VerificationRecord[]
-
-  @@index([candidateId])
-  @@index([status])
+  @@unique([name, lgaId])
 }
 
-model VerificationRecord {
-  id                String   @id @default(cuid())
-  campaignId        String
-  voterId           String
-  verificationType  String   // "nin" | "phone"
-  status            String   // "success" | "failed" | "pending"
-  provider          String?  // "smileid" | "nimc" | "termii"
-  providerResponse  Json?    // Raw API response
-  errorMessage      String?
-  cost              Int      // In kobo
-  verifiedAt        DateTime?
-  createdAt         DateTime @default(now())
+model PollingUnit {
+  id          Int    @id @default(autoincrement())
+  code        String @default("")
+  name        String
+  wardId      Int
+  ward        Ward   @relation(fields: [wardId], references: [id])
+  submissions CollectSubmission[]
 
-  campaign          VerificationCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  @@unique([name, wardId])
+  @@index([wardId])
+  @@index([code])
+}
 
+// === Collect: Campaign & Submission Models ===
+
+model Campaign {
+  id               String   @id @default(uuid())
+  candidateId      String
+  candidate        Candidate @relation(fields: [candidateId], references: [id])
+  slug             String   @unique
+  candidateName    String
+  candidateTitle   String?
+  party            String
+  constituency     String
+  constituencyType String   // "federal" | "state" | "lga"
+  enabledLgaIds    Int[]
+  requireApcReg    String   @default("optional")  // "required" | "optional" | "hidden"
+  requireVoterId   String   @default("optional")
+  customQuestion1  String?
+  customQuestion2  String?
+  status           String   @default("draft")     // "draft" | "active" | "paused" | "closed"
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  submissions      CollectSubmission[]
+}
+
+model CollectSubmission {
+  id               String   @id @default(uuid())
+  campaignId       String
+  campaign         Campaign @relation(fields: [campaignId], references: [id])
+  fullName         String
+  phone            String
+  email            String?
+  sex              String
+  age              Int
+  occupation       String
+  maritalStatus    String
+  lgaId            Int?
+  lga              Lga?        @relation(fields: [lgaId], references: [id])
+  lgaName          String
+  wardId           Int?
+  ward             Ward?       @relation(fields: [wardId], references: [id])
+  wardName         String
+  pollingUnitId    Int?
+  pollingUnit      PollingUnit? @relation(fields: [pollingUnitId], references: [id])
+  pollingUnitName  String
+  apcRegNumber     String?
+  voterIdNumber    String?
+  isVerified       Boolean  @default(false)
+  role             String   // "women_leader" | "coordinator" | "youth_leader" | "member"
+  customAnswer1    String?
+  customAnswer2    String?
+  canvasserName    String?
+  canvasserPhone   String?
+  isFlagged        Boolean  @default(false)
+  adminNotes       String?
+  createdAt        DateTime @default(now())
+
+  @@unique([campaignId, phone])
+  @@unique([campaignId, voterIdNumber])
   @@index([campaignId])
-  @@index([voterId])
-  @@index([status])
+  @@index([createdAt])
+  @@index([lgaId])
+  @@index([wardId])
+  @@index([pollingUnitId])
 }

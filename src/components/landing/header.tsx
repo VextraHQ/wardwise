@@ -3,25 +3,10 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Transition } from "@headlessui/react";
-import {
-  HiMenu,
-  HiX,
-  HiChip,
-  HiLockClosed,
-  HiUserGroup,
-  HiChevronDown,
-  HiDeviceMobile,
-} from "react-icons/hi";
+import { HiMenu, HiX, HiLockClosed } from "react-icons/hi";
 import { Logo } from "@/components/layout/logo";
 import { useSession } from "next-auth/react";
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { navigationLinks } from "@/lib/landing-data";
 import { cn } from "@/lib/utils";
 import { useClickOutside } from "@/hooks/use-click-outside";
@@ -103,82 +88,23 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                       : "Login"}
                 </Link>
               ) : (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="text-muted-foreground hover:text-foreground border-border hover:border-primary/50 hover:bg-primary/10 flex items-center gap-1.5 text-sm font-medium transition-colors"
-                    >
-                      <HiLockClosed className="h-3.5 w-3.5" />
-                      Access Portal
-                      <HiChevronDown className="h-3 w-3 opacity-60" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="border-border bg-card text-card-foreground p-1"
-                  >
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/voter-login"
-                        className="focus:bg-muted flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors"
-                      >
-                        <HiUserGroup className="text-muted-foreground h-4 w-4" />
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-foreground text-sm font-medium">
-                            Voter Login
-                          </span>
-                          <span className="text-muted-foreground text-[10px]">
-                            Profile Verification
-                          </span>
-                        </div>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/canvasser"
-                        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors focus:bg-orange-500/10"
-                      >
-                        <HiDeviceMobile className="h-4 w-4 text-orange-600" />
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-foreground text-sm font-medium">
-                            Canvasser Access
-                          </span>
-                          <span className="text-muted-foreground text-[10px]">
-                            Field agent sync
-                          </span>
-                        </div>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/login"
-                        className="focus:bg-primary/10 flex w-full cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors"
-                      >
-                        <HiChip className="text-primary h-4 w-4" />
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-foreground text-sm font-medium">
-                            Candidate Login
-                          </span>
-                          <span className="text-muted-foreground text-[10px]">
-                            Strategy dashboard
-                          </span>
-                        </div>
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Link
+                  href="/login"
+                  className="text-muted-foreground hover:text-foreground flex items-center gap-2 font-mono text-[10px] font-black tracking-widest uppercase transition-colors"
+                >
+                  <HiLockClosed className="h-3.5 w-3.5" />
+                  Candidate Login
+                </Link>
               )}
-              <Button
-                size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 rounded-full px-6 text-[11px] font-black tracking-widest uppercase transition-all active:scale-95"
-                asChild
+              <Link
+                href="/contact"
+                className="bg-primary text-primary-foreground hover:bg-primary/95 rounded-full px-6 py-2.5 font-mono text-[10px] font-black tracking-widest uppercase transition-transform active:scale-95"
               >
-                <Link href="/register">Support a Candidate</Link>
-              </Button>
+                Request a Demo
+              </Link>
             </div>
             <button
-              className="border-border bg-card/90 text-foreground hover:border-primary hover:text-primary inline-flex items-center justify-center rounded-lg border p-2 transition-colors duration-200 lg:hidden"
+              className="border-border bg-card/90 text-foreground hover:border-primary hover:text-primary inline-flex items-center justify-center rounded-sm border p-2 transition-colors duration-200 lg:hidden"
               type="button"
               onClick={() => setIsMobileOpen((prev) => !prev)}
               aria-label="Toggle navigation"
@@ -231,7 +157,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                 <a
                   key={link.section}
                   href={`#${link.section}`}
-                  className="hover:bg-muted hover:text-foreground focus-visible:ring-primary rounded-lg px-3 py-3 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  className="hover:bg-muted hover:text-foreground focus-visible:ring-primary rounded-sm px-3 py-3 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                   onClick={() => setIsMobileOpen(false)}
                 >
                   {link.label}
@@ -248,7 +174,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                         ? "/admin"
                         : "/login"
                   }
-                  className="border-border text-foreground hover:bg-foreground hover:text-background rounded-lg border px-4 py-3 text-center text-sm font-semibold transition-colors duration-200 hover:border-transparent"
+                  className="border-border text-foreground hover:bg-foreground hover:text-background rounded-sm border px-4 py-3 text-center text-sm font-semibold transition-colors duration-200 hover:border-transparent"
                   onClick={() => setIsMobileOpen(false)}
                 >
                   {session.user.role === "candidate"
@@ -258,39 +184,21 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                       : "Login"}
                 </Link>
               ) : (
-                <>
-                  <Link
-                    href="/voter-login"
-                    className="border-border text-foreground hover:bg-muted rounded-lg border px-4 py-2.5 text-center text-sm font-medium transition-colors duration-200"
-                    onClick={() => setIsMobileOpen(false)}
-                  >
-                    Voter Login
-                  </Link>
-                  <Link
-                    href="/canvasser"
-                    className="rounded-lg border border-orange-500/30 px-4 py-2.5 text-center text-sm font-medium text-orange-600 transition-colors duration-200 hover:bg-orange-500/5"
-                    onClick={() => setIsMobileOpen(false)}
-                  >
-                    Canvasser Access
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="border-primary/30 text-primary hover:bg-primary/5 rounded-lg border px-4 py-2.5 text-center text-sm font-medium transition-colors duration-200"
-                    onClick={() => setIsMobileOpen(false)}
-                  >
-                    Candidate Login
-                  </Link>
-                </>
-              )}
-              <Button
-                size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 mt-1 rounded-full transition-all duration-200"
-                asChild
-              >
-                <Link href="/register" onClick={() => setIsMobileOpen(false)}>
-                  Support a Candidate
+                <Link
+                  href="/login"
+                  className="border-primary/30 text-primary hover:bg-primary/5 rounded-sm border px-4 py-2.5 text-center text-sm font-medium transition-colors duration-200"
+                  onClick={() => setIsMobileOpen(false)}
+                >
+                  Candidate Login
                 </Link>
-              </Button>
+              )}
+              <Link
+                href="/contact"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 mt-1 rounded-full px-4 py-3 text-center text-sm font-bold transition-all duration-200"
+                onClick={() => setIsMobileOpen(false)}
+              >
+                Request a Demo
+              </Link>
             </div>
           </div>
         </div>

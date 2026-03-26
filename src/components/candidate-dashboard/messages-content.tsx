@@ -18,10 +18,12 @@ export function MessagesContent() {
         </p>
       </div>
 
-      <Card>
+      <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>
-          <CardTitle>Messages</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-sm font-semibold tracking-tight">
+            Messages
+          </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-sm">
             Messaging functionality will be implemented here
           </CardDescription>
         </CardHeader>

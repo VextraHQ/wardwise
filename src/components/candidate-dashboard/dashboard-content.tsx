@@ -12,16 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import Link from "next/link";
-import {
-  IconArrowRight,
-  IconClipboardList,
-  IconShieldCheck,
-  IconFingerprint,
-  IconUsers,
-} from "@tabler/icons-react";
+import { IconMapPin, IconUsers } from "@tabler/icons-react";
 
 export function DashboardContent() {
   const { data: dashboardData, isLoading, error } = useCandidateDashboard();
@@ -31,11 +22,14 @@ export function DashboardContent() {
       <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
         <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-32" />
+            <Skeleton
+              key={i}
+              className="border-border/50 bg-muted/20 h-32 rounded-sm border"
+            />
           ))}
         </div>
-        <Skeleton className="mx-4 h-64 lg:mx-6" />
-        <Skeleton className="h-96" />
+        <Skeleton className="border-border/50 bg-muted/20 mx-4 h-64 rounded-sm border lg:mx-6" />
+        <Skeleton className="border-border/50 bg-muted/20 mx-4 h-96 rounded-sm border lg:mx-6" />
       </div>
     );
   }
@@ -70,18 +64,6 @@ export function DashboardContent() {
       reviewer: ward.supporterCount > 0 ? "Active" : "Inactive",
     })) || [];
 
-  // Get survey analytics for top issues
-  const surveyAnalytics = dashboardData?.surveyAnalytics;
-  const topIssues = surveyAnalytics?.questionBreakdown
-    ? Object.values(surveyAnalytics.questionBreakdown)
-        .filter((q) => q.topAnswer && q.topAnswer.percentage > 0)
-        .sort(
-          (a, b) =>
-            (b.topAnswer?.percentage || 0) - (a.topAnswer?.percentage || 0),
-        )
-        .slice(0, 3)
-    : [];
-
   return (
     <div className="flex flex-1 flex-col gap-2">
       <div className="@container/main flex flex-1 flex-col gap-2">
@@ -91,148 +73,45 @@ export function DashboardContent() {
             <ChartAreaInteractive dashboardData={dashboardData} />
           </div>
           <div className="grid gap-4 px-4 md:grid-cols-2 lg:px-6">
-            {surveyAnalytics && surveyAnalytics.survey && (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Survey Insights</CardTitle>
-                      <CardDescription>
-                        Top responses from your active survey
-                      </CardDescription>
-                    </div>
-                    <Link
-                      href="/dashboard/surveys"
-                      className="text-primary hover:text-primary/80 flex items-center gap-1 text-sm font-medium"
-                    >
-                      View All
-                      <IconArrowRight className="size-4" />
-                    </Link>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between rounded-lg border p-3">
-                      <div className="flex items-center gap-3">
-                        <div className="bg-primary/10 flex size-10 items-center justify-center rounded-lg">
-                          <IconClipboardList className="text-primary size-5" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">
-                            {surveyAnalytics.survey.title}
-                          </p>
-                          <p className="text-muted-foreground text-xs">
-                            {surveyAnalytics.totalResponses} responses
-                          </p>
-                        </div>
-                      </div>
-                      <Badge variant="outline">
-                        {surveyAnalytics.completionRate}% complete
-                      </Badge>
-                    </div>
-
-                    {topIssues.length > 0 ? (
-                      <div className="space-y-3">
-                        <h3 className="text-sm font-medium">Top Issues</h3>
-                        {topIssues.map((issue) => (
-                          <div key={issue.questionId} className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium">
-                                {issue.questionText}
-                              </span>
-                              {issue.topAnswer && (
-                                <Badge variant="outline">
-                                  {issue.topAnswer.percentage}%
-                                </Badge>
-                              )}
-                            </div>
-                            {issue.topAnswer && (
-                              <>
-                                <p className="text-muted-foreground text-xs">
-                                  {issue.topAnswer.label}
-                                </p>
-                                <Progress
-                                  value={issue.topAnswer.percentage}
-                                  className="h-1.5"
-                                />
-                              </>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="rounded-lg border p-6 text-center">
-                        <p className="text-muted-foreground text-sm">
-                          No survey responses yet. Responses will appear here
-                          once supporters complete your survey.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            {/* Verification Stats Card */}
-            <Card>
+            {/* Ward Coverage Card */}
+            <Card className="border-border/60 rounded-sm shadow-none">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Verification Status</CardTitle>
-                    <CardDescription>
-                      Voter identity verification overview
+                  <div className="space-y-1">
+                    <CardTitle className="text-sm font-semibold tracking-tight">
+                      Ward Coverage
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+                      Registration Activity
                     </CardDescription>
                   </div>
-                  <Link
-                    href="/dashboard/verification"
-                    className="text-primary hover:text-primary/80 flex items-center gap-1 text-sm font-medium"
-                  >
-                    Manage
-                    <IconArrowRight className="size-4" />
-                  </Link>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-lg border p-3 text-center">
-                      <div className="text-primary mx-auto mb-1 flex size-8 items-center justify-center rounded-lg bg-green-500/10">
-                        <IconUsers className="size-4 text-green-600" />
+                    <div className="border-border/40 bg-muted/10 hover:bg-muted/20 hover:border-border/60 rounded-sm border p-3 text-center transition-all">
+                      <div className="bg-primary/10 border-primary/20 mx-auto mb-2 flex size-8 items-center justify-center rounded-sm border">
+                        <IconUsers className="text-primary size-4" />
                       </div>
-                      <p className="text-foreground text-xl font-bold">
+                      <p className="text-foreground font-mono text-xl font-bold tracking-tight">
                         {dashboardData?.totalSupporters?.toLocaleString() ||
                           "0"}
                       </p>
-                      <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide">
+                      <p className="text-muted-foreground mt-1 text-[10px] font-bold tracking-widest uppercase">
                         Registered
                       </p>
                     </div>
-                    <div className="rounded-lg border p-3 text-center">
-                      <div className="mx-auto mb-1 flex size-8 items-center justify-center rounded-lg bg-amber-500/10">
-                        <IconFingerprint className="size-4 text-amber-600" />
+                    <div className="border-border/40 bg-muted/10 hover:bg-muted/20 hover:border-border/60 rounded-sm border p-3 text-center transition-all">
+                      <div className="mx-auto mb-2 flex size-8 items-center justify-center rounded-sm border border-orange-500/20 bg-orange-500/10">
+                        <IconMapPin className="size-4 text-orange-600" />
                       </div>
-                      <p className="text-foreground text-xl font-bold">0</p>
-                      <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide">
-                        NIN Verified
+                      <p className="text-foreground font-mono text-xl font-bold tracking-tight">
+                        {dashboardData?.wardCoverage?.wardDetails?.length ||
+                          "0"}
                       </p>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        Verification Rate
-                      </span>
-                      <span className="font-medium">0%</span>
-                    </div>
-                    <Progress value={0} className="h-1.5" />
-                  </div>
-                  <div className="bg-primary/5 flex items-center gap-3 rounded-lg border p-3">
-                    <IconShieldCheck className="text-primary size-5 shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-foreground text-xs font-medium">
-                        Start verifying voters
-                      </p>
-                      <p className="text-muted-foreground text-[10px]">
-                        Upgrade to Premium for NIN identity verification
+                      <p className="text-muted-foreground mt-1 text-[10px] font-bold tracking-widest uppercase">
+                        Active Wards
                       </p>
                     </div>
                   </div>

@@ -3,18 +3,18 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { HiArrowRight } from "react-icons/hi";
+import { HiArrowUpRight } from "react-icons/hi2";
 import { motion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { heroSupportingCopy } from "@/lib/landing-data";
-import { HiArrowUpRight } from "react-icons/hi2";
 import { cn } from "@/lib/utils";
 
 const benefitPoints = [
-  "Supporters share what matters most in their community",
-  "Canvassers register voters with ward-level precision",
+  "Monitor campaign metrics with ward-level precision",
   "Candidates drive strategy with real-time field data",
+  "Every canvasser interaction tracked to your dashboard",
 ];
 
 export function HeroSection() {
@@ -31,7 +31,7 @@ export function HeroSection() {
       ? "Go to dashboard"
       : isAuthenticated && session.user.role === "admin"
         ? "Go to admin"
-        : "Login to dashboard";
+        : "Candidate Login";
 
   return (
     <section className="bg-background border-border/40 relative overflow-hidden border-b py-8 sm:py-10 lg:py-16">
@@ -119,54 +119,28 @@ export function HeroSection() {
                   asChild
                 >
                   <Link
-                    href="/register"
+                    href="/contact"
                     className="flex items-center justify-center gap-3"
                   >
-                    Support a Candidate
+                    Request a Demo
                     <HiArrowRight className="size-5" />
                   </Link>
                 </Button>
 
                 <Link
-                  href="/canvasser"
+                  href={loginHref}
                   className="group border-border bg-muted/30 hover:bg-muted/50 flex h-13 items-center justify-center gap-3 rounded-xl border px-6 transition-all duration-300"
                 >
                   <div className="flex flex-col items-start leading-none">
                     <span className="text-muted-foreground mb-1 text-[8px] font-black tracking-widest uppercase">
-                      Personnel Portal
+                      Existing System?
                     </span>
                     <span className="text-foreground text-sm font-bold">
-                      Canvasser Access
+                      {loginText}
                     </span>
                   </div>
-                  <HiArrowUpRight className="text-muted-foreground group-hover:text-primary size-4 transition-colors" />
+                  <HiArrowRight className="text-muted-foreground group-hover:text-primary size-4 transition-colors" />
                 </Link>
-              </div>
-
-              {/* Secondary Access Points */}
-              <div className="flex flex-col gap-3 text-xs sm:flex-row sm:items-center">
-                <div className="bg-muted/50 border-border inline-flex items-center gap-2 rounded-lg border px-3 py-2">
-                  <span className="text-muted-foreground font-medium">
-                    Already Registered?
-                  </span>
-                  <Link
-                    href="/voter-login"
-                    className="text-primary hover:text-primary/80 font-bold transition-colors"
-                  >
-                    Voter Login
-                  </Link>
-                </div>
-                <div className="bg-muted/50 border-border inline-flex items-center gap-2 rounded-lg border px-3 py-2">
-                  <span className="text-muted-foreground font-medium">
-                    For Admin & Candidates
-                  </span>
-                  <Link
-                    href={loginHref}
-                    className="text-primary hover:text-primary/80 font-bold transition-colors"
-                  >
-                    {loginText}
-                  </Link>
-                </div>
               </div>
             </motion.div>
 
@@ -205,40 +179,40 @@ export function HeroSection() {
           >
             <div className="relative mx-auto w-full max-w-xl">
               {/* The Command Dashboard Hub - "Silver Glass" Aesthetic */}
-              <div className="relative overflow-hidden border border-slate-200/60 bg-slate-50/80 shadow-[0_48px_96px_-12px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+              <div className="border-border/60 bg-card relative overflow-hidden border shadow-[0_48px_96px_-12px_rgba(0,0,0,0.12)] backdrop-blur-xl">
                 {/* Minimal Architectural Frame */}
                 <div className="border-primary absolute top-0 left-0 h-6 w-6 border-t-2 border-l-2" />
                 <div className="border-primary absolute top-0 right-0 h-6 w-6 border-t-2 border-r-2" />
 
                 {/* Header: Project Context */}
-                <div className="flex items-center justify-between border-b border-slate-100 bg-white/40 px-6 py-3.5">
+                <div className="border-border/40 bg-muted/30 flex items-center justify-between border-b px-6 py-3.5">
                   <div className="flex items-center gap-4">
                     <div>
-                      <h3 className="text-sm font-black tracking-tight text-slate-900 uppercase">
+                      <h3 className="text-foreground text-sm font-black tracking-tight uppercase">
                         State Command Hub
                       </h3>
-                      <p className="text-[10px] font-bold text-slate-500">
+                      <p className="text-muted-foreground text-[10px] font-bold">
                         Node: Adamawa Central • Northern Geo-Zone
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
-                    <span className="text-[10px] font-bold text-slate-600">
+                    <span className="text-muted-foreground text-[10px] font-bold">
                       LIVE
                     </span>
                   </div>
                 </div>
 
-                <div className="divide-y divide-slate-50">
+                <div className="divide-border/20 divide-y">
                   {/* Section 1: Progress Overview */}
                   <div className="space-y-3 p-5">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                        <p className="text-muted-foreground/70 text-[10px] font-black tracking-widest uppercase">
                           Registration Progress
                         </p>
-                        <p className="text-4xl font-black tracking-tighter text-slate-900">
+                        <p className="text-foreground text-4xl font-black tracking-tighter">
                           84.2%
                         </p>
                       </div>
@@ -249,13 +223,13 @@ export function HeroSection() {
                             +12% this week
                           </span>
                         </div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">
-                          Target: Oct 2024
+                        <p className="text-muted-foreground/70 text-[10px] font-bold uppercase">
+                          Target: Oct 2027
                         </p>
                       </div>
                     </div>
                     {/* Premium Progress Bar */}
-                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200/50 p-0.5">
+                    <div className="bg-muted h-2.5 w-full overflow-hidden rounded-full p-0.5">
                       <motion.div
                         initial={{ width: 0 }}
                         whileInView={{ width: "84.2%" }}
@@ -269,8 +243,8 @@ export function HeroSection() {
 
                   {/* Section 2: Ward Coverage Grid & Meta */}
                   <div className="grid grid-cols-12">
-                    <div className="col-span-12 border-b border-slate-100 p-5 md:col-span-7 md:border-r md:border-b-0">
-                      <p className="mb-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                    <div className="border-border/40 col-span-12 border-b p-5 md:col-span-7 md:border-r md:border-b-0">
+                      <p className="text-muted-foreground/70 mb-2 text-[10px] font-black tracking-widest uppercase">
                         Field Coverage Index
                       </p>
                       {/* Detailed Coverage Matrix */}
@@ -284,12 +258,12 @@ export function HeroSection() {
                                 ? "bg-primary/10 border-primary/20"
                                 : i < 24
                                   ? "animate-pulse border-orange-500/20 bg-orange-500/10"
-                                  : "border-slate-100 bg-slate-50",
+                                  : "border-border/40 bg-muted/30",
                             )}
                           />
                         ))}
                       </div>
-                      <div className="mt-4 flex items-center justify-between text-[9px] font-bold text-slate-400 uppercase">
+                      <div className="text-muted-foreground/70 mt-4 flex items-center justify-between text-[9px] font-bold uppercase">
                         <span>LGA Core</span>
                         <span>Ward Boundary</span>
                       </div>
@@ -308,10 +282,10 @@ export function HeroSection() {
                         },
                       ].map((stat, i) => (
                         <div key={i} className="space-y-0.5">
-                          <p className="text-[9px] font-black text-slate-400 uppercase">
+                          <p className="text-muted-foreground/70 text-[9px] font-black uppercase">
                             {stat.label}
                           </p>
-                          <p className="text-2xl font-black tracking-tighter text-slate-900">
+                          <p className="text-foreground text-2xl font-black tracking-tighter">
                             {stat.val}
                           </p>
                           <p className="text-[9px] font-bold text-emerald-600">
@@ -324,14 +298,14 @@ export function HeroSection() {
 
                   {/* Section 3: Live Field Activity Feed */}
                   <div className="p-5">
-                    <p className="mb-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                    <p className="text-muted-foreground/70 mb-2 text-[10px] font-black tracking-widest uppercase">
                       Latest Field Activity
                     </p>
                     <div className="space-y-3">
                       {[
                         {
                           ward: "Ward 04",
-                          act: "+42 Voters Registered",
+                          act: "+42 Records Synced",
                           time: "2m ago",
                           status: "success",
                         },
@@ -350,7 +324,7 @@ export function HeroSection() {
                       ].map((log, i) => (
                         <div
                           key={i}
-                          className="flex items-center justify-between border-b border-slate-50 py-1.5 last:border-0"
+                          className="border-border/20 flex items-center justify-between border-b py-1.5 last:border-0"
                         >
                           <div className="flex items-center gap-3">
                             <div
@@ -361,14 +335,14 @@ export function HeroSection() {
                                   : "bg-orange-500",
                               )}
                             />
-                            <span className="text-xs font-black text-slate-800">
+                            <span className="text-foreground text-xs font-black">
                               {log.ward}
                             </span>
-                            <span className="text-xs font-medium text-slate-500">
+                            <span className="text-muted-foreground text-xs font-medium">
                               {log.act}
                             </span>
                           </div>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase">
+                          <span className="text-muted-foreground/70 text-[10px] font-bold uppercase">
                             {log.time}
                           </span>
                         </div>
@@ -378,7 +352,7 @@ export function HeroSection() {
                 </div>
 
                 {/* Footer: User Context */}
-                <div className="flex items-center justify-between border-t border-slate-100 bg-white/40 px-6 py-3">
+                <div className="border-border/40 bg-muted/30 flex items-center justify-between border-t px-6 py-3">
                   <div className="flex items-center gap-3">
                     <div className="flex -space-x-2">
                       {[
@@ -405,38 +379,37 @@ export function HeroSection() {
                       ].map((agent, i) => (
                         <Avatar
                           key={i}
-                          className="size-8 border-2 border-white shadow-sm"
+                          className="border-background size-8 border-2 shadow-sm"
                         >
                           <AvatarImage src={agent.src} alt={agent.alt} />
-                          <AvatarFallback className="bg-slate-200 text-[10px] font-bold text-slate-600">
+                          <AvatarFallback className="bg-muted text-muted-foreground text-[10px] font-bold">
                             {agent.initials}
                           </AvatarFallback>
                         </Avatar>
                       ))}
                       {/* Additional agents indicator */}
-                      <Avatar className="size-8 border-2 border-white shadow-sm">
+                      <Avatar className="border-background size-8 border-2 shadow-sm">
                         <AvatarFallback className="bg-primary text-[9px] font-bold text-white">
                           99+
                         </AvatarFallback>
                       </Avatar>
                     </div>
-                    <p className="text-[11px] font-bold text-slate-600">
+                    <p className="text-muted-foreground text-[11px] font-bold">
                       Active Field Agents:{" "}
                       <span className="text-primary font-black">128</span>
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="bg-primary size-1.5 rounded-full" />
-                    <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">
+                    <span className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
                       Sys_Nominal
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Decorative Support Elements */}
-              <div className="absolute -top-8 -left-8 -z-10 h-32 w-32 rounded-full border border-slate-100 opacity-60" />
-              <div className="absolute -right-12 -bottom-12 -z-10 h-48 w-48 rounded-full border border-slate-100 opacity-60" />
+              <div className="border-border/40 absolute -top-8 -left-8 -z-10 h-32 w-32 rounded-full border opacity-60" />
+              <div className="border-border/40 absolute -right-12 -bottom-12 -z-10 h-48 w-48 rounded-full border opacity-60" />
             </div>
           </motion.div>
         </div>

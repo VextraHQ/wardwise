@@ -78,6 +78,26 @@ export function ComboboxSelect({
     [allOptions, value],
   );
 
+  // Build a lookup so the custom filter can search by label + description, not just value
+  const searchIndex = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const opt of allOptions) {
+      map.set(
+        opt.value.toLowerCase(),
+        `${opt.label} ${opt.value} ${opt.description ?? ""}`.toLowerCase(),
+      );
+    }
+    return map;
+  }, [allOptions]);
+
+  const customFilter = React.useCallback(
+    (itemValue: string, search: string) => {
+      const haystack = searchIndex.get(itemValue.toLowerCase()) ?? itemValue.toLowerCase();
+      return haystack.includes(search.toLowerCase()) ? 1 : 0;
+    },
+    [searchIndex],
+  );
+
   const renderTriggerButton = () => {
     // Parse polling unit format: "001 - Polling Unit Name"
     const labelMatch = selectedOption?.label.match(/^(\d{3})\s*-\s*(.+)$/);
@@ -204,7 +224,7 @@ export function ComboboxSelect({
         align="start"
         sideOffset={4}
       >
-        <Command className="overflow-hidden rounded-xl">
+        <Command filter={customFilter} className="overflow-hidden rounded-xl">
           <CommandInput
             placeholder={searchPlaceholder}
             className="h-10 border-none focus:ring-0"

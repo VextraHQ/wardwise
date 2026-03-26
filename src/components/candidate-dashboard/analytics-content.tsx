@@ -61,11 +61,11 @@ export function AnalyticsContent() {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
         <div className="flex items-center justify-between">
-          <Skeleton className="h-10 w-48" />
+          <Skeleton className="bg-muted/20 h-10 w-48 rounded-sm" />
         </div>
-        <Skeleton className="h-64" />
-        <Skeleton className="h-64" />
-        <Skeleton className="h-64" />
+        <Skeleton className="bg-muted/20 h-64 rounded-sm" />
+        <Skeleton className="bg-muted/20 h-64 rounded-sm" />
+        <Skeleton className="bg-muted/20 h-64 rounded-sm" />
       </div>
     );
   }
@@ -105,17 +105,34 @@ export function AnalyticsContent() {
       </div>
 
       <Tabs defaultValue="trends" className="w-full">
-        <TabsList>
-          <TabsTrigger value="trends">Registration Trends</TabsTrigger>
-          <TabsTrigger value="demographics">Demographics</TabsTrigger>
-          <TabsTrigger value="geographic">Geographic</TabsTrigger>
+        <TabsList className="bg-muted rounded-sm p-1">
+          <TabsTrigger
+            value="trends"
+            className="font-mono text-[10px] font-bold tracking-widest uppercase"
+          >
+            Registration Trends
+          </TabsTrigger>
+          <TabsTrigger
+            value="demographics"
+            className="font-mono text-[10px] font-bold tracking-widest uppercase"
+          >
+            Demographics
+          </TabsTrigger>
+          <TabsTrigger
+            value="geographic"
+            className="font-mono text-[10px] font-bold tracking-widest uppercase"
+          >
+            Geographic
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="trends" className="space-y-4">
-          <Card>
+          <Card className="border-border/60 rounded-sm shadow-none">
             <CardHeader>
-              <CardTitle>Registration Trends</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-sm font-semibold tracking-tight">
+                Registration Trends
+              </CardTitle>
+              <CardDescription className="text-muted-foreground mt-1 text-sm">
                 Track voter registration growth over time
               </CardDescription>
             </CardHeader>
@@ -125,6 +142,7 @@ export function AnalyticsContent() {
                   variant={trendPeriod === "daily" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setTrendPeriod("daily")}
+                  className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
                 >
                   Daily
                 </Button>
@@ -132,6 +150,7 @@ export function AnalyticsContent() {
                   variant={trendPeriod === "weekly" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setTrendPeriod("weekly")}
+                  className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
                 >
                   Weekly
                 </Button>
@@ -139,6 +158,7 @@ export function AnalyticsContent() {
                   variant={trendPeriod === "monthly" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setTrendPeriod("monthly")}
+                  className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
                 >
                   Monthly
                 </Button>
@@ -181,10 +201,14 @@ export function AnalyticsContent() {
 
         <TabsContent value="demographics" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
+            <Card className="border-border/60 rounded-sm shadow-none">
               <CardHeader>
-                <CardTitle>Age Groups</CardTitle>
-                <CardDescription>Distribution by age</CardDescription>
+                <CardTitle className="text-sm font-semibold tracking-tight">
+                  Age Groups
+                </CardTitle>
+                <CardDescription className="text-muted-foreground mt-1 text-sm">
+                  Distribution by age
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {ageGroupData.length > 0 ? (
@@ -208,10 +232,14 @@ export function AnalyticsContent() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-border/60 rounded-sm shadow-none">
               <CardHeader>
-                <CardTitle>Gender Distribution</CardTitle>
-                <CardDescription>Supporters by gender</CardDescription>
+                <CardTitle className="text-sm font-semibold tracking-tight">
+                  Gender Distribution
+                </CardTitle>
+                <CardDescription className="text-muted-foreground mt-1 text-sm">
+                  Supporters by gender
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {genderData.length > 0 ? (
@@ -253,10 +281,14 @@ export function AnalyticsContent() {
         </TabsContent>
 
         <TabsContent value="geographic" className="space-y-4">
-          <Card>
+          <Card className="border-border/60 rounded-sm shadow-none">
             <CardHeader>
-              <CardTitle>Geographic Distribution</CardTitle>
-              <CardDescription>Supporters by location</CardDescription>
+              <CardTitle className="text-sm font-semibold tracking-tight">
+                Geographic Distribution
+              </CardTitle>
+              <CardDescription className="text-muted-foreground mt-1 text-sm">
+                Supporters by location
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {dashboardData?.demographics?.locations ? (
@@ -270,10 +302,12 @@ export function AnalyticsContent() {
                         .map(([lga, count]) => (
                           <div
                             key={lga}
-                            className="flex items-center justify-between rounded-lg border p-3"
+                            className="border-border/40 bg-muted/10 hover:bg-muted/20 flex items-center justify-between rounded-sm border p-3 transition-colors"
                           >
-                            <span className="text-sm font-medium">{lga}</span>
-                            <span className="text-muted-foreground text-sm">
+                            <span className="font-sans text-sm font-medium tracking-tight">
+                              {lga}
+                            </span>
+                            <span className="text-muted-foreground font-mono text-[11px] tracking-widest uppercase">
                               {count as number} supporters
                             </span>
                           </div>

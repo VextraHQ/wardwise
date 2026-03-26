@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const stepRoleInfo = {
   "01": {
-    actor: "Voters",
+    actor: "Constituents",
     theme: "primary",
     accent: "bg-primary",
     textClass: "text-primary",
@@ -86,7 +86,7 @@ export function HowItWorksSection() {
                   className="group relative flex flex-col p-8 sm:p-12"
                 >
                   {/* Subtle Phase ID Overlay */}
-                  <div className="text-muted-foreground/10 absolute top-6 right-6 font-mono text-[9px] font-black tracking-widest uppercase">
+                  <div className="text-muted-foreground/30 absolute top-6 right-6 font-mono text-[9px] font-black tracking-widest uppercase">
                     SEG_{step.number}
                   </div>
 
@@ -141,7 +141,7 @@ export function HowItWorksSection() {
                               Verified Profile
                             </span>
                             <span className="border-primary/20 bg-primary/5 text-primary rounded-sm border px-2 py-0.5 text-[9px] font-black tracking-wider uppercase">
-                              Sentiment Map
+                              Constituent Record
                             </span>
                           </>
                         )}

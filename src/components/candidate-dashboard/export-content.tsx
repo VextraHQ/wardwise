@@ -20,24 +20,33 @@ export function ExportContent() {
         </p>
       </div>
 
-      <Card>
+      <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>
-          <CardTitle>Export Options</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-sm font-semibold tracking-tight">
+            Export Options
+          </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-sm">
             Data export functionality will be implemented here
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground text-sm">
-            This page will allow exporting supporter lists, survey responses,
-            and analytics data in various formats (CSV, Excel, PDF).
+            This page will allow exporting supporter lists, field reports, and
+            analytics data in various formats (CSV, Excel, PDF).
           </p>
           <div className="flex gap-2">
-            <Button disabled>
+            <Button
+              disabled
+              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            >
               <IconDownload className="mr-2 size-4" />
               Export Supporters
             </Button>
-            <Button disabled variant="outline">
+            <Button
+              disabled
+              variant="outline"
+              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            >
               <IconDownload className="mr-2 size-4" />
               Export Analytics
             </Button>

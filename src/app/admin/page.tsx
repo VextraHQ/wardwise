@@ -2,13 +2,13 @@ import { createAdminMetadata } from "@/lib/metadata";
 import { AdminDashboard } from "@/components/admin/admin-dashboard";
 
 export const metadata = createAdminMetadata({
-  title: "Dashboard",
+  title: "Admin Dashboard",
   description:
-    "Manage candidates, voters, and platform settings. View analytics and oversee the WardWise platform.",
+    "Monitor candidate coverage, recent admin activity, and platform readiness from the WardWise Super Admin dashboard.",
   openGraph: {
-    title: "Dashboard",
+    title: "Admin Dashboard",
     description:
-      "Manage candidates, voters, and platform settings. View analytics and oversee the WardWise platform.",
+      "Monitor candidate coverage, recent admin activity, and platform readiness from the WardWise Super Admin dashboard.",
   },
 });
 

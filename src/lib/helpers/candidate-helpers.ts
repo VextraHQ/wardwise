@@ -14,9 +14,7 @@
  */
 
 import type { Candidate } from "@/types/candidate";
-import type { CandidateSurvey } from "@/types/survey";
 import { candidates } from "@/lib/mock/data/candidates";
-import { candidateSurveys } from "@/lib/mock/data/candidate-surveys";
 import { getSupportersCount } from "@/lib/helpers/voter-analytics";
 
 // ============================================================================
@@ -39,7 +37,7 @@ export function getAllCandidates(): Candidate[] {
  * @returns Array of candidates from the specified state
  */
 export function getCandidatesByState(state: string): Candidate[] {
-  return candidates.filter((candidate) => candidate.state === state);
+  return candidates.filter((candidate) => candidate.stateCode === state);
 }
 
 /**
@@ -99,7 +97,7 @@ export function getCandidateByIdWithSupporters(
 
   return {
     ...candidate,
-    supporters: getSupportersCount(id),
+    supporterCount: getSupportersCount(id),
   };
 }
 
@@ -111,7 +109,7 @@ export function getCandidateByIdWithSupporters(
 export function getCandidatesWithSupporters(): Candidate[] {
   return candidates.map((candidate) => ({
     ...candidate,
-    supporters: getSupportersCount(candidate.id),
+    supporterCount: getSupportersCount(candidate.id),
   }));
 }
 
@@ -141,7 +139,7 @@ export function filterCandidates(filters: {
   constituency?: string;
 }): Candidate[] {
   return candidates.filter((candidate) => {
-    if (filters.state && candidate.state !== filters.state) return false;
+    if (filters.state && candidate.stateCode !== filters.state) return false;
     if (filters.party && candidate.party !== filters.party) return false;
     if (filters.position && candidate.position !== filters.position)
       return false;
@@ -185,7 +183,7 @@ export function searchCandidates(query: string): Candidate[] {
 export function groupCandidatesByState(): Record<string, Candidate[]> {
   return candidates.reduce(
     (acc, candidate) => {
-      const state = candidate.state ?? "National";
+      const state = candidate.stateCode ?? "National";
       if (!acc[state]) {
         acc[state] = [];
       }
@@ -255,7 +253,7 @@ export function getTotalCandidates(): number {
 export function getCandidateCountByState(): Record<string, number> {
   return candidates.reduce(
     (acc, candidate) => {
-      const state = candidate.state || "National";
+      const state = candidate.stateCode || "National";
       acc[state] = (acc[state] || 0) + 1;
       return acc;
     },
@@ -316,7 +314,7 @@ export function getTotalSupporters(): number {
 export function getSupportersByState(): Record<string, number> {
   return candidates.reduce(
     (acc, candidate) => {
-      const state = candidate.state || "National";
+      const state = candidate.stateCode || "National";
       acc[state] = (acc[state] || 0) + getSupportersCount(candidate.id);
       return acc;
     },
@@ -351,7 +349,7 @@ export function getSupportersByParty(): Record<string, number> {
  */
 export function getTopCandidatesBySupporters(limit: number = 10): Candidate[] {
   return getCandidatesWithSupporters()
-    .sort((a, b) => b.supporters - a.supporters)
+    .sort((a, b) => (b.supporterCount ?? 0) - (a.supporterCount ?? 0))
     .slice(0, limit);
 }
 
@@ -369,7 +367,7 @@ export function getUniqueStates(): string[] {
   return Array.from<string>(
     new Set(
       candidates
-        .map((c) => c.state ?? "National")
+        .map((c) => c.stateCode ?? "National")
         .filter((state): state is string => Boolean(state)),
     ),
   ).sort() as string[];
@@ -427,85 +425,4 @@ export function sortCandidatesBy(
     if (aVal > bVal) return order === "asc" ? 1 : -1;
     return 0;
   });
-}
-
-// ============================================================================
-// SURVEY HELPER FUNCTIONS
-// ============================================================================
-// NOTE: These functions filter surveys by candidate metadata (state/party/position)
-// Different from candidate-surveys.ts functions which are data accessors
-// 🔮 Future Use: Admin dashboards, survey filtering/analytics
-
-/**
- * Get surveys by state
- * 🔮 Future Use: Admin dashboards, survey filtering
- * Returns all surveys for candidates from a specific state
- * @param state - The state name (e.g., "Adamawa State", "Bauchi State")
- * @returns Array of surveys for candidates from the specified state
- *
- * @example
- * // Get all surveys for Bauchi State candidates
- * const bauchiSurveys = getSurveysByState("Bauchi State")
- */
-export function getSurveysByState(state: string): CandidateSurvey[] {
-  return candidateSurveys.filter((survey) => {
-    const candidate = getCandidateById(survey.candidateId);
-    return candidate?.state === state;
-  });
-}
-
-/**
- * Get surveys by party
- * 🔮 Future Use: Admin dashboards, survey filtering
- * Returns all surveys for candidates from a specific party
- * @param party - The party abbreviation (e.g., "APC", "PDP")
- * @returns Array of surveys for candidates from the specified party
- *
- * @example
- * // Get all surveys for APC candidates
- * const apcSurveys = getSurveysByParty("APC")
- */
-export function getSurveysByParty(party: string): CandidateSurvey[] {
-  return candidateSurveys.filter((survey) => {
-    const candidate = getCandidateById(survey.candidateId);
-    return candidate?.party === party;
-  });
-}
-
-/**
- * Get surveys by position
- * 🔮 Future Use: Admin dashboards, survey filtering
- * Returns all surveys for candidates running for a specific position
- * @param position - The position (e.g., "Governor", "Senator", "House of Representatives")
- * @returns Array of surveys for candidates running for the specified position
- *
- * @example
- * // Get all surveys for gubernatorial candidates
- * const governorSurveys = getSurveysByPosition("Governor")
- */
-export function getSurveysByPosition(
-  position: Candidate["position"],
-): CandidateSurvey[] {
-  return candidateSurveys.filter((survey) => {
-    const candidate = getCandidateById(survey.candidateId);
-    return candidate?.position === position;
-  });
-}
-
-/**
- * Get candidate information for a survey
- * 🔮 Future Use: Survey display components, admin views
- * Convenience function to get candidate details when you have a survey
- * @param survey - The survey object
- * @returns The candidate object or undefined if not found
- *
- * @example
- * const survey = getSurveyByCandidateId("cand-apc-1")
- * const candidate = getCandidateForSurvey(survey)
- * console.log(candidate?.party) // "APC"
- */
-export function getCandidateForSurvey(
-  survey: CandidateSurvey,
-): Candidate | undefined {
-  return getCandidateById(survey.candidateId);
 }

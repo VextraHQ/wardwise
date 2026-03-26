@@ -2,7 +2,7 @@
 
 import { IconCirclePlusFilled, type Icon } from "@tabler/icons-react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +13,7 @@ import {
 import {
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -21,6 +22,7 @@ import {
 export function NavMain({
   items,
   quickActions,
+  label,
 }: {
   items: {
     title: string;
@@ -32,12 +34,17 @@ export function NavMain({
     url: string;
     icon: Icon;
   }[];
+  label?: string;
 }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   return (
     <SidebarGroup>
+      {label && (
+        <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+          {label}
+        </SidebarGroupLabel>
+      )}
       <SidebarGroupContent className="flex flex-col gap-2">
         {quickActions && quickActions.length > 0 && (
           <SidebarMenu>
@@ -49,7 +56,9 @@ export function NavMain({
                     className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground w-full duration-200 ease-linear"
                   >
                     <IconCirclePlusFilled />
-                    <span>Quick Actions</span>
+                    <span className="mt-0.5 font-mono text-[11px] font-bold tracking-widest uppercase">
+                      Quick Actions
+                    </span>
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56">
@@ -71,17 +80,17 @@ export function NavMain({
         )}
         <SidebarMenu>
           {items.map((item) => {
-            // Check if URL matches pathname exactly, or if it's a query param match
             const urlPath = item.url.split("?")[0];
-            const urlParams = new URLSearchParams(item.url.split("?")[1] || "");
-            const currentTab = searchParams?.get("tab");
-            const itemTab = urlParams.get("tab");
-
+            const isExactMatchOnly =
+              urlPath === "/" ||
+              urlPath === "/admin" ||
+              urlPath === "/dashboard";
+            const matchesNestedRoute =
+              !isExactMatchOnly &&
+              urlPath !== "/" &&
+              pathname.startsWith(`${urlPath}/`);
             const isActive =
-              pathname === item.url ||
-              (pathname === urlPath &&
-                ((itemTab && currentTab === itemTab) ||
-                  (!itemTab && !currentTab && pathname === urlPath)));
+              item.url !== "#" && (pathname === urlPath || matchesNestedRoute);
 
             return (
               <SidebarMenuItem key={item.title}>

@@ -21,13 +21,20 @@ export function NotificationsContent() {
             Stay updated with campaign activities
           </p>
         </div>
-        <Badge variant="outline">All</Badge>
+        <Badge
+          variant="outline"
+          className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+        >
+          All
+        </Badge>
       </div>
 
-      <Card>
+      <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>
-          <CardTitle>Notifications</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-sm font-semibold tracking-tight">
+            Notifications
+          </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-sm">
             Notification system will be implemented here
           </CardDescription>
         </CardHeader>
