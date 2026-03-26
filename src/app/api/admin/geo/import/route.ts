@@ -344,7 +344,7 @@ export async function POST(request: Request) {
           await tx.ward.createMany({
             data: validRows.map((r) => ({
               name: r.data.name,
-              lgaId: parseInt(r.data._lgaid),
+              lgaId: parseInt(r.data._lgaId),
             })),
             skipDuplicates: true,
           });
@@ -355,7 +355,7 @@ export async function POST(request: Request) {
             data: validRows.map((r) => ({
               code: r.data.code,
               name: r.data.name,
-              wardId: parseInt(r.data._wardid),
+              wardId: parseInt(r.data._wardId),
             })),
             skipDuplicates: true,
           });

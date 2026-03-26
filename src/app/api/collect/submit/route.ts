@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     // Find campaign
     const campaign = await prisma.campaign.findUnique({
       where: { slug: campaignSlug },
-      select: { id: true, status: true },
+      select: { id: true, status: true, enabledLgaIds: true },
     });
 
     if (!campaign || campaign.status === "draft") {
@@ -109,6 +109,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Campaign is closed" },
         { status: 410 },
+      );
+    }
+
+    // Validate geographic scope
+    if (campaign.enabledLgaIds.length > 0 && !campaign.enabledLgaIds.includes(data.lgaId)) {
+      return NextResponse.json(
+        { error: "Selected LGA is outside the scope of this campaign" },
+        { status: 400 },
+      );
+    }
+
+    // Validate geographic hierarchy
+    const pu = await prisma.pollingUnit.findUnique({
+      where: { id: data.pollingUnitId },
+      include: { ward: true },
+    });
+    
+    if (!pu || pu.wardId !== data.wardId || pu.ward.lgaId !== data.lgaId) {
+      return NextResponse.json(
+        { error: "Invalid geographic hierarchy" },
+        { status: 400 },
       );
     }
 
