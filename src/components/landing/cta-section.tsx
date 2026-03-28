@@ -92,7 +92,7 @@ export function CallToActionSection() {
 
                 {status === "loading" ? (
                   <div className="border-foreground/5 text-foreground/50 flex cursor-wait items-center gap-2 border-b-2 pb-1 font-mono text-[10px] font-black tracking-widest uppercase transition-all">
-                    <div className="size-2.5 animate-spin rounded-full border-[1.5px] border-primary border-t-transparent" />
+                    <div className="border-primary size-2.5 animate-spin rounded-full border-[1.5px] border-t-transparent" />
                     Validating...
                   </div>
                 ) : (

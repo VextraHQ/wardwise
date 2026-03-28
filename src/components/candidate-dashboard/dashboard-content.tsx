@@ -24,12 +24,12 @@ export function DashboardContent() {
           {[1, 2, 3, 4].map((i) => (
             <Skeleton
               key={i}
-              className="border-border/60 bg-card animate-pulse h-32 rounded-sm border border-dashed"
+              className="border-border/60 bg-card h-32 animate-pulse rounded-sm border border-dashed"
             />
           ))}
         </div>
-        <Skeleton className="border-border/60 bg-card animate-pulse mx-4 h-64 rounded-sm border border-dashed lg:mx-6" />
-        <Skeleton className="border-border/60 bg-card animate-pulse mx-4 h-96 rounded-sm border border-dashed lg:mx-6" />
+        <Skeleton className="border-border/60 bg-card mx-4 h-64 animate-pulse rounded-sm border border-dashed lg:mx-6" />
+        <Skeleton className="border-border/60 bg-card mx-4 h-96 animate-pulse rounded-sm border border-dashed lg:mx-6" />
       </div>
     );
   }

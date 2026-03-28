@@ -222,7 +222,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                       s.isFlagged
                         ? "bg-destructive/5 hover:bg-destructive/10"
                         : s.isVerified
-                          ? "bg-emerald-500/5 hover:bg-emerald-500/10"
+                          ? "bg-brand-emerald/5 hover:bg-brand-emerald/10"
                           : "hover:bg-muted/30"
                     }`}
                     onClick={() => setSelected(s)}

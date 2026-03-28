@@ -29,7 +29,7 @@ export function NavSecondary({
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
-        <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+        <SidebarGroupLabel className="text-sidebar-foreground/50 font-mono text-[10px] font-bold tracking-widest uppercase">
           System
         </SidebarGroupLabel>
         <SidebarMenu>

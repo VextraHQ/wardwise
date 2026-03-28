@@ -67,7 +67,7 @@ export function AdminHeader() {
         />
         <div className="min-w-0 flex-1 overflow-hidden">
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="text-foreground/50 shrink-0 font-mono text-[9px] sm:text-[10px] font-black tracking-[0.2em] uppercase">
+            <span className="text-foreground/50 shrink-0 font-mono text-[9px] font-black tracking-[0.2em] uppercase sm:text-[10px]">
               Admin
             </span>
             <span className="text-foreground/30 shrink-0 font-mono text-[10px] sm:text-xs">
@@ -78,13 +78,13 @@ export function AdminHeader() {
             </h1>
             <Badge
               variant="outline"
-              className="bg-primary/10 text-primary border-primary/20 hidden sm:inline-flex shrink-0 items-center gap-1 rounded-sm px-1.5 py-px sm:px-2 sm:py-0.5 font-mono text-[9px] sm:text-[10px] font-bold tracking-widest uppercase"
+              className="bg-primary/10 text-primary border-primary/20 hidden shrink-0 items-center gap-1 rounded-sm px-1.5 py-px font-mono text-[9px] font-bold tracking-widest uppercase sm:inline-flex sm:px-2 sm:py-0.5 sm:text-[10px]"
             >
               <HiOutlineShieldCheck className="h-3 w-3" />
               <span>Super Admin</span>
             </Badge>
           </div>
-          <p className="text-muted-foreground hidden truncate text-xs sm:text-sm md:block mt-0.5">
+          <p className="text-muted-foreground mt-0.5 hidden truncate text-xs sm:text-sm md:block">
             {getDescription()}
           </p>
         </div>

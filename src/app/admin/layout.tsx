@@ -55,9 +55,7 @@ export default function AdminLayout({
       <AdminSidebar variant="inset" />
       <SidebarInset>
         <AdminHeader />
-        <div className="flex flex-1 flex-col">
-          {children}
-        </div>
+        <div className="flex flex-1 flex-col">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

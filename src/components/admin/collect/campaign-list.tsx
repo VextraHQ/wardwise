@@ -106,7 +106,10 @@ function StatsBarSkeleton() {
   return (
     <div className="grid gap-4 sm:grid-cols-3">
       {Array.from({ length: 3 }).map((_, i) => (
-        <Card key={i} className="border-border/60 bg-card rounded-sm shadow-none animate-pulse border-dashed">
+        <Card
+          key={i}
+          className="border-border/60 bg-card animate-pulse rounded-sm border-dashed shadow-none"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <Skeleton className="h-4 w-28" />
             <Skeleton className="h-9 w-9 rounded-sm" />
@@ -123,7 +126,7 @@ function StatsBarSkeleton() {
 
 function TableSkeleton() {
   return (
-    <div className="border-border/60 bg-card rounded-sm border border-dashed animate-pulse">
+    <div className="border-border/60 bg-card animate-pulse rounded-sm border border-dashed">
       <Table>
         <TableHeader className="bg-muted/30">
           <TableRow className="hover:bg-transparent">

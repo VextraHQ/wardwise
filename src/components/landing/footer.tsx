@@ -20,7 +20,7 @@ const roleLinks = [
   {
     label: "Candidate Login",
     href: "/login",
-    hoverColor: "hover:text-emerald-600",
+    hoverColor: "hover:text-brand-lagoon",
   },
   {
     label: "Admin Portal",

@@ -45,12 +45,12 @@ export function SiteHeader({ className }: SiteHeaderProps) {
           className={cn(
             "relative z-50 transition-all duration-300",
             scrolled || isMobileOpen
-              ? "border-border bg-card border-b backdrop-blur-md"
+              ? "border-border bg-background border-b backdrop-blur-md"
               : "bg-background/80 border-b border-transparent backdrop-blur-md",
           )}
         >
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
-            <Logo />
+            <Logo size="lg" />
             <nav className="hidden items-center gap-1 lg:flex">
               {navigationLinks.map((link, i) => (
                 <a
@@ -71,7 +71,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
             <div className="hidden items-center gap-6 lg:flex">
               {status === "loading" ? (
                 <div className="text-muted-foreground/50 flex cursor-wait items-center gap-2 font-mono text-[10px] font-black tracking-widest uppercase transition-colors">
-                  <div className="size-3 animate-spin rounded-full border outline-1 outline-primary border-t-transparent" />
+                  <div className="outline-primary size-3 animate-spin rounded-full border border-t-transparent outline-1" />
                   Verifying...
                 </div>
               ) : status === "authenticated" && session?.user ? (
@@ -85,7 +85,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                   }
                   className="text-muted-foreground hover:text-foreground flex items-center gap-2 font-mono text-[10px] font-black tracking-widest uppercase transition-colors"
                 >
-                  <div className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
+                  <div className="bg-brand-emerald size-1.5 animate-pulse rounded-full" />
                   {session.user.role === "candidate"
                     ? "Dashboard"
                     : session.user.role === "admin"
@@ -172,7 +172,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
             <div className="mt-5 flex flex-col gap-2.5">
               {status === "loading" ? (
                 <div className="border-border text-foreground/50 bg-muted/10 flex cursor-wait items-center justify-center gap-2 rounded-sm border px-4 py-3 text-center text-sm font-semibold transition-colors duration-200">
-                  <div className="size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  <div className="border-primary size-4 animate-spin rounded-full border-2 border-t-transparent" />
                   Validating...
                 </div>
               ) : status === "authenticated" && session?.user ? (

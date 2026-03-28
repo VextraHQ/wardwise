@@ -20,8 +20,8 @@ const stepRoleInfo = {
   "03": {
     actor: "Candidates",
     theme: "emerald",
-    accent: "bg-emerald-500",
-    textClass: "text-emerald-600",
+    accent: "bg-brand-emerald",
+    textClass: "text-brand-lagoon",
   },
 };
 
@@ -157,10 +157,10 @@ export function HowItWorksSection() {
                         )}
                         {index === 2 && (
                           <>
-                            <span className="rounded-sm border border-emerald-500/20 bg-emerald-500/5 px-2 py-0.5 text-[9px] font-black tracking-wider text-emerald-600 uppercase">
+                            <span className="border-brand-emerald/20 bg-brand-emerald/5 text-brand-lagoon rounded-sm border px-2 py-0.5 text-[9px] font-black tracking-wider uppercase">
                               Resource Ops
                             </span>
-                            <span className="rounded-sm border border-emerald-500/20 bg-emerald-500/5 px-2 py-0.5 text-[9px] font-black tracking-wider text-emerald-600 uppercase">
+                            <span className="border-brand-emerald/20 bg-brand-emerald/5 text-brand-lagoon rounded-sm border px-2 py-0.5 text-[9px] font-black tracking-wider uppercase">
                               Victory Model
                             </span>
                           </>

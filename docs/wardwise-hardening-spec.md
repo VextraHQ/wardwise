@@ -42,14 +42,14 @@ Chosen over in-memory because the app deploys to Vercel (serverless — no share
 
 ## Key Files
 
-| File                               | Purpose                                          |
-| ---------------------------------- | ------------------------------------------------ |
-| `src/lib/auth-helpers.ts`          | `requireAdmin()` — centralized auth check        |
-| `src/proxy.ts`                    | Server-side Edge route protection (Next.js 16 proxy) |
-| `src/lib/rate-limit.ts`            | Upstash rate limiters (submit + auth)            |
-| `src/lib/audit.ts`                 | `logAudit()` fire-and-forget utility             |
-| `src/lib/schemas/admin-schemas.ts` | All Zod schemas (candidate, canvasser, campaign) |
-| `.env.example`                     | Environment variable template                    |
+| File                               | Purpose                                              |
+| ---------------------------------- | ---------------------------------------------------- |
+| `src/lib/auth-helpers.ts`          | `requireAdmin()` — centralized auth check            |
+| `src/proxy.ts`                     | Server-side Edge route protection (Next.js 16 proxy) |
+| `src/lib/rate-limit.ts`            | Upstash rate limiters (submit + auth)                |
+| `src/lib/audit.ts`                 | `logAudit()` fire-and-forget utility                 |
+| `src/lib/schemas/admin-schemas.ts` | All Zod schemas (candidate, canvasser, campaign)     |
+| `.env.example`                     | Environment variable template                        |
 
 ---
 

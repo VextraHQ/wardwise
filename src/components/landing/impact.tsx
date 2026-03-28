@@ -123,7 +123,7 @@ export function ImpactSection() {
             {/* Matrix Legend */}
             <div className="border-border/40 mt-12 flex flex-wrap gap-8 border-t pt-10">
               <div className="flex items-center gap-3">
-                <div className="bg-primary size-3 rounded-sm shadow-[0_0_10px_rgba(70,194,167,0.4)]" />
+                <div className="bg-primary size-3 rounded-sm shadow-[0_0_10px_rgba(2,201,136,0.4)]" />
                 <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
                   Ready Hub
                 </span>

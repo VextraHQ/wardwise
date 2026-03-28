@@ -59,7 +59,7 @@ export function NavUser() {
             >
               <Avatar className="h-8 w-8 rounded-sm">
                 {isLoadingSession ? (
-                  <div className="bg-muted/30 size-full animate-pulse rounded-sm border border-border/50" />
+                  <div className="bg-muted/30 border-border/50 size-full animate-pulse rounded-sm border" />
                 ) : (
                   <>
                     <AvatarImage src={user.avatar} alt={user.name} />
@@ -72,7 +72,7 @@ export function NavUser() {
               <div className="grid flex-1 text-left text-sm leading-tight">
                 {isLoadingSession ? (
                   <>
-                    <span className="text-muted-foreground/60 truncate font-mono text-[10px] font-bold tracking-widest uppercase animate-pulse">
+                    <span className="text-muted-foreground/60 animate-pulse truncate font-mono text-[10px] font-bold tracking-widest uppercase">
                       Syncing...
                     </span>
                     <span className="text-muted-foreground/40 truncate font-mono text-[9px] tracking-widest uppercase">

@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function StatCardSkeleton() {
   return (
-    <Card className="border-border/60 rounded-sm shadow-none border-dashed animate-pulse">
+    <Card className="border-border/60 animate-pulse rounded-sm border-dashed shadow-none">
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <Skeleton className="h-4 w-32 rounded-sm" />
         <Skeleton className="h-5 w-5 rounded-sm" />
@@ -18,7 +18,7 @@ export function StatCardSkeleton() {
 
 export function CandidateCardSkeleton() {
   return (
-    <div className="border-border/60 animate-pulse flex flex-col gap-4 rounded-sm border border-dashed p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="border-border/60 flex animate-pulse flex-col gap-4 rounded-sm border border-dashed p-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex-1 space-y-2">
         {/* Name with badges */}
         <div className="flex flex-wrap items-center gap-2">
@@ -44,7 +44,7 @@ export function CandidateCardSkeleton() {
 
 export function VoterCardSkeleton() {
   return (
-    <div className="border-border/60 animate-pulse flex flex-col gap-4 rounded-sm border border-dashed p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="border-border/60 flex animate-pulse flex-col gap-4 rounded-sm border border-dashed p-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex-1 space-y-2">
         {/* Full name */}
         <Skeleton className="h-5 w-full max-w-[180px] rounded-sm sm:w-48" />
@@ -60,4 +60,3 @@ export function VoterCardSkeleton() {
     </div>
   );
 }
-

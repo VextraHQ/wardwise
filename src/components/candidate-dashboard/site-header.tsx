@@ -30,22 +30,22 @@ export function SiteHeader() {
         />
         <div className="min-w-0 flex-1 overflow-hidden">
           {isResolving ? (
-            <div className="flex flex-col animate-pulse">
+            <div className="flex animate-pulse flex-col">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-muted-foreground/30 shrink-0 font-mono text-[9px] sm:text-[10px] font-black tracking-[0.2em] uppercase">
+                <span className="text-muted-foreground/30 shrink-0 font-mono text-[9px] font-black tracking-[0.2em] uppercase sm:text-[10px]">
                   Candidate
                 </span>
                 <span className="text-muted-foreground/15 shrink-0 font-mono text-[10px] sm:text-xs">
                   {"//"}
                 </span>
-                <div className="bg-muted/30 h-4 w-32 sm:w-36 rounded" />
+                <div className="bg-muted/30 h-4 w-32 rounded sm:w-36" />
               </div>
               <div className="bg-muted/20 mt-1.5 hidden h-3 w-28 rounded md:block" />
             </div>
           ) : (
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-muted-foreground/50 shrink-0 font-mono text-[9px] sm:text-[10px] font-black tracking-[0.2em] uppercase">
+                <span className="text-muted-foreground/50 shrink-0 font-mono text-[9px] font-black tracking-[0.2em] uppercase sm:text-[10px]">
                   Candidate
                 </span>
                 <span className="text-muted-foreground/30 shrink-0 font-mono text-[10px] sm:text-xs">

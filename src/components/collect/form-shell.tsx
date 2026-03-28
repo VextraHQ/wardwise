@@ -30,7 +30,7 @@ export function FormShell({
               </span>
             </div>
             <div className="ml-3 flex min-w-0 items-center justify-end gap-2">
-              <div className="size-1.5 shrink-0 animate-pulse rounded-full bg-emerald-500" />
+              <div className="bg-brand-emerald size-1.5 shrink-0 animate-pulse rounded-full" />
               <span className="text-muted-foreground truncate text-right text-[9px] font-black tracking-widest uppercase">
                 <span className="hidden sm:inline">Supporter </span>Registration
               </span>

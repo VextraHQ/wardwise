@@ -93,7 +93,7 @@ export function SecuritySection() {
               <div className="border-border/40 mt-8 border-t pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="size-1.5 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                    <div className="bg-brand-emerald size-1.5 animate-pulse rounded-full shadow-[0_0_8px_rgba(2,201,136,0.5)]" />
                     <span className="text-muted-foreground font-mono text-[8px] font-black tracking-[0.2em] uppercase">
                       Verified Agent
                     </span>
@@ -112,7 +112,7 @@ export function SecuritySection() {
 
         {/* Bottom Trust Notation - Translated to Human Policy terms */}
         <div className="mt-6 flex flex-col items-center justify-center gap-4 text-center">
-          <div className="border-border/60 flex flex-col items-center gap-6 rounded-2xl border bg-slate-50/40 px-8 py-4 sm:flex-row">
+          <div className="border-border/60 bg-card/40 flex flex-col items-center gap-6 rounded-2xl border px-8 py-4 sm:flex-row">
             <div className="flex flex-col items-center sm:items-start sm:px-4">
               <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
                 Privacy Protocol

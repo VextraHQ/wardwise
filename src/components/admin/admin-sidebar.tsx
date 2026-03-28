@@ -22,8 +22,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
-import { HiMap } from "react-icons/hi";
+import { Logo } from "@/components/layout/logo";
 
 const adminNavItems = [
   {
@@ -88,14 +87,7 @@ export function AdminSidebar({
               asChild
               className="data-[slot=sidebar-menu-button]:p-0!"
             >
-              <Link href="/">
-                <div className="from-primary flex size-8 items-center justify-center rounded-sm bg-linear-to-br via-[#2f7f6b] to-[#163a30] text-white">
-                  <HiMap className="h-4 w-4" />
-                </div>
-                <span className="text-base font-bold tracking-tight">
-                  WardWise
-                </span>
-              </Link>
+              <Logo variant="offwhite" size="sm" className="gap-2 px-1" />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

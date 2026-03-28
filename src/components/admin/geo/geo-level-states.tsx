@@ -76,7 +76,7 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
       return (
         <Badge
           variant="outline"
-          className="rounded-sm border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-emerald-600 uppercase"
+          className="border-brand-emerald/20 bg-brand-emerald/10 text-brand-lagoon rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
         >
           <HiCheck className="mr-0.5 h-3 w-3" />
           Complete

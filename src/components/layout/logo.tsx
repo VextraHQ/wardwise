@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { HiMap } from "react-icons/hi";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { IconType } from "react-icons";
 
 export interface LogoProps {
   /** Whether logo links to home - defaults to true */
@@ -12,100 +11,49 @@ export interface LogoProps {
   href?: string;
   /** Size variant */
   size?: "sm" | "md" | "lg";
-  /** Color variant */
-  variant?: "primary" | "amber";
-  /** Custom icon - defaults to HiMap */
-  icon?: IconType;
-  /** Show tagline below name */
-  showTagline?: boolean;
+  /** Color variant — lagoon for light backgrounds, offwhite for dark (sidebar) */
+  variant?: "lagoon" | "offwhite";
   /** Additional classes for the wrapper */
   className?: string;
 }
 
 const sizeConfig = {
-  sm: {
-    icon: "h-8 w-8",
-    iconInner: "h-5 w-5",
-    name: "text-base",
-    tagline: "text-[9px]",
-  },
-  md: {
-    icon: "h-10 w-10 sm:h-11 sm:w-11",
-    iconInner: "h-6 w-6",
-    name: "text-lg sm:text-xl",
-    tagline: "text-[10px] sm:text-[10.5px]",
-  },
-  lg: {
-    icon: "h-12 w-12",
-    iconInner: "h-7 w-7",
-    name: "text-xl sm:text-2xl",
-    tagline: "text-[11px]",
-  },
+  sm: { h: 20, w: 112, className: "h-5 w-auto" }, // For mobile headers
+  md: { h: 24, w: 134, className: "h-6 w-auto" }, // For standard navigation
+  lg: { h: 32, w: 179, className: "h-8 w-auto" }, // For hero sections/footers
 };
 
 const variantConfig = {
-  primary: {
-    iconWrapper: "border-primary/20 bg-primary/5 text-primary",
-    tagline: "text-muted-foreground",
-  },
-  amber: {
-    iconWrapper: "border-amber-500/20 bg-amber-500/5 text-amber-600",
-    tagline: "text-amber-600/80",
-  },
+  lagoon: { src: "/brand/logotype-lagoon.svg" },
+  offwhite: { src: "/brand/logotype-offwhite.svg" },
 };
 
 export function Logo({
   linkToHome = true,
   href = "/",
   size = "md",
-  variant = "primary",
-  icon: Icon = HiMap,
-  showTagline = true,
+  variant = "lagoon",
   className,
 }: LogoProps) {
   const sizeStyles = sizeConfig[size];
   const variantStyles = variantConfig[variant];
 
   const content = (
-    <>
-      <div
-        className={cn(
-          "flex items-center justify-center rounded-2xl border transition-transform duration-300 group-hover:scale-105",
-          sizeStyles.icon,
-          variantStyles.iconWrapper,
-        )}
-      >
-        <Icon className={sizeStyles.iconInner} />
-      </div>
-      <div className="flex flex-col leading-tight">
-        <span
-          className={cn(
-            "text-foreground font-black tracking-tight",
-            sizeStyles.name,
-          )}
-        >
-          WardWise
-        </span>
-        {showTagline && (
-          <span
-            className={cn(
-              "truncate font-medium",
-              sizeStyles.tagline,
-              variantStyles.tagline,
-            )}
-          >
-            Civic Intelligence Platform
-          </span>
-        )}
-      </div>
-    </>
+    <Image
+      src={variantStyles.src}
+      alt="WardWise"
+      width={sizeStyles.w}
+      height={sizeStyles.h}
+      className={cn("object-contain", sizeStyles.className)}
+      priority
+    />
   );
 
   if (linkToHome) {
     return (
       <Link
         href={href}
-        className={cn("group flex items-center gap-3", className)}
+        className={cn("group flex items-center", className)}
         aria-label="WardWise home"
       >
         {content}
@@ -113,7 +61,5 @@ export function Logo({
     );
   }
 
-  return (
-    <div className={cn("flex items-center gap-3", className)}>{content}</div>
-  );
+  return <div className={cn("flex items-center", className)}>{content}</div>;
 }

@@ -119,7 +119,7 @@ export default function LoginPage() {
               <div className="flex h-[380px] flex-col items-center justify-center space-y-6">
                 <div className="text-primary/40 relative flex size-16 items-center justify-center">
                   <div className="absolute inset-0 animate-ping rounded-full border-2 border-current opacity-20" />
-                  <div className="size-8 animate-spin rounded-full border-[3px] border-current border-t-primary" />
+                  <div className="border-t-primary size-8 animate-spin rounded-full border-[3px] border-current" />
                 </div>
                 <div className="flex flex-col items-center gap-2">
                   <p className="text-primary font-mono text-xs font-black tracking-widest uppercase">

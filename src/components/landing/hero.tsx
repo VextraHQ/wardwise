@@ -131,7 +131,7 @@ export function HeroSection() {
                   <div className="border-border bg-muted/10 flex h-13 w-full min-w-[200px] cursor-wait items-center justify-center gap-3 rounded-xl border px-6 transition-all duration-300 sm:w-auto">
                     <div className="flex flex-col items-start leading-none opacity-50">
                       <span className="text-muted-foreground mb-1 flex items-center gap-1.5 text-[8px] font-black tracking-widest uppercase">
-                        <div className="size-1.5 animate-pulse rounded-full bg-primary/70" />
+                        <div className="bg-primary/70 size-1.5 animate-pulse rounded-full" />
                         System Check
                       </span>
                       <span className="text-foreground text-sm font-bold">
@@ -211,7 +211,7 @@ export function HeroSection() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
+                    <div className="bg-brand-emerald size-1.5 animate-pulse rounded-full" />
                     <span className="text-muted-foreground text-[10px] font-bold">
                       LIVE
                     </span>
@@ -232,8 +232,8 @@ export function HeroSection() {
                       </div>
                       <div className="space-y-1 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <HiArrowUpRight className="text-emerald-500" />
-                          <span className="text-sm font-black text-emerald-600">
+                          <HiArrowUpRight className="text-brand-emerald" />
+                          <span className="text-brand-lagoon text-sm font-black">
                             +12% this week
                           </span>
                         </div>
@@ -302,7 +302,7 @@ export function HeroSection() {
                           <p className="text-foreground text-2xl font-black tracking-tighter">
                             {stat.val}
                           </p>
-                          <p className="text-[9px] font-bold text-emerald-600">
+                          <p className="text-brand-lagoon text-[9px] font-bold">
                             {stat.subtitle}
                           </p>
                         </div>
@@ -345,7 +345,7 @@ export function HeroSection() {
                               className={cn(
                                 "size-2 rounded-full",
                                 log.status === "success"
-                                  ? "bg-emerald-500"
+                                  ? "bg-brand-emerald"
                                   : "bg-orange-500",
                               )}
                             />

@@ -174,8 +174,8 @@ export function ReportsContent() {
 
             <div className="border-border/40 bg-muted/10 hover:bg-muted/20 rounded-sm border p-4 transition-all">
               <div className="mb-2 flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded-sm bg-green-500/10">
-                  <IconFingerprint className="size-4 text-green-600" />
+                <div className="bg-brand-emerald/10 flex size-8 items-center justify-center rounded-sm">
+                  <IconFingerprint className="text-brand-lagoon size-4" />
                 </div>
                 <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
                   NIN Collected
@@ -230,8 +230,8 @@ export function ReportsContent() {
 
             <div className="border-border/40 bg-muted/10 hover:bg-muted/20 rounded-sm border p-4 transition-all">
               <div className="mb-2 flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded-sm bg-emerald-500/10">
-                  <IconChartBar className="size-4 text-emerald-600" />
+                <div className="bg-brand-emerald/10 flex size-8 items-center justify-center rounded-sm">
+                  <IconChartBar className="text-brand-lagoon size-4" />
                 </div>
                 <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
                   Data Quality Score

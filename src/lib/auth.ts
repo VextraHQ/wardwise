@@ -78,7 +78,8 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     // Add custom fields from JWT to session object
-    async session({ session, token }) {      if (token) {
+    async session({ session, token }) {
+      if (token) {
         session.user.id = token.sub!;
         session.user.role = token.role as string;
         session.user.candidateId = token.candidateId as string;

@@ -175,10 +175,10 @@ export const featureCards: FeatureCard[] = [
 ];
 
 export const nigeriaGradient =
-  "bg-[radial-gradient(circle_at_14%_18%,rgba(70,194,167,0.22),transparent_55%),radial-gradient(circle_at_88%_22%,rgba(20,53,46,0.18),transparent_60%)]";
+  "bg-[radial-gradient(circle_at_14%_18%,rgba(2,201,136,0.22),transparent_55%),radial-gradient(circle_at_88%_22%,rgba(9,40,42,0.18),transparent_60%)]";
 
 export const heroBackgroundGradient =
-  "bg-[linear-gradient(140deg,_#eff9f5_0%,_#ffffff_55%,_#f9fbfa_100%)]";
+  "bg-[linear-gradient(140deg,_#F5F5ED_0%,_#ffffff_55%,_#F5F5ED_100%)]";
 
 export const heroPlaceholder = {
   imageUrl:

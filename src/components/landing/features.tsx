@@ -19,7 +19,7 @@ const features = [
           className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage:
-              "linear-gradient(#1f6b5e 1px, transparent 1px), linear-gradient(to right, #1f6b5e 1px, transparent 1px)",
+              "linear-gradient(#0A645A 1px, transparent 1px), linear-gradient(to right, #0A645A 1px, transparent 1px)",
             backgroundSize: "30px 30px",
           }}
         />
@@ -92,8 +92,8 @@ const features = [
             NODE_SYNC_BASE
           </span>
           <div className="flex items-center gap-1.5">
-            <div className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
-            <span className="font-mono text-[9px] font-bold text-emerald-600 uppercase">
+            <div className="bg-brand-emerald size-1.5 animate-pulse rounded-full" />
+            <span className="text-brand-lagoon font-mono text-[9px] font-bold uppercase">
               Active
             </span>
           </div>
@@ -113,9 +113,9 @@ const features = [
                   className="bg-primary/20 h-3 w-1 rounded-sm"
                   animate={{
                     backgroundColor: [
-                      "rgba(31,107,94,0.1)",
-                      "rgba(31,107,94,0.4)",
-                      "rgba(31,107,94,0.1)",
+                      "rgba(10,100,90,0.1)",
+                      "rgba(10,100,90,0.4)",
+                      "rgba(10,100,90,0.1)",
                     ],
                   }}
                   transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
@@ -154,7 +154,7 @@ const features = [
           },
           {
             role: "CANDIDATE",
-            color: "bg-emerald-500",
+            color: "bg-brand-emerald",
             percentage: 75,
             access: "R_ANALYTICS",
           },

@@ -101,10 +101,10 @@ export default function ForgotPasswordPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-6"
               >
-                <div className="flex gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-                  <HiCheckCircle className="size-4 shrink-0 text-emerald-600" />
+                <div className="border-brand-emerald/20 bg-brand-emerald/5 flex gap-3 rounded-xl border p-4">
+                  <HiCheckCircle className="text-brand-lagoon size-4 shrink-0" />
                   <div className="space-y-0.5">
-                    <p className="text-xs font-bold tracking-widest text-emerald-600 uppercase">
+                    <p className="text-brand-lagoon text-xs font-bold tracking-widest uppercase">
                       Reset Link Sent
                     </p>
                     <p className="text-muted-foreground text-xs leading-relaxed font-medium">
