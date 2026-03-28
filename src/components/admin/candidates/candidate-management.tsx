@@ -36,7 +36,6 @@ import { CandidateCardSkeleton } from "@/components/admin/admin-skeletons";
 
 import { nigeriaStates } from "@/lib/data/state-lga-locations";
 
-
 function resolveStateName(stateCode: string | null): string {
   if (!stateCode) return "Nigeria";
   return nigeriaStates.find((s) => s.code === stateCode)?.name ?? stateCode;
@@ -82,7 +81,6 @@ export function CandidateManagement() {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
-
 
   const uniqueParties = useMemo(
     () =>
@@ -198,27 +196,27 @@ export function CandidateManagement() {
           </Button>
         </div>
 
-          <CandidateFilters
-            partyFilter={partyFilter}
-            positionFilter={positionFilter}
-            sort={candidateSort}
-            uniqueParties={uniqueParties}
-            uniquePositions={uniquePositions}
-            onFilterChange={({ party, position, sort }) => {
-              if (party !== undefined) setPartyFilter(party);
-              if (position !== undefined) setPositionFilter(position);
-              if (sort !== undefined) setCandidateSort(sort);
-              setCandidatePage(1);
-            }}
-            onReset={() => {
-              setSearchQuery("");
-              setPartyFilter("all");
-              setPositionFilter("all");
-              setCandidateSort("date");
-              setCandidatePage(1);
-            }}
-            hasFilters={activeFilters}
-          />
+        <CandidateFilters
+          partyFilter={partyFilter}
+          positionFilter={positionFilter}
+          sort={candidateSort}
+          uniqueParties={uniqueParties}
+          uniquePositions={uniquePositions}
+          onFilterChange={({ party, position, sort }) => {
+            if (party !== undefined) setPartyFilter(party);
+            if (position !== undefined) setPositionFilter(position);
+            if (sort !== undefined) setCandidateSort(sort);
+            setCandidatePage(1);
+          }}
+          onReset={() => {
+            setSearchQuery("");
+            setPartyFilter("all");
+            setPositionFilter("all");
+            setCandidateSort("date");
+            setCandidatePage(1);
+          }}
+          hasFilters={activeFilters}
+        />
       </div>
 
       <Card className="border-border/60 flex-1 rounded-sm shadow-none">
@@ -312,69 +310,69 @@ export function CandidateManagement() {
                       const isSuspended =
                         candidate.onboardingStatus === "suspended";
                       return (
-                      <TableRow
-                        key={candidate.id}
-                        className={`cursor-pointer transition-colors ${
-                          isSuspended
-                            ? "bg-destructive/5 hover:bg-destructive/10"
-                            : "hover:bg-muted/50"
-                        }`}
-                        onClick={() =>
-                          router.push(`/admin/candidates/${candidate.id}`)
-                        }
-                      >
-                        <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
-                          {snOffset + idx + 1}
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <span className="text-sm font-medium">
-                              {candidate.name}
-                            </span>
-                            <span className="text-muted-foreground block text-xs">
-                              {candidate.user?.email}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-                          >
-                            {candidate.party}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs">
-                          {candidate.position}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <div>
-                            <span className="text-xs font-medium">
-                              {resolveStateName(candidate.stateCode)}
-                            </span>
-                            {candidate.constituency && (
-                              <span className="text-muted-foreground block text-[11px]">
-                                {candidate.constituency}
+                        <TableRow
+                          key={candidate.id}
+                          className={`cursor-pointer transition-colors ${
+                            isSuspended
+                              ? "bg-destructive/5 hover:bg-destructive/10"
+                              : "hover:bg-muted/50"
+                          }`}
+                          onClick={() =>
+                            router.push(`/admin/candidates/${candidate.id}`)
+                          }
+                        >
+                          <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
+                            {snOffset + idx + 1}
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <span className="text-sm font-medium">
+                                {candidate.name}
                               </span>
+                              <span className="text-muted-foreground block text-xs">
+                                {candidate.user?.email}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                            >
+                              {candidate.party}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            {candidate.position}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <div>
+                              <span className="text-xs font-medium">
+                                {resolveStateName(candidate.stateCode)}
+                              </span>
+                              {candidate.constituency && (
+                                <span className="text-muted-foreground block text-[11px]">
+                                  {candidate.constituency}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell">
+                            <OnboardingBadge
+                              status={candidate.onboardingStatus}
+                            />
+                          </TableCell>
+                          <TableCell className="text-muted-foreground hidden text-xs xl:table-cell">
+                            {new Date(candidate.createdAt).toLocaleDateString(
+                              "en-NG",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              },
                             )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden lg:table-cell">
-                          <OnboardingBadge
-                            status={candidate.onboardingStatus}
-                          />
-                        </TableCell>
-                        <TableCell className="text-muted-foreground hidden text-xs xl:table-cell">
-                          {new Date(candidate.createdAt).toLocaleDateString(
-                            "en-NG",
-                            {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            },
-                          )}
-                        </TableCell>
-                      </TableRow>
+                          </TableCell>
+                        </TableRow>
                       );
                     })}
                   </TableBody>
@@ -399,7 +397,6 @@ export function CandidateManagement() {
           )}
         </CardContent>
       </Card>
-
     </div>
   );
 }

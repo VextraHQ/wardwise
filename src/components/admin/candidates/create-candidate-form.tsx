@@ -67,7 +67,12 @@ export function CreateCandidateForm() {
         name: data.name,
         email: data.email,
         party: data.party,
-        position: data.position as "President" | "Governor" | "Senator" | "House of Representatives" | "State Assembly",
+        position: data.position as
+          | "President"
+          | "Governor"
+          | "Senator"
+          | "House of Representatives"
+          | "State Assembly",
         constituency: data.constituency,
         stateCode: data.stateCode || undefined,
         lga: data.lga || undefined,

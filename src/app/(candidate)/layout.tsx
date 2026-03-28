@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { AppSidebar } from "@/components/candidate-dashboard/app-sidebar";
 import { SiteHeader } from "@/components/candidate-dashboard/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { CandidateDashboardSkeleton } from "@/components/candidate-dashboard/candidate-skeletons";
 
 export default function CandidateLayout({
   children,
@@ -25,28 +25,17 @@ export default function CandidateLayout({
     }
   }, [status, session]);
 
-  // Show loading state while checking authentication
-  if (status === "loading") {
-    return (
-      <div className="flex min-h-screen flex-col sm:flex-row">
-        <div className="hidden w-64 border-r p-4 sm:block">
-          <Skeleton className="h-12 w-full" />
-          <div className="mt-4 space-y-2">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </div>
-        <div className="flex-1 p-4 sm:p-6">
-          <Skeleton className="mb-4 h-12 w-full sm:mb-6 sm:h-16" />
-          <Skeleton className="h-64 w-full" />
-        </div>
-      </div>
-    );
-  }
+  // ─── "Always-On Shell" Pattern ──────────────────────────────────
+  // Layout frame renders unconditionally. Each child component
+  // handles its own loading state independently. This eliminates
+  // the jarring "skeleton wall → real UI" double-transition.
+  // ────────────────────────────────────────────────────────────────
 
-  // Don't render if not authenticated
-  if (status === "unauthenticated" || session?.user?.role !== "candidate") {
+  // Only bail out if we KNOW user is unauthorized
+  if (
+    status === "unauthenticated" ||
+    (status === "authenticated" && session?.user?.role !== "candidate")
+  ) {
     return null;
   }
 
@@ -62,7 +51,13 @@ export default function CandidateLayout({
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col">{children}</div>
+        <div className="flex flex-1 flex-col">
+          {status === "authenticated" ? (
+            children
+          ) : (
+            <CandidateDashboardSkeleton />
+          )}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -76,7 +76,7 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
       return (
         <Badge
           variant="outline"
-          className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+          className="rounded-sm border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-emerald-600 uppercase"
         >
           <HiCheck className="mr-0.5 h-3 w-3" />
           Complete
@@ -228,7 +228,7 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
                   return (
                     <TableRow
                       key={state.code}
-                      className="cursor-pointer transition-colors hover:bg-muted/50"
+                      className="hover:bg-muted/50 cursor-pointer transition-colors"
                       onClick={() => onDrillDown(state.code)}
                     >
                       <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">

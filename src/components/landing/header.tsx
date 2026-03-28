@@ -69,7 +69,12 @@ export function SiteHeader({ className }: SiteHeaderProps) {
               ))}
             </nav>
             <div className="hidden items-center gap-6 lg:flex">
-              {status === "authenticated" && session?.user ? (
+              {status === "loading" ? (
+                <div className="text-muted-foreground/50 flex cursor-wait items-center gap-2 font-mono text-[10px] font-black tracking-widest uppercase transition-colors">
+                  <div className="size-3 animate-spin rounded-full border outline-1 outline-primary border-t-transparent" />
+                  Verifying...
+                </div>
+              ) : status === "authenticated" && session?.user ? (
                 <Link
                   href={
                     session.user.role === "candidate"
@@ -165,7 +170,12 @@ export function SiteHeader({ className }: SiteHeaderProps) {
               ))}
             </nav>
             <div className="mt-5 flex flex-col gap-2.5">
-              {status === "authenticated" && session?.user ? (
+              {status === "loading" ? (
+                <div className="border-border text-foreground/50 bg-muted/10 flex cursor-wait items-center justify-center gap-2 rounded-sm border px-4 py-3 text-center text-sm font-semibold transition-colors duration-200">
+                  <div className="size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  Validating...
+                </div>
+              ) : status === "authenticated" && session?.user ? (
                 <Link
                   href={
                     session.user.role === "candidate"

@@ -114,8 +114,8 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
       <div className="flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
           {campaigns.length} campaign{campaigns.length !== 1 ? "s" : ""}{" "}
-          <span className="text-muted-foreground/50">·</span>{" "}
-          {totalSubmissions} submission{totalSubmissions !== 1 ? "s" : ""}
+          <span className="text-muted-foreground/50">·</span> {totalSubmissions}{" "}
+          submission{totalSubmissions !== 1 ? "s" : ""}
         </p>
         <Button
           variant="outline"
@@ -128,96 +128,93 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
         </Button>
       </div>
 
-          <div className="overflow-x-auto rounded-sm border">
-            <Table>
-              <TableHeader className="bg-muted/30 sticky top-0 z-10">
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
-                    S/N
-                  </TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                    Campaign
-                  </TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                    Status
-                  </TableHead>
-                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
-                    Submissions
-                  </TableHead>
-                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase lg:table-cell">
-                    Constituency
-                  </TableHead>
-                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase sm:table-cell">
-                    Created
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedCampaigns.map((campaign, idx) => (
-                  <TableRow
-                    key={campaign.id}
-                    className="hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() =>
-                      router.push(`/admin/collect/campaigns/${campaign.id}`)
-                    }
+      <div className="overflow-x-auto rounded-sm border">
+        <Table>
+          <TableHeader className="bg-muted/30 sticky top-0 z-10">
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
+                S/N
+              </TableHead>
+              <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Campaign
+              </TableHead>
+              <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Status
+              </TableHead>
+              <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
+                Submissions
+              </TableHead>
+              <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase lg:table-cell">
+                Constituency
+              </TableHead>
+              <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase sm:table-cell">
+                Created
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedCampaigns.map((campaign, idx) => (
+              <TableRow
+                key={campaign.id}
+                className="hover:bg-muted/50 cursor-pointer transition-colors"
+                onClick={() =>
+                  router.push(`/admin/collect/campaigns/${campaign.id}`)
+                }
+              >
+                <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
+                  {snOffset + idx + 1}
+                </TableCell>
+                <TableCell>
+                  <div>
+                    <span className="text-sm font-medium">
+                      {campaign.candidateName}
+                    </span>
+                    <span className="text-muted-foreground block font-mono text-xs">
+                      /c/{campaign.slug}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="outline"
+                    className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${STATUS_STYLES[campaign.status] ?? ""}`}
                   >
-                    <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
-                      {snOffset + idx + 1}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <span className="text-sm font-medium">
-                          {campaign.candidateName}
-                        </span>
-                        <span className="text-muted-foreground block font-mono text-xs">
-                          /c/{campaign.slug}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${STATUS_STYLES[campaign.status] ?? ""}`}
-                      >
-                        {campaign.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden font-mono text-sm tabular-nums md:table-cell">
-                      {campaign._count.submissions}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground hidden text-xs lg:table-cell">
-                      {campaign.constituency || "—"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground hidden text-xs sm:table-cell">
-                      {new Date(campaign.createdAt).toLocaleDateString(
-                        "en-NG",
-                        {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        },
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                    {campaign.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="hidden font-mono text-sm tabular-nums md:table-cell">
+                  {campaign._count.submissions}
+                </TableCell>
+                <TableCell className="text-muted-foreground hidden text-xs lg:table-cell">
+                  {campaign.constituency || "—"}
+                </TableCell>
+                <TableCell className="text-muted-foreground hidden text-xs sm:table-cell">
+                  {new Date(campaign.createdAt).toLocaleDateString("en-NG", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
-          <div className="pt-4">
-            <AdminPagination
-              currentPage={safePage}
-              totalPages={totalPages}
-              pageSize={pageSize}
-              totalItems={campaigns.length}
-              itemLabel="campaigns"
-              onPageChange={setPage}
-              onPageSizeChange={(size) => {
-                setPageSize(size);
-                setPage(1);
-              }}
-            />
-          </div>
+      <div className="pt-4">
+        <AdminPagination
+          currentPage={safePage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={campaigns.length}
+          itemLabel="campaigns"
+          onPageChange={setPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+        />
+      </div>
     </div>
   );
 }

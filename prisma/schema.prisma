@@ -17,7 +17,7 @@ model User {
   candidateId String?    @unique
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  candidate   Candidate? @relation(fields: [candidateId], references: [id])
+  candidate   Candidate? @relation(fields: [candidateId], references: [id], onDelete: Cascade)
 }
 
 model Candidate {
@@ -137,7 +137,7 @@ model PollingUnit {
 model Campaign {
   id               String   @id @default(uuid())
   candidateId      String
-  candidate        Candidate @relation(fields: [candidateId], references: [id])
+  candidate        Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
   slug             String   @unique
   candidateName    String
   candidateTitle   String?
@@ -158,7 +158,7 @@ model Campaign {
 model CollectSubmission {
   id               String   @id @default(uuid())
   campaignId       String
-  campaign         Campaign @relation(fields: [campaignId], references: [id])
+  campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   fullName         String
   phone            String
   email            String?
@@ -194,4 +194,20 @@ model CollectSubmission {
   @@index([lgaId])
   @@index([wardId])
   @@index([pollingUnitId])
+}
+
+// === Audit Log ===
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String   // e.g. "candidate.create", "campaign.delete"
+  entityType String   // "candidate", "campaign", "submission"
+  entityId   String
+  userId     String?  // admin who performed the action
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
 }

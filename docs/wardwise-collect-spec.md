@@ -2,7 +2,14 @@
 
 ## Status
 
-- **Collect v1 is implemented** on branch `feature/collect`.
+- **Collect v1 is complete** — merged to `main`.
+- **Future changes**: Branch off `main` with `fix/collect-*` (bug fixes) or `feature/collect-*` (new features). Keep branches short-lived and scoped to one change.
+- **Production hardening applied** — see `docs/wardwise-hardening-spec.md` for details:
+  - Rate limiting on `/api/collect/submit` (Upstash Redis, 10 req/min per IP)
+  - Geo hierarchy validation on submit (PU → ward → LGA chain verified)
+  - Cascade deletes: Campaign → Submissions, Candidate → Campaigns
+  - Server-side Zod validation on campaign create/update
+  - Audit logging on campaign CRUD and submission deletes
 - Database schema, API routes, public registration form, and admin management UI are all live.
 - Geo data seeded: 14 LGAs, 143 wards, 2,123 polling units (Adamawa + Bauchi states).
 - Client is testing; Girei and remaining Adamawa LGA data pending from client.
@@ -213,15 +220,15 @@ model PollingUnit {
 
 ### Admin (auth required)
 
-| Route                                           | Method               | Notes                                           |
-| ----------------------------------------------- | -------------------- | ----------------------------------------------- |
+| Route                                           | Method               | Notes                                                                               |
+| ----------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------- |
 | `/api/admin/collect/campaigns`                  | GET + POST           | List with `_count`; GET accepts `?candidateId=` filter; create with slug uniqueness |
-| `/api/admin/collect/campaigns/[id]`             | GET + PATCH + DELETE |                                                 |
-| `/api/admin/collect/campaigns/[id]/submissions` | GET                  | Paginated, filterable; includes PU code         |
-| `/api/admin/collect/campaigns/[id]/export`      | GET                  | CSV with PU code column; sanitizes `=+-@`       |
-| `/api/admin/collect/campaigns/[id]/canvassers`  | GET                  | Aggregation                                     |
-| `/api/admin/collect/lgas`                       | GET                  | All LGAs for campaign wizard                    |
-| `/api/admin/collect/submissions/[sid]`          | PATCH                | Flag, verify, notes                             |
+| `/api/admin/collect/campaigns/[id]`             | GET + PATCH + DELETE |                                                                                     |
+| `/api/admin/collect/campaigns/[id]/submissions` | GET                  | Paginated, filterable; includes PU code                                             |
+| `/api/admin/collect/campaigns/[id]/export`      | GET                  | CSV with PU code column; sanitizes `=+-@`                                           |
+| `/api/admin/collect/campaigns/[id]/canvassers`  | GET                  | Aggregation                                                                         |
+| `/api/admin/collect/lgas`                       | GET                  | All LGAs for campaign wizard                                                        |
+| `/api/admin/collect/submissions/[sid]`          | PATCH                | Flag, verify, notes                                                                 |
 
 ## File Structure
 

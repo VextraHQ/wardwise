@@ -216,16 +216,15 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Created</span>
-            <span>{new Date(campaign.createdAt).toLocaleString(
-                  "en-NG",
-                  {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                  },
-                )}</span>
+            <span>
+              {new Date(campaign.createdAt).toLocaleString("en-NG", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              })}
+            </span>
           </div>
         </CardContent>
       </Card>

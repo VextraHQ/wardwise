@@ -1,7 +1,4 @@
-"use client";
-
 import * as React from "react";
-import { Suspense } from "react";
 import {
   IconDashboard,
   IconUsers,
@@ -16,7 +13,6 @@ import {
 import { NavMain } from "@/components/candidate-dashboard/nav-main";
 import { NavSecondary } from "@/components/candidate-dashboard/nav-secondary";
 import { AdminNavUser } from "@/components/admin/admin-nav-user";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sidebar,
   SidebarContent,
@@ -105,17 +101,7 @@ export function AdminSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <Suspense
-          fallback={
-            <div className="space-y-2 px-2">
-              <Skeleton className="h-10 w-full rounded-sm" />
-              <Skeleton className="h-10 w-full rounded-sm" />
-              <Skeleton className="h-10 w-full rounded-sm" />
-            </div>
-          }
-        >
-          <NavMain items={adminNavItems} label="Operations" />
-        </Suspense>
+        <NavMain items={adminNavItems} label="Operations" />
         <NavSecondary items={adminSecondaryItems} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

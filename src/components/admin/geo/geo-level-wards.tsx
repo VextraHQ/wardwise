@@ -315,7 +315,7 @@ export function GeoLevelWards({
                         {ward._count.pollingUnits === 0 ? (
                           <Badge
                             variant="outline"
-                            className="bg-orange-500/10 text-orange-600 border-orange-500/20 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                            className="rounded-sm border-orange-500/20 bg-orange-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-orange-600 uppercase"
                           >
                             No PUs
                           </Badge>

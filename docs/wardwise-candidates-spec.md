@@ -1,13 +1,22 @@
 # WardWise Candidate Management Spec
 
 > Living reference for the candidate management and onboarding system.
-> Branch: `feature/collect` | Last updated: 2026-03-24
+> Branch: `main` | Last updated: 2026-03-28
+> Future changes: branch off `main` → `fix/candidates-*` or `feature/candidates-*`
 
 ---
 
 ## Overview
 
 Candidate Management is the B2B entry point for WardWise. When a client pays, Vextra creates their candidate account, shares credentials, and begins onboarding. The system uses geo-backed location selects (State/LGA from the Geo API) instead of free-text inputs to ensure data consistency with the Collect system.
+
+### Production Hardening (2026-03-27)
+
+- **Server-side Zod validation** on candidate create (`createCandidateSchema`) and update (`updateCandidateSchema`) API routes
+- **Cascade deletes**: Deleting a candidate now cascades to User account, Campaigns, and Submissions (no orphaned records)
+- **Centralized auth**: All admin API routes use `requireAdmin()` helper instead of manual session checks
+- **Audit logging**: Candidate create, update, delete, and password reset actions logged to `AuditLog` table
+- See `docs/wardwise-hardening-spec.md` for full details
 
 ---
 
@@ -46,13 +55,13 @@ Candidate Management is the B2B entry point for WardWise. When a client pays, Ve
 
 ## Position Hierarchy & Field Requirements
 
-| Position                 | State Required       | LGA Required | Constituency Type |
-| ------------------------ | -------------------- | ------------ | ----------------- |
-| President                | Optional (home state)| No           | `federal`         |
-| Governor                 | Yes                  | No           | `state`           |
-| Senator                  | Yes                  | Yes          | `federal`         |
-| House of Representatives | Yes                  | Yes          | `federal`         |
-| State Assembly           | Yes                  | Yes          | `state`           |
+| Position                 | State Required        | LGA Required | Constituency Type |
+| ------------------------ | --------------------- | ------------ | ----------------- |
+| President                | Optional (home state) | No           | `federal`         |
+| Governor                 | Yes                   | No           | `state`           |
+| Senator                  | Yes                   | Yes          | `federal`         |
+| House of Representatives | Yes                   | Yes          | `federal`         |
+| State Assembly           | Yes                   | Yes          | `state`           |
 
 ---
 
@@ -225,8 +234,8 @@ The shared `ComboboxSelect` component (`src/components/ui/combobox-select.tsx`) 
 
 ## Changelog
 
-| Date       | Change                                                                                                                                                                                                                                                                                                             |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Date       | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-03-25 | Governor auto-fill, Location column, newest-first default. Detail page UI overhaul: stat cards aligned to admin standard (Pattern 2 — icon top-right, value below), overview grouped into sections with dividers, campaigns tab rewritten as table, account tab typography standardized. Text contrast audit: bumped faint labels from opacity-40/50 to foreground/70-80, font-semibold section titles, reverted font-mono from body text (reserved for codes/IDs/badges/column headers). Onboarding status select uses colored dots instead of badges for clean hover. |
-| 2026-03-24 | Fixed ComboboxSelect search (custom filter searches label+value+description). President can optionally select "home state". Create form rewritten as 3-step wizard with StepProgress bar, matching Collect campaign wizard pattern. Added phone field to candidate edit form. Account tab danger zone with delete. |
-| 2026-03-18 | Initial spec. Schema cleanup (removed dead models), renamed `state` → `stateCode`, removed stored `supporters` field, added `phone`/`title`/`onboardingStatus`. Created page-based CRUD with geo-backed selects, table list view, detail page with tabs, readable password generation, onboarding status tracking. |
+| 2026-03-24 | Fixed ComboboxSelect search (custom filter searches label+value+description). President can optionally select "home state". Create form rewritten as 3-step wizard with StepProgress bar, matching Collect campaign wizard pattern. Added phone field to candidate edit form. Account tab danger zone with delete.                                                                                                                                                                                                                                                      |
+| 2026-03-18 | Initial spec. Schema cleanup (removed dead models), renamed `state` → `stateCode`, removed stored `supporters` field, added `phone`/`title`/`onboardingStatus`. Created page-based CRUD with geo-backed selects, table list view, detail page with tabs, readable password generation, onboarding status tracking.                                                                                                                                                                                                                                                      |

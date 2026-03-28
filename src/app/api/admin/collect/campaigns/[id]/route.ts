@@ -1,17 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { updateCampaignSchema } from "@/lib/schemas/admin-schemas";
+import { logAudit } from "@/lib/audit";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, { params }: RouteParams) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { error } = await requireAdmin();
+    if (error) return error;
 
     const { id } = await params;
     const campaign = await prisma.campaign.findUnique({
@@ -44,48 +43,63 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { error, session } = await requireAdmin();
+    if (error) return error;
 
     const { id } = await params;
     const body = await request.json();
+    const parsed = updateCampaignSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: parsed.error.flatten().fieldErrors,
+        },
+        { status: 400 },
+      );
+    }
 
+    const d = parsed.data;
     const campaign = await prisma.campaign.update({
       where: { id },
       data: {
-        ...(body.slug !== undefined && { slug: body.slug }),
-        ...(body.candidateName !== undefined && {
-          candidateName: body.candidateName,
+        ...(d.slug !== undefined && { slug: d.slug }),
+        ...(d.candidateName !== undefined && {
+          candidateName: d.candidateName,
         }),
-        ...(body.candidateTitle !== undefined && {
-          candidateTitle: body.candidateTitle || null,
+        ...(d.candidateTitle !== undefined && {
+          candidateTitle: d.candidateTitle || null,
         }),
-        ...(body.party !== undefined && { party: body.party }),
-        ...(body.constituency !== undefined && {
-          constituency: body.constituency,
+        ...(d.party !== undefined && { party: d.party }),
+        ...(d.constituency !== undefined && {
+          constituency: d.constituency,
         }),
-        ...(body.constituencyType !== undefined && {
-          constituencyType: body.constituencyType,
+        ...(d.constituencyType !== undefined && {
+          constituencyType: d.constituencyType,
         }),
-        ...(body.enabledLgaIds !== undefined && {
-          enabledLgaIds: body.enabledLgaIds,
+        ...(d.enabledLgaIds !== undefined && {
+          enabledLgaIds: d.enabledLgaIds,
         }),
-        ...(body.requireApcReg !== undefined && {
-          requireApcReg: body.requireApcReg,
+        ...(d.requireApcReg !== undefined && {
+          requireApcReg: d.requireApcReg,
         }),
-        ...(body.requireVoterId !== undefined && {
-          requireVoterId: body.requireVoterId,
+        ...(d.requireVoterId !== undefined && {
+          requireVoterId: d.requireVoterId,
         }),
-        ...(body.customQuestion1 !== undefined && {
-          customQuestion1: body.customQuestion1 || null,
+        ...(d.customQuestion1 !== undefined && {
+          customQuestion1: d.customQuestion1 || null,
         }),
-        ...(body.customQuestion2 !== undefined && {
-          customQuestion2: body.customQuestion2 || null,
+        ...(d.customQuestion2 !== undefined && {
+          customQuestion2: d.customQuestion2 || null,
         }),
-        ...(body.status !== undefined && { status: body.status }),
+        ...(d.status !== undefined && { status: d.status }),
       },
+    });
+
+    void logAudit("campaign.update", "campaign", id, session!.user.id, {
+      changedFields: Object.keys(d).filter(
+        (k) => d[k as keyof typeof d] !== undefined,
+      ),
     });
 
     return NextResponse.json({
@@ -120,16 +134,14 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { error, session } = await requireAdmin();
+    if (error) return error;
 
     const { id } = await params;
 
-    // Delete submissions first, then campaign
-    await prisma.collectSubmission.deleteMany({ where: { campaignId: id } });
     await prisma.campaign.delete({ where: { id } });
+
+    void logAudit("campaign.delete", "campaign", id, session!.user.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

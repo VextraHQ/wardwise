@@ -1,5 +1,7 @@
 "use client";
 
+import * as React from "react";
+
 import { signOut, useSession } from "next-auth/react";
 import {
   IconDotsVertical,
@@ -26,8 +28,13 @@ import {
 } from "@/components/ui/sidebar";
 
 export function AdminNavUser() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const { isMobile } = useSidebar();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSignOut = () => {
     signOut({ callbackUrl: "/" });
@@ -37,6 +44,8 @@ export function AdminNavUser() {
     name: session?.user?.name || "Admin",
     email: session?.user?.email || "admin@wardwise.ng",
   };
+
+  const isLoadingSession = status === "loading" || !mounted;
 
   return (
     <SidebarMenu>
@@ -48,15 +57,32 @@ export function AdminNavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-sm">
-                <AvatarFallback className="text-primary-foreground bg-primary rounded-sm">
-                  {user.name.charAt(0)}
-                </AvatarFallback>
+                {isLoadingSession ? (
+                  <div className="bg-muted/30 size-full animate-pulse rounded-sm border border-border/50" />
+                ) : (
+                  <AvatarFallback className="text-primary-foreground bg-primary rounded-sm">
+                    {user.name.charAt(0)}
+                  </AvatarFallback>
+                )}
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="text-muted-foreground truncate text-xs">
-                  {user.email}
-                </span>
+                {isLoadingSession ? (
+                  <>
+                    <span className="text-muted-foreground/60 truncate font-mono text-[10px] font-bold tracking-widest uppercase animate-pulse">
+                      Syncing...
+                    </span>
+                    <span className="text-muted-foreground/40 truncate font-mono text-[9px] tracking-widest uppercase">
+                      ID_FETCH
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="text-muted-foreground truncate text-xs">
+                      {user.email}
+                    </span>
+                  </>
+                )}
               </div>
               <IconDotsVertical className="ml-auto size-4" />
             </SidebarMenuButton>

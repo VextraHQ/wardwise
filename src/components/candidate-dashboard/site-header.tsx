@@ -7,12 +7,14 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { IconHome } from "@tabler/icons-react";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import Link from "next/link";
 
 export function SiteHeader() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const { data: candidateProfile, isLoading } = useCandidateProfile();
+
+  const isResolving = status === "loading" || isLoading;
 
   const candidateName =
     candidateProfile?.name || session?.user?.name || "Candidate";
@@ -27,11 +29,19 @@ export function SiteHeader() {
           className="mx-1 hidden data-[orientation=vertical]:h-4 sm:block"
         />
         <div className="min-w-0 flex-1">
-          {isLoading ? (
-            <>
-              <Skeleton className="h-5 w-48" />
-              <Skeleton className="mt-1 h-4 w-32" />
-            </>
+          {isResolving ? (
+            <div className="flex flex-col animate-pulse">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground/30 hidden font-mono text-[10px] font-black tracking-[0.2em] uppercase sm:inline-block">
+                  Candidate
+                </span>
+                <span className="text-muted-foreground/15 hidden font-mono text-xs sm:inline-block">
+                  {"//"}
+                </span>
+                <div className="bg-muted/30 h-4 w-36 rounded" />
+              </div>
+              <div className="bg-muted/20 mt-1.5 hidden h-3 w-28 rounded sm:block" />
+            </div>
           ) : (
             <div className="flex flex-col">
               <div className="flex items-center gap-2">

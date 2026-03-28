@@ -127,20 +127,34 @@ export function HeroSection() {
                   </Link>
                 </Button>
 
-                <Link
-                  href={loginHref}
-                  className="group border-border bg-muted/30 hover:bg-muted/50 flex h-13 items-center justify-center gap-3 rounded-xl border px-6 transition-all duration-300"
-                >
-                  <div className="flex flex-col items-start leading-none">
-                    <span className="text-muted-foreground mb-1 text-[8px] font-black tracking-widest uppercase">
-                      Existing System?
-                    </span>
-                    <span className="text-foreground text-sm font-bold">
-                      {loginText}
-                    </span>
+                {status === "loading" ? (
+                  <div className="border-border bg-muted/10 flex h-13 w-full min-w-[200px] cursor-wait items-center justify-center gap-3 rounded-xl border px-6 transition-all duration-300 sm:w-auto">
+                    <div className="flex flex-col items-start leading-none opacity-50">
+                      <span className="text-muted-foreground mb-1 flex items-center gap-1.5 text-[8px] font-black tracking-widest uppercase">
+                        <div className="size-1.5 animate-pulse rounded-full bg-primary/70" />
+                        System Check
+                      </span>
+                      <span className="text-foreground text-sm font-bold">
+                        Authenticating...
+                      </span>
+                    </div>
                   </div>
-                  <HiArrowRight className="text-muted-foreground group-hover:text-primary size-4 transition-colors" />
-                </Link>
+                ) : (
+                  <Link
+                    href={loginHref}
+                    className="group border-border bg-muted/30 hover:bg-muted/50 flex h-13 items-center justify-center gap-3 rounded-xl border px-6 transition-all duration-300"
+                  >
+                    <div className="flex flex-col items-start leading-none">
+                      <span className="text-muted-foreground mb-1 text-[8px] font-black tracking-widest uppercase">
+                        Existing System?
+                      </span>
+                      <span className="text-foreground text-sm font-bold">
+                        {loginText}
+                      </span>
+                    </div>
+                    <HiArrowRight className="text-muted-foreground group-hover:text-primary size-4 transition-colors" />
+                  </Link>
+                )}
               </div>
             </motion.div>
 

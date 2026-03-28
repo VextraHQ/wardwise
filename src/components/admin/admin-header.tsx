@@ -65,12 +65,12 @@ export function AdminHeader() {
           orientation="vertical"
           className="mx-1 hidden data-[orientation=vertical]:h-4 sm:block"
         />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-foreground/50 hidden font-mono text-[10px] font-black tracking-[0.2em] uppercase sm:inline-block">
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-foreground/50 shrink-0 font-mono text-[9px] sm:text-[10px] font-black tracking-[0.2em] uppercase">
               Admin
             </span>
-            <span className="text-foreground/30 hidden font-mono text-xs sm:inline-block">
+            <span className="text-foreground/30 shrink-0 font-mono text-[10px] sm:text-xs">
               {"//"}
             </span>
             <h1 className="truncate text-sm font-bold tracking-tight">
@@ -78,13 +78,13 @@ export function AdminHeader() {
             </h1>
             <Badge
               variant="outline"
-              className="bg-primary/10 text-primary border-primary/20 hidden items-center gap-1 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase sm:inline-flex"
+              className="bg-primary/10 text-primary border-primary/20 hidden sm:inline-flex shrink-0 items-center gap-1 rounded-sm px-1.5 py-px sm:px-2 sm:py-0.5 font-mono text-[9px] sm:text-[10px] font-bold tracking-widest uppercase"
             >
               <HiOutlineShieldCheck className="h-3 w-3" />
               <span>Super Admin</span>
             </Badge>
           </div>
-          <p className="text-muted-foreground hidden truncate text-sm sm:block">
+          <p className="text-muted-foreground hidden truncate text-xs sm:text-sm md:block mt-0.5">
             {getDescription()}
           </p>
         </div>

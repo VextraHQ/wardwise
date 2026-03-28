@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-// Custom type for API responses (dates as ISO strings)
 import type { Candidate } from "@/types/candidate";
+import { updateCandidateSchema } from "@/lib/schemas/admin-schemas";
+import { logAudit } from "@/lib/audit";
 
 const CANDIDATE_INCLUDE = {
   user: {
@@ -46,10 +46,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { error } = await requireAdmin();
+    if (error) return error;
 
     const { id } = await params;
     const candidate = await prisma.candidate.findUnique({
@@ -81,13 +79,22 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { error, session } = await requireAdmin();
+    if (error) return error;
 
     const { id } = await params;
     const body = await request.json();
+    const parsed = updateCandidateSchema.safeParse({ ...body, id });
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: parsed.error.flatten().fieldErrors,
+        },
+        { status: 400 },
+      );
+    }
+
     const {
       name,
       email,
@@ -95,13 +102,12 @@ export async function PUT(
       position,
       constituency,
       description,
-      isNational,
       stateCode,
       lga,
       phone,
       title,
       onboardingStatus,
-    } = body;
+    } = parsed.data;
 
     const existingCandidate = await prisma.candidate.findUnique({
       where: { id },
@@ -126,8 +132,10 @@ export async function PUT(
     const updateData: Prisma.CandidateUpdateInput = {};
     if (name) updateData.name = name;
     if (party) updateData.party = party;
-    if (position) updateData.position = position;
-    if (isNational !== undefined) updateData.isNational = isNational;
+    if (position) {
+      updateData.position = position;
+      updateData.isNational = position === "President";
+    }
     if (stateCode !== undefined) updateData.stateCode = stateCode || null;
     if (lga !== undefined) updateData.lga = lga || null;
     if (constituency !== undefined)
@@ -158,6 +166,10 @@ export async function PUT(
         { status: 500 },
       );
     }
+
+    void logAudit("candidate.update", "candidate", id, session!.user.id, {
+      changedFields: Object.keys(updateData),
+    });
 
     return NextResponse.json({
       candidate: transformCandidate(candidateWithUser),
@@ -190,10 +202,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { error, session } = await requireAdmin();
+    if (error) return error;
 
     const { id } = await params;
     const candidate = await prisma.candidate.findUnique({ where: { id } });
@@ -205,6 +215,11 @@ export async function DELETE(
     }
 
     await prisma.candidate.delete({ where: { id } });
+
+    void logAudit("candidate.delete", "candidate", id, session!.user.id, {
+      candidateName: candidate.name,
+    });
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting candidate:", error);

@@ -216,17 +216,17 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
               </TableHeader>
               <TableBody>
                 {submissions.map((s, idx) => (
-                   <TableRow
-                     key={s.id}
-                     className={`cursor-pointer transition-colors ${
-                       s.isFlagged
-                         ? "bg-destructive/5 hover:bg-destructive/10"
-                         : s.isVerified
-                           ? "bg-emerald-500/5 hover:bg-emerald-500/10"
-                           : "hover:bg-muted/30"
-                     }`}
-                     onClick={() => setSelected(s)}
-                   >
+                  <TableRow
+                    key={s.id}
+                    className={`cursor-pointer transition-colors ${
+                      s.isFlagged
+                        ? "bg-destructive/5 hover:bg-destructive/10"
+                        : s.isVerified
+                          ? "bg-emerald-500/5 hover:bg-emerald-500/10"
+                          : "hover:bg-muted/30"
+                    }`}
+                    onClick={() => setSelected(s)}
+                  >
                     <TableCell className="text-muted-foreground text-center text-xs font-medium">
                       {(page - 1) * pageSize + idx + 1}
                     </TableCell>
@@ -288,16 +288,13 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground hidden text-xs lg:table-cell">
-                      {new Date(s.createdAt).toLocaleString(
-                        "en-NG",
-                        {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                        },
-                      )}
+                      {new Date(s.createdAt).toLocaleString("en-NG", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
                     </TableCell>
                   </TableRow>
                 ))}

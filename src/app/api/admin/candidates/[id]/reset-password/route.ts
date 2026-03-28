@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { logAudit } from "@/lib/audit";
 
 function generateReadablePassword(): string {
   const words = [
@@ -29,10 +29,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { error, session } = await requireAdmin();
+    if (error) return error;
 
     const { id } = await params;
 
@@ -54,6 +52,13 @@ export async function POST(
       where: { id: user.id },
       data: { password: hashedPassword },
     });
+
+    void logAudit(
+      "candidate.password_reset",
+      "candidate",
+      id,
+      session!.user.id,
+    );
 
     return NextResponse.json({ generatedPassword });
   } catch (error) {

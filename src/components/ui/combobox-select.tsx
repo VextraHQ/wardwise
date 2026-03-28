@@ -92,7 +92,8 @@ export function ComboboxSelect({
 
   const customFilter = React.useCallback(
     (itemValue: string, search: string) => {
-      const haystack = searchIndex.get(itemValue.toLowerCase()) ?? itemValue.toLowerCase();
+      const haystack =
+        searchIndex.get(itemValue.toLowerCase()) ?? itemValue.toLowerCase();
       return haystack.includes(search.toLowerCase()) ? 1 : 0;
     },
     [searchIndex],

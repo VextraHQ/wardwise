@@ -6,7 +6,7 @@ import { useEffect, Suspense } from "react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { AdminDashboardSkeleton } from "@/components/admin/admin-skeletons";
 
 export default function AdminLayout({
   children,
@@ -25,27 +25,21 @@ export default function AdminLayout({
     }
   }, [status, session]);
 
-  // Show loading state while checking authentication
-  if (status === "loading") {
-    return (
-      <div className="flex min-h-screen flex-col sm:flex-row">
-        <div className="hidden w-64 border-r p-4 sm:block">
-          <Skeleton className="h-12 w-full" />
-          <div className="mt-4 space-y-2">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </div>
-        <div className="flex-1 p-4 sm:p-6">
-          <Skeleton className="mb-4 h-12 w-full sm:mb-6 sm:h-16" />
-          <Skeleton className="h-64 w-full" />
-        </div>
-      </div>
-    );
-  }
+  // ─── "Always-On Shell" Pattern ──────────────────────────────────
+  // The layout frame (sidebar, header) renders IMMEDIATELY and
+  // unconditionally. Each component inside the shell (NavUser,
+  // page content) independently handles its own loading state.
+  //
+  // This eliminates the "double skeleton" problem:
+  //   ❌ Old: Skeleton wall → Shell appears → Content skeletons → Data
+  //   ✅ New: Shell appears instantly → Content area loads in-place
+  // ────────────────────────────────────────────────────────────────
 
-  // Don't render if not authenticated
-  if (status === "unauthenticated" || session?.user?.role !== "admin") {
+  // Don't render anything only if we KNOW user is unauthorized
+  if (
+    status === "unauthenticated" ||
+    (status === "authenticated" && session?.user?.role !== "admin")
+  ) {
     return null;
   }
 
@@ -62,9 +56,13 @@ export default function AdminLayout({
       <SidebarInset>
         <AdminHeader />
         <div className="flex flex-1 flex-col">
-          <Suspense fallback={<Skeleton className="h-64 w-full" />}>
-            {children}
-          </Suspense>
+          {status === "authenticated" ? (
+            <Suspense fallback={<AdminDashboardSkeleton />}>
+              {children}
+            </Suspense>
+          ) : (
+            <AdminDashboardSkeleton />
+          )}
         </div>
       </SidebarInset>
     </SidebarProvider>

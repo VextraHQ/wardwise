@@ -1,17 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
 // GET /api/admin/canvassers - Get all canvassers with optional filtering
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { error } = await requireAdmin();
+    if (error) return error;
 
     const { searchParams } = new URL(request.url);
     const candidateId = searchParams.get("candidateId");
@@ -87,11 +83,8 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/canvassers - Create new canvasser
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { error } = await requireAdmin();
+    if (error) return error;
 
     const body = await request.json();
     const { code, name, phone, candidateId, ward, lga, state } = body;

@@ -90,12 +90,19 @@ export function CallToActionSection() {
                   </Link>
                 </Button>
 
-                <Link
-                  href={loginHref}
-                  className="border-foreground/10 text-foreground hover:border-primary/40 hover:text-primary border-b-2 pb-1 font-mono text-[10px] font-black tracking-widest uppercase transition-all"
-                >
-                  {loginText}
-                </Link>
+                {status === "loading" ? (
+                  <div className="border-foreground/5 text-foreground/50 flex cursor-wait items-center gap-2 border-b-2 pb-1 font-mono text-[10px] font-black tracking-widest uppercase transition-all">
+                    <div className="size-2.5 animate-spin rounded-full border-[1.5px] border-primary border-t-transparent" />
+                    Validating...
+                  </div>
+                ) : (
+                  <Link
+                    href={loginHref}
+                    className="border-foreground/10 text-foreground hover:border-primary/40 hover:text-primary border-b-2 pb-1 font-mono text-[10px] font-black tracking-widest uppercase transition-all"
+                  >
+                    {loginText}
+                  </Link>
+                )}
               </div>
             </div>
 

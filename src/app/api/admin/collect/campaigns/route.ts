@@ -1,15 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { createCampaignSchema } from "@/lib/schemas/admin-schemas";
+import { logAudit } from "@/lib/audit";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { error } = await requireAdmin();
+    if (error) return error;
 
     const candidateId = request.nextUrl.searchParams.get("candidateId");
 
@@ -37,67 +36,49 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { error, session } = await requireAdmin();
+    if (error) return error;
 
     const body = await request.json();
-    const {
-      candidateId,
-      slug,
-      candidateName,
-      candidateTitle,
-      party,
-      constituency,
-      constituencyType,
-      enabledLgaIds,
-      requireApcReg,
-      requireVoterId,
-      customQuestion1,
-      customQuestion2,
-    } = body;
-
-    if (
-      !candidateId ||
-      !slug ||
-      !candidateName ||
-      !party ||
-      !constituency ||
-      !constituencyType
-    ) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
-    }
-
-    if (!/^[a-z0-9-]+$/.test(slug)) {
+    const parsed = createCampaignSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
         {
-          error:
-            "Slug must contain only lowercase letters, numbers, and hyphens",
+          error: "Validation failed",
+          details: parsed.error.flatten().fieldErrors,
         },
         { status: 400 },
       );
     }
 
+    const data = parsed.data;
     const campaign = await prisma.campaign.create({
       data: {
-        candidateId,
-        slug,
-        candidateName,
-        candidateTitle: candidateTitle || null,
-        party,
-        constituency,
-        constituencyType,
-        enabledLgaIds: enabledLgaIds || [],
-        requireApcReg: requireApcReg || "optional",
-        requireVoterId: requireVoterId || "optional",
-        customQuestion1: customQuestion1 || null,
-        customQuestion2: customQuestion2 || null,
+        candidateId: data.candidateId,
+        slug: data.slug,
+        candidateName: data.candidateName,
+        candidateTitle: data.candidateTitle || null,
+        party: data.party,
+        constituency: data.constituency,
+        constituencyType: data.constituencyType,
+        enabledLgaIds: data.enabledLgaIds,
+        requireApcReg: data.requireApcReg,
+        requireVoterId: data.requireVoterId,
+        customQuestion1: data.customQuestion1 || null,
+        customQuestion2: data.customQuestion2 || null,
       },
     });
+
+    void logAudit(
+      "campaign.create",
+      "campaign",
+      campaign.id,
+      session!.user.id,
+      {
+        slug: data.slug,
+        candidateName: data.candidateName,
+      },
+    );
 
     return NextResponse.json(
       {

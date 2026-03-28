@@ -1,11 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { Prisma } from "@prisma/client";
 import type { Candidate } from "@/types/candidate";
+import { createCandidateSchema } from "@/lib/schemas/admin-schemas";
+import { logAudit } from "@/lib/audit";
 
 // Generate a readable password like WARD-7842-BETA
 function generateReadablePassword(): string {
@@ -68,10 +69,8 @@ const CANDIDATE_INCLUDE = {
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { error } = await requireAdmin();
+    if (error) return error;
 
     const candidates = await prisma.candidate.findMany({
       include: CANDIDATE_INCLUDE,
@@ -91,12 +90,21 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { error, session } = await requireAdmin();
+    if (error) return error;
 
     const body = await request.json();
+    const parsed = createCandidateSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: parsed.error.flatten().fieldErrors,
+        },
+        { status: 400 },
+      );
+    }
+
     const {
       name,
       email,
@@ -104,19 +112,11 @@ export async function POST(request: NextRequest) {
       position,
       constituency,
       description,
-      isNational,
       stateCode,
       lga,
       phone,
       title,
-    } = body;
-
-    if (!name || !email || !party || !position) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
-    }
+    } = parsed.data;
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
         name,
         party,
         position,
-        isNational: isNational ?? position === "President",
+        isNational: position === "President",
         stateCode: stateCode || null,
         lga: lga || null,
         constituency: constituency || null,
@@ -166,6 +166,18 @@ export async function POST(request: NextRequest) {
         { status: 500 },
       );
     }
+
+    void logAudit(
+      "candidate.create",
+      "candidate",
+      candidate.id,
+      session!.user.id,
+      {
+        candidateName: name,
+        email,
+        position,
+      },
+    );
 
     return NextResponse.json({
       candidate: transformCandidate(candidateWithUser),

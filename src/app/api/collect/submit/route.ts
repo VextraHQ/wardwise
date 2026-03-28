@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { submitRateLimit, getClientIp } from "@/lib/rate-limit";
 import {
   phoneSchema,
   normalizeNigerianPhoneInput,
@@ -70,6 +71,18 @@ const submitSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting (skipped if Upstash not configured)
+    if (submitRateLimit) {
+      const ip = getClientIp(request);
+      const { success } = await submitRateLimit.limit(ip);
+      if (!success) {
+        return NextResponse.json(
+          { error: "Too many requests. Please try again shortly." },
+          { status: 429 },
+        );
+      }
+    }
+
     const body = await request.json();
     const parsed = submitSchema.safeParse(body);
 
@@ -113,7 +126,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate geographic scope
-    if (campaign.enabledLgaIds.length > 0 && !campaign.enabledLgaIds.includes(data.lgaId)) {
+    if (
+      campaign.enabledLgaIds.length > 0 &&
+      !campaign.enabledLgaIds.includes(data.lgaId)
+    ) {
       return NextResponse.json(
         { error: "Selected LGA is outside the scope of this campaign" },
         { status: 400 },
@@ -125,7 +141,7 @@ export async function POST(request: NextRequest) {
       where: { id: data.pollingUnitId },
       include: { ward: true },
     });
-    
+
     if (!pu || pu.wardId !== data.wardId || pu.ward.lgaId !== data.lgaId) {
       return NextResponse.json(
         { error: "Invalid geographic hierarchy" },

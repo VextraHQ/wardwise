@@ -79,6 +79,11 @@ export const authOptions: NextAuthOptions = {
     },
     // Add custom fields from JWT to session object
     async session({ session, token }) {
+      // Artificial delay for local testing of loading states
+      if (process.env.NODE_ENV === "development") {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
       if (token) {
         session.user.id = token.sub!;
         session.user.role = token.role as string;

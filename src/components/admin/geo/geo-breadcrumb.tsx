@@ -38,7 +38,7 @@ export function GeoBreadcrumb({
         <BreadcrumbItem>
           {stateCode ? (
             <BreadcrumbLink
-              className="text-foreground/60 hover:text-foreground font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors cursor-pointer"
+              className="text-foreground/60 hover:text-foreground cursor-pointer font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors"
               onClick={() => onNavigate({})}
             >
               All States
@@ -58,7 +58,7 @@ export function GeoBreadcrumb({
             <BreadcrumbItem>
               {lgaId ? (
                 <BreadcrumbLink
-                  className="text-foreground/60 hover:text-foreground font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors cursor-pointer"
+                  className="text-foreground/60 hover:text-foreground cursor-pointer font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors"
                   onClick={() => onNavigate({ state: stateCode })}
                 >
                   {state.name}
@@ -80,7 +80,7 @@ export function GeoBreadcrumb({
             <BreadcrumbItem>
               {wardId ? (
                 <BreadcrumbLink
-                   className="text-foreground/60 hover:text-foreground font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors cursor-pointer"
+                  className="text-foreground/60 hover:text-foreground cursor-pointer font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors"
                   onClick={() =>
                     onNavigate({
                       state: stateCode || "",

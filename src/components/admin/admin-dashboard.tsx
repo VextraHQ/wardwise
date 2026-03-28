@@ -119,7 +119,8 @@ export function AdminDashboard() {
         >
           <Link href="/admin/collect">
             <HiOutlineClipboardList className="h-4 w-4" />
-            <span>Collect Campaigns</span>
+            <span className="inline sm:hidden">Collect</span>
+            <span className="hidden sm:inline">Collect Campaigns</span>
           </Link>
         </Button>
         <Button

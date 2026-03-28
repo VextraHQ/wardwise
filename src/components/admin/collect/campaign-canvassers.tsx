@@ -76,21 +76,28 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
                     : i === 2
                       ? "bg-orange-600/10 hover:bg-orange-600/15"
                       : "hover:bg-muted/30";
-              const rankLabel = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : String(i + 1);
+              const rankLabel =
+                i === 0
+                  ? "🥇"
+                  : i === 1
+                    ? "🥈"
+                    : i === 2
+                      ? "🥉"
+                      : String(i + 1);
               return (
-              <TableRow
-                key={`${c.canvasserName}-${c.canvasserPhone}`}
-                className={`transition-colors ${rankClass}`}
-              >
-                <TableCell className="text-muted-foreground text-center text-xs font-medium">
-                  {rankLabel}
-                </TableCell>
-                <TableCell>{c.canvasserName}</TableCell>
-                <TableCell>{c.canvasserPhone}</TableCell>
-                <TableCell className="text-right font-mono font-semibold tabular-nums">
-                  {c._count}
-                </TableCell>
-              </TableRow>
+                <TableRow
+                  key={`${c.canvasserName}-${c.canvasserPhone}`}
+                  className={`transition-colors ${rankClass}`}
+                >
+                  <TableCell className="text-muted-foreground text-center text-xs font-medium">
+                    {rankLabel}
+                  </TableCell>
+                  <TableCell>{c.canvasserName}</TableCell>
+                  <TableCell>{c.canvasserPhone}</TableCell>
+                  <TableCell className="text-right font-mono font-semibold tabular-nums">
+                    {c._count}
+                  </TableCell>
+                </TableRow>
               );
             })}
           </TableBody>

@@ -88,13 +88,55 @@ export default function LoginPage() {
   };
 
   // Show loading state while checking session
-  if (status === "loading") {
-    return null;
-  }
+  if (status === "loading" || status === "authenticated") {
+    return (
+      <div className="bg-background min-h-screen">
+        <Header badge="Candidate & Admin Portal" />
 
-  // Don't show login form if already authenticated (redirect will happen)
-  if (status === "authenticated") {
-    return null;
+        {/* Main Content */}
+        <div className="flex items-center justify-center px-4 py-6 sm:py-8 md:py-12 lg:py-16">
+          <div className="w-full max-w-md space-y-6">
+            {/* Loading Hero Section */}
+            <div className="animate-pulse space-y-3 text-center opacity-70">
+              <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
+                System{" "}
+                <span className="text-primary font-serif font-normal italic">
+                  Check
+                </span>
+              </h1>
+              <p className="text-muted-foreground mx-auto max-w-xl text-base sm:text-lg">
+                Verifying secure session status...
+              </p>
+            </div>
+
+            {/* Loading Card Silhouette */}
+            <AuthCard
+              title="Secure Access"
+              subtitle="Admin Gateway"
+              status="Connecting"
+              icon={HiShieldCheck}
+            >
+              <div className="flex h-[380px] flex-col items-center justify-center space-y-6">
+                <div className="text-primary/40 relative flex size-16 items-center justify-center">
+                  <div className="absolute inset-0 animate-ping rounded-full border-2 border-current opacity-20" />
+                  <div className="size-8 animate-spin rounded-full border-[3px] border-current border-t-primary" />
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-primary font-mono text-xs font-black tracking-widest uppercase">
+                    {status === "authenticated"
+                      ? "Redirecting..."
+                      : "Validating Auth Token"}
+                  </p>
+                  <p className="text-muted-foreground/60 font-mono text-[9px] font-bold tracking-widest uppercase">
+                    Establishing Handshake
+                  </p>
+                </div>
+              </div>
+            </AuthCard>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
