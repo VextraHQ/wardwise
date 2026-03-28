@@ -49,7 +49,8 @@ export function SectionCards({ dashboardData }: SectionCardsProps) {
 
   return (
     <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      <Card className="border-border/60 @container/card rounded-sm shadow-none">
+      <Card className="border-border/60 hover:border-border group relative overflow-hidden transition-colors @container/card rounded-sm shadow-none">
+        <div className="bg-primary/20 absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
         <CardHeader>
           <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
             Total Supporters
@@ -88,7 +89,8 @@ export function SectionCards({ dashboardData }: SectionCardsProps) {
         </CardFooter>
       </Card>
 
-      <Card className="border-border/60 @container/card rounded-sm shadow-none">
+      <Card className="border-border/60 hover:border-border group relative overflow-hidden transition-colors @container/card rounded-sm shadow-none">
+        <div className="bg-primary/20 absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
         <CardHeader>
           <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
             Ward Coverage
@@ -133,7 +135,8 @@ export function SectionCards({ dashboardData }: SectionCardsProps) {
         </CardFooter>
       </Card>
 
-      <Card className="border-border/60 @container/card rounded-sm shadow-none">
+      <Card className="border-border/60 hover:border-border group relative overflow-hidden transition-colors @container/card rounded-sm shadow-none">
+        <div className="bg-primary/20 absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
         <CardHeader>
           <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
             Polling Units
@@ -174,7 +177,8 @@ export function SectionCards({ dashboardData }: SectionCardsProps) {
         </CardFooter>
       </Card>
 
-      <Card className="border-border/60 @container/card rounded-sm shadow-none">
+      <Card className="border-border/60 hover:border-border group relative overflow-hidden transition-colors @container/card rounded-sm shadow-none">
+        <div className="bg-primary/20 absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
         <CardHeader>
           <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
             Support Strength

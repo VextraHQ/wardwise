@@ -220,12 +220,13 @@ export function AdminDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="border-border/60 rounded-sm shadow-none">
+            <Card className="border-border/60 hover:border-border group relative overflow-hidden rounded-sm shadow-none transition-colors">
+              <div className="bg-primary/20 absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
                   Collect Campaigns
                 </CardTitle>
-                <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
+                <div className="bg-primary/10 group-hover:bg-primary/20 flex h-9 w-9 items-center justify-center rounded-sm transition-colors">
                   <HiOutlineClipboardList className="text-primary h-5 w-5" />
                 </div>
               </CardHeader>
@@ -233,9 +234,15 @@ export function AdminDashboard() {
                 <div className="font-mono text-2xl font-semibold tabular-nums">
                   {campaigns.length}
                 </div>
-                <p className="text-muted-foreground mt-1 text-xs">
-                  {activeCampaigns} active
-                </p>
+                <div className="text-muted-foreground mt-1.5 flex items-center gap-2 text-xs">
+                  {activeCampaigns > 0 && (
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="bg-victory absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"></span>
+                      <span className="bg-victory relative inline-flex h-1.5 w-1.5 rounded-full"></span>
+                    </span>
+                  )}
+                  <span>{activeCampaigns} live campaigns</span>
+                </div>
               </CardContent>
             </Card>
 

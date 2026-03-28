@@ -77,13 +77,14 @@ function StatsBar({ campaigns }: { campaigns: CampaignSummary[] }) {
       {stats.map((stat) => (
         <Card
           key={stat.label}
-          className="border-border/60 rounded-sm shadow-none"
+          className="border-border/60 hover:border-border group relative overflow-hidden rounded-sm shadow-none transition-colors"
         >
+          <div className="bg-primary/20 absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-foreground/60 font-mono text-[10px] font-bold tracking-widest uppercase">
               {stat.label}
             </CardTitle>
-            <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
+            <div className="bg-primary/10 group-hover:bg-primary/20 flex h-9 w-9 items-center justify-center rounded-sm transition-colors">
               <stat.icon className="text-primary h-5 w-5" />
             </div>
           </CardHeader>
@@ -105,7 +106,7 @@ function StatsBarSkeleton() {
   return (
     <div className="grid gap-4 sm:grid-cols-3">
       {Array.from({ length: 3 }).map((_, i) => (
-        <Card key={i} className="border-border/60 rounded-sm shadow-none">
+        <Card key={i} className="border-border/60 bg-card rounded-sm shadow-none animate-pulse border-dashed">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <Skeleton className="h-4 w-28" />
             <Skeleton className="h-9 w-9 rounded-sm" />
@@ -122,45 +123,47 @@ function StatsBarSkeleton() {
 
 function TableSkeleton() {
   return (
-    <Table>
-      <TableHeader className="bg-muted/30">
-        <TableRow className="hover:bg-transparent">
-          <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
-            S/N
-          </TableHead>
-          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-            Candidate
-          </TableHead>
-          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-            Constituency
-          </TableHead>
-          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-            Status
-          </TableHead>
-          <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
-            Submissions
-          </TableHead>
-          <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-            Created
-          </TableHead>
-          <TableHead />
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <TableRow key={i}>
-            <TableCell className="text-center">
-              <Skeleton className="mx-auto h-4 w-4" />
-            </TableCell>
-            {Array.from({ length: 6 }).map((_, j) => (
-              <TableCell key={j}>
-                <Skeleton className="h-4 w-24" />
-              </TableCell>
-            ))}
+    <div className="border-border/60 bg-card rounded-sm border border-dashed animate-pulse">
+      <Table>
+        <TableHeader className="bg-muted/30">
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
+              S/N
+            </TableHead>
+            <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+              Candidate
+            </TableHead>
+            <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+              Constituency
+            </TableHead>
+            <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+              Status
+            </TableHead>
+            <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
+              Submissions
+            </TableHead>
+            <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+              Created
+            </TableHead>
+            <TableHead />
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <TableRow key={i}>
+              <TableCell className="text-center">
+                <Skeleton className="mx-auto h-4 w-4" />
+              </TableCell>
+              {Array.from({ length: 6 }).map((_, j) => (
+                <TableCell key={j}>
+                  <Skeleton className="h-4 w-24" />
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
 
@@ -247,7 +250,7 @@ export function CampaignList() {
 
       {/* Table */}
       {isLoading ? (
-        <div className="overflow-x-auto rounded-sm border">
+        <div className="overflow-x-auto">
           <TableSkeleton />
         </div>
       ) : error ? (

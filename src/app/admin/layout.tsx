@@ -2,11 +2,11 @@
 
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useEffect, Suspense } from "react";
+import { useEffect } from "react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AdminDashboardSkeleton } from "@/components/admin/admin-skeletons";
+// Removed AdminDashboardSkeleton import to prevent unused variable
 
 export default function AdminLayout({
   children,
@@ -56,13 +56,7 @@ export default function AdminLayout({
       <SidebarInset>
         <AdminHeader />
         <div className="flex flex-1 flex-col">
-          {status === "authenticated" ? (
-            <Suspense fallback={<AdminDashboardSkeleton />}>
-              {children}
-            </Suspense>
-          ) : (
-            <AdminDashboardSkeleton />
-          )}
+          {children}
         </div>
       </SidebarInset>
     </SidebarProvider>

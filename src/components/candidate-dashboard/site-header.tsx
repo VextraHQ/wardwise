@@ -28,34 +28,34 @@ export function SiteHeader() {
           orientation="vertical"
           className="mx-1 hidden data-[orientation=vertical]:h-4 sm:block"
         />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 overflow-hidden">
           {isResolving ? (
             <div className="flex flex-col animate-pulse">
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground/30 hidden font-mono text-[10px] font-black tracking-[0.2em] uppercase sm:inline-block">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-muted-foreground/30 shrink-0 font-mono text-[9px] sm:text-[10px] font-black tracking-[0.2em] uppercase">
                   Candidate
                 </span>
-                <span className="text-muted-foreground/15 hidden font-mono text-xs sm:inline-block">
+                <span className="text-muted-foreground/15 shrink-0 font-mono text-[10px] sm:text-xs">
                   {"//"}
                 </span>
-                <div className="bg-muted/30 h-4 w-36 rounded" />
+                <div className="bg-muted/30 h-4 w-32 sm:w-36 rounded" />
               </div>
-              <div className="bg-muted/20 mt-1.5 hidden h-3 w-28 rounded sm:block" />
+              <div className="bg-muted/20 mt-1.5 hidden h-3 w-28 rounded md:block" />
             </div>
           ) : (
             <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground/50 hidden font-mono text-[10px] font-black tracking-[0.2em] uppercase sm:inline-block">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-muted-foreground/50 shrink-0 font-mono text-[9px] sm:text-[10px] font-black tracking-[0.2em] uppercase">
                   Candidate
                 </span>
-                <span className="text-muted-foreground/30 hidden font-mono text-xs sm:inline-block">
+                <span className="text-muted-foreground/30 shrink-0 font-mono text-[10px] sm:text-xs">
                   {"//"}
                 </span>
                 <h1 className="truncate text-sm font-bold tracking-tight sm:text-base">
                   {candidateName}
                 </h1>
               </div>
-              <p className="text-muted-foreground hidden truncate font-mono text-[11px] tracking-wider uppercase sm:block">
+              <p className="text-muted-foreground mt-0.5 hidden truncate font-mono text-[11px] tracking-wider uppercase md:block">
                 Role: {candidatePosition || "Candidate"}
               </p>
             </div>

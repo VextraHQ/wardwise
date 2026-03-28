@@ -88,9 +88,9 @@ export function GeoManagement() {
     <Suspense
       fallback={
         <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-          <Skeleton className="h-8 w-64 rounded-sm" />
-          <Skeleton className="h-24 w-full rounded-sm" />
-          <Skeleton className="h-96 w-full rounded-sm" />
+          <Skeleton className="bg-card border-border/60 animate-pulse h-8 w-64 rounded-sm border border-dashed" />
+          <Skeleton className="bg-card border-border/60 animate-pulse h-24 w-full rounded-sm border border-dashed" />
+          <Skeleton className="bg-card border-border/60 animate-pulse h-96 w-full rounded-sm border border-dashed" />
         </div>
       }
     >

@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { AppSidebar } from "@/components/candidate-dashboard/app-sidebar";
 import { SiteHeader } from "@/components/candidate-dashboard/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { CandidateDashboardSkeleton } from "@/components/candidate-dashboard/candidate-skeletons";
+// Removed CandidateDashboardSkeleton to prevent unused variable
 
 export default function CandidateLayout({
   children,
@@ -52,11 +52,7 @@ export default function CandidateLayout({
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">
-          {status === "authenticated" ? (
-            children
-          ) : (
-            <CandidateDashboardSkeleton />
-          )}
+          {children}
         </div>
       </SidebarInset>
     </SidebarProvider>
