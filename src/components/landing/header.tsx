@@ -51,7 +51,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
         >
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
             <Logo size="lg" />
-            <nav className="hidden items-center gap-1 lg:flex">
+            <nav className="hidden items-center gap-1 xl:flex">
               {navigationLinks.map((link, i) => (
                 <a
                   key={link.section}
@@ -68,7 +68,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                 </a>
               ))}
             </nav>
-            <div className="hidden items-center gap-6 lg:flex">
+            <div className="hidden items-center gap-6 xl:flex">
               {status === "loading" ? (
                 <div className="text-muted-foreground/50 flex cursor-wait items-center gap-2 font-mono text-[10px] font-black tracking-widest uppercase transition-colors">
                   <div className="outline-primary size-3 animate-spin rounded-full border border-t-transparent outline-1" />
@@ -109,7 +109,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
               </Link>
             </div>
             <button
-              className="border-border bg-card/90 text-foreground hover:border-primary hover:text-primary inline-flex items-center justify-center rounded-sm border p-2 transition-colors duration-200 lg:hidden"
+              className="border-border bg-card/90 text-foreground hover:border-primary hover:text-primary inline-flex items-center justify-center rounded-sm border p-2 transition-colors duration-200 xl:hidden"
               type="button"
               onClick={() => setIsMobileOpen((prev) => !prev)}
               aria-label="Toggle navigation"
@@ -136,7 +136,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
         leaveTo="opacity-0"
       >
         <div
-          className="bg-foreground/40 absolute inset-x-0 top-full z-30 h-[200vh] lg:hidden"
+          className="bg-foreground/40 absolute inset-x-0 top-full z-30 h-[200vh] xl:hidden"
           onClick={() => setIsMobileOpen(false)}
           aria-hidden={true}
         />
@@ -152,7 +152,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 -translate-y-3"
       >
-        <div className="absolute inset-x-0 top-full z-40 lg:hidden">
+        <div className="absolute inset-x-0 top-full z-40 xl:hidden">
           <div
             className="border-border bg-card/95 border-b px-6 pt-4 pb-6"
             ref={mobileMenuRef}
