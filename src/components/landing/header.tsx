@@ -51,24 +51,24 @@ export function SiteHeader({ className }: SiteHeaderProps) {
         >
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
             <Logo size="lg" />
-            <nav className="hidden items-center gap-1 xl:flex">
+            <nav className="hidden items-center gap-0 lg:flex xl:gap-2">
               {navigationLinks.map((link, i) => (
                 <a
                   key={link.section}
                   href={`#${link.section}`}
                   className="group relative flex flex-col items-center px-4 py-2"
                 >
-                  <span className="text-muted-foreground/40 group-hover:text-primary/60 font-mono text-[8px] font-black tracking-[0.3em] transition-colors">
+                  <span className="text-muted-foreground/40 group-hover:text-primary/60 hidden font-mono text-[8px] font-black tracking-[0.3em] transition-colors xl:inline-block">
                     0{i + 1}
                   </span>
-                  <span className="text-muted-foreground group-hover:text-foreground font-mono text-[10.5px] font-black tracking-widest uppercase transition-colors">
+                  <span className="text-muted-foreground group-hover:text-foreground font-mono text-[9px] font-black tracking-widest uppercase transition-colors xl:text-[10.5px]">
                     {link.label}
                   </span>
                   <div className="bg-primary absolute -bottom-1 h-1 w-1 rounded-full opacity-0 transition-opacity group-hover:opacity-100" />
                 </a>
               ))}
             </nav>
-            <div className="hidden items-center gap-6 xl:flex">
+            <div className="hidden items-center gap-4 lg:flex xl:gap-6">
               {status === "loading" ? (
                 <div className="text-muted-foreground/50 flex cursor-wait items-center gap-2 font-mono text-[10px] font-black tracking-widest uppercase transition-colors">
                   <div className="outline-primary size-3 animate-spin rounded-full border border-t-transparent outline-1" />
@@ -97,19 +97,19 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                   href="/login"
                   className="text-muted-foreground hover:text-foreground flex items-center gap-2 font-mono text-[10px] font-black tracking-widest uppercase transition-colors"
                 >
-                  <HiLockClosed className="h-3.5 w-3.5" />
-                  Candidate Login
+                  <HiLockClosed className="h-3.5 w-3.5 shrink-0" />
+                  <span className="shrink-0 whitespace-nowrap"><span className="hidden xl:inline">Candidate</span> Login</span>
                 </Link>
               )}
               <Link
                 href="/contact"
-                className="bg-primary text-primary-foreground hover:bg-primary/95 rounded-full px-6 py-2.5 font-mono text-[10px] font-black tracking-widest uppercase transition-transform active:scale-95"
+                className="bg-primary text-primary-foreground hover:bg-primary/95 shrink-0 whitespace-nowrap rounded-full px-4 py-2 font-mono text-[9px] font-black tracking-widest uppercase transition-transform active:scale-95 xl:px-6 xl:py-2.5 xl:text-[10px]"
               >
                 Request a Demo
               </Link>
             </div>
             <button
-              className="border-border bg-card/90 text-foreground hover:border-primary hover:text-primary inline-flex items-center justify-center rounded-sm border p-2 transition-colors duration-200 xl:hidden"
+              className="border-border bg-card/90 text-foreground hover:border-primary hover:text-primary inline-flex items-center justify-center rounded-sm border p-2 transition-colors duration-200 lg:hidden"
               type="button"
               onClick={() => setIsMobileOpen((prev) => !prev)}
               aria-label="Toggle navigation"
@@ -136,7 +136,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
         leaveTo="opacity-0"
       >
         <div
-          className="bg-foreground/40 absolute inset-x-0 top-full z-30 h-[200vh] xl:hidden"
+          className="bg-foreground/40 absolute inset-x-0 top-full z-30 h-[200vh] lg:hidden"
           onClick={() => setIsMobileOpen(false)}
           aria-hidden={true}
         />
@@ -152,17 +152,17 @@ export function SiteHeader({ className }: SiteHeaderProps) {
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 -translate-y-3"
       >
-        <div className="absolute inset-x-0 top-full z-40 xl:hidden">
+        <div className="absolute inset-x-0 top-full z-40 lg:hidden">
           <div
             className="border-border bg-card/95 border-b px-6 pt-4 pb-6"
             ref={mobileMenuRef}
           >
-            <nav className="text-accent flex flex-col gap-1 text-base">
+            <nav className="text-foreground flex flex-col gap-1 text-base">
               {navigationLinks.map((link) => (
                 <a
                   key={link.section}
                   href={`#${link.section}`}
-                  className="hover:bg-muted hover:text-foreground focus-visible:ring-primary rounded-sm px-3 py-3 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  className="hover:bg-muted text-foreground/80 hover:text-foreground focus-visible:ring-primary rounded-sm px-3 py-3 font-mono text-xs font-bold tracking-widest uppercase transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                   onClick={() => setIsMobileOpen(false)}
                 >
                   {link.label}

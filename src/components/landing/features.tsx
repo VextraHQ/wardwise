@@ -319,8 +319,8 @@ export function FeaturesSection() {
             </p>
           </div>
 
-          <div className="bg-muted/30 border-border flex items-center gap-8 rounded-3xl border px-10 py-6">
-            <div className="flex -space-x-4">
+          <div className="bg-muted/30 border-border flex w-full flex-col items-center gap-6 rounded-3xl border p-8 sm:w-auto sm:flex-row sm:gap-8 sm:px-10 sm:py-6">
+            <div className="flex shrink-0 -space-x-4">
               {[...Array(4)].map((_, i) => (
                 <div
                   key={i}
@@ -336,13 +336,13 @@ export function FeaturesSection() {
                 </div>
               ))}
             </div>
-            <div className="border-border border-l pl-8">
-              <p className="text-foreground mb-1 text-[10px] font-black tracking-[0.3em] uppercase">
+            <div className="border-border flex flex-col items-center border-t pt-6 text-center sm:block sm:border-t-0 sm:border-l sm:pt-0 sm:pl-8 sm:text-left">
+              <p className="text-foreground mb-2 whitespace-nowrap text-[11px] font-black tracking-[0.2em] uppercase sm:mb-1 sm:text-[10px] sm:tracking-[0.3em]">
                 Audit Log Active
               </p>
-              <div className="flex items-center gap-2">
-                <div className="bg-primary size-1.5 rounded-full" />
-                <p className="text-muted-foreground text-[10px] font-medium tracking-wide">
+              <div className="flex items-center justify-center gap-2 sm:justify-start">
+                <div className="bg-primary size-1.5 shrink-0 rounded-full" />
+                <p className="text-muted-foreground max-w-[200px] text-xs font-medium tracking-wide sm:max-w-none sm:text-[10px]">
                   Validation Layer synced across all 36 States
                 </p>
               </div>

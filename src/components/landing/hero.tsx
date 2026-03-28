@@ -366,8 +366,8 @@ export function HeroSection() {
                 </div>
 
                 {/* Footer: User Context */}
-                <div className="border-border/40 bg-muted/30 flex items-center justify-between border-t px-6 py-3">
-                  <div className="flex items-center gap-3">
+                <div className="border-border/40 bg-muted/30 flex flex-col items-center justify-between gap-3 border-t px-4 py-3 sm:flex-row sm:px-6">
+                  <div className="flex flex-wrap items-center justify-center gap-3">
                     <div className="flex -space-x-2">
                       {[
                         {
@@ -408,12 +408,12 @@ export function HeroSection() {
                         </AvatarFallback>
                       </Avatar>
                     </div>
-                    <p className="text-muted-foreground text-[11px] font-bold">
-                      Active Field Agents:{" "}
-                      <span className="text-primary font-black">128</span>
+                    <p className="text-muted-foreground whitespace-nowrap text-[11px] font-bold">
+                      <span className="hidden sm:inline">Active Field </span>
+                      Agents: <span className="text-primary font-black">128</span>
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     <div className="bg-primary size-1.5 rounded-full" />
                     <span className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
                       Sys_Nominal
