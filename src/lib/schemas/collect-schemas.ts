@@ -4,6 +4,9 @@ import {
   normalizeNigerianPhoneInput,
 } from "@/lib/schemas/common-schemas";
 
+// ── VIN regex (INEC standard: 19 alphanumeric characters) ──
+const vinRegex = /^[A-Za-z0-9]{19}$/;
+
 // Screen 1: Personal details
 export const screen1Schema = z.object({
   fullName: z
@@ -42,8 +45,6 @@ export const screen2Schema = z.object({
 const ninRegex = /^\d{11}$/;
 // APC membership numbers are alphanumeric
 const apcRegex = /^[A-Za-z0-9/\-]+$/;
-// VIN: 19 alphanumeric characters (INEC standard)
-const vinRegex = /^[A-Za-z0-9]{19}$/;
 
 // Stricter APC/NIN validation:
 // - If exactly 11 digits → validate as NIN (reject all-same-digit, reject sequential)
@@ -71,6 +72,7 @@ export const screen3Schema = z.object({
   voterIdNumber: z
     .string()
     .min(1, "Voter ID (VIN) is required")
+    .transform((val) => val.toUpperCase())
     .refine(
       (val) => vinRegex.test(val),
       "VIN must be exactly 19 alphanumeric characters",
@@ -135,7 +137,8 @@ export type RegistrationFormData = {
   customAnswer2?: string | undefined;
 };
 
-// Admin: Create campaign schema
+// ── Admin: Campaign schemas (single source of truth) ──
+
 export const createCampaignSchema = z.object({
   candidateId: z.string().min(1, "Select a candidate"),
   slug: z
@@ -144,22 +147,27 @@ export const createCampaignSchema = z.object({
     .max(60, "Slug too long")
     .regex(/^[a-z0-9-]+$/, "Only lowercase letters, numbers, and hyphens"),
   candidateName: z.string().min(1),
-  candidateTitle: z.string().optional().or(z.literal("")),
+  candidateTitle: z.string().nullish().or(z.literal("")),
   party: z.string().min(1),
   constituency: z.string().min(1, "Constituency is required"),
   constituencyType: z.enum(["federal", "state", "lga"]),
   enabledLgaIds: z.array(z.number()),
-  requireApcReg: z.enum(["required", "optional", "hidden"]),
-  requireVoterId: z.enum(["required", "optional", "hidden"]),
-  customQuestion1: z.string().optional().or(z.literal("")),
-  customQuestion2: z.string().optional().or(z.literal("")),
+  customQuestion1: z.string().nullish().or(z.literal("")),
+  customQuestion2: z.string().nullish().or(z.literal("")),
 });
 
 export type CreateCampaignData = z.infer<typeof createCampaignSchema>;
 
-// Admin: Update campaign schema (partial)
 export const updateCampaignSchema = createCampaignSchema.partial().extend({
   status: z.enum(["draft", "active", "paused", "closed"]).optional(),
 });
 
 export type UpdateCampaignData = z.infer<typeof updateCampaignSchema>;
+
+// ── Server submit schema (extends client schema with campaignSlug, drops client-only name fields) ──
+
+export const serverSubmitSchema = submitRegistrationSchema
+  .omit({ lgaName: true, wardName: true, pollingUnitName: true })
+  .extend({
+    campaignSlug: z.string().min(1),
+  });

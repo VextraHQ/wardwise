@@ -164,6 +164,22 @@ export const adminCollectApi = {
       `/campaigns/${campaignId}/canvassers`,
     ),
 
+  // Stats (server-side aggregations for overview dashboard)
+  getCampaignStats: (campaignId: string) =>
+    adminApiCall<CampaignStats>(`/campaigns/${campaignId}/stats`),
+
   // Geo (all LGAs for campaign wizard)
   getAllLgas: () => adminApiCall<{ lgas: GeoLga[] }>("/lgas"),
+};
+
+// Stats response shape
+export type CampaignStats = {
+  total: number;
+  verified: number;
+  flagged: number;
+  daily: { date: string; count: number; cumulative: number }[];
+  byLga: { lga: string; count: number }[];
+  byWard: { ward: string; count: number }[];
+  byRole: { role: string; count: number }[];
+  bySex: { sex: string; count: number }[];
 };

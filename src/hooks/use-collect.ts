@@ -1,5 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { publicCollectApi, adminCollectApi } from "@/lib/api/collect";
+import {
+  publicCollectApi,
+  adminCollectApi,
+  type CampaignStats,
+} from "@/lib/api/collect";
 
 // === Public Hooks ===
 export function usePublicCampaign(slug: string) {
@@ -158,6 +162,15 @@ export function useUpdateSubmission() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["campaign-submissions"] });
     },
+  });
+}
+
+export function useCampaignStats(campaignId: string) {
+  return useQuery<CampaignStats>({
+    queryKey: ["campaign-stats", campaignId],
+    queryFn: () => adminCollectApi.getCampaignStats(campaignId),
+    enabled: !!campaignId,
+    staleTime: 1000 * 60,
   });
 }
 

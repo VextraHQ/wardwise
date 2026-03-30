@@ -18,8 +18,6 @@ export async function GET(
         constituency: true,
         constituencyType: true,
         enabledLgaIds: true,
-        requireApcReg: true,
-        requireVoterId: true,
         customQuestion1: true,
         customQuestion2: true,
         status: true,

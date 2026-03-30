@@ -145,8 +145,6 @@ model Campaign {
   constituency     String
   constituencyType String   // "federal" | "state" | "lga"
   enabledLgaIds    Int[]
-  requireApcReg    String   @default("optional")  // "required" | "optional" | "hidden"
-  requireVoterId   String   @default("optional")
   customQuestion1  String?
   customQuestion2  String?
   status           String   @default("draft")     // "draft" | "active" | "paused" | "closed"

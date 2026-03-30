@@ -93,8 +93,6 @@ export function CampaignWizard() {
       constituency: "",
       constituencyType: undefined,
       enabledLgaIds: [],
-      requireApcReg: "required",
-      requireVoterId: "required",
       customQuestion1: "",
       customQuestion2: "",
     },
@@ -232,8 +230,6 @@ export function CampaignWizard() {
         constituency: data.constituency.trim(),
         constituencyType: data.constituencyType,
         enabledLgaIds: data.enabledLgaIds,
-        requireApcReg: data.requireApcReg,
-        requireVoterId: data.requireVoterId,
         customQuestion1: data.customQuestion1?.trim() || null,
         customQuestion2: data.customQuestion2?.trim() || null,
       });

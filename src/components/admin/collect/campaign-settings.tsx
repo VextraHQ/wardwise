@@ -151,41 +151,6 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
         </CardContent>
       </Card>
 
-      {/* Field Requirements */}
-      <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader>
-          <CardTitle className="text-sm font-semibold tracking-tight">
-            Field Requirements
-          </CardTitle>
-          <CardDescription className="text-muted-foreground mt-1 text-sm">
-            Verification fields that are always required on the registration
-            form.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              APC Registration Number / NIN
-            </span>
-            <Badge
-              variant="default"
-              className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-            >
-              Required
-            </Badge>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Voter ID (VIN)</span>
-            <Badge
-              variant="default"
-              className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-            >
-              Required
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Campaign Details */}
       <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>

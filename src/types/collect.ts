@@ -9,8 +9,6 @@ export type Campaign = {
   constituency: string;
   constituencyType: string; // "federal" | "state" | "lga"
   enabledLgaIds: number[];
-  requireApcReg: string; // "required" | "optional" | "hidden"
-  requireVoterId: string;
   customQuestion1: string | null;
   customQuestion2: string | null;
   status: string; // "draft" | "active" | "paused" | "closed"
@@ -63,8 +61,6 @@ export type PublicCampaign = {
   constituency: string;
   constituencyType: string;
   enabledLgaIds: number[];
-  requireApcReg: string;
-  requireVoterId: string;
   customQuestion1: string | null;
   customQuestion2: string | null;
   status: string;

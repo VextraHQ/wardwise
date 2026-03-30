@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { updateCampaignSchema } from "@/lib/schemas/admin-schemas";
+import { updateCampaignSchema } from "@/lib/schemas/collect-schemas";
 import { logAudit } from "@/lib/audit";
 
 type RouteParams = { params: Promise<{ id: string }> };
@@ -79,12 +79,6 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         }),
         ...(d.enabledLgaIds !== undefined && {
           enabledLgaIds: d.enabledLgaIds,
-        }),
-        ...(d.requireApcReg !== undefined && {
-          requireApcReg: d.requireApcReg,
-        }),
-        ...(d.requireVoterId !== undefined && {
-          requireVoterId: d.requireVoterId,
         }),
         ...(d.customQuestion1 !== undefined && {
           customQuestion1: d.customQuestion1 || null,

@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { createCampaignSchema } from "@/lib/schemas/admin-schemas";
+import { createCampaignSchema } from "@/lib/schemas/collect-schemas";
 import { logAudit } from "@/lib/audit";
 
 export async function GET(request: NextRequest) {
@@ -62,8 +62,6 @@ export async function POST(request: NextRequest) {
         constituency: data.constituency,
         constituencyType: data.constituencyType,
         enabledLgaIds: data.enabledLgaIds,
-        requireApcReg: data.requireApcReg,
-        requireVoterId: data.requireVoterId,
         customQuestion1: data.customQuestion1 || null,
         customQuestion2: data.customQuestion2 || null,
       },

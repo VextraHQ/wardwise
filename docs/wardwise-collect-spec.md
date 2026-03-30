@@ -38,7 +38,20 @@
 - **Campaign settings sync**: Removed APC/VIN field mode dropdowns (since both are always required now). Shows "Required" badges instead.
 - **Campaign overview analytics**: Added cumulative registration trend line chart and top wards horizontal bar chart. New `getCumulativeRegistrations` and `getSubmissionsByWard` analytics helpers.
 
-### What Changed (Batch 4 — Latest)
+### What Changed (Hardening — Latest)
+
+- **Schema consolidation**: Campaign create/update schemas unified into `collect-schemas.ts` (single source of truth). Removed duplicate definitions from `admin-schemas.ts`.
+- **Dead config removal**: Removed `requireApcReg` and `requireVoterId` from Prisma schema, API routes, types, wizard, and settings UI. APC/NIN and VIN are always required — no configurable option needed.
+- **Settings UI cleanup**: Removed static "Field Requirements" card (non-actionable). Settings now shows: Status controls, Campaign Details, Danger Zone.
+- **VIN case normalization**: VIN is now uppercased via Zod `.transform()` before storage and duplicate checking. Prevents case-variant bypass of dedup.
+- **Geo name trust fix**: Submit route now derives `lgaName`, `wardName`, `pollingUnitName` from validated DB records instead of trusting client-provided names.
+- **P2002 race condition**: Submit route catch block now handles unique constraint violations (concurrent duplicate submissions) with a clear 409 response instead of generic 500.
+- **Server-side analytics**: New `/api/admin/collect/campaigns/[id]/stats` endpoint computes all overview dashboard stats via SQL aggregations on full dataset. Replaces the previous approach of deriving analytics from a 100-row client page.
+- **Null validation fix**: Campaign optional string fields (`candidateTitle`, `customQuestion1/2`) now accept `null` via `.nullish()`, fixing a 400 error when the wizard sends `null` for empty optional fields.
+- **Submit schema DRY**: Server submit route now imports `serverSubmitSchema` from shared `collect-schemas.ts` instead of duplicating the Zod schema inline.
+- **Spec doc**: Removed stale branch reference (`feature/collect` from `develop`) that contradicted the "merged to main" status.
+
+### What Changed (Batch 4)
 
 - **Position-aware wizard**: President/Governor campaigns skip the LGA step; `enabledLgaIds` left empty for national/state scope.
 - **Public LGA API**: 3-branch scope logic — national (all seeded LGAs), state (all LGAs in candidate's state), constituency (only `enabledLgaIds`).
@@ -60,11 +73,6 @@
 ### What Is Pending
 
 - Full Adamawa LGA data (client providing remaining data including Girei)
-
-## Current Branch Workflow
-
-- Active implementation branch: `feature/collect` (created from `develop`)
-- `pre-scope-reduction` is archive/reference only
 
 ## Locked Product Decisions
 

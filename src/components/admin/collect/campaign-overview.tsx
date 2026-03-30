@@ -1,17 +1,9 @@
 "use client";
 
-import { useCampaign, useCampaignSubmissions } from "@/hooks/use-collect";
+import { useCampaign, useCampaignStats } from "@/hooks/use-collect";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  getCumulativeRegistrations,
-  getDailySubmissions,
-  getSubmissionsByLga,
-  getSubmissionsByRole,
-  getSubmissionsBySex,
-  getSubmissionsByWard,
-  roleLabels,
-} from "@/lib/helpers/collect-analytics";
+import { roleLabels } from "@/lib/helpers/collect-analytics";
 import {
   ChartContainer,
   ChartTooltip,
@@ -56,21 +48,18 @@ const wardChartConfig: ChartConfig = {
 
 export function CampaignOverview({ campaignId }: { campaignId: string }) {
   const { data: campaign } = useCampaign(campaignId);
-  const { data: submissionsData } = useCampaignSubmissions(campaignId, {
-    pageSize: 100,
-  });
+  const { data: stats } = useCampaignStats(campaignId);
 
-  const submissions = submissionsData?.submissions || [];
-  const total = submissionsData?.total || 0;
-  const verified = submissions.filter((s) => s.isVerified).length;
-  const flagged = submissions.filter((s) => s.isFlagged).length;
+  const total = stats?.total || 0;
+  const verified = stats?.verified || 0;
+  const flagged = stats?.flagged || 0;
 
-  const dailyData = getDailySubmissions(submissions);
-  const lgaData = getSubmissionsByLga(submissions);
-  const roleData = getSubmissionsByRole(submissions);
-  const sexData = getSubmissionsBySex(submissions);
-  const trendData = getCumulativeRegistrations(submissions);
-  const wardData = getSubmissionsByWard(submissions);
+  const dailyData = stats?.daily || [];
+  const lgaData = stats?.byLga || [];
+  const roleData = stats?.byRole || [];
+  const sexData = stats?.bySex || [];
+  const trendData = stats?.daily || [];
+  const wardData = stats?.byWard || [];
 
   if (!campaign) {
     return (
