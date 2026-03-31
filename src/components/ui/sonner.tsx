@@ -20,7 +20,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
       // }}
       toastOptions={{
         classNames: {
-          toast: "group bg-card border-solid border-border/80 rounded-sm shadow-lg",
+          toast:
+            "group bg-card border-solid border-border/80 rounded-sm shadow-lg",
           title: "font-sans font-semibold text-sm tracking-tight",
           description: "font-sans text-xs text-muted-foreground",
           success: "toast-success border-primary/40 text-primary",

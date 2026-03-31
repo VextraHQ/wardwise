@@ -28,6 +28,7 @@ import {
   IconLock,
   IconFileDescription,
 } from "@tabler/icons-react";
+import type { CampaignSummary } from "@/types/collect";
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border/60",
@@ -42,7 +43,10 @@ function capitalize(s: string) {
 
 export function CampaignSettings({ campaignId }: { campaignId: string }) {
   const router = useRouter();
-  const { data: campaign, isLoading } = useCampaign(campaignId);
+  const { data: campaign, isLoading } = useCampaign(campaignId) as {
+    data: CampaignSummary | undefined;
+    isLoading: boolean;
+  };
   const updateMutation = useUpdateCampaign(campaignId);
   const deleteMutation = useDeleteCampaign();
   const [deleteSlug, setDeleteSlug] = useState("");
@@ -201,8 +205,11 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
             Danger Zone
           </CardTitle>
           <CardDescription className="text-muted-foreground mt-1 text-sm">
-            Delete this campaign and all its submissions. This action cannot be
-            undone.
+            Delete this campaign
+            {campaign._count.submissions > 0
+              ? ` and all ${campaign._count.submissions} submission${campaign._count.submissions === 1 ? "" : "s"}`
+              : ""}
+            . This action cannot be undone.
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -235,8 +235,12 @@ export function CampaignWizard() {
       });
       toast.success("Campaign created successfully");
       router.push(`/admin/collect/campaigns/${result.campaign.id}`);
-    } catch {
-      toast.error("Failed to create campaign. Please try again.");
+    } catch (err) {
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Failed to create campaign. Please try again.",
+      );
     }
   }
 
