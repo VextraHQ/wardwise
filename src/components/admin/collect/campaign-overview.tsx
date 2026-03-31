@@ -1,10 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { format } from "date-fns";
 import { useCampaign, useCampaignStats } from "@/hooks/use-collect";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { roleLabels } from "@/lib/helpers/collect-analytics";
 import {
@@ -50,23 +56,25 @@ const wardChartConfig: ChartConfig = {
   count: { label: "Submissions", color: "var(--chart-4)" },
 };
 
-function getPresetRange(preset: string): { from?: string; to?: string } {
+function getPresetRange(preset: string): {
+  from?: Date;
+  to?: Date;
+} {
   const now = new Date();
-  const fmt = (d: Date) => d.toISOString().split("T")[0];
   switch (preset) {
     case "7d": {
       const from = new Date(now);
       from.setDate(from.getDate() - 7);
-      return { from: fmt(from), to: fmt(now) };
+      return { from, to: now };
     }
     case "30d": {
       const from = new Date(now);
       from.setDate(from.getDate() - 30);
-      return { from: fmt(from), to: fmt(now) };
+      return { from, to: now };
     }
     case "month": {
       const from = new Date(now.getFullYear(), now.getMonth(), 1);
-      return { from: fmt(from), to: fmt(now) };
+      return { from, to: now };
     }
     default:
       return {};
@@ -75,12 +83,16 @@ function getPresetRange(preset: string): { from?: string; to?: string } {
 
 export function CampaignOverview({ campaignId }: { campaignId: string }) {
   const { data: campaign } = useCampaign(campaignId);
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [fromOpen, setFromOpen] = useState(false);
+  const [toOpen, setToOpen] = useState(false);
 
+  const fmt = (d: Date | undefined) =>
+    d ? format(d, "yyyy-MM-dd") : undefined;
   const statsParams = {
-    ...(dateFrom && { from: dateFrom }),
-    ...(dateTo && { to: dateTo }),
+    ...(dateFrom && { from: fmt(dateFrom) }),
+    ...(dateTo && { to: fmt(dateTo) }),
   };
   const { data: stats } = useCampaignStats(
     campaignId,
@@ -131,21 +143,51 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
       {/* Date Range Filter */}
       <div className="flex flex-wrap items-center gap-2">
         <IconCalendar className="text-muted-foreground h-4 w-4" />
-        <Input
-          type="date"
-          value={dateFrom}
-          onChange={(e) => setDateFrom(e.target.value)}
-          className="h-8 w-auto rounded-sm text-xs"
-          placeholder="From"
-        />
+        <Popover open={fromOpen} onOpenChange={setFromOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-sm px-3 text-xs font-medium"
+            >
+              {dateFrom ? format(dateFrom, "dd MMM yyyy") : "From"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dateFrom}
+              onSelect={(d) => {
+                setDateFrom(d);
+                setFromOpen(false);
+              }}
+              disabled={(date) => (dateTo ? date > dateTo : false)}
+            />
+          </PopoverContent>
+        </Popover>
         <span className="text-muted-foreground text-xs">to</span>
-        <Input
-          type="date"
-          value={dateTo}
-          onChange={(e) => setDateTo(e.target.value)}
-          className="h-8 w-auto rounded-sm text-xs"
-          placeholder="To"
-        />
+        <Popover open={toOpen} onOpenChange={setToOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-sm px-3 text-xs font-medium"
+            >
+              {dateTo ? format(dateTo, "dd MMM yyyy") : "To"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dateTo}
+              onSelect={(d) => {
+                setDateTo(d);
+                setToOpen(false);
+              }}
+              disabled={(date) => (dateFrom ? date < dateFrom : false)}
+            />
+          </PopoverContent>
+        </Popover>
         <div className="flex gap-1">
           {[
             { label: "7d", value: "7d" },
@@ -160,8 +202,8 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
               className="h-7 rounded-sm px-2 text-[10px] font-medium tracking-wide uppercase"
               onClick={() => {
                 const range = getPresetRange(p.value);
-                setDateFrom(range.from || "");
-                setDateTo(range.to || "");
+                setDateFrom(range.from);
+                setDateTo(range.to);
               }}
             >
               {p.label}

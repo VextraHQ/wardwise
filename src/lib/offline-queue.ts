@@ -70,10 +70,19 @@ export async function getPendingCount(): Promise<number> {
   });
 }
 
-/** Flush all pending submissions to the server. Returns count of successfully synced. */
-export async function syncPendingSubmissions(): Promise<number> {
+// HTTP status codes that are permanent failures (no point retrying)
+const PERMANENT_FAILURE_CODES = new Set([400, 403, 404, 409, 410, 422]);
+
+export type SyncResult = {
+  synced: number;
+  failed: { id: number; error: string }[];
+};
+
+/** Flush all pending submissions to the server. Returns synced count and permanent failures. */
+export async function syncPendingSubmissions(): Promise<SyncResult> {
   const pending = await getPendingSubmissions();
   let synced = 0;
+  const failed: { id: number; error: string }[] = [];
 
   for (const entry of pending) {
     try {
@@ -85,12 +94,20 @@ export async function syncPendingSubmissions(): Promise<number> {
       if (response.ok) {
         await removePendingSubmission(entry.id!);
         synced++;
+      } else if (PERMANENT_FAILURE_CODES.has(response.status)) {
+        // Permanent failure — remove from queue, report to user
+        const body = await response.json().catch(() => ({}));
+        const error =
+          body.error || `Server rejected submission (${response.status})`;
+        await removePendingSubmission(entry.id!);
+        failed.push({ id: entry.id!, error });
       }
+      // 5xx / other transient errors: leave in queue for next sync
     } catch {
-      // Still offline or server error — stop trying
+      // Network error — stop trying remaining entries
       break;
     }
   }
 
-  return synced;
+  return { synced, failed };
 }

@@ -54,8 +54,15 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     "select",
   );
 
-  const { isOffline, pendingCount, isSyncing, trySync, refreshPendingCount } =
-    useOffline();
+  const {
+    isOffline,
+    pendingCount,
+    isSyncing,
+    trySync,
+    refreshPendingCount,
+    lastSyncResult,
+    clearLastSyncResult,
+  } = useOffline();
 
   // Register service worker
   useEffect(() => {
@@ -65,6 +72,21 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       });
     }
   }, []);
+
+  // Surface auto-sync results (from reconnect) as toasts
+  useEffect(() => {
+    if (!lastSyncResult) return;
+    if (lastSyncResult.synced > 0) {
+      toast.success(`${lastSyncResult.synced} submission(s) synced`);
+    }
+    for (const f of lastSyncResult.failed) {
+      toast.error("Queued submission rejected", {
+        description: f.error,
+        duration: 8000,
+      });
+    }
+    clearLastSyncResult();
+  }, [lastSyncResult, clearLastSyncResult]);
 
   const form = useForm<RegistrationFormData>({
     resolver: zodResolver(submitRegistrationSchema),
@@ -387,7 +409,20 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
           </span>
           <button
             type="button"
-            onClick={() => void trySync()}
+            onClick={async () => {
+              const result = await trySync();
+              if (result) {
+                if (result.synced > 0) {
+                  toast.success(`${result.synced} submission(s) synced`);
+                }
+                for (const f of result.failed) {
+                  toast.error("Submission rejected", {
+                    description: f.error,
+                    duration: 8000,
+                  });
+                }
+              }
+            }}
             disabled={isSyncing}
             className="ml-2 rounded bg-teal-600 px-3 py-1 text-xs font-bold text-white hover:bg-teal-700 disabled:opacity-50"
           >
@@ -442,7 +477,13 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       )}
 
       {screen === 4 && (
-        <RoleStep form={form} onBack={goBack} onNext={validateAndNext} />
+        <RoleStep
+          form={form}
+          onBack={goBack}
+          onNext={validateAndNext}
+          isSubmitting={skipCanvasserStep && submitMutation.isPending}
+          submitError={skipCanvasserStep ? submitMutation.error?.message : undefined}
+        />
       )}
 
       {screen === 5 && (
@@ -459,11 +500,22 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       )}
 
       {screen === 6 && (
-        <ConfirmationScreen
-          campaign={campaign}
-          submittedCount={submittedCount}
-          onNewRegistration={handleNewRegistration}
-        />
+        <>
+          {submittedCount === null && (
+            <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm text-amber-800">
+              <p className="font-bold">Saved offline</p>
+              <p className="mt-1 text-xs">
+                Your registration has been queued and will be submitted
+                automatically when you reconnect to the internet.
+              </p>
+            </div>
+          )}
+          <ConfirmationScreen
+            campaign={campaign}
+            submittedCount={submittedCount}
+            onNewRegistration={handleNewRegistration}
+          />
+        </>
       )}
     </FormShell>
   );

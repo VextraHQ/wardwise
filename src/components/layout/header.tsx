@@ -7,13 +7,9 @@ import { cn } from "@/lib/utils";
 import type { IconType } from "react-icons";
 
 export interface HeaderProps {
-  /** Badge text shown on the right side */
   badge?: string;
-  /** Badge icon - defaults to HiShieldCheck */
   badgeIcon?: IconType;
-  /** Color variant for the badge */
   variant?: "primary" | "amber";
-  /** Additional classes */
   className?: string;
 }
 
@@ -30,10 +26,6 @@ const variantStyles = {
   },
 };
 
-/**
- * Header - A reusable header with logo and optional badge.
- * Used for auth pages, voter portal, and other standalone pages.
- */
 export function Header({
   badge,
   badgeIcon: BadgeIcon = HiShieldCheck,

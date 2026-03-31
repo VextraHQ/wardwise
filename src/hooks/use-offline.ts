@@ -1,12 +1,33 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { syncPendingSubmissions, getPendingCount } from "@/lib/offline-queue";
+import {
+  syncPendingSubmissions,
+  getPendingCount,
+  type SyncResult,
+} from "@/lib/offline-queue";
 
 export function useOffline() {
   const [isOffline, setIsOffline] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncResult, setLastSyncResult] = useState<SyncResult | null>(
+    null,
+  );
+
+  const trySync = useCallback(async (): Promise<SyncResult | undefined> => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    try {
+      const result = await syncPendingSubmissions();
+      await refreshPendingCount();
+      setLastSyncResult(result);
+      return result;
+    } finally {
+      setIsSyncing(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSyncing]);
 
   // Track online/offline status
   useEffect(() => {
@@ -17,7 +38,6 @@ export function useOffline() {
     const goOffline = () => setIsOffline(true);
     const goOnline = () => {
       setIsOffline(false);
-      // Auto-sync when back online
       void trySync();
     };
 
@@ -28,7 +48,7 @@ export function useOffline() {
       window.removeEventListener("offline", goOffline);
       window.removeEventListener("online", goOnline);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [trySync]);
 
   // Refresh pending count
   const refreshPendingCount = useCallback(async () => {
@@ -44,19 +64,18 @@ export function useOffline() {
     void refreshPendingCount();
   }, [refreshPendingCount]);
 
-  const trySync = useCallback(async () => {
-    if (isSyncing) return;
-    setIsSyncing(true);
-    try {
-      const synced = await syncPendingSubmissions();
-      if (synced > 0) {
-        await refreshPendingCount();
-      }
-      return synced;
-    } finally {
-      setIsSyncing(false);
-    }
-  }, [isSyncing, refreshPendingCount]);
+  const clearLastSyncResult = useCallback(
+    () => setLastSyncResult(null),
+    [],
+  );
 
-  return { isOffline, pendingCount, isSyncing, trySync, refreshPendingCount };
+  return {
+    isOffline,
+    pendingCount,
+    isSyncing,
+    trySync,
+    refreshPendingCount,
+    lastSyncResult,
+    clearLastSyncResult,
+  };
 }

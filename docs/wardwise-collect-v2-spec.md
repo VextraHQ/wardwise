@@ -1,12 +1,14 @@
 # WardWise Collect v2 — Feature Roadmap Spec
 
 > Living document. Update as features are built or priorities shift.
-> Last updated: 2026-03-30
+> Last updated: 2026-03-31
+> See also: `wardwise-collect-spec.md` (v1), `wardwise-hardening-spec.md`
 
 ## Status
 
 - **Collect v1 complete** — merged to `main`, hardened (see `wardwise-collect-spec.md`)
-- **v2 features**: In progress, tracked below by tier
+- **Collect v2 features complete** — merged to `develop`, hardened via v2.1 pass (see below)
+- **v2.1 hardening pass complete** — offline queue, cache invalidation, bulk audit, UI polish
 
 ---
 
@@ -14,7 +16,7 @@
 
 ### 1. Filtered CSV Export
 
-**Status:** Planned
+**Status:** Complete
 **Why:** Admin applies filters (role, LGA, verified/flagged) in the submissions table but "Export CSV" downloads everything. Should export what admin is looking at.
 
 **Approach:**
@@ -27,7 +29,7 @@
 
 ### 2. Date Range Picker for Analytics
 
-**Status:** Planned
+**Status:** Complete
 **Why:** "View stats for March 1-15" measures campaign pushes. Currently always shows all-time.
 
 **Approach:**
@@ -40,7 +42,7 @@
 
 ### 3. Campaign List Enhancements
 
-**Status:** Planned
+**Status:** Complete
 **Why:** Admin needs submission counts and last activity at a glance.
 
 **Approach:**
@@ -54,7 +56,7 @@
 
 ### 4. Canvasser Pre-load System
 
-**Status:** Planned
+**Status:** Complete
 **Why:** Currently canvasser name/phone is free text — typos everywhere, no clean analytics. Admin should add canvassers upfront, form uses a dropdown.
 
 **Approach:**
@@ -82,7 +84,7 @@ model CampaignCanvasser {
 
 ### 5. Canvasser Performance Dashboard
 
-**Status:** Planned
+**Status:** Complete
 **Why:** "Ali collected 200, Bola collected 3." Campaign team needs to measure field agent productivity.
 
 **Approach:**
@@ -96,7 +98,7 @@ model CampaignCanvasser {
 
 ### 6. Bulk Actions on Submissions
 
-**Status:** Planned
+**Status:** Complete
 **Why:** Verifying 500 submissions one-by-one is painful.
 
 **Approach:**
@@ -107,7 +109,7 @@ model CampaignCanvasser {
 
 ### 7. Submission Edit Trail
 
-**Status:** Planned
+**Status:** Complete
 **Why:** When admin flags/verifies/deletes, no record of who changed what. Audit gap.
 
 **Approach:**
@@ -118,7 +120,7 @@ model CampaignCanvasser {
 
 ### 8. Redacted CSV Export
 
-**Status:** Planned
+**Status:** Complete
 **Why:** Share analytics with stakeholders without exposing PII.
 
 **Approach:**
@@ -129,7 +131,7 @@ model CampaignCanvasser {
 
 ### 9. PWA / Offline Mode
 
-**Status:** Planned
+**Status:** Complete
 **Why:** Field canvassers in rural Nigeria lose connectivity mid-form.
 
 **Approach:**
@@ -171,6 +173,26 @@ These were fixed in the `fix/collect-hardening` branch:
 | Server-side analytics                       | Charts wrong after 100 submissions                         |
 | Schema consolidation                        | Dual campaign schemas causing drift and 400 errors         |
 | Dead config removal                         | `requireApcReg`/`requireVoterId` causing confusion         |
+
+---
+
+## Completed v2.1 Hardening (2026-03-31)
+
+Post-merge polish and Codex-identified bug fixes applied on `develop`:
+
+- [x] **Offline queue permanent failures** — 4xx responses now removed from IndexedDB queue, surfaced as toasts on reconnect
+- [x] **Date range end-of-day** — `to` date now includes `T23:59:59.999Z` so same-day ranges work correctly
+- [x] **Bulk audit trail** — Bulk verify/flag/unflag now creates per-submission `SubmissionAuditEntry` records
+- [x] **Cache invalidation** — `campaign-stats`, `campaign-canvassers`, and `submission-audit` queries invalidated after all mutations
+- [x] **Canvasser phone normalization** — Admin canvasser add endpoint uses `phoneSchema.transform(normalizeNigerianPhoneInput)`
+- [x] **Form header redesign** — Fixed text overlap, removed duplicate candidate name, responsive stacking
+- [x] **Form footer redesign** — Matches landing footer pattern, `/contact` CTA, Vextra branding
+- [x] **Export dropdown indicator** — Chevron icon on export button shows it's a dropdown
+- [x] **Admin notes editable** — Textarea + save button in submission detail sheet (was read-only)
+- [x] **AlertDialog confirmations** — Replaced browser `confirm()` with shadcn AlertDialog for delete actions
+- [x] **Calendar date picker** — Replaced native `<input type="date">` with shadcn Calendar + Popover
+- [x] **Role=canvasser submit UX** — "Submit Registration" label + loading spinner + inline error display
+- [x] **DRY submit error component** — Extracted reusable `SubmitError` from form-ui.tsx
 
 ---
 

@@ -145,6 +145,8 @@ export function useDeleteSubmission() {
     mutationFn: (sid: string) => adminCollectApi.deleteSubmission(sid),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["campaign-submissions"] });
+      qc.invalidateQueries({ queryKey: ["campaign-stats"] });
+      qc.invalidateQueries({ queryKey: ["campaign-canvassers"] });
     },
   });
 }
@@ -157,6 +159,7 @@ export function useBulkSubmissionAction() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["campaign-submissions"] });
       qc.invalidateQueries({ queryKey: ["campaign-stats"] });
+      qc.invalidateQueries({ queryKey: ["campaign-canvassers"] });
     },
   });
 }
@@ -171,8 +174,13 @@ export function useUpdateSubmission() {
       sid: string;
       data: { isFlagged?: boolean; adminNotes?: string; isVerified?: boolean };
     }) => adminCollectApi.updateSubmission(sid, data),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["campaign-submissions"] });
+      qc.invalidateQueries({ queryKey: ["campaign-stats"] });
+      qc.invalidateQueries({ queryKey: ["campaign-canvassers"] });
+      qc.invalidateQueries({
+        queryKey: ["submission-audit", variables.sid],
+      });
     },
   });
 }

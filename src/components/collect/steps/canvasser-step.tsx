@@ -21,6 +21,7 @@ import {
   InputIcon,
   FieldError,
   NavButtons,
+  SubmitError,
   StepCard,
   CardSectionHeader,
 } from "@/components/collect/form-ui";
@@ -199,41 +200,7 @@ export function CanvasserStep({
               isLoading={isSubmitting}
             />
 
-            {submitError && (
-              <div
-                className={cn(
-                  "rounded-sm border p-4 text-center",
-                  submitError.includes("already registered")
-                    ? "border-orange-500/30 bg-orange-500/10"
-                    : "bg-destructive/10 border-destructive/30",
-                )}
-              >
-                <p
-                  className={cn(
-                    "text-sm font-bold",
-                    submitError.includes("already registered")
-                      ? "text-orange-600 dark:text-orange-400"
-                      : "text-destructive",
-                  )}
-                >
-                  {submitError.includes("already registered")
-                    ? "Duplicate Registration Detected"
-                    : "Submission Failed"}
-                </p>
-                <p
-                  className={cn(
-                    "mt-1 text-xs",
-                    submitError.includes("already registered")
-                      ? "text-orange-600/80 dark:text-orange-400/80"
-                      : "text-destructive/80",
-                  )}
-                >
-                  {submitError.includes("already registered")
-                    ? "This phone number or Voter ID (VIN) has already been submitted for this campaign. Each supporter can only register once."
-                    : submitError}
-                </p>
-              </div>
-            )}
+            <SubmitError error={submitError} />
           </div>
         </StepCard>
       </motion.div>

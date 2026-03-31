@@ -30,9 +30,11 @@ export async function GET(
     const from = sp.get("from");
     const to = sp.get("to");
 
+    // Parse `to` as end-of-day so the selected date is fully included
+    const toEndOfDay = to ? new Date(to + "T23:59:59.999Z") : undefined;
     const dateFilter = {
       ...(from && { gte: new Date(from) }),
-      ...(to && { lte: new Date(to) }),
+      ...(toEndOfDay && { lte: toEndOfDay }),
     };
     const hasDateFilter = from || to;
 
@@ -62,12 +64,12 @@ export async function GET(
         }),
 
       // Daily submissions (group by date)
-      from && to
+      from && toEndOfDay
         ? prisma.$queryRaw<{ date: string; count: bigint }[]>`
             SELECT DATE("createdAt")::text as date, COUNT(*)::bigint as count
             FROM "CollectSubmission"
             WHERE "campaignId" = ${id}
-              AND "createdAt" >= ${new Date(from)} AND "createdAt" <= ${new Date(to)}
+              AND "createdAt" >= ${new Date(from)} AND "createdAt" <= ${toEndOfDay}
             GROUP BY DATE("createdAt") ORDER BY date ASC
           `
         : from
@@ -77,11 +79,11 @@ export async function GET(
               WHERE "campaignId" = ${id} AND "createdAt" >= ${new Date(from)}
               GROUP BY DATE("createdAt") ORDER BY date ASC
             `
-          : to
+          : toEndOfDay
             ? prisma.$queryRaw<{ date: string; count: bigint }[]>`
                 SELECT DATE("createdAt")::text as date, COUNT(*)::bigint as count
                 FROM "CollectSubmission"
-                WHERE "campaignId" = ${id} AND "createdAt" <= ${new Date(to)}
+                WHERE "campaignId" = ${id} AND "createdAt" <= ${toEndOfDay}
                 GROUP BY DATE("createdAt") ORDER BY date ASC
               `
             : prisma.$queryRaw<{ date: string; count: bigint }[]>`

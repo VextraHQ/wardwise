@@ -80,6 +80,24 @@ export async function POST(request: NextRequest) {
         break;
     }
 
+    // Create per-submission audit entries for the edit trail
+    if (action !== "delete") {
+      const auditAction =
+        action === "verify"
+          ? "verified"
+          : action === "flag"
+            ? "flagged"
+            : "unflagged";
+      await prisma.submissionAuditEntry.createMany({
+        data: ids.map((sid) => ({
+          submissionId: sid,
+          action: auditAction,
+          userId: session!.user.id,
+          details: JSON.stringify({ source: "bulk", count: affected }),
+        })),
+      });
+    }
+
     void logAudit(
       `submission.bulk_${action}`,
       "submission",
