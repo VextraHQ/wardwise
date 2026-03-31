@@ -7,6 +7,8 @@ import {
   type SyncResult,
 } from "@/lib/offline-queue";
 
+// Tracks the device's network status, manages an offline submission queue,
+// and auto-syncs any pending records the moment connectivity is restored.
 export function useOffline() {
   const [isOffline, setIsOffline] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
@@ -15,6 +17,7 @@ export function useOffline() {
     null,
   );
 
+  // Flushes all queued offline submissions to the server.
   const trySync = useCallback(async (): Promise<SyncResult | undefined> => {
     if (isSyncing) return;
     setIsSyncing(true);
@@ -29,7 +32,7 @@ export function useOffline() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSyncing]);
 
-  // Track online/offline status
+  // Listens to browser online/offline events and triggers a sync on reconnect.
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -50,7 +53,7 @@ export function useOffline() {
     };
   }, [trySync]);
 
-  // Refresh pending count
+  // Reads the current number of queued submissions from IndexedDB.
   const refreshPendingCount = useCallback(async () => {
     try {
       const count = await getPendingCount();
@@ -64,6 +67,7 @@ export function useOffline() {
     void refreshPendingCount();
   }, [refreshPendingCount]);
 
+  // Clears the last sync result from state (used to dismiss sync banners).
   const clearLastSyncResult = useCallback(
     () => setLastSyncResult(null),
     [],

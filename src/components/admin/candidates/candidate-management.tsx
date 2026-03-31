@@ -2,13 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useAdminCandidates } from "@/hooks/use-admin";
 import {
   HiExclamationCircle,
   HiOutlineUserAdd,
   HiOutlineUserGroup,
 } from "react-icons/hi";
-import { adminApi } from "@/lib/api/admin";
+
 import type { Candidate } from "@/types/candidate";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -75,12 +75,7 @@ export function CandidateManagement() {
     data: candidates = [],
     isLoading,
     error,
-  } = useQuery({
-    queryKey: ["admin", "candidates"],
-    queryFn: () => adminApi.candidates.getAll(),
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
+  } = useAdminCandidates();
 
   const uniqueParties = useMemo(
     () =>

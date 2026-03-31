@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useUpdateCandidate } from "@/hooks/use-admin";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
 import type { CandidateWithUser } from "@/lib/api/admin";
-import { adminApi } from "@/lib/api/admin";
 import {
   updateCandidateSchema,
   type UpdateCandidateFormValues,
@@ -72,7 +71,6 @@ interface CandidateOverviewProps {
 }
 
 export function CandidateOverview({ candidate }: CandidateOverviewProps) {
-  const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
 
   const form = useForm<UpdateCandidateFormValues>({
@@ -132,35 +130,33 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     }));
   }, []);
 
-  const updateMutation = useMutation({
-    mutationFn: adminApi.candidates.update,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["admin", "candidates", candidate.id],
-      });
-      queryClient.invalidateQueries({ queryKey: ["admin", "candidates"] });
-      setEditing(false);
-      toast.success("Candidate updated");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to update candidate");
-    },
-  });
+  const updateMutation = useUpdateCandidate();
 
   function onSubmit(data: UpdateCandidateFormValues) {
-    updateMutation.mutate({
-      id: candidate.id,
-      name: data.name,
-      email: data.email,
-      party: data.party,
-      position: data.position as (typeof POSITIONS)[number],
-      constituency: data.constituency,
-      stateCode: data.stateCode || undefined,
-      lga: data.lga || undefined,
-      description: data.description || undefined,
-      phone: data.phone || undefined,
-      title: data.title || undefined,
-    });
+    updateMutation.mutate(
+      {
+        id: candidate.id,
+        name: data.name,
+        email: data.email,
+        party: data.party,
+        position: data.position as (typeof POSITIONS)[number],
+        constituency: data.constituency,
+        stateCode: data.stateCode || undefined,
+        lga: data.lga || undefined,
+        description: data.description || undefined,
+        phone: data.phone || undefined,
+        title: data.title || undefined,
+      },
+      {
+        onSuccess: () => {
+          setEditing(false);
+          toast.success("Candidate updated");
+        },
+        onError: (error: Error) => {
+          toast.error(error.message || "Failed to update candidate");
+        },
+      },
+    );
   }
 
   // Stats

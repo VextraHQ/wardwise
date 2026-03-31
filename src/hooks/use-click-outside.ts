@@ -2,6 +2,8 @@ import { useEffect } from "react";
 
 type MaybeRef<T> = { current: T | null };
 
+// Fires a callback when the user clicks or touches outside of a target element.
+// Supports an `ignoreRefs` list for elements that should be treated as "inside".
 export function useClickOutside<T extends HTMLElement>(
   targetRef: MaybeRef<T>,
   onOutsideClick: () => void,
