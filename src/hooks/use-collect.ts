@@ -1,5 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { publicCollectApi, adminCollectApi } from "@/lib/api/collect";
+import {
+  publicCollectApi,
+  adminCollectApi,
+  type CampaignStats,
+} from "@/lib/api/collect";
 
 // === Public Hooks ===
 export function usePublicCampaign(slug: string) {
@@ -145,6 +149,18 @@ export function useDeleteSubmission() {
   });
 }
 
+export function useBulkSubmissionAction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ids, action }: { ids: string[]; action: string }) =>
+      adminCollectApi.bulkAction(ids, action),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["campaign-submissions"] });
+      qc.invalidateQueries({ queryKey: ["campaign-stats"] });
+    },
+  });
+}
+
 export function useUpdateSubmission() {
   const qc = useQueryClient();
   return useMutation({
@@ -161,15 +177,55 @@ export function useUpdateSubmission() {
   });
 }
 
+export function useCampaignStats(
+  campaignId: string,
+  params?: { from?: string; to?: string },
+) {
+  return useQuery<CampaignStats>({
+    queryKey: ["campaign-stats", campaignId, params],
+    queryFn: () => adminCollectApi.getCampaignStats(campaignId, params),
+    enabled: !!campaignId,
+    staleTime: 1000 * 60,
+  });
+}
+
 export function useCampaignCanvassers(campaignId: string) {
   return useQuery({
     queryKey: ["campaign-canvassers", campaignId],
-    queryFn: async () => {
-      const data = await adminCollectApi.getCanvassers(campaignId);
-      return data.canvassers;
-    },
+    queryFn: () => adminCollectApi.getCanvassers(campaignId),
     enabled: !!campaignId,
     staleTime: 1000 * 60 * 2,
+  });
+}
+
+export function useAddCanvasser(campaignId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { name: string; phone: string; zone?: string }) =>
+      adminCollectApi.addCanvasser(campaignId, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["campaign-canvassers", campaignId] });
+    },
+  });
+}
+
+export function useRemoveCanvasser(campaignId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (canvasserId: string) =>
+      adminCollectApi.removeCanvasser(campaignId, canvasserId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["campaign-canvassers", campaignId] });
+    },
+  });
+}
+
+export function useSubmissionAudit(sid: string | null) {
+  return useQuery({
+    queryKey: ["submission-audit", sid],
+    queryFn: () => adminCollectApi.getSubmissionAudit(sid!),
+    enabled: !!sid,
+    staleTime: 1000 * 30,
   });
 }
 

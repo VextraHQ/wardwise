@@ -35,7 +35,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} selection:bg-primary/30 antialiased`}
       >
         <AppProviders>{children}</AppProviders>
       </body>

@@ -7,6 +7,7 @@ import type {
   GeoWard,
   GeoPollingUnit,
   CanvasserSummary,
+  CampaignCanvasserRecord,
 } from "@/types/collect";
 
 // --- Helpers ---
@@ -143,10 +144,50 @@ export const adminCollectApi = {
       method: "DELETE",
     }),
 
+  bulkAction: (ids: string[], action: string) =>
+    adminApiCall<{ affected: number }>("/submissions/bulk", {
+      method: "POST",
+      body: JSON.stringify({ ids, action }),
+    }),
+
+  getSubmissionAudit: (sid: string) =>
+    adminApiCall<{
+      entries: {
+        id: string;
+        action: string;
+        userId: string;
+        userName: string;
+        details: string | null;
+        createdAt: string;
+      }[];
+    }>(`/submissions/${sid}/audit`),
+
   // Export
-  exportCsv: async (campaignId: string) => {
+  exportCsv: async (
+    campaignId: string,
+    filters?: {
+      search?: string;
+      role?: string;
+      isFlagged?: boolean;
+      isVerified?: boolean;
+      redacted?: boolean;
+    },
+  ) => {
+    const params = qs({
+      search: filters?.search,
+      role: filters?.role,
+      isFlagged:
+        filters?.isFlagged !== undefined
+          ? String(filters.isFlagged)
+          : undefined,
+      isVerified:
+        filters?.isVerified !== undefined
+          ? String(filters.isVerified)
+          : undefined,
+      redacted: filters?.redacted ? "true" : undefined,
+    });
     const response = await fetch(
-      `/api/admin/collect/campaigns/${campaignId}/export`,
+      `/api/admin/collect/campaigns/${campaignId}/export${params}`,
     );
     if (!response.ok) throw new Error("Export failed");
     const blob = await response.blob();
@@ -160,10 +201,47 @@ export const adminCollectApi = {
 
   // Canvassers
   getCanvassers: (campaignId: string) =>
-    adminApiCall<{ canvassers: CanvasserSummary[] }>(
+    adminApiCall<{
+      preloaded: CampaignCanvasserRecord[];
+      canvassers: CanvasserSummary[];
+    }>(`/campaigns/${campaignId}/canvassers`),
+
+  addCanvasser: (
+    campaignId: string,
+    data: { name: string; phone: string; zone?: string },
+  ) =>
+    adminApiCall<{ canvasser: CampaignCanvasserRecord }>(
       `/campaigns/${campaignId}/canvassers`,
+      { method: "POST", body: JSON.stringify(data) },
+    ),
+
+  removeCanvasser: (campaignId: string, canvasserId: string) =>
+    adminApiCall<{ success: boolean }>(
+      `/campaigns/${campaignId}/canvassers/${canvasserId}`,
+      { method: "DELETE" },
+    ),
+
+  // Stats (server-side aggregations for overview dashboard)
+  getCampaignStats: (
+    campaignId: string,
+    params?: { from?: string; to?: string },
+  ) =>
+    adminApiCall<CampaignStats>(
+      `/campaigns/${campaignId}/stats${qs({ from: params?.from, to: params?.to })}`,
     ),
 
   // Geo (all LGAs for campaign wizard)
   getAllLgas: () => adminApiCall<{ lgas: GeoLga[] }>("/lgas"),
+};
+
+// Stats response shape
+export type CampaignStats = {
+  total: number;
+  verified: number;
+  flagged: number;
+  daily: { date: string; count: number; cumulative: number }[];
+  byLga: { lga: string; count: number }[];
+  byWard: { ward: string; count: number }[];
+  byRole: { role: string; count: number }[];
+  bySex: { sex: string; count: number }[];
 };

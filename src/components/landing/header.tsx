@@ -98,12 +98,14 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                   className="text-muted-foreground hover:text-foreground flex items-center gap-2 font-mono text-[10px] font-black tracking-widest uppercase transition-colors"
                 >
                   <HiLockClosed className="h-3.5 w-3.5 shrink-0" />
-                  <span className="shrink-0 whitespace-nowrap"><span className="hidden xl:inline">Candidate</span> Login</span>
+                  <span className="shrink-0 whitespace-nowrap">
+                    <span className="hidden xl:inline">Candidate</span> Login
+                  </span>
                 </Link>
               )}
               <Link
                 href="/contact"
-                className="bg-primary text-primary-foreground hover:bg-primary/95 shrink-0 whitespace-nowrap rounded-full px-4 py-2 font-mono text-[9px] font-black tracking-widest uppercase transition-transform active:scale-95 xl:px-6 xl:py-2.5 xl:text-[10px]"
+                className="bg-primary text-primary-foreground hover:bg-primary/95 shrink-0 rounded-full px-4 py-2 font-mono text-[9px] font-black tracking-widest whitespace-nowrap uppercase transition-transform active:scale-95 xl:px-6 xl:py-2.5 xl:text-[10px]"
               >
                 Request a Demo
               </Link>

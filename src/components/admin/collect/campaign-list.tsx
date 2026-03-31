@@ -12,6 +12,7 @@ import {
   IconClipboard,
   IconDotsVertical,
   IconCopy,
+  IconAlertTriangle,
 } from "@tabler/icons-react";
 import { useCampaigns } from "@/hooks/use-collect";
 import type { CampaignSummary } from "@/types/collect";
@@ -35,6 +36,26 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { AdminPagination } from "@/components/admin/admin-pagination";
+
+function relativeTime(dateStr: string | null): string {
+  if (!dateStr) return "No activity";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return `${Math.floor(days / 30)}mo ago`;
+}
+
+function isStale(campaign: CampaignSummary): boolean {
+  if (campaign.status !== "active") return false;
+  if (!campaign.lastSubmissionAt) return campaign._count.submissions === 0;
+  const diff = Date.now() - new Date(campaign.lastSubmissionAt).getTime();
+  return diff > 48 * 60 * 60 * 1000; // 48 hours
+}
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border/60",
@@ -285,6 +306,9 @@ export function CampaignList() {
                   <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
                     Submissions
                   </TableHead>
+                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase lg:table-cell">
+                    Last Activity
+                  </TableHead>
                   <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
                     Created
                   </TableHead>
@@ -330,6 +354,19 @@ export function CampaignList() {
                       </TableCell>
                       <TableCell className="text-right font-mono font-medium tabular-nums">
                         {campaign._count.submissions.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground text-xs">
+                            {relativeTime(campaign.lastSubmissionAt)}
+                          </span>
+                          {isStale(campaign) && (
+                            <IconAlertTriangle
+                              className="h-3.5 w-3.5 text-amber-500"
+                              title="No submissions in 48h"
+                            />
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground hidden md:table-cell">
                         {new Date(campaign.createdAt).toLocaleDateString(

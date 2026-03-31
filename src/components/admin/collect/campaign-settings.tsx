@@ -28,6 +28,7 @@ import {
   IconLock,
   IconFileDescription,
 } from "@tabler/icons-react";
+import type { CampaignSummary } from "@/types/collect";
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border/60",
@@ -42,7 +43,10 @@ function capitalize(s: string) {
 
 export function CampaignSettings({ campaignId }: { campaignId: string }) {
   const router = useRouter();
-  const { data: campaign, isLoading } = useCampaign(campaignId);
+  const { data: campaign, isLoading } = useCampaign(campaignId) as {
+    data: CampaignSummary | undefined;
+    isLoading: boolean;
+  };
   const updateMutation = useUpdateCampaign(campaignId);
   const deleteMutation = useDeleteCampaign();
   const [deleteSlug, setDeleteSlug] = useState("");
@@ -151,41 +155,6 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
         </CardContent>
       </Card>
 
-      {/* Field Requirements */}
-      <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader>
-          <CardTitle className="text-sm font-semibold tracking-tight">
-            Field Requirements
-          </CardTitle>
-          <CardDescription className="text-muted-foreground mt-1 text-sm">
-            Verification fields that are always required on the registration
-            form.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              APC Registration Number / NIN
-            </span>
-            <Badge
-              variant="default"
-              className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-            >
-              Required
-            </Badge>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Voter ID (VIN)</span>
-            <Badge
-              variant="default"
-              className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-            >
-              Required
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Campaign Details */}
       <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>
@@ -236,8 +205,11 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
             Danger Zone
           </CardTitle>
           <CardDescription className="text-muted-foreground mt-1 text-sm">
-            Delete this campaign and all its submissions. This action cannot be
-            undone.
+            Delete this campaign
+            {campaign._count.submissions > 0
+              ? ` and all ${campaign._count.submissions} submission${campaign._count.submissions === 1 ? "" : "s"}`
+              : ""}
+            . This action cannot be undone.
           </CardDescription>
         </CardHeader>
         <CardContent>

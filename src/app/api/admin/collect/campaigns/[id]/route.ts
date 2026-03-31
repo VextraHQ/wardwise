@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { updateCampaignSchema } from "@/lib/schemas/admin-schemas";
+import { updateCampaignSchema } from "@/lib/schemas/collect-schemas";
 import { logAudit } from "@/lib/audit";
 
 type RouteParams = { params: Promise<{ id: string }> };
@@ -60,6 +60,33 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const d = parsed.data;
+
+    // Guard: one active campaign per candidate when activating
+    if (d.status === "active") {
+      const current = await prisma.campaign.findUnique({
+        where: { id },
+        select: { candidateId: true },
+      });
+      if (current) {
+        const existingActive = await prisma.campaign.findFirst({
+          where: {
+            candidateId: current.candidateId,
+            status: "active",
+            id: { not: id },
+          },
+          select: { slug: true },
+        });
+        if (existingActive) {
+          return NextResponse.json(
+            {
+              error: `This candidate already has an active campaign (${existingActive.slug}). Close or pause it first.`,
+            },
+            { status: 409 },
+          );
+        }
+      }
+    }
+
     const campaign = await prisma.campaign.update({
       where: { id },
       data: {
@@ -79,12 +106,6 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         }),
         ...(d.enabledLgaIds !== undefined && {
           enabledLgaIds: d.enabledLgaIds,
-        }),
-        ...(d.requireApcReg !== undefined && {
-          requireApcReg: d.requireApcReg,
-        }),
-        ...(d.requireVoterId !== undefined && {
-          requireVoterId: d.requireVoterId,
         }),
         ...(d.customQuestion1 !== undefined && {
           customQuestion1: d.customQuestion1 || null,

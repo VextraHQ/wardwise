@@ -1,17 +1,12 @@
 "use client";
 
-import { useCampaign, useCampaignSubmissions } from "@/hooks/use-collect";
+import { useState } from "react";
+import { useCampaign, useCampaignStats } from "@/hooks/use-collect";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  getCumulativeRegistrations,
-  getDailySubmissions,
-  getSubmissionsByLga,
-  getSubmissionsByRole,
-  getSubmissionsBySex,
-  getSubmissionsByWard,
-  roleLabels,
-} from "@/lib/helpers/collect-analytics";
+import { roleLabels } from "@/lib/helpers/collect-analytics";
 import {
   ChartContainer,
   ChartTooltip,
@@ -35,6 +30,7 @@ import {
   IconFlag,
   IconShieldCheck,
   IconClipboardList,
+  IconCalendar,
 } from "@tabler/icons-react";
 import Image from "next/image";
 
@@ -54,23 +50,53 @@ const wardChartConfig: ChartConfig = {
   count: { label: "Submissions", color: "var(--chart-4)" },
 };
 
+function getPresetRange(preset: string): { from?: string; to?: string } {
+  const now = new Date();
+  const fmt = (d: Date) => d.toISOString().split("T")[0];
+  switch (preset) {
+    case "7d": {
+      const from = new Date(now);
+      from.setDate(from.getDate() - 7);
+      return { from: fmt(from), to: fmt(now) };
+    }
+    case "30d": {
+      const from = new Date(now);
+      from.setDate(from.getDate() - 30);
+      return { from: fmt(from), to: fmt(now) };
+    }
+    case "month": {
+      const from = new Date(now.getFullYear(), now.getMonth(), 1);
+      return { from: fmt(from), to: fmt(now) };
+    }
+    default:
+      return {};
+  }
+}
+
 export function CampaignOverview({ campaignId }: { campaignId: string }) {
   const { data: campaign } = useCampaign(campaignId);
-  const { data: submissionsData } = useCampaignSubmissions(campaignId, {
-    pageSize: 100,
-  });
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
-  const submissions = submissionsData?.submissions || [];
-  const total = submissionsData?.total || 0;
-  const verified = submissions.filter((s) => s.isVerified).length;
-  const flagged = submissions.filter((s) => s.isFlagged).length;
+  const statsParams = {
+    ...(dateFrom && { from: dateFrom }),
+    ...(dateTo && { to: dateTo }),
+  };
+  const { data: stats } = useCampaignStats(
+    campaignId,
+    Object.keys(statsParams).length > 0 ? statsParams : undefined,
+  );
 
-  const dailyData = getDailySubmissions(submissions);
-  const lgaData = getSubmissionsByLga(submissions);
-  const roleData = getSubmissionsByRole(submissions);
-  const sexData = getSubmissionsBySex(submissions);
-  const trendData = getCumulativeRegistrations(submissions);
-  const wardData = getSubmissionsByWard(submissions);
+  const total = stats?.total || 0;
+  const verified = stats?.verified || 0;
+  const flagged = stats?.flagged || 0;
+
+  const dailyData = stats?.daily || [];
+  const lgaData = stats?.byLga || [];
+  const roleData = stats?.byRole || [];
+  const sexData = stats?.bySex || [];
+  const trendData = stats?.daily || [];
+  const wardData = stats?.byWard || [];
 
   if (!campaign) {
     return (
@@ -102,6 +128,48 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
 
   return (
     <div className="space-y-6">
+      {/* Date Range Filter */}
+      <div className="flex flex-wrap items-center gap-2">
+        <IconCalendar className="text-muted-foreground h-4 w-4" />
+        <Input
+          type="date"
+          value={dateFrom}
+          onChange={(e) => setDateFrom(e.target.value)}
+          className="h-8 w-auto rounded-sm text-xs"
+          placeholder="From"
+        />
+        <span className="text-muted-foreground text-xs">to</span>
+        <Input
+          type="date"
+          value={dateTo}
+          onChange={(e) => setDateTo(e.target.value)}
+          className="h-8 w-auto rounded-sm text-xs"
+          placeholder="To"
+        />
+        <div className="flex gap-1">
+          {[
+            { label: "7d", value: "7d" },
+            { label: "30d", value: "30d" },
+            { label: "This month", value: "month" },
+            { label: "All time", value: "all" },
+          ].map((p) => (
+            <Button
+              key={p.value}
+              variant="outline"
+              size="sm"
+              className="h-7 rounded-sm px-2 text-[10px] font-medium tracking-wide uppercase"
+              onClick={() => {
+                const range = getPresetRange(p.value);
+                setDateFrom(range.from || "");
+                setDateTo(range.to || "");
+              }}
+            >
+              {p.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
       {/* Stat Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="border-border/60 rounded-sm shadow-none">
@@ -391,31 +459,39 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-3">
-            <Image
-              src={qrUrl}
-              alt="QR Code"
-              width={160}
-              height={160}
-              className="h-40 w-40 rounded"
-            />
-            <p className="text-muted-foreground max-w-full truncate text-xs">
-              {formUrl}
-            </p>
-            <button
-              className="text-primary text-xs underline"
-              onClick={async () => {
-                const res = await fetch(qrUrl);
-                const blob = await res.blob();
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `qr-${campaign.slug}.png`;
-                a.click();
-                URL.revokeObjectURL(url);
-              }}
-            >
-              Download QR
-            </button>
+            {campaign.status === "active" ? (
+              <>
+                <Image
+                  src={qrUrl}
+                  alt="QR Code"
+                  width={160}
+                  height={160}
+                  className="h-40 w-40 rounded"
+                />
+                <p className="text-muted-foreground max-w-full truncate text-xs">
+                  {formUrl}
+                </p>
+                <button
+                  className="text-primary text-xs underline"
+                  onClick={async () => {
+                    const res = await fetch(qrUrl);
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `qr-${campaign.slug}.png`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                >
+                  Download QR
+                </button>
+              </>
+            ) : (
+              <p className="text-muted-foreground py-6 text-center text-sm">
+                QR code available when campaign is active.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
