@@ -11,6 +11,8 @@ import {
   usePollingUnits,
   useSubmitRegistration,
 } from "@/hooks/use-collect";
+import { useOffline } from "@/hooks/use-offline";
+import { queueSubmission } from "@/lib/offline-queue";
 import {
   submitRegistrationSchema,
   type RegistrationFormData,
@@ -51,6 +53,18 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   const [occupationMode, setOccupationMode] = useState<"select" | "custom">(
     "select",
   );
+
+  const { isOffline, pendingCount, isSyncing, trySync, refreshPendingCount } =
+    useOffline();
+
+  // Register service worker
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {
+        // SW registration failed — non-critical
+      });
+    }
+  }, []);
 
   const form = useForm<RegistrationFormData>({
     resolver: zodResolver(submitRegistrationSchema),
@@ -186,6 +200,54 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     5: ["canvasserName", "canvasserPhone"],
   };
 
+  const role = useWatch({ control: form.control, name: "role" });
+  const skipCanvasserStep = role === "canvasser";
+
+  const doSubmit = async () => {
+    saveProgress();
+    const values = form.getValues();
+    const payload = { ...values, campaignSlug: campaign.slug };
+
+    // Offline: queue in IndexedDB
+    if (isOffline) {
+      try {
+        await queueSubmission(payload);
+        await refreshPendingCount();
+        localStorage.removeItem(storageKey);
+        toast.success("Saved offline", {
+          description:
+            "Your registration will be submitted automatically when you reconnect.",
+        });
+        setScreen(TOTAL_SCREENS - 1);
+      } catch {
+        toast.error("Failed to save offline");
+      }
+      return;
+    }
+
+    submitMutation.mutate(payload, {
+      onSuccess: (result) => {
+        setSubmittedCount(result.count);
+        localStorage.removeItem(storageKey);
+        setScreen(TOTAL_SCREENS - 1); // confirmation
+      },
+      onError: (error) => {
+        const msg = error.message || "";
+        if (msg.includes("already registered")) {
+          toast.error("Duplicate Registration", {
+            description:
+              "This phone number or VIN has already been registered for this campaign.",
+            duration: 6000,
+          });
+        } else {
+          toast.error("Submission Failed", {
+            description: msg || "Please try again.",
+          });
+        }
+      },
+    });
+  };
+
   const validateAndNext = async () => {
     const fields = screenFieldMap[screen];
     if (fields) {
@@ -210,34 +272,18 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       }
     }
 
+    // Role step: if role is "canvasser", skip canvasser step and submit directly
+    if (screen === 4 && skipCanvasserStep) {
+      setHasCanvasser(false);
+      setValue("canvasserName", "");
+      setValue("canvasserPhone", "");
+      doSubmit();
+      return;
+    }
+
     // Submit on the last input screen (canvasser = screen before confirmation)
     if (screen === TOTAL_SCREENS - 2) {
-      saveProgress();
-      const values = form.getValues();
-      submitMutation.mutate(
-        { ...values, campaignSlug: campaign.slug },
-        {
-          onSuccess: (result) => {
-            setSubmittedCount(result.count);
-            localStorage.removeItem(storageKey);
-            setScreen(screen + 1);
-          },
-          onError: (error) => {
-            const msg = error.message || "";
-            if (msg.includes("already registered")) {
-              toast.error("Duplicate Registration", {
-                description:
-                  "This phone number or VIN has already been registered for this campaign.",
-                duration: 6000,
-              });
-            } else {
-              toast.error("Submission Failed", {
-                description: msg || "Please try again.",
-              });
-            }
-          },
-        },
-      );
+      doSubmit();
       return;
     }
 
@@ -245,7 +291,14 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   };
 
   const goBack = () => {
-    if (screen > 0) setScreen(screen - 1);
+    if (screen > 0) {
+      // Skip canvasser step when going back from confirmation
+      if (screen === TOTAL_SCREENS - 1 && skipCanvasserStep) {
+        setScreen(4); // go back to role step
+        return;
+      }
+      setScreen(screen - 1);
+    }
   };
 
   const handleNewRegistration = () => {
@@ -319,11 +372,35 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
 
   return (
     <FormShell campaign={campaign}>
+      {/* Offline / Sync banners */}
+      {isOffline && (
+        <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-800">
+          You&apos;re offline — submissions will be queued and sent when you
+          reconnect.
+        </div>
+      )}
+      {!isOffline && pendingCount > 0 && (
+        <div className="mb-4 flex items-center justify-between rounded-md border border-teal-300 bg-teal-50 px-4 py-2 text-sm text-teal-800">
+          <span>
+            {pendingCount} pending submission{pendingCount !== 1 ? "s" : ""}{" "}
+            waiting to sync
+          </span>
+          <button
+            type="button"
+            onClick={() => void trySync()}
+            disabled={isSyncing}
+            className="ml-2 rounded bg-teal-600 px-3 py-1 text-xs font-bold text-white hover:bg-teal-700 disabled:opacity-50"
+          >
+            {isSyncing ? "Syncing..." : "Sync now"}
+          </button>
+        </div>
+      )}
+
       {/* Progress Bar — hide on splash and confirmation */}
       {screen > 0 && screen < TOTAL_SCREENS - 1 && (
         <StepProgress
-          currentStep={screen}
-          totalSteps={TOTAL_SCREENS - 2}
+          currentStep={skipCanvasserStep && screen > 4 ? screen - 1 : screen}
+          totalSteps={TOTAL_SCREENS - 2 - (skipCanvasserStep ? 1 : 0)}
           stepTitle={STEP_TITLES[screen] || ""}
           className="mb-6"
         />
@@ -377,6 +454,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
           submitError={submitMutation.error?.message}
           onBack={goBack}
           onNext={validateAndNext}
+          preloadedCanvassers={campaign.campaignCanvassers}
         />
       )}
 

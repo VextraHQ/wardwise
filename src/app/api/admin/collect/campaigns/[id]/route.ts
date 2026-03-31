@@ -60,6 +60,33 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const d = parsed.data;
+
+    // Guard: one active campaign per candidate when activating
+    if (d.status === "active") {
+      const current = await prisma.campaign.findUnique({
+        where: { id },
+        select: { candidateId: true },
+      });
+      if (current) {
+        const existingActive = await prisma.campaign.findFirst({
+          where: {
+            candidateId: current.candidateId,
+            status: "active",
+            id: { not: id },
+          },
+          select: { slug: true },
+        });
+        if (existingActive) {
+          return NextResponse.json(
+            {
+              error: `This candidate already has an active campaign (${existingActive.slug}). Close or pause it first.`,
+            },
+            { status: 409 },
+          );
+        }
+      }
+    }
+
     const campaign = await prisma.campaign.update({
       where: { id },
       data: {

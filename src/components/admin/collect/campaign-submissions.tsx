@@ -5,12 +5,15 @@ import {
   useCampaignSubmissions,
   useUpdateSubmission,
   useDeleteSubmission,
+  useBulkSubmissionAction,
+  useSubmissionAudit,
 } from "@/hooks/use-collect";
 import { adminCollectApi } from "@/lib/api/collect";
 import { roleLabels } from "@/lib/helpers/collect-analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -32,6 +35,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { toast } from "sonner";
@@ -42,6 +51,7 @@ import {
   IconSearch,
   IconShieldCheck,
   IconTrash,
+  IconEyeOff,
 } from "@tabler/icons-react";
 import type { CollectSubmission } from "@/types/collect";
 
@@ -72,14 +82,62 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
 
   const updateMutation = useUpdateSubmission();
   const deleteMutation = useDeleteSubmission();
+  const bulkMutation = useBulkSubmissionAction();
+  const { data: auditData } = useSubmissionAudit(selected?.id || null);
   const submissions = (data?.submissions || []) as SubmissionWithPU[];
   const total = data?.total || 0;
   const totalPages = Math.ceil(total / pageSize);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const handleExport = async () => {
+  const allOnPageSelected =
+    submissions.length > 0 && submissions.every((s) => selectedIds.has(s.id));
+
+  const toggleSelectAll = () => {
+    if (allOnPageSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(submissions.map((s) => s.id)));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIds(next);
+  };
+
+  const handleBulkAction = (action: string) => {
+    if (action === "delete") {
+      if (
+        !confirm(
+          `Delete ${selectedIds.size} submission(s)? This cannot be undone.`,
+        )
+      )
+        return;
+    }
+    bulkMutation.mutate(
+      { ids: Array.from(selectedIds), action },
+      {
+        onSuccess: (result) => {
+          toast.success(
+            `${result.affected} submission(s) ${action === "delete" ? "deleted" : action === "verify" ? "verified" : action === "flag" ? "flagged" : "unflagged"}`,
+          );
+          setSelectedIds(new Set());
+        },
+        onError: (e) => toast.error(e.message),
+      },
+    );
+  };
+
+  const handleExport = async (redacted = false) => {
     try {
-      await adminCollectApi.exportCsv(campaignId);
-      toast.success("CSV exported");
+      await adminCollectApi.exportCsv(campaignId, {
+        search: search || undefined,
+        role: roleFilter !== "all" ? roleFilter : undefined,
+        redacted,
+      });
+      toast.success(redacted ? "Redacted CSV exported" : "CSV exported");
     } catch {
       toast.error("Export failed");
     }
@@ -151,16 +209,88 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
             <SelectItem value="canvasser">Canvasser</SelectItem>
           </SelectContent>
         </Select>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleExport}
-          className="h-9 rounded-sm px-4 font-mono text-[10px] font-bold tracking-widest uppercase shadow-sm"
-        >
-          <IconDownload className="mr-2 h-4 w-4" />
-          Export CSV
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={total === 0}
+              title={total === 0 ? "No submissions to export" : undefined}
+              className="h-9 rounded-sm px-4 font-mono text-[10px] font-bold tracking-widest uppercase shadow-sm"
+            >
+              <IconDownload className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleExport(false)}>
+              <IconDownload className="mr-2 h-4 w-4" />
+              Export CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExport(true)}>
+              <IconEyeOff className="mr-2 h-4 w-4" />
+              Export Redacted CSV
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
+
+      {/* Bulk Actions Toolbar */}
+      {selectedIds.size > 0 && (
+        <div className="bg-primary/5 border-primary/20 flex flex-wrap items-center gap-2 rounded-sm border px-3 py-2">
+          <span className="text-primary text-xs font-bold">
+            {selectedIds.size} selected
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase"
+            onClick={() => handleBulkAction("verify")}
+            disabled={bulkMutation.isPending}
+          >
+            <IconShieldCheck className="mr-1 h-3 w-3" />
+            Verify
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase"
+            onClick={() => handleBulkAction("flag")}
+            disabled={bulkMutation.isPending}
+          >
+            <IconFlag className="mr-1 h-3 w-3" />
+            Flag
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase"
+            onClick={() => handleBulkAction("unflag")}
+            disabled={bulkMutation.isPending}
+          >
+            <IconFlagOff className="mr-1 h-3 w-3" />
+            Unflag
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 rounded-sm border-red-500/20 px-2 text-[10px] font-bold tracking-wider text-red-600 uppercase hover:bg-red-600 hover:text-white"
+            onClick={() => handleBulkAction("delete")}
+            disabled={bulkMutation.isPending}
+          >
+            <IconTrash className="mr-1 h-3 w-3" />
+            Delete
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="ml-auto h-7 px-2 text-[10px] font-bold tracking-wider uppercase"
+            onClick={() => setSelectedIds(new Set())}
+          >
+            Clear
+          </Button>
+        </div>
+      )}
 
       {/* Table */}
       {isLoading ? (
@@ -179,6 +309,13 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
             <Table>
               <TableHeader className="bg-muted/30 sticky top-0 z-10">
                 <TableRow className="hover:bg-transparent">
+                  <TableHead className="h-10 w-10 text-center">
+                    <Checkbox
+                      checked={allOnPageSelected}
+                      onCheckedChange={toggleSelectAll}
+                      aria-label="Select all"
+                    />
+                  </TableHead>
                   <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
                     S/N
                   </TableHead>
@@ -227,6 +364,16 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                     }`}
                     onClick={() => setSelected(s)}
                   >
+                    <TableCell
+                      className="text-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Checkbox
+                        checked={selectedIds.has(s.id)}
+                        onCheckedChange={() => toggleSelect(s.id)}
+                        aria-label={`Select ${s.fullName}`}
+                      />
+                    </TableCell>
                     <TableCell className="text-muted-foreground text-center text-xs font-medium">
                       {(page - 1) * pageSize + idx + 1}
                     </TableCell>
@@ -410,6 +557,36 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                     {selected.adminNotes || "No administrative notes provided."}
                   </p>
                 </Section>
+
+                {auditData && auditData.entries.length > 0 && (
+                  <Section label="History">
+                    <div className="space-y-2">
+                      {auditData.entries.map((entry) => (
+                        <div
+                          key={entry.id}
+                          className="border-border/60 flex items-start gap-2 border-l-2 pl-3 text-xs"
+                        >
+                          <div className="flex-1">
+                            <span className="font-medium">
+                              {entry.userName}
+                            </span>{" "}
+                            <span className="text-muted-foreground">
+                              {entry.action}
+                            </span>
+                          </div>
+                          <span className="text-muted-foreground shrink-0 text-[10px]">
+                            {new Date(entry.createdAt).toLocaleString("en-NG", {
+                              day: "numeric",
+                              month: "short",
+                              hour: "numeric",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </Section>
+                )}
               </div>
             )}
           </div>

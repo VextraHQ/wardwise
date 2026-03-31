@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(
-  _request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -25,44 +25,76 @@ export async function GET(
       );
     }
 
+    // Optional date range filtering
+    const sp = request.nextUrl.searchParams;
+    const from = sp.get("from");
+    const to = sp.get("to");
+
+    const dateFilter = {
+      ...(from && { gte: new Date(from) }),
+      ...(to && { lte: new Date(to) }),
+    };
+    const hasDateFilter = from || to;
+
+    const baseWhere = {
+      campaignId: id,
+      ...(hasDateFilter && { createdAt: dateFilter }),
+    };
+
     // Run all aggregations in parallel
-    const [
-      totals,
-      dailyRaw,
-      byLga,
-      byWard,
-      byRole,
-      bySex,
-    ] = await Promise.all([
+    const [totals, dailyRaw, byLga, byWard, byRole, bySex] = await Promise.all([
       // Total, verified, flagged counts
-      prisma.collectSubmission.aggregate({
-        where: { campaignId: id },
-        _count: true,
-      }).then(async (agg) => {
-        const [verified, flagged] = await Promise.all([
-          prisma.collectSubmission.count({
-            where: { campaignId: id, isVerified: true },
-          }),
-          prisma.collectSubmission.count({
-            where: { campaignId: id, isFlagged: true },
-          }),
-        ]);
-        return { total: agg._count, verified, flagged };
-      }),
+      prisma.collectSubmission
+        .aggregate({
+          where: baseWhere,
+          _count: true,
+        })
+        .then(async (agg) => {
+          const [verified, flagged] = await Promise.all([
+            prisma.collectSubmission.count({
+              where: { ...baseWhere, isVerified: true },
+            }),
+            prisma.collectSubmission.count({
+              where: { ...baseWhere, isFlagged: true },
+            }),
+          ]);
+          return { total: agg._count, verified, flagged };
+        }),
 
       // Daily submissions (group by date)
-      prisma.$queryRaw<{ date: string; count: bigint }[]>`
-        SELECT DATE("createdAt")::text as date, COUNT(*)::bigint as count
-        FROM "CollectSubmission"
-        WHERE "campaignId" = ${id}
-        GROUP BY DATE("createdAt")
-        ORDER BY date ASC
-      `,
+      from && to
+        ? prisma.$queryRaw<{ date: string; count: bigint }[]>`
+            SELECT DATE("createdAt")::text as date, COUNT(*)::bigint as count
+            FROM "CollectSubmission"
+            WHERE "campaignId" = ${id}
+              AND "createdAt" >= ${new Date(from)} AND "createdAt" <= ${new Date(to)}
+            GROUP BY DATE("createdAt") ORDER BY date ASC
+          `
+        : from
+          ? prisma.$queryRaw<{ date: string; count: bigint }[]>`
+              SELECT DATE("createdAt")::text as date, COUNT(*)::bigint as count
+              FROM "CollectSubmission"
+              WHERE "campaignId" = ${id} AND "createdAt" >= ${new Date(from)}
+              GROUP BY DATE("createdAt") ORDER BY date ASC
+            `
+          : to
+            ? prisma.$queryRaw<{ date: string; count: bigint }[]>`
+                SELECT DATE("createdAt")::text as date, COUNT(*)::bigint as count
+                FROM "CollectSubmission"
+                WHERE "campaignId" = ${id} AND "createdAt" <= ${new Date(to)}
+                GROUP BY DATE("createdAt") ORDER BY date ASC
+              `
+            : prisma.$queryRaw<{ date: string; count: bigint }[]>`
+                SELECT DATE("createdAt")::text as date, COUNT(*)::bigint as count
+                FROM "CollectSubmission"
+                WHERE "campaignId" = ${id}
+                GROUP BY DATE("createdAt") ORDER BY date ASC
+              `,
 
       // By LGA
       prisma.collectSubmission.groupBy({
         by: ["lgaName"],
-        where: { campaignId: id },
+        where: baseWhere,
         _count: true,
         orderBy: { _count: { lgaName: "desc" } },
       }),
@@ -70,7 +102,7 @@ export async function GET(
       // By Ward (top 10)
       prisma.collectSubmission.groupBy({
         by: ["wardName"],
-        where: { campaignId: id },
+        where: baseWhere,
         _count: true,
         orderBy: { _count: { wardName: "desc" } },
         take: 10,
@@ -79,14 +111,14 @@ export async function GET(
       // By Role
       prisma.collectSubmission.groupBy({
         by: ["role"],
-        where: { campaignId: id },
+        where: baseWhere,
         _count: true,
       }),
 
       // By Sex
       prisma.collectSubmission.groupBy({
         by: ["sex"],
-        where: { campaignId: id },
+        where: baseWhere,
         _count: true,
       }),
     ]);

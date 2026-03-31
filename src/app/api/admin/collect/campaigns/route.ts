@@ -14,15 +14,26 @@ export async function GET(request: NextRequest) {
 
     const campaigns = await prisma.campaign.findMany({
       where: candidateId ? { candidateId } : undefined,
-      include: { _count: { select: { submissions: true } } },
+      include: {
+        _count: { select: { submissions: true } },
+        submissions: {
+          select: { createdAt: true },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
 
-    const serialized = campaigns.map((c) => ({
-      ...c,
-      createdAt: c.createdAt.toISOString(),
-      updatedAt: c.updatedAt.toISOString(),
-    }));
+    const serialized = campaigns.map((c) => {
+      const { submissions, ...rest } = c;
+      return {
+        ...rest,
+        createdAt: c.createdAt.toISOString(),
+        updatedAt: c.updatedAt.toISOString(),
+        lastSubmissionAt: submissions[0]?.createdAt.toISOString() || null,
+      };
+    });
 
     return NextResponse.json({ campaigns: serialized });
   } catch (error) {
@@ -52,6 +63,21 @@ export async function POST(request: NextRequest) {
     }
 
     const data = parsed.data;
+
+    // Guard: one active campaign per candidate
+    const existingActive = await prisma.campaign.findFirst({
+      where: { candidateId: data.candidateId, status: "active" },
+      select: { id: true, slug: true },
+    });
+    if (existingActive) {
+      return NextResponse.json(
+        {
+          error: `This candidate already has an active campaign (${existingActive.slug}). Close or pause it first.`,
+        },
+        { status: 409 },
+      );
+    }
+
     const campaign = await prisma.campaign.create({
       data: {
         candidateId: data.candidateId,

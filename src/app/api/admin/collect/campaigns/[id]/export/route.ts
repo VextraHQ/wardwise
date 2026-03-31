@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 
@@ -14,8 +14,40 @@ function sanitizeCell(value: string | null | undefined): string {
   return s;
 }
 
+// Redaction helpers for PII masking
+function redactName(name: string | null | undefined): string {
+  if (!name) return "";
+  return name
+    .split(" ")
+    .map((part) =>
+      part.length > 1 ? part[0] + "*".repeat(part.length - 1) : part,
+    )
+    .join(" ");
+}
+
+function redactPhone(phone: string | null | undefined): string {
+  if (!phone) return "";
+  // Keep country code prefix + last 4 digits
+  if (phone.length > 7) {
+    return phone.slice(0, 4) + "***" + phone.slice(-4);
+  }
+  return "***" + phone.slice(-4);
+}
+
+function redactEmail(email: string | null | undefined): string {
+  if (!email) return "";
+  const [local, domain] = email.split("@");
+  if (!domain) return "***";
+  return (local?.[0] || "") + "***@" + domain;
+}
+
+function redactId(id: string | null | undefined): string {
+  if (!id) return "";
+  return "***";
+}
+
 export async function GET(
-  _request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -36,8 +68,38 @@ export async function GET(
       );
     }
 
+    // Build filter where clause (same params as submissions list)
+    const sp = request.nextUrl.searchParams;
+    const search = sp.get("search") || undefined;
+    const role = sp.get("role") || undefined;
+    const isFlagged =
+      sp.get("isFlagged") === "true"
+        ? true
+        : sp.get("isFlagged") === "false"
+          ? false
+          : undefined;
+    const isVerified =
+      sp.get("isVerified") === "true"
+        ? true
+        : sp.get("isVerified") === "false"
+          ? false
+          : undefined;
+    const redacted = sp.get("redacted") === "true";
+
+    const where: Record<string, unknown> = { campaignId: id };
+    if (search) {
+      where.OR = [
+        { fullName: { contains: search, mode: "insensitive" } },
+        { phone: { contains: search } },
+        { email: { contains: search, mode: "insensitive" } },
+      ];
+    }
+    if (role) where.role = role;
+    if (isFlagged !== undefined) where.isFlagged = isFlagged;
+    if (isVerified !== undefined) where.isVerified = isVerified;
+
     const submissions = await prisma.collectSubmission.findMany({
-      where: { campaignId: id },
+      where,
       orderBy: { createdAt: "desc" },
       include: {
         pollingUnit: { select: { code: true } },
@@ -70,9 +132,9 @@ export async function GET(
     ];
 
     const rows = submissions.map((s) => [
-      sanitizeCell(s.fullName),
-      sanitizeCell(s.phone),
-      sanitizeCell(s.email),
+      sanitizeCell(redacted ? redactName(s.fullName) : s.fullName),
+      sanitizeCell(redacted ? redactPhone(s.phone) : s.phone),
+      sanitizeCell(redacted ? redactEmail(s.email) : s.email),
       sanitizeCell(s.sex),
       String(s.age),
       sanitizeCell(s.occupation),
@@ -81,13 +143,13 @@ export async function GET(
       sanitizeCell(s.wardName),
       sanitizeCell(s.pollingUnit?.code || ""),
       sanitizeCell(s.pollingUnitName),
-      sanitizeCell(s.apcRegNumber),
-      sanitizeCell(s.voterIdNumber),
+      sanitizeCell(redacted ? redactId(s.apcRegNumber) : s.apcRegNumber),
+      sanitizeCell(redacted ? redactId(s.voterIdNumber) : s.voterIdNumber),
       sanitizeCell(s.role),
       ...(campaign.customQuestion1 ? [sanitizeCell(s.customAnswer1)] : []),
       ...(campaign.customQuestion2 ? [sanitizeCell(s.customAnswer2)] : []),
-      sanitizeCell(s.canvasserName),
-      sanitizeCell(s.canvasserPhone),
+      sanitizeCell(redacted ? redactName(s.canvasserName) : s.canvasserName),
+      sanitizeCell(redacted ? redactPhone(s.canvasserPhone) : s.canvasserPhone),
       s.isVerified ? "Yes" : "No",
       s.isFlagged ? "Yes" : "No",
       sanitizeCell(s.adminNotes),
@@ -99,7 +161,7 @@ export async function GET(
     return new Response(csv, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="submissions-${campaign.slug}.csv"`,
+        "Content-Disposition": `attachment; filename="submissions-${campaign.slug}${redacted ? "-redacted" : ""}.csv"`,
       },
     });
   } catch (error) {

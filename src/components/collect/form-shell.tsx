@@ -26,7 +26,7 @@ export function FormShell({
                 {campaign.constituency}
               </Badge>
               <span className="text-primary/60 hidden shrink-0 font-mono text-[9px] font-bold tracking-widest uppercase sm:inline-block">
-                SYS_ACTIVE_NODE
+                {campaign.candidateName}
               </span>
             </div>
             <div className="ml-3 flex min-w-0 items-center justify-end gap-2">
@@ -42,13 +42,23 @@ export function FormShell({
           {children}
         </div>
 
-        <div className="border-border/40 border-t py-4">
-          <p className="text-muted-foreground/50 text-center text-[10px] font-medium tracking-widest uppercase">
-            Powered by{" "}
-            <span className="text-muted-foreground/70 font-bold">
-              Vextra Limited
-            </span>
-          </p>
+        <div className="border-border/40 border-t py-5">
+          <div className="mx-auto flex max-w-2xl flex-col items-center gap-1.5 px-4">
+            <p className="text-muted-foreground/50 text-center text-[10px] font-medium tracking-widest uppercase">
+              Powered by{" "}
+              <a
+                href="https://vextralimited.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary/50 hover:text-primary/70 font-bold transition-colors"
+              >
+                Vextra Limited
+              </a>
+            </p>
+            <p className="text-muted-foreground/30 font-mono text-[9px] tracking-wider">
+              © {new Date().getFullYear()} WardWise
+            </p>
+          </div>
         </div>
       </div>
     </div>
