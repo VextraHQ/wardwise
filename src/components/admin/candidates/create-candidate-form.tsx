@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useCreateCandidate } from "@/hooks/use-admin";
 
 import {
   Breadcrumb,
@@ -22,7 +22,7 @@ import {
   createCandidateSchema,
   type CreateCandidateFormValues,
 } from "@/lib/schemas/admin-schemas";
-import { adminApi, type CreateCandidateResponse } from "@/lib/api/admin";
+import { type CreateCandidateResponse } from "@/lib/api/admin";
 import { CredentialsDialog } from "./credentials-dialog";
 import { StepIdentity } from "./wizard/step-identity";
 import { StepPosition } from "./wizard/step-position";
@@ -33,13 +33,12 @@ const STEP_TITLES = ["Identity", "Electoral Position", "Review & Submit"];
 // Fields validated at each step
 const stepFieldMap: Record<number, (keyof CreateCandidateFormValues)[]> = {
   0: ["name", "email", "party"],
-  1: ["position", "constituency", "stateCode", "lga"],
+  1: ["position", "constituency", "stateCode", "constituencyLgaIds"],
   2: [],
 };
 
 export function CreateCandidateForm() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const [step, setStep] = useState(0);
   const [credentialsData, setCredentialsData] =
     useState<CreateCandidateResponse | null>(null);
@@ -54,6 +53,7 @@ export function CreateCandidateForm() {
       constituency: "",
       stateCode: "",
       lga: "",
+      constituencyLgaIds: [],
       description: "",
       phone: "",
       title: "",
@@ -61,33 +61,7 @@ export function CreateCandidateForm() {
     mode: "onChange",
   });
 
-  const createMutation = useMutation({
-    mutationFn: (data: CreateCandidateFormValues) =>
-      adminApi.candidates.create({
-        name: data.name,
-        email: data.email,
-        party: data.party,
-        position: data.position as
-          | "President"
-          | "Governor"
-          | "Senator"
-          | "House of Representatives"
-          | "State Assembly",
-        constituency: data.constituency,
-        stateCode: data.stateCode || undefined,
-        lga: data.lga || undefined,
-        description: data.description || undefined,
-        phone: data.phone || undefined,
-        title: data.title || undefined,
-      }),
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "candidates"] });
-      setCredentialsData(result);
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to create candidate");
-    },
-  });
+  const createMutation = useCreateCandidate();
 
   async function validateAndNext() {
     const fields = stepFieldMap[step];
@@ -110,7 +84,32 @@ export function CreateCandidateForm() {
       toast.error("Please fix the errors before submitting");
       return;
     }
-    createMutation.mutate(form.getValues());
+    const data = form.getValues();
+    createMutation.mutate(
+      {
+        name: data.name,
+        email: data.email,
+        party: data.party,
+        position: data.position as
+          | "President"
+          | "Governor"
+          | "Senator"
+          | "House of Representatives"
+          | "State Assembly",
+        constituency: data.constituency,
+        constituencyLgaIds: data.constituencyLgaIds,
+        stateCode: data.stateCode || undefined,
+        lga: data.lga || undefined,
+        description: data.description || undefined,
+        phone: data.phone || undefined,
+        title: data.title || undefined,
+      },
+      {
+        onSuccess: (result) => setCredentialsData(result),
+        onError: (error: Error) =>
+          toast.error(error.message || "Failed to create candidate"),
+      },
+    );
   }
 
   return (

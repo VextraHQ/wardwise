@@ -1,34 +1,15 @@
-/**
- * Candidate Dashboard React Query Hooks
- *
- * Custom hooks for fetching candidate dashboard data using React Query.
- * All hooks filter by candidateId from NextAuth session to ensure data isolation.
- *
- * These hooks provide:
- * - Automatic caching and refetching
- * - Loading and error states
- * - Optimistic updates
- * - Proper query key management
- */
-
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { dashboardApi } from "@/lib/api/candidate-dashboard";
 import { candidateApi } from "@/lib/api/candidate";
 
-/**
- * Get candidateId from session
- * Returns null if not authenticated or no candidateId
- */
+// Reads candidateId from the active NextAuth session. Returns null if unauthenticated.
 function useCandidateId(): string | null {
   const { data: session } = useSession();
   return session?.user?.candidateId || null;
 }
 
-/**
- * Hook to get comprehensive dashboard data for the logged-in candidate
- * Includes all key metrics: supporters, ward coverage, demographics, trends, field data
- */
+// Fetches all key dashboard metrics (supporters, ward coverage, demographics, trends) for the logged-in candidate.
 export function useCandidateDashboard() {
   const candidateId = useCandidateId();
 
@@ -45,9 +26,7 @@ export function useCandidateDashboard() {
   });
 }
 
-/**
- * Hook to get paginated supporters list with filters
- */
+// Fetches a paginated, filterable supporters list for the candidate.
 export function useCandidateSupporters(options?: {
   page?: number;
   pageSize?: number;
@@ -85,9 +64,7 @@ export function useCandidateSupporters(options?: {
   });
 }
 
-/**
- * Hook to get ward breakdown data
- */
+// Fetches a breakdown of supporter counts grouped by ward.
 export function useCandidateWardData() {
   const candidateId = useCandidateId();
 
@@ -103,9 +80,7 @@ export function useCandidateWardData() {
   });
 }
 
-/**
- * Hook to get demographic breakdown
- */
+// Fetches a demographic breakdown (age, gender, etc.) of the candidate's supporters.
 export function useCandidateDemographics() {
   const candidateId = useCandidateId();
 
@@ -121,9 +96,7 @@ export function useCandidateDemographics() {
   });
 }
 
-/**
- * Hook to get candidate profile information
- */
+// Fetches the candidate's own profile information from the database.
 export function useCandidateProfile() {
   const candidateId = useCandidateId();
 
@@ -139,9 +112,7 @@ export function useCandidateProfile() {
   });
 }
 
-/**
- * Hook to get registration trends for a specific period
- */
+// Fetches registration activity trends over a given period (daily/weekly/monthly).
 export function useCandidateRegistrationTrends(
   period: "daily" | "weekly" | "monthly" = "daily",
 ) {
@@ -160,7 +131,4 @@ export function useCandidateRegistrationTrends(
   });
 }
 
-/**
- * Export candidateId hook for use in components that need it directly
- */
 export { useCandidateId };

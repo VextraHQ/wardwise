@@ -164,9 +164,9 @@ src/
     delete-geo-dialog.tsx             — Shared delete confirmation with impact summary
     bulk-import-dialog.tsx            — CSV/bulk paste import
   hooks/
-    use-geo-admin.ts                  — React Query hooks for all geo CRUD
+    use-geo.ts                        — React Query hooks for all geo CRUD
   lib/api/
-    geo-admin.ts                      — API client functions
+    geo.ts                            — API client functions
 ```
 
 ---

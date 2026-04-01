@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useAdminCandidates } from "@/hooks/use-admin";
+import { useCampaigns } from "@/hooks/use-collect";
 import Link from "next/link";
 import {
   HiExclamationCircle,
@@ -11,8 +12,7 @@ import {
   HiOutlineUserGroup,
   HiOutlineUsers,
 } from "react-icons/hi";
-import { adminApi } from "@/lib/api/admin";
-import { adminCollectApi } from "@/lib/api/collect";
+
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -29,26 +29,9 @@ import {
 } from "@/components/admin/admin-skeletons";
 
 export function AdminDashboard() {
-  const {
-    data: candidates = [],
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["admin", "candidates"],
-    queryFn: () => adminApi.candidates.getAll(),
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
+  const { data: candidates = [], isLoading, error } = useAdminCandidates();
 
-  const { data: campaigns = [] } = useQuery({
-    queryKey: ["admin-campaigns"],
-    queryFn: async () => {
-      const res = await adminCollectApi.getCampaigns();
-      return res.campaigns;
-    },
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
+  const { data: campaigns = [] } = useCampaigns();
 
   const uniqueParties = useMemo(
     () =>

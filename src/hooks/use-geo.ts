@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminGeoApi } from "@/lib/api/geo";
 
 // === Query Hooks ===
+
+// Fetches overall database counts (LGAs, Wards, PUs) for the geo matrix dashboard.
 export function useGeoStats() {
   return useQuery({
     queryKey: ["admin", "geo", "stats"],
@@ -13,6 +15,7 @@ export function useGeoStats() {
   });
 }
 
+// Fetches a paginated, filterable list of LGAs for a selected state.
 export function useGeoLgas(
   stateCode: string | null,
   params?: { page?: number; pageSize?: number; search?: string },
@@ -26,6 +29,7 @@ export function useGeoLgas(
   });
 }
 
+// Fetches a paginated, filterable list of Wards under a selected LGA.
 export function useGeoWards(
   lgaId: number | null,
   params?: { page?: number; pageSize?: number; search?: string },
@@ -39,6 +43,7 @@ export function useGeoWards(
   });
 }
 
+// Fetches a paginated, filterable list of Polling Units under a selected Ward.
 export function useGeoPollingUnits(
   wardId: number | null,
   params?: { page?: number; pageSize?: number; search?: string },
@@ -52,6 +57,7 @@ export function useGeoPollingUnits(
   });
 }
 
+// Analyzes the cascading deletion impact (how many children will be lost) for a node.
 export function useGeoImpact(type: string | null, id: number | null) {
   return useQuery({
     queryKey: ["admin", "geo", "impact", type, id],
@@ -61,6 +67,8 @@ export function useGeoImpact(type: string | null, id: number | null) {
 }
 
 // === Mutation Hooks ===
+
+// Creates a new Local Government Area entity.
 export function useCreateLga() {
   const qc = useQueryClient();
   return useMutation({
@@ -72,6 +80,7 @@ export function useCreateLga() {
   });
 }
 
+// Updates the metadata properties (name, code) of an existing LGA.
 export function useUpdateLga() {
   const qc = useQueryClient();
   return useMutation({
@@ -88,6 +97,7 @@ export function useUpdateLga() {
   });
 }
 
+// Permanently deletes an LGA and purges all cascading Wards and Polling Units.
 export function useDeleteLga() {
   const qc = useQueryClient();
   return useMutation({
@@ -98,6 +108,7 @@ export function useDeleteLga() {
   });
 }
 
+// Creates a new Ward entity under a specific LGA parent.
 export function useCreateWard() {
   const qc = useQueryClient();
   return useMutation({
@@ -109,6 +120,7 @@ export function useCreateWard() {
   });
 }
 
+// Updates the metadata properties (name) of an existing Ward.
 export function useUpdateWard() {
   const qc = useQueryClient();
   return useMutation({
@@ -120,6 +132,7 @@ export function useUpdateWard() {
   });
 }
 
+// Permanently deletes a Ward and purges all cascading Polling Units.
 export function useDeleteWard() {
   const qc = useQueryClient();
   return useMutation({
@@ -130,6 +143,7 @@ export function useDeleteWard() {
   });
 }
 
+// Creates a new Polling Unit entity under a specific Ward parent.
 export function useCreatePollingUnit() {
   const qc = useQueryClient();
   return useMutation({
@@ -141,6 +155,7 @@ export function useCreatePollingUnit() {
   });
 }
 
+// Updates the metadata properties (name, code) of an existing Polling Unit.
 export function useUpdatePollingUnit() {
   const qc = useQueryClient();
   return useMutation({
@@ -157,6 +172,7 @@ export function useUpdatePollingUnit() {
   });
 }
 
+// Permanently deletes a specific Polling Unit entity.
 export function useDeletePollingUnit() {
   const qc = useQueryClient();
   return useMutation({
@@ -168,6 +184,8 @@ export function useDeletePollingUnit() {
 }
 
 // === Bulk Import Hooks ===
+
+// Runs pre-flight validation checks on bulk parsed CSV spreadsheet data.
 export function useGeoImportPreview() {
   return useMutation({
     mutationFn: (data: { level: string; rows: Record<string, string>[] }) =>
@@ -175,6 +193,7 @@ export function useGeoImportPreview() {
   });
 }
 
+// Commits clean spreadsheet data to the database in bulk and refreshes the geo-matrix.
 export function useGeoImportCommit() {
   const qc = useQueryClient();
   return useMutation({

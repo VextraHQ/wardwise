@@ -2,8 +2,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { updateCampaignSchema } from "@/lib/schemas/admin-schemas";
+import { updateCampaignSchema } from "@/lib/schemas/collect-schemas";
 import { logAudit } from "@/lib/audit";
+import { positionRequiresLgas } from "@/lib/utils/constituency";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -60,31 +61,83 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const d = parsed.data;
+
+    const currentCampaign = await prisma.campaign.findUnique({
+      where: { id },
+      select: { candidateId: true },
+    });
+    if (!currentCampaign) {
+      return NextResponse.json(
+        { error: "Campaign not found" },
+        { status: 404 },
+      );
+    }
+
+    const candidate = await prisma.candidate.findUnique({
+      where: { id: currentCampaign.candidateId },
+      select: { position: true, constituencyLgaIds: true },
+    });
+    if (!candidate) {
+      return NextResponse.json(
+        { error: "Candidate not found" },
+        { status: 404 },
+      );
+    }
+
+    // Guard: one active campaign per candidate when activating
+    if (d.status === "active") {
+      const existingActive = await prisma.campaign.findFirst({
+        where: {
+          candidateId: currentCampaign.candidateId,
+          status: "active",
+          id: { not: id },
+        },
+        select: { slug: true },
+      });
+      if (existingActive) {
+        return NextResponse.json(
+          {
+            error: `This candidate already has an active campaign (${existingActive.slug}). Close or pause it first.`,
+          },
+          { status: 409 },
+        );
+      }
+    }
+
+    if (
+      d.enabledLgaIds !== undefined &&
+      positionRequiresLgas(candidate.position)
+    ) {
+      if (d.enabledLgaIds.length === 0) {
+        return NextResponse.json(
+          {
+            error:
+              "Constituency campaigns must keep at least one enabled LGA. Turn off restriction to inherit the full constituency.",
+          },
+          { status: 400 },
+        );
+      }
+
+      const isSubset = d.enabledLgaIds.every((lgaId) =>
+        candidate.constituencyLgaIds.includes(lgaId),
+      );
+      if (!isSubset) {
+        return NextResponse.json(
+          {
+            error:
+              "Enabled LGAs must be a subset of the candidate's constituency LGAs",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     const campaign = await prisma.campaign.update({
       where: { id },
       data: {
         ...(d.slug !== undefined && { slug: d.slug }),
-        ...(d.candidateName !== undefined && {
-          candidateName: d.candidateName,
-        }),
-        ...(d.candidateTitle !== undefined && {
-          candidateTitle: d.candidateTitle || null,
-        }),
-        ...(d.party !== undefined && { party: d.party }),
-        ...(d.constituency !== undefined && {
-          constituency: d.constituency,
-        }),
-        ...(d.constituencyType !== undefined && {
-          constituencyType: d.constituencyType,
-        }),
         ...(d.enabledLgaIds !== undefined && {
           enabledLgaIds: d.enabledLgaIds,
-        }),
-        ...(d.requireApcReg !== undefined && {
-          requireApcReg: d.requireApcReg,
-        }),
-        ...(d.requireVoterId !== undefined && {
-          requireVoterId: d.requireVoterId,
         }),
         ...(d.customQuestion1 !== undefined && {
           customQuestion1: d.customQuestion1 || null,

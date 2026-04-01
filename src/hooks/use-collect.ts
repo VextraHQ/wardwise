@@ -1,7 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { publicCollectApi, adminCollectApi } from "@/lib/api/collect";
+import {
+  publicCollectApi,
+  adminCollectApi,
+  type CampaignStats,
+} from "@/lib/api/collect";
 
-// === Public Hooks ===
+// Fetches a specific campaign by public slug (used for canvasser registration).
 export function usePublicCampaign(slug: string) {
   return useQuery({
     queryKey: ["public-campaign", slug],
@@ -14,6 +18,7 @@ export function usePublicCampaign(slug: string) {
   });
 }
 
+// Fetches authorized LGAs for a campaign dropdown.
 export function useCampaignLgas(campaignSlug: string) {
   return useQuery({
     queryKey: ["campaign-lgas", campaignSlug],
@@ -26,6 +31,7 @@ export function useCampaignLgas(campaignSlug: string) {
   });
 }
 
+// Fetches wards under a specifically selected LGA.
 export function useWards(lgaId: number | undefined) {
   return useQuery({
     queryKey: ["wards", lgaId],
@@ -38,6 +44,7 @@ export function useWards(lgaId: number | undefined) {
   });
 }
 
+// Fetches all polling units directly under a selected ward.
 export function usePollingUnits(wardId: number | undefined) {
   return useQuery({
     queryKey: ["polling-units", wardId],
@@ -50,6 +57,7 @@ export function usePollingUnits(wardId: number | undefined) {
   });
 }
 
+// Submits a new constituent form from a canvasser.
 export function useSubmitRegistration() {
   return useMutation({
     mutationFn: (data: Record<string, unknown>) =>
@@ -57,7 +65,7 @@ export function useSubmitRegistration() {
   });
 }
 
-// === Admin Hooks ===
+// Fetches all campaigns for the global admin dashboard.
 export function useCampaigns() {
   return useQuery({
     queryKey: ["admin-campaigns"],
@@ -65,10 +73,11 @@ export function useCampaigns() {
       const data = await adminCollectApi.getCampaigns();
       return data.campaigns;
     },
-    staleTime: 1000 * 60 * 2,
+    staleTime: 1000 * 60 * 2, // 2 minutes
   });
 }
 
+// Fetches details and settings for a single admin campaign.
 export function useCampaign(id: string) {
   return useQuery({
     queryKey: ["admin-campaign", id],
@@ -77,10 +86,11 @@ export function useCampaign(id: string) {
       return data.campaign;
     },
     enabled: !!id,
-    staleTime: 1000 * 60 * 2,
+    staleTime: 1000 * 60 * 2, // 2 minutes
   });
 }
 
+// Creates a new campaign and refreshes the global admin list.
 export function useCreateCampaign() {
   const qc = useQueryClient();
   return useMutation({
@@ -92,6 +102,7 @@ export function useCreateCampaign() {
   });
 }
 
+// Updates an existing campaign's configuration or status.
 export function useUpdateCampaign(id: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -104,6 +115,7 @@ export function useUpdateCampaign(id: string) {
   });
 }
 
+// Permanently deletes a campaign from the database.
 export function useDeleteCampaign() {
   const qc = useQueryClient();
   return useMutation({
@@ -114,6 +126,7 @@ export function useDeleteCampaign() {
   });
 }
 
+// Fetches paginated, filterable constituent submissions for a campaign.
 export function useCampaignSubmissions(
   campaignId: string,
   params?: {
@@ -130,21 +143,39 @@ export function useCampaignSubmissions(
     queryKey: ["campaign-submissions", campaignId, params],
     queryFn: () => adminCollectApi.getSubmissions(campaignId, params),
     enabled: !!campaignId,
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 60, // 1 minute
     placeholderData: (prev) => prev,
   });
 }
 
+// Deletes a specific constituent submission record.
 export function useDeleteSubmission() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (sid: string) => adminCollectApi.deleteSubmission(sid),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["campaign-submissions"] });
+      qc.invalidateQueries({ queryKey: ["campaign-stats"] });
+      qc.invalidateQueries({ queryKey: ["campaign-canvassers"] });
     },
   });
 }
 
+// Executes a mass action (Bulk Verify, Delete, Flag) across multiple submissions.
+export function useBulkSubmissionAction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ids, action }: { ids: string[]; action: string }) =>
+      adminCollectApi.bulkAction(ids, action),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["campaign-submissions"] });
+      qc.invalidateQueries({ queryKey: ["campaign-stats"] });
+      qc.invalidateQueries({ queryKey: ["campaign-canvassers"] });
+    },
+  });
+}
+
+// Edits metadata properties (verification, flags, notes) on a submission.
 export function useUpdateSubmission() {
   const qc = useQueryClient();
   return useMutation({
@@ -155,24 +186,75 @@ export function useUpdateSubmission() {
       sid: string;
       data: { isFlagged?: boolean; adminNotes?: string; isVerified?: boolean };
     }) => adminCollectApi.updateSubmission(sid, data),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["campaign-submissions"] });
+      qc.invalidateQueries({ queryKey: ["campaign-stats"] });
+      qc.invalidateQueries({ queryKey: ["campaign-canvassers"] });
+      qc.invalidateQueries({
+        queryKey: ["submission-audit", variables.sid],
+      });
     },
   });
 }
 
+// Fetches mathematical aggregations (totals, verification rates) for a campaign.
+export function useCampaignStats(
+  campaignId: string,
+  params?: { from?: string; to?: string },
+) {
+  return useQuery<CampaignStats>({
+    queryKey: ["campaign-stats", campaignId, params],
+    queryFn: () => adminCollectApi.getCampaignStats(campaignId, params),
+    enabled: !!campaignId,
+    staleTime: 1000 * 60,
+  });
+}
+
+// Fetches the active list of authorized canvassers assigned to a campaign.
 export function useCampaignCanvassers(campaignId: string) {
   return useQuery({
     queryKey: ["campaign-canvassers", campaignId],
-    queryFn: async () => {
-      const data = await adminCollectApi.getCanvassers(campaignId);
-      return data.canvassers;
-    },
+    queryFn: () => adminCollectApi.getCanvassers(campaignId),
     enabled: !!campaignId,
     staleTime: 1000 * 60 * 2,
   });
 }
 
+// Provisions a new canvasser access code for a campaign.
+export function useAddCanvasser(campaignId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { name: string; phone: string; zone?: string }) =>
+      adminCollectApi.addCanvasser(campaignId, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["campaign-canvassers", campaignId] });
+    },
+  });
+}
+
+// Revokes a canvasser's access from a campaign.
+export function useRemoveCanvasser(campaignId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (canvasserId: string) =>
+      adminCollectApi.removeCanvasser(campaignId, canvasserId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["campaign-canvassers", campaignId] });
+    },
+  });
+}
+
+// Retrieves the cryptographic event trail for a specific submission record.
+export function useSubmissionAudit(sid: string | null) {
+  return useQuery({
+    queryKey: ["submission-audit", sid],
+    queryFn: () => adminCollectApi.getSubmissionAudit(sid!),
+    enabled: !!sid,
+    staleTime: 1000 * 30,
+  });
+}
+
+// Fetches a global list of all LGAs (used in campaign creation forms).
 export function useAllLgas() {
   return useQuery({
     queryKey: ["all-lgas"],

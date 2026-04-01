@@ -9,8 +9,6 @@ export type Campaign = {
   constituency: string;
   constituencyType: string; // "federal" | "state" | "lga"
   enabledLgaIds: number[];
-  requireApcReg: string; // "required" | "optional" | "hidden"
-  requireVoterId: string;
   customQuestion1: string | null;
   customQuestion2: string | null;
   status: string; // "draft" | "active" | "paused" | "closed"
@@ -21,6 +19,7 @@ export type Campaign = {
 // Campaign with submission count for list views
 export type CampaignSummary = Campaign & {
   _count: { submissions: number };
+  lastSubmissionAt: string | null;
 };
 
 // Collect submission type
@@ -63,11 +62,10 @@ export type PublicCampaign = {
   constituency: string;
   constituencyType: string;
   enabledLgaIds: number[];
-  requireApcReg: string;
-  requireVoterId: string;
   customQuestion1: string | null;
   customQuestion2: string | null;
   status: string;
+  campaignCanvassers?: { id: string; name: string; phone: string }[];
 };
 
 // Geo types for dropdowns
@@ -80,9 +78,22 @@ export type GeoPollingUnit = {
   wardId: number;
 };
 
-// Canvasser aggregation
+// Pre-loaded canvasser (added by admin)
+export type CampaignCanvasserRecord = {
+  id: string;
+  campaignId: string;
+  name: string;
+  phone: string;
+  zone: string | null;
+  createdAt: string;
+};
+
+// Canvasser aggregation from submissions
 export type CanvasserSummary = {
   canvasserName: string;
   canvasserPhone: string;
   _count: number;
+  verified: number;
+  flagged: number;
+  lastActive: string | null;
 };

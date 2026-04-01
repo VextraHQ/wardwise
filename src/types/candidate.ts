@@ -13,6 +13,7 @@ export type Candidate = {
   stateCode: string | null; // 2-letter code (e.g. "AD"), null for President
   lga: string | null;
   constituency: string | null;
+  constituencyLgaIds: number[];
   description?: string;
   phone: string | null;
   title: string | null; // Honorific: Hon., Sen., Dr., etc.

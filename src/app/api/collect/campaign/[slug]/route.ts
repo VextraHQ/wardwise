@@ -18,11 +18,13 @@ export async function GET(
         constituency: true,
         constituencyType: true,
         enabledLgaIds: true,
-        requireApcReg: true,
-        requireVoterId: true,
         customQuestion1: true,
         customQuestion2: true,
         status: true,
+        campaignCanvassers: {
+          select: { id: true, name: true, phone: true },
+          orderBy: { name: "asc" },
+        },
       },
     });
 

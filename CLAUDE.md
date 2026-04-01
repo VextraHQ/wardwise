@@ -36,7 +36,7 @@ Three user types:
 
 - **Auth**: All admin API routes use `requireAdmin()` from `src/lib/auth-helpers.ts` — never inline auth checks
 - **Route protection**: `src/proxy.ts` (Next.js 16's Edge middleware, NOT `middleware.ts`)
-- **Validation**: Zod schemas in `src/lib/schemas/admin-schemas.ts`, validated both client-side and server-side via `.safeParse()`
+- **Validation**: Zod schemas in `src/lib/schemas/admin-schemas.ts` (candidates, canvassers) and `src/lib/schemas/collect-schemas.ts` (campaigns, submissions), validated both client-side and server-side via `.safeParse()`
 - **Audit logging**: `logAudit()` from `src/lib/audit.ts` on all sensitive operations (fire-and-forget)
 - **Rate limiting**: `src/lib/rate-limit.ts` — Upstash Redis, null when env vars not set
 - **Geo data**: Database-backed (Lga → Ward → PollingUnit), seeded via `prisma/seed-geo.ts`
@@ -52,7 +52,8 @@ Three user types:
 
 Living specs in `docs/` — update these when making decisions or completing features. Create new spec docs for major new features when the user requests it (don't auto-create every chat).
 
-- `docs/wardwise-collect-spec.md` — Collect feature (complete, on main)
+- `docs/wardwise-collect-spec.md` — Collect v1 feature (complete, on main)
+- `docs/wardwise-collect-v2-spec.md` — Collect v2 roadmap (filtered export, canvassers, bulk ops, PWA)
 - `docs/wardwise-candidates-spec.md` — Candidate management
 - `docs/wardwise-hardening-spec.md` — Security & architecture decisions
 - `docs/geo-management-spec.md` — Geo drill-down UI

@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
-import { type UseFormReturn, useWatch } from "react-hook-form";
+import { useMemo, useEffect, useRef } from "react";
+import type { UseFormReturn } from "react-hook-form";
+import { useWatch } from "react-hook-form";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -12,6 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ComboboxSelect } from "@/components/ui/combobox-select";
+import { LgaCheckboxGrid } from "@/components/admin/shared/lga-checkbox-grid";
+import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituency-boundary-alerts";
 import {
   StepCard,
   CardSectionHeader,
@@ -22,9 +25,15 @@ import {
 } from "@/components/collect/form-ui";
 import { IconBuildingCommunity } from "@tabler/icons-react";
 import type { CreateCandidateFormValues } from "@/lib/schemas/admin-schemas";
-import { nigeriaStates } from "@/lib/data/state-lga-locations";
+import { nigeriaStates, getLGAsByState } from "@/lib/data/state-lga-locations";
 import { useGeoLgas } from "@/hooks/use-geo";
 import type { ComboboxSelectGroup } from "@/components/ui/combobox-select";
+import {
+  positionRequiresLgas,
+  autoConstituencyName,
+  getConstituencyBoundaryWarnings,
+} from "@/lib/utils/constituency";
+import { IconAlertTriangle } from "@tabler/icons-react";
 
 const POSITIONS = [
   "President",
@@ -33,12 +42,6 @@ const POSITIONS = [
   "House of Representatives",
   "State Assembly",
 ] as const;
-
-const CONSTITUENCY_POSITIONS = [
-  "Senator",
-  "House of Representatives",
-  "State Assembly",
-];
 
 function getConstituencyPlaceholder(position: string) {
   switch (position) {
@@ -77,29 +80,120 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
     control: form.control,
     name: "stateCode",
   });
-  const selectedLga = useWatch({ control: form.control, name: "lga" });
   const constituency = useWatch({
     control: form.control,
     name: "constituency",
   });
+  const rawConstituencyLgaIds = useWatch({
+    control: form.control,
+    name: "constituencyLgaIds",
+  });
+  const constituencyLgaIds = useMemo(
+    () => rawConstituencyLgaIds ?? [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(rawConstituencyLgaIds)],
+  );
 
-  const showStateField = !!selectedPosition;
-  const showLgaField =
-    selectedPosition && CONSTITUENCY_POSITIONS.includes(selectedPosition);
+  const showStateField = Boolean(selectedPosition);
+  const showLgaGrid = Boolean(
+    selectedPosition && positionRequiresLgas(selectedPosition),
+  );
 
   const { data: lgaResponse, isLoading: lgasLoading } = useGeoLgas(
-    showLgaField && selectedStateCode ? selectedStateCode : null,
+    showLgaGrid && selectedStateCode ? selectedStateCode : null,
     { pageSize: 200 },
   );
 
-  const lgaOptions = useMemo(
-    () =>
-      lgaResponse?.data.map((l) => ({
-        value: l.name,
-        label: l.name,
-      })) ?? [],
+  const lgas = useMemo(
+    () => lgaResponse?.data.map((l) => ({ id: l.id, name: l.name })) ?? [],
     [lgaResponse],
   );
+  const selectedStateName = useMemo(
+    () =>
+      nigeriaStates.find((state) => state.code === selectedStateCode)?.name ??
+      selectedStateCode,
+    [selectedStateCode],
+  );
+  const selectedLgaNames = useMemo(
+    () =>
+      lgas
+        .filter((lga) => constituencyLgaIds.includes(lga.id))
+        .map((lga) => lga.name),
+    [constituencyLgaIds, lgas],
+  );
+  const suggestedConstituency = useMemo(
+    () => autoConstituencyName(selectedLgaNames),
+    [selectedLgaNames],
+  );
+
+  // True when state is selected, LGAs are needed, query finished, but no data exists
+  const stateHasNoLgas = Boolean(
+    showLgaGrid && selectedStateCode && !lgasLoading && lgas.length === 0,
+  );
+
+  const expectedLgaCount = selectedStateCode
+    ? getLGAsByState(selectedStateCode).length
+    : 0;
+  const hasPartialLgas = Boolean(
+    showLgaGrid &&
+    selectedStateCode &&
+    !lgasLoading &&
+    lgas.length > 0 &&
+    lgas.length < expectedLgaCount,
+  );
+  const boundaryWarnings = useMemo(
+    () =>
+      getConstituencyBoundaryWarnings({
+        position: selectedPosition ?? "",
+        stateName: selectedStateName,
+        selectedLgaCount: constituencyLgaIds.length,
+        expectedLgaCount,
+        constituencyName: constituency,
+        autoSuggestedName: suggestedConstituency,
+        hasPartialGeo: hasPartialLgas,
+      }),
+    [
+      constituency,
+      constituencyLgaIds.length,
+      expectedLgaCount,
+      hasPartialLgas,
+      selectedPosition,
+      selectedStateName,
+      suggestedConstituency,
+    ],
+  );
+  const lastAutoConstituencyRef = useRef("");
+
+  // Auto-suggest constituency name from selected LGAs
+  useEffect(() => {
+    if (!showLgaGrid || lgas.length === 0) {
+      lastAutoConstituencyRef.current = "";
+      return;
+    }
+    const suggested = suggestedConstituency;
+
+    if (!suggested) {
+      if (constituency === lastAutoConstituencyRef.current && constituency) {
+        lastAutoConstituencyRef.current = "";
+        setValue("constituency", "", { shouldValidate: false });
+      }
+      return;
+    }
+
+    const isManualOverride =
+      constituency.length > 0 &&
+      constituency !== lastAutoConstituencyRef.current;
+
+    if (suggested === constituency) {
+      lastAutoConstituencyRef.current = suggested;
+      return;
+    }
+
+    if (!isManualOverride) {
+      lastAutoConstituencyRef.current = suggested;
+      setValue("constituency", suggested, { shouldValidate: false });
+    }
+  }, [constituency, lgas.length, setValue, showLgaGrid, suggestedConstituency]);
 
   const stateGroups: ComboboxSelectGroup[] = useMemo(() => {
     const zones = [
@@ -126,18 +220,11 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
     setValue("position", value, { shouldValidate: true });
     setValue("stateCode", "");
     setValue("lga", "");
+    setValue("constituencyLgaIds", []);
     if (value === "President") {
       setValue("constituency", "Federal Republic of Nigeria", {
         shouldValidate: true,
       });
-    } else if (value === "Governor" && selectedStateCode) {
-      const stateName = nigeriaStates.find(
-        (s) => s.code === selectedStateCode,
-      )?.name;
-      if (stateName)
-        setValue("constituency", `${stateName} State`, {
-          shouldValidate: true,
-        });
     } else {
       setValue("constituency", "");
     }
@@ -146,6 +233,7 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
   function handleStateChange(value: string) {
     setValue("stateCode", value, { shouldValidate: true });
     setValue("lga", "");
+    setValue("constituencyLgaIds", []);
     if (selectedPosition === "Governor") {
       const stateName = nigeriaStates.find((s) => s.code === value)?.name;
       if (stateName)
@@ -192,15 +280,19 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
           </div>
         </div>
 
-        {/* State & LGA */}
+        {/* State & Electoral Boundary */}
         {showStateField && (
           <div className="space-y-3">
             <SectionLabel
-              title="Location"
+              title={
+                selectedPosition === "President"
+                  ? "Location"
+                  : "Electoral Boundary"
+              }
               subtitle={
                 selectedPosition === "President"
                   ? "Optional home state for informational purposes"
-                  : "State and local government area"
+                  : "The state and LGAs that define this constituency"
               }
             />
             <div className="space-y-1.5">
@@ -223,19 +315,63 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
               <FieldError error={errors.stateCode?.message} />
             </div>
 
-            {showLgaField && selectedStateCode && (
-              <div className="space-y-1.5">
-                <FieldLabel>LGA</FieldLabel>
-                <ComboboxSelect
-                  options={lgaOptions}
-                  value={selectedLga || ""}
-                  onValueChange={(val) => setValue("lga", val)}
-                  placeholder="Select LGA..."
-                  searchPlaceholder="Search LGAs..."
-                  emptyMessage="No LGA found."
-                  isLoading={lgasLoading}
+            {/* Constituency LGAs */}
+            {showLgaGrid && selectedStateCode && !stateHasNoLgas && (
+              <div className="space-y-3">
+                <LgaCheckboxGrid
+                  lgas={lgas}
+                  selectedIds={constituencyLgaIds}
+                  onToggle={(lgaId) => {
+                    const ids = constituencyLgaIds.includes(lgaId)
+                      ? constituencyLgaIds.filter((id) => id !== lgaId)
+                      : [...constituencyLgaIds, lgaId];
+                    setValue("constituencyLgaIds", ids, {
+                      shouldValidate: true,
+                    });
+                  }}
+                  onSelectAll={() =>
+                    setValue(
+                      "constituencyLgaIds",
+                      lgas.map((lga) => lga.id),
+                      { shouldValidate: true },
+                    )
+                  }
+                  onClearAll={() =>
+                    setValue("constituencyLgaIds", [], {
+                      shouldValidate: true,
+                    })
+                  }
+                  loading={lgasLoading}
+                  label="Constituency LGAs"
+                  helperText="Select the LGAs that form this constituency's boundary"
+                  stateLabel={selectedStateName}
+                  error={errors.constituencyLgaIds?.message}
                 />
-                <FieldError error={errors.lga?.message} />
+                {hasPartialLgas && (
+                  <p className="text-muted-foreground text-xs">
+                    <span className="font-medium text-amber-600 dark:text-amber-500">
+                      {lgas.length} of {expectedLgaCount} LGAs available
+                    </span>{" "}
+                    for {selectedStateName}. Some LGAs have not been seeded yet.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Empty-state banner for unseeded states */}
+            {stateHasNoLgas && (
+              <div className="flex items-start gap-3 rounded-sm border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/50 dark:bg-amber-950/30">
+                <IconAlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-500" />
+                <div className="text-sm">
+                  <p className="font-medium text-amber-800 dark:text-amber-400">
+                    No LGA data available for {selectedStateName} yet.
+                  </p>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    You can save this candidate now and add constituency LGAs
+                    later by editing their profile. Note: campaigns cannot be
+                    created until constituency LGAs are defined.
+                  </p>
+                </div>
               </div>
             )}
           </div>
@@ -244,8 +380,12 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
         {/* Constituency */}
         <div className="space-y-3">
           <SectionLabel
-            title="Constituency"
-            subtitle="The electoral constituency the candidate represents"
+            title="Constituency Name"
+            subtitle={
+              showLgaGrid
+                ? "Auto-suggested — edit for official names like 'Adamawa Central Senatorial District'"
+                : "The electoral constituency the candidate represents"
+            }
           />
           <div className="space-y-1.5">
             <FieldLabel>Constituency</FieldLabel>
@@ -262,6 +402,8 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
             <FieldError error={errors.constituency?.message} />
           </div>
         </div>
+
+        <ConstituencyBoundaryAlerts warnings={boundaryWarnings} />
       </div>
 
       <div className="mt-4">

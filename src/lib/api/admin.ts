@@ -23,6 +23,7 @@ export interface CreateCandidateData {
   party: string;
   position: Candidate["position"];
   constituency: string;
+  constituencyLgaIds?: number[];
   stateCode?: string;
   lga?: string;
   description?: string;
@@ -37,6 +38,7 @@ export interface UpdateCandidateData {
   party?: string;
   position?: Candidate["position"];
   constituency?: string;
+  constituencyLgaIds?: number[];
   stateCode?: string;
   lga?: string;
   description?: string;

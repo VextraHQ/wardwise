@@ -14,7 +14,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service if needed like Sentry, Bugsnag, etc.
+    // TODO: Log the error to an error reporting service if needed like Sentry, Bugsnag, etc.
     console.error(error);
   }, [error]);
 

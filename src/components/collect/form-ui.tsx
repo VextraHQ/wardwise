@@ -1,6 +1,7 @@
 import { HiArrowRight, HiArrowLeft } from "react-icons/hi";
 import { IconLoader } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function SectionLabel({
   title,
@@ -100,6 +101,45 @@ export function NavButtons({
           </>
         )}
       </Button>
+    </div>
+  );
+}
+
+/** Inline submit-error alert — reused on any step that triggers form submission */
+export function SubmitError({ error }: { error?: string }) {
+  if (!error) return null;
+  const isDuplicate = error.includes("already registered");
+  return (
+    <div
+      className={cn(
+        "rounded-sm border p-4 text-center",
+        isDuplicate
+          ? "border-orange-500/30 bg-orange-500/10"
+          : "bg-destructive/10 border-destructive/30",
+      )}
+    >
+      <p
+        className={cn(
+          "text-sm font-bold",
+          isDuplicate
+            ? "text-orange-600 dark:text-orange-400"
+            : "text-destructive",
+        )}
+      >
+        {isDuplicate ? "Duplicate Registration Detected" : "Submission Failed"}
+      </p>
+      <p
+        className={cn(
+          "mt-1 text-xs",
+          isDuplicate
+            ? "text-orange-600/80 dark:text-orange-400/80"
+            : "text-destructive/80",
+        )}
+      >
+        {isDuplicate
+          ? "This phone number or Voter ID (VIN) has already been submitted for this campaign. Each supporter can only register once."
+          : error}
+      </p>
     </div>
   );
 }

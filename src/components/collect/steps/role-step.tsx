@@ -10,6 +10,7 @@ import { RegistrationStepHeader } from "@/components/collect/registration-step-h
 import {
   FieldError,
   NavButtons,
+  SubmitError,
   StepCard,
   CardSectionHeader,
 } from "@/components/collect/form-ui";
@@ -40,10 +41,14 @@ export function RoleStep({
   form,
   onBack,
   onNext,
+  isSubmitting = false,
+  submitError,
 }: {
   form: UseFormReturn<RegistrationFormData>;
   onBack: () => void;
   onNext: () => void;
+  isSubmitting?: boolean;
+  submitError?: string;
 }) {
   const {
     setValue,
@@ -103,7 +108,18 @@ export function RoleStep({
             <FieldError error={errors.role?.message} />
 
             <Separator />
-            <NavButtons onBack={onBack} onNext={onNext} />
+            <NavButtons
+              onBack={onBack}
+              onNext={onNext}
+              nextLabel={
+                selectedRole === "canvasser"
+                  ? "Submit Registration"
+                  : "Continue"
+              }
+              isLoading={isSubmitting}
+            />
+
+            <SubmitError error={submitError} />
           </div>
         </StepCard>
       </motion.div>

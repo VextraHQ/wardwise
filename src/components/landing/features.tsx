@@ -337,7 +337,7 @@ export function FeaturesSection() {
               ))}
             </div>
             <div className="border-border flex flex-col items-center border-t pt-6 text-center sm:block sm:border-t-0 sm:border-l sm:pt-0 sm:pl-8 sm:text-left">
-              <p className="text-foreground mb-2 whitespace-nowrap text-[11px] font-black tracking-[0.2em] uppercase sm:mb-1 sm:text-[10px] sm:tracking-[0.3em]">
+              <p className="text-foreground mb-2 text-[11px] font-black tracking-[0.2em] whitespace-nowrap uppercase sm:mb-1 sm:text-[10px] sm:tracking-[0.3em]">
                 Audit Log Active
               </p>
               <div className="flex items-center justify-center gap-2 sm:justify-start">

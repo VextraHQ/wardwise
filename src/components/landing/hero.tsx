@@ -408,9 +408,10 @@ export function HeroSection() {
                         </AvatarFallback>
                       </Avatar>
                     </div>
-                    <p className="text-muted-foreground whitespace-nowrap text-[11px] font-bold">
+                    <p className="text-muted-foreground text-[11px] font-bold whitespace-nowrap">
                       <span className="hidden sm:inline">Active Field </span>
-                      Agents: <span className="text-primary font-black">128</span>
+                      Agents:{" "}
+                      <span className="text-primary font-black">128</span>
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">

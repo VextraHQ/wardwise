@@ -1,59 +1,167 @@
-# WardWise Demo
+# WardWise
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+WardWise is a campaign intelligence and field operations platform built for political teams. It helps candidates, admins, and canvassers coordinate voter registration, manage campaign data, monitor ward-level coverage, and collect supporter information with polling-unit precision.
 
-## Getting Started
+This repo contains a full-stack Next.js application with role-based dashboards, public campaign registration flows, Prisma-backed data models, and optional rate limiting for production hardening.
 
-First, run the development server:
+## What the App Does
+
+- Candidate dashboard for campaign analytics, supporter insights, ward coverage, and operational visibility
+- Admin dashboard for candidate management, geo management, campaign oversight, and submission review
+- Public campaign registration flow at `/c/[slug]` for collecting supporter data
+- Canvasser-friendly data collection workflows with structured location capture
+- Geographic hierarchy support for State -> LGA -> Ward -> Polling Unit
+- Audit-friendly data handling with submission activity tracking and optional rate limiting
+
+## Main Flows
+
+- Landing page: marketing site and product overview
+- Login: shared authentication entry point for admin and candidate users
+- Candidate workspace: `/dashboard`
+- Admin workspace: `/admin`
+- Public collect form: `/c/[slug]`
+
+## Tech Stack
+
+- Next.js 16 + React 19
+- TypeScript
+- Tailwind CSS 4
+- Prisma ORM
+- PostgreSQL
+- NextAuth
+- React Query
+- Zod
+- Radix UI + shadcn-style component patterns
+
+## Local Setup
+
+### 1. Install dependencies
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Create your environment file
 
-## Documentation
+Copy `.env.example` to `.env` and set the required values:
 
-All project documentation has been moved to the `/docs` folder. Key documents include:
+```bash
+cp .env.example .env
+```
 
-- **[Architecture Flow](docs/ARCHITECTURE_FLOW.md)** - Data architecture and flow diagrams
-- **[Voter System](docs/VOTER_SYSTEM.md)** - Complete voter system documentation
-- **[Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md)** - Overview of implementation
-- **[Quick Start](docs/QUICK_START.md)** - Quick start guide
-- **[Voter Flow](docs/VOTER_FLOW.md)** - Voter registration flow details
+Required environment variables:
 
-For detailed documentation, see the `/docs` directory.
+```env
+DATABASE_URL=""
+DIRECT_URL=""
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET=""
+```
+
+Optional:
+
+```env
+UPSTASH_REDIS_REST_URL=""
+UPSTASH_REDIS_REST_TOKEN=""
+```
+
+### 3. Push the database schema
+
+```bash
+pnpm db:push
+```
+
+### 4. Seed demo data
+
+```bash
+pnpm db:seed
+```
+
+### 5. Start the app
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+## Demo Credentials
+
+The seed script creates demo users you can use immediately.
+
+Admin:
+
+- Email: `admin@wardwise.ng`
+- Password: `admin123`
+
+Candidate accounts:
+
+- Seeded candidate emails use the `@wardwise.ng` domain
+- Password for seeded candidate accounts: `demo123`
+
+Examples from the seed data include:
+
+- `ahmadu.fintiri@wardwise.ng`
+- `aishatu.binani@wardwise.ng`
+- `bola.tinubu@wardwise.ng`
+- `atiku.abubakar@wardwise.ng`
+
+## Useful Scripts
+
+```bash
+pnpm dev
+pnpm build
+pnpm start
+pnpm lint
+pnpm typecheck
+pnpm format
+pnpm db:push
+pnpm db:migrate
+pnpm db:seed
+pnpm db:studio
+```
 
 ## Project Structure
 
-```
+```text
 src/
-├── types/          # Production-ready types (Voter, Candidate, etc.)
-├── lib/
-│   ├── mock/      # Mock API and data
-│   └── data/      # Location data (states, LGAs, wards, polling units)
-└── components/    # React components
+  app/             Next.js routes, layouts, API routes, and role-based pages
+  components/      UI and feature components for landing, admin, auth, collect, and dashboard flows
+  hooks/           React hooks for admin, collect, geo, offline, and dashboard behavior
+  lib/             API clients, schemas, helpers, mock data, auth, and shared utilities
+  types/           Shared TypeScript types
 
-docs/              # All documentation files
+prisma/
+  schema.prisma    Database schema
+  seed.ts          Demo data seeding
+
+docs/
+  Product, branding, geo, collect, and hardening specs
 ```
 
-## Learn More
+## Documentation
 
-To learn more about Next.js, take a look at the following resources:
+The `/docs` folder contains product and implementation notes for the app, including:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [collect-candidate-geo-rethink.md](docs/collect-candidate-geo-rethink.md)
+- [geo-management-spec.md](docs/geo-management-spec.md)
+- [wardwise-branding-spec.md](docs/wardwise-branding-spec.md)
+- [wardwise-candidates-spec.md](docs/wardwise-candidates-spec.md)
+- [wardwise-collect-spec.md](docs/wardwise-collect-spec.md)
+- [wardwise-collect-v2-spec.md](docs/wardwise-collect-v2-spec.md)
+- [wardwise-hardening-spec.md](docs/wardwise-hardening-spec.md)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes
 
-## Deploy on Vercel
+- Prisma client is generated automatically on install via `postinstall`
+- Upstash Redis is optional; the app falls back gracefully when rate-limit env vars are not set
+- This project uses `pnpm` as the package manager
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For production, provide a PostgreSQL database, set the NextAuth secrets and app URL, then run:
+
+```bash
+pnpm build
+pnpm start
+```

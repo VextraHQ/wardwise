@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import {
+  useDeleteCandidate,
+  useResetCandidatePassword,
+  useUpdateCandidateStatus,
+} from "@/hooks/use-admin";
 
 import type { CandidateWithUser } from "@/lib/api/admin";
-import { adminApi } from "@/lib/api/admin";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -58,7 +61,6 @@ interface CandidateAccountProps {
 }
 
 export function CandidateAccount({ candidate }: CandidateAccountProps) {
-  const queryClient = useQueryClient();
   const router = useRouter();
   const [newPassword, setNewPassword] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -67,47 +69,11 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
   );
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const deleteMutation = useMutation({
-    mutationFn: () => adminApi.candidates.delete(candidate.id),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["admin", "candidates"] });
-      toast.success("Candidate account permanently deleted");
-      router.push("/admin/candidates");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to delete candidate");
-    },
-  });
+  const deleteMutation = useDeleteCandidate();
 
-  const resetPasswordMutation = useMutation({
-    mutationFn: () => adminApi.candidates.resetPassword(candidate.id),
-    onSuccess: (data) => {
-      setNewPassword(data.generatedPassword);
-      setShowPassword(true);
-      toast.success("Password has been reset");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to reset password");
-    },
-  });
+  const resetPasswordMutation = useResetCandidatePassword();
 
-  const updateStatusMutation = useMutation({
-    mutationFn: (status: string) =>
-      adminApi.candidates.update({
-        id: candidate.id,
-        onboardingStatus: status,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["admin", "candidates", candidate.id],
-      });
-      queryClient.invalidateQueries({ queryKey: ["admin", "candidates"] });
-      toast.success("Status updated");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to update status");
-    },
-  });
+  const updateStatusMutation = useUpdateCandidateStatus();
 
   function copyPassword() {
     if (!newPassword) return;
@@ -117,7 +83,14 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
 
   function handleStatusSave() {
     if (selectedStatus !== candidate.onboardingStatus) {
-      updateStatusMutation.mutate(selectedStatus);
+      updateStatusMutation.mutate(
+        { id: candidate.id, status: selectedStatus },
+        {
+          onSuccess: () => toast.success("Status updated"),
+          onError: (error: Error) =>
+            toast.error(error.message || "Failed to update status"),
+        },
+      );
     }
   }
 
@@ -284,7 +257,17 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
             size="sm"
             className="rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
             disabled={resetPasswordMutation.isPending}
-            onClick={() => resetPasswordMutation.mutate()}
+            onClick={() =>
+              resetPasswordMutation.mutate(candidate.id, {
+                onSuccess: (data) => {
+                  setNewPassword(data.generatedPassword);
+                  setShowPassword(true);
+                  toast.success("Password has been reset");
+                },
+                onError: (error: Error) =>
+                  toast.error(error.message || "Failed to reset password"),
+              })
+            }
           >
             <IconKey className="mr-1.5 h-3.5 w-3.5" />
             {resetPasswordMutation.isPending
@@ -332,7 +315,16 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
         candidateName={candidate.name}
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        onConfirm={() => deleteMutation.mutate()}
+        onConfirm={() =>
+          deleteMutation.mutate(candidate.id, {
+            onSuccess: () => {
+              toast.success("Candidate account permanently deleted");
+              router.push("/admin/candidates");
+            },
+            onError: (error: Error) =>
+              toast.error(error.message || "Failed to delete candidate"),
+          })
+        }
         isLoading={deleteMutation.isPending}
       />
     </div>

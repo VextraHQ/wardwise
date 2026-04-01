@@ -29,6 +29,7 @@ model Candidate {
   stateCode        String?  // 2-letter code (e.g. "AD", "LA")
   lga              String?
   constituency     String?
+  constituencyLgaIds Int[]  @default([])
   description      String?
   phone            String?
   title            String?  // Honorific: Hon., Sen., Dr., Chief, Alh.
@@ -145,14 +146,25 @@ model Campaign {
   constituency     String
   constituencyType String   // "federal" | "state" | "lga"
   enabledLgaIds    Int[]
-  requireApcReg    String   @default("optional")  // "required" | "optional" | "hidden"
-  requireVoterId   String   @default("optional")
   customQuestion1  String?
   customQuestion2  String?
   status           String   @default("draft")     // "draft" | "active" | "paused" | "closed"
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   submissions      CollectSubmission[]
+  campaignCanvassers CampaignCanvasser[]
+}
+
+model CampaignCanvasser {
+  id         String   @id @default(cuid())
+  campaignId String
+  name       String
+  phone      String
+  zone       String?
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([campaignId, phone])
 }
 
 model CollectSubmission {
@@ -186,6 +198,7 @@ model CollectSubmission {
   isFlagged        Boolean  @default(false)
   adminNotes       String?
   createdAt        DateTime @default(now())
+  auditEntries     SubmissionAuditEntry[]
 
   @@unique([campaignId, phone])
   @@unique([campaignId, voterIdNumber])
@@ -194,6 +207,18 @@ model CollectSubmission {
   @@index([lgaId])
   @@index([wardId])
   @@index([pollingUnitId])
+}
+
+model SubmissionAuditEntry {
+  id           String   @id @default(cuid())
+  submissionId String
+  action       String   // "verified", "unverified", "flagged", "unflagged", "note_added", "deleted"
+  userId       String
+  details      String?  // JSON string with change details
+  createdAt    DateTime @default(now())
+  submission   CollectSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
 }
 
 // === Audit Log ===

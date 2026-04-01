@@ -32,40 +32,41 @@ The demo used provisional colors (`#1f6b5e`, `#1a2926`, `#f0f4f1`, shadcn defaul
 
 ### 2.2 Semantic Token Mapping
 
-| Token                  | Light Mode              | Dark Mode                  |
-| ---------------------- | ----------------------- | -------------------------- |
-| `--background`         | Off-White `#F5F5ED`     | Pine `#09282A`             |
-| `--foreground`         | Pine `#09282A`          | Off-White `#F5F5ED`        |
-| `--primary`            | Lagoon `#0A645A`        | Emerald `#02C988`          |
-| `--primary-foreground` | White `#ffffff`         | Pine `#09282A`             |
-| `--secondary`          | `#E8E8DF` (darker bg)  | `rgba(9,40,42,0.75)`      |
-| `--secondary-foreground` | Pine `#09282A`        | Light Grey `#C0BFBB`      |
-| `--muted`              | `#E2E2D9` (visible)    | `rgba(9,40,42,0.5)`       |
-| `--muted-foreground`   | Dark Grey `#525252`     | Light Grey `#C0BFBB`      |
-| `--accent`             | Emerald `#02C988`       | Mint `#06FDAF`             |
-| `--accent-foreground`  | Pine `#09282A`          | Pine `#09282A`             |
-| `--border`             | Light Grey `#C0BFBB`    | `rgba(192,191,187,0.12)`  |
-| `--input`              | `#D6D6CE`              | `rgba(192,191,187,0.15)`  |
-| `--ring`               | Lagoon `#0A645A`        | Emerald `#02C988`          |
-| `--victory`            | Emerald `#02C988`       | Mint `#06FDAF`             |
+| Token                    | Light Mode            | Dark Mode                |
+| ------------------------ | --------------------- | ------------------------ |
+| `--background`           | Off-White `#F5F5ED`   | Pine `#09282A`           |
+| `--foreground`           | Pine `#09282A`        | Off-White `#F5F5ED`      |
+| `--primary`              | Lagoon `#0A645A`      | Emerald `#02C988`        |
+| `--primary-foreground`   | White `#ffffff`       | Pine `#09282A`           |
+| `--secondary`            | `#E8E8DF` (darker bg) | `rgba(9,40,42,0.75)`     |
+| `--secondary-foreground` | Pine `#09282A`        | Light Grey `#C0BFBB`     |
+| `--muted`                | `#E2E2D9` (visible)   | `rgba(9,40,42,0.5)`      |
+| `--muted-foreground`     | Dark Grey `#525252`   | Light Grey `#C0BFBB`     |
+| `--accent`               | Emerald `#02C988`     | Mint `#06FDAF`           |
+| `--accent-foreground`    | Pine `#09282A`        | Pine `#09282A`           |
+| `--border`               | Light Grey `#C0BFBB`  | `rgba(192,191,187,0.12)` |
+| `--input`                | `#D6D6CE`             | `rgba(192,191,187,0.15)` |
+| `--ring`                 | Lagoon `#0A645A`      | Emerald `#02C988`        |
+| `--victory`              | Emerald `#02C988`     | Mint `#06FDAF`           |
 
 **Key design decisions:**
+
 - Light mode primary = Lagoon (authoritative, subdued). Dark mode primary = Emerald (high contrast on Pine).
 - `--secondary` and `--muted` are intentionally darker than `--background` so hover states and muted surfaces are visible on Off-White.
 - `--input` is lighter than `--border` for subtle input field boundaries.
 
 ### 2.3 Sidebar Tokens
 
-| Token                       | Value                        | Notes                                  |
-| --------------------------- | ---------------------------- | -------------------------------------- |
-| `--sidebar`                 | `rgba(9,40,42,0.97)`        | Pine (near-opaque)                     |
-| `--sidebar-foreground`      | `#F5F5ED`                   | Off-White text                         |
-| `--sidebar-primary`         | `rgba(10,100,90,0.92)`      | Lagoon (active item bg)                |
-| `--sidebar-primary-foreground` | `#ffffff`                 | White on Lagoon                        |
-| `--sidebar-accent`          | `rgba(245,245,237,0.1)`     | Off-White tint (hover)                 |
-| `--sidebar-accent-foreground` | `#F5F5ED`                 | Off-White                              |
-| `--sidebar-border`          | `rgba(255,255,255,0.08)`    | Subtle white border                    |
-| `--sidebar-ring`            | `#0A645A`                   | Lagoon focus ring                      |
+| Token                          | Value                    | Notes                   |
+| ------------------------------ | ------------------------ | ----------------------- |
+| `--sidebar`                    | `rgba(9,40,42,0.97)`     | Pine (near-opaque)      |
+| `--sidebar-foreground`         | `#F5F5ED`                | Off-White text          |
+| `--sidebar-primary`            | `rgba(10,100,90,0.92)`   | Lagoon (active item bg) |
+| `--sidebar-primary-foreground` | `#ffffff`                | White on Lagoon         |
+| `--sidebar-accent`             | `rgba(245,245,237,0.1)`  | Off-White tint (hover)  |
+| `--sidebar-accent-foreground`  | `#F5F5ED`                | Off-White               |
+| `--sidebar-border`             | `rgba(255,255,255,0.08)` | Subtle white border     |
+| `--sidebar-ring`               | `#0A645A`                | Lagoon focus ring       |
 
 > **Note:** `--sidebar-accent` uses an Off-White tint, not Pine — Pine-on-Pine would be invisible.
 
@@ -79,7 +80,7 @@ The demo used provisional colors (`#1f6b5e`, `#1a2926`, `#f0f4f1`, shadcn defaul
 | `#f0f4f1` (old light green secondary)    | `#F5F5ED` Off-White                   |
 | `#fcfdfc` (old background)               | `#F5F5ED` Off-White                   |
 | `#d4ddd8` (old border)                   | `#C0BFBB` Light Grey                  |
-| `#e2ebe6` (old input)                    | `#D6D6CE` (lighter than border)        |
+| `#e2ebe6` (old input)                    | `#D6D6CE` (lighter than border)       |
 | `#5a6b65` (old muted text)               | `#525252` Dark Grey                   |
 | `#2f7f6b`, `#163a30` (sidebar gradient)  | Brand token utilities                 |
 | `emerald-500` (Tailwind default)         | `brand-emerald` (`#02C988`)           |
