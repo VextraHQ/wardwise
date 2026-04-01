@@ -1,7 +1,7 @@
 # Constituency Architecture: Candidate-Driven Geo Scope
 
 > Restructure how WardWise handles constituency and LGA data — candidate owns electoral identity, campaign inherits it.
-> Branch: `develop` | Last updated: 2026-03-31
+> Branch: `develop` | Last updated: 2026-04-01
 > See also: `wardwise-candidates-spec.md`, `wardwise-collect-spec.md`, `geo-management-spec.md`
 
 ---
@@ -9,7 +9,10 @@
 ## Status
 
 - **Problem identified** — constituency is free text, geo entered twice, LGA filtering broken for multi-LGA constituencies
-- **Implementation**: Planned (see phases below)
+- **Implementation**: In progress on `develop` (2026-04-01)
+- **Launch exception approved** — constituency candidates may be saved without LGAs when geo data is incomplete; campaign creation remains blocked until LGAs are defined
+- **UX decision finalized** — candidate boundary selection uses a searchable checkbox grid, not a tag-style multi-select
+- **Guardrails added** — suspiciously broad boundaries now show soft warnings; impossible state/LGA mismatches are blocked server-side
 
 ---
 
@@ -39,10 +42,10 @@ Three issues stem from a data-model gap:
 
 Codex proposed a `CandidateCoverage` join table (`candidateId + lgaId`). We chose `constituencyLgaIds Int[]` on Candidate instead:
 
-| Approach | Pros | Cons |
-|----------|------|------|
-| `Int[]` array (chosen) | Consistent with existing `Campaign.enabledLgaIds`, simpler queries, no extra model | Can't attach per-LGA metadata |
-| Join table | More normalized, allows metadata | Extra model, extra queries, overkill for this use case |
+| Approach               | Pros                                                                               | Cons                                                   |
+| ---------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `Int[]` array (chosen) | Consistent with existing `Campaign.enabledLgaIds`, simpler queries, no extra model | Can't attach per-LGA metadata                          |
+| Join table             | More normalized, allows metadata                                                   | Extra model, extra queries, overkill for this use case |
 
 The `Int[]` pattern is already proven in the codebase and sufficient for our needs.
 
@@ -54,13 +57,13 @@ LGA-level boundaries are an approximation. Some State Assembly seats split withi
 
 ## Position → Scope Rules
 
-| Position | State | LGA Selection | Scope |
-|----------|-------|---------------|-------|
-| President | Optional (home state) | None | Nationwide — all seeded LGAs |
-| Governor | Required | None | All LGAs in state |
-| Senator | Required | Multi-select from state LGAs | Selected LGAs define senatorial district |
-| House of Representatives | Required | Multi-select from state LGAs | Selected LGAs define federal constituency |
-| State Assembly | Required | Multi-select from state LGAs | Selected LGAs define state constituency |
+| Position                 | State                 | LGA Selection                | Scope                                     |
+| ------------------------ | --------------------- | ---------------------------- | ----------------------------------------- |
+| President                | Optional (home state) | None                         | Nationwide — all seeded LGAs              |
+| Governor                 | Required              | None                         | All LGAs in state                         |
+| Senator                  | Required              | Multi-select from state LGAs | Selected LGAs define senatorial district  |
+| House of Representatives | Required              | Multi-select from state LGAs | Selected LGAs define federal constituency |
+| State Assembly           | Required              | Multi-select from state LGAs | Selected LGAs define state constituency   |
 
 ---
 
@@ -70,16 +73,25 @@ LGA-level boundaries are an approximation. Some State Assembly seats split withi
 
 **Before:** Position → State → type single LGA name (free text) → type constituency name (free text)
 
-**After:** Position → State → select LGAs from checkbox grid → constituency name auto-suggested (e.g., "Fufore/Song") with manual override for official labels like "Adamawa Central Senatorial District"
+**After:** Position → State → searchable checkbox grid for constituency LGAs → constituency name auto-suggested (e.g., "Fufore/Song") with manual override for official labels like "Adamawa Central Senatorial District". States without seeded LGA data show a warning banner — candidate can be saved without LGAs and edited later.
+
+Why checkbox grid instead of compact multi-select:
+
+- Boundary definition is a high-trust admin task, not a casual tag picker
+- Visibility matters more than compactness
+- Reviewing all selected LGAs at once is safer for electoral geography
+- Search is still available, but the selection stays visible and easier to audit
 
 ### Campaign Creation (before → after)
 
 **Before (3 steps):**
+
 1. Select candidate → re-enter title, constituency, constituency type → slug
 2. LGA coverage — shows ALL state LGAs (broken)
 3. Questions + review
 
 **After (2 steps):**
+
 1. Select candidate → slug → read-only scope summary (inherited from candidate)
 2. Questions + review → optional "Restrict to part of constituency" toggle
 
@@ -101,14 +113,41 @@ constituencyLgaIds Int[] @default([])
 
 - Stores LGA IDs that define the constituency boundary
 - Empty for President/Governor (scope is implicit)
-- Required for Senator/HoR/State Assembly
+- Expected for Senator/HoR/State Assembly (soft requirement — campaign API guard enforces before campaign creation)
 - Old `lga` field kept but deprecated (backward compat)
 
 ### Campaign (no schema change)
 
 - `enabledLgaIds` stays as-is — populated from `candidate.constituencyLgaIds` at creation time
 - Optional "restrict" toggle in UI lets admin deselect LGAs from the inherited set; API stores the reduced array as `enabledLgaIds` — no new boolean field needed
+- Restriction mode cannot submit an empty LGA list; admin must keep at least one LGA selected or turn restriction off to inherit the full constituency
+- Campaign create and campaign update both enforce that `enabledLgaIds` must stay within the candidate's constituency boundary
 - `constituency`, `constituencyType`, `candidateName`, `party` still denormalized (set server-side, not by admin form)
+
+---
+
+## Boundary Guardrails
+
+The product still allows temporary flexibility for launch, but the following guardrails are now part of the intended behavior:
+
+### Soft warnings (UI)
+
+- **Boundary incomplete** — candidate saved without LGAs is allowed during rollout, but Collect stays blocked
+- **Full-state coverage selected** — if a constituency position selects all LGAs in a state, show a warning because that is unusual for Senator / HoR / State Assembly
+- **Very broad boundary** — if ~80% or more of a state's LGAs are selected, show a review warning
+- **Custom constituency label** — if the typed constituency name differs from the current auto-suggested LGA combination, show an informational warning
+- **Existing campaigns will not auto-sync** — editing a candidate boundary does not rewrite `enabledLgaIds` on already-created campaigns
+
+Warnings are advisory, not blocking, because the geo rollout is still in progress.
+
+### Hard validation (API / schema)
+
+- Candidate `constituencyLgaIds` are deduplicated and normalized before save
+- Candidate `constituencyLgaIds` must belong to the selected `stateCode`
+- Positions that do not use LGA-defined constituency scope (`President`, `Governor`) store `constituencyLgaIds = []`
+- `Governor + FCT` is invalid in this flow
+- `State Assembly + FCT` is invalid in this flow
+- Campaign create and campaign update both reject LGAs outside the candidate boundary
 
 ---
 
@@ -128,31 +167,38 @@ Public form: LGA dropdown shows Fufore and Song only
 
 ### Phase 1: Schema + Shared Utilities
 
-- [ ] Add `constituencyLgaIds Int[]` to Candidate model (Prisma migration)
-- [ ] Extract `positionToConstituencyType()` helper to `src/lib/utils/constituency.ts`
-- [ ] Extract `LgaCheckboxGrid` shared component from existing `step-coverage-requirements.tsx`
+- [x] Add `constituencyLgaIds Int[]` to Candidate model (Prisma migration)
+- [x] Extract `positionToConstituencyType()` helper to `src/lib/utils/constituency.ts`
+- [x] Extract `LgaCheckboxGrid` shared component from existing `step-coverage-requirements.tsx`
 
-### Phase 2: Candidate Creation — Add LGA Multi-Select
+### Phase 2: Candidate Creation — Add Boundary LGA Selection
 
-- [ ] Update `createCandidateSchema` — add `constituencyLgaIds`, require non-empty for constituency positions
-- [ ] Update `step-position.tsx` — replace single LGA dropdown with checkbox grid
-- [ ] Update candidate creation API — persist `constituencyLgaIds`
-- [ ] Update candidate detail page — display/edit constituency LGAs
-- [ ] Update `useCreateCandidate` and `useUpdateCandidate` hooks in `use-admin.ts`
+- [x] Update `createCandidateSchema` — add `constituencyLgaIds`
+- [x] Update `step-position.tsx` — replace single LGA dropdown with searchable checkbox-grid constituency picker
+- [x] Update candidate creation API — persist `constituencyLgaIds`
+- [x] Update candidate detail page — display/edit constituency LGAs
+- [x] Update `useCreateCandidate` and `useUpdateCandidate` hooks in `use-admin.ts`
+- [x] Align candidate edit UX with candidate create UX (same state reset + constituency reset rules)
 
 ### Phase 3: Campaign Creation — Simplify to 2 Steps
 
-- [ ] Simplify `createCampaignSchema` — remove admin-entered constituency fields from the form, derive them server-side, keep `enabledLgaIds` as the stored coverage array
-- [ ] Update campaign creation API — derive `candidateName`, `party`, `constituency`, `constituencyType` from candidate; populate `enabledLgaIds` from `candidate.constituencyLgaIds` (or admin-restricted subset)
-- [ ] Add guard: constituency positions with empty `constituencyLgaIds` → 400 error
-- [ ] Simplify campaign wizard to 2 steps
-- [ ] Add "Restrict to part of constituency" advanced toggle
-- [ ] Delete `step-coverage-requirements.tsx`
+- [x] Simplify `createCampaignSchema` — remove admin-entered constituency fields from the form, derive them server-side, keep `enabledLgaIds` as the stored coverage array
+- [x] Update campaign creation API — derive `candidateName`, `party`, `constituency`, `constituencyType` from candidate; populate `enabledLgaIds` from `candidate.constituencyLgaIds` (or admin-restricted subset)
+- [x] Add guard: constituency positions with empty `constituencyLgaIds` → 400 error
+- [x] Simplify campaign wizard to 2 steps
+- [x] Add "Restrict to part of constituency" advanced toggle
+- [x] Delete `step-coverage-requirements.tsx`
 
 ### Phase 4: Validation
 
-- [ ] `pnpm tsc --noEmit` passes
-- [ ] `pnpm lint` passes
+- [x] `pnpm tsc --noEmit` passes
+- [x] `pnpm lint` passes
+- [x] UX finalized: searchable checkbox grid used for candidate boundary selection; labels clarified ("Electoral Boundary", "Constituency LGAs")
+- [x] Soft block: unseeded states show warning banner, candidate saveable without LGAs, campaign API guard enforces
+- [x] Campaign restriction behavior tightened: empty restricted selection now shows validation message instead of silently inheriting all LGAs
+- [x] Campaign PATCH guard added: updates cannot set LGAs outside the candidate boundary
+- [x] Candidate boundary warnings added: incomplete, full-state, very broad, custom-name, existing-campaign drift
+- [x] Candidate create/update validation tightened: constituency LGAs must belong to selected state; FCT invalid combos blocked
 - [ ] Create candidate (Senator) → select LGAs → constituency auto-generates
 - [ ] Create campaign → inherits LGAs → public form shows correct scope
 - [ ] Existing campaigns continue working unchanged
@@ -167,16 +213,33 @@ Public form: LGA dropdown shows Fufore and Song only
 
 ---
 
+## Temporary Launch Rule
+
+- Candidate completeness is temporarily split into two stages:
+- Stage 1: admin may save a constituency candidate without LGAs (regardless of whether the state has seeded geo data)
+- Stage 2: collect campaign creation is blocked until constituency LGAs are defined
+
+This exception is intentional for faster Collect launch. It allows admins to onboard candidates immediately and define constituency boundaries later. Should be removed once geo coverage is mature enough to make constituency LGAs mandatory at candidate creation time.
+
+---
+
 ## Key Files
 
-| File | Role |
-|------|------|
-| `prisma/schema.prisma` | Candidate model — add `constituencyLgaIds` |
-| `src/lib/utils/constituency.ts` | Shared helpers (position → type, LGA name generation) |
-| `src/components/admin/shared/lga-checkbox-grid.tsx` | Reusable LGA multi-select grid |
-| `src/lib/schemas/admin-schemas.ts` | Candidate validation — add `constituencyLgaIds` |
-| `src/lib/schemas/collect-schemas.ts` | Campaign validation — simplify |
-| `src/components/admin/candidates/wizard/step-position.tsx` | Candidate LGA selection |
-| `src/components/admin/collect/wizard/campaign-wizard.tsx` | Simplified 2-step flow |
-| `src/app/api/admin/collect/campaigns/route.ts` | Server-side field derivation |
-| `src/hooks/use-admin.ts` | Update candidate mutation hooks |
+| File                                                           | Role                                                                          |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `prisma/schema.prisma`                                         | Candidate model — add `constituencyLgaIds`                                    |
+| `src/lib/utils/constituency.ts`                                | Shared helpers (position → type, warning rules, LGA name generation)          |
+| `src/lib/utils/constituency-server.ts`                         | Server-side constituency LGA normalization + state validation                 |
+| `src/components/admin/shared/lga-checkbox-grid.tsx`            | Shared searchable checkbox grid for candidate boundary + campaign restriction |
+| `src/components/admin/shared/constituency-boundary-alerts.tsx` | Reusable UI for soft warning banners                                          |
+| `src/lib/schemas/admin-schemas.ts`                             | Candidate validation — add `constituencyLgaIds`                               |
+| `src/lib/schemas/collect-schemas.ts`                           | Campaign validation — simplify                                                |
+| `src/components/admin/candidates/wizard/step-position.tsx`     | Candidate LGA selection                                                       |
+| `src/components/admin/candidates/wizard/step-review.tsx`       | Candidate review step — boundary warning summary                              |
+| `src/components/admin/candidates/candidate-overview.tsx`       | Candidate edit page — same boundary UX + warnings                             |
+| `src/components/admin/collect/wizard/campaign-wizard.tsx`      | Simplified 2-step flow                                                        |
+| `src/components/admin/collect/wizard/step-candidate-setup.tsx` | Candidate scope summary + inherited boundary warnings                         |
+| `src/app/api/admin/collect/campaigns/route.ts`                 | Server-side field derivation                                                  |
+| `src/app/api/admin/candidates/route.ts`                        | Candidate create validation + persistence                                     |
+| `src/app/api/admin/candidates/[id]/route.ts`                   | Candidate update validation + persistence                                     |
+| `src/hooks/use-admin.ts`                                       | Update candidate mutation hooks                                               |

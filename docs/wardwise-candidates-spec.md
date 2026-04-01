@@ -32,8 +32,9 @@ Candidate Management is the B2B entry point for WardWise. When a client pays, Ve
 | `position`         | `String`                      | President, Governor, Senator, House of Representatives, State Assembly |
 | `isNational`       | `Boolean @default(false)`     | True for President                                                     |
 | `stateCode`        | `String?`                     | 2-letter code (e.g. "AD"). Null for President                          |
-| `lga`              | `String?`                     | Required for constituency-level positions only                         |
-| `constituency`     | `String?`                     | Human-readable constituency name                                       |
+| `lga`              | `String?`                     | Deprecated — kept for backward compat, not used in new flows           |
+| `constituency`     | `String?`                     | Human-readable constituency name (auto-suggested from LGAs)            |
+| `constituencyLgaIds` | `Int[] @default([])`        | LGA IDs defining constituency boundary. Empty for President/Governor. See `collect-candidate-geo-rethink.md` |
 | `description`      | `String?`                     | Brief bio                                                              |
 | `phone`            | `String?`                     | Nigerian phone number                                                  |
 | `title`            | `String?`                     | Honorific: Hon., Sen., Dr., Chief, Alh., etc.                          |
@@ -55,13 +56,15 @@ Candidate Management is the B2B entry point for WardWise. When a client pays, Ve
 
 ## Position Hierarchy & Field Requirements
 
-| Position                 | State Required        | LGA Required | Constituency Type |
-| ------------------------ | --------------------- | ------------ | ----------------- |
-| President                | Optional (home state) | No           | `federal`         |
-| Governor                 | Yes                   | No           | `state`           |
-| Senator                  | Yes                   | Yes          | `federal`         |
-| House of Representatives | Yes                   | Yes          | `federal`         |
-| State Assembly           | Yes                   | Yes          | `state`           |
+| Position                 | State Required        | Constituency LGAs          | Constituency Type |
+| ------------------------ | --------------------- | -------------------------- | ----------------- |
+| President                | Optional (home state) | None (nationwide scope)    | `federal`         |
+| Governor                 | Yes                   | None (all LGAs in state)   | `state`           |
+| Senator                  | Yes                   | Multi-select from state    | `federal`         |
+| House of Representatives | Yes                   | Multi-select from state    | `federal`         |
+| State Assembly           | Yes                   | Multi-select from state    | `state`           |
+
+> `constituencyLgaIds` is soft-required for Senator/HoR/State Assembly: candidates can be saved without LGAs (for states with incomplete geo data), but campaign creation is blocked until LGAs are defined. See `collect-candidate-geo-rethink.md` for full architecture.
 
 ---
 
@@ -145,12 +148,18 @@ Multi-step wizard with `StepProgress` bar — same architecture as the Collect c
 **Step 2 — Electoral Position** (`wizard/step-position.tsx`)
 
 - Position (Select, 5 options)
-- Location: State (ComboboxSelect grouped by zone — shown for all positions, optional "home state" for President), LGA (ComboboxSelect from Geo API, cascading — hidden for President/Governor)
-- Constituency (text input, position-aware placeholder. Auto-fills "Federal Republic of Nigeria" for President, auto-fills "{State} State" for Governor when state is selected)
+- Electoral Boundary section (shown for non-President positions):
+  - State (ComboboxSelect grouped by zone — optional "home state" for President)
+  - Constituency LGAs (searchable checkbox grid from Geo API — shown for Senator/HoR/State Assembly). Includes search, select all/clear, count indicator.
+  - Partial seeding indicator when state has incomplete geo data (e.g., "12 of 21 LGAs available")
+  - Warning banner when state has no seeded LGA data (candidate can still be saved)
+- Constituency Name (text input, auto-suggested from selected LGAs with manual override for official names. Auto-fills "Federal Republic of Nigeria" for President, "{State} State" for Governor)
+- Boundary warnings: full-state coverage, very broad boundary, custom label mismatch (via `ConstituencyBoundaryAlerts`)
 
 **Step 3 — Review & Submit** (`wizard/step-review.tsx`)
 
-- Summary card with all candidate details
+- Summary card with all candidate details including boundary LGA count
+- Boundary warnings repeated for final review
 - Editable description field
 - Submit button with loading state
 
@@ -165,8 +174,10 @@ Three tabs: **Overview** | **Campaigns** | **Account**
 **Overview Tab:**
 
 - Stats row: Standard admin stat cards (icon top-right, value + subtitle below label) — Campaigns, Supporters (computed), Canvassers. Responsive: 1 col → 2 cols (sm) → 3 cols (lg)
-- Info card with grouped sections (Identity, Location, Contact, Bio) separated by subtle dividers
-- Edit form with matching section grouping and geo-backed selects
+- Info card with grouped sections (Identity, Electoral Boundary, Contact, Bio) separated by subtle dividers
+- Electoral Boundary section shows state, constituency name, and LGA count with boundary warnings (read-only)
+- Edit form with matching section grouping, geo-backed selects, and searchable checkbox grid for constituency LGAs
+- Boundary warnings shown in both read-only and edit modes (via `ConstituencyBoundaryAlerts`)
 
 **Campaigns Tab:**
 
@@ -197,29 +208,33 @@ The shared `ComboboxSelect` component (`src/components/ui/combobox-select.tsx`) 
 
 ## Key Files
 
-| File                                                        | Purpose                                                    |
-| ----------------------------------------------------------- | ---------------------------------------------------------- |
-| `prisma/schema.prisma`                                      | Candidate model definition                                 |
-| `prisma/seed.ts`                                            | Seed data (11 candidates, 7 canvassers, 6 voters, 1 admin) |
-| `src/types/candidate.ts`                                    | TypeScript type                                            |
-| `src/lib/schemas/admin-schemas.ts`                          | Zod validation schemas                                     |
-| `src/lib/api/admin.ts`                                      | Client-side API helpers                                    |
-| `src/lib/data/nigerian-parties.ts`                          | Party + title options                                      |
-| `src/app/api/admin/candidates/route.ts`                     | GET + POST endpoints                                       |
-| `src/app/api/admin/candidates/[id]/route.ts`                | GET + PUT + DELETE                                         |
-| `src/app/api/admin/candidates/[id]/reset-password/route.ts` | Password reset                                             |
-| `src/app/admin/candidates/new/page.tsx`                     | Create route                                               |
-| `src/app/admin/candidates/[id]/page.tsx`                    | Detail route                                               |
-| `src/components/admin/candidates/create-candidate-form.tsx` | Wizard orchestrator (step state, validation, submission)   |
-| `src/components/admin/candidates/wizard/step-identity.tsx`  | Step 1: name, email, phone, party                          |
-| `src/components/admin/candidates/wizard/step-position.tsx`  | Step 2: position, state, LGA, constituency                 |
-| `src/components/admin/candidates/wizard/step-review.tsx`    | Step 3: summary review + description                       |
-| `src/components/admin/candidates/credentials-dialog.tsx`    | Post-create credential display                             |
-| `src/components/admin/candidates/candidate-detail.tsx`      | Detail page with tabs                                      |
-| `src/components/admin/candidates/candidate-overview.tsx`    | Overview tab                                               |
-| `src/components/admin/candidates/candidate-campaigns.tsx`   | Campaigns tab                                              |
-| `src/components/admin/candidates/candidate-account.tsx`     | Account tab                                                |
-| `src/components/admin/candidates/candidate-management.tsx`  | Table-based list view                                      |
+| File                                                        | Purpose                                                                 |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `prisma/schema.prisma`                                      | Candidate model definition                                              |
+| `prisma/seed.ts`                                            | Seed data (11 candidates, 7 canvassers, 6 voters, 1 admin)             |
+| `src/types/candidate.ts`                                    | TypeScript type                                                         |
+| `src/lib/schemas/admin-schemas.ts`                          | Zod validation schemas (with FCT superRefine)                           |
+| `src/lib/api/admin.ts`                                      | Client-side API helpers                                                 |
+| `src/lib/data/nigerian-parties.ts`                          | Party + title options                                                   |
+| `src/lib/utils/constituency.ts`                             | Shared isomorphic helpers (position→type, warnings, auto-suggest)       |
+| `src/lib/utils/constituency-server.ts`                      | Server-side constituency LGA validation + state matching                |
+| `src/app/api/admin/candidates/route.ts`                     | GET + POST endpoints                                                    |
+| `src/app/api/admin/candidates/[id]/route.ts`                | GET + PUT + DELETE                                                      |
+| `src/app/api/admin/candidates/[id]/reset-password/route.ts` | Password reset                                                          |
+| `src/app/admin/candidates/new/page.tsx`                     | Create route                                                            |
+| `src/app/admin/candidates/[id]/page.tsx`                    | Detail route                                                            |
+| `src/components/admin/candidates/create-candidate-form.tsx` | Wizard orchestrator (step state, validation, submission)                |
+| `src/components/admin/candidates/wizard/step-identity.tsx`  | Step 1: name, email, phone, party                                       |
+| `src/components/admin/candidates/wizard/step-position.tsx`  | Step 2: position, state, constituency LGAs, boundary warnings           |
+| `src/components/admin/candidates/wizard/step-review.tsx`    | Step 3: summary review + boundary warnings + description                |
+| `src/components/admin/candidates/credentials-dialog.tsx`    | Post-create credential display                                          |
+| `src/components/admin/candidates/candidate-detail.tsx`      | Detail page with tabs                                                   |
+| `src/components/admin/candidates/candidate-overview.tsx`    | Overview tab (with boundary edit + warnings)                            |
+| `src/components/admin/candidates/candidate-campaigns.tsx`   | Campaigns tab                                                           |
+| `src/components/admin/candidates/candidate-account.tsx`     | Account tab                                                             |
+| `src/components/admin/candidates/candidate-management.tsx`  | Table-based list view                                                   |
+| `src/components/admin/shared/lga-checkbox-grid.tsx`         | Shared searchable checkbox grid (candidate boundary + campaign restrict) |
+| `src/components/admin/shared/constituency-boundary-alerts.tsx` | Reusable soft warning banners for boundary issues                    |
 
 ---
 
@@ -236,6 +251,7 @@ The shared `ComboboxSelect` component (`src/components/ui/combobox-select.tsx`) 
 
 | Date       | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-01 | Candidate-driven geo scope: `constituencyLgaIds Int[]` on Candidate defines constituency boundary. Searchable checkbox grid for LGA selection. Auto-suggested constituency name with manual override. Boundary warnings (full-state, very broad, custom label, incomplete). Partial LGA seeding indicator. Soft block: candidates saveable without LGAs, campaign creation blocked until defined. Server-side validation via `sanitizeCandidateConstituencyLgaIds()`. FCT invalid combos blocked. See `collect-candidate-geo-rethink.md`. |
 | 2026-03-25 | Governor auto-fill, Location column, newest-first default. Detail page UI overhaul: stat cards aligned to admin standard (Pattern 2 — icon top-right, value below), overview grouped into sections with dividers, campaigns tab rewritten as table, account tab typography standardized. Text contrast audit: bumped faint labels from opacity-40/50 to foreground/70-80, font-semibold section titles, reverted font-mono from body text (reserved for codes/IDs/badges/column headers). Onboarding status select uses colored dots instead of badges for clean hover. |
 | 2026-03-24 | Fixed ComboboxSelect search (custom filter searches label+value+description). President can optionally select "home state". Create form rewritten as 3-step wizard with StepProgress bar, matching Collect campaign wizard pattern. Added phone field to candidate edit form. Account tab danger zone with delete.                                                                                                                                                                                                                                                      |
 | 2026-03-18 | Initial spec. Schema cleanup (removed dead models), renamed `state` → `stateCode`, removed stored `supporters` field, added `phone`/`title`/`onboardingStatus`. Created page-based CRUD with geo-backed selects, table list view, detail page with tabs, readable password generation, onboarding status tracking.                                                                                                                                                                                                                                                      |

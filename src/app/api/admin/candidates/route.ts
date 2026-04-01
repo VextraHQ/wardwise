@@ -7,6 +7,7 @@ import { Prisma } from "@prisma/client";
 import type { Candidate } from "@/types/candidate";
 import { createCandidateSchema } from "@/lib/schemas/admin-schemas";
 import { logAudit } from "@/lib/audit";
+import { sanitizeCandidateConstituencyLgaIds } from "@/lib/utils/constituency-server";
 
 // Generate a readable password like WARD-7842-BETA
 function generateReadablePassword(): string {
@@ -111,6 +112,7 @@ export async function POST(request: NextRequest) {
       party,
       position,
       constituency,
+      constituencyLgaIds,
       description,
       stateCode,
       lga,
@@ -126,6 +128,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { ids: sanitizedConstituencyLgaIds, error: constituencyError } =
+      await sanitizeCandidateConstituencyLgaIds({
+        position,
+        stateCode,
+        constituencyLgaIds,
+      });
+    if (constituencyError) {
+      return NextResponse.json({ error: constituencyError }, { status: 400 });
+    }
+
     // Generate readable password
     const generatedPassword = generateReadablePassword();
     const hashedPassword = await bcrypt.hash(generatedPassword, 12);
@@ -139,6 +151,7 @@ export async function POST(request: NextRequest) {
         stateCode: stateCode || null,
         lga: lga || null,
         constituency: constituency || null,
+        constituencyLgaIds: sanitizedConstituencyLgaIds,
         description: description || null,
         phone: phone || null,
         title: title || null,

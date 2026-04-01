@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { createCampaignSchema } from "@/lib/schemas/collect-schemas";
 import { logAudit } from "@/lib/audit";
+import {
+  positionToConstituencyType,
+  positionRequiresLgas,
+} from "@/lib/utils/constituency";
 
 export async function GET(request: NextRequest) {
   try {
@@ -64,6 +68,31 @@ export async function POST(request: NextRequest) {
 
     const data = parsed.data;
 
+    // Fetch candidate to derive campaign fields
+    const candidate = await prisma.candidate.findUnique({
+      where: { id: data.candidateId },
+    });
+    if (!candidate) {
+      return NextResponse.json(
+        { error: "Candidate not found" },
+        { status: 404 },
+      );
+    }
+
+    // Guard: constituency positions need constituencyLgaIds on candidate
+    if (
+      positionRequiresLgas(candidate.position) &&
+      candidate.constituencyLgaIds.length === 0
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Please add constituency LGAs to this candidate before creating a campaign.",
+        },
+        { status: 400 },
+      );
+    }
+
     // Guard: one active campaign per candidate
     const existingActive = await prisma.campaign.findFirst({
       where: { candidateId: data.candidateId, status: "active" },
@@ -78,16 +107,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Derive fields from candidate
+    const constituencyType =
+      positionToConstituencyType(candidate.position) ?? "federal";
+
+    // enabledLgaIds: if client sent non-empty array, use it (must be subset); otherwise inherit from candidate
+    let enabledLgaIds = candidate.constituencyLgaIds;
+    if (data.enabledLgaIds.length > 0) {
+      // Validate it's a subset of candidate's constituency LGAs
+      const isSubset = data.enabledLgaIds.every((id) =>
+        candidate.constituencyLgaIds.includes(id),
+      );
+      if (!isSubset && candidate.constituencyLgaIds.length > 0) {
+        return NextResponse.json(
+          {
+            error:
+              "Enabled LGAs must be a subset of the candidate's constituency LGAs",
+          },
+          { status: 400 },
+        );
+      }
+      enabledLgaIds = data.enabledLgaIds;
+    }
+
     const campaign = await prisma.campaign.create({
       data: {
         candidateId: data.candidateId,
         slug: data.slug,
-        candidateName: data.candidateName,
-        candidateTitle: data.candidateTitle || null,
-        party: data.party,
-        constituency: data.constituency,
-        constituencyType: data.constituencyType,
-        enabledLgaIds: data.enabledLgaIds,
+        candidateName: candidate.name,
+        candidateTitle: candidate.title || null,
+        party: candidate.party,
+        constituency: candidate.constituency || "",
+        constituencyType,
+        enabledLgaIds,
         customQuestion1: data.customQuestion1 || null,
         customQuestion2: data.customQuestion2 || null,
       },
@@ -100,7 +152,7 @@ export async function POST(request: NextRequest) {
       session!.user.id,
       {
         slug: data.slug,
-        candidateName: data.candidateName,
+        candidateName: candidate.name,
       },
     );
 

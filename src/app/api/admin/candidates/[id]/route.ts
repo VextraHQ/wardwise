@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import type { Candidate } from "@/types/candidate";
 import { updateCandidateSchema } from "@/lib/schemas/admin-schemas";
 import { logAudit } from "@/lib/audit";
+import { sanitizeCandidateConstituencyLgaIds } from "@/lib/utils/constituency-server";
 
 const CANDIDATE_INCLUDE = {
   user: {
@@ -101,6 +102,7 @@ export async function PUT(
       party,
       position,
       constituency,
+      constituencyLgaIds,
       description,
       stateCode,
       lga,
@@ -129,6 +131,24 @@ export async function PUT(
       }
     }
 
+    const nextPosition = position ?? existingCandidate.position;
+    const nextStateCode =
+      stateCode !== undefined ? stateCode || null : existingCandidate.stateCode;
+    const nextConstituencyLgaIds =
+      constituencyLgaIds !== undefined
+        ? constituencyLgaIds
+        : existingCandidate.constituencyLgaIds;
+
+    const { ids: sanitizedConstituencyLgaIds, error: constituencyError } =
+      await sanitizeCandidateConstituencyLgaIds({
+        position: nextPosition,
+        stateCode: nextStateCode,
+        constituencyLgaIds: nextConstituencyLgaIds,
+      });
+    if (constituencyError) {
+      return NextResponse.json({ error: constituencyError }, { status: 400 });
+    }
+
     const updateData: Prisma.CandidateUpdateInput = {};
     if (name) updateData.name = name;
     if (party) updateData.party = party;
@@ -140,6 +160,13 @@ export async function PUT(
     if (lga !== undefined) updateData.lga = lga || null;
     if (constituency !== undefined)
       updateData.constituency = constituency || null;
+    if (
+      constituencyLgaIds !== undefined ||
+      position !== undefined ||
+      stateCode !== undefined
+    ) {
+      updateData.constituencyLgaIds = sanitizedConstituencyLgaIds;
+    }
     if (description !== undefined) updateData.description = description || null;
     if (phone !== undefined) updateData.phone = phone || null;
     if (title !== undefined) updateData.title = title || null;

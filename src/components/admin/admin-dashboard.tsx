@@ -29,11 +29,7 @@ import {
 } from "@/components/admin/admin-skeletons";
 
 export function AdminDashboard() {
-  const {
-    data: candidates = [],
-    isLoading,
-    error,
-  } = useAdminCandidates();
+  const { data: candidates = [], isLoading, error } = useAdminCandidates();
 
   const { data: campaigns = [] } = useCampaigns();
 

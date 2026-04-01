@@ -1,6 +1,7 @@
 "use client";
 
 import { type UseFormReturn } from "react-hook-form";
+import { useMemo } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,7 +14,14 @@ import {
 } from "@/components/collect/form-ui";
 import { IconChecklist } from "@tabler/icons-react";
 import type { CreateCandidateFormValues } from "@/lib/schemas/admin-schemas";
-import { nigeriaStates } from "@/lib/data/state-lga-locations";
+import { nigeriaStates, getLGAsByState } from "@/lib/data/state-lga-locations";
+import { useGeoLgas } from "@/hooks/use-geo";
+import {
+  autoConstituencyName,
+  getConstituencyBoundaryWarnings,
+  positionRequiresLgas,
+} from "@/lib/utils/constituency";
+import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituency-boundary-alerts";
 
 function resolveStateName(stateCode: string | null | undefined): string {
   if (!stateCode) return "—";
@@ -36,6 +44,38 @@ export function StepReview({
   const { watch, setValue } = form;
 
   const data = watch();
+  const requiresLgas = positionRequiresLgas(data.position || "");
+  const { data: lgaResponse } = useGeoLgas(
+    requiresLgas && data.stateCode ? data.stateCode : null,
+    { pageSize: 200 },
+  );
+  const selectedLgaNames = useMemo(
+    () =>
+      (lgaResponse?.data ?? [])
+        .filter((lga) => data.constituencyLgaIds.includes(lga.id))
+        .map((lga) => lga.name),
+    [data.constituencyLgaIds, lgaResponse],
+  );
+  const boundaryWarnings = useMemo(
+    () =>
+      getConstituencyBoundaryWarnings({
+        position: data.position,
+        stateName: resolveStateName(data.stateCode),
+        selectedLgaCount: data.constituencyLgaIds.length,
+        expectedLgaCount: data.stateCode
+          ? getLGAsByState(data.stateCode).length
+          : 0,
+        constituencyName: data.constituency,
+        autoSuggestedName: autoConstituencyName(selectedLgaNames),
+      }),
+    [
+      data.constituency,
+      data.constituencyLgaIds,
+      data.position,
+      data.stateCode,
+      selectedLgaNames,
+    ],
+  );
 
   const reviewFields = [
     { label: "Title", value: data.title || "—" },
@@ -44,7 +84,14 @@ export function StepReview({
     { label: "Phone", value: data.phone || "—" },
     { label: "Position", value: data.position },
     { label: "State", value: resolveStateName(data.stateCode) },
-    ...(data.lga ? [{ label: "LGA", value: data.lga }] : []),
+    ...(data.constituencyLgaIds.length > 0
+      ? [
+          {
+            label: "Boundary LGAs",
+            value: `${data.constituencyLgaIds.length} selected`,
+          },
+        ]
+      : []),
     { label: "Constituency", value: data.constituency },
   ];
 
@@ -112,6 +159,8 @@ export function StepReview({
             />
           </div>
         </div>
+
+        <ConstituencyBoundaryAlerts warnings={boundaryWarnings} />
       </div>
 
       <div className="mt-4">

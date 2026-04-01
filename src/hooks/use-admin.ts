@@ -23,8 +23,7 @@ export function useAdminCandidates() {
 export function useCreateCandidate() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateCandidateData) =>
-      adminApi.candidates.create(data),
+    mutationFn: (data: CreateCandidateData) => adminApi.candidates.create(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "candidates"] });
     },
@@ -35,8 +34,7 @@ export function useCreateCandidate() {
 export function useUpdateCandidate() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: UpdateCandidateData) =>
-      adminApi.candidates.update(data),
+    mutationFn: (data: UpdateCandidateData) => adminApi.candidates.update(data),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({
         queryKey: ["admin", "candidates", variables.id],
@@ -50,13 +48,7 @@ export function useUpdateCandidate() {
 export function useUpdateCandidateStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      status,
-    }: {
-      id: string;
-      status: string;
-    }) =>
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
       adminApi.candidates.update({ id, onboardingStatus: status }),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({

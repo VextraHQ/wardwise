@@ -1,15 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ComboboxSelect } from "@/components/ui/combobox-select";
 import {
   StepCard,
@@ -22,6 +16,9 @@ import {
 } from "@/components/collect/form-ui";
 import { IconUser, IconLink } from "@tabler/icons-react";
 import type { CreateCampaignData } from "@/lib/schemas/collect-schemas";
+import { nigeriaStates, getLGAsByState } from "@/lib/data/state-lga-locations";
+import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituency-boundary-alerts";
+import { getConstituencyBoundaryWarnings } from "@/lib/utils/constituency";
 
 type CandidateOption = {
   value: string;
@@ -36,6 +33,7 @@ type CandidateInfo = {
   position: string;
   constituency: string;
   stateCode: string;
+  constituencyLgaIds: number[];
 };
 
 interface StepCandidateSetupProps {
@@ -65,6 +63,38 @@ export function StepCandidateSetup({
 
   const candidateId = watch("candidateId");
   const slug = watch("slug");
+  const selectedStateName = useMemo(
+    () =>
+      nigeriaStates.find((state) => state.code === selectedCandidate?.stateCode)
+        ?.name ?? selectedCandidate?.stateCode,
+    [selectedCandidate?.stateCode],
+  );
+  const candidateBoundaryWarnings = useMemo(
+    () =>
+      selectedCandidate
+        ? getConstituencyBoundaryWarnings({
+            position: selectedCandidate.position,
+            stateName: selectedStateName,
+            selectedLgaCount: selectedCandidate.constituencyLgaIds.length,
+            expectedLgaCount: selectedCandidate.stateCode
+              ? getLGAsByState(selectedCandidate.stateCode).length
+              : 0,
+            constituencyName: selectedCandidate.constituency,
+          })
+        : [],
+    [selectedCandidate, selectedStateName],
+  );
+
+  // Derive scope display
+  const scopeDisplay = selectedCandidate
+    ? selectedCandidate.position === "President"
+      ? "Nationwide — all LGAs"
+      : selectedCandidate.position === "Governor"
+        ? `All LGAs in ${selectedStateName || "state"}`
+        : selectedCandidate.constituencyLgaIds.length > 0
+          ? `${selectedCandidate.constituencyLgaIds.length} LGA${selectedCandidate.constituencyLgaIds.length !== 1 ? "s" : ""}`
+          : "No LGAs defined — edit candidate first"
+    : null;
 
   return (
     <StepCard>
@@ -96,37 +126,51 @@ export function StepCandidateSetup({
             <FieldError error={errors.candidateId?.message} />
           </div>
 
+          {/* Inherited scope summary */}
           {selectedCandidate && (
-            <div className="bg-muted/50 space-y-1 rounded-sm border px-4 py-3">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium">{selectedCandidate.name}</p>
-                <Badge
-                  variant="outline"
-                  className="shrink-0 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-                >
-                  {selectedCandidate.party}
-                </Badge>
+            <div className="space-y-3">
+              <div className="bg-muted/50 space-y-2 rounded-sm border px-4 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium">
+                    {selectedCandidate.name}
+                  </p>
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                  >
+                    {selectedCandidate.party}
+                  </Badge>
+                </div>
+                <div className="text-muted-foreground space-y-0.5 text-xs">
+                  <p>
+                    <span className="font-medium">Position:</span>{" "}
+                    {selectedCandidate.position}
+                  </p>
+                  {selectedCandidate.constituency && (
+                    <p>
+                      <span className="font-medium">Constituency:</span>{" "}
+                      {selectedCandidate.constituency}
+                    </p>
+                  )}
+                  {selectedCandidate.stateCode && (
+                    <p>
+                      <span className="font-medium">State:</span>{" "}
+                      {selectedStateName}
+                    </p>
+                  )}
+                  {scopeDisplay && (
+                    <p>
+                      <span className="font-medium">Collection Area:</span>{" "}
+                      {scopeDisplay}
+                    </p>
+                  )}
+                </div>
               </div>
-              <p className="text-muted-foreground text-xs">
-                {selectedCandidate.position}
-                {selectedCandidate.constituency &&
-                  ` · ${selectedCandidate.constituency}`}
-                {selectedCandidate.stateCode &&
-                  ` · ${selectedCandidate.stateCode}`}
-              </p>
+              <ConstituencyBoundaryAlerts
+                warnings={candidateBoundaryWarnings}
+              />
             </div>
           )}
-
-          {/* Candidate Title (optional) */}
-          <div className="space-y-1.5">
-            <FieldLabel optional>Candidate Title</FieldLabel>
-            <Input
-              value={watch("candidateTitle") || ""}
-              onChange={(e) => setValue("candidateTitle", e.target.value)}
-              placeholder="e.g. His Excellency, Sen."
-              className="rounded-sm"
-            />
-          </div>
         </div>
 
         {/* Campaign Slug */}
@@ -158,57 +202,6 @@ export function StepCandidateSetup({
               <p className="text-muted-foreground text-xs">URL: /c/{slug}</p>
             )}
             <FieldError error={errors.slug?.message} />
-          </div>
-        </div>
-
-        {/* Constituency */}
-        <div className="space-y-3">
-          <SectionLabel
-            title="Constituency"
-            subtitle="The electoral constituency for this campaign"
-          />
-          <div className="space-y-1.5">
-            <FieldLabel>Constituency *</FieldLabel>
-            <Input
-              value={watch("constituency")}
-              onChange={(e) =>
-                setValue("constituency", e.target.value, {
-                  shouldValidate: true,
-                })
-              }
-              placeholder="e.g. Adamawa North"
-              className="rounded-sm"
-            />
-            <FieldError error={errors.constituency?.message} />
-          </div>
-        </div>
-
-        {/* Constituency Type */}
-        <div className="space-y-3">
-          <SectionLabel
-            title="Constituency Type"
-            subtitle="The scope level of the position"
-          />
-          <div className="space-y-1.5">
-            <FieldLabel>Type *</FieldLabel>
-            <Select
-              value={watch("constituencyType")}
-              onValueChange={(v) =>
-                setValue("constituencyType", v as "federal" | "state" | "lga", {
-                  shouldValidate: true,
-                })
-              }
-            >
-              <SelectTrigger className="rounded-sm">
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="federal">Federal</SelectItem>
-                <SelectItem value="state">State</SelectItem>
-                <SelectItem value="lga">LGA</SelectItem>
-              </SelectContent>
-            </Select>
-            <FieldError error={errors.constituencyType?.message} />
           </div>
         </div>
       </div>

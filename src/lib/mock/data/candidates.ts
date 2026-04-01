@@ -22,6 +22,7 @@ export const candidates: Candidate[] = [
     stateCode: null,
     lga: null,
     constituency: "Federal Republic of Nigeria",
+    constituencyLgaIds: [],
     description:
       "Former Lagos State Governor with extensive experience in governance and nation-building.",
     supporterCount: 5420,
@@ -45,6 +46,7 @@ export const candidates: Candidate[] = [
     stateCode: null,
     lga: null,
     constituency: "Federal Republic of Nigeria",
+    constituencyLgaIds: [],
     description:
       "Former Vice President and business mogul committed to economic restructuring and job creation.",
     supporterCount: 4980,
@@ -68,6 +70,7 @@ export const candidates: Candidate[] = [
     stateCode: null,
     lga: null,
     constituency: "Federal Republic of Nigeria",
+    constituencyLgaIds: [],
     description:
       "Former Anambra Governor and business leader focused on youth empowerment and education reform.",
     supporterCount: 6150,
@@ -91,6 +94,7 @@ export const candidates: Candidate[] = [
     stateCode: null,
     lga: null,
     constituency: "Federal Republic of Nigeria",
+    constituencyLgaIds: [],
     description:
       "Former Kano State Governor and Senator with strong track record in education and infrastructure.",
     supporterCount: 3890,
@@ -120,6 +124,7 @@ export const candidates: Candidate[] = [
     stateCode: "AD",
     lga: "Adamawa Central",
     constituency: "Adamawa State",
+    constituencyLgaIds: [],
     description: "Progressive leader committed to education and healthcare.",
     supporterCount: 1250,
     surveyId: "survey-apc-1",
@@ -142,6 +147,7 @@ export const candidates: Candidate[] = [
     stateCode: "AD",
     lga: "Adamawa Central",
     constituency: "Adamawa State",
+    constituencyLgaIds: [],
     description: "Experienced leader focused on development and security.",
     supporterCount: 980,
     surveyId: "survey-pdp-1",
@@ -165,6 +171,7 @@ export const candidates: Candidate[] = [
     stateCode: "AD",
     lga: "Adamawa Central",
     constituency: "Adamawa Central",
+    constituencyLgaIds: [],
     description:
       "Healthcare professional dedicated to women's empowerment and community welfare.",
     supporterCount: 650,
@@ -190,6 +197,7 @@ export const candidates: Candidate[] = [
     stateCode: "AD",
     lga: "Jada/Ganye/Mayo-Belwa/Toungo",
     constituency: "Jada/Ganye/Mayo-Belwa/Toungo",
+    constituencyLgaIds: [],
     description: "Youth advocate and infrastructure development champion.",
     supporterCount: 750,
     surveyId: "survey-apc-2",
@@ -212,6 +220,7 @@ export const candidates: Candidate[] = [
     stateCode: "AD",
     lga: "Fufore/Song",
     constituency: "Fufore/Song Federal Constituency",
+    constituencyLgaIds: [],
     description:
       "Former ALGON Chairman and Executive Chairman of Fufore LGA. Currently serving first term in 10th National Assembly.",
     supporterCount: 850,
@@ -241,6 +250,7 @@ export const candidates: Candidate[] = [
     stateCode: "BA",
     lga: "Bauchi Central",
     constituency: "Bauchi State",
+    constituencyLgaIds: [],
     description:
       "Former FCT Minister with extensive experience in urban development and infrastructure.",
     supporterCount: 1420,
@@ -266,6 +276,7 @@ export const candidates: Candidate[] = [
     stateCode: "BA",
     lga: "Bauchi Central",
     constituency: "Bauchi Central",
+    constituencyLgaIds: [],
     description:
       "Business leader committed to economic empowerment and job creation.",
     supporterCount: 820,
@@ -288,6 +299,7 @@ export const candidates: Candidate[] = [
     stateCode: "BA",
     lga: "Bauchi South",
     constituency: "Bauchi South",
+    constituencyLgaIds: [],
     description:
       "Medical doctor and public health advocate focused on rural healthcare access.",
     supporterCount: 720,
@@ -313,6 +325,7 @@ export const candidates: Candidate[] = [
     stateCode: "BA",
     lga: "Bauchi Federal Constituency",
     constituency: "Bauchi Federal Constituency",
+    constituencyLgaIds: [],
     description:
       "Former Local Government Chairman with strong grassroots support and focus on rural electrification.",
     supporterCount: 680,
@@ -335,6 +348,7 @@ export const candidates: Candidate[] = [
     stateCode: "BA",
     lga: "Ningi/Warji Federal Constituency",
     constituency: "Ningi/Warji Federal Constituency",
+    constituencyLgaIds: [],
     description:
       "Agricultural economist dedicated to farming communities and food security.",
     supporterCount: 590,
@@ -360,6 +374,7 @@ export const candidates: Candidate[] = [
     stateCode: "AD",
     lga: "Song State Constituency",
     constituency: "Song State Constituency",
+    constituencyLgaIds: [],
     description:
       "Grassroots leader focused on local development and community empowerment.",
     supporterCount: 420,
@@ -383,6 +398,7 @@ export const candidates: Candidate[] = [
     stateCode: "AD",
     lga: "Fufore State Constituency",
     constituency: "Fufore State Constituency",
+    constituencyLgaIds: [],
     description:
       "Education advocate and women's rights champion at the state level.",
     supporterCount: 380,
@@ -406,6 +422,7 @@ export const candidates: Candidate[] = [
     stateCode: "BA",
     lga: "Bauchi Central State Constituency",
     constituency: "Bauchi Central State Constituency",
+    constituencyLgaIds: [],
     description:
       "Business leader and advocate for local economic development and job creation.",
     supporterCount: 450,
@@ -429,6 +446,7 @@ export const candidates: Candidate[] = [
     stateCode: "BA",
     lga: "Bauchi South State Constituency",
     constituency: "Bauchi South State Constituency",
+    constituencyLgaIds: [],
     description:
       "Healthcare professional focused on improving local health services and rural access.",
     supporterCount: 390,

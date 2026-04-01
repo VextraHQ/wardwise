@@ -51,16 +51,20 @@
 - **Submit schema DRY**: Server submit route now imports `serverSubmitSchema` from shared `collect-schemas.ts` instead of duplicating the Zod schema inline.
 - **Spec doc**: Removed stale branch reference (`feature/collect` from `develop`) that contradicted the "merged to main" status.
 
-### What Changed (Batch 4)
+### What Changed (Batch 4 + Geo Rethink)
 
 - **Position-aware wizard**: President/Governor campaigns skip the LGA step; `enabledLgaIds` left empty for national/state scope.
 - **Public LGA API**: 3-branch scope logic — national (all seeded LGAs), state (all LGAs in candidate's state), constituency (only `enabledLgaIds`).
 - **Bug fix**: Constituency-scoped campaigns now correctly return only enabled LGAs (not all state LGAs).
-- **Wizard step 1**: Added editable Constituency, Constituency Type, and Candidate Title fields. Pre-filled from candidate but manually editable as fallback.
+- **Candidate-driven geo scope**: Constituency, constituency type, candidate name, and party are now derived server-side from the candidate — no longer editable in the campaign wizard.
+- **2-step campaign wizard**: Step 1 = candidate + slug + read-only scope summary (inherited from candidate). Step 2 = questions + review. Old 3-step flow with manual constituency/LGA entry removed.
+- **Restrict toggle**: Optional "Restrict to part of constituency" in step 1 lets admin deselect LGAs from the inherited set. Must keep at least one LGA selected.
+- **Campaign boundary guard**: Campaign create/update API validates `enabledLgaIds` is a subset of the candidate's `constituencyLgaIds`. Constituency positions with empty `constituencyLgaIds` return 400.
+- **PATCH guard**: Campaign update rejects LGAs outside the candidate boundary; blocks activating when another active campaign exists.
 
 ### What Changed (Batch 2)
 
-- **LGA dropdown**: Shows all LGAs for the campaign's state (derived from enabledLgaIds).
+- **LGA dropdown**: Shows only the campaign's `enabledLgaIds` (inherited from candidate's constituency boundary, or restricted subset).
 - **APC/NIN field**: Renamed to "APC Registration Number or NIN". Now required.
 - **VIN field**: Now required. Used for deduplication alongside phone number.
 - **Role options**: Volunteer / Member / Canvasser (3 options).

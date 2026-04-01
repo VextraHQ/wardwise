@@ -33,7 +33,7 @@ const STEP_TITLES = ["Identity", "Electoral Position", "Review & Submit"];
 // Fields validated at each step
 const stepFieldMap: Record<number, (keyof CreateCandidateFormValues)[]> = {
   0: ["name", "email", "party"],
-  1: ["position", "constituency", "stateCode", "lga"],
+  1: ["position", "constituency", "stateCode", "constituencyLgaIds"],
   2: [],
 };
 
@@ -53,6 +53,7 @@ export function CreateCandidateForm() {
       constituency: "",
       stateCode: "",
       lga: "",
+      constituencyLgaIds: [],
       description: "",
       phone: "",
       title: "",
@@ -96,6 +97,7 @@ export function CreateCandidateForm() {
           | "House of Representatives"
           | "State Assembly",
         constituency: data.constituency,
+        constituencyLgaIds: data.constituencyLgaIds,
         stateCode: data.stateCode || undefined,
         lga: data.lga || undefined,
         description: data.description || undefined,

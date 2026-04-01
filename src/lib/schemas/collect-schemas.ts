@@ -146,11 +146,6 @@ export const createCampaignSchema = z.object({
     .min(3, "Slug must be at least 3 characters")
     .max(60, "Slug too long")
     .regex(/^[a-z0-9-]+$/, "Only lowercase letters, numbers, and hyphens"),
-  candidateName: z.string().min(1),
-  candidateTitle: z.string().nullish().or(z.literal("")),
-  party: z.string().min(1),
-  constituency: z.string().min(1, "Constituency is required"),
-  constituencyType: z.enum(["federal", "state", "lga"]),
   enabledLgaIds: z.array(z.number()),
   customQuestion1: z.string().nullish().or(z.literal("")),
   customQuestion2: z.string().nullish().or(z.literal("")),

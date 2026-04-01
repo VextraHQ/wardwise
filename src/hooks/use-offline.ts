@@ -13,9 +13,7 @@ export function useOffline() {
   const [isOffline, setIsOffline] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSyncResult, setLastSyncResult] = useState<SyncResult | null>(
-    null,
-  );
+  const [lastSyncResult, setLastSyncResult] = useState<SyncResult | null>(null);
 
   // Flushes all queued offline submissions to the server.
   const trySync = useCallback(async (): Promise<SyncResult | undefined> => {
@@ -68,10 +66,7 @@ export function useOffline() {
   }, [refreshPendingCount]);
 
   // Clears the last sync result from state (used to dismiss sync banners).
-  const clearLastSyncResult = useCallback(
-    () => setLastSyncResult(null),
-    [],
-  );
+  const clearLastSyncResult = useCallback(() => setLastSyncResult(null), []);
 
   return {
     isOffline,

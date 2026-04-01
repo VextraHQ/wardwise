@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import {
   IconArrowLeft,
@@ -9,65 +10,113 @@ import {
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   StepCard,
   CardSectionHeader,
   SectionLabel,
   FieldLabel,
 } from "@/components/collect/form-ui";
+import { LgaCheckboxGrid } from "@/components/admin/shared/lga-checkbox-grid";
+import { useGeoLgas } from "@/hooks/use-geo";
+import { positionRequiresLgas } from "@/lib/utils/constituency";
 import type { CreateCampaignData } from "@/lib/schemas/collect-schemas";
 
-type Lga = { id: number; name: string };
+type CandidateInfo = {
+  id: string;
+  name: string;
+  party: string;
+  position: string;
+  constituency: string;
+  stateCode: string;
+  constituencyLgaIds: number[];
+};
 
 interface StepQuestionsReviewProps {
   form: UseFormReturn<CreateCampaignData>;
-  lgas: Lga[] | undefined;
   isSubmitting: boolean;
-  candidatePosition?: string;
-  candidateState?: string;
+  selectedCandidate?: CandidateInfo;
   onBack: () => void;
   onSubmit: () => void;
 }
 
 export function StepQuestionsReview({
   form,
-  lgas,
   isSubmitting,
-  candidatePosition,
-  candidateState,
+  selectedCandidate,
   onBack,
   onSubmit,
 }: StepQuestionsReviewProps) {
-  const { register, watch } = form;
+  const { register, watch, setValue, setError, clearErrors } = form;
+  const [restrictMode, setRestrictMode] = useState(false);
 
-  const candidateName = watch("candidateName");
-  const party = watch("party");
   const slug = watch("slug");
-  const constituency = watch("constituency");
-  const constituencyType = watch("constituencyType");
   const enabledLgaIds = watch("enabledLgaIds");
   const customQuestion1 = watch("customQuestion1");
   const customQuestion2 = watch("customQuestion2");
 
-  const selectedLgaNames = lgas
-    ?.filter((l) => enabledLgaIds.includes(l.id))
-    .map((l) => l.name);
+  // Only fetch LGAs when candidate has constituency LGAs and we might need to show the grid
+  const needsLgas =
+    selectedCandidate && positionRequiresLgas(selectedCandidate.position);
+  const { data: lgaResponse, isLoading: lgasLoading } = useGeoLgas(
+    needsLgas ? selectedCandidate.stateCode : null,
+    { pageSize: 200 },
+  );
+
+  // Filter to only LGAs that belong to the candidate's constituency
+  const candidateLgas = useMemo(() => {
+    if (!lgaResponse || !selectedCandidate) return [];
+    return lgaResponse.data
+      .filter((l) => selectedCandidate.constituencyLgaIds.includes(l.id))
+      .map((l) => ({ id: l.id, name: l.name }));
+  }, [lgaResponse, selectedCandidate]);
 
   // Position-aware LGA display
-  const lgaDisplayValue =
-    candidatePosition === "President"
+  const lgaDisplayValue = selectedCandidate
+    ? selectedCandidate.position === "President"
       ? "Nationwide"
-      : candidatePosition === "Governor"
-        ? `All LGAs in ${candidateState || "state"}`
-        : selectedLgaNames && selectedLgaNames.length <= 5
-          ? selectedLgaNames.join(", ")
-          : `${enabledLgaIds.length} selected`;
+      : selectedCandidate.position === "Governor"
+        ? `All LGAs in ${selectedCandidate.stateCode || "state"}`
+        : restrictMode && enabledLgaIds.length > 0
+          ? `${enabledLgaIds.length} of ${selectedCandidate.constituencyLgaIds.length} LGAs (restricted)`
+          : selectedCandidate.constituencyLgaIds.length > 0
+            ? `${selectedCandidate.constituencyLgaIds.length} LGA${selectedCandidate.constituencyLgaIds.length !== 1 ? "s" : ""}`
+            : "—"
+    : "—";
+
+  function handleRestrictToggle(enabled: boolean) {
+    setRestrictMode(enabled);
+    if (!enabled) {
+      // Reset to empty = inherit all from candidate
+      clearErrors("enabledLgaIds");
+      setValue("enabledLgaIds", [], { shouldValidate: true });
+    } else {
+      // Pre-fill with candidate's full set
+      setValue("enabledLgaIds", selectedCandidate?.constituencyLgaIds ?? [], {
+        shouldValidate: true,
+      });
+    }
+  }
+
+  function handleCreateCampaign() {
+    if (restrictMode && enabledLgaIds.length === 0) {
+      setError("enabledLgaIds", {
+        type: "manual",
+        message:
+          "Select at least one LGA or turn off restriction to inherit the full constituency.",
+      });
+      return;
+    }
+
+    clearErrors("enabledLgaIds");
+    onSubmit();
+  }
 
   return (
     <StepCard>
       <CardSectionHeader
         title="Questions & Review"
-        subtitle="Step 3"
+        subtitle="Step 2"
         statusLabel="Final Review"
         icon={<IconClipboardList className="size-5" />}
       />
@@ -99,6 +148,57 @@ export function StepQuestionsReview({
           </div>
         </div>
 
+        {/* Advanced: Restrict to part of constituency */}
+        {needsLgas && candidateLgas.length > 1 && (
+          <div className="space-y-4">
+            <SectionLabel
+              title="Advanced"
+              subtitle="Optionally narrow the collection area"
+            />
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium">
+                  Restrict to part of constituency
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  Deselect LGAs to exclude from this campaign
+                </p>
+              </div>
+              <Switch
+                checked={restrictMode}
+                onCheckedChange={handleRestrictToggle}
+              />
+            </div>
+
+            {restrictMode && (
+              <LgaCheckboxGrid
+                lgas={candidateLgas}
+                selectedIds={enabledLgaIds}
+                onToggle={(lgaId) => {
+                  const ids = enabledLgaIds.includes(lgaId)
+                    ? enabledLgaIds.filter((id) => id !== lgaId)
+                    : [...enabledLgaIds, lgaId];
+                  setValue("enabledLgaIds", ids, { shouldValidate: true });
+                }}
+                onSelectAll={() =>
+                  setValue(
+                    "enabledLgaIds",
+                    candidateLgas.map((l) => l.id),
+                    { shouldValidate: true },
+                  )
+                }
+                onClearAll={() =>
+                  setValue("enabledLgaIds", [], { shouldValidate: true })
+                }
+                loading={lgasLoading}
+                label="Campaign LGAs"
+                helperText="Select the LGAs that should remain available on this campaign"
+                error={form.formState.errors.enabledLgaIds?.message}
+              />
+            )}
+          </div>
+        )}
+
         {/* Review Summary */}
         <div className="space-y-4">
           <SectionLabel
@@ -107,14 +207,21 @@ export function StepQuestionsReview({
           />
 
           <div className="bg-muted/30 divide-border/40 divide-y rounded-sm border">
-            <ReviewRow label="Candidate" value={candidateName} />
-            <ReviewRow label="Party" value={party} />
+            <ReviewRow
+              label="Candidate"
+              value={selectedCandidate?.name || "—"}
+            />
+            <ReviewRow label="Party" value={selectedCandidate?.party || "—"} />
             <ReviewRow label="Slug" value={`/c/${slug}`} mono />
-            <ReviewRow label="Constituency" value={constituency} />
-            <ReviewRow label="Type" value={constituencyType} capitalize />
-            <ReviewRow label="LGAs" value={lgaDisplayValue} />
-            <ReviewRow label="APC/NIN" value="Required" />
-            <ReviewRow label="Voter ID" value="Required" />
+            <ReviewRow
+              label="Position"
+              value={selectedCandidate?.position || "—"}
+            />
+            <ReviewRow
+              label="Constituency"
+              value={selectedCandidate?.constituency || "—"}
+            />
+            <ReviewRow label="Collection Area" value={lgaDisplayValue} />
             {customQuestion1 && (
               <ReviewRow label="Q1" value={customQuestion1} />
             )}
@@ -138,7 +245,7 @@ export function StepQuestionsReview({
         </Button>
         <Button
           type="button"
-          onClick={onSubmit}
+          onClick={handleCreateCampaign}
           disabled={isSubmitting}
           className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 flex-1 rounded-sm font-mono text-[11px] font-bold tracking-widest uppercase transition-all active:scale-95"
         >
@@ -158,18 +265,16 @@ function ReviewRow({
   label,
   value,
   mono,
-  capitalize: cap,
 }: {
   label: string;
   value: string;
   mono?: boolean;
-  capitalize?: boolean;
 }) {
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-2.5 text-sm">
       <span className="text-muted-foreground shrink-0">{label}</span>
       <span
-        className={`truncate text-right font-medium ${mono ? "font-mono text-xs" : ""} ${cap ? "capitalize" : ""}`}
+        className={`truncate text-right font-medium ${mono ? "font-mono text-xs" : ""}`}
       >
         {value}
       </span>

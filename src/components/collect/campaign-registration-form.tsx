@@ -482,7 +482,9 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
           onBack={goBack}
           onNext={validateAndNext}
           isSubmitting={skipCanvasserStep && submitMutation.isPending}
-          submitError={skipCanvasserStep ? submitMutation.error?.message : undefined}
+          submitError={
+            skipCanvasserStep ? submitMutation.error?.message : undefined
+          }
         />
       )}
 

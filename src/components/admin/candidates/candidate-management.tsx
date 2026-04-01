@@ -71,11 +71,7 @@ export function CandidateManagement() {
   const [candidatePage, setCandidatePage] = useState(1);
   const [candidatePageSize, setCandidatePageSize] = useState(10);
 
-  const {
-    data: candidates = [],
-    isLoading,
-    error,
-  } = useAdminCandidates();
+  const { data: candidates = [], isLoading, error } = useAdminCandidates();
 
   const uniqueParties = useMemo(
     () =>

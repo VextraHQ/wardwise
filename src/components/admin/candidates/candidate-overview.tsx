@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useUpdateCandidate } from "@/hooks/use-admin";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +11,7 @@ import {
   updateCandidateSchema,
   type UpdateCandidateFormValues,
 } from "@/lib/schemas/admin-schemas";
-import { nigeriaStates } from "@/lib/data/state-lga-locations";
+import { nigeriaStates, getLGAsByState } from "@/lib/data/state-lga-locations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,7 +45,14 @@ import {
   IconBuildingCommunity,
   IconClipboardList,
 } from "@tabler/icons-react";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
+import { LgaCheckboxGrid } from "@/components/admin/shared/lga-checkbox-grid";
+import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituency-boundary-alerts";
+import {
+  positionRequiresLgas,
+  autoConstituencyName,
+  getConstituencyBoundaryWarnings,
+} from "@/lib/utils/constituency";
 
 function resolveStateName(stateCode: string | null): string {
   if (!stateCode) return "—";
@@ -60,18 +67,19 @@ const POSITIONS = [
   "State Assembly",
 ] as const;
 
-const CONSTITUENCY_POSITIONS = [
-  "Senator",
-  "House of Representatives",
-  "State Assembly",
-];
-
 interface CandidateOverviewProps {
   candidate: CandidateWithUser;
 }
 
 export function CandidateOverview({ candidate }: CandidateOverviewProps) {
   const [editing, setEditing] = useState(false);
+  const campaignCount =
+    (candidate as CandidateWithUser & { _count?: { campaigns?: number } })
+      ._count?.campaigns ?? 0;
+  const canvasserCount =
+    (candidate as CandidateWithUser & { _count?: { canvassers?: number } })
+      ._count?.canvassers ?? 0;
+  const supporterCount = candidate.supporterCount ?? 0;
 
   const form = useForm<UpdateCandidateFormValues>({
     resolver: zodResolver(updateCandidateSchema),
@@ -84,6 +92,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
       constituency: candidate.constituency ?? "",
       stateCode: candidate.stateCode ?? "",
       lga: candidate.lga ?? "",
+      constituencyLgaIds: candidate.constituencyLgaIds ?? [],
       description: candidate.description ?? "",
       phone: candidate.phone ?? "",
       title: candidate.title ?? "",
@@ -98,20 +107,151 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     control: form.control,
     name: "stateCode",
   });
-  const showStateField = !!selectedPosition;
-  const showLgaField =
-    selectedPosition && CONSTITUENCY_POSITIONS.includes(selectedPosition);
+  const rawConstituencyLgaIds = useWatch({
+    control: form.control,
+    name: "constituencyLgaIds",
+  });
+  const constituency = useWatch({
+    control: form.control,
+    name: "constituency",
+  });
+  const constituencyValue = constituency ?? "";
+  const constituencyLgaIds = useMemo(
+    () => rawConstituencyLgaIds ?? [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(rawConstituencyLgaIds)],
+  );
+  const showStateField = Boolean(selectedPosition);
+  const showLgaGrid = Boolean(
+    selectedPosition && positionRequiresLgas(selectedPosition),
+  );
 
   const { data: lgaResponse, isLoading: lgasLoading } = useGeoLgas(
-    editing && showLgaField && selectedStateCode ? selectedStateCode : null,
+    editing && showLgaGrid && selectedStateCode ? selectedStateCode : null,
     { pageSize: 200 },
   );
 
-  const lgaOptions = useMemo(
-    () =>
-      lgaResponse?.data.map((l) => ({ value: l.name, label: l.name })) ?? [],
+  const lgas = useMemo(
+    () => lgaResponse?.data.map((l) => ({ id: l.id, name: l.name })) ?? [],
     [lgaResponse],
   );
+  const selectedStateName = useMemo(
+    () =>
+      nigeriaStates.find((state) => state.code === selectedStateCode)?.name ??
+      selectedStateCode,
+    [selectedStateCode],
+  );
+  const selectedLgaNames = useMemo(
+    () =>
+      lgas
+        .filter((lga) => constituencyLgaIds.includes(lga.id))
+        .map((lga) => lga.name),
+    [constituencyLgaIds, lgas],
+  );
+  const suggestedConstituency = useMemo(
+    () => autoConstituencyName(selectedLgaNames),
+    [selectedLgaNames],
+  );
+
+  const stateHasNoLgas = Boolean(
+    showLgaGrid && selectedStateCode && !lgasLoading && lgas.length === 0,
+  );
+
+  const expectedLgaCount = selectedStateCode
+    ? getLGAsByState(selectedStateCode).length
+    : 0;
+  const hasPartialLgas = Boolean(
+    showLgaGrid &&
+    selectedStateCode &&
+    !lgasLoading &&
+    lgas.length > 0 &&
+    lgas.length < expectedLgaCount,
+  );
+  const editBoundaryWarnings = useMemo(
+    () =>
+      getConstituencyBoundaryWarnings({
+        position: selectedPosition ?? "",
+        stateName: selectedStateName,
+        selectedLgaCount: constituencyLgaIds.length,
+        expectedLgaCount,
+        constituencyName: constituencyValue,
+        autoSuggestedName: suggestedConstituency,
+        hasPartialGeo: hasPartialLgas,
+        hasExistingCampaigns: campaignCount > 0,
+      }),
+    [
+      campaignCount,
+      constituencyLgaIds.length,
+      constituencyValue,
+      expectedLgaCount,
+      hasPartialLgas,
+      selectedPosition,
+      selectedStateName,
+      suggestedConstituency,
+    ],
+  );
+  const summaryBoundaryWarnings = useMemo(
+    () =>
+      getConstituencyBoundaryWarnings({
+        position: candidate.position,
+        stateName: resolveStateName(candidate.stateCode),
+        selectedLgaCount: candidate.constituencyLgaIds.length,
+        expectedLgaCount: candidate.stateCode
+          ? getLGAsByState(candidate.stateCode).length
+          : 0,
+        constituencyName: candidate.constituency,
+        hasExistingCampaigns: campaignCount > 0,
+      }),
+    [
+      campaignCount,
+      candidate.constituency,
+      candidate.constituencyLgaIds.length,
+      candidate.position,
+      candidate.stateCode,
+    ],
+  );
+  const lastAutoConstituencyRef = useRef("");
+
+  // Auto-suggest constituency from selected LGAs when editing
+  useEffect(() => {
+    if (!editing || !showLgaGrid || lgas.length === 0) {
+      lastAutoConstituencyRef.current = "";
+      return;
+    }
+    const suggested = suggestedConstituency;
+
+    if (!suggested) {
+      if (
+        constituencyValue === lastAutoConstituencyRef.current &&
+        constituencyValue
+      ) {
+        lastAutoConstituencyRef.current = "";
+        form.setValue("constituency", "", { shouldValidate: false });
+      }
+      return;
+    }
+
+    const isManualOverride =
+      constituencyValue.length > 0 &&
+      constituencyValue !== lastAutoConstituencyRef.current;
+
+    if (suggested === constituencyValue) {
+      lastAutoConstituencyRef.current = suggested;
+      return;
+    }
+
+    if (!isManualOverride) {
+      lastAutoConstituencyRef.current = suggested;
+      form.setValue("constituency", suggested, { shouldValidate: false });
+    }
+  }, [
+    constituencyValue,
+    editing,
+    form,
+    lgas.length,
+    showLgaGrid,
+    suggestedConstituency,
+  ]);
 
   const stateGroups = useMemo(() => {
     const zones = [
@@ -141,6 +281,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
         party: data.party,
         position: data.position as (typeof POSITIONS)[number],
         constituency: data.constituency,
+        constituencyLgaIds: data.constituencyLgaIds,
         stateCode: data.stateCode || undefined,
         lga: data.lga || undefined,
         description: data.description || undefined,
@@ -159,14 +300,37 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     );
   }
 
-  // Stats
-  const campaignCount =
-    (candidate as CandidateWithUser & { _count?: { campaigns?: number } })
-      ._count?.campaigns ?? 0;
-  const canvasserCount =
-    (candidate as CandidateWithUser & { _count?: { canvassers?: number } })
-      ._count?.canvassers ?? 0;
-  const supporterCount = candidate.supporterCount ?? 0;
+  function handleEditPositionChange(value: string) {
+    form.setValue("position", value, { shouldValidate: true });
+    form.setValue("stateCode", "", { shouldValidate: true });
+    form.setValue("lga", "");
+    form.setValue("constituencyLgaIds", [], { shouldValidate: true });
+
+    if (value === "President") {
+      form.setValue("constituency", "Federal Republic of Nigeria", {
+        shouldValidate: true,
+      });
+    } else {
+      form.setValue("constituency", "", { shouldValidate: true });
+    }
+  }
+
+  function handleEditStateChange(value: string) {
+    form.setValue("stateCode", value, { shouldValidate: true });
+    form.setValue("lga", "");
+    form.setValue("constituencyLgaIds", [], { shouldValidate: true });
+
+    if (selectedPosition === "Governor") {
+      const stateName = nigeriaStates.find(
+        (state) => state.code === value,
+      )?.name;
+      if (stateName) {
+        form.setValue("constituency", `${stateName} State`, {
+          shouldValidate: true,
+        });
+      }
+    }
+  }
 
   const stats = [
     {
@@ -314,7 +478,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                             Position
                           </FormLabel>
                           <Select
-                            onValueChange={field.onChange}
+                            onValueChange={handleEditPositionChange}
                             value={field.value}
                           >
                             <FormControl>
@@ -339,10 +503,12 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
 
                 <div className="border-border/40 border-b" />
 
-                {/* Location */}
+                {/* Electoral Boundary */}
                 <div className="space-y-4">
                   <p className="text-foreground/70 font-mono text-[9px] font-bold tracking-widest uppercase">
-                    Location
+                    {selectedPosition === "President"
+                      ? "Location"
+                      : "Electoral Boundary"}
                   </p>
                   {showStateField && (
                     <FormField
@@ -356,12 +522,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                           <ComboboxSelect
                             groups={stateGroups}
                             value={selectedStateCode || ""}
-                            onValueChange={(val) => {
-                              form.setValue("stateCode", val, {
-                                shouldValidate: true,
-                              });
-                              form.setValue("lga", "");
-                            }}
+                            onValueChange={handleEditStateChange}
                             placeholder="Select state..."
                           />
                           <FormMessage />
@@ -370,26 +531,66 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                     />
                   )}
 
-                  {showLgaField && selectedStateCode && (
-                    <FormField
-                      control={form.control}
-                      name="lga"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
-                            LGA
-                          </FormLabel>
-                          <ComboboxSelect
-                            options={lgaOptions}
-                            value={field.value || ""}
-                            onValueChange={(val) => field.onChange(val)}
-                            placeholder="Select LGA..."
-                            isLoading={lgasLoading}
-                          />
-                          <FormMessage />
-                        </FormItem>
+                  {showLgaGrid && selectedStateCode && !stateHasNoLgas && (
+                    <div className="space-y-3">
+                      <LgaCheckboxGrid
+                        lgas={lgas}
+                        selectedIds={constituencyLgaIds}
+                        onToggle={(lgaId) => {
+                          const ids = constituencyLgaIds.includes(lgaId)
+                            ? constituencyLgaIds.filter((id) => id !== lgaId)
+                            : [...constituencyLgaIds, lgaId];
+                          form.setValue("constituencyLgaIds", ids, {
+                            shouldValidate: true,
+                          });
+                        }}
+                        onSelectAll={() =>
+                          form.setValue(
+                            "constituencyLgaIds",
+                            lgas.map((lga) => lga.id),
+                            { shouldValidate: true },
+                          )
+                        }
+                        onClearAll={() =>
+                          form.setValue("constituencyLgaIds", [], {
+                            shouldValidate: true,
+                          })
+                        }
+                        loading={lgasLoading}
+                        label="Constituency LGAs"
+                        helperText="Select the LGAs that form this constituency's boundary"
+                        stateLabel={selectedStateName}
+                        error={
+                          form.formState.errors.constituencyLgaIds?.message
+                        }
+                      />
+                      {hasPartialLgas && (
+                        <p className="text-muted-foreground text-xs">
+                          <span className="font-medium text-amber-600 dark:text-amber-500">
+                            {lgas.length} of {expectedLgaCount} LGAs available
+                          </span>{" "}
+                          for {selectedStateName}. Some LGAs have not been
+                          seeded yet.
+                        </p>
                       )}
-                    />
+                    </div>
+                  )}
+
+                  {stateHasNoLgas && (
+                    <div className="flex items-start gap-3 rounded-sm border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/50 dark:bg-amber-950/30">
+                      <span className="mt-0.5 text-amber-600 dark:text-amber-500">
+                        &#9888;
+                      </span>
+                      <div className="text-sm">
+                        <p className="font-medium text-amber-800 dark:text-amber-400">
+                          No LGA data available for {selectedStateName} yet.
+                        </p>
+                        <p className="text-muted-foreground mt-1 text-xs">
+                          Save and add constituency LGAs later. Campaigns cannot
+                          be created until constituency LGAs are defined.
+                        </p>
+                      </div>
+                    </div>
                   )}
 
                   <FormField
@@ -398,7 +599,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
-                          Constituency
+                          Constituency Name
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -410,6 +611,8 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                       </FormItem>
                     )}
                   />
+
+                  <ConstituencyBoundaryAlerts warnings={editBoundaryWarnings} />
                 </div>
 
                 <div className="border-border/40 border-b" />
@@ -503,20 +706,30 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
 
               <div className="border-border/40 border-b" />
 
-              {/* Location */}
+              {/* Electoral Boundary */}
               <div>
                 <p className="text-foreground/70 mb-3 font-mono text-[9px] font-bold tracking-widest uppercase">
-                  Location
+                  Electoral Boundary
                 </p>
                 <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                   <InfoRow
                     label="State"
                     value={resolveStateName(candidate.stateCode)}
                   />
-                  <InfoRow label="LGA" value={candidate.lga || "—"} />
                   <InfoRow
                     label="Constituency"
                     value={candidate.constituency || "—"}
+                  />
+                  {candidate.constituencyLgaIds.length > 0 && (
+                    <InfoRow
+                      label="Constituency LGAs"
+                      value={`${candidate.constituencyLgaIds.length} LGA${candidate.constituencyLgaIds.length !== 1 ? "s" : ""} selected`}
+                    />
+                  )}
+                </div>
+                <div className="mt-4">
+                  <ConstituencyBoundaryAlerts
+                    warnings={summaryBoundaryWarnings}
                   />
                 </div>
               </div>

@@ -29,6 +29,7 @@ model Candidate {
   stateCode        String?  // 2-letter code (e.g. "AD", "LA")
   lga              String?
   constituency     String?
+  constituencyLgaIds Int[]  @default([])
   description      String?
   phone            String?
   title            String?  // Honorific: Hon., Sen., Dr., Chief, Alh.

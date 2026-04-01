@@ -111,7 +111,11 @@ export function RoleStep({
             <NavButtons
               onBack={onBack}
               onNext={onNext}
-              nextLabel={selectedRole === "canvasser" ? "Submit Registration" : "Continue"}
+              nextLabel={
+                selectedRole === "canvasser"
+                  ? "Submit Registration"
+                  : "Continue"
+              }
               isLoading={isSubmitting}
             />
 

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { emailSchema, phoneSchema } from "@/lib/schemas/common-schemas";
+import { getPositionStateValidationMessage } from "@/lib/utils/constituency";
 
 // Candidate position enum
 export const candidatePositionSchema = z.enum([
@@ -9,13 +10,6 @@ export const candidatePositionSchema = z.enum([
   "House of Representatives",
   "State Assembly",
 ]);
-
-// Positions that require LGA (constituency-level only)
-const CONSTITUENCY_POSITIONS = [
-  "Senator",
-  "House of Representatives",
-  "State Assembly",
-];
 
 // Create Candidate Schema
 export const createCandidateSchema = z
@@ -53,6 +47,7 @@ export const createCandidateSchema = z
       .max(100, "LGA must not exceed 100 characters")
       .optional()
       .or(z.literal("")),
+    constituencyLgaIds: z.array(z.number()),
     description: z
       .string()
       .max(1000, "Description must not exceed 1000 characters")
@@ -78,20 +73,19 @@ export const createCandidateSchema = z
       path: ["stateCode"],
     },
   )
-  .refine(
-    (data) => {
-      // LGA is required only for constituency-level positions
-      if (data.position && CONSTITUENCY_POSITIONS.includes(data.position)) {
-        return data.lga && data.lga.trim().length > 0;
-      }
-      return true;
-    },
-    {
-      message: "LGA is required for this position",
-      path: ["lga"],
-    },
-  );
-
+  .superRefine((data, ctx) => {
+    const message = getPositionStateValidationMessage(
+      data.position,
+      data.stateCode,
+    );
+    if (message) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["stateCode"],
+        message,
+      });
+    }
+  });
 // Update Candidate Schema (all fields optional except id)
 export const updateCandidateSchema = z
   .object({
@@ -135,6 +129,7 @@ export const updateCandidateSchema = z
       .max(100, "LGA must not exceed 100 characters")
       .optional()
       .or(z.literal("")),
+    constituencyLgaIds: z.array(z.number()).optional(),
     description: z
       .string()
       .max(1000, "Description must not exceed 1000 characters")
@@ -162,18 +157,20 @@ export const updateCandidateSchema = z
       path: ["stateCode"],
     },
   )
-  .refine(
-    (data) => {
-      if (data.position && CONSTITUENCY_POSITIONS.includes(data.position)) {
-        return data.lga && data.lga.trim().length > 0;
-      }
-      return true;
-    },
-    {
-      message: "LGA is required for this position",
-      path: ["lga"],
-    },
-  );
+  .superRefine((data, ctx) => {
+    if (!data.position) return;
+    const message = getPositionStateValidationMessage(
+      data.position,
+      data.stateCode,
+    );
+    if (message) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["stateCode"],
+        message,
+      });
+    }
+  });
 
 // Create Canvasser Schema
 export const createCanvasserSchema = z.object({
