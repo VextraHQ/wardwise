@@ -52,7 +52,9 @@ import {
   positionRequiresLgas,
   autoConstituencyName,
   getConstituencyBoundaryWarnings,
+  matchPresetToSeededIds,
 } from "@/lib/utils/constituency";
+import { getPresetsForState } from "@/lib/data/nigerian-constituencies";
 
 function resolveStateName(stateCode: string | null): string {
   if (!stateCode) return "—";
@@ -167,6 +169,35 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     lgas.length > 0 &&
     lgas.length < expectedLgaCount,
   );
+  const [selectedPresetShortName, setSelectedPresetShortName] = useState<string | null>(null);
+
+  const availablePresets = useMemo(
+    () =>
+      editing && showLgaGrid && selectedPosition && selectedStateCode
+        ? getPresetsForState(
+            selectedPosition as "Senator" | "House of Representatives" | "State Assembly",
+            selectedStateCode,
+          )
+        : [],
+    [editing, showLgaGrid, selectedPosition, selectedStateCode],
+  );
+  const hasPresets = availablePresets.length > 0;
+
+  const presetMatchResult = useMemo(() => {
+    if (!selectedPresetShortName) return null;
+    const preset = availablePresets.find(
+      (p) => p.shortName === selectedPresetShortName,
+    );
+    return preset ? matchPresetToSeededIds(preset, lgas) : null;
+  }, [selectedPresetShortName, availablePresets, lgas]);
+
+  const isPresetDeviated = useMemo(() => {
+    if (!selectedPresetShortName || !presetMatchResult) return false;
+    const s1 = [...presetMatchResult.ids].sort((a, b) => a - b);
+    const s2 = [...constituencyLgaIds].sort((a, b) => a - b);
+    return JSON.stringify(s1) !== JSON.stringify(s2);
+  }, [selectedPresetShortName, presetMatchResult, constituencyLgaIds]);
+
   const editBoundaryWarnings = useMemo(
     () =>
       getConstituencyBoundaryWarnings({
@@ -178,6 +209,13 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
         autoSuggestedName: suggestedConstituency,
         hasPartialGeo: hasPartialLgas,
         hasExistingCampaigns: campaignCount > 0,
+        presetMismatchInfo: hasPresets
+          ? {
+              hasPresets,
+              activePresetName: selectedPresetShortName ?? undefined,
+              isDeviated: isPresetDeviated,
+            }
+          : undefined,
       }),
     [
       campaignCount,
@@ -185,7 +223,10 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
       constituencyValue,
       expectedLgaCount,
       hasPartialLgas,
+      hasPresets,
+      isPresetDeviated,
       selectedPosition,
+      selectedPresetShortName,
       selectedStateName,
       suggestedConstituency,
     ],
@@ -253,6 +294,20 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     suggestedConstituency,
   ]);
 
+  function handlePresetChange(value: string) {
+    if (value === "__custom__" || !value) {
+      setSelectedPresetShortName(null);
+      return;
+    }
+    const preset = availablePresets.find((p) => p.shortName === value);
+    if (!preset) return;
+    setSelectedPresetShortName(value);
+    const { ids } = matchPresetToSeededIds(preset, lgas);
+    form.setValue("constituencyLgaIds", ids, { shouldValidate: true });
+    lastAutoConstituencyRef.current = preset.name;
+    form.setValue("constituency", preset.name, { shouldValidate: false });
+  }
+
   const stateGroups = useMemo(() => {
     const zones = [
       "North Central",
@@ -305,6 +360,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     form.setValue("stateCode", "", { shouldValidate: true });
     form.setValue("lga", "");
     form.setValue("constituencyLgaIds", [], { shouldValidate: true });
+    setSelectedPresetShortName(null);
 
     if (value === "President") {
       form.setValue("constituency", "Federal Republic of Nigeria", {
@@ -319,6 +375,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     form.setValue("stateCode", value, { shouldValidate: true });
     form.setValue("lga", "");
     form.setValue("constituencyLgaIds", [], { shouldValidate: true });
+    setSelectedPresetShortName(null);
 
     if (selectedPosition === "Governor") {
       const stateName = nigeriaStates.find(
@@ -529,6 +586,46 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                         </FormItem>
                       )}
                     />
+                  )}
+
+                  {showLgaGrid && selectedStateCode && hasPresets && (
+                    <FormItem>
+                      <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
+                        Official Constituency
+                      </FormLabel>
+                      <ComboboxSelect
+                        value={selectedPresetShortName ?? ""}
+                        onValueChange={handlePresetChange}
+                        options={[
+                          {
+                            value: "__custom__",
+                            label: "Custom (manual selection)",
+                            description: "Skip preset — pick LGAs manually",
+                          },
+                          ...availablePresets.map((p) => ({
+                            value: p.shortName,
+                            label: p.shortName,
+                            description: p.name,
+                          })),
+                        ]}
+                        placeholder="Select official constituency..."
+                        searchPlaceholder="Search constituencies..."
+                        emptyMessage="No constituency found."
+                      />
+                      {presetMatchResult &&
+                        presetMatchResult.unmatchedNames.length > 0 && (
+                          <p className="text-muted-foreground text-xs">
+                            <span className="font-medium text-amber-600 dark:text-amber-500">
+                              {presetMatchResult.unmatchedNames.length} LGA
+                              {presetMatchResult.unmatchedNames.length > 1
+                                ? "s"
+                                : ""}{" "}
+                              not yet seeded:
+                            </span>{" "}
+                            {presetMatchResult.unmatchedNames.join(", ")}
+                          </p>
+                        )}
+                    </FormItem>
                   )}
 
                   {showLgaGrid && selectedStateCode && !stateHasNoLgas && (

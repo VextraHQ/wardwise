@@ -1,4 +1,6 @@
 // Constituency helpers — shared between candidate and campaign modules
+import type { ConstituencyPreset } from "@/lib/data/nigerian-constituencies";
+
 export type ConstituencyBoundaryWarning = {
   severity: "info" | "warning";
   title: string;
@@ -52,6 +54,24 @@ export function autoConstituencyName(lgaNames: string[]): string {
   return lgaNames.sort().join("/");
 }
 
+/**
+ * Match a preset's canonical LGA names against the live DB records for a state.
+ * Returns the matched IDs (to write to the form) and any names not yet seeded.
+ */
+export function matchPresetToSeededIds(
+  preset: ConstituencyPreset,
+  lgas: { id: number; name: string }[],
+): { ids: number[]; unmatchedNames: string[] } {
+  const ids: number[] = [];
+  const unmatchedNames: string[] = [];
+  for (const name of preset.lgaNames) {
+    const lga = lgas.find((l) => l.name === name);
+    if (lga) ids.push(lga.id);
+    else unmatchedNames.push(name);
+  }
+  return { ids, unmatchedNames };
+}
+
 // Deduplicate and stabilize LGA arrays before persisting or comparing them
 export function normalizeConstituencyLgaIds(
   lgaIds: number[] | undefined,
@@ -70,6 +90,7 @@ export function getConstituencyBoundaryWarnings({
   hasPartialGeo = false,
   hasExistingCampaigns = false,
   allowIncompleteSave = true,
+  presetMismatchInfo,
 }: {
   position: string;
   stateName?: string | null;
@@ -80,6 +101,11 @@ export function getConstituencyBoundaryWarnings({
   hasPartialGeo?: boolean;
   hasExistingCampaigns?: boolean;
   allowIncompleteSave?: boolean;
+  presetMismatchInfo?: {
+    hasPresets: boolean;
+    activePresetName?: string; // set when a preset was applied
+    isDeviated: boolean; // current LGAs no longer match the applied preset
+  };
 }): ConstituencyBoundaryWarning[] {
   if (!positionRequiresLgas(position)) return [];
 
@@ -141,6 +167,22 @@ export function getConstituencyBoundaryWarnings({
       description:
         "Saving a new candidate boundary does not rewrite existing campaign coverage. Review each active campaign after this update.",
     });
+  }
+
+  if (presetMismatchInfo?.hasPresets && selectedLgaCount > 0) {
+    if (presetMismatchInfo.isDeviated && presetMismatchInfo.activePresetName) {
+      warnings.push({
+        severity: "info",
+        title: "LGAs deviate from preset",
+        description: `The current selection differs from "${presetMismatchInfo.activePresetName}". Verify this is the correct official boundary before saving.`,
+      });
+    } else if (!presetMismatchInfo.activePresetName) {
+      warnings.push({
+        severity: "info",
+        title: "No matching official constituency",
+        description: `The selected LGAs don't match any known official ${position} constituency. Double-check against INEC records.`,
+      });
+    }
   }
 
   return warnings;
