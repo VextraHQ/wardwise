@@ -111,21 +111,34 @@ export async function POST(request: NextRequest) {
     const constituencyType =
       positionToConstituencyType(candidate.position) ?? "federal";
 
-    // enabledLgaIds: if client sent non-empty array, use it (must be subset); otherwise inherit from candidate
+    // Derive enabledLgaIds based on position scope
     let enabledLgaIds = candidate.constituencyLgaIds;
+
+    if (candidate.position === "Governor" && candidate.stateCode) {
+      // Governor scope = all LGAs in state — derive from DB so submit route enforces state boundary
+      const stateLgas = await prisma.lga.findMany({
+        where: { stateCode: candidate.stateCode },
+        select: { id: true },
+      });
+      enabledLgaIds = stateLgas.map((l) => l.id);
+    }
+
+    // If client sent a restricted subset, validate it
     if (data.enabledLgaIds.length > 0) {
-      // Validate it's a subset of candidate's constituency LGAs
-      const isSubset = data.enabledLgaIds.every((id) =>
-        candidate.constituencyLgaIds.includes(id),
-      );
-      if (!isSubset && candidate.constituencyLgaIds.length > 0) {
-        return NextResponse.json(
-          {
-            error:
-              "Enabled LGAs must be a subset of the candidate's constituency LGAs",
-          },
-          { status: 400 },
+      // Validate it's a subset of the effective scope
+      if (enabledLgaIds.length > 0) {
+        const isSubset = data.enabledLgaIds.every((id) =>
+          enabledLgaIds.includes(id),
         );
+        if (!isSubset) {
+          return NextResponse.json(
+            {
+              error:
+                "Enabled LGAs must be a subset of the candidate's constituency LGAs",
+            },
+            { status: 400 },
+          );
+        }
       }
       enabledLgaIds = data.enabledLgaIds;
     }
