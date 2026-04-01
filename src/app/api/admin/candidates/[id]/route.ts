@@ -6,6 +6,7 @@ import type { Candidate } from "@/types/candidate";
 import { updateCandidateSchema } from "@/lib/schemas/admin-schemas";
 import { logAudit } from "@/lib/audit";
 import { sanitizeCandidateConstituencyLgaIds } from "@/lib/utils/constituency-server";
+import { getPositionStateValidationMessage } from "@/lib/utils/constituency";
 
 const CANDIDATE_INCLUDE = {
   user: {
@@ -134,6 +135,16 @@ export async function PUT(
     const nextPosition = position ?? existingCandidate.position;
     const nextStateCode =
       stateCode !== undefined ? stateCode || null : existingCandidate.stateCode;
+
+    // Validate FCT rules against effective position+state (not just payload)
+    const fctMessage = getPositionStateValidationMessage(
+      nextPosition,
+      nextStateCode,
+    );
+    if (fctMessage) {
+      return NextResponse.json({ error: fctMessage }, { status: 400 });
+    }
+
     const nextConstituencyLgaIds =
       constituencyLgaIds !== undefined
         ? constituencyLgaIds
