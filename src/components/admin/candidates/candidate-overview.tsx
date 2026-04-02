@@ -53,6 +53,7 @@ import {
   autoConstituencyName,
   getConstituencyBoundaryWarnings,
   matchPresetToSeededIds,
+  findMatchingPreset,
 } from "@/lib/utils/constituency";
 import { getPresetsForState } from "@/lib/data/nigerian-constituencies";
 
@@ -128,7 +129,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     selectedPosition && positionRequiresLgas(selectedPosition),
   );
 
-  const { data: lgaResponse, isLoading: lgasLoading } = useGeoLgas(
+  const { data: lgaResponse, isLoading: lgasLoading, isFetching: lgasFetching } = useGeoLgas(
     editing && showLgaGrid && selectedStateCode ? selectedStateCode : null,
     { pageSize: 200 },
   );
@@ -198,6 +199,11 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     return JSON.stringify(s1) !== JSON.stringify(s2);
   }, [selectedPresetShortName, presetMatchResult, constituencyLgaIds]);
 
+  const manuallyMatchesPreset = useMemo(() => {
+    if (selectedPresetShortName) return false;
+    return findMatchingPreset(constituencyLgaIds, lgas, availablePresets) !== null;
+  }, [selectedPresetShortName, constituencyLgaIds, lgas, availablePresets]);
+
   const editBoundaryWarnings = useMemo(
     () =>
       getConstituencyBoundaryWarnings({
@@ -214,6 +220,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
               hasPresets,
               activePresetName: selectedPresetShortName ?? undefined,
               isDeviated: isPresetDeviated,
+              manuallyMatchesPreset,
             }
           : undefined,
       }),
@@ -225,6 +232,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
       hasPartialLgas,
       hasPresets,
       isPresetDeviated,
+      manuallyMatchesPreset,
       selectedPosition,
       selectedPresetShortName,
       selectedStateName,
@@ -299,6 +307,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
       setSelectedPresetShortName(null);
       return;
     }
+    if (lgasFetching || lgas.length === 0) return;
     const preset = availablePresets.find((p) => p.shortName === value);
     if (!preset) return;
     setSelectedPresetShortName(value);
@@ -596,6 +605,8 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                       <ComboboxSelect
                         value={selectedPresetShortName ?? ""}
                         onValueChange={handlePresetChange}
+                        disabled={lgasFetching}
+                        isLoading={lgasFetching}
                         options={[
                           {
                             value: "__custom__",

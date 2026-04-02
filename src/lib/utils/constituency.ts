@@ -72,6 +72,29 @@ export function matchPresetToSeededIds(
   return { ids, unmatchedNames };
 }
 
+/**
+ * Check whether the current manual LGA selection exactly matches any known preset.
+ * Returns the matched preset, or null if no exact match.
+ */
+export function findMatchingPreset(
+  selectedLgaIds: number[],
+  lgas: { id: number; name: string }[],
+  presets: ConstituencyPreset[],
+): ConstituencyPreset | null {
+  if (selectedLgaIds.length === 0 || presets.length === 0) return null;
+  const selectedNames = new Set(
+    selectedLgaIds
+      .map((id) => lgas.find((l) => l.id === id)?.name)
+      .filter(Boolean),
+  );
+  return (
+    presets.find((p) => {
+      if (p.lgaNames.length !== selectedNames.size) return false;
+      return p.lgaNames.every((name) => selectedNames.has(name));
+    }) ?? null
+  );
+}
+
 // Deduplicate and stabilize LGA arrays before persisting or comparing them
 export function normalizeConstituencyLgaIds(
   lgaIds: number[] | undefined,
@@ -105,6 +128,7 @@ export function getConstituencyBoundaryWarnings({
     hasPresets: boolean;
     activePresetName?: string; // set when a preset was applied
     isDeviated: boolean; // current LGAs no longer match the applied preset
+    manuallyMatchesPreset?: boolean; // manual selection matches an official preset
   };
 }): ConstituencyBoundaryWarning[] {
   if (!positionRequiresLgas(position)) return [];
@@ -176,7 +200,7 @@ export function getConstituencyBoundaryWarnings({
         title: "LGAs deviate from preset",
         description: `The current selection differs from "${presetMismatchInfo.activePresetName}". Verify this is the correct official boundary before saving.`,
       });
-    } else if (!presetMismatchInfo.activePresetName) {
+    } else if (!presetMismatchInfo.activePresetName && !presetMismatchInfo.manuallyMatchesPreset) {
       warnings.push({
         severity: "info",
         title: "No matching official constituency",
