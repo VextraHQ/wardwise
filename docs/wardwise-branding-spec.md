@@ -233,5 +233,5 @@ This enables utilities: `bg-brand-lagoon`, `text-brand-pine`, `border-brand-emer
 - [x] Landing page gradients updated to brand rgba values
 - [x] `public/wardwise-logo.svg` — updated with brand colors
 - [x] `src/app/icon.svg` — favicon with W mark (Off-White on Pine)
-- [ ] Dark mode tested (Pine bg, Emerald primary, Off-White text)
-- [ ] `pnpm build` passes
+- [x] Dark mode tested (Pine bg, Emerald primary, Off-White text)
+- [x] `pnpm build` passes

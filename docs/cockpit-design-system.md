@@ -410,7 +410,7 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
     <CardTitle className="text-sm font-semibold tracking-tight">
       Title Here
     </CardTitle>
-    <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+    <CardDescription className="text-muted-foreground/70 font-mono text-[10px] uppercase tracking-widest">
       Category Label
     </CardDescription>
   </CardHeader>
@@ -422,7 +422,7 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 ```tsx
 <Badge
   variant="outline"
-  className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+  className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest"
 >
   STATUS
 </Badge>
@@ -433,7 +433,7 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 ```tsx
 <Button
   variant="outline"
-  className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+  className="rounded-sm font-mono text-[11px] uppercase tracking-widest"
 >
   Action Label
 </Button>
@@ -442,7 +442,7 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 ### Cockpit Table Header
 
 ```tsx
-<TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+<TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold uppercase tracking-widest">
   Column Name
 </TableHead>
 ```
@@ -451,7 +451,7 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 
 ```tsx
 <TabsTrigger
-  className="font-mono text-[10px] font-bold tracking-widest uppercase"
+  className="font-mono text-[10px] font-bold uppercase tracking-widest"
   value="tab-id"
 >
   Tab Label
@@ -477,7 +477,7 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
   aria-checked={isSelected}
   aria-label="Select option"
   className={cn(
-    "border-border bg-card hover:border-primary/50 focus-visible:ring-primary rounded-sm border-2 transition-all focus-visible:ring-2 focus-visible:outline-none",
+    "border-border bg-card hover:border-primary/50 focus-visible:ring-primary rounded-sm border-2 transition-all focus-visible:outline-none focus-visible:ring-2",
     isSelected &&
       "border-primary bg-primary/10 ring-primary/20 ring-2 ring-offset-1",
   )}
@@ -490,8 +490,8 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 
 ```tsx
 <div className="border-border/60 bg-card relative overflow-hidden border shadow-none">
-  <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
-  <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
+  <div className="border-primary absolute left-0 top-0 size-5 border-l border-t" />
+  <div className="border-primary absolute right-0 top-0 size-5 border-r border-t" />
   <div className="p-6">{/* content */}</div>
 </div>
 ```
