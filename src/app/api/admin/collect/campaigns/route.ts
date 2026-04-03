@@ -8,6 +8,7 @@ import {
   positionToConstituencyType,
   positionRequiresLgas,
 } from "@/lib/utils/constituency";
+import { resolveCandidateCampaignLgaIds } from "@/lib/utils/constituency-server";
 
 export async function GET(request: NextRequest) {
   try {
@@ -111,17 +112,21 @@ export async function POST(request: NextRequest) {
     const constituencyType =
       positionToConstituencyType(candidate.position) ?? "federal";
 
-    // Derive enabledLgaIds based on position scope
-    let enabledLgaIds = candidate.constituencyLgaIds;
-
-    if (candidate.position === "Governor" && candidate.stateCode) {
-      // Governor scope = all LGAs in state — derive from DB so submit route enforces state boundary
-      const stateLgas = await prisma.lga.findMany({
-        where: { stateCode: candidate.stateCode },
-        select: { id: true },
+    const { ids: candidateScopeLgaIds, error: candidateScopeError } =
+      await resolveCandidateCampaignLgaIds({
+        position: candidate.position,
+        stateCode: candidate.stateCode,
+        constituencyLgaIds: candidate.constituencyLgaIds,
       });
-      enabledLgaIds = stateLgas.map((l) => l.id);
+
+    if (candidateScopeError) {
+      return NextResponse.json(
+        { error: candidateScopeError },
+        { status: 400 },
+      );
     }
+
+    let enabledLgaIds = candidateScopeLgaIds;
 
     // If client sent a restricted subset, validate it
     if (data.enabledLgaIds.length > 0) {

@@ -77,6 +77,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!parsed.data.code) {
+      const conflictingWard = await prisma.ward.findFirst({
+        where: {
+          lgaId: parsed.data.lgaId,
+          name: { equals: parsed.data.name, mode: "insensitive" },
+        },
+        select: { id: true },
+      });
+
+      if (conflictingWard) {
+        return NextResponse.json(
+          {
+            error:
+              "A ward with this name already exists in this LGA. Add the official ward code if this is a distinct official ward.",
+          },
+          { status: 409 },
+        );
+      }
+    }
+
     const ward = await prisma.ward.create({ data: parsed.data });
 
     return NextResponse.json({ ward }, { status: 201 });

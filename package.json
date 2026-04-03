@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "prebuild": "node -e \"const fs=require('fs');const {execSync}=require('child_process');const id=execSync('git rev-parse --short HEAD').toString().trim()+'-'+Date.now();const sw=fs.readFileSync('public/sw.js','utf8');fs.writeFileSync('public/sw.js',sw.replace('__BUILD_ID__',id));\"",
+    "prebuild": "node scripts/update-sw-build-id.mjs",
     "build": "next build",
     "start": "next start",
     "postinstall": "prisma generate",

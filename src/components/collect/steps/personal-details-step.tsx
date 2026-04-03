@@ -118,19 +118,51 @@ export function PersonalDetailsStep({
                 subtitle="Your personal identification details"
               />
 
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <FieldLabel>First Name</FieldLabel>
+                  <div className="relative">
+                    <InputIcon>
+                      <HiUser className="text-muted-foreground size-3.5" />
+                    </InputIcon>
+                    <Input
+                      {...register("firstName")}
+                      placeholder="Enter your first name"
+                      className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-medium transition-all placeholder:text-xs"
+                    />
+                  </div>
+                  <FieldError error={errors.firstName?.message} />
+                </div>
+
+                <div className="space-y-1.5">
+                  <FieldLabel>Last Name</FieldLabel>
+                  <div className="relative">
+                    <InputIcon>
+                      <HiUser className="text-muted-foreground size-3.5" />
+                    </InputIcon>
+                    <Input
+                      {...register("lastName")}
+                      placeholder="Enter your last name"
+                      className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-medium transition-all placeholder:text-xs"
+                    />
+                  </div>
+                  <FieldError error={errors.lastName?.message} />
+                </div>
+              </div>
+
               <div className="space-y-1.5">
-                <FieldLabel>Full Name</FieldLabel>
+                <FieldLabel optional>Middle Name</FieldLabel>
                 <div className="relative">
                   <InputIcon>
                     <HiUser className="text-muted-foreground size-3.5" />
                   </InputIcon>
                   <Input
-                    {...register("fullName")}
-                    placeholder="Enter your full name"
+                    {...register("middleName")}
+                    placeholder="Enter your middle name"
                     className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-medium transition-all placeholder:text-xs"
                   />
                 </div>
-                <FieldError error={errors.fullName?.message} />
+                <FieldError error={errors.middleName?.message} />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">

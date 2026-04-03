@@ -4,7 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { updateCampaignSchema } from "@/lib/schemas/collect-schemas";
 import { logAudit } from "@/lib/audit";
-import { positionRequiresLgas } from "@/lib/utils/constituency";
+import {
+  normalizeConstituencyLgaIds,
+  positionRequiresLgas,
+} from "@/lib/utils/constituency";
+import { resolveCandidateCampaignLgaIds } from "@/lib/utils/constituency-server";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -16,7 +20,16 @@ export async function GET(_request: Request, { params }: RouteParams) {
     const { id } = await params;
     const campaign = await prisma.campaign.findUnique({
       where: { id },
-      include: { _count: { select: { submissions: true } } },
+      include: {
+        _count: { select: { submissions: true } },
+        candidate: {
+          select: {
+            position: true,
+            stateCode: true,
+            constituencyLgaIds: true,
+          },
+        },
+      },
     });
 
     if (!campaign) {
@@ -26,11 +39,29 @@ export async function GET(_request: Request, { params }: RouteParams) {
       );
     }
 
+    const { ids: currentCandidateBoundaryLgaIds, error: candidateBoundaryError } =
+      await resolveCandidateCampaignLgaIds({
+        position: campaign.candidate.position,
+        stateCode: campaign.candidate.stateCode,
+        constituencyLgaIds: campaign.candidate.constituencyLgaIds,
+      });
+
+    const currentBoundary =
+      normalizeConstituencyLgaIds(currentCandidateBoundaryLgaIds);
+    const campaignBoundary = normalizeConstituencyLgaIds(campaign.enabledLgaIds);
+    const isBoundaryOutOfSync =
+      JSON.stringify(currentBoundary) !== JSON.stringify(campaignBoundary);
+
+    const { candidate: _candidate, ...campaignRecord } = campaign;
+
     return NextResponse.json({
       campaign: {
-        ...campaign,
-        createdAt: campaign.createdAt.toISOString(),
-        updatedAt: campaign.updatedAt.toISOString(),
+        ...campaignRecord,
+        currentCandidateBoundaryLgaIds,
+        candidateBoundaryError: candidateBoundaryError ?? null,
+        isBoundaryOutOfSync,
+        createdAt: campaignRecord.createdAt.toISOString(),
+        updatedAt: campaignRecord.updatedAt.toISOString(),
       },
     });
   } catch (error) {
@@ -75,12 +106,26 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const candidate = await prisma.candidate.findUnique({
       where: { id: currentCampaign.candidateId },
-      select: { position: true, constituencyLgaIds: true },
+      select: { position: true, stateCode: true, constituencyLgaIds: true },
     });
     if (!candidate) {
       return NextResponse.json(
         { error: "Candidate not found" },
         { status: 404 },
+      );
+    }
+
+    const { ids: candidateScopeLgaIds, error: candidateScopeError } =
+      await resolveCandidateCampaignLgaIds({
+        position: candidate.position,
+        stateCode: candidate.stateCode,
+        constituencyLgaIds: candidate.constituencyLgaIds,
+      });
+
+    if (candidateScopeError) {
+      return NextResponse.json(
+        { error: candidateScopeError },
+        { status: 400 },
       );
     }
 
@@ -118,14 +163,17 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         );
       }
 
+    }
+
+    if (d.enabledLgaIds !== undefined && candidateScopeLgaIds.length > 0) {
       const isSubset = d.enabledLgaIds.every((lgaId) =>
-        candidate.constituencyLgaIds.includes(lgaId),
+        candidateScopeLgaIds.includes(lgaId),
       );
       if (!isSubset) {
         return NextResponse.json(
           {
             error:
-              "Enabled LGAs must be a subset of the candidate's constituency LGAs",
+              "Enabled LGAs must be a subset of the candidate's current boundary LGAs",
           },
           { status: 400 },
         );

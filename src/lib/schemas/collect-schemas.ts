@@ -9,9 +9,18 @@ const vinRegex = /^[A-Za-z0-9]{19}$/;
 
 // Screen 1: Personal details
 export const screen1Schema = z.object({
-  fullName: z
+  firstName: z
     .string()
-    .min(2, "Full name is required")
+    .min(2, "First name is required")
+    .transform((v) => v.trim()),
+  middleName: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .transform((v) => v?.trim() || ""),
+  lastName: z
+    .string()
+    .min(2, "Last name is required")
     .transform((v) => v.trim()),
   phone: phoneSchema.transform(normalizeNigerianPhoneInput),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
@@ -117,7 +126,9 @@ export const submitRegistrationSchema = screen1Schema
   .merge(customQuestionsSchema);
 
 export type RegistrationFormData = {
-  fullName: string;
+  firstName: string;
+  middleName?: string | undefined;
+  lastName: string;
   phone: string;
   email?: string | undefined;
   sex: "male" | "female";

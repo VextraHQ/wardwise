@@ -168,7 +168,7 @@ export function GeoLevelWards({
     updateMutation.mutate(
       {
         id: editingWard.id,
-        data: { code: formCode.trim() || undefined, name: formName.trim() },
+        data: { code: formCode.trim() || null, name: formName.trim() },
       },
       {
         onSuccess: () => {

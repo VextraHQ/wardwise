@@ -129,7 +129,7 @@ export function useUpdateWard() {
       data,
     }: {
       id: number;
-      data: { code?: string; name?: string };
+      data: { code?: string | null; name?: string };
     }) => adminGeoApi.updateWard(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "geo"] });

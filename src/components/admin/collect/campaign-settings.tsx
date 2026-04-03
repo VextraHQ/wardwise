@@ -27,8 +27,9 @@ import {
   IconPlayerPause,
   IconLock,
   IconFileDescription,
+  IconRefresh,
 } from "@tabler/icons-react";
-import type { CampaignSummary } from "@/types/collect";
+import type { Campaign } from "@/types/collect";
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border/60",
@@ -44,12 +45,13 @@ function capitalize(s: string) {
 export function CampaignSettings({ campaignId }: { campaignId: string }) {
   const router = useRouter();
   const { data: campaign, isLoading } = useCampaign(campaignId) as {
-    data: CampaignSummary | undefined;
+    data: Campaign | undefined;
     isLoading: boolean;
   };
   const updateMutation = useUpdateCampaign(campaignId);
   const deleteMutation = useDeleteCampaign();
   const [deleteSlug, setDeleteSlug] = useState("");
+  const submissionCount = campaign?._count?.submissions ?? 0;
 
   if (isLoading || !campaign) {
     return (
@@ -81,6 +83,30 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
       },
       onError: (e) => toast.error(e.message),
     });
+  };
+
+  const currentCandidateBoundaryIds =
+    campaign.currentCandidateBoundaryLgaIds ?? [];
+  const canShowBoundarySync =
+    currentCandidateBoundaryIds.length > 0 ||
+    Boolean(campaign.candidateBoundaryError) ||
+    Boolean(campaign.isBoundaryOutOfSync);
+  const canResetToCandidateBoundary =
+    currentCandidateBoundaryIds.length > 0 &&
+    campaign.isBoundaryOutOfSync === true;
+
+  const handleResetBoundary = () => {
+    if (!canResetToCandidateBoundary) return;
+
+    updateMutation.mutate(
+      { enabledLgaIds: currentCandidateBoundaryIds },
+      {
+        onSuccess: () => {
+          toast.success("Campaign boundary reset to the candidate boundary");
+        },
+        onError: (e) => toast.error(e.message),
+      },
+    );
   };
 
   return (
@@ -198,6 +224,76 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
         </CardContent>
       </Card>
 
+      {canShowBoundarySync && (
+        <Card className="border-border/60 rounded-sm shadow-none">
+          <CardHeader>
+            <CardTitle className="text-sm font-semibold tracking-tight">
+              Boundary Sync
+            </CardTitle>
+            <CardDescription className="text-muted-foreground mt-1 text-sm">
+              Campaigns keep their own saved coverage after creation. Reset this
+              campaign only if you want the public form to match the
+              candidate&apos;s current boundary again.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">Campaign coverage</span>
+                <span className="font-medium">
+                  {campaign.enabledLgaIds.length} LGA
+                  {campaign.enabledLgaIds.length === 1 ? "" : "s"}
+                </span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">
+                  Candidate coverage now
+                </span>
+                <span className="font-medium">
+                  {currentCandidateBoundaryIds.length > 0
+                    ? `${currentCandidateBoundaryIds.length} LGA${currentCandidateBoundaryIds.length === 1 ? "" : "s"}`
+                    : "Unavailable"}
+                </span>
+              </div>
+            </div>
+
+            {campaign.candidateBoundaryError ? (
+              <p className="text-muted-foreground text-sm">
+                {campaign.candidateBoundaryError}
+              </p>
+            ) : campaign.isBoundaryOutOfSync ? (
+              <p className="text-sm text-amber-700">
+                The candidate boundary changed after this campaign was created.
+                Reset the campaign boundary if you want the public form to use
+                the new scope.
+              </p>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                This campaign already matches the candidate&apos;s current
+                boundary.
+              </p>
+            )}
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+              onClick={handleResetBoundary}
+              disabled={!canResetToCandidateBoundary || updateMutation.isPending}
+            >
+              <IconRefresh className="mr-1.5 h-3.5 w-3.5" />
+              Reset to Candidate Boundary
+            </Button>
+
+            <p className="text-muted-foreground text-xs">
+              This updates future form submissions only. Existing submissions
+              remain unchanged.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Danger Zone */}
       <Card className="border-destructive rounded-sm shadow-none">
         <CardHeader>
@@ -206,8 +302,8 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           </CardTitle>
           <CardDescription className="text-muted-foreground mt-1 text-sm">
             Delete this campaign
-            {campaign._count.submissions > 0
-              ? ` and all ${campaign._count.submissions} submission${campaign._count.submissions === 1 ? "" : "s"}`
+            {submissionCount > 0
+              ? ` and all ${submissionCount} submission${submissionCount === 1 ? "" : "s"}`
               : ""}
             . This action cannot be undone.
           </CardDescription>

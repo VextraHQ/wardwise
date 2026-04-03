@@ -136,7 +136,7 @@ The product still allows temporary flexibility for launch, but the following gua
 - **Full-state coverage selected** — if a constituency position selects all LGAs in a state, show a warning because that is unusual for Senator / HoR / State Assembly
 - **Very broad boundary** — if ~80% or more of a state's LGAs are selected, show a review warning
 - **Custom constituency label** — if the typed constituency name differs from the current auto-suggested LGA combination, show an informational warning
-- **Existing campaigns will not auto-sync** — editing a candidate boundary does not rewrite `enabledLgaIds` on already-created campaigns
+- **Existing campaigns will not auto-sync** — editing a candidate boundary does not rewrite `enabledLgaIds` on already-created campaigns; campaign settings should expose an explicit reset-to-candidate-boundary action instead of silently changing live coverage
 
 Warnings are advisory, not blocking, because the geo rollout is still in progress.
 
