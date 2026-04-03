@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { submitRateLimit, getClientIp } from "@/lib/rate-limit";
 import { serverSubmitSchema } from "@/lib/schemas/collect-schemas";
+import { composeFullName } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,6 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { campaignSlug, ...data } = parsed.data;
+    const fullName = composeFullName(data);
 
     // Find campaign
     const campaign = await prisma.campaign.findUnique({
@@ -119,7 +121,10 @@ export async function POST(request: NextRequest) {
     const submission = await prisma.collectSubmission.create({
       data: {
         campaignId: campaign.id,
-        fullName: data.fullName,
+        firstName: data.firstName,
+        middleName: data.middleName || null,
+        lastName: data.lastName,
+        fullName,
         phone: data.phone,
         email: data.email || null,
         sex: data.sex,

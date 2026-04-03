@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { composeFullName } from "@/lib/utils";
 
 function sanitizeCell(value: string | null | undefined): string {
   if (!value) return "";
@@ -23,6 +24,26 @@ function redactName(name: string | null | undefined): string {
       part.length > 1 ? part[0] + "*".repeat(part.length - 1) : part,
     )
     .join(" ");
+}
+
+function getSubmissionNameParts(submission: {
+  fullName: string | null;
+  firstName: string | null;
+  middleName: string | null;
+  lastName: string | null;
+}) {
+  return {
+    firstName: submission.firstName || "",
+    middleName: submission.middleName || "",
+    lastName: submission.lastName || "",
+    fullName:
+      submission.fullName ||
+      composeFullName({
+        firstName: submission.firstName,
+        middleName: submission.middleName,
+        lastName: submission.lastName,
+      }),
+  };
 }
 
 function redactPhone(phone: string | null | undefined): string {
@@ -90,6 +111,9 @@ export async function GET(
     if (search) {
       where.OR = [
         { fullName: { contains: search, mode: "insensitive" } },
+        { firstName: { contains: search, mode: "insensitive" } },
+        { middleName: { contains: search, mode: "insensitive" } },
+        { lastName: { contains: search, mode: "insensitive" } },
         { phone: { contains: search } },
         { email: { contains: search, mode: "insensitive" } },
       ];
@@ -107,6 +131,9 @@ export async function GET(
     });
 
     const headers = [
+      "First Name",
+      "Middle Name",
+      "Last Name",
       "Full Name",
       "Phone",
       "Email",
@@ -131,8 +158,13 @@ export async function GET(
       "Date",
     ];
 
-    const rows = submissions.map((s) => [
-      sanitizeCell(redacted ? redactName(s.fullName) : s.fullName),
+    const rows = submissions.map((s) => {
+      const name = getSubmissionNameParts(s);
+      return [
+      sanitizeCell(redacted ? redactName(name.firstName) : name.firstName),
+      sanitizeCell(redacted ? redactName(name.middleName) : name.middleName),
+      sanitizeCell(redacted ? redactName(name.lastName) : name.lastName),
+      sanitizeCell(redacted ? redactName(name.fullName) : name.fullName),
       sanitizeCell(redacted ? redactPhone(s.phone) : s.phone),
       sanitizeCell(redacted ? redactEmail(s.email) : s.email),
       sanitizeCell(s.sex),
@@ -154,7 +186,8 @@ export async function GET(
       s.isFlagged ? "Yes" : "No",
       sanitizeCell(s.adminNotes),
       s.createdAt.toISOString(),
-    ]);
+    ];
+    });
 
     const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
 

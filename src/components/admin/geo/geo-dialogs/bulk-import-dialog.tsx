@@ -40,8 +40,21 @@ const LEVEL_LABELS: Record<ImportLevel, string> = {
 
 const CSV_HEADERS: Record<ImportLevel, string[]> = {
   lga: ["name", "stateCode"],
-  ward: ["name", "lgaName", "stateCode"],
-  "polling-unit": ["code", "name", "wardName", "lgaName", "stateCode"],
+  ward: ["code", "name", "lgaName", "stateCode"],
+  "polling-unit": [
+    "code",
+    "name",
+    "wardCode",
+    "wardName",
+    "lgaName",
+    "stateCode",
+  ],
+};
+
+const IMPORT_NOTES: Partial<Record<ImportLevel, string>> = {
+  ward: "Include official ward codes when a ward name is reused inside the same LGA.",
+  "polling-unit":
+    "Include wardCode whenever the ward name is duplicated inside the same LGA.",
 };
 
 function splitCSVLine(line: string): string[] {
@@ -208,6 +221,12 @@ export function BulkImportDialog({
             .
           </DialogDescription>
         </DialogHeader>
+
+        {IMPORT_NOTES[level] && (
+          <p className="text-muted-foreground -mt-2 text-xs">
+            {IMPORT_NOTES[level]}
+          </p>
+        )}
 
         {(state === "idle" || state === "parsing") && (
           <div className="space-y-4 py-4">

@@ -173,6 +173,9 @@ model CollectSubmission {
   id               String   @id @default(uuid())
   campaignId       String
   campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  firstName        String?
+  middleName       String?
+  lastName         String?
   fullName         String
   phone            String
   email            String?

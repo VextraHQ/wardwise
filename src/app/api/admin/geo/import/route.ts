@@ -32,6 +32,31 @@ interface ImportRequest {
 
 const validStateCodes = new Set(nigeriaStates.map((s) => s.code));
 
+type WardLookupRow = {
+  id: number;
+  code: string | null;
+  name: string;
+  lgaId: number;
+};
+
+function buildWardLookupMaps(wards: WardLookupRow[]) {
+  const wardCodeMap = new Map<string, number>();
+  const wardNameMap = new Map<string, number[]>();
+
+  for (const ward of wards) {
+    if (ward.code) {
+      wardCodeMap.set(`${ward.code.toLowerCase()}|${ward.lgaId}`, ward.id);
+    }
+
+    const nameKey = `${ward.name.toLowerCase()}|${ward.lgaId}`;
+    const ids = wardNameMap.get(nameKey) ?? [];
+    ids.push(ward.id);
+    wardNameMap.set(nameKey, ids);
+  }
+
+  return { wardCodeMap, wardNameMap };
+}
+
 async function validateLgaRows(
   rows: Record<string, string>[],
 ): Promise<ImportRowResult[]> {
@@ -109,13 +134,16 @@ async function validateWardRows(
     where: { lgaId: { in: lgaIds } },
     select: { code: true, name: true, lgaId: true },
   });
-  const existingSet = new Set(
-    existingWards.map((w) =>
-      w.code
-        ? `code:${w.code.toLowerCase()}|${w.lgaId}`
-        : `name:${w.name.toLowerCase()}|${w.lgaId}`,
-    ),
+  const existingCodeSet = new Set(
+    existingWards
+      .filter((w) => Boolean(w.code))
+      .map((w) => `code:${w.code!.toLowerCase()}|${w.lgaId}`),
   );
+  const existingNameSet = new Set(
+    existingWards.map((w) => `name:${w.name.toLowerCase()}|${w.lgaId}`),
+  );
+  const seenCodeSet = new Set<string>();
+  const seenNameSet = new Set<string>();
 
   return rows.map((row) => {
     const code = sanitize(row.code || row.wardcode || "");
@@ -149,15 +177,29 @@ async function validateWardRows(
     const duplicateKey = code
       ? `code:${code.toLowerCase()}|${lgaId}`
       : `name:${name.toLowerCase()}|${lgaId}`;
-    if (existingSet.has(duplicateKey)) {
+    if (
+      (code &&
+        (existingCodeSet.has(duplicateKey) ||
+          seenCodeSet.has(duplicateKey))) ||
+      (!code &&
+        (existingNameSet.has(duplicateKey) ||
+          seenNameSet.has(duplicateKey)))
+    ) {
       return {
         status: "duplicate",
         data: row,
         message: code
           ? "Ward code already exists in this LGA"
-          : "Ward name already exists in this LGA",
+          : "Ward name already exists in this LGA. Add the official ward code if this is a distinct official ward.",
       };
     }
+
+    if (code) {
+      seenCodeSet.add(duplicateKey);
+    } else {
+      seenNameSet.add(duplicateKey);
+    }
+
     return {
       status: "valid",
       data: { ...row, name, code, _lgaId: String(lgaId) },
@@ -197,16 +239,13 @@ async function validatePollingUnitRows(
   const lgaIds = Array.from(new Set(lgaMap.values()));
   const allWards = await prisma.ward.findMany({
     where: { lgaId: { in: lgaIds } },
-    select: { id: true, name: true, lgaId: true },
+    select: { id: true, code: true, name: true, lgaId: true },
   });
 
-  const wardMap = new Map<string, number>();
-  for (const ward of allWards) {
-    wardMap.set(`${ward.name.toLowerCase()}|${ward.lgaId}`, ward.id);
-  }
+  const { wardCodeMap, wardNameMap } = buildWardLookupMaps(allWards);
 
   // Batch lookup existing PUs
-  const wardIds = Array.from(new Set(wardMap.values()));
+  const wardIds = Array.from(new Set(allWards.map((ward) => ward.id)));
   const existingPUs = await prisma.pollingUnit.findMany({
     where: { wardId: { in: wardIds } },
     select: { code: true, name: true, wardId: true },
@@ -225,6 +264,7 @@ async function validatePollingUnitRows(
     const lgaName = (row.lganame || "").trim().toLowerCase();
     const stateCode = (row.statecode || "").toUpperCase();
     const wardName = (row.wardname || "").trim().toLowerCase();
+    const wardCode = sanitize(row.wardcode || "");
 
     if (!code) {
       return { status: "error", data: row, message: "INEC Code is required" };
@@ -246,12 +286,21 @@ async function validatePollingUnitRows(
       };
     }
 
-    const wardId = wardMap.get(`${wardName}|${lgaId}`);
+    const wardMatchesByName = wardNameMap.get(`${wardName}|${lgaId}`) ?? [];
+    const wardId = wardCode
+      ? wardCodeMap.get(`${wardCode.toLowerCase()}|${lgaId}`)
+      : wardMatchesByName.length === 1
+        ? wardMatchesByName[0]
+        : undefined;
     if (!wardId) {
       return {
         status: "error",
         data: row,
-        message: `Ward "${row.wardname}" not found in LGA "${row.lganame}"`,
+        message: wardCode
+          ? `Ward code "${row.wardcode}" was not found in LGA "${row.lganame}"`
+          : wardMatchesByName.length > 1
+            ? `Ward "${row.wardname}" is ambiguous in LGA "${row.lganame}". Include wardCode in the CSV.`
+            : `Ward "${row.wardname}" not found in LGA "${row.lganame}"`,
       };
     }
 

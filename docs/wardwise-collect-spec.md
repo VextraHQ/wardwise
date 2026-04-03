@@ -73,6 +73,7 @@
 - **Submit 400s are more understandable**: public submit errors now surface the first field-level server validation message instead of only showing a generic failure.
 - **Progress restore is more reliable**: localStorage persistence now saves field changes during the flow, not just step changes. Restoring progress preserves saved ward / polling unit choices and the canvasser yes/no state more reliably.
 - **Service worker scope is now constrained to Collect**: the offline worker is registered for `/c/` only, and development sessions clean up old Collect workers/caches so stale JS/CSS does not leak into admin or local UI work.
+- **Name capture is now split in the public form**: the personal details step uses `First Name`, `Middle Name` (optional), and `Last Name`. The backend stores both the split fields and the composed `fullName`, so admin views, search, and CSV exports can support either format.
 
 ### What Changed (Batch 2)
 
@@ -158,7 +159,7 @@
 | Screen | Content                                                                                                                        |
 | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
 | 0      | Campaign splash → Begin Registration                                                                                           |
-| 1      | Personal details: name, phone, email?, sex, age, occupation, marital status, custom questions                                  |
+| 1      | Personal details: first name, middle name?, last name, phone, email?, sex, age, occupation, marital status, custom questions  |
 | 2      | Location: cascading LGA → Ward → Polling Unit (with INEC codes)                                                                |
 | 3      | Party info: APC/NIN (required) + VIN (required)                                                                                |
 | 4      | Role: Volunteer / Member / Canvasser (3 cards)                                                                                 |
@@ -230,6 +231,7 @@ model PollingUnit {
 ### CollectSubmission
 
 - `@@unique([campaignId, phone])` + `@@unique([campaignId, voterIdNumber])`
+- Stores split name fields (`firstName`, `middleName`, `lastName`) plus composed `fullName`
 - Stores both FK references (lgaId, wardId, pollingUnitId) AND display names
 - `role`: "volunteer" | "member" | "canvasser"
 - `apcRegNumber`: stores APC number or NIN

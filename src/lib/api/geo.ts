@@ -90,7 +90,7 @@ export const adminGeoApi = {
       body: JSON.stringify(data),
     }),
 
-  updateWard: (id: number, data: { code?: string; name?: string }) =>
+  updateWard: (id: number, data: { code?: string | null; name?: string }) =>
     adminApiCall<{ ward: GeoWard }>(`/wards/${id}`, {
       method: "PATCH",
       body: JSON.stringify(data),

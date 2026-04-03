@@ -12,6 +12,10 @@ export type Campaign = {
   customQuestion1: string | null;
   customQuestion2: string | null;
   status: string; // "draft" | "active" | "paused" | "closed"
+  currentCandidateBoundaryLgaIds?: number[];
+  candidateBoundaryError?: string | null;
+  isBoundaryOutOfSync?: boolean;
+  _count?: { submissions: number };
   createdAt: string;
   updatedAt: string;
 };
@@ -26,6 +30,9 @@ export type CampaignSummary = Campaign & {
 export type CollectSubmission = {
   id: string;
   campaignId: string;
+  firstName: string | null;
+  middleName: string | null;
+  lastName: string | null;
   fullName: string;
   phone: string;
   email: string | null;

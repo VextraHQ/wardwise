@@ -34,6 +34,9 @@ export async function GET(
     if (search) {
       where.OR = [
         { fullName: { contains: search, mode: "insensitive" } },
+        { firstName: { contains: search, mode: "insensitive" } },
+        { middleName: { contains: search, mode: "insensitive" } },
+        { lastName: { contains: search, mode: "insensitive" } },
         { phone: { contains: search } },
         { email: { contains: search, mode: "insensitive" } },
       ];

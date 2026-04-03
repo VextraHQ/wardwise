@@ -29,7 +29,22 @@ export const createWardSchema = z.object({
   lgaId: z.number({ message: "LGA is required" }).min(1, "LGA is required"),
 });
 
-export const updateWardSchema = createWardSchema.partial();
+export const updateWardSchema = z.object({
+  code: z
+    .union([z.string(), z.null()])
+    .optional()
+    .transform((v) => {
+      if (v === undefined) return undefined;
+      if (v === null) return null;
+      const trimmed = v.trim();
+      return trimmed.length > 0 ? trimmed : null;
+    }),
+  name: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .transform((v) => v.trim())
+    .optional(),
+});
 
 export const createPollingUnitSchema = z.object({
   code: z

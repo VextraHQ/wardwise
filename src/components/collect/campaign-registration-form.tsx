@@ -20,7 +20,7 @@ import {
   type RegistrationFormData,
 } from "@/lib/schemas/collect-schemas";
 import type { PublicCampaign } from "@/types/collect";
-import { generateRefCode } from "@/lib/utils";
+import { composeFullName, generateRefCode } from "@/lib/utils";
 import { StepProgress } from "@/components/ui/step-progress";
 import { FormShell } from "@/components/collect/form-shell";
 import { SplashScreen } from "@/components/collect/steps/splash-screen";
@@ -94,7 +94,9 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   const form = useForm<RegistrationFormData>({
     resolver: zodResolver(submitRegistrationSchema),
     defaultValues: {
-      fullName: "",
+      firstName: "",
+      middleName: "",
+      lastName: "",
       phone: "",
       email: "",
       sex: undefined,
@@ -232,7 +234,9 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
 
   const screenFieldMap: Record<number, (keyof RegistrationFormData)[]> = {
     1: [
-      "fullName",
+      "firstName",
+      "middleName",
+      "lastName",
       "phone",
       "email",
       "sex",
@@ -289,7 +293,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
         localStorage.setItem(
           `collect-submitted-${campaign.slug}`,
           JSON.stringify({
-            name: form.getValues("fullName"),
+            name: composeFullName(form.getValues()),
             count: result.count,
             submittedAt: new Date().toISOString(),
             refCode,
@@ -426,7 +430,9 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
 
   const handleNewRegistration = () => {
     form.reset({
-      fullName: "",
+      firstName: "",
+      middleName: "",
+      lastName: "",
       phone: "",
       email: "",
       sex: undefined as unknown as "male" | "female",

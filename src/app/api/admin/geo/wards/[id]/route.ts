@@ -27,6 +27,40 @@ export async function PATCH(
       );
     }
 
+    const existingWard = await prisma.ward.findUnique({
+      where: { id: numId },
+      select: { id: true, lgaId: true, name: true, code: true },
+    });
+
+    if (!existingWard) {
+      return NextResponse.json({ error: "Ward not found" }, { status: 404 });
+    }
+
+    const nextName = parsed.data.name ?? existingWard.name;
+    const nextCode =
+      parsed.data.code !== undefined ? parsed.data.code : existingWard.code;
+
+    if (!nextCode) {
+      const conflictingWard = await prisma.ward.findFirst({
+        where: {
+          lgaId: existingWard.lgaId,
+          name: { equals: nextName, mode: "insensitive" },
+          id: { not: numId },
+        },
+        select: { id: true },
+      });
+
+      if (conflictingWard) {
+        return NextResponse.json(
+          {
+            error:
+              "A ward with this name already exists in this LGA. Add the official ward code if this is a distinct official ward.",
+          },
+          { status: 409 },
+        );
+      }
+    }
+
     const ward = await prisma.ward.update({
       where: { id: numId },
       data: parsed.data,
