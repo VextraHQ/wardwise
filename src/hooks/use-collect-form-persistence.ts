@@ -4,7 +4,7 @@
  * Handles:
  *   • Saving form progress to localStorage (on screen change + debounced on field change)
  *   • Restoring saved progress (form values + UI state)
- *   • Detecting returning visitors (previously submitted)
+ *   • Reading same-device submission metadata for lightweight reference recall
  *   • Clearing progress after submission
  *
  * Does NOT own:
@@ -19,8 +19,8 @@ import { useWatch } from "react-hook-form";
 import type { RegistrationFormData } from "@/lib/schemas/collect-schemas";
 
 // ── Types ──
-export type ReturningVisitorData = {
-  name: string;
+export type DeviceSubmissionData = {
+  name?: string;
   count: number;
   submittedAt: string;
   refCode: string;
@@ -54,8 +54,8 @@ interface UseCollectFormPersistenceOptions {
 interface UseCollectFormPersistenceReturn {
   /** True when there's a saved form in localStorage */
   hasSavedProgress: boolean;
-  /** Non-null when the user has previously submitted for this campaign */
-  returningVisitor: ReturningVisitorData | null;
+  /** Non-null when this device previously completed a submission for this campaign */
+  deviceSubmission: DeviceSubmissionData | null;
   /** Restore saved form data + UI state from localStorage */
   restoreProgress: () => void;
   /** Save current form state to localStorage */
@@ -132,21 +132,21 @@ export function useCollectFormPersistence({
 
   // ── Returning visitor + saved progress detection ──
   const [hasSavedProgress, setHasSavedProgress] = useState(false);
-  const [returningVisitor, setReturningVisitor] =
-    useState<ReturningVisitorData | null>(null);
+  const [deviceSubmission, setDeviceSubmission] =
+    useState<DeviceSubmissionData | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Returning visitor
+    // Same-device completed submission metadata
     const submittedKey = `collect-submitted-${campaignSlug}`;
     const submitted = localStorage.getItem(submittedKey);
     if (submitted) {
       try {
         const data = JSON.parse(submitted);
-        if (data.name && data.refCode) {
+        if (data.refCode) {
           // eslint-disable-next-line react-hooks/set-state-in-effect
-          setReturningVisitor(data);
+          setDeviceSubmission(data);
         }
       } catch {
         /* ignore corrupted data */
@@ -230,7 +230,7 @@ export function useCollectFormPersistence({
 
   return {
     hasSavedProgress,
-    returningVisitor,
+    deviceSubmission,
     restoreProgress,
     saveProgress,
     clearProgress,

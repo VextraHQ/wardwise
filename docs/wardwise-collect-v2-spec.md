@@ -214,17 +214,18 @@ UX audit and post-submission improvements for the public registration form:
 
 **Files:** `src/app/c/[slug]/page.tsx`
 
-### Returning Visitor Recognition
+### Same-Device Reference Recall
 
 **Status:** Complete
-**Why:** Registration links circulate on WhatsApp for weeks. Returning supporters saw a blank form and didn't know if they'd already registered. Could hit duplicate errors after re-filling the entire form.
+**Why:** Registration links circulate on WhatsApp for weeks. Supporters and canvassers still need a quick way to recover a recent reference code on the same device, but a full personalized "welcome back" takeover is too aggressive for a public shared-device flow.
 
 **Approach:**
 
 - After successful submission, persist `{ name, count, submittedAt, refCode }` to `localStorage` key `collect-submitted-${slug}` (separate from form progress key)
-- On page load, detect returning visitor and show "Welcome back" splash variant
-- Welcome-back shows: supporter number, date, reference code, full share card (WhatsApp, SMS, Email, Copy, QR), and "Register Someone Else" button
-- "Register Someone Else" starts a fresh form without clearing submitted data
+- Draft resume takes priority over same-device completion metadata
+- Splash remains the standard registration start screen
+- If no active draft exists, splash can show a subtle `Last registration on this device` utility with the reference code and completion date
+- Users explicitly begin a new registration; the app does not automatically treat the next visitor as the same person
 
 **Files:** `src/components/collect/campaign-registration-form.tsx`, `src/components/collect/steps/splash-screen.tsx`
 
@@ -236,7 +237,7 @@ UX audit and post-submission improvements for the public registration form:
 **Approach:**
 
 - `generateRefCode(id)` utility derives `WW-XXXXXXXX` from submission UUID
-- Displayed as a mono-styled badge on confirmation screen and returning visitor splash
+- Displayed as a mono-styled badge on the confirmation screen and surfaced later via the same-device reference utility
 - Stored in `collect-submitted-${slug}` localStorage for persistence
 
 **Files:** `src/lib/utils.ts`, `src/components/collect/steps/confirmation-screen.tsx`
