@@ -107,13 +107,18 @@ async function validateWardRows(
   const lgaIds = Array.from(new Set(lgaMap.values()));
   const existingWards = await prisma.ward.findMany({
     where: { lgaId: { in: lgaIds } },
-    select: { name: true, lgaId: true },
+    select: { code: true, name: true, lgaId: true },
   });
   const existingSet = new Set(
-    existingWards.map((w) => `${w.name.toLowerCase()}|${w.lgaId}`),
+    existingWards.map((w) =>
+      w.code
+        ? `code:${w.code.toLowerCase()}|${w.lgaId}`
+        : `name:${w.name.toLowerCase()}|${w.lgaId}`,
+    ),
   );
 
   return rows.map((row) => {
+    const code = sanitize(row.code || row.wardcode || "");
     const name = sanitize(row.name || "");
     const lgaName = (row.lganame || "").trim().toLowerCase();
     const stateCode = (row.statecode || "").toUpperCase();
@@ -141,14 +146,22 @@ async function validateWardRows(
         message: `LGA "${row.lganame}" not found in state ${stateCode}`,
       };
     }
-    if (existingSet.has(`${name.toLowerCase()}|${lgaId}`)) {
+    const duplicateKey = code
+      ? `code:${code.toLowerCase()}|${lgaId}`
+      : `name:${name.toLowerCase()}|${lgaId}`;
+    if (existingSet.has(duplicateKey)) {
       return {
         status: "duplicate",
         data: row,
-        message: "Ward already exists in this LGA",
+        message: code
+          ? "Ward code already exists in this LGA"
+          : "Ward name already exists in this LGA",
       };
     }
-    return { status: "valid", data: { ...row, name, _lgaId: String(lgaId) } };
+    return {
+      status: "valid",
+      data: { ...row, name, code, _lgaId: String(lgaId) },
+    };
   });
 }
 
@@ -196,10 +209,14 @@ async function validatePollingUnitRows(
   const wardIds = Array.from(new Set(wardMap.values()));
   const existingPUs = await prisma.pollingUnit.findMany({
     where: { wardId: { in: wardIds } },
-    select: { name: true, wardId: true },
+    select: { code: true, name: true, wardId: true },
   });
   const existingSet = new Set(
-    existingPUs.map((p) => `${p.name.toLowerCase()}|${p.wardId}`),
+    existingPUs.map((p) =>
+      p.code
+        ? `code:${p.code.toLowerCase()}|${p.wardId}`
+        : `name:${p.name.toLowerCase()}|${p.wardId}`,
+    ),
   );
 
   return rows.map((row) => {
@@ -238,11 +255,16 @@ async function validatePollingUnitRows(
       };
     }
 
-    if (existingSet.has(`${name.toLowerCase()}|${wardId}`)) {
+    const duplicateKey = code
+      ? `code:${code.toLowerCase()}|${wardId}`
+      : `name:${name.toLowerCase()}|${wardId}`;
+    if (existingSet.has(duplicateKey)) {
       return {
         status: "duplicate",
         data: row,
-        message: "Polling unit already exists in this ward",
+        message: code
+          ? "Polling unit code already exists in this ward"
+          : "Polling unit name already exists in this ward",
       };
     }
     return {
@@ -340,6 +362,7 @@ export async function POST(request: Request) {
         case "ward": {
           await tx.ward.createMany({
             data: validRows.map((r) => ({
+              code: r.data.code || null,
               name: r.data.name,
               lgaId: parseInt(r.data._lgaId),
             })),

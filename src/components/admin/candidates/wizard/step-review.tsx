@@ -9,7 +9,6 @@ import {
   StepCard,
   CardSectionHeader,
   SectionLabel,
-  FieldLabel,
   NavButtons,
 } from "@/components/collect/form-ui";
 import { IconChecklist } from "@tabler/icons-react";
@@ -20,8 +19,10 @@ import {
   autoConstituencyName,
   getConstituencyBoundaryWarnings,
   positionRequiresLgas,
+  findMatchingPreset,
 } from "@/lib/utils/constituency";
 import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituency-boundary-alerts";
+import { getPresetsForState } from "@/lib/data/nigerian-constituencies";
 
 function resolveStateName(stateCode: string | null | undefined): string {
   if (!stateCode) return "—";
@@ -56,6 +57,22 @@ export function StepReview({
         .map((lga) => lga.name),
     [data.constituencyLgaIds, lgaResponse],
   );
+  const matchingPreset = useMemo(() => {
+    if (!data.position || !data.stateCode || !positionRequiresLgas(data.position)) {
+      return null;
+    }
+
+    const presets = getPresetsForState(
+      data.position as "Senator" | "House of Representatives" | "State Assembly",
+      data.stateCode,
+    );
+
+    return findMatchingPreset(
+      data.constituencyLgaIds,
+      (lgaResponse?.data ?? []).map((lga) => ({ id: lga.id, name: lga.name })),
+      presets,
+    );
+  }, [data.constituencyLgaIds, data.position, data.stateCode, lgaResponse]);
   const boundaryWarnings = useMemo(
     () =>
       getConstituencyBoundaryWarnings({
@@ -67,12 +84,25 @@ export function StepReview({
           : 0,
         constituencyName: data.constituency,
         autoSuggestedName: autoConstituencyName(selectedLgaNames),
+        presetMismatchInfo: matchingPreset
+          ? {
+              hasPresets: true,
+              activePresetName:
+                data.constituency === matchingPreset.name
+                  ? matchingPreset.name
+                  : undefined,
+              officialPresetName: matchingPreset.name,
+              isDeviated: false,
+              manuallyMatchesPreset: true,
+            }
+          : undefined,
       }),
     [
       data.constituency,
       data.constituencyLgaIds,
       data.position,
       data.stateCode,
+      matchingPreset,
       selectedLgaNames,
     ],
   );
@@ -149,8 +179,8 @@ export function StepReview({
             subtitle="Optional bio or notes about the candidate"
           />
           <div className="space-y-1.5">
-            <FieldLabel optional>Description</FieldLabel>
             <Textarea
+              aria-label="Description"
               value={data.description || ""}
               onChange={(e) => setValue("description", e.target.value)}
               placeholder="Brief description of the candidate..."

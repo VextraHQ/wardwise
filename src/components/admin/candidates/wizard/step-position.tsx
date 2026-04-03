@@ -15,6 +15,7 @@ import {
 import { ComboboxSelect } from "@/components/ui/combobox-select";
 import { LgaCheckboxGrid } from "@/components/admin/shared/lga-checkbox-grid";
 import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituency-boundary-alerts";
+import { OfficialConstituencySelector } from "@/components/admin/shared/official-constituency-selector";
 import {
   StepCard,
   CardSectionHeader,
@@ -37,6 +38,7 @@ import {
 } from "@/lib/utils/constituency";
 import {
   getPresetsForState,
+  getUnsupportedPresetsForState,
 } from "@/lib/data/nigerian-constituencies";
 import { IconAlertTriangle } from "@tabler/icons-react";
 
@@ -104,10 +106,13 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
     selectedPosition && positionRequiresLgas(selectedPosition),
   );
 
-  const { data: lgaResponse, isLoading: lgasLoading, isFetching: lgasFetching } = useGeoLgas(
-    showLgaGrid && selectedStateCode ? selectedStateCode : null,
-    { pageSize: 200 },
-  );
+  const {
+    data: lgaResponse,
+    isLoading: lgasLoading,
+    isFetching: lgasFetching,
+  } = useGeoLgas(showLgaGrid && selectedStateCode ? selectedStateCode : null, {
+    pageSize: 200,
+  });
 
   const lgas = useMemo(
     () => lgaResponse?.data.map((l) => ({ id: l.id, name: l.name })) ?? [],
@@ -133,7 +138,11 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
 
   // True when state is selected, LGAs are needed, query finished, but no data exists
   const stateHasNoLgas = Boolean(
-    showLgaGrid && selectedStateCode && !lgasLoading && lgas.length === 0,
+    showLgaGrid &&
+      selectedStateCode &&
+      !lgasLoading &&
+      !lgasFetching &&
+      lgas.length === 0,
   );
 
   const expectedLgaCount = selectedStateCode
@@ -143,42 +152,85 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
     showLgaGrid &&
     selectedStateCode &&
     !lgasLoading &&
+    !lgasFetching &&
     lgas.length > 0 &&
     lgas.length < expectedLgaCount,
   );
-  const [selectedPresetShortName, setSelectedPresetShortName] = useState<string | null>(null);
+  const [selectedPresetShortName, setSelectedPresetShortName] = useState<
+    string | null
+  >(null);
+  const [customBoundaryMode, setCustomBoundaryMode] = useState(false);
 
   const availablePresets = useMemo(
     () =>
       showLgaGrid && selectedPosition && selectedStateCode
         ? getPresetsForState(
-            selectedPosition as "Senator" | "House of Representatives" | "State Assembly",
+            selectedPosition as
+              | "Senator"
+              | "House of Representatives"
+              | "State Assembly",
             selectedStateCode,
           )
         : [],
     [showLgaGrid, selectedPosition, selectedStateCode],
   );
   const hasPresets = availablePresets.length > 0;
-
-  const presetMatchResult = useMemo(() => {
-    if (!selectedPresetShortName) return null;
-    const preset = availablePresets.find(
-      (p) => p.shortName === selectedPresetShortName,
-    );
-    return preset ? matchPresetToSeededIds(preset, lgas) : null;
-  }, [selectedPresetShortName, availablePresets, lgas]);
-
-  const isPresetDeviated = useMemo(() => {
-    if (!selectedPresetShortName || !presetMatchResult) return false;
-    const s1 = [...presetMatchResult.ids].sort((a, b) => a - b);
+  const unsupportedPresets = useMemo(
+    () =>
+      showLgaGrid &&
+      selectedStateCode &&
+      (selectedPosition === "House of Representatives" ||
+        selectedPosition === "State Assembly")
+        ? getUnsupportedPresetsForState(selectedPosition, selectedStateCode)
+        : [],
+    [showLgaGrid, selectedPosition, selectedStateCode],
+  );
+  const matchingPreset = useMemo(
+    () => findMatchingPreset(constituencyLgaIds, lgas, availablePresets),
+    [constituencyLgaIds, lgas, availablePresets],
+  );
+  const effectivePresetShortName =
+    selectedPresetShortName ??
+    (matchingPreset && constituency?.trim() === matchingPreset.name
+      ? matchingPreset.shortName
+      : null);
+  const effectivePreset = useMemo(
+    () =>
+      effectivePresetShortName
+        ? availablePresets.find((preset) => preset.shortName === effectivePresetShortName) ??
+          null
+        : null,
+    [availablePresets, effectivePresetShortName],
+  );
+  const activePresetName = effectivePreset?.name;
+  const effectiveOfficialPresetName = effectivePreset?.name ?? matchingPreset?.name;
+  const effectivePresetMatchResult = useMemo(
+    () =>
+      effectivePreset ? matchPresetToSeededIds(effectivePreset, lgas) : null,
+    [effectivePreset, lgas],
+  );
+  const effectivePresetDeviated = useMemo(() => {
+    if (!effectivePresetMatchResult) return false;
+    const s1 = [...effectivePresetMatchResult.ids].sort((a, b) => a - b);
     const s2 = [...constituencyLgaIds].sort((a, b) => a - b);
     return JSON.stringify(s1) !== JSON.stringify(s2);
-  }, [selectedPresetShortName, presetMatchResult, constituencyLgaIds]);
-
-  const manuallyMatchesPreset = useMemo(() => {
-    if (selectedPresetShortName) return false;
-    return findMatchingPreset(constituencyLgaIds, lgas, availablePresets) !== null;
-  }, [selectedPresetShortName, constituencyLgaIds, lgas, availablePresets]);
+  }, [effectivePresetMatchResult, constituencyLgaIds]);
+  const manuallyMatchesPreset = !effectivePresetShortName && Boolean(matchingPreset);
+  const showBoundaryGrid = Boolean(
+    showLgaGrid &&
+      selectedStateCode &&
+      !lgasFetching &&
+      !stateHasNoLgas &&
+      (!hasPresets ||
+        customBoundaryMode ||
+        effectivePresetShortName ||
+        constituencyLgaIds.length > 0),
+  );
+  const boundaryHelperText = effectivePresetShortName
+    ? `Loaded ${constituencyLgaIds.length} LGAs from ${effectivePresetShortName}. Adjust the boundary below only if you need a custom variation.`
+    : hasPresets && customBoundaryMode
+      ? "Custom boundary mode. Select the LGAs that define this constituency."
+      : "Select the LGAs that form this constituency's boundary";
 
   const boundaryWarnings = useMemo(
     () =>
@@ -193,8 +245,9 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
         presetMismatchInfo: hasPresets
           ? {
               hasPresets,
-              activePresetName: selectedPresetShortName ?? undefined,
-              isDeviated: isPresetDeviated,
+              activePresetName,
+              officialPresetName: effectiveOfficialPresetName,
+              isDeviated: effectivePresetDeviated,
               manuallyMatchesPreset,
             }
           : undefined,
@@ -205,10 +258,11 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
       expectedLgaCount,
       hasPartialLgas,
       hasPresets,
-      isPresetDeviated,
+      effectivePresetDeviated,
+      effectiveOfficialPresetName,
+      activePresetName,
       manuallyMatchesPreset,
       selectedPosition,
-      selectedPresetShortName,
       selectedStateName,
       suggestedConstituency,
     ],
@@ -218,22 +272,27 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
   function handlePresetChange(value: string) {
     if (value === "__custom__" || !value) {
       setSelectedPresetShortName(null);
+      setCustomBoundaryMode(true);
       return;
     }
     if (lgasFetching || lgas.length === 0) return;
     const preset = availablePresets.find((p) => p.shortName === value);
     if (!preset) return;
     setSelectedPresetShortName(value);
+    setCustomBoundaryMode(false);
     const { ids } = matchPresetToSeededIds(preset, lgas);
     setValue("constituencyLgaIds", ids, { shouldValidate: true });
     lastAutoConstituencyRef.current = preset.name;
-    setValue("constituency", preset.name, { shouldValidate: false });
+    setValue("constituency", preset.name, { shouldValidate: true });
   }
 
   // Auto-suggest constituency name from selected LGAs
   useEffect(() => {
     if (!showLgaGrid || lgas.length === 0) {
       lastAutoConstituencyRef.current = "";
+      return;
+    }
+    if (effectivePresetShortName) {
       return;
     }
     const suggested = suggestedConstituency;
@@ -259,7 +318,14 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
       lastAutoConstituencyRef.current = suggested;
       setValue("constituency", suggested, { shouldValidate: false });
     }
-  }, [constituency, lgas.length, setValue, showLgaGrid, suggestedConstituency]);
+  }, [
+    constituency,
+    effectivePresetShortName,
+    lgas.length,
+    setValue,
+    showLgaGrid,
+    suggestedConstituency,
+  ]);
 
   const stateGroups: ComboboxSelectGroup[] = useMemo(() => {
     const zones = [
@@ -288,6 +354,7 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
     setValue("lga", "");
     setValue("constituencyLgaIds", []);
     setSelectedPresetShortName(null);
+    setCustomBoundaryMode(false);
     if (value === "President") {
       setValue("constituency", "Federal Republic of Nigeria", {
         shouldValidate: true,
@@ -302,12 +369,15 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
     setValue("lga", "");
     setValue("constituencyLgaIds", []);
     setSelectedPresetShortName(null);
+    setCustomBoundaryMode(false);
     if (selectedPosition === "Governor") {
       const stateName = nigeriaStates.find((s) => s.code === value)?.name;
       if (stateName)
-        setValue("constituency", `${stateName} State`, {
+        setValue("constituency", stateName, {
           shouldValidate: true,
         });
+    } else if (selectedPosition !== "President") {
+      setValue("constituency", "", { shouldValidate: false });
     }
   }
 
@@ -328,12 +398,14 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
             subtitle="The office the candidate is contesting for"
           />
           <div className="space-y-1.5">
-            <FieldLabel>Position</FieldLabel>
             <Select
               onValueChange={handlePositionChange}
               value={selectedPosition}
             >
-              <SelectTrigger className="border-border/60 h-11 rounded-sm">
+              <SelectTrigger
+                aria-label="Position"
+                className="border-border/60 h-11 rounded-sm"
+              >
                 <SelectValue placeholder="Select position" />
               </SelectTrigger>
               <SelectContent>
@@ -360,6 +432,8 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
               subtitle={
                 selectedPosition === "President"
                   ? "Optional home state for informational purposes"
+                  : selectedPosition === "Governor"
+                    ? "The state that defines this governorship constituency"
                   : "The state and LGAs that define this constituency"
               }
             />
@@ -387,41 +461,26 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
             {showLgaGrid && selectedStateCode && hasPresets && (
               <div className="space-y-1.5">
                 <FieldLabel>Official Constituency</FieldLabel>
-                <ComboboxSelect
-                  value={selectedPresetShortName ?? ""}
+                <OfficialConstituencySelector
+                  value={effectivePresetShortName ?? ""}
                   onValueChange={handlePresetChange}
+                  presets={availablePresets}
+                  unsupportedPresets={unsupportedPresets}
+                  unmatchedNames={effectivePresetMatchResult?.unmatchedNames}
+                  position={
+                    selectedPosition as
+                      | "Senator"
+                      | "House of Representatives"
+                      | "State Assembly"
+                  }
                   disabled={lgasFetching}
                   isLoading={lgasFetching}
-                  options={[
-                    {
-                      value: "__custom__",
-                      label: "Custom (manual selection)",
-                      description: "Skip preset — pick LGAs manually",
-                    },
-                    ...availablePresets.map((p) => ({
-                      value: p.shortName,
-                      label: p.shortName,
-                      description: p.name,
-                    })),
-                  ]}
-                  placeholder="Select official constituency..."
-                  searchPlaceholder="Search constituencies..."
-                  emptyMessage="No constituency found."
                 />
-                {presetMatchResult && presetMatchResult.unmatchedNames.length > 0 && (
-                  <p className="text-muted-foreground text-xs">
-                    <span className="font-medium text-amber-600 dark:text-amber-500">
-                      {presetMatchResult.unmatchedNames.length} LGA
-                      {presetMatchResult.unmatchedNames.length > 1 ? "s" : ""} not yet seeded:
-                    </span>{" "}
-                    {presetMatchResult.unmatchedNames.join(", ")}
-                  </p>
-                )}
               </div>
             )}
 
             {/* Constituency LGAs */}
-            {showLgaGrid && selectedStateCode && !stateHasNoLgas && (
+            {showBoundaryGrid && (
               <div className="space-y-3">
                 <LgaCheckboxGrid
                   lgas={lgas}
@@ -448,7 +507,7 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
                   }
                   loading={lgasLoading}
                   label="Constituency LGAs"
-                  helperText="Select the LGAs that form this constituency's boundary"
+                  helperText={boundaryHelperText}
                   stateLabel={selectedStateName}
                   error={errors.constituencyLgaIds?.message}
                 />
@@ -483,30 +542,32 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
         )}
 
         {/* Constituency */}
-        <div className="space-y-3">
-          <SectionLabel
-            title="Constituency Name"
-            subtitle={
-              showLgaGrid
-                ? "Auto-suggested — edit for official names like 'Adamawa Central Senatorial District'"
-                : "The electoral constituency the candidate represents"
-            }
-          />
-          <div className="space-y-1.5">
-            <FieldLabel>Constituency</FieldLabel>
-            <Input
-              value={constituency || ""}
-              onChange={(e) =>
-                setValue("constituency", e.target.value, {
-                  shouldValidate: true,
-                })
+        {selectedPosition && (
+          <div className="space-y-3">
+            <SectionLabel
+              title="Constituency Name"
+              subtitle={
+                showLgaGrid
+                  ? "Auto-suggested — edit for official names like 'Adamawa Central Senatorial District'"
+                  : "The electoral constituency the candidate represents"
               }
-              placeholder={getConstituencyPlaceholder(selectedPosition)}
-              className="border-border/60 h-11 rounded-sm"
             />
-            <FieldError error={errors.constituency?.message} />
+            <div className="space-y-1.5">
+              <Input
+                aria-label="Constituency"
+                value={constituency || ""}
+                onChange={(e) =>
+                  setValue("constituency", e.target.value, {
+                    shouldValidate: true,
+                  })
+                }
+                placeholder={getConstituencyPlaceholder(selectedPosition)}
+                className="border-border/60 h-11 rounded-sm"
+              />
+              <FieldError error={errors.constituency?.message} />
+            </div>
           </div>
-        </div>
+        )}
 
         <ConstituencyBoundaryAlerts warnings={boundaryWarnings} />
       </div>

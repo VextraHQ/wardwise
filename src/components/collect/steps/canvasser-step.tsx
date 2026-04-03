@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
 import { HiUser, HiPhone, HiUsers } from "react-icons/hi";
 import { Users } from "lucide-react";
 import { motion } from "motion/react";
@@ -33,33 +33,64 @@ export function CanvasserStep({
   form,
   hasCanvasser,
   setHasCanvasser,
+  selectionError,
   isSubmitting,
   submitError,
   onBack,
   onNext,
+  nextDisabled,
   preloadedCanvassers = [],
 }: {
   form: UseFormReturn<RegistrationFormData>;
   hasCanvasser: boolean | null;
   setHasCanvasser: (v: boolean | null) => void;
+  selectionError?: string;
   isSubmitting: boolean;
   submitError?: string;
   onBack: () => void;
   onNext: () => void;
+  nextDisabled?: boolean;
   preloadedCanvassers?: PreloadedCanvasser[];
 }) {
   const {
     register,
     setValue,
+    watch,
     formState: { errors },
   } = form;
 
   const hasPreloaded = preloadedCanvassers.length > 0;
-  const [selectedCanvasserId, setSelectedCanvasserId] = useState<string>("");
+  const currentCanvasserName = watch("canvasserName")?.trim();
+  const currentCanvasserPhone = watch("canvasserPhone")?.trim();
+  const selectedCanvasserId = useMemo(() => {
+    if (!hasCanvasser || preloadedCanvassers.length === 0) {
+      return "";
+    }
+
+    const matched = preloadedCanvassers.find(
+      (canvasser) =>
+        canvasser.name === currentCanvasserName &&
+        canvasser.phone === currentCanvasserPhone,
+    );
+
+    if (matched) {
+      return matched.id;
+    }
+
+    if (currentCanvasserName || currentCanvasserPhone) {
+      return "__other__";
+    }
+
+    return "";
+  }, [
+    currentCanvasserName,
+    currentCanvasserPhone,
+    hasCanvasser,
+    preloadedCanvassers,
+  ]);
   const isOther = selectedCanvasserId === "__other__";
 
   const handleCanvasserSelect = (value: string) => {
-    setSelectedCanvasserId(value);
     if (value === "__other__") {
       setValue("canvasserName", "");
       setValue("canvasserPhone", "");
@@ -120,7 +151,6 @@ export function CanvasserStep({
                     setHasCanvasser(false);
                     setValue("canvasserName", "");
                     setValue("canvasserPhone", "");
-                    setSelectedCanvasserId("");
                   }}
                   className={cn(
                     "border-border bg-card hover:border-primary/50 focus-visible:ring-primary flex cursor-pointer items-center justify-center gap-2 rounded-sm border-2 p-3 transition-all focus-visible:ring-2 focus-visible:outline-none",
@@ -131,6 +161,7 @@ export function CanvasserStep({
                   <span className="text-sm font-medium">No</span>
                 </button>
               </div>
+              <FieldError error={selectionError} />
             </div>
 
             {hasCanvasser && hasPreloaded && (
@@ -181,7 +212,7 @@ export function CanvasserStep({
                     </InputIcon>
                     <Input
                       {...register("canvasserPhone")}
-                      placeholder="Canvasser's phone"
+                      placeholder="08012345678"
                       type="tel"
                       className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-mono font-medium tracking-wider transition-all placeholder:text-xs"
                     />
@@ -198,6 +229,7 @@ export function CanvasserStep({
               onNext={onNext}
               nextLabel="Submit Registration"
               isLoading={isSubmitting}
+              nextDisabled={nextDisabled}
             />
 
             <SubmitError error={submitError} />

@@ -137,10 +137,11 @@ export function StepIdentity({ form, onBack, onNext }: StepIdentityProps) {
             subtitle="The party the candidate is running under"
           />
           <div className="space-y-1.5">
-            <FieldLabel>Party</FieldLabel>
+            <span className="sr-only">Party</span>
             {showOtherParty ? (
               <div className="flex gap-2">
                 <Input
+                  aria-label="Party"
                   value={watch("party")}
                   onChange={(e) =>
                     setValue("party", e.target.value, { shouldValidate: true })
@@ -165,6 +166,7 @@ export function StepIdentity({ form, onBack, onNext }: StepIdentityProps) {
                 options={partyOptions}
                 value={watch("party") || ""}
                 onValueChange={handlePartySelect}
+                triggerAriaLabel="Party"
                 placeholder="Select party..."
                 searchPlaceholder="Search parties..."
                 emptyMessage="No party found."

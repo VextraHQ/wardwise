@@ -226,7 +226,7 @@ export function PersonalDetailsStep({
                     inputMode="numeric"
                     min={18}
                     max={120}
-                    placeholder="Enter your age"
+                    placeholder="Age (18+)"
                     className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 font-medium transition-all placeholder:text-xs"
                   />
                   <FieldError error={errors.age?.message} />

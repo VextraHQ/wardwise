@@ -1,47 +1,35 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  HiPhone,
-  HiMail,
-  HiCheckCircle,
-  HiShieldCheck,
-  HiUsers,
-} from "react-icons/hi";
+import { HiCheckCircle, HiShieldCheck } from "react-icons/hi";
 import { HiLockClosed } from "react-icons/hi2";
-import { FaWhatsapp } from "react-icons/fa";
 import { PartyPopper } from "lucide-react";
-import { IconCopy, IconPlus } from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import confetti from "canvas-confetti";
-import { toast } from "sonner";
-import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RegistrationStepHeader } from "@/components/collect/registration-step-header";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
+import { ShareInviteCard } from "@/components/collect/share-invite-card";
 import type { PublicCampaign } from "@/types/collect";
 
 export function ConfirmationScreen({
   campaign,
   submittedCount,
+  refCode,
   onNewRegistration,
 }: {
   campaign: PublicCampaign;
   submittedCount: number | null;
+  refCode: string | null;
   onNewRegistration: () => void;
 }) {
   const [hasTriggeredConfetti, setHasTriggeredConfetti] = useState(false);
 
-  const shareUrl =
-    typeof window !== "undefined"
-      ? `${process.env.NEXT_PUBLIC_COLLECT_BASE_URL || window.location.origin}/c/${campaign.slug}`
-      : "";
-  const shareText = `I just registered as a supporter for ${campaign.candidateName} (${campaign.party})! Join here: ${shareUrl}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(shareUrl)}&size=200x200`;
-
   useEffect(() => {
-    if (!hasTriggeredConfetti) {
+    // Only trigger confetti for confirmed online submissions, not offline queued ones
+    if (!hasTriggeredConfetti && submittedCount !== null) {
       const timer = setTimeout(() => {
         confetti({
           particleCount: 100,
@@ -53,17 +41,7 @@ export function ConfirmationScreen({
       }, 400);
       return () => clearTimeout(timer);
     }
-  }, [hasTriggeredConfetti]);
-
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success("Link copied to clipboard!");
-    } catch {
-      toast.error("Failed to copy link.");
-    }
-  };
-
+  }, [hasTriggeredConfetti, submittedCount]);
   return (
     <div className="space-y-6">
       {/* Animated Checkmark */}
@@ -81,8 +59,23 @@ export function ConfirmationScreen({
           icon={PartyPopper}
           badge="Registration Complete"
           title="You're All Set!"
-          description={`Thank you for registering as a supporter. You are supporter #${submittedCount || "—"}.`}
+          description={
+            submittedCount !== null
+              ? `Thank you for registering as a supporter. You are supporter #${submittedCount}.`
+              : "Your registration is saved and will be submitted when you're back online."
+          }
         />
+
+        {refCode && (
+          <div className="border-border/60 bg-muted/30 inline-flex items-center gap-2 rounded-sm border px-4 py-2">
+            <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+              Ref:
+            </span>
+            <span className="text-foreground font-mono text-sm font-bold tracking-wider">
+              {refCode}
+            </span>
+          </div>
+        )}
       </section>
 
       {/* New Registration Button */}
@@ -103,7 +96,7 @@ export function ConfirmationScreen({
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className="border-border/60 bg-card relative overflow-hidden border shadow-[0_20px_40px_-12px_rgba(0,0,0,0.04)]"
+        className="border-border/60 bg-card relative overflow-hidden border"
       >
         <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
         <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
@@ -153,102 +146,13 @@ export function ConfirmationScreen({
       </motion.div>
 
       {/* Share + QR Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="border-border/60 bg-card/80 relative overflow-hidden border p-6 backdrop-blur-sm"
-      >
-        <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
-        <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
-
-        <div className="space-y-5">
-          {/* Share Header */}
-          <div className="flex items-center gap-3">
-            <div className="border-primary/30 bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-sm border">
-              <HiUsers className="text-primary h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-foreground text-sm font-bold tracking-widest uppercase">
-                Share & Invite Others
-              </h3>
-              <p className="text-muted-foreground text-xs font-medium">
-                Spread the word with your network
-              </p>
-            </div>
-          </div>
-
-          {/* Share Buttons */}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <Button
-              variant="outline"
-              size="sm"
-              aria-label="Share via WhatsApp"
-              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 rounded-sm px-3 text-[10px] font-bold tracking-widest uppercase"
-              onClick={() =>
-                window.open(
-                  `https://wa.me/?text=${encodeURIComponent(shareText)}`,
-                  "_blank",
-                )
-              }
-            >
-              <FaWhatsapp className="h-3.5 w-3.5" />
-              <span>WhatsApp</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              aria-label="Share via SMS"
-              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 rounded-sm px-3 text-[10px] font-bold tracking-widest uppercase"
-              onClick={() => {
-                window.location.href = `sms:?body=${encodeURIComponent(shareText)}`;
-              }}
-            >
-              <HiPhone className="h-3.5 w-3.5" />
-              <span>SMS</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              aria-label="Share via Email"
-              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 rounded-sm px-3 text-[10px] font-bold tracking-widest uppercase"
-              onClick={() => {
-                window.location.href = `mailto:?subject=${encodeURIComponent(`Support ${campaign.candidateName}`)}&body=${encodeURIComponent(shareText)}`;
-              }}
-            >
-              <HiMail className="h-3.5 w-3.5" />
-              <span>Email</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              aria-label="Copy registration link"
-              className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 rounded-sm px-3 text-[10px] font-bold tracking-widest uppercase"
-              onClick={handleCopyLink}
-            >
-              <IconCopy className="h-3.5 w-3.5" />
-              <span>Copy</span>
-            </Button>
-          </div>
-
-          {/* QR Code */}
-          <div className="border-border/40 flex flex-col items-center gap-2 border-t pt-5">
-            <p className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
-              Scan to Register
-            </p>
-            <Image
-              src={qrUrl}
-              alt="Registration QR Code"
-              width={120}
-              height={120}
-              className="rounded"
-            />
-            <p className="text-muted-foreground max-w-full truncate text-[10px]">
-              {shareUrl}
-            </p>
-          </div>
-        </div>
-      </motion.div>
+      <ShareInviteCard
+        campaignSlug={campaign.slug}
+        candidateName={campaign.candidateName}
+        party={campaign.party}
+        animated
+        animationDelay={0.2}
+      />
 
       <TrustIndicators
         items={[

@@ -48,7 +48,7 @@ export async function PATCH(
       error.code === "P2002"
     ) {
       return NextResponse.json(
-        { error: "A polling unit with this name already exists in this ward" },
+        { error: "A polling unit with this code already exists in this ward" },
         { status: 409 },
       );
     }

@@ -1,4 +1,6 @@
-// Polling Unit Data - Real INEC Data
+// Transitional static polling-unit seed source.
+// Still used by partial geo seeding and the legacy /api/register/locations path.
+// Do not treat this file as the long-term canonical runtime geo source.
 import type { LocationPollingUnit } from "@/types/location";
 import { getWardsByLGA, getWardByCode } from "@/lib/data/wards";
 

@@ -21,7 +21,17 @@ async function publicApiCall<T>(
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.error || `Error: ${response.statusText}`);
+    const firstDetail =
+      error.details && typeof error.details === "object"
+        ? Object.values(error.details)
+            .flat()
+            .find((value) => typeof value === "string" && value.length > 0)
+        : undefined;
+    const message =
+      typeof firstDetail === "string" && firstDetail.length > 0
+        ? `${error.error || "Validation failed"}: ${firstDetail}`
+        : error.error || `Error: ${response.statusText}`;
+    throw new Error(message);
   }
   return response.json();
 }

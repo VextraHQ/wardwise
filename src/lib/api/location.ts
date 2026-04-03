@@ -5,6 +5,8 @@ import type {
   LocationWard,
 } from "@/types/location";
 
+// Legacy static location API client kept for the future public voter/NIN flow.
+// Current admin/candidate geo should use DB-backed geo APIs instead.
 type LocationLevel = "state" | "lga" | "ward" | "pu";
 
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {

@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
 
     const data = wards.map((w) => ({
       id: w.id,
+      code: w.code,
       name: w.name,
       lgaId: w.lgaId,
       _count: { pollingUnits: w._count.pollingUnits },
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
       error.code === "P2002"
     ) {
       return NextResponse.json(
-        { error: "A ward with this name already exists in this LGA" },
+        { error: "A ward with this official code already exists in this LGA" },
         { status: 409 },
       );
     }

@@ -70,6 +70,7 @@ import {
 import { AdminSearchBar } from "@/components/admin/admin-search-bar";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { BulkImportDialog } from "@/components/admin/geo/geo-dialogs/bulk-import-dialog";
+import { formatGeoDisplayName } from "@/lib/utils/geo-display";
 
 interface GeoLevelLgasProps {
   stateCode: string;
@@ -309,7 +310,9 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
                       <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
                         {(page - 1) * pageSize + idx + 1}
                       </TableCell>
-                      <TableCell className="font-medium">{lga.name}</TableCell>
+                      <TableCell className="font-medium">
+                        {formatGeoDisplayName(lga.name)}
+                      </TableCell>
                       <TableCell className="text-right font-mono tabular-nums">
                         {lga._count.wards === 0 ? (
                           <Badge
@@ -493,8 +496,9 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the LGA
-              {deletingLga && ` "${deletingLga.name}"`} and all its wards and
-              polling units.
+              {deletingLga &&
+                ` "${formatGeoDisplayName(deletingLga.name)}"`}{" "}
+              and all its wards and polling units.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

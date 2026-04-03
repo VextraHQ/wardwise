@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { FieldLabel, FieldError } from "@/components/collect/form-ui";
+import { formatGeoDisplayName } from "@/lib/utils/geo-display";
 import { IconSearch } from "@tabler/icons-react";
 
 type Lga = { id: number; name: string };
@@ -70,7 +71,7 @@ export function LgaCheckboxGrid({
 
       {stateLabel && (
         <p className="text-muted-foreground text-xs">
-          {stateLabel} — {lgas.length} LGAs
+          {formatGeoDisplayName(stateLabel)} — {lgas.length} LGAs
         </p>
       )}
 
@@ -123,7 +124,7 @@ export function LgaCheckboxGrid({
               checked={selectedIds.includes(lga.id)}
               onCheckedChange={() => onToggle(lga.id)}
             />
-            <span className="truncate">{lga.name}</span>
+            <span className="truncate">{formatGeoDisplayName(lga.name)}</span>
           </label>
         ))}
         {filteredLgas.length === 0 && (

@@ -112,7 +112,7 @@ export function useDeleteLga() {
 export function useCreateWard() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { name: string; lgaId: number }) =>
+    mutationFn: (data: { code?: string; name: string; lgaId: number }) =>
       adminGeoApi.createWard(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "geo"] });
@@ -124,8 +124,13 @@ export function useCreateWard() {
 export function useUpdateWard() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: { name?: string } }) =>
-      adminGeoApi.updateWard(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: { code?: string; name?: string };
+    }) => adminGeoApi.updateWard(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "geo"] });
     },
@@ -147,7 +152,7 @@ export function useDeleteWard() {
 export function useCreatePollingUnit() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { code?: string; name: string; wardId: number }) =>
+    mutationFn: (data: { code: string; name: string; wardId: number }) =>
       adminGeoApi.createPollingUnit(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "geo"] });

@@ -79,7 +79,7 @@ export function RoleStep({
           />
 
           <div className="space-y-6">
-            <div className="grid grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
               {ROLE_OPTIONS.map((r) => {
                 const Icon = r.icon;
                 return (

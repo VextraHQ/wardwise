@@ -41,6 +41,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local sqlite
+prisma/dev.db
+
 # documentation (keep README.md in root, ignore docs folder)
 /docs/archive/*
 !/docs/wardwise-collect-spec.md

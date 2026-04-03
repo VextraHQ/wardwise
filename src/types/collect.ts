@@ -70,7 +70,12 @@ export type PublicCampaign = {
 
 // Geo types for dropdowns
 export type GeoLga = { id: number; name: string; stateCode: string };
-export type GeoWard = { id: number; name: string; lgaId: number };
+export type GeoWard = {
+  id: number;
+  code?: string | null;
+  name: string;
+  lgaId: number;
+};
 export type GeoPollingUnit = {
   id: number;
   code: string;

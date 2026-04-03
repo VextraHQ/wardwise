@@ -20,12 +20,19 @@ import {
   StepCard,
   CardSectionHeader,
 } from "@/components/collect/form-ui";
+import { formatGeoDisplayName } from "@/lib/utils/geo-display";
 
 export function LocationStep({
   form,
   lgas,
   wards,
   pollingUnits,
+  lgasLoading = false,
+  wardsLoading = false,
+  unitsLoading = false,
+  lgasError = false,
+  wardsError = false,
+  unitsError = false,
   onBack,
   onNext,
 }: {
@@ -33,6 +40,12 @@ export function LocationStep({
   lgas: GeoLga[];
   wards: GeoWard[];
   pollingUnits: GeoPollingUnit[];
+  lgasLoading?: boolean;
+  wardsLoading?: boolean;
+  unitsLoading?: boolean;
+  lgasError?: boolean;
+  wardsError?: boolean;
+  unitsError?: boolean;
   onBack: () => void;
   onNext: () => void;
 }) {
@@ -46,17 +59,19 @@ export function LocationStep({
 
   const lgaOptions: ComboboxSelectOption[] = lgas.map((l) => ({
     value: String(l.id),
-    label: l.name,
+    label: formatGeoDisplayName(l.name),
   }));
 
   const wardOptions: ComboboxSelectOption[] = wards.map((w) => ({
     value: String(w.id),
-    label: w.name,
+    label: formatGeoDisplayName(w.name),
   }));
 
   const puOptions: ComboboxSelectOption[] = pollingUnits.map((p) => ({
     value: String(p.id),
-    label: p.code ? `${p.code.padStart(3, "0")} - ${p.name}` : p.name,
+    label: p.code
+      ? `${p.code.padStart(3, "0")} - ${formatGeoDisplayName(p.name)}`
+      : formatGeoDisplayName(p.name),
   }));
 
   return (
@@ -95,7 +110,12 @@ export function LocationStep({
                   }}
                   placeholder="Select LGA"
                   searchPlaceholder="Search LGAs..."
-                  emptyMessage="No LGAs found."
+                  emptyMessage={
+                    lgasError
+                      ? "Failed to load LGAs. Please refresh the page."
+                      : "No LGAs found."
+                  }
+                  isLoading={lgasLoading}
                 />
                 <FieldError error={errors.lgaId?.message} />
               </div>
@@ -113,8 +133,13 @@ export function LocationStep({
                   }}
                   placeholder={lgaId ? "Select Ward" : "Select LGA first"}
                   searchPlaceholder="Search wards..."
-                  emptyMessage="No wards found."
+                  emptyMessage={
+                    wardsError
+                      ? "Failed to load wards. Please try again."
+                      : "No wards found."
+                  }
                   disabled={!lgaId}
+                  isLoading={wardsLoading}
                 />
                 <FieldError error={errors.wardId?.message} />
               </div>
@@ -137,8 +162,13 @@ export function LocationStep({
                   wardId ? "Select Polling Unit" : "Select Ward first"
                 }
                 searchPlaceholder="Search polling units..."
-                emptyMessage="No polling units found."
+                emptyMessage={
+                  unitsError
+                    ? "Failed to load polling units. Please try again."
+                    : "No polling units found."
+                }
                 disabled={!wardId}
+                isLoading={unitsLoading}
               />
               <FieldError error={errors.pollingUnitId?.message} />
             </div>

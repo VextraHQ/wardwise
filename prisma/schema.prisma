@@ -111,24 +111,26 @@ model Lga {
 
 model Ward {
   id           Int           @id @default(autoincrement())
+  code         String?
   name         String
   lgaId        Int
   lga          Lga           @relation(fields: [lgaId], references: [id])
   pollingUnits PollingUnit[]
   submissions  CollectSubmission[]
 
-  @@unique([name, lgaId])
+  @@unique([code, lgaId])
+  @@index([lgaId])
 }
 
 model PollingUnit {
-  id          Int    @id @default(autoincrement())
-  code        String @default("")
+  id          Int     @id @default(autoincrement())
+  code        String?
   name        String
   wardId      Int
-  ward        Ward   @relation(fields: [wardId], references: [id])
+  ward        Ward    @relation(fields: [wardId], references: [id])
   submissions CollectSubmission[]
 
-  @@unique([name, wardId])
+  @@unique([code, wardId])
   @@index([wardId])
   @@index([code])
 }
@@ -190,7 +192,7 @@ model CollectSubmission {
   apcRegNumber     String?
   voterIdNumber    String?
   isVerified       Boolean  @default(false)
-  role             String   // "women_leader" | "coordinator" | "youth_leader" | "member"
+  role             String   // "volunteer" | "member" | "canvasser"
   customAnswer1    String?
   customAnswer2    String?
   canvasserName    String?

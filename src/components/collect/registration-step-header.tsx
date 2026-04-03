@@ -35,7 +35,7 @@ export function RegistrationStepHeader({
   className,
 }: RegistrationStepHeaderProps) {
   return (
-    <div className={cn("mb-10 space-y-5 text-center", className)}>
+    <div className={cn("mb-4 space-y-5 text-center", className)}>
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}

@@ -54,6 +54,32 @@ export function autoConstituencyName(lgaNames: string[]): string {
   return lgaNames.sort().join("/");
 }
 
+function normalizeBoundaryLabel(label: string): string[] {
+  return label
+    .replace(
+      /\b(federal constituency|senatorial district|state constituency|constituency|district)\b/gi,
+      "",
+    )
+    .split("/")
+    .map((part) => part.trim().toLowerCase())
+    .filter(Boolean)
+    .sort();
+}
+
+export function labelsRepresentSameBoundary(
+  left: string | null | undefined,
+  right: string | null | undefined,
+): boolean {
+  const normalizedLeft = normalizeBoundaryLabel(left ?? "");
+  const normalizedRight = normalizeBoundaryLabel(right ?? "");
+
+  if (normalizedLeft.length === 0 || normalizedRight.length === 0) {
+    return false;
+  }
+
+  return JSON.stringify(normalizedLeft) === JSON.stringify(normalizedRight);
+}
+
 /**
  * Match a preset's canonical LGA names against the live DB records for a state.
  * Returns the matched IDs (to write to the form) and any names not yet seeded.
@@ -127,6 +153,7 @@ export function getConstituencyBoundaryWarnings({
   presetMismatchInfo?: {
     hasPresets: boolean;
     activePresetName?: string; // set when a preset was applied
+    officialPresetName?: string; // full official label for the matching preset
     isDeviated: boolean; // current LGAs no longer match the applied preset
     manuallyMatchesPreset?: boolean; // manual selection matches an official preset
   };
@@ -136,7 +163,14 @@ export function getConstituencyBoundaryWarnings({
   const warnings: ConstituencyBoundaryWarning[] = [];
   const trimmedConstituency = constituencyName?.trim() ?? "";
   const trimmedSuggested = autoSuggestedName?.trim() ?? "";
+  const trimmedOfficialPresetName =
+    presetMismatchInfo?.officialPresetName?.trim() ?? "";
   const stateLabel = stateName || "this state";
+  const hasOfficialMatch = Boolean(
+    presetMismatchInfo &&
+      ((presetMismatchInfo.activePresetName && !presetMismatchInfo.isDeviated) ||
+        presetMismatchInfo.manuallyMatchesPreset),
+  );
 
   if (selectedLgaCount === 0) {
     warnings.push({
@@ -152,7 +186,8 @@ export function getConstituencyBoundaryWarnings({
     expectedLgaCount &&
     expectedLgaCount > 0 &&
     selectedLgaCount > 0 &&
-    !hasPartialGeo
+    !hasPartialGeo &&
+    !hasOfficialMatch
   ) {
     if (selectedLgaCount === expectedLgaCount) {
       warnings.push({
@@ -173,9 +208,28 @@ export function getConstituencyBoundaryWarnings({
   }
 
   if (
+    hasOfficialMatch &&
+    trimmedConstituency.length > 0 &&
+    trimmedOfficialPresetName.length > 0 &&
+    trimmedConstituency !== trimmedOfficialPresetName &&
+    !labelsRepresentSameBoundary(
+      trimmedConstituency,
+      trimmedOfficialPresetName,
+    )
+  ) {
+    warnings.push({
+      severity: "info",
+      title: "Official constituency label changed",
+      description: `The selected LGAs match "${trimmedOfficialPresetName}", but the display name was changed. That can be intentional, but it is worth reviewing before launch.`,
+    });
+  }
+
+  if (
     trimmedConstituency.length > 0 &&
     trimmedSuggested.length > 0 &&
-    trimmedConstituency !== trimmedSuggested
+    trimmedConstituency !== trimmedSuggested &&
+    !labelsRepresentSameBoundary(trimmedConstituency, trimmedSuggested) &&
+    !hasOfficialMatch
   ) {
     warnings.push({
       severity: "info",
@@ -200,7 +254,10 @@ export function getConstituencyBoundaryWarnings({
         title: "LGAs deviate from preset",
         description: `The current selection differs from "${presetMismatchInfo.activePresetName}". Verify this is the correct official boundary before saving.`,
       });
-    } else if (!presetMismatchInfo.activePresetName && !presetMismatchInfo.manuallyMatchesPreset) {
+    } else if (
+      !presetMismatchInfo.activePresetName &&
+      !presetMismatchInfo.manuallyMatchesPreset
+    ) {
       warnings.push({
         severity: "info",
         title: "No matching official constituency",
