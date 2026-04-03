@@ -135,7 +135,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   // ── Form persistence ──
   const {
     hasSavedProgress,
-    returningVisitor,
+    deviceSubmission,
     restoreProgress,
     saveProgress,
     clearProgress,
@@ -319,6 +319,55 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     });
   };
 
+  const resetToFreshRegistration = (nextScreen = 1) => {
+    form.reset({
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      phone: "",
+      email: "",
+      sex: undefined as unknown as "male" | "female",
+      age: undefined as unknown as number,
+      occupation: "",
+      maritalStatus: undefined as unknown as
+        | "single"
+        | "married"
+        | "divorced"
+        | "widowed",
+      lgaId: undefined as unknown as number,
+      lgaName: "",
+      wardId: undefined as unknown as number,
+      wardName: "",
+      pollingUnitId: undefined as unknown as number,
+      pollingUnitName: "",
+      apcRegNumber: "",
+      voterIdNumber: "",
+      role: undefined as unknown as "volunteer" | "member" | "canvasser",
+      customAnswer1: "",
+      customAnswer2: "",
+      canvasserName: prefilledCanvasserName,
+      canvasserPhone: prefilledCanvasserPhone,
+    });
+    setScreen(nextScreen);
+    setSubmittedCount(null);
+    setSubmissionId(null);
+    setHasCanvasser(prefilledCanvasserName ? true : null);
+    setCanvasserStepError("");
+    setOccupationMode("select");
+    clearProgress();
+  };
+
+  const handleCopyLastReference = async () => {
+    if (!deviceSubmission?.refCode) return;
+
+    try {
+      await navigator.clipboard.writeText(deviceSubmission.refCode);
+      toast.success("Reference code copied");
+    } catch {
+      toast.error("Could not copy reference code");
+    }
+  };
+
   const validateAndNext = async () => {
     const fields = screenFieldMap[screen];
     if (fields) {
@@ -429,40 +478,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   };
 
   const handleNewRegistration = () => {
-    form.reset({
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      phone: "",
-      email: "",
-      sex: undefined as unknown as "male" | "female",
-      age: undefined as unknown as number,
-      occupation: "",
-      maritalStatus: undefined as unknown as
-        | "single"
-        | "married"
-        | "divorced"
-        | "widowed",
-      lgaId: undefined as unknown as number,
-      lgaName: "",
-      wardId: undefined as unknown as number,
-      wardName: "",
-      pollingUnitId: undefined as unknown as number,
-      pollingUnitName: "",
-      apcRegNumber: "",
-      voterIdNumber: "",
-      role: undefined as unknown as "volunteer" | "member" | "canvasser",
-      customAnswer1: "",
-      customAnswer2: "",
-      canvasserName: prefilledCanvasserName,
-      canvasserPhone: prefilledCanvasserPhone,
-    });
-    setScreen(0);
-    setSubmittedCount(null);
-    setHasCanvasser(prefilledCanvasserName ? true : null);
-    setCanvasserStepError("");
-    setOccupationMode("select");
-    clearProgress();
+    resetToFreshRegistration(1);
   };
 
   // Paused/Closed states
@@ -578,9 +594,11 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
         <SplashScreen
           campaign={campaign}
           hasSavedProgress={hasSavedProgress}
-          returningVisitor={returningVisitor}
+          deviceSubmission={deviceSubmission}
           onStart={() => setScreen(1)}
+          onStartFresh={() => resetToFreshRegistration(1)}
           onRestore={restoreProgress}
+          onCopyReference={handleCopyLastReference}
         />
       )}
 

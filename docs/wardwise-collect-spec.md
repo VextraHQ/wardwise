@@ -168,9 +168,11 @@
 
 ### Persistence
 
-- localStorage under `collect-form-${slug}`, cleared on successful submit.
-- "Continue where you left off?" on splash if saved state exists.
-- Saved progress now includes lightweight UI state needed to restore the flow accurately (for example canvasser yes/no choice and occupation input mode).
+- Draft progress is stored locally under `collect-form-${slug}` and cleared on successful submit.
+- If a draft exists, splash prioritizes `Continue where you left off` as the primary action and offers `Start fresh` as the secondary action.
+- Completed submissions are still stored in the database, but splash no longer auto-personalizes the experience as a returning-user takeover.
+- Instead, same-device completion metadata is stored under `collect-submitted-${slug}` and used only for a subtle `Last registration on this device` utility card with the reference code.
+- Saved progress includes lightweight UI state needed to restore the flow accurately (for example canvasser yes/no choice and occupation input mode).
 
 ### Validation
 
