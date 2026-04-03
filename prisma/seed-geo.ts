@@ -1,11 +1,22 @@
+import { config } from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { nigeriaLGAs } from "../src/lib/data/state-lga-locations";
 import { wards } from "../src/lib/data/wards";
 import { getPollingUnitsByWard } from "../src/lib/data/polling-units";
 
+config();
+
 const prisma = new PrismaClient();
+const OFFICIAL_STATE_SYNC_EXCLUSIONS = new Set(["AD"]);
 
 /**
+ * Partial geo seed for the current static ward + polling unit files.
+ * This is NOT the canonical national state/LGA seed.
+ *
+ * Use `seed-states-lgas.ts` for the canonical all-states/all-LGAs rollout.
+ * Keep this script for demo data and partial ward/PU seeding while runtime geo
+ * is still transitioning fully into the database.
+ *
  * Seeds all LGAs that have ward + polling unit data in /lib/data/.
  * Idempotent: uses unique lookups + upsert logic, safe to re-run.
  * Skips LGAs with no ward data gracefully.
@@ -16,9 +27,13 @@ async function main() {
   // Discover which LGA codes actually have ward data
   const lgaCodesWithWards = new Set(wards.map((w) => w.lgaCode));
 
-  // Filter to LGAs that have ward data
-  const seedableLgas = nigeriaLGAs.filter((lga) =>
-    lgaCodesWithWards.has(lga.code),
+  // Filter to LGAs that have ward data and are still managed by this legacy seed.
+  // States migrated to official state-level ward/PU syncs should be excluded here
+  // so this partial seed cannot re-introduce stale demo rows.
+  const seedableLgas = nigeriaLGAs.filter(
+    (lga) =>
+      lgaCodesWithWards.has(lga.code) &&
+      !OFFICIAL_STATE_SYNC_EXCLUSIONS.has(lga.stateCode),
   );
 
   console.log(

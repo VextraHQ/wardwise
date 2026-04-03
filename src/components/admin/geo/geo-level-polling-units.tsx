@@ -69,6 +69,7 @@ import {
 import { AdminSearchBar } from "@/components/admin/admin-search-bar";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { BulkImportDialog } from "@/components/admin/geo/geo-dialogs/bulk-import-dialog";
+import { formatGeoDisplayName } from "@/lib/utils/geo-display";
 
 interface GeoLevelPollingUnitsProps {
   wardId: number;
@@ -323,7 +324,7 @@ export function GeoLevelPollingUnits({
                         {pu.code}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {pu.name}
+                        {formatGeoDisplayName(pu.name)}
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
@@ -386,7 +387,8 @@ export function GeoLevelPollingUnits({
           <DialogHeader>
             <DialogTitle>Add Polling Unit</DialogTitle>
             <DialogDescription>
-              Create a new polling unit{wardName ? ` in ${wardName}` : ""}.
+              Create a new polling unit
+              {wardName ? ` in ${formatGeoDisplayName(wardName)}` : ""}.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -452,7 +454,9 @@ export function GeoLevelPollingUnits({
           <DialogHeader>
             <DialogTitle>Edit Polling Unit</DialogTitle>
             <DialogDescription>
-              Update the polling unit details.
+              Update
+              {editingPu ? ` ${formatGeoDisplayName(editingPu.name)}` : ""}{" "}
+              details.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -520,7 +524,7 @@ export function GeoLevelPollingUnits({
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
               polling unit
-              {deletingPu && ` "${deletingPu.name}"`}.
+              {deletingPu && ` "${formatGeoDisplayName(deletingPu.name)}"`}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

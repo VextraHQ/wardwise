@@ -49,11 +49,7 @@ export function InputIcon({ children }: { children: React.ReactNode }) {
 
 export function FieldError({ error }: { error?: string }) {
   if (!error) return null;
-  return (
-    <p className="text-destructive text-[9px] font-medium tracking-wide uppercase">
-      {error}
-    </p>
-  );
+  return <p className="text-destructive text-[11px] font-medium">{error}</p>;
 }
 
 export function NavButtons({
@@ -77,7 +73,7 @@ export function NavButtons({
         onClick={onBack}
         disabled={isLoading}
         aria-label="Go back to previous step"
-        className="hover:bg-muted/10 h-11 rounded-sm px-8 text-xs font-bold tracking-widest uppercase"
+        className="hover:bg-muted/10 h-11 shrink-0 rounded-sm px-4 text-xs font-bold tracking-widest uppercase sm:px-8"
       >
         <HiArrowLeft className="mr-2 h-4 w-4" />
         Back
@@ -87,7 +83,7 @@ export function NavButtons({
         onClick={onNext}
         disabled={nextDisabled || isLoading}
         aria-label={nextLabel}
-        className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 flex-1 rounded-sm text-xs font-bold tracking-widest uppercase transition-all active:scale-95"
+        className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 min-w-0 flex-1 rounded-sm text-[10px] font-bold tracking-widest uppercase transition-all active:scale-95 sm:text-xs"
       >
         {isLoading ? (
           <>

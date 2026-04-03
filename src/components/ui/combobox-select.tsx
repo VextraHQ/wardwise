@@ -48,6 +48,7 @@ interface ComboboxSelectProps {
   disabled?: boolean;
   className?: string;
   triggerClassName?: string;
+  triggerAriaLabel?: string;
   isLoading?: boolean;
 }
 
@@ -62,6 +63,7 @@ export function ComboboxSelect({
   disabled = false,
   className,
   triggerClassName,
+  triggerAriaLabel,
   isLoading = false,
 }: ComboboxSelectProps) {
   const [open, setOpen] = React.useState(false);
@@ -109,6 +111,7 @@ export function ComboboxSelect({
       <Button
         variant="outline"
         role="combobox"
+        aria-label={triggerAriaLabel}
         aria-expanded={open}
         disabled={disabled || isLoading}
         title={selectedOption?.label}

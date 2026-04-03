@@ -66,6 +66,7 @@ import {
   IconEyeOff,
 } from "@tabler/icons-react";
 import type { CollectSubmission } from "@/types/collect";
+import { formatGeoDisplayName } from "@/lib/utils/geo-display";
 
 // Extended type to include nested polling unit from API
 type SubmissionWithPU = CollectSubmission & {
@@ -74,8 +75,9 @@ type SubmissionWithPU = CollectSubmission & {
 
 function formatPU(sub: SubmissionWithPU) {
   const code = sub.pollingUnit?.code;
-  if (code) return `${code.padStart(3, "0")} - ${sub.pollingUnitName}`;
-  return sub.pollingUnitName;
+  const displayName = formatGeoDisplayName(sub.pollingUnitName);
+  if (code) return `${code.padStart(3, "0")} - ${displayName}`;
+  return displayName;
 }
 
 export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
@@ -427,10 +429,10 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                       {s.voterIdNumber || "—"}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {s.lgaName}
+                      {formatGeoDisplayName(s.lgaName)}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {s.wardName}
+                      {formatGeoDisplayName(s.wardName)}
                     </TableCell>
                     <TableCell className="hidden xl:table-cell">
                       <code className="text-muted-foreground bg-muted rounded px-1.5 py-0.5 text-xs">
@@ -546,8 +548,14 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                 </Section>
 
                 <Section label="Location Data">
-                  <Field label="LGA" value={selected.lgaName} />
-                  <Field label="Ward" value={selected.wardName} />
+                  <Field
+                    label="LGA"
+                    value={formatGeoDisplayName(selected.lgaName)}
+                  />
+                  <Field
+                    label="Ward"
+                    value={formatGeoDisplayName(selected.wardName)}
+                  />
                   <Field label="Polling Unit" value={formatPU(selected)} mono />
                 </Section>
 

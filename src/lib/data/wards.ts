@@ -1,4 +1,6 @@
-// Ward data - single source of truth for ward data - DEMO ONLY
+// Transitional static ward seed source.
+// Still used by partial geo seeding and the legacy /api/register/locations path.
+// Do not treat this file as the long-term canonical runtime geo source.
 import type { LocationWard } from "@/types/location";
 
 export const wards: LocationWard[] = [

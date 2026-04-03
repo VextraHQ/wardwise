@@ -22,7 +22,12 @@ export async function GET(request: NextRequest) {
       orderBy: { code: "asc" },
     });
 
-    return NextResponse.json({ pollingUnits });
+    return NextResponse.json({
+      pollingUnits: pollingUnits.map((pollingUnit) => ({
+        ...pollingUnit,
+        code: pollingUnit.code ?? "",
+      })),
+    });
   } catch (error) {
     console.error("Error fetching polling units:", error);
     return NextResponse.json(

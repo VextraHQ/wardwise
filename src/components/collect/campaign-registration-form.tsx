@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
@@ -11,6 +11,8 @@ import {
   usePollingUnits,
   useSubmitRegistration,
 } from "@/hooks/use-collect";
+import { useCollectServiceWorker } from "@/hooks/use-collect-service-worker";
+import { useCollectFormPersistence } from "@/hooks/use-collect-form-persistence";
 import { useOffline } from "@/hooks/use-offline";
 import { queueSubmission } from "@/lib/offline-queue";
 import {
@@ -18,6 +20,7 @@ import {
   type RegistrationFormData,
 } from "@/lib/schemas/collect-schemas";
 import type { PublicCampaign } from "@/types/collect";
+import { generateRefCode } from "@/lib/utils";
 import { StepProgress } from "@/components/ui/step-progress";
 import { FormShell } from "@/components/collect/form-shell";
 import { SplashScreen } from "@/components/collect/steps/splash-screen";
@@ -47,9 +50,15 @@ const TOTAL_SCREENS = 7; // 0=splash, 1=personal, 2=location, 3=party, 4=role, 5
 export function CampaignRegistrationForm({ initialCampaign }: Props) {
   const campaign = initialCampaign;
   const searchParams = useSearchParams();
+  const prefilledCanvasserName = searchParams.get("canvasser")?.trim() || "";
+  const prefilledCanvasserPhone = searchParams.get("cphone")?.trim() || "";
   const [screen, setScreen] = useState(0);
   const [submittedCount, setSubmittedCount] = useState<number | null>(null);
-  const [hasCanvasser, setHasCanvasser] = useState<boolean | null>(null);
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [hasCanvasser, setHasCanvasser] = useState<boolean | null>(
+    prefilledCanvasserName ? true : null,
+  );
+  const [canvasserStepError, setCanvasserStepError] = useState<string>("");
   const [occupationMode, setOccupationMode] = useState<"select" | "custom">(
     "select",
   );
@@ -64,14 +73,8 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     clearLastSyncResult,
   } = useOffline();
 
-  // Register service worker
-  useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {
-        // SW registration failed — non-critical
-      });
-    }
-  }, []);
+  // Register / manage service worker lifecycle
+  useCollectServiceWorker();
 
   // Surface auto-sync results (from reconnect) as toasts
   useEffect(() => {
@@ -109,22 +112,64 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       role: undefined,
       customAnswer1: "",
       customAnswer2: "",
-      canvasserName: searchParams.get("canvasser") || "",
-      canvasserPhone: searchParams.get("cphone") || "",
+      canvasserName: prefilledCanvasserName,
+      canvasserPhone: prefilledCanvasserPhone,
     },
   });
 
   const { setValue, trigger } = form;
   const lgaId = useWatch({ control: form.control, name: "lgaId" });
   const wardId = useWatch({ control: form.control, name: "wardId" });
+  const skipLocationResetRef = useRef(false);
+
+  // Holds pending location values that need to be re-applied once query data loads
+  const pendingRestoreRef = useRef<{
+    wardId?: number;
+    wardName?: string;
+    pollingUnitId?: number;
+    pollingUnitName?: string;
+  } | null>(null);
+
+  // ── Form persistence ──
+  const {
+    hasSavedProgress,
+    returningVisitor,
+    restoreProgress,
+    saveProgress,
+    clearProgress,
+  } = useCollectFormPersistence({
+    form,
+    campaignSlug: campaign.slug,
+    screen,
+    totalScreens: TOTAL_SCREENS,
+    uiState: { hasCanvasser, occupationMode },
+    skipLocationResetRef,
+    pendingRestoreRef,
+    setHasCanvasser,
+    setOccupationMode,
+    setScreen,
+  });
 
   // Geo dropdowns
-  const { data: lgas = [] } = useCampaignLgas(campaign.slug);
-  const { data: wards = [] } = useWards(lgaId);
-  const { data: pollingUnits = [] } = usePollingUnits(wardId);
+  const {
+    data: lgas = [],
+    isLoading: lgasLoading,
+    isError: lgasError,
+  } = useCampaignLgas(campaign.slug);
+  const {
+    data: wards = [],
+    isLoading: wardsLoading,
+    isError: wardsError,
+  } = useWards(lgaId);
+  const {
+    data: pollingUnits = [],
+    isLoading: unitsLoading,
+    isError: unitsError,
+  } = usePollingUnits(wardId);
 
-  // Reset cascading dropdowns
+  // Reset cascading dropdowns (skip during restore)
   useEffect(() => {
+    if (skipLocationResetRef.current) return;
     setValue("wardId", undefined as unknown as number);
     setValue("wardName", "");
     setValue("pollingUnitId", undefined as unknown as number);
@@ -132,70 +177,56 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   }, [lgaId, setValue]);
 
   useEffect(() => {
+    if (skipLocationResetRef.current) return;
     setValue("pollingUnitId", undefined as unknown as number);
     setValue("pollingUnitName", "");
   }, [wardId, setValue]);
 
+  // Re-apply saved ward once wards query finishes loading
+  useEffect(() => {
+    if (!pendingRestoreRef.current) return;
+    if (wardsLoading || !wards.length) return;
+    const pending = pendingRestoreRef.current;
+    if (pending.wardId && wards.some((w) => w.id === pending.wardId)) {
+      skipLocationResetRef.current = true;
+      setValue("wardId", pending.wardId);
+      setValue("wardName", pending.wardName || "");
+      // Keep pending for pollingUnit — it will be set by the next effect
+      // but remove the ward part so this effect doesn't re-fire
+      pendingRestoreRef.current = {
+        pollingUnitId: pending.pollingUnitId,
+        pollingUnitName: pending.pollingUnitName,
+      };
+      // Release the skip guard after React processes the setValue
+      window.setTimeout(() => {
+        skipLocationResetRef.current = false;
+      }, 0);
+    }
+  }, [wards, wardsLoading, setValue]);
+
+  // Re-apply saved polling unit once pollingUnits query finishes loading
+  useEffect(() => {
+    if (!pendingRestoreRef.current) return;
+    if (unitsLoading || !pollingUnits.length) return;
+    const pending = pendingRestoreRef.current;
+    if (
+      pending.pollingUnitId &&
+      pollingUnits.some((p) => p.id === pending.pollingUnitId)
+    ) {
+      setValue("pollingUnitId", pending.pollingUnitId);
+      setValue("pollingUnitName", pending.pollingUnitName || "");
+      pendingRestoreRef.current = null; // fully restored
+    }
+  }, [pollingUnits, unitsLoading, setValue]);
+
   // Canvasser URL params
   useEffect(() => {
-    const canvasserValue = searchParams.get("canvasser")?.trim();
-    const cphone = searchParams.get("cphone")?.trim();
-    if (canvasserValue) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setHasCanvasser(true);
-      setValue("canvasserName", canvasserValue);
+    if (prefilledCanvasserName) {
+      setValue("canvasserName", prefilledCanvasserName);
     }
-    if (cphone) setValue("canvasserPhone", cphone);
-  }, [searchParams, setValue]);
+    if (prefilledCanvasserPhone) setValue("canvasserPhone", prefilledCanvasserPhone);
+  }, [prefilledCanvasserName, prefilledCanvasserPhone, setValue]);
 
-  // localStorage persistence
-  const storageKey = `collect-form-${campaign.slug}`;
-
-  const saveProgress = useCallback(() => {
-    if (typeof window === "undefined") return;
-    const data = form.getValues();
-    localStorage.setItem(storageKey, JSON.stringify({ screen, data }));
-  }, [form, screen, storageKey]);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || screen === 0) return;
-    saveProgress();
-  }, [screen, saveProgress]);
-
-  const [hasSavedProgress, setHasSavedProgress] = useState(false);
-
-  // Restore on mount
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const saved = localStorage.getItem(storageKey);
-    if (saved && screen === 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setHasSavedProgress(true);
-      try {
-        const { screen: savedScreen } = JSON.parse(saved);
-        if (savedScreen > 0) {
-          // Don't auto-restore, just keep splash — user can click "Continue"
-        }
-      } catch {
-        /* ignore */
-      }
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const restoreProgress = () => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        const { screen: savedScreen, data } = JSON.parse(saved);
-        Object.entries(data).forEach(([key, value]) => {
-          setValue(key as keyof RegistrationFormData, value as string | number);
-        });
-        setScreen(savedScreen);
-      }
-    } catch {
-      localStorage.removeItem(storageKey);
-    }
-  };
 
   const submitMutation = useSubmitRegistration();
 
@@ -226,8 +257,8 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   const skipCanvasserStep = role === "canvasser";
 
   const doSubmit = async () => {
-    saveProgress();
     const values = form.getValues();
+    saveProgress(values);
     const payload = { ...values, campaignSlug: campaign.slug };
 
     // Offline: queue in IndexedDB
@@ -235,7 +266,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       try {
         await queueSubmission(payload);
         await refreshPendingCount();
-        localStorage.removeItem(storageKey);
+        clearProgress();
         toast.success("Saved offline", {
           description:
             "Your registration will be submitted automatically when you reconnect.",
@@ -250,7 +281,21 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     submitMutation.mutate(payload, {
       onSuccess: (result) => {
         setSubmittedCount(result.count);
-        localStorage.removeItem(storageKey);
+        setSubmissionId(result.submission.id);
+        clearProgress();
+
+        // Persist submission for returning visitor recognition
+        const refCode = generateRefCode(result.submission.id);
+        localStorage.setItem(
+          `collect-submitted-${campaign.slug}`,
+          JSON.stringify({
+            name: form.getValues("fullName"),
+            count: result.count,
+            submittedAt: new Date().toISOString(),
+            refCode,
+          }),
+        );
+
         setScreen(TOTAL_SCREENS - 1); // confirmation
       },
       onError: (error) => {
@@ -277,20 +322,76 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       if (!valid) return;
     }
 
-    // Canvasser validation: if "Yes" selected, require both name and phone
-    if (screen === 5 && hasCanvasser) {
-      const trimmedName = form.getValues("canvasserName")?.trim();
-      const trimmedPhone = form.getValues("canvasserPhone")?.trim();
-      if (!trimmedName || !trimmedPhone) {
-        if (!trimmedName)
-          form.setError("canvasserName", {
-            message: "Canvasser name is required",
-          });
-        if (!trimmedPhone)
-          form.setError("canvasserPhone", {
-            message: "Canvasser phone is required",
-          });
+    // Extra guardrail: ComboboxSelect fields set via setValue may not
+    // trigger zod's min(1) rule properly through trigger() alone.
+    // Explicitly check required select-based fields for each screen.
+    if (screen === 1) {
+      const vals = form.getValues();
+      if (!vals.occupation || vals.occupation.trim() === "") {
+        form.setError("occupation", { message: "Occupation is required" });
         return;
+      }
+      if (!vals.sex) {
+        form.setError("sex", { message: "Please select your sex" });
+        return;
+      }
+      if (!vals.maritalStatus) {
+        form.setError("maritalStatus", { message: "Select marital status" });
+        return;
+      }
+    }
+
+    if (screen === 2) {
+      const vals = form.getValues();
+      if (!vals.lgaId) {
+        form.setError("lgaId", { message: "Select your LGA" });
+        return;
+      }
+      if (!vals.wardId) {
+        form.setError("wardId", { message: "Select your ward" });
+        return;
+      }
+      if (!vals.pollingUnitId) {
+        form.setError("pollingUnitId", { message: "Select your polling unit" });
+        return;
+      }
+    }
+
+    // Canvasser validation: if "Yes" selected, require both name and phone
+    if (screen === 5) {
+      if (hasCanvasser === null) {
+        setCanvasserStepError("Please select Yes or No before submitting.");
+        return;
+      }
+
+      setCanvasserStepError("");
+
+      if (!hasCanvasser) {
+        setValue("canvasserName", "");
+        setValue("canvasserPhone", "");
+      } else {
+        const trimmedName = form.getValues("canvasserName")?.trim();
+        const trimmedPhone = form.getValues("canvasserPhone")?.trim();
+
+        if (!trimmedName || !trimmedPhone) {
+          if (campaign.campaignCanvassers?.length) {
+            setCanvasserStepError(
+              "Please choose a canvasser or select Other (not listed).",
+            );
+          }
+
+          if (!trimmedName) {
+            form.setError("canvasserName", {
+              message: "Canvasser name is required",
+            });
+          }
+          if (!trimmedPhone) {
+            form.setError("canvasserPhone", {
+              message: "Canvasser phone is required",
+            });
+          }
+          return;
+        }
       }
     }
 
@@ -324,12 +425,38 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   };
 
   const handleNewRegistration = () => {
-    form.reset();
+    form.reset({
+      fullName: "",
+      phone: "",
+      email: "",
+      sex: undefined as unknown as "male" | "female",
+      age: undefined as unknown as number,
+      occupation: "",
+      maritalStatus: undefined as unknown as
+        | "single"
+        | "married"
+        | "divorced"
+        | "widowed",
+      lgaId: undefined as unknown as number,
+      lgaName: "",
+      wardId: undefined as unknown as number,
+      wardName: "",
+      pollingUnitId: undefined as unknown as number,
+      pollingUnitName: "",
+      apcRegNumber: "",
+      voterIdNumber: "",
+      role: undefined as unknown as "volunteer" | "member" | "canvasser",
+      customAnswer1: "",
+      customAnswer2: "",
+      canvasserName: prefilledCanvasserName,
+      canvasserPhone: prefilledCanvasserPhone,
+    });
     setScreen(0);
     setSubmittedCount(null);
-    setHasCanvasser(null);
+    setHasCanvasser(prefilledCanvasserName ? true : null);
+    setCanvasserStepError("");
     setOccupationMode("select");
-    localStorage.removeItem(storageKey);
+    clearProgress();
   };
 
   // Paused/Closed states
@@ -445,6 +572,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
         <SplashScreen
           campaign={campaign}
           hasSavedProgress={hasSavedProgress}
+          returningVisitor={returningVisitor}
           onStart={() => setScreen(1)}
           onRestore={restoreProgress}
         />
@@ -467,6 +595,12 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
           lgas={lgas}
           wards={wards}
           pollingUnits={pollingUnits}
+          lgasLoading={lgasLoading}
+          wardsLoading={wardsLoading}
+          unitsLoading={unitsLoading}
+          lgasError={lgasError}
+          wardsError={wardsError}
+          unitsError={unitsError}
           onBack={goBack}
           onNext={validateAndNext}
         />
@@ -492,11 +626,16 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
         <CanvasserStep
           form={form}
           hasCanvasser={hasCanvasser}
-          setHasCanvasser={setHasCanvasser}
+          setHasCanvasser={(value) => {
+            setHasCanvasser(value);
+            setCanvasserStepError("");
+          }}
+          selectionError={canvasserStepError}
           isSubmitting={submitMutation.isPending}
           submitError={submitMutation.error?.message}
           onBack={goBack}
           onNext={validateAndNext}
+          nextDisabled={hasCanvasser === null}
           preloadedCanvassers={campaign.campaignCanvassers}
         />
       )}
@@ -515,6 +654,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
           <ConfirmationScreen
             campaign={campaign}
             submittedCount={submittedCount}
+            refCode={submissionId ? generateRefCode(submissionId) : null}
             onNewRegistration={handleNewRegistration}
           />
         </>

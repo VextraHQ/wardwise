@@ -45,7 +45,7 @@ export async function PATCH(
       error.code === "P2002"
     ) {
       return NextResponse.json(
-        { error: "A ward with this name already exists in this LGA" },
+        { error: "A ward with this official code already exists in this LGA" },
         { status: 409 },
       );
     }

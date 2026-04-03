@@ -10,6 +10,7 @@ export type GeoLga = {
 
 export type GeoWard = {
   id: number;
+  code?: string | null;
   name: string;
   lgaId: number;
   _count: { pollingUnits: number };

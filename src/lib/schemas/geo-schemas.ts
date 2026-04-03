@@ -17,11 +17,16 @@ export const createLgaSchema = z.object({
 export const updateLgaSchema = createLgaSchema.partial();
 
 export const createWardSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .transform((v) => v || undefined)
+    .optional(),
   name: z
     .string()
     .min(2, "Name must be at least 2 characters")
     .transform((v) => v.trim()),
-  lgaId: z.number().min(1, "LGA is required"),
+  lgaId: z.number({ message: "LGA is required" }).min(1, "LGA is required"),
 });
 
 export const updateWardSchema = createWardSchema.partial();
@@ -35,7 +40,7 @@ export const createPollingUnitSchema = z.object({
     .string()
     .transform((v) => v.trim())
     .default(""),
-  wardId: z.number().min(1, "Ward is required"),
+  wardId: z.number({ message: "Ward is required" }).min(1, "Ward is required"),
 });
 
 export const updatePollingUnitSchema = createPollingUnitSchema.partial();

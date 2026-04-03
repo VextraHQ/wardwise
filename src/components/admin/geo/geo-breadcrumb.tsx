@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { getStateByCode } from "@/lib/data/state-lga-locations";
+import { formatGeoDisplayName } from "@/lib/utils/geo-display";
 
 interface GeoBreadcrumbProps {
   stateCode: string | null;
@@ -89,11 +90,11 @@ export function GeoBreadcrumb({
                     })
                   }
                 >
-                  {lgaName}
+                  {formatGeoDisplayName(lgaName)}
                 </BreadcrumbLink>
               ) : (
                 <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
-                  {lgaName}
+                  {formatGeoDisplayName(lgaName)}
                 </BreadcrumbPage>
               )}
             </BreadcrumbItem>
@@ -107,7 +108,7 @@ export function GeoBreadcrumb({
             </BreadcrumbSeparator>
             <BreadcrumbItem>
               <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
-                {wardName}
+                {formatGeoDisplayName(wardName)}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </>

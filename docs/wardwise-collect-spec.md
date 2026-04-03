@@ -11,13 +11,17 @@
   - Server-side Zod validation on campaign create/update
   - Audit logging on campaign CRUD and submission deletes
 - Database schema, API routes, public registration form, and admin management UI are all live.
-- Geo data seeded: 14 LGAs, 143 wards, 2,123 polling units (Adamawa + Bauchi states).
-- Client is testing; Girei and remaining Adamawa LGA data pending from client.
+- Canonical LGA seed is complete nationally: `774` LGAs across `37` state codes are available for candidate and campaign boundary selection.
+- Adamawa ward + polling unit data is now synced to the official INEC source: `21` LGAs, `226` wards, `4,104` polling units for the Adamawa slice.
+- Ward + polling unit cleanup for other states now continues state-by-state through the canonical sync pipeline rather than ad hoc static seed files.
 
 ### What Has Been Done
 
 - Prisma schema: Campaign, CollectSubmission, Lga, Ward, PollingUnit models with unique constraints
-- Geo seed script (`prisma/seed-geo.ts`): idempotent, seeds all available LGA/ward/PU data
+- Canonical geo foundation added:
+  - `prisma/seed-states-lgas.ts` — idempotent national LGA seed
+  - `prisma/audit-geo.ts` — live-vs-canonical geo audit
+  - `scripts/sync_state_wards_pus.mjs` — official state ward/PU sync pipeline
 - Public form at `/c/[slug]`: 7-screen multi-step registration with localStorage persistence
 - Admin: Campaign CRUD, submissions table with PU codes, CSV export, QR codes, canvasser aggregation
 - Admin sidebar: Dashboard → Candidates → Collect
@@ -62,6 +66,14 @@
 - **Campaign boundary guard**: Campaign create/update API validates `enabledLgaIds` is a subset of the candidate's `constituencyLgaIds`. Constituency positions with empty `constituencyLgaIds` return 400.
 - **PATCH guard**: Campaign update rejects LGAs outside the candidate boundary; blocks activating when another active campaign exists.
 
+### What Changed (Batch 5 — Public Flow Reliability)
+
+- **Canvasser choice is now enforced in the UI**: on the final referral step, registrants must explicitly choose `Yes` or `No` before submit is enabled.
+- **Referral validation tightened**: if `Yes` is selected, registrants must either choose a preloaded canvasser or provide both canvasser name and phone.
+- **Submit 400s are more understandable**: public submit errors now surface the first field-level server validation message instead of only showing a generic failure.
+- **Progress restore is more reliable**: localStorage persistence now saves field changes during the flow, not just step changes. Restoring progress preserves saved ward / polling unit choices and the canvasser yes/no state more reliably.
+- **Service worker scope is now constrained to Collect**: the offline worker is registered for `/c/` only, and development sessions clean up old Collect workers/caches so stale JS/CSS does not leak into admin or local UI work.
+
 ### What Changed (Batch 2)
 
 - **LGA dropdown**: Shows only the campaign's `enabledLgaIds` (inherited from candidate's constituency boundary, or restricted subset).
@@ -76,7 +88,8 @@
 
 ### What Is Pending
 
-- Full Adamawa LGA data (client providing remaining data including Girei)
+- Official ward + polling unit sync for additional states beyond Adamawa (for example Bauchi)
+- Future precision work for split-LGA constituencies lives in `docs/geo-canonical-seeding-plan.md`
 
 ## Locked Product Decisions
 
@@ -100,13 +113,13 @@
 ### Geography
 
 - **Option B implemented**: Database-backed geo tables (Lga, Ward, PollingUnit) with unique constraints.
-- `@@unique([name, stateCode])` on Lga, `@@unique([name, lgaId])` on Ward, `@@unique([name, wardId])` on PollingUnit.
-- PollingUnit has `code` field storing real INEC polling unit numbers.
+- `@@unique([name, stateCode])` on Lga, `@@unique([code, lgaId])` on Ward, `@@unique([code, wardId])` on PollingUnit.
+- Ward and PollingUnit codes now carry the real INEC identity where official source data contains duplicate names under the same parent.
 - Public LGA dropdown is **scope-aware** based on position:
   - **President** → all seeded LGAs (national scope)
   - **Governor** → all LGAs in the candidate's state
   - **Senator / HoR / State Assembly** → only the campaign's `enabledLgaIds`
-- Seed script at `prisma/seed-geo.ts` is idempotent — safe to re-run without duplicates.
+- National LGA seed and state ward/PU sync scripts are idempotent — safe to re-run without exact duplicate inserts.
 
 ### Deduplication
 
@@ -156,11 +169,12 @@
 
 - localStorage under `collect-form-${slug}`, cleared on successful submit.
 - "Continue where you left off?" on splash if saved state exists.
+- Saved progress now includes lightweight UI state needed to restore the flow accurately (for example canvasser yes/no choice and occupation input mode).
 
 ### Validation
 
 - Per-screen field validation via `form.trigger(screenFields)`
-- Canvasser: if "Yes" selected, both name and phone required
+- Canvasser: user must choose `Yes` or `No` before submit. If `Yes` is selected, both name and phone are required (or a preloaded canvasser must be chosen).
 - Server-side: Zod validation, phone/VIN dedup, campaign status checks
 
 ### Edge Cases
@@ -173,6 +187,8 @@
 | Closed campaign      | Static "Registration Closed" message             |
 | Duplicate phone      | 409 → "Already Registered" error box             |
 | Duplicate VIN        | 409 → "Already Registered" error box             |
+| Missing canvasser Yes/No | Submit button stays disabled on canvasser step |
+| Invalid submit payload | 400 → first field-level validation message shown |
 | Network error        | Error displayed, localStorage preserves progress |
 
 ## Data Model
@@ -189,17 +205,18 @@ model Lga {
 
 model Ward {
   id    Int    @id @default(autoincrement())
+  code  String?
   name  String
   lgaId Int
-  @@unique([name, lgaId])
+  @@unique([code, lgaId])
 }
 
 model PollingUnit {
   id     Int    @id @default(autoincrement())
-  code   String @default("")
+  code   String?
   name   String
   wardId Int
-  @@unique([name, wardId])
+  @@unique([code, wardId])
 }
 ```
 
@@ -287,7 +304,7 @@ src/components/admin/collect/
 - [x] QR code generation works
 - [x] Polling units sorted by INEC code
 - [x] Build, lint, and typecheck pass
-- [ ] Full Adamawa geo data seeded
+- [x] Adamawa official ward + polling unit sync completed
 
 ## Working Agreement With Claude
 

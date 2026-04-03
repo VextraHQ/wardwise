@@ -1,7 +1,7 @@
 # WardWise Collect v2 — Feature Roadmap Spec
 
 > Living document. Update as features are built or priorities shift.
-> Last updated: 2026-03-31
+> Last updated: 2026-04-03
 > See also: `wardwise-collect-spec.md` (v1), `wardwise-hardening-spec.md`
 
 ## Status
@@ -9,6 +9,7 @@
 - **Collect v1 complete** — merged to `main`, hardened (see `wardwise-collect-spec.md`)
 - **Collect v2 features complete** — merged to `develop`, hardened via v2.1 pass (see below)
 - **v2.1 hardening pass complete** — offline queue, cache invalidation, bulk audit, UI polish
+- **v2.2 post-submission polish complete** — OpenGraph, returning visitor recognition, reference IDs, form UX audit fixes
 
 ---
 
@@ -193,6 +194,74 @@ Post-merge polish and Codex-identified bug fixes applied on `develop`:
 - [x] **Calendar date picker** — Replaced native `<input type="date">` with shadcn Calendar + Popover
 - [x] **Role=canvasser submit UX** — "Submit Registration" label + loading spinner + inline error display
 - [x] **DRY submit error component** — Extracted reusable `SubmitError` from form-ui.tsx
+
+---
+
+## Completed v2.2 — Post-Submission Polish (2026-04-03)
+
+UX audit and post-submission improvements for the public registration form:
+
+### OpenGraph Metadata for Social Sharing
+
+**Status:** Complete
+**Why:** WhatsApp link previews showed generic WardWise site title — no candidate name, no description. Low tap-through rate on shared links.
+
+**Approach:**
+
+- Added `openGraph` and `twitter` metadata to `generateMetadata()` in campaign page
+- Properties: title, description, url, siteName, type
+- OG image to be added later (requires custom image per campaign)
+
+**Files:** `src/app/c/[slug]/page.tsx`
+
+### Returning Visitor Recognition
+
+**Status:** Complete
+**Why:** Registration links circulate on WhatsApp for weeks. Returning supporters saw a blank form and didn't know if they'd already registered. Could hit duplicate errors after re-filling the entire form.
+
+**Approach:**
+
+- After successful submission, persist `{ name, count, submittedAt, refCode }` to `localStorage` key `collect-submitted-${slug}` (separate from form progress key)
+- On page load, detect returning visitor and show "Welcome back" splash variant
+- Welcome-back shows: supporter number, date, reference code, full share card (WhatsApp, SMS, Email, Copy, QR), and "Register Someone Else" button
+- "Register Someone Else" starts a fresh form without clearing submitted data
+
+**Files:** `src/components/collect/campaign-registration-form.tsx`, `src/components/collect/steps/splash-screen.tsx`
+
+### Reference ID on Confirmation Screen
+
+**Status:** Complete
+**Why:** No proof of registration once the browser tab closed. Supporters couldn't verify to canvassers that they'd registered.
+
+**Approach:**
+
+- `generateRefCode(id)` utility derives `WW-XXXXXXXX` from submission UUID
+- Displayed as a mono-styled badge on confirmation screen and returning visitor splash
+- Stored in `collect-submitted-${slug}` localStorage for persistence
+
+**Files:** `src/lib/utils.ts`, `src/components/collect/steps/confirmation-screen.tsx`
+
+### Form UX Polish
+
+**Status:** Complete
+**Why:** Audit identified multiple small UX issues: jargon on splash, unreadable error text, mobile overflow, broken offline display.
+
+**Changes:**
+
+- [x] **Splash copy** — "Campaign Onboarding" / "System Initialization" / "Ready" → "Supporter Registration" / "Get Started" / "Open"
+- [x] **Offline confirmation text** — "You are supporter #—" → "Your registration is saved and will be submitted when you're back online."
+- [x] **Error font size** — 9px uppercase → 11px sentence case for readability
+- [x] **Phone placeholder** — Canvasser phone now shows `08012345678`
+- [x] **Age placeholder** — "Enter your age" → "Age (18+)"
+- [x] **Role grid responsive** — `grid-cols-3` → `grid-cols-1 sm:grid-cols-3` to prevent cramping on small phones
+- [x] **Nav button overflow** — Back button padding reduced on mobile, next button text scaled down to prevent overflow on "SUBMIT REGISTRATION"
+- [x] **Hydration fix** — `typeof window` checks replaced with `useState` + `useEffect` pattern for share URLs
+- [x] **Confetti suppressed offline** — No confetti for queued submissions (misleading celebration)
+- [x] **WhatsApp share text** — Now mentions "on WardWise" for brand recognition
+- [x] **Confirmation screen progress save** — Fixed bug where `saveProgress` useEffect re-saved screen=6 after localStorage was cleared, causing stale confirmation on refresh
+- [x] **Zod validation messages** — Location step `z.number()` now shows "Select your ward" instead of raw "Invalid input: expected number, received undefined". Also hardened `geo-schemas.ts`
+
+**Files:** `src/components/collect/form-ui.tsx`, `src/components/collect/steps/personal-details-step.tsx`, `src/components/collect/steps/canvasser-step.tsx`, `src/components/collect/steps/role-step.tsx`, `src/components/collect/steps/confirmation-screen.tsx`, `src/components/collect/campaign-registration-form.tsx`
 
 ---
 

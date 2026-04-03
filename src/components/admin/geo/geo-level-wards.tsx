@@ -70,6 +70,7 @@ import {
 import { AdminSearchBar } from "@/components/admin/admin-search-bar";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { BulkImportDialog } from "@/components/admin/geo/geo-dialogs/bulk-import-dialog";
+import { formatGeoDisplayName } from "@/lib/utils/geo-display";
 
 interface GeoLevelWardsProps {
   lgaId: number;
@@ -112,6 +113,7 @@ export function GeoLevelWards({
     name: string;
   } | null>(null);
 
+  const [formCode, setFormCode] = useState("");
   const [formName, setFormName] = useState("");
   const [importOpen, setImportOpen] = useState(false);
 
@@ -144,11 +146,12 @@ export function GeoLevelWards({
   const handleCreate = () => {
     if (!formName.trim()) return;
     createMutation.mutate(
-      { name: formName.trim(), lgaId },
+      { code: formCode.trim() || undefined, name: formName.trim(), lgaId },
       {
         onSuccess: () => {
           toast.success("Ward created successfully");
           setCreateOpen(false);
+          setFormCode("");
           setFormName("");
         },
         onError: (err) => {
@@ -163,11 +166,15 @@ export function GeoLevelWards({
   const handleUpdate = () => {
     if (!editingWard || !formName.trim()) return;
     updateMutation.mutate(
-      { id: editingWard.id, data: { name: formName.trim() } },
+      {
+        id: editingWard.id,
+        data: { code: formCode.trim() || undefined, name: formName.trim() },
+      },
       {
         onSuccess: () => {
           toast.success("Ward updated successfully");
           setEditingWard(null);
+          setFormCode("");
           setFormName("");
         },
         onError: (err) => {
@@ -195,6 +202,7 @@ export function GeoLevelWards({
   };
 
   const openEdit = (ward: GeoWard) => {
+    setFormCode(ward.code ?? "");
     setFormName(ward.name);
     setEditingWard(ward);
   };
@@ -220,6 +228,7 @@ export function GeoLevelWards({
               <Button
                 size="sm"
                 onClick={() => {
+                  setFormCode("");
                   setFormName("");
                   setCreateOpen(true);
                 }}
@@ -286,6 +295,9 @@ export function GeoLevelWards({
                       S/N
                     </TableHead>
                     <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Code
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                       Name
                     </TableHead>
                     <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
@@ -305,12 +317,19 @@ export function GeoLevelWards({
                           ? "bg-orange-500/5 hover:bg-orange-500/10"
                           : "hover:bg-muted/50"
                       }`}
-                      onClick={() => onDrillDown(ward.id, ward.name)}
+                      onClick={() =>
+                        onDrillDown(ward.id, formatGeoDisplayName(ward.name))
+                      }
                     >
                       <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
                         {(page - 1) * pageSize + idx + 1}
                       </TableCell>
-                      <TableCell className="font-medium">{ward.name}</TableCell>
+                      <TableCell className="text-muted-foreground font-mono text-xs tabular-nums">
+                        {ward.code || "—"}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {formatGeoDisplayName(ward.name)}
+                      </TableCell>
                       <TableCell className="text-right font-mono tabular-nums">
                         {ward._count.pollingUnits === 0 ? (
                           <Badge
@@ -388,10 +407,23 @@ export function GeoLevelWards({
           <DialogHeader>
             <DialogTitle>Add Ward</DialogTitle>
             <DialogDescription>
-              Create a new ward{lgaName ? ` in ${lgaName}` : ""}.
+              Create a new ward
+              {lgaName ? ` in ${formatGeoDisplayName(lgaName)}` : ""}.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="ward-code">
+                Official Code (Optional)
+              </label>
+              <Input
+                id="ward-code"
+                value={formCode}
+                onChange={(e) => setFormCode(e.target.value)}
+                placeholder="Optional official ward code"
+                className="rounded-sm font-mono"
+              />
+            </div>
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="ward-name">
                 Name
@@ -438,9 +470,27 @@ export function GeoLevelWards({
         <DialogContent className="rounded-sm">
           <DialogHeader>
             <DialogTitle>Edit Ward</DialogTitle>
-            <DialogDescription>Update the ward details.</DialogDescription>
+            <DialogDescription>
+              Update
+              {editingWard
+                ? ` ${formatGeoDisplayName(editingWard.name)}`
+                : ""}{" "}
+              details.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="edit-ward-code">
+                Official Code (Optional)
+              </label>
+              <Input
+                id="edit-ward-code"
+                value={formCode}
+                onChange={(e) => setFormCode(e.target.value)}
+                placeholder="Optional official ward code"
+                className="rounded-sm font-mono"
+              />
+            </div>
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="edit-ward-name">
                 Name
@@ -490,8 +540,9 @@ export function GeoLevelWards({
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
               ward
-              {deletingWard && ` "${deletingWard.name}"`} and all its polling
-              units.
+              {deletingWard &&
+                ` "${formatGeoDisplayName(deletingWard.name)}"`}{" "}
+              and all its polling units.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

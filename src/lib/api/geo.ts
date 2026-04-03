@@ -84,13 +84,13 @@ export const adminGeoApi = {
       })}`,
     ),
 
-  createWard: (data: { name: string; lgaId: number }) =>
+  createWard: (data: { code?: string; name: string; lgaId: number }) =>
     adminApiCall<{ ward: GeoWard }>("/wards", {
       method: "POST",
       body: JSON.stringify(data),
     }),
 
-  updateWard: (id: number, data: { name?: string }) =>
+  updateWard: (id: number, data: { code?: string; name?: string }) =>
     adminApiCall<{ ward: GeoWard }>(`/wards/${id}`, {
       method: "PATCH",
       body: JSON.stringify(data),
@@ -115,7 +115,7 @@ export const adminGeoApi = {
       })}`,
     ),
 
-  createPollingUnit: (data: { code?: string; name: string; wardId: number }) =>
+  createPollingUnit: (data: { code: string; name: string; wardId: number }) =>
     adminApiCall<{ pollingUnit: GeoPollingUnit }>("/polling-units", {
       method: "POST",
       body: JSON.stringify(data),

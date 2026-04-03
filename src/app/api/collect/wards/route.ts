@@ -15,8 +15,8 @@ export async function GET(request: NextRequest) {
 
     const wards = await prisma.ward.findMany({
       where: { lgaId },
-      select: { id: true, name: true, lgaId: true },
-      orderBy: { name: "asc" },
+      select: { id: true, code: true, name: true, lgaId: true },
+      orderBy: [{ name: "asc" }, { code: "asc" }],
     });
 
     return NextResponse.json({ wards });

@@ -1,4 +1,5 @@
-// Comprehensive Nigeria location data - States and LGAs
+// Canonical v1 source for Nigeria state + LGA metadata.
+// This file backs the national state/LGA seed and lightweight metadata lookups.
 // Source: Official INEC data and National Bureau of Statistics
 export type StateData = {
   code: string;
@@ -403,7 +404,7 @@ export const nigeriaLGAs: LGAData[] = [
   { code: "AKAMKPA", name: "Akamkpa", stateCode: "CR" },
   { code: "AKPABUYO", name: "Akpabuyo", stateCode: "CR" },
   { code: "BAKASSI", name: "Bakassi", stateCode: "CR" },
-  { code: "BEKWARA", name: "Bekwara", stateCode: "CR" },
+  { code: "BEKWARRA", name: "Bekwarra", stateCode: "CR" },
   { code: "BIASE", name: "Biase", stateCode: "CR" },
   { code: "BOKI", name: "Boki", stateCode: "CR" },
   { code: "CALABAR-MUNICIPAL", name: "Calabar Municipal", stateCode: "CR" },
@@ -505,7 +506,7 @@ export const nigeriaLGAs: LGAData[] = [
   { code: "ENUGU-NORTH", name: "Enugu North", stateCode: "EN" },
   { code: "ENUGU-SOUTH", name: "Enugu South", stateCode: "EN" },
   { code: "EZEAGU", name: "Ezeagu", stateCode: "EN" },
-  { code: "IGBO-EKITI", name: "Igbo-Ekiti", stateCode: "EN" },
+  { code: "IGBO-ETITI", name: "Igbo-Etiti", stateCode: "EN" },
   { code: "IGBO-EZE-NORTH", name: "Igbo-Eze North", stateCode: "EN" },
   { code: "IGBO-EZE-SOUTH", name: "Igbo-Eze South", stateCode: "EN" },
   { code: "ISI-UZO", name: "Isi-Uzo", stateCode: "EN" },
@@ -527,7 +528,7 @@ export const nigeriaLGAs: LGAData[] = [
   { code: "KALTUNGO", name: "Kaltungo", stateCode: "GO" },
   { code: "KWAMI", name: "Kwami", stateCode: "GO" },
   { code: "NAFADA", name: "Nafada/Bajoga", stateCode: "GO" },
-  { code: "SHOMGOM", name: "Shomgom", stateCode: "GO" },
+  { code: "SHONGOM", name: "Shongom", stateCode: "GO" },
   { code: "YAMALTU-DEBA", name: "Yamaltu/Deba", stateCode: "GO" },
 
   // Imo State (27 LGAs)
@@ -723,7 +724,7 @@ export const nigeriaLGAs: LGAData[] = [
   { code: "KOKONA", name: "Kokona", stateCode: "NS" },
   { code: "LAFIA", name: "Lafia", stateCode: "NS" },
   { code: "NASARAWA-LGA", name: "Nasarawa", stateCode: "NS" },
-  { code: "NASARAWA-EGON", name: "Nasarawa Egon", stateCode: "NS" },
+  { code: "NASARAWA-EGGON", name: "Nasarawa Eggon", stateCode: "NS" },
   { code: "OBI-NS", name: "Obi", stateCode: "NS" },
   { code: "TOTO", name: "Toto", stateCode: "NS" },
   { code: "WAMBA", name: "Wamba", stateCode: "NS" },
@@ -857,7 +858,7 @@ export const nigeriaLGAs: LGAData[] = [
   { code: "OLUYOLE", name: "Oluyole", stateCode: "OY" },
   { code: "ONA-ARA", name: "Ona Ara", stateCode: "OY" },
   { code: "ORELOPE", name: "Orelope", stateCode: "OY" },
-  { code: "ORI-IRE", name: "Ori Ire", stateCode: "OY" },
+  { code: "ORIIRE", name: "Oriire", stateCode: "OY" },
   { code: "OYO-EAST", name: "Oyo East", stateCode: "OY" },
   { code: "OYO-WEST", name: "Oyo West", stateCode: "OY" },
   { code: "SAKI-EAST", name: "Saki East", stateCode: "OY" },

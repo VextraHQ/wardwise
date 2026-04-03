@@ -21,9 +21,27 @@ export async function generateMetadata({
     return { title: "Campaign Not Found" };
   }
 
+  const title = `Register — ${campaign.candidateName} (${campaign.party})`;
+  const description = `Join ${campaign.candidateName}'s supporter registration for ${campaign.constituency} on WardWise.`;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_COLLECT_BASE_URL || "https://wardwise.ng";
+  const url = `${baseUrl}/c/${slug}`;
+
   return {
-    title: `Register — ${campaign.candidateName} (${campaign.party})`,
-    description: `Join ${campaign.candidateName}'s supporter registration for ${campaign.constituency}.`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: "WardWise",
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 

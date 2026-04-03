@@ -33,11 +33,13 @@ export const screen1Schema = z.object({
 
 // Screen 2: Location
 export const screen2Schema = z.object({
-  lgaId: z.number().min(1, "Select your LGA"),
+  lgaId: z.number({ message: "Select your LGA" }).min(1, "Select your LGA"),
   lgaName: z.string().min(1),
-  wardId: z.number().min(1, "Select your ward"),
+  wardId: z.number({ message: "Select your ward" }).min(1, "Select your ward"),
   wardName: z.string().min(1),
-  pollingUnitId: z.number().min(1, "Select your polling unit"),
+  pollingUnitId: z
+    .number({ message: "Select your polling unit" })
+    .min(1, "Select your polling unit"),
   pollingUnitName: z.string().min(1),
 });
 

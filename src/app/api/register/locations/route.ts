@@ -4,6 +4,9 @@ import { getLGAsByState } from "@/lib/data/state-lga-locations";
 import { getWardsByLGA } from "@/lib/data/wards";
 import { getPollingUnitsByWard } from "@/lib/data/polling-units";
 
+// Legacy static location route kept for the future public voter/NIN flow.
+// Current admin/candidate geo uses DB-backed APIs instead and should not rely on
+// this route as the canonical runtime source.
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const level = searchParams.get("level");

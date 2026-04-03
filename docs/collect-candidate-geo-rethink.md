@@ -199,7 +199,7 @@ Public form: LGA dropdown shows Fufore and Song only
 - [x] Campaign PATCH guard added: updates cannot set LGAs outside the candidate boundary
 - [x] Candidate boundary warnings added: incomplete, full-state, very broad, custom-name, existing-campaign drift
 - [x] Candidate create/update validation tightened: constituency LGAs must belong to selected state; FCT invalid combos blocked
-- [ ] Create candidate (Senator) → select LGAs → constituency auto-generates
+- [x] Create candidate (Senator) → select LGAs → constituency auto-generates
 - [ ] Create campaign → inherits LGAs → public form shows correct scope
 - [ ] Existing campaigns continue working unchanged
 
