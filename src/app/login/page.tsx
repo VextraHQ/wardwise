@@ -285,7 +285,7 @@ export default function LoginPage() {
           </AuthCard>
 
           {/* Utility Navigation */}
-          <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <div className="flex items-center justify-center gap-3">
             <Link
               href="/"
               className="group border-border/60 bg-card/50 hover:border-primary/20 hover:bg-primary/5 flex items-center gap-3 rounded-xl border px-5 py-3 transition-all hover:shadow-[0_4px_14px_0_rgba(0,0,0,0.05)] active:scale-95"

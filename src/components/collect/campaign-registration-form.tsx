@@ -226,9 +226,9 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     if (prefilledCanvasserName) {
       setValue("canvasserName", prefilledCanvasserName);
     }
-    if (prefilledCanvasserPhone) setValue("canvasserPhone", prefilledCanvasserPhone);
+    if (prefilledCanvasserPhone)
+      setValue("canvasserPhone", prefilledCanvasserPhone);
   }, [prefilledCanvasserName, prefilledCanvasserPhone, setValue]);
-
 
   const submitMutation = useSubmitRegistration();
 
@@ -545,17 +545,31 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     <FormShell campaign={campaign}>
       {/* Offline / Sync banners */}
       {isOffline && (
-        <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-800">
-          You&apos;re offline — submissions will be queued and sent when you
-          reconnect.
+        <div className="mb-4 overflow-hidden rounded-sm border border-amber-500/30 border-dashed bg-amber-500/5 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <div className="size-1.5 animate-pulse rounded-full bg-amber-500 shrink-0" />
+            <p className="text-amber-700 dark:text-amber-400 font-mono text-[10px] font-bold tracking-widest uppercase">
+              Connection Lost
+            </p>
+          </div>
+          <p className="text-muted-foreground mt-1 text-xs">
+            You're currently offline. Any submissions will be secured locally and queued for when you reconnect.
+          </p>
         </div>
       )}
       {!isOffline && pendingCount > 0 && (
-        <div className="mb-4 flex items-center justify-between rounded-md border border-teal-300 bg-teal-50 px-4 py-2 text-sm text-teal-800">
-          <span>
-            {pendingCount} pending submission{pendingCount !== 1 ? "s" : ""}{" "}
-            waiting to sync
-          </span>
+        <div className="mb-4 flex flex-col justify-between gap-3 overflow-hidden rounded-sm border border-emerald-500/30 border-dashed bg-emerald-500/5 px-4 py-3 sm:flex-row sm:items-center">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
+              <p className="text-emerald-700 dark:text-emerald-400 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Ready to Sync
+              </p>
+            </div>
+            <p className="text-muted-foreground text-xs">
+              {pendingCount} offline submission{pendingCount !== 1 ? "s" : ""} waiting to be uploaded.
+            </p>
+          </div>
           <button
             type="button"
             onClick={async () => {
@@ -573,9 +587,9 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
               }
             }}
             disabled={isSyncing}
-            className="ml-2 rounded bg-teal-600 px-3 py-1 text-xs font-bold text-white hover:bg-teal-700 disabled:opacity-50"
+            className="flex h-8 items-center justify-center rounded-sm border border-emerald-500/20 bg-emerald-500/10 px-3 font-mono text-[10px] font-bold tracking-widest text-emerald-700 uppercase transition-colors hover:bg-emerald-500/20 disabled:opacity-50 dark:text-emerald-400"
           >
-            {isSyncing ? "Syncing..." : "Sync now"}
+            {isSyncing ? "Syncing..." : "Sync Now"}
           </button>
         </div>
       )}

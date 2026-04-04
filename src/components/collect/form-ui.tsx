@@ -164,7 +164,7 @@ export function CardSectionHeader({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="border-border/40 mb-8 flex items-center justify-between border-b pb-6">
+    <div className="border-border/50 mb-8 flex items-center justify-between border-b pb-6">
       <div className="space-y-1">
         <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
           {title}

@@ -67,11 +67,12 @@ export function ConfirmationScreen({
         />
 
         {refCode && (
-          <div className="border-border/60 bg-muted/30 inline-flex items-center gap-2 rounded-sm border px-4 py-2">
-            <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+          <div className="border-border/60 bg-muted/30 inline-flex items-center gap-3 rounded-sm border border-dashed px-5 py-2.5">
+            <span className="text-muted-foreground/60 text-[10px] font-bold tracking-[0.2em] uppercase">
               Ref:
             </span>
-            <span className="text-foreground font-mono text-sm font-bold tracking-wider">
+            <div className="bg-border/50 h-3 w-px" />
+            <span className="text-foreground font-mono text-sm font-bold tracking-widest">
               {refCode}
             </span>
           </div>
@@ -121,11 +122,11 @@ export function ConfirmationScreen({
             </div>
           </div>
 
-          <div className="bg-muted/30 border-border rounded-sm border p-5">
-            <h3 className="text-foreground mb-3 text-xs font-bold tracking-widest uppercase">
+          <div className="bg-muted/10 border-border/50 rounded-sm border border-dashed p-5">
+            <h3 className="text-foreground mb-4 text-xs font-bold tracking-widest uppercase">
               What Happens Next?
             </h3>
-            <ul className="space-y-2 text-xs">
+            <ul className="space-y-2.5 text-xs">
               <li className="text-muted-foreground flex items-start gap-2 leading-relaxed">
                 <span className="text-primary mt-0.5 shrink-0">•</span>
                 <span>Your registration has been saved securely</span>
