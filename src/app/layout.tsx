@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppProviders } from "./providers";
+import {
+  createDefaultOpenGraph,
+  createDefaultTwitter,
+  getMetadataBase,
+} from "@/lib/metadata";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,13 +18,25 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const defaultTitle = "WardWise | From Ward to Victory";
+const defaultDescription =
+  "Nigeria's first location-precise civic intelligence platform for voter insights organized by LGA, Ward, and Polling Unit.";
+
 export const metadata: Metadata = {
+  metadataBase: getMetadataBase(),
   title: {
-    default: "WardWise | From Ward to Victory",
+    default: defaultTitle,
     template: "%s | WardWise",
   },
-  description:
-    "Nigeria's first location-precise civic intelligence platform for voter insights organized by LGA, Ward, and Polling Unit.",
+  description: defaultDescription,
+  openGraph: createDefaultOpenGraph({
+    title: defaultTitle,
+    description: defaultDescription,
+  }),
+  twitter: createDefaultTwitter({
+    title: defaultTitle,
+    description: defaultDescription,
+  }),
 };
 
 export default function RootLayout({

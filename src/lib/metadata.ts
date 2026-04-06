@@ -1,18 +1,98 @@
 import type { Metadata } from "next";
 
+const FALLBACK_SITE_URL = "https://wardwise.ng";
+type OpenGraphMetadata = NonNullable<Metadata["openGraph"]>;
+type TwitterMetadata = NonNullable<Metadata["twitter"]>;
+type OpenGraphInput = Omit<OpenGraphMetadata, "title" | "description"> & {
+  title: OpenGraphMetadata["title"];
+  description?: string;
+};
+type TwitterInput = Omit<TwitterMetadata, "title" | "description"> & {
+  title: TwitterMetadata["title"];
+  description?: string;
+};
+
+function normalizeSiteUrl(url: string): string {
+  return url.endsWith("/") ? url.slice(0, -1) : url;
+}
+
+export function getSiteUrl(): string {
+  return normalizeSiteUrl(
+    process.env.NEXT_PUBLIC_COLLECT_BASE_URL ||
+      process.env.NEXTAUTH_URL ||
+      FALLBACK_SITE_URL,
+  );
+}
+
+export function getMetadataBase(): URL {
+  return new URL(getSiteUrl());
+}
+
+export function createDefaultOpenGraph({
+  title,
+  description,
+  ...rest
+}: OpenGraphInput): OpenGraphMetadata {
+  return {
+    siteName: "WardWise",
+    type: "website",
+    url: getSiteUrl(),
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 2400,
+        height: 1260,
+        alt: "WardWise | From Ward to Victory",
+      },
+    ],
+    title,
+    description,
+    ...rest,
+  };
+}
+
+export function createDefaultTwitter({
+  title,
+  description,
+  ...rest
+}: TwitterInput): TwitterMetadata {
+  return {
+    card: "summary_large_image",
+    images: ["/twitter-image.png"],
+    title,
+    description,
+    ...rest,
+  };
+}
+
 /**
  * Creates metadata for admin dashboard pages (/admin/*).
  */
 export function createAdminMetadata({
   title,
   description,
+  openGraph,
+  twitter,
   ...rest
 }: Omit<Metadata, "title"> & { title: string }): Metadata {
+  const resolvedTitle = `${title} | WardWise Admin`;
+  const resolvedDescription = description ?? undefined;
+
   return {
     ...rest,
     title: {
-      absolute: `${title} | WardWise Admin`,
+      absolute: resolvedTitle,
     },
-    description,
+    description: resolvedDescription,
+    openGraph: createDefaultOpenGraph({
+      title: resolvedTitle,
+      description: resolvedDescription,
+      ...openGraph,
+    }),
+    twitter: createDefaultTwitter({
+      title: resolvedTitle,
+      description: resolvedDescription,
+      ...twitter,
+    }),
   };
 }
