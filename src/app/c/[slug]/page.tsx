@@ -3,6 +3,11 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { CampaignRegistrationForm } from "@/components/collect/campaign-registration-form";
 import type { PublicCampaign } from "@/types/collect";
+import {
+  createDefaultOpenGraph,
+  createDefaultTwitter,
+  getSiteUrl,
+} from "@/lib/metadata";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -23,25 +28,20 @@ export async function generateMetadata({
 
   const title = `Register — ${campaign.candidateName} (${campaign.party})`;
   const description = `Join ${campaign.candidateName}'s supporter registration for ${campaign.constituency} on WardWise.`;
-  const baseUrl =
-    process.env.NEXT_PUBLIC_COLLECT_BASE_URL || "https://wardwise.ng";
-  const url = `${baseUrl}/c/${slug}`;
+  const url = `${getSiteUrl()}/c/${slug}`;
 
   return {
     title,
     description,
-    openGraph: {
+    openGraph: createDefaultOpenGraph({
       title,
       description,
       url,
-      siteName: "WardWise",
-      type: "website",
-    },
-    twitter: {
-      card: "summary",
+    }),
+    twitter: createDefaultTwitter({
       title,
       description,
-    },
+    }),
   };
 }
 

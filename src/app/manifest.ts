@@ -11,9 +11,9 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#0d9488",
     icons: [
       {
-        src: "/brand/logomark-lagoon.svg",
-        sizes: "any",
-        type: "image/svg+xml",
+        src: "/icon.png",
+        sizes: "360x360",
+        type: "image/png",
       },
     ],
   };
