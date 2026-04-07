@@ -44,7 +44,7 @@ Geo Data / Adamawa / Fufore / Ward 04
 - Server-side paginated (default 20 per page, configurable via AdminPagination)
 - Search bar: filter by LGA name
 - "Add LGA" button opens dialog/sheet
-- Bulk import button (CSV upload) for seeding new states
+- Bulk import button (CSV/Excel upload) for corrections and seeding support
 
 ---
 
@@ -128,7 +128,7 @@ POST   /api/admin/geo/wards/:wardId/polling-units   { name, code }
 PATCH  /api/admin/geo/polling-units/:id             { name, code }
 DELETE /api/admin/geo/polling-units/:id
 
-POST   /api/admin/geo/import                        CSV/bulk import
+POST   /api/admin/geo/import                        CSV/Excel bulk import
 ```
 
 All endpoints: auth-gated (super admin), server-side paginated, return `{ data, total, page, pageSize }`.
@@ -162,7 +162,7 @@ src/
     add-ward-dialog.tsx               — Add/edit ward form dialog
     add-polling-unit-dialog.tsx       — Add/edit PU form dialog
     delete-geo-dialog.tsx             — Shared delete confirmation with impact summary
-    bulk-import-dialog.tsx            — CSV/bulk paste import
+    bulk-import-dialog.tsx            — CSV/Excel bulk import
   hooks/
     use-geo.ts                        — React Query hooks for all geo CRUD
   lib/api/
@@ -192,5 +192,5 @@ Should match the existing admin patterns:
 4. **Ward list** — drill-down from LGA, same pattern
 5. **PU list** — drill-down from Ward, same pattern
 6. **Breadcrumb** — navigation between levels
-7. **Bulk import** — CSV upload for seeding
+7. **Bulk import** — CSV/Excel upload for seeding and corrections
 8. **Sidebar nav** — add "Geo Data" link

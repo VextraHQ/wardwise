@@ -225,7 +225,7 @@ export function GeoLevelPollingUnits({
                 className="h-9 w-full gap-1.5 rounded-sm font-mono text-[10px] tracking-widest uppercase sm:w-auto sm:text-[11px]"
               >
                 <HiOutlineUpload className="h-4 w-4" />
-                Import CSV
+                Import CSV / Excel
               </Button>
               <Button
                 size="sm"
