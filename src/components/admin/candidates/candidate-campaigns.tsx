@@ -111,7 +111,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
 
   return (
     <div className="space-y-4 pt-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-muted-foreground text-sm">
           {campaigns.length} campaign{campaigns.length !== 1 ? "s" : ""}{" "}
           <span className="text-muted-foreground/50">·</span> {totalSubmissions}{" "}
@@ -120,7 +120,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
         <Button
           variant="outline"
           size="sm"
-          className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+          className="h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
           onClick={() => router.push("/admin/collect/campaigns/new")}
         >
           <IconPlus className="mr-1.5 h-3.5 w-3.5" />

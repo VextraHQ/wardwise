@@ -67,7 +67,8 @@ export async function resolveCandidateCampaignLgaIds({
     if (!stateCode) {
       return {
         ids: [],
-        error: "Candidate state is required before campaign geography can be derived.",
+        error:
+          "Candidate state is required before campaign geography can be derived.",
       };
     }
 

@@ -150,16 +150,16 @@ export function CampaignWizard() {
           <BreadcrumbItem>
             <BreadcrumbLink
               asChild
-              className="text-foreground/60 hover:text-foreground font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors"
+              className="text-foreground/90 hover:text-foreground font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors"
             >
               <Link href="/admin/collect">Campaigns</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
-          <BreadcrumbSeparator className="text-muted-foreground/30">
+          <BreadcrumbSeparator className="text-muted-foreground/70">
             /
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
+            <BreadcrumbPage className="text-foreground/40 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
               New Campaign
             </BreadcrumbPage>
           </BreadcrumbItem>

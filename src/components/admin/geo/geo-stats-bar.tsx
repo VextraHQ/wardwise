@@ -15,7 +15,7 @@ export function GeoStatsBar() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
         <StatCardSkeleton />
         <StatCardSkeleton />
         <StatCardSkeleton />
@@ -52,22 +52,22 @@ export function GeoStatsBar() {
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
       {items.map((item) => (
         <Card
           key={item.label}
           className="border-border/60 rounded-sm shadow-none"
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
             <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
               {item.label}
             </CardTitle>
-            <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
-              <item.icon className="text-primary h-5 w-5" />
+            <div className="bg-primary/10 flex h-8 w-8 shrink-0 items-center justify-center rounded-sm sm:h-9 sm:w-9">
+              <item.icon className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="font-mono text-2xl font-semibold tabular-nums">
+            <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
               {item.value}
             </div>
             <p className="text-muted-foreground mt-1 text-xs">

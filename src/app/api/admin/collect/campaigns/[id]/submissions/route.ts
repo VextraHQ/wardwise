@@ -1,6 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import {
+  buildSubmissionWhere,
+  parseSubmissionFilters,
+} from "@/lib/exports/submissions";
 
 export async function GET(
   request: NextRequest,
@@ -17,34 +21,7 @@ export async function GET(
       100,
       Math.max(1, parseInt(sp.get("pageSize") || "20", 10)),
     );
-    const search = sp.get("search") || undefined;
-    const lgaId = sp.get("lgaId") ? parseInt(sp.get("lgaId")!, 10) : undefined;
-    const wardId = sp.get("wardId")
-      ? parseInt(sp.get("wardId")!, 10)
-      : undefined;
-    const role = sp.get("role") || undefined;
-    const isFlagged =
-      sp.get("isFlagged") === "true"
-        ? true
-        : sp.get("isFlagged") === "false"
-          ? false
-          : undefined;
-
-    const where: Record<string, unknown> = { campaignId: id };
-    if (search) {
-      where.OR = [
-        { fullName: { contains: search, mode: "insensitive" } },
-        { firstName: { contains: search, mode: "insensitive" } },
-        { middleName: { contains: search, mode: "insensitive" } },
-        { lastName: { contains: search, mode: "insensitive" } },
-        { phone: { contains: search } },
-        { email: { contains: search, mode: "insensitive" } },
-      ];
-    }
-    if (lgaId) where.lgaId = lgaId;
-    if (wardId) where.wardId = wardId;
-    if (role) where.role = role;
-    if (isFlagged !== undefined) where.isFlagged = isFlagged;
+    const where = buildSubmissionWhere(id, parseSubmissionFilters(sp));
 
     const [submissions, total] = await Promise.all([
       prisma.collectSubmission.findMany({

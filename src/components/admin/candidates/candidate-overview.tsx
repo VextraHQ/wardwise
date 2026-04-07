@@ -172,10 +172,10 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
 
   const stateHasNoLgas = Boolean(
     showLgaGrid &&
-      selectedStateCode &&
-      !lgasLoading &&
-      !lgasFetching &&
-      lgas.length === 0,
+    selectedStateCode &&
+    !lgasLoading &&
+    !lgasFetching &&
+    lgas.length === 0,
   );
 
   const expectedLgaCount = selectedStateCode
@@ -231,13 +231,15 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
   const effectivePreset = useMemo(
     () =>
       effectivePresetShortName
-        ? availablePresets.find((preset) => preset.shortName === effectivePresetShortName) ??
-          null
+        ? (availablePresets.find(
+            (preset) => preset.shortName === effectivePresetShortName,
+          ) ?? null)
         : null,
     [availablePresets, effectivePresetShortName],
   );
   const activePresetName = effectivePreset?.name;
-  const effectiveOfficialPresetName = effectivePreset?.name ?? matchingPreset?.name;
+  const effectiveOfficialPresetName =
+    effectivePreset?.name ?? matchingPreset?.name;
   const effectivePresetMatchResult = useMemo(
     () =>
       effectivePreset ? matchPresetToSeededIds(effectivePreset, lgas) : null,
@@ -249,17 +251,18 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     const s2 = [...constituencyLgaIds].sort((a, b) => a - b);
     return JSON.stringify(s1) !== JSON.stringify(s2);
   }, [effectivePresetMatchResult, constituencyLgaIds]);
-  const manuallyMatchesPreset = !effectivePresetShortName && Boolean(matchingPreset);
+  const manuallyMatchesPreset =
+    !effectivePresetShortName && Boolean(matchingPreset);
   const showBoundaryGrid = Boolean(
     editing &&
-      showLgaGrid &&
-      selectedStateCode &&
-      !lgasFetching &&
-      !stateHasNoLgas &&
-      (!hasPresets ||
-        customBoundaryMode ||
-        effectivePresetShortName ||
-        constituencyLgaIds.length > 0),
+    showLgaGrid &&
+    selectedStateCode &&
+    !lgasFetching &&
+    !stateHasNoLgas &&
+    (!hasPresets ||
+      customBoundaryMode ||
+      effectivePresetShortName ||
+      constituencyLgaIds.length > 0),
   );
   const boundaryHelperText = effectivePresetShortName
     ? `Loaded ${constituencyLgaIds.length} LGAs from ${effectivePresetShortName}. Adjust the boundary below only if you need a custom variation.`
@@ -304,56 +307,55 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
       suggestedConstituency,
     ],
   );
-  const summaryBoundaryWarnings = useMemo(
-    () => {
-      const summaryPresets =
-        candidate.stateCode && positionRequiresLgas(candidate.position)
-          ? getPresetsForState(
-              candidate.position as
-                | "Senator"
-                | "House of Representatives"
-                | "State Assembly",
-              candidate.stateCode,
-            )
-          : [];
-      const summaryMatchingPreset = findMatchingPreset(
-        candidate.constituencyLgaIds,
-        lgas,
-        summaryPresets,
-      );
-
-      return getConstituencyBoundaryWarnings({
-        position: candidate.position,
-        stateName: resolveStateName(candidate.stateCode),
-        selectedLgaCount: candidate.constituencyLgaIds.length,
-        expectedLgaCount: candidate.stateCode
-          ? getLGAsByState(candidate.stateCode).length
-          : 0,
-        constituencyName: candidate.constituency,
-        hasExistingCampaigns: campaignCount > 0,
-        presetMismatchInfo: summaryMatchingPreset
-          ? {
-              hasPresets: true,
-              activePresetName:
-                candidate.constituency === summaryMatchingPreset.name
-                  ? summaryMatchingPreset.name
-                  : undefined,
-              officialPresetName: summaryMatchingPreset.name,
-              isDeviated: false,
-              manuallyMatchesPreset: true,
-            }
-          : undefined,
-      });
-    },
-    [
-      campaignCount,
-      candidate.constituency,
+  const summaryBoundaryWarnings = useMemo(() => {
+    const summaryPresets =
+      candidate.stateCode && positionRequiresLgas(candidate.position)
+        ? getPresetsForState(
+            candidate.position as
+              | "Senator"
+              | "House of Representatives"
+              | "State Assembly",
+            candidate.stateCode,
+          )
+        : [];
+    const summaryMatchingPreset = findMatchingPreset(
       candidate.constituencyLgaIds,
-      candidate.position,
-      candidate.stateCode,
       lgas,
-    ],
-  );
+      summaryPresets,
+    );
+
+    return getConstituencyBoundaryWarnings({
+      position: candidate.position,
+      stateName: resolveStateName(candidate.stateCode),
+      selectedLgaCount: candidate.constituencyLgaIds.length,
+      expectedLgaCount: candidate.stateCode
+        ? getLGAsByState(candidate.stateCode).length
+        : 0,
+      constituencyName: candidate.constituency,
+      presetMismatchInfo: summaryMatchingPreset
+        ? {
+            hasPresets: true,
+            activePresetName:
+              candidate.constituency === summaryMatchingPreset.name
+                ? summaryMatchingPreset.name
+                : undefined,
+            officialPresetName: summaryMatchingPreset.name,
+            isDeviated: false,
+            manuallyMatchesPreset: true,
+          }
+        : undefined,
+    });
+  }, [
+    candidate.constituency,
+    candidate.constituencyLgaIds,
+    candidate.position,
+    candidate.stateCode,
+    lgas,
+  ]);
+  const showCampaignBoundaryReviewNote =
+    campaignCount > 0 &&
+    (positionRequiresLgas(candidate.position) ||
+      candidate.position === "Governor");
   const lastAutoConstituencyRef = useRef("");
 
   // Auto-suggest constituency from selected LGAs when editing
@@ -534,22 +536,22 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
   return (
     <div className="space-y-6 pt-4">
       {/* Stats row */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
         {stats.map((stat) => (
           <Card
             key={stat.label}
             className="border-border/60 rounded-sm shadow-none"
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
               <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
                 {stat.label}
               </CardTitle>
-              <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
-                <stat.icon className="text-primary h-5 w-5" />
+              <div className="bg-primary/10 flex h-8 w-8 shrink-0 items-center justify-center rounded-sm sm:h-9 sm:w-9">
+                <stat.icon className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="font-mono text-2xl font-semibold tabular-nums">
+              <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
                 {stat.value}
               </div>
               <p className="text-muted-foreground mt-1 text-xs">
@@ -562,7 +564,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
 
       {/* Info / Edit card */}
       <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-foreground font-mono text-[11px] font-bold tracking-widest uppercase">
             Candidate Information
           </CardTitle>
@@ -570,7 +572,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
             <Button
               variant="outline"
               size="sm"
-              className="h-8 rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase"
+              className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
               onClick={() => setEditing(true)}
             >
               <IconEdit className="mr-1.5 h-3.5 w-3.5" />
@@ -719,7 +721,9 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                         onValueChange={handlePresetChange}
                         presets={availablePresets}
                         unsupportedPresets={unsupportedPresets}
-                        unmatchedNames={effectivePresetMatchResult?.unmatchedNames}
+                        unmatchedNames={
+                          effectivePresetMatchResult?.unmatchedNames
+                        }
                         position={
                           selectedPosition as
                             | "Senator"
@@ -864,12 +868,12 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                   />
                 </div>
 
-                <div className="flex items-center gap-2 pt-2">
+                <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center">
                   <Button
                     type="submit"
                     size="sm"
                     disabled={updateMutation.isPending}
-                    className="h-8 rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase"
+                    className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
                   >
                     <IconDeviceFloppy className="mr-1.5 h-3.5 w-3.5" />
                     {updateMutation.isPending ? "Saving..." : "Save"}
@@ -878,7 +882,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-8 rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase"
+                    className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
                     onClick={() => {
                       form.reset();
                       setEditing(false);
@@ -933,6 +937,19 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                     warnings={summaryBoundaryWarnings}
                   />
                 </div>
+                {showCampaignBoundaryReviewNote && (
+                  <div className="border-border/50 bg-muted/20 mt-4 rounded-sm border px-3 py-2.5">
+                    <p className="text-foreground text-xs font-medium">
+                      {campaignCount} existing Collect campaign
+                      {campaignCount === 1 ? "" : "s"} use
+                      {campaignCount === 1 ? "s" : ""} this saved boundary.
+                    </p>
+                    <p className="text-muted-foreground mt-1 text-xs">
+                      If you edit this boundary later, review campaign coverage
+                      in the Campaigns tab.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="border-border/40 border-b" />

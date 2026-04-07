@@ -39,16 +39,21 @@ export async function GET(_request: Request, { params }: RouteParams) {
       );
     }
 
-    const { ids: currentCandidateBoundaryLgaIds, error: candidateBoundaryError } =
-      await resolveCandidateCampaignLgaIds({
-        position: campaign.candidate.position,
-        stateCode: campaign.candidate.stateCode,
-        constituencyLgaIds: campaign.candidate.constituencyLgaIds,
-      });
+    const {
+      ids: currentCandidateBoundaryLgaIds,
+      error: candidateBoundaryError,
+    } = await resolveCandidateCampaignLgaIds({
+      position: campaign.candidate.position,
+      stateCode: campaign.candidate.stateCode,
+      constituencyLgaIds: campaign.candidate.constituencyLgaIds,
+    });
 
-    const currentBoundary =
-      normalizeConstituencyLgaIds(currentCandidateBoundaryLgaIds);
-    const campaignBoundary = normalizeConstituencyLgaIds(campaign.enabledLgaIds);
+    const currentBoundary = normalizeConstituencyLgaIds(
+      currentCandidateBoundaryLgaIds,
+    );
+    const campaignBoundary = normalizeConstituencyLgaIds(
+      campaign.enabledLgaIds,
+    );
     const isBoundaryOutOfSync =
       JSON.stringify(currentBoundary) !== JSON.stringify(campaignBoundary);
 
@@ -123,10 +128,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       });
 
     if (candidateScopeError) {
-      return NextResponse.json(
-        { error: candidateScopeError },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: candidateScopeError }, { status: 400 });
     }
 
     // Guard: one active campaign per candidate when activating
@@ -162,7 +164,6 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           { status: 400 },
         );
       }
-
     }
 
     if (d.enabledLgaIds !== undefined && candidateScopeLgaIds.length > 0) {

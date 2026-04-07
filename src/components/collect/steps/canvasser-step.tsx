@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { HiUser, HiPhone, HiUsers } from "react-icons/hi";
 import { Users } from "lucide-react";
 import { motion } from "motion/react";
@@ -8,12 +8,9 @@ import type { UseFormReturn } from "react-hook-form";
 import type { RegistrationFormData } from "@/lib/schemas/collect-schemas";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  ComboboxSelect,
+  type ComboboxSelectOption,
+} from "@/components/ui/combobox-select";
 import { Separator } from "@/components/ui/separator";
 import { RegistrationStepHeader } from "@/components/collect/registration-step-header";
 import {
@@ -56,50 +53,95 @@ export function CanvasserStep({
     register,
     setValue,
     watch,
+    clearErrors,
     formState: { errors },
   } = form;
 
   const hasPreloaded = preloadedCanvassers.length > 0;
   const currentCanvasserName = watch("canvasserName")?.trim();
   const currentCanvasserPhone = watch("canvasserPhone")?.trim();
+  const [manualCanvasserEntry, setManualCanvasserEntry] = useState(false);
+  const matchedCanvasser = useMemo(
+    () =>
+      preloadedCanvassers.find(
+        (canvasser) =>
+          canvasser.name === currentCanvasserName &&
+          canvasser.phone === currentCanvasserPhone,
+      ) || null,
+    [currentCanvasserName, currentCanvasserPhone, preloadedCanvassers],
+  );
+  const isOther =
+    !!hasCanvasser &&
+    hasPreloaded &&
+    !matchedCanvasser &&
+    (manualCanvasserEntry || !!currentCanvasserName || !!currentCanvasserPhone);
   const selectedCanvasserId = useMemo(() => {
     if (!hasCanvasser || preloadedCanvassers.length === 0) {
       return "";
     }
 
-    const matched = preloadedCanvassers.find(
-      (canvasser) =>
-        canvasser.name === currentCanvasserName &&
-        canvasser.phone === currentCanvasserPhone,
-    );
-
-    if (matched) {
-      return matched.id;
+    if (matchedCanvasser) {
+      return matchedCanvasser.id;
     }
 
-    if (currentCanvasserName || currentCanvasserPhone) {
+    if (isOther) {
       return "__other__";
     }
 
     return "";
-  }, [
-    currentCanvasserName,
-    currentCanvasserPhone,
-    hasCanvasser,
-    preloadedCanvassers,
-  ]);
-  const isOther = selectedCanvasserId === "__other__";
+  }, [hasCanvasser, isOther, matchedCanvasser, preloadedCanvassers]);
+
+  const canvasserOptions: ComboboxSelectOption[] = useMemo(
+    () => [
+      ...preloadedCanvassers.map((c) => ({
+        value: c.id,
+        label: `${c.name} — ${c.phone}`,
+      })),
+      { value: "__other__", label: "Other (not listed)" },
+    ],
+    [preloadedCanvassers],
+  );
 
   const handleCanvasserSelect = (value: string) => {
     if (value === "__other__") {
-      setValue("canvasserName", "");
-      setValue("canvasserPhone", "");
-    } else {
-      const canvasser = preloadedCanvassers.find((c) => c.id === value);
-      if (canvasser) {
-        setValue("canvasserName", canvasser.name);
-        setValue("canvasserPhone", canvasser.phone);
-      }
+      setManualCanvasserEntry(true);
+      setValue("canvasserName", "", {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      setValue("canvasserPhone", "", {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      clearErrors(["canvasserName", "canvasserPhone"]);
+      return;
+    }
+
+    setManualCanvasserEntry(false);
+
+    if (!value) {
+      setValue("canvasserName", "", {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      setValue("canvasserPhone", "", {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      return;
+    }
+
+    const canvasser = preloadedCanvassers.find((c) => c.id === value);
+    if (canvasser) {
+      setValue("canvasserName", canvasser.name, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      setValue("canvasserPhone", canvasser.phone, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      clearErrors(["canvasserName", "canvasserPhone"]);
     }
   };
 
@@ -149,6 +191,7 @@ export function CanvasserStep({
                   aria-label="No, I was not referred by a canvasser"
                   onClick={() => {
                     setHasCanvasser(false);
+                    setManualCanvasserEntry(false);
                     setValue("canvasserName", "");
                     setValue("canvasserPhone", "");
                   }}
@@ -167,24 +210,15 @@ export function CanvasserStep({
             {hasCanvasser && hasPreloaded && (
               <div className="space-y-1.5">
                 <FieldLabel>Select your canvasser</FieldLabel>
-                <Select
+                <ComboboxSelect
+                  options={canvasserOptions}
                   value={selectedCanvasserId}
                   onValueChange={handleCanvasserSelect}
-                >
-                  <SelectTrigger className="border-border/60 bg-muted/5 h-12">
-                    <SelectValue placeholder="Choose a canvasser..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {preloadedCanvassers.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name} — {c.phone}
-                      </SelectItem>
-                    ))}
-                    <SelectItem value="__other__">
-                      Other (not listed)
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                  placeholder="Search for your canvasser..."
+                  searchPlaceholder="Type name or phone..."
+                  emptyMessage="No matching canvasser found."
+                  triggerClassName="border-border/60 bg-muted/5 h-12"
+                />
               </div>
             )}
 

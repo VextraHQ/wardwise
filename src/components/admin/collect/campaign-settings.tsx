@@ -122,7 +122,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:gap-2">
             <span className="text-muted-foreground text-sm">
               Current status:
             </span>
@@ -133,11 +133,11 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
               {capitalize(campaign.status)}
             </Badge>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
             {campaign.status !== "active" && (
               <Button
                 size="sm"
-                className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+                className="h-9 w-full justify-center rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
                 onClick={() => handleStatusChange("active")}
               >
                 <IconPlayerPlay className="mr-1.5 h-3.5 w-3.5" />
@@ -148,7 +148,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
               <Button
                 size="sm"
                 variant="outline"
-                className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+                className="h-9 w-full justify-center rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
                 onClick={() => handleStatusChange("paused")}
               >
                 <IconPlayerPause className="mr-1.5 h-3.5 w-3.5" />
@@ -159,7 +159,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
               <Button
                 size="sm"
                 variant="outline"
-                className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+                className="h-9 w-full justify-center rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
                 onClick={() => handleStatusChange("closed")}
               >
                 <IconLock className="mr-1.5 h-3.5 w-3.5" />
@@ -170,7 +170,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
               <Button
                 size="sm"
                 variant="outline"
-                className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+                className="col-span-2 h-9 w-full justify-center rounded-sm font-mono text-[11px] tracking-widest uppercase sm:col-auto sm:w-auto"
                 onClick={() => handleStatusChange("draft")}
               >
                 <IconFileDescription className="mr-1.5 h-3.5 w-3.5" />
@@ -189,29 +189,37 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
-          <div className="flex justify-between">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <span className="text-muted-foreground">Slug</span>
-            <span className="font-mono">{campaign.slug}</span>
+            <span className="max-w-full text-left font-mono wrap-break-word sm:max-w-[65%] sm:text-right">
+              {campaign.slug}
+            </span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <span className="text-muted-foreground">Candidate</span>
-            <span>{campaign.candidateName}</span>
+            <span className="max-w-full text-left wrap-break-word sm:max-w-[65%] sm:text-right">
+              {campaign.candidateName}
+            </span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <span className="text-muted-foreground">Party</span>
-            <span>{campaign.party}</span>
+            <span className="text-left sm:text-right">{campaign.party}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <span className="text-muted-foreground">Constituency</span>
-            <span>{campaign.constituency}</span>
+            <span className="max-w-full text-left wrap-break-word sm:max-w-[65%] sm:text-right">
+              {campaign.constituency}
+            </span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <span className="text-muted-foreground">Type</span>
-            <span className="capitalize">{campaign.constituencyType}</span>
+            <span className="text-left capitalize sm:text-right">
+              {campaign.constituencyType}
+            </span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <span className="text-muted-foreground">Created</span>
-            <span>
+            <span className="text-left sm:text-right">
               {new Date(campaign.createdAt).toLocaleString("en-NG", {
                 day: "numeric",
                 month: "short",
@@ -238,18 +246,18 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between gap-3">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                 <span className="text-muted-foreground">Campaign coverage</span>
-                <span className="font-medium">
+                <span className="text-left font-medium sm:text-right">
                   {campaign.enabledLgaIds.length} LGA
                   {campaign.enabledLgaIds.length === 1 ? "" : "s"}
                 </span>
               </div>
-              <div className="flex justify-between gap-3">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                 <span className="text-muted-foreground">
                   Candidate coverage now
                 </span>
-                <span className="font-medium">
+                <span className="text-left font-medium sm:text-right">
                   {currentCandidateBoundaryIds.length > 0
                     ? `${currentCandidateBoundaryIds.length} LGA${currentCandidateBoundaryIds.length === 1 ? "" : "s"}`
                     : "Unavailable"}
@@ -278,9 +286,11 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
               type="button"
               variant="outline"
               size="sm"
-              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+              className="h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
               onClick={handleResetBoundary}
-              disabled={!canResetToCandidateBoundary || updateMutation.isPending}
+              disabled={
+                !canResetToCandidateBoundary || updateMutation.isPending
+              }
             >
               <IconRefresh className="mr-1.5 h-3.5 w-3.5" />
               Reset to Candidate Boundary
@@ -325,7 +335,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
             <Button
               variant="destructive"
               size="sm"
-              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+              className="h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
               disabled={
                 deleteSlug !== campaign.slug || deleteMutation.isPending
               }

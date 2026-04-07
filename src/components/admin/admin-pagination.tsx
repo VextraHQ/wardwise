@@ -45,15 +45,15 @@ export function AdminPagination({
   const canGoNext = currentPage < totalPages;
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       {/* Item count */}
-      <div className="text-foreground/60 hidden flex-1 font-mono text-[11px] tracking-wider lg:flex">
+      <div className="text-foreground/60 flex-1 text-center font-mono text-[10px] tracking-wider sm:text-left lg:text-[11px]">
         Showing {startItem}-{endItem} of {totalItems.toLocaleString()}{" "}
         {itemLabel}
       </div>
 
       {/* Controls */}
-      <div className="flex w-full items-center gap-8 lg:w-fit">
+      <div className="flex w-full items-center justify-between gap-3 sm:w-fit sm:justify-normal sm:gap-8">
         {/* Rows per page */}
         <div className="hidden items-center gap-2 lg:flex">
           <Label className="text-foreground/60 font-mono text-[10px] font-bold tracking-widest uppercase">
@@ -77,12 +77,12 @@ export function AdminPagination({
         </div>
 
         {/* Page indicator */}
-        <div className="text-foreground/60 flex w-fit items-center justify-center font-mono text-[11px] font-bold tracking-wider">
+        <div className="text-foreground/60 flex min-w-0 items-center justify-center text-center font-mono text-[10px] font-bold tracking-wider sm:w-fit sm:text-[11px]">
           Page {currentPage} of {totalPages}
         </div>
 
         {/* Navigation buttons */}
-        <div className="ml-auto flex items-center gap-2 lg:ml-0">
+        <div className="flex items-center gap-2 sm:ml-auto lg:ml-0">
           <Button
             variant="outline"
             className="hidden size-8 rounded-sm lg:flex"

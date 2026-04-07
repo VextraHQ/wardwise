@@ -119,5 +119,10 @@
     "typescript": "^5",
     "xlsx": "^0.18.5"
   },
-  "packageManager": "pnpm@10.26.0"
+  "packageManager": "pnpm@10.26.0",
+  "pnpm": {
+    "overrides": {
+      "baseline-browser-mapping": "latest"
+    }
+  }
 }

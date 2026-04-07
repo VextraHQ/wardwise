@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { roleLabels } from "@/lib/helpers/collect-analytics";
+import { formatGeoDisplayName } from "@/lib/utils/geo-display";
 import {
   ChartContainer,
   ChartTooltip,
@@ -104,11 +105,21 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
   const flagged = stats?.flagged || 0;
 
   const dailyData = stats?.daily || [];
-  const lgaData = stats?.byLga || [];
+  const lgaData = (stats?.byLga || []).map(
+    (d: { lga: string; count: number }) => ({
+      ...d,
+      lga: formatGeoDisplayName(d.lga),
+    }),
+  );
   const roleData = stats?.byRole || [];
   const sexData = stats?.bySex || [];
   const trendData = stats?.daily || [];
-  const wardData = stats?.byWard || [];
+  const wardData = (stats?.byWard || []).map(
+    (d: { ward: string; count: number }) => ({
+      ...d,
+      ward: formatGeoDisplayName(d.ward),
+    }),
+  );
 
   if (!campaign) {
     return (
@@ -141,54 +152,56 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
   return (
     <div className="space-y-6">
       {/* Date Range Filter */}
-      <div className="flex flex-wrap items-center gap-2">
-        <IconCalendar className="text-muted-foreground h-4 w-4" />
-        <Popover open={fromOpen} onOpenChange={setFromOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 rounded-sm px-3 text-xs font-medium"
-            >
-              {dateFrom ? format(dateFrom, "dd MMM yyyy") : "From"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={dateFrom}
-              onSelect={(d) => {
-                setDateFrom(d);
-                setFromOpen(false);
-              }}
-              disabled={(date) => (dateTo ? date > dateTo : false)}
-            />
-          </PopoverContent>
-        </Popover>
-        <span className="text-muted-foreground text-xs">to</span>
-        <Popover open={toOpen} onOpenChange={setToOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 rounded-sm px-3 text-xs font-medium"
-            >
-              {dateTo ? format(dateTo, "dd MMM yyyy") : "To"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={dateTo}
-              onSelect={(d) => {
-                setDateTo(d);
-                setToOpen(false);
-              }}
-              disabled={(date) => (dateFrom ? date < dateFrom : false)}
-            />
-          </PopoverContent>
-        </Popover>
-        <div className="flex gap-1">
+      <div className="space-y-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2 sm:space-y-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <IconCalendar className="text-muted-foreground h-4 w-4 shrink-0" />
+          <Popover open={fromOpen} onOpenChange={setFromOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 flex-1 rounded-sm px-3 text-xs font-medium sm:flex-none"
+              >
+                {dateFrom ? format(dateFrom, "dd MMM yyyy") : "From"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateFrom}
+                onSelect={(d) => {
+                  setDateFrom(d);
+                  setFromOpen(false);
+                }}
+                disabled={(date) => (dateTo ? date > dateTo : false)}
+              />
+            </PopoverContent>
+          </Popover>
+          <span className="text-muted-foreground text-xs">to</span>
+          <Popover open={toOpen} onOpenChange={setToOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 flex-1 rounded-sm px-3 text-xs font-medium sm:flex-none"
+              >
+                {dateTo ? format(dateTo, "dd MMM yyyy") : "To"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateTo}
+                onSelect={(d) => {
+                  setDateTo(d);
+                  setToOpen(false);
+                }}
+                disabled={(date) => (dateFrom ? date < dateFrom : false)}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-1">
           {[
             { label: "7d", value: "7d" },
             { label: "30d", value: "30d" },
@@ -199,7 +212,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
               key={p.value}
               variant="outline"
               size="sm"
-              className="h-7 rounded-sm px-2 text-[10px] font-medium tracking-wide uppercase"
+              className="h-8 w-full rounded-sm px-2 text-[10px] font-medium tracking-wide uppercase sm:h-7 sm:w-auto"
               onClick={() => {
                 const range = getPresetRange(p.value);
                 setDateFrom(range.from);
@@ -213,18 +226,18 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
             <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
               Total Submissions
             </CardTitle>
-            <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
-              <IconClipboardList className="text-primary h-5 w-5" />
+            <div className="bg-primary/10 flex h-8 w-8 shrink-0 items-center justify-center rounded-sm sm:h-9 sm:w-9">
+              <IconClipboardList className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="font-mono text-2xl font-semibold tabular-nums">
+            <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
               {total}
             </div>
             <p className="text-muted-foreground mt-1 text-xs">
@@ -233,16 +246,16 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
           </CardContent>
         </Card>
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
             <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
               Verified
             </CardTitle>
-            <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
-              <IconShieldCheck className="text-primary h-5 w-5" />
+            <div className="bg-primary/10 flex h-8 w-8 shrink-0 items-center justify-center rounded-sm sm:h-9 sm:w-9">
+              <IconShieldCheck className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="font-mono text-2xl font-semibold tabular-nums">
+            <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
               {verified}
             </div>
             <p className="text-muted-foreground mt-1 text-xs">
@@ -252,16 +265,16 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
           </CardContent>
         </Card>
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
             <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
               Flagged
             </CardTitle>
-            <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
-              <IconFlag className="text-primary h-5 w-5" />
+            <div className="bg-primary/10 flex h-8 w-8 shrink-0 items-center justify-center rounded-sm sm:h-9 sm:w-9">
+              <IconFlag className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="font-mono text-2xl font-semibold tabular-nums">
+            <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
               {flagged}
             </div>
             <p className="text-muted-foreground mt-1 text-xs">
@@ -270,16 +283,16 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
           </CardContent>
         </Card>
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
             <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
               LGAs Active
             </CardTitle>
-            <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-sm">
-              <IconUsers className="text-primary h-5 w-5" />
+            <div className="bg-primary/10 flex h-8 w-8 shrink-0 items-center justify-center rounded-sm sm:h-9 sm:w-9">
+              <IconUsers className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="font-mono text-2xl font-semibold tabular-nums">
+            <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
               {campaign.enabledLgaIds.length}
             </div>
             <p className="text-muted-foreground mt-1 text-xs">

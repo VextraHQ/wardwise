@@ -202,7 +202,7 @@ export async function PATCH(
     }
 
     if (auditEntries.length > 0) {
-      void prisma.submissionAuditEntry.createMany({ data: auditEntries });
+      await prisma.submissionAuditEntry.createMany({ data: auditEntries });
     }
 
     return NextResponse.json({

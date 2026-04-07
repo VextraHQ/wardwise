@@ -1,13 +1,13 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { HiViewGrid, HiViewList, HiCheck } from "react-icons/hi";
+import { HiCheck } from "react-icons/hi";
 import { nigeriaStates, type StateData } from "@/lib/data/state-lga-locations";
 import { useGeoStats } from "@/hooks/use-geo";
-import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ViewModeToggle } from "@/components/ui/view-mode-toggle";
 import {
   Table,
   TableBody,
@@ -124,34 +124,7 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
           <CardTitle className="text-sm font-semibold tracking-tight">
             States
           </CardTitle>
-          <div className="border-border/60 bg-muted/30 flex items-center rounded-sm border p-0.5">
-            <button
-              type="button"
-              onClick={() => setViewMode("grid")}
-              className={cn(
-                "rounded-sm p-1.5 transition-colors",
-                viewMode === "grid"
-                  ? "bg-background text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-              aria-label="Grid view"
-            >
-              <HiViewGrid className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("list")}
-              className={cn(
-                "rounded-sm p-1.5 transition-colors",
-                viewMode === "list"
-                  ? "bg-background text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-              aria-label="List view"
-            >
-              <HiViewList className="h-4 w-4" />
-            </button>
-          </div>
+          <ViewModeToggle value={viewMode} onValueChange={setViewMode} />
         </div>
       </CardHeader>
       <CardContent className="pt-0">

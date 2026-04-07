@@ -168,8 +168,8 @@ export function getConstituencyBoundaryWarnings({
   const stateLabel = stateName || "this state";
   const hasOfficialMatch = Boolean(
     presetMismatchInfo &&
-      ((presetMismatchInfo.activePresetName && !presetMismatchInfo.isDeviated) ||
-        presetMismatchInfo.manuallyMatchesPreset),
+    ((presetMismatchInfo.activePresetName && !presetMismatchInfo.isDeviated) ||
+      presetMismatchInfo.manuallyMatchesPreset),
   );
 
   if (selectedLgaCount === 0) {
@@ -212,10 +212,7 @@ export function getConstituencyBoundaryWarnings({
     trimmedConstituency.length > 0 &&
     trimmedOfficialPresetName.length > 0 &&
     trimmedConstituency !== trimmedOfficialPresetName &&
-    !labelsRepresentSameBoundary(
-      trimmedConstituency,
-      trimmedOfficialPresetName,
-    )
+    !labelsRepresentSameBoundary(trimmedConstituency, trimmedOfficialPresetName)
   ) {
     warnings.push({
       severity: "info",

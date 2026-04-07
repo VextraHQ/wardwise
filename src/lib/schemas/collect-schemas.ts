@@ -172,6 +172,25 @@ export const updateCampaignSchema = createCampaignSchema.partial().extend({
 
 export type UpdateCampaignData = z.infer<typeof updateCampaignSchema>;
 
+// ── Admin: Add canvasser to campaign (mirrors server-side schema) ──
+
+export const addCampaignCanvasserSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .transform((v) => v.trim()),
+  phone: phoneSchema.transform(normalizeNigerianPhoneInput),
+  zone: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .transform((v) => v?.trim() || ""),
+});
+
+export type AddCampaignCanvasserData = z.infer<
+  typeof addCampaignCanvasserSchema
+>;
+
 // ── Server submit schema (extends client schema with campaignSlug, drops client-only name fields) ──
 
 export const serverSubmitSchema = submitRegistrationSchema

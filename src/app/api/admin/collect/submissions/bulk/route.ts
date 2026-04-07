@@ -6,7 +6,7 @@ import { logAudit } from "@/lib/audit";
 
 const bulkActionSchema = z.object({
   ids: z.array(z.string()).min(1).max(500),
-  action: z.enum(["verify", "flag", "unflag", "delete"]),
+  action: z.enum(["verify", "unverify", "flag", "unflag", "delete"]),
 });
 
 export async function POST(request: NextRequest) {
@@ -55,6 +55,14 @@ export async function POST(request: NextRequest) {
           })
         ).count;
         break;
+      case "unverify":
+        affected = (
+          await prisma.collectSubmission.updateMany({
+            where: { id: { in: ids } },
+            data: { isVerified: false },
+          })
+        ).count;
+        break;
       case "flag":
         affected = (
           await prisma.collectSubmission.updateMany({
@@ -85,9 +93,11 @@ export async function POST(request: NextRequest) {
       const auditAction =
         action === "verify"
           ? "verified"
-          : action === "flag"
-            ? "flagged"
-            : "unflagged";
+          : action === "unverify"
+            ? "unverified"
+            : action === "flag"
+              ? "flagged"
+              : "unflagged";
       await prisma.submissionAuditEntry.createMany({
         data: ids.map((sid) => ({
           submissionId: sid,

@@ -68,7 +68,7 @@ export function CampaignDetail({
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 md:p-6">
         <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-72" />
+        <Skeleton className="h-4 w-full max-w-xs sm:w-72" />
         <Skeleton className="h-[400px] w-full" />
       </div>
     );
@@ -89,7 +89,7 @@ export function CampaignDetail({
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+    <div className="flex flex-1 flex-col gap-5 p-4 md:gap-6 md:p-6">
       {/* Header Zone */}
       <header className="flex flex-col gap-2">
         <Breadcrumb>
@@ -97,16 +97,16 @@ export function CampaignDetail({
             <BreadcrumbItem>
               <BreadcrumbLink
                 asChild
-                className="text-foreground/60 hover:text-foreground font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors"
+                className="text-foreground/90 hover:text-foreground font-mono text-[9px] font-bold tracking-[0.15em] uppercase transition-colors"
               >
                 <Link href="/admin/collect">Campaigns</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator className="text-muted-foreground/30">
+            <BreadcrumbSeparator className="text-muted-foreground/70">
               /
             </BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
+              <BreadcrumbPage className="text-foreground/40 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
                 {campaign.candidateName}
               </BreadcrumbPage>
             </BreadcrumbItem>
@@ -115,8 +115,8 @@ export function CampaignDetail({
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0 space-y-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-foreground text-2xl font-extrabold tracking-tighter sm:text-4xl">
+            <div className="flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+              <h1 className="text-foreground text-[1.9rem] leading-none font-extrabold tracking-tighter sm:text-4xl">
                 {campaign.candidateName}
               </h1>
               <Badge
@@ -127,14 +127,14 @@ export function CampaignDetail({
               </Badge>
             </div>
 
-            <div className="text-muted-foreground/70 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[10px] font-bold tracking-widest uppercase">
-              <div className="flex items-center gap-2">
+            <div className="text-muted-foreground/70 flex flex-col items-start gap-1.5 font-mono text-[9px] font-bold tracking-widest uppercase sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2 sm:text-[10px]">
+              <div className="flex max-w-full items-center gap-2">
                 <span className="bg-primary/40 size-1.5 rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
                 <span>{campaign.party}</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex max-w-full items-center gap-2">
                 <span className="bg-border size-1.5 rounded-full" />
-                <span>{campaign.constituency}</span>
+                <span className="wrap-break-word">{campaign.constituency}</span>
               </div>
             </div>
           </div>
@@ -143,7 +143,7 @@ export function CampaignDetail({
             variant="outline"
             size="sm"
             onClick={copyPublicLink}
-            className="hover:bg-muted shrink-0 rounded-sm font-mono text-[10px] tracking-widest uppercase shadow-sm transition-all"
+            className="hover:bg-muted h-9 w-full shrink-0 rounded-sm font-mono text-[10px] tracking-widest uppercase shadow-sm transition-all sm:w-auto"
           >
             <IconCopy className="mr-2 h-3.5 w-3.5" />
             Copy Link
@@ -154,12 +154,12 @@ export function CampaignDetail({
 
       {/* Tabs */}
       <Tabs value={currentTab} onValueChange={handleTabChange}>
-        <TabsList className="bg-muted rounded-sm p-1">
+        <TabsList className="bg-muted w-full justify-start overflow-x-auto rounded-sm p-1 [scrollbar-width:none] sm:w-fit sm:overflow-visible [&::-webkit-scrollbar]:hidden">
           {TABS.map((tab) => (
             <TabsTrigger
               key={tab}
               value={tab}
-              className="rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
+              className="flex-none rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase"
             >
               {tab}
             </TabsTrigger>

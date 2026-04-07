@@ -19,13 +19,7 @@ import {
 import type { GeoPollingUnit } from "@/types/geo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardAction,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -219,16 +213,16 @@ export function GeoLevelPollingUnits({
     <>
       <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>
-          <CardTitle className="text-sm font-semibold tracking-tight">
-            Polling Units
-          </CardTitle>
-          <CardAction>
-            <div className="flex gap-2">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <CardTitle className="text-sm font-semibold tracking-tight">
+              Polling Units
+            </CardTitle>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => setImportOpen(true)}
-                className="gap-1.5 rounded-sm font-mono text-[11px] tracking-widest uppercase"
+                className="h-9 w-full gap-1.5 rounded-sm font-mono text-[10px] tracking-widest uppercase sm:w-auto sm:text-[11px]"
               >
                 <HiOutlineUpload className="h-4 w-4" />
                 Import CSV
@@ -240,13 +234,13 @@ export function GeoLevelPollingUnits({
                   setFormName("");
                   setCreateOpen(true);
                 }}
-                className="gap-1.5 rounded-sm font-mono text-[11px] tracking-widest uppercase"
+                className="h-9 w-full gap-1.5 rounded-sm font-mono text-[10px] tracking-widest uppercase sm:w-auto sm:text-[11px]"
               >
                 <HiOutlinePlus className="h-4 w-4" />
                 Add Polling Unit
               </Button>
             </div>
-          </CardAction>
+          </div>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -261,7 +255,7 @@ export function GeoLevelPollingUnits({
               value={sort}
               onValueChange={(v) => setSort(v as SortOption)}
             >
-              <SelectTrigger className="w-[160px] rounded-sm">
+              <SelectTrigger className="w-full rounded-sm sm:w-[160px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

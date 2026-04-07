@@ -120,10 +120,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (candidateScopeError) {
-      return NextResponse.json(
-        { error: candidateScopeError },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: candidateScopeError }, { status: 400 });
     }
 
     let enabledLgaIds = candidateScopeLgaIds;

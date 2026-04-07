@@ -38,7 +38,7 @@ function GeoManagementContent() {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+    <div className="flex flex-1 flex-col gap-5 p-4 md:gap-6 md:p-6">
       <GeoBreadcrumb
         stateCode={stateCode}
         lgaId={lgaId ? parseInt(lgaId) : null}
@@ -87,9 +87,9 @@ export function GeoManagement() {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-          <Skeleton className="bg-card border-border/60 h-8 w-64 animate-pulse rounded-sm border border-dashed" />
-          <Skeleton className="bg-card border-border/60 h-24 w-full animate-pulse rounded-sm border border-dashed" />
+        <div className="flex flex-1 flex-col gap-5 p-4 md:gap-6 md:p-6">
+          <Skeleton className="bg-card border-border/60 h-8 w-full max-w-[18rem] animate-pulse rounded-sm border border-dashed sm:w-64" />
+          <Skeleton className="bg-card border-border/60 h-40 w-full animate-pulse rounded-sm border border-dashed sm:h-24" />
           <Skeleton className="bg-card border-border/60 h-96 w-full animate-pulse rounded-sm border border-dashed" />
         </div>
       }

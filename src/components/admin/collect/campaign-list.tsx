@@ -94,23 +94,23 @@ function StatsBar({ campaigns }: { campaigns: CampaignSummary[] }) {
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
       {stats.map((stat) => (
         <Card
           key={stat.label}
           className="border-border/60 hover:border-border group relative overflow-hidden rounded-sm shadow-none transition-colors"
         >
           <div className="bg-primary/20 absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
             <CardTitle className="text-foreground/60 font-mono text-[10px] font-bold tracking-widest uppercase">
               {stat.label}
             </CardTitle>
-            <div className="bg-primary/10 group-hover:bg-primary/20 flex h-9 w-9 items-center justify-center rounded-sm transition-colors">
-              <stat.icon className="text-primary h-5 w-5" />
+            <div className="bg-primary/10 group-hover:bg-primary/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-sm transition-colors sm:h-9 sm:w-9">
+              <stat.icon className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="font-mono text-2xl font-semibold tabular-nums">
+            <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
               {stat.value}
             </div>
             <p className="text-foreground/50 mt-1 text-xs font-medium">
@@ -125,18 +125,18 @@ function StatsBar({ campaigns }: { campaigns: CampaignSummary[] }) {
 
 function StatsBarSkeleton() {
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
       {Array.from({ length: 3 }).map((_, i) => (
         <Card
           key={i}
           className="border-border/60 bg-card animate-pulse rounded-sm border-dashed shadow-none"
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
             <Skeleton className="h-4 w-28" />
-            <Skeleton className="h-9 w-9 rounded-sm" />
+            <Skeleton className="h-8 w-8 rounded-sm sm:h-9 sm:w-9" />
           </CardHeader>
           <CardContent className="pt-0">
-            <Skeleton className="h-8 w-16" />
+            <Skeleton className="h-7 w-14 sm:h-8 sm:w-16" />
             <Skeleton className="mt-2 h-3 w-24" />
           </CardContent>
         </Card>
@@ -248,7 +248,7 @@ export function CampaignList() {
       ) : null}
 
       {/* Header + action */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold">Campaigns</h2>
           {!isLoading && campaigns && campaigns.length > 0 && (
@@ -262,7 +262,7 @@ export function CampaignList() {
           <Button
             asChild
             size="sm"
-            className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            className="h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
           >
             <Link href="/admin/collect/campaigns/new">
               <IconPlus className="mr-1.5 h-4 w-4" />

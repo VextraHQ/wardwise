@@ -60,6 +60,35 @@ function qs(params: Record<string, string | number | undefined>) {
   return s ? `?${s}` : "";
 }
 
+function parseFilenameFromDisposition(
+  disposition: string | null,
+): string | undefined {
+  if (!disposition) return undefined;
+  const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) return decodeURIComponent(utf8Match[1]);
+  const basicMatch = disposition.match(/filename="?([^"]+)"?/i);
+  return basicMatch?.[1];
+}
+
+async function downloadFileResponse(
+  response: Response,
+  fallbackFilename: string,
+): Promise<void> {
+  if (!response.ok) {
+    throw new Error("Export failed");
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download =
+    parseFilenameFromDisposition(response.headers.get("Content-Disposition")) ||
+    fallbackFilename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 // --- Public API ---
 export const publicCollectApi = {
   getCampaign: (slug: string) =>
@@ -118,6 +147,9 @@ export const adminCollectApi = {
       wardId?: number;
       role?: string;
       isFlagged?: boolean;
+      isVerified?: boolean;
+      canvasserName?: string;
+      canvasserPhone?: string;
     },
   ) =>
     adminApiCall<{
@@ -137,6 +169,12 @@ export const adminCollectApi = {
           params?.isFlagged !== undefined
             ? String(params.isFlagged)
             : undefined,
+        isVerified:
+          params?.isVerified !== undefined
+            ? String(params.isVerified)
+            : undefined,
+        canvasserName: params?.canvasserName,
+        canvasserPhone: params?.canvasserPhone,
       })}`,
     ),
 
@@ -173,18 +211,25 @@ export const adminCollectApi = {
     }>(`/submissions/${sid}/audit`),
 
   // Export
-  exportCsv: async (
+  exportSubmissions: async (
     campaignId: string,
     filters?: {
       search?: string;
+      lgaId?: number;
+      wardId?: number;
       role?: string;
       isFlagged?: boolean;
       isVerified?: boolean;
+      canvasserName?: string;
+      canvasserPhone?: string;
+      format?: "csv" | "xlsx";
       redacted?: boolean;
     },
   ) => {
     const params = qs({
       search: filters?.search,
+      lgaId: filters?.lgaId,
+      wardId: filters?.wardId,
       role: filters?.role,
       isFlagged:
         filters?.isFlagged !== undefined
@@ -194,19 +239,38 @@ export const adminCollectApi = {
         filters?.isVerified !== undefined
           ? String(filters.isVerified)
           : undefined,
+      canvasserName: filters?.canvasserName,
+      canvasserPhone: filters?.canvasserPhone,
+      format: filters?.format || "csv",
       redacted: filters?.redacted ? "true" : undefined,
     });
     const response = await fetch(
       `/api/admin/collect/campaigns/${campaignId}/export${params}`,
     );
-    if (!response.ok) throw new Error("Export failed");
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `submissions-${campaignId}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    await downloadFileResponse(
+      response,
+      `submissions-${campaignId}.${filters?.format || "csv"}`,
+    );
+  },
+
+  exportCanvasserLeaderboard: async (
+    campaignId: string,
+    filters?: {
+      search?: string;
+      format?: "csv" | "xlsx";
+    },
+  ) => {
+    const params = qs({
+      search: filters?.search,
+      format: filters?.format || "csv",
+    });
+    const response = await fetch(
+      `/api/admin/collect/campaigns/${campaignId}/canvassers/export${params}`,
+    );
+    await downloadFileResponse(
+      response,
+      `canvasser-leaderboard-${campaignId}.${filters?.format || "csv"}`,
+    );
   },
 
   // Canvassers
@@ -214,6 +278,7 @@ export const adminCollectApi = {
     adminApiCall<{
       preloaded: CampaignCanvasserRecord[];
       canvassers: CanvasserSummary[];
+      selfIdentifiedCount: number;
     }>(`/campaigns/${campaignId}/canvassers`),
 
   addCanvasser: (

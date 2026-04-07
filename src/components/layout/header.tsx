@@ -39,18 +39,23 @@ export function Header({
   return (
     <header className={cn("sticky top-0 z-50 w-full", className)}>
       <div className="bg-background/80 border-border/40 border-b backdrop-blur-md transition-all duration-300">
-        <div 
+        <div
           className={cn(
             "mx-auto flex max-w-7xl items-center px-6 py-3.5",
             hideMobileBadge && badge
               ? "justify-center sm:justify-between"
-              : "justify-between"
+              : "justify-between",
           )}
         >
           <Logo />
 
           {badge && (
-            <div className={cn("flex items-center gap-4", hideMobileBadge && "hidden sm:flex")}>
+            <div
+              className={cn(
+                "flex items-center gap-4",
+                hideMobileBadge && "hidden sm:flex",
+              )}
+            >
               <motion.div
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -82,4 +87,3 @@ export function Header({
     </header>
   );
 }
-

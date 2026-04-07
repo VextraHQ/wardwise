@@ -179,11 +179,9 @@ async function validateWardRows(
       : `name:${name.toLowerCase()}|${lgaId}`;
     if (
       (code &&
-        (existingCodeSet.has(duplicateKey) ||
-          seenCodeSet.has(duplicateKey))) ||
+        (existingCodeSet.has(duplicateKey) || seenCodeSet.has(duplicateKey))) ||
       (!code &&
-        (existingNameSet.has(duplicateKey) ||
-          seenNameSet.has(duplicateKey)))
+        (existingNameSet.has(duplicateKey) || seenNameSet.has(duplicateKey)))
     ) {
       return {
         status: "duplicate",

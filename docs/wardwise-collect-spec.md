@@ -159,7 +159,7 @@
 | Screen | Content                                                                                                                        |
 | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
 | 0      | Campaign splash → Begin Registration                                                                                           |
-| 1      | Personal details: first name, middle name?, last name, phone, email?, sex, age, occupation, marital status, custom questions  |
+| 1      | Personal details: first name, middle name?, last name, phone, email?, sex, age, occupation, marital status, custom questions   |
 | 2      | Location: cascading LGA → Ward → Polling Unit (with INEC codes)                                                                |
 | 3      | Party info: APC/NIN (required) + VIN (required)                                                                                |
 | 4      | Role: Volunteer / Member / Canvasser (3 cards)                                                                                 |
@@ -182,17 +182,17 @@
 
 ### Edge Cases
 
-| Case                 | Behavior                                         |
-| -------------------- | ------------------------------------------------ |
-| Invalid/missing slug | `notFound()`                                     |
-| Draft campaign       | `notFound()`                                     |
-| Paused campaign      | Static "Registration Paused" message             |
-| Closed campaign      | Static "Registration Closed" message             |
-| Duplicate phone      | 409 → "Already Registered" error box             |
-| Duplicate VIN        | 409 → "Already Registered" error box             |
-| Missing canvasser Yes/No | Submit button stays disabled on canvasser step |
-| Invalid submit payload | 400 → first field-level validation message shown |
-| Network error        | Error displayed, localStorage preserves progress |
+| Case                     | Behavior                                         |
+| ------------------------ | ------------------------------------------------ |
+| Invalid/missing slug     | `notFound()`                                     |
+| Draft campaign           | `notFound()`                                     |
+| Paused campaign          | Static "Registration Paused" message             |
+| Closed campaign          | Static "Registration Closed" message             |
+| Duplicate phone          | 409 → "Already Registered" error box             |
+| Duplicate VIN            | 409 → "Already Registered" error box             |
+| Missing canvasser Yes/No | Submit button stays disabled on canvasser step   |
+| Invalid submit payload   | 400 → first field-level validation message shown |
+| Network error            | Error displayed, localStorage preserves progress |
 
 ## Data Model
 

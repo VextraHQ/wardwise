@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   useCampaignSubmissions,
   useUpdateSubmission,
@@ -39,6 +40,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -57,21 +60,37 @@ import { AdminPagination } from "@/components/admin/admin-pagination";
 import { toast } from "sonner";
 import {
   IconChevronDown,
-  IconDownload,
+  IconFileExport,
   IconFlag,
   IconFlagOff,
+  IconFileTypeCsv,
+  IconFileTypeXls,
   IconSearch,
   IconShieldCheck,
+  IconShieldX,
   IconTrash,
-  IconEyeOff,
 } from "@tabler/icons-react";
 import type { CollectSubmission } from "@/types/collect";
 import { formatGeoDisplayName } from "@/lib/utils/geo-display";
+import type { ExportFormat } from "@/lib/exports/shared";
+import {
+  getOrderedExportFormats,
+  readPreferredExportFormat,
+  writePreferredExportFormat,
+} from "@/lib/exports/client-preferences";
 
 // Extended type to include nested polling unit from API
 type SubmissionWithPU = CollectSubmission & {
   pollingUnit?: { id: number; code: string; name: string } | null;
 };
+
+const exportFormatMeta = {
+  csv: { label: "CSV", icon: IconFileTypeCsv },
+  xlsx: { label: "Excel", icon: IconFileTypeXls },
+} satisfies Record<
+  ExportFormat,
+  { label: string; icon: React.ComponentType<{ className?: string }> }
+>;
 
 function formatPU(sub: SubmissionWithPU) {
   const code = sub.pollingUnit?.code;
@@ -80,11 +99,44 @@ function formatPU(sub: SubmissionWithPU) {
   return displayName;
 }
 
+function buildExportToastMessage(args: {
+  format: ExportFormat;
+  redacted?: boolean;
+  hasSearch: boolean;
+  hasRoleFilter: boolean;
+  hasCanvasserFilter: boolean;
+}) {
+  const label = `${args.redacted ? "Redacted " : ""}${exportFormatMeta[args.format].label}`;
+  const activeFilters = [
+    args.hasSearch ? "search" : null,
+    args.hasRoleFilter ? "role" : null,
+    args.hasCanvasserFilter ? "canvasser" : null,
+  ].filter(Boolean);
+
+  if (activeFilters.length === 0) return `${label} exported`;
+  if (activeFilters.length === 1) {
+    return `${label} exported with ${activeFilters[0]} filter`;
+  }
+
+  return `${label} exported with active filters`;
+}
+
 export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [roleFilter, setRoleFilter] = useState<string>(
+    () => searchParams.get("role") || "all",
+  );
+  const [canvasserFilter, setCanvasserFilter] = useState<string | null>(() =>
+    searchParams.get("canvasserName"),
+  );
+  const [canvasserPhoneFilter, setCanvasserPhoneFilter] = useState<
+    string | null
+  >(() => searchParams.get("canvasserPhone"));
   const [selected, setSelected] = useState<SubmissionWithPU | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -92,12 +144,32 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     description: string;
     onConfirm: () => void;
   } | null>(null);
+  const [preferredFormat, setPreferredFormat] = useState<ExportFormat>("csv");
+
+  // Clear one-shot URL params after consuming them
+  useEffect(() => {
+    const hasCanvasserParam = searchParams.has("canvasserName");
+    const hasRoleParam = searchParams.has("role");
+    if (hasCanvasserParam || hasRoleParam) {
+      const sp = new URLSearchParams(searchParams.toString());
+      sp.delete("canvasserName");
+      sp.delete("canvasserPhone");
+      sp.delete("role");
+      router.replace(`?${sp.toString()}`);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    setPreferredFormat(readPreferredExportFormat());
+  }, []);
 
   const { data, isLoading } = useCampaignSubmissions(campaignId, {
     page,
     pageSize,
     search: search || undefined,
     role: roleFilter !== "all" ? roleFilter : undefined,
+    canvasserName: canvasserFilter || undefined,
+    canvasserPhone: canvasserPhoneFilter || undefined,
   });
 
   const updateMutation = useUpdateSubmission();
@@ -132,8 +204,15 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
       { ids: Array.from(selectedIds), action },
       {
         onSuccess: (result) => {
+          const actionLabels: Record<string, string> = {
+            delete: "deleted",
+            verify: "verified",
+            unverify: "unverified",
+            flag: "flagged",
+            unflag: "unflagged",
+          };
           toast.success(
-            `${result.affected} submission(s) ${action === "delete" ? "deleted" : action === "verify" ? "verified" : action === "flag" ? "flagged" : "unflagged"}`,
+            `${result.affected} submission(s) ${actionLabels[action] ?? action}`,
           );
           setSelectedIds(new Set());
         },
@@ -154,18 +233,46 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     executeBulkAction(action);
   };
 
-  const handleExport = async (redacted = false) => {
+  // Compute which bulk actions to show based on selected rows' states
+  const selectedSubs = submissions.filter((s) => selectedIds.has(s.id));
+  const hasUnverified = selectedSubs.some((s) => !s.isVerified);
+  const hasVerified = selectedSubs.some((s) => s.isVerified);
+  const hasUnflagged = selectedSubs.some((s) => !s.isFlagged);
+  const hasFlagged = selectedSubs.some((s) => s.isFlagged);
+
+  const handleExport = async ({
+    format,
+    redacted = false,
+  }: {
+    format: "csv" | "xlsx";
+    redacted?: boolean;
+  }) => {
     try {
-      await adminCollectApi.exportCsv(campaignId, {
+      await adminCollectApi.exportSubmissions(campaignId, {
         search: search || undefined,
         role: roleFilter !== "all" ? roleFilter : undefined,
+        canvasserName: canvasserFilter || undefined,
+        canvasserPhone: canvasserPhoneFilter || undefined,
+        format,
         redacted,
       });
-      toast.success(redacted ? "Redacted CSV exported" : "CSV exported");
+      writePreferredExportFormat(format);
+      setPreferredFormat(format);
+      toast.success(
+        buildExportToastMessage({
+          format,
+          redacted,
+          hasSearch: search.trim().length > 0,
+          hasRoleFilter: roleFilter !== "all",
+          hasCanvasserFilter: Boolean(canvasserFilter || canvasserPhoneFilter),
+        }),
+      );
     } catch {
       toast.error("Export failed");
     }
   };
+
+  const orderedFormats = getOrderedExportFormats(preferredFormat);
 
   const handleToggleFlag = (sub: SubmissionWithPU) => {
     const newFlagged = !sub.isFlagged;
@@ -216,8 +323,8 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
   return (
     <div className="space-y-4">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1">
+      <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+        <div className="relative min-w-0 sm:flex-1">
           <IconSearch className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             placeholder="Search by name, phone, or email..."
@@ -229,90 +336,153 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
             className="rounded-sm pl-9"
           />
         </div>
-        <Select
-          value={roleFilter}
-          onValueChange={(v) => {
-            setRoleFilter(v);
-            setPage(1);
-          }}
-        >
-          <SelectTrigger className="w-40 rounded-sm">
-            <SelectValue placeholder="All Roles" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="volunteer">Volunteer</SelectItem>
-            <SelectItem value="member">Member</SelectItem>
-            <SelectItem value="canvasser">Canvasser</SelectItem>
-          </SelectContent>
-        </Select>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={total === 0}
-              title={total === 0 ? "No submissions to export" : undefined}
-              className="h-9 rounded-sm px-4 font-mono text-[10px] font-bold tracking-widest uppercase shadow-sm"
-            >
-              <IconDownload className="mr-2 h-4 w-4" />
-              Export
-              <IconChevronDown className="ml-1 h-3 w-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleExport(false)}>
-              <IconDownload className="mr-2 h-4 w-4" />
-              Export CSV
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExport(true)}>
-              <IconEyeOff className="mr-2 h-4 w-4" />
-              Export Redacted CSV
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:w-auto">
+          <Select
+            value={roleFilter}
+            onValueChange={(v) => {
+              setRoleFilter(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full rounded-sm sm:w-40">
+              <SelectValue placeholder="All Roles" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value="volunteer">Volunteer</SelectItem>
+              <SelectItem value="member">Member</SelectItem>
+              <SelectItem value="canvasser">Canvasser</SelectItem>
+            </SelectContent>
+          </Select>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={total === 0}
+                title={total === 0 ? "No submissions to export" : undefined}
+                className="h-9 w-full justify-center rounded-sm px-4 font-mono text-[10px] font-bold tracking-widest uppercase shadow-sm sm:w-auto"
+              >
+                <IconFileExport className="mr-2 h-4 w-4" />
+                Export
+                <IconChevronDown className="ml-1 h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel className="text-muted-foreground font-mono text-[10px] tracking-widest uppercase">
+                Last Used: {exportFormatMeta[preferredFormat].label}
+              </DropdownMenuLabel>
+              {orderedFormats.map((format) => {
+                const Icon = exportFormatMeta[format].icon;
+                return (
+                  <DropdownMenuItem
+                    key={format}
+                    onClick={() => handleExport({ format })}
+                  >
+                    <Icon className="mr-2 h-4 w-4" />
+                    Export {exportFormatMeta[format].label}
+                  </DropdownMenuItem>
+                );
+              })}
+              <DropdownMenuSeparator />
+              {orderedFormats.map((format) => {
+                const Icon = exportFormatMeta[format].icon;
+                return (
+                  <DropdownMenuItem
+                    key={`redacted-${format}`}
+                    onClick={() => handleExport({ format, redacted: true })}
+                  >
+                    <Icon className="mr-2 h-4 w-4" />
+                    Export Redacted {exportFormatMeta[format].label}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
+
+      {/* Canvasser Filter Chip */}
+      {canvasserFilter && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge
+            variant="secondary"
+            className="rounded-sm px-2 py-1 text-xs wrap-break-word"
+          >
+            Referred by: {canvasserFilter}
+            <button
+              type="button"
+              className="hover:text-foreground ml-1.5"
+              onClick={() => {
+                setCanvasserFilter(null);
+                setCanvasserPhoneFilter(null);
+                setPage(1);
+              }}
+            >
+              &times;
+            </button>
+          </Badge>
+        </div>
+      )}
 
       {/* Bulk Actions Toolbar */}
       {selectedIds.size > 0 && (
         <div className="bg-primary/5 border-primary/20 flex flex-wrap items-center gap-2 rounded-sm border px-3 py-2">
-          <span className="text-primary text-xs font-bold">
+          <span className="text-primary w-full text-xs font-bold sm:w-auto">
             {selectedIds.size} selected
           </span>
+          {hasUnverified && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 flex-1 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase sm:h-7 sm:flex-none"
+              onClick={() => handleBulkAction("verify")}
+              disabled={bulkMutation.isPending}
+            >
+              <IconShieldCheck className="mr-1 h-3 w-3" />
+              Verify
+            </Button>
+          )}
+          {hasVerified && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 flex-1 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase sm:h-7 sm:flex-none"
+              onClick={() => handleBulkAction("unverify")}
+              disabled={bulkMutation.isPending}
+            >
+              <IconShieldX className="mr-1 h-3 w-3" />
+              Unverify
+            </Button>
+          )}
+          {hasUnflagged && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 flex-1 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase sm:h-7 sm:flex-none"
+              onClick={() => handleBulkAction("flag")}
+              disabled={bulkMutation.isPending}
+            >
+              <IconFlag className="mr-1 h-3 w-3" />
+              Flag
+            </Button>
+          )}
+          {hasFlagged && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 flex-1 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase sm:h-7 sm:flex-none"
+              onClick={() => handleBulkAction("unflag")}
+              disabled={bulkMutation.isPending}
+            >
+              <IconFlagOff className="mr-1 h-3 w-3" />
+              Unflag
+            </Button>
+          )}
           <Button
             size="sm"
             variant="outline"
-            className="h-7 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase"
-            onClick={() => handleBulkAction("verify")}
-            disabled={bulkMutation.isPending}
-          >
-            <IconShieldCheck className="mr-1 h-3 w-3" />
-            Verify
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase"
-            onClick={() => handleBulkAction("flag")}
-            disabled={bulkMutation.isPending}
-          >
-            <IconFlag className="mr-1 h-3 w-3" />
-            Flag
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase"
-            onClick={() => handleBulkAction("unflag")}
-            disabled={bulkMutation.isPending}
-          >
-            <IconFlagOff className="mr-1 h-3 w-3" />
-            Unflag
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7 rounded-sm border-red-500/20 px-2 text-[10px] font-bold tracking-wider text-red-600 uppercase hover:bg-red-600 hover:text-white"
+            className="h-8 flex-1 rounded-sm border-red-500/20 px-2 text-[10px] font-bold tracking-wider text-red-600 uppercase hover:bg-red-600 hover:text-white sm:h-7 sm:flex-none"
             onClick={() => handleBulkAction("delete")}
             disabled={bulkMutation.isPending}
           >
@@ -322,7 +492,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
           <Button
             size="sm"
             variant="ghost"
-            className="ml-auto h-7 px-2 text-[10px] font-bold tracking-wider uppercase"
+            className="h-8 w-full px-2 text-[10px] font-bold tracking-wider uppercase sm:ml-auto sm:h-7 sm:w-auto"
             onClick={() => setSelectedIds(new Set())}
           >
             Clear
@@ -641,7 +811,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
 
                 {auditData && auditData.entries.length > 0 && (
                   <Section label="History">
-                    <div className="space-y-2">
+                    <div className="max-h-40 space-y-2 overflow-y-auto">
                       {auditData.entries.map((entry) => (
                         <div
                           key={entry.id}

@@ -25,7 +25,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
     const { id } = await params;
 
     // Fetch both pre-loaded canvassers and submission-aggregated stats
-    const [preloaded, canvasserStats] = await Promise.all([
+    const [preloaded, canvasserStats, selfIdentifiedCount] = await Promise.all([
       prisma.campaignCanvasser.findMany({
         where: { campaignId: id },
         orderBy: { createdAt: "desc" },
@@ -54,6 +54,9 @@ export async function GET(_request: Request, { params }: RouteParams) {
         GROUP BY "canvasserName", "canvasserPhone"
         ORDER BY total DESC
       `,
+      prisma.collectSubmission.count({
+        where: { campaignId: id, role: "canvasser" },
+      }),
     ]);
 
     const canvassers = canvasserStats.map((r) => ({
@@ -71,6 +74,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
         createdAt: c.createdAt.toISOString(),
       })),
       canvassers,
+      selfIdentifiedCount,
     });
   } catch (error) {
     console.error("Error fetching canvassers:", error);

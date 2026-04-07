@@ -139,10 +139,10 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
   // True when state is selected, LGAs are needed, query finished, but no data exists
   const stateHasNoLgas = Boolean(
     showLgaGrid &&
-      selectedStateCode &&
-      !lgasLoading &&
-      !lgasFetching &&
-      lgas.length === 0,
+    selectedStateCode &&
+    !lgasLoading &&
+    !lgasFetching &&
+    lgas.length === 0,
   );
 
   const expectedLgaCount = selectedStateCode
@@ -197,13 +197,15 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
   const effectivePreset = useMemo(
     () =>
       effectivePresetShortName
-        ? availablePresets.find((preset) => preset.shortName === effectivePresetShortName) ??
-          null
+        ? (availablePresets.find(
+            (preset) => preset.shortName === effectivePresetShortName,
+          ) ?? null)
         : null,
     [availablePresets, effectivePresetShortName],
   );
   const activePresetName = effectivePreset?.name;
-  const effectiveOfficialPresetName = effectivePreset?.name ?? matchingPreset?.name;
+  const effectiveOfficialPresetName =
+    effectivePreset?.name ?? matchingPreset?.name;
   const effectivePresetMatchResult = useMemo(
     () =>
       effectivePreset ? matchPresetToSeededIds(effectivePreset, lgas) : null,
@@ -215,16 +217,17 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
     const s2 = [...constituencyLgaIds].sort((a, b) => a - b);
     return JSON.stringify(s1) !== JSON.stringify(s2);
   }, [effectivePresetMatchResult, constituencyLgaIds]);
-  const manuallyMatchesPreset = !effectivePresetShortName && Boolean(matchingPreset);
+  const manuallyMatchesPreset =
+    !effectivePresetShortName && Boolean(matchingPreset);
   const showBoundaryGrid = Boolean(
     showLgaGrid &&
-      selectedStateCode &&
-      !lgasFetching &&
-      !stateHasNoLgas &&
-      (!hasPresets ||
-        customBoundaryMode ||
-        effectivePresetShortName ||
-        constituencyLgaIds.length > 0),
+    selectedStateCode &&
+    !lgasFetching &&
+    !stateHasNoLgas &&
+    (!hasPresets ||
+      customBoundaryMode ||
+      effectivePresetShortName ||
+      constituencyLgaIds.length > 0),
   );
   const boundaryHelperText = effectivePresetShortName
     ? `Loaded ${constituencyLgaIds.length} LGAs from ${effectivePresetShortName}. Adjust the boundary below only if you need a custom variation.`
@@ -434,7 +437,7 @@ export function StepPosition({ form, onBack, onNext }: StepPositionProps) {
                   ? "Optional home state for informational purposes"
                   : selectedPosition === "Governor"
                     ? "The state that defines this governorship constituency"
-                  : "The state and LGAs that define this constituency"
+                    : "The state and LGAs that define this constituency"
               }
             />
             <div className="space-y-1.5">

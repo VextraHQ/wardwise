@@ -1,8 +1,8 @@
 # WardWise Collect v2 — Feature Roadmap Spec
 
 > Living document. Update as features are built or priorities shift.
-> Last updated: 2026-04-03
-> See also: `wardwise-collect-spec.md` (v1), `wardwise-hardening-spec.md`
+> Last updated: 2026-04-07
+> See also: `wardwise-collect-spec.md` (v1), `wardwise-hardening-spec.md`, `collect-admin-export-plan.md`
 
 ## Status
 
@@ -263,6 +263,28 @@ UX audit and post-submission improvements for the public registration form:
 - [x] **Zod validation messages** — Location step `z.number()` now shows "Select your ward" instead of raw "Invalid input: expected number, received undefined". Also hardened `geo-schemas.ts`
 
 **Files:** `src/components/collect/form-ui.tsx`, `src/components/collect/steps/personal-details-step.tsx`, `src/components/collect/steps/canvasser-step.tsx`, `src/components/collect/steps/role-step.tsx`, `src/components/collect/steps/confirmation-screen.tsx`, `src/components/collect/campaign-registration-form.tsx`
+
+---
+
+## Completed v2.3 — Admin UX Polish (2026-04-07)
+
+- [x] **Smart bulk actions** — Bulk toolbar now shows contextual buttons based on selected rows' state (Verify/Unverify, Flag/Unflag). Added `unverify` action to bulk API endpoint with audit trail.
+- [x] **Geo display in charts** — LGA and Ward names in campaign overview charts now formatted via `formatGeoDisplayName()` (was showing raw CAPS from DB).
+- [x] **Audit trail race condition** — Audit entry write is now awaited before the response is sent in the single-submission PATCH route. Fixes history not showing new entries immediately after verify/flag actions.
+- [x] **History section scroll** — Added `max-h-40 overflow-y-auto` to submission detail History section to prevent unbounded growth.
+- [x] **Canvasser tab overhaul** — Redesigned layout hierarchy: Referral Leaderboard is now the hero content above the fold with search/export toolbar. Pre-loaded canvasser management moved to a side Sheet ("Public Form Canvassers"). Self-identified canvassers shown as compact stat pill. Added Zod validation, AlertDialog confirmations with referral count context, leaderboard CSV export with `sanitizeCell()`, keyboard-accessible row click-through to submissions filtered by `canvasserName`+`canvasserPhone` (exact match). Submissions tab reads `canvasserName`, `canvasserPhone`, and `role` from URL params with dismissable filter chip.
+- [x] **Public form canvasser dropdown** — Replaced plain `<Select>` with searchable `ComboboxSelect` in `canvasser-step.tsx`. Scales to 50+ preloaded canvassers with type-to-search.
+
+---
+
+## Completed v2.4 — Admin Export Centralization (2026-04-07)
+
+- [x] **Shared export layer** — Added `src/lib/exports/` with shared sanitize/redaction helpers, CSV rendering, XLSX rendering, submissions export mapping, and canvasser leaderboard export mapping.
+- [x] **Submissions CSV + Excel export** — Existing admin submissions export route now supports `format=csv|xlsx` while preserving redacted export support and campaign-specific filenames.
+- [x] **Leaderboard export moved server-side** — Canvasser leaderboard export no longer assembles files inside the React component; it now downloads from a dedicated admin export route.
+- [x] **Filter alignment improved** — Submissions list and submissions export now share the same filter parsing/building path for `search`, geo filters, verification/flag status, role, and canvasser filters.
+- [x] **Admin export UI expanded** — Submissions dropdown now exposes CSV, Excel, redacted CSV, and redacted Excel. Both export menus also remember the last-used format locally and surface it as the preferred option in the dropdown.
+- [x] **Verification complete** — `pnpm typecheck` and `pnpm build` passed. Smoke test confirmed empty export headers, blank optional cells, escaped multiline CSV content, and spreadsheet formula sanitization. Manual browser QA also confirmed CSV/XLSX downloads, redacted exports, and filter-aligned output. Unauthenticated requests to both export routes were verified to return `401 Unauthorized`.
 
 ---
 

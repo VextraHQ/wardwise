@@ -58,12 +58,19 @@ export function StepReview({
     [data.constituencyLgaIds, lgaResponse],
   );
   const matchingPreset = useMemo(() => {
-    if (!data.position || !data.stateCode || !positionRequiresLgas(data.position)) {
+    if (
+      !data.position ||
+      !data.stateCode ||
+      !positionRequiresLgas(data.position)
+    ) {
       return null;
     }
 
     const presets = getPresetsForState(
-      data.position as "Senator" | "House of Representatives" | "State Assembly",
+      data.position as
+        | "Senator"
+        | "House of Representatives"
+        | "State Assembly",
       data.stateCode,
     );
 

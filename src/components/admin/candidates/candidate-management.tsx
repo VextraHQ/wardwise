@@ -318,7 +318,7 @@ export function CandidateManagement() {
                           <TableCell>
                             <div>
                               <span className="text-sm font-medium">
-                                {candidate.name}
+                                {candidate?.title} {candidate.name}
                               </span>
                               <span className="text-muted-foreground block text-xs">
                                 {candidate.user?.email}
