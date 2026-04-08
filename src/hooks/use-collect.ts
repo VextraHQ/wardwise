@@ -129,19 +129,19 @@ export function useDeleteCampaign() {
 // Fetches paginated, filterable constituent submissions for a campaign.
 export function useCampaignSubmissions(
   campaignId: string,
-    params?: {
-      page?: number;
-      pageSize?: number;
-      search?: string;
-      lgaId?: number;
-      wardId?: number;
-      role?: string;
-      isFlagged?: boolean;
-      isVerified?: boolean;
-      canvasserName?: string;
-      canvasserPhone?: string;
-    },
-  ) {
+  params?: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    lgaId?: number;
+    wardId?: number;
+    role?: string;
+    isFlagged?: boolean;
+    isVerified?: boolean;
+    canvasserName?: string;
+    canvasserPhone?: string;
+  },
+) {
   return useQuery({
     queryKey: ["campaign-submissions", campaignId, params],
     queryFn: () => adminCollectApi.getSubmissions(campaignId, params),

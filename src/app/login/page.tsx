@@ -22,7 +22,27 @@ import {
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { AuthCard } from "@/components/auth/auth-card";
+import { track } from "@/lib/analytics/client";
 import { loginSchema, type LoginFormData } from "@/lib/schemas/auth-schemas";
+
+function getLoginErrorCategory(error: string) {
+  if (!error) return "unknown";
+
+  const normalized = error.toLowerCase();
+
+  if (
+    normalized.includes("credentials") ||
+    normalized.includes("invalid email or password")
+  ) {
+    return "invalid_credentials";
+  }
+
+  if (normalized.includes("access denied") || normalized.includes("role")) {
+    return "invalid_role";
+  }
+
+  return "unknown";
+}
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -59,6 +79,7 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError("");
+    track("login_submitted", { has_remember_me: data.rememberMe });
 
     try {
       const result = await signIn("credentials", {
@@ -68,19 +89,26 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
+        track("login_failed", {
+          error_category: getLoginErrorCategory(result.error),
+        });
         setError("Invalid email or password");
       } else {
         // Check user role and redirect accordingly
         const session = await getSession();
         if (session?.user?.role === "candidate") {
+          track("login_succeeded", { role: "candidate" });
           router.push("/dashboard");
         } else if (session?.user?.role === "admin") {
+          track("login_succeeded", { role: "admin" });
           router.push("/admin");
         } else {
+          track("login_failed", { error_category: "invalid_role" });
           setError("Access denied. Invalid user role.");
         }
       }
     } catch {
+      track("login_failed", { error_category: "unknown" });
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);

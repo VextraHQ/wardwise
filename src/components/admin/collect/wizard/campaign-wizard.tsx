@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import Link from "next/link";
 
+import { track } from "@/lib/analytics/client";
 import { useCreateCampaign } from "@/hooks/use-collect";
 import {
   createCampaignSchema,
@@ -124,9 +125,16 @@ export function CampaignWizard() {
         customQuestion1: data.customQuestion1?.trim() || null,
         customQuestion2: data.customQuestion2?.trim() || null,
       });
+      track("admin_campaign_created", {
+        campaign_id: result.campaign.id,
+        candidate_id: data.candidateId,
+      });
       toast.success("Campaign created successfully");
       router.push(`/admin/collect/campaigns/${result.campaign.id}`);
     } catch (err) {
+      track("admin_campaign_creation_failed", {
+        error_category: "request_failed",
+      });
       toast.error(
         err instanceof Error
           ? err.message

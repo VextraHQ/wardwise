@@ -31,11 +31,13 @@ export async function GET(request: NextRequest) {
     });
 
     const serialized = campaigns.map((c) => {
-      const { submissions, ...rest } = c;
+      const { submissions, clientReportPasscodeHash: _hash, ...rest } = c;
       return {
         ...rest,
         createdAt: c.createdAt.toISOString(),
         updatedAt: c.updatedAt.toISOString(),
+        clientReportLastViewedAt:
+          c.clientReportLastViewedAt?.toISOString() ?? null,
         lastSubmissionAt: submissions[0]?.createdAt.toISOString() || null,
       };
     });
@@ -171,12 +173,17 @@ export async function POST(request: NextRequest) {
       },
     );
 
+    const { clientReportPasscodeHash: _createHash, ...campaignWithoutHash } =
+      campaign;
+
     return NextResponse.json(
       {
         campaign: {
-          ...campaign,
+          ...campaignWithoutHash,
           createdAt: campaign.createdAt.toISOString(),
           updatedAt: campaign.updatedAt.toISOString(),
+          clientReportLastViewedAt:
+            campaign.clientReportLastViewedAt?.toISOString() ?? null,
         },
       },
       { status: 201 },

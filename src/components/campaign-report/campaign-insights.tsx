@@ -1,0 +1,787 @@
+"use client";
+
+import { Activity, BarChart3, ClipboardList } from "lucide-react";
+import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { InsightsHero } from "./insights-hero";
+import { InsightsSupporters } from "./insights-supporters";
+import { InsightsMomentum } from "./insights-momentum";
+import { InsightsGeography } from "./insights-geography";
+import { InsightsBreakdown } from "./insights-breakdown";
+import {
+  useCampaignReportSubmissions,
+  useCampaignReportSummary,
+} from "@/hooks/use-campaign-report";
+import { formatGeoDisplayName } from "@/lib/utils/geo-display";
+import { titleCase } from "@/lib/utils/text";
+import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
+import { ShareInviteCard } from "@/components/collect/share-invite-card";
+import type { CampaignReportSubmission } from "@/types/campaign-report";
+import {
+  IconChartBar,
+  IconClipboardList,
+  IconCopy,
+  IconFlag,
+  IconMapPin,
+  IconShieldCheck,
+  IconSparkles,
+  IconUsersGroup,
+} from "@tabler/icons-react";
+import {
+  timeAgo,
+  STATUS_COPY,
+  SubmissionStatusBadge,
+} from "./insights-helpers";
+
+const STATUS_BADGE: Record<string, { label: string; style: string }> = {
+  active: {
+    label: "Live",
+    style: "bg-primary/10 text-primary border-primary/30",
+  },
+  paused: {
+    label: "Paused",
+    style: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  },
+  closed: {
+    label: "Closed",
+    style: "bg-destructive/10 text-destructive border-destructive/30",
+  },
+  draft: {
+    label: "Draft",
+    style: "bg-muted text-muted-foreground border-border/60",
+  },
+};
+
+function getSevenDayCount(
+  daily: { date: string; count: number; cumulative: number }[],
+) {
+  const cutoff = new Date();
+  cutoff.setHours(0, 0, 0, 0);
+  cutoff.setDate(cutoff.getDate() - 6);
+
+  return daily.reduce((sum, entry) => {
+    const entryDate = new Date(entry.date);
+    return entryDate >= cutoff ? sum + entry.count : sum;
+  }, 0);
+}
+
+function getVerificationRate(total: number, verified: number) {
+  return total > 0 ? Math.round((verified / total) * 100) : 0;
+}
+
+function OverviewPanel({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card className="border-border/60 min-w-0 overflow-hidden rounded-sm shadow-none">
+      <CardHeader>
+        <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">{children}</CardContent>
+    </Card>
+  );
+}
+
+function StatsGrid({
+  total,
+  verified,
+  flagged,
+  enabledLgaCount,
+}: {
+  total: number;
+  verified: number;
+  flagged: number;
+  enabledLgaCount: number;
+}) {
+  const verifiedPct = getVerificationRate(total, verified);
+  const cards = [
+    {
+      label: "Supporters Captured",
+      value: total.toLocaleString(),
+      subtitle: "All successful submissions",
+      icon: IconClipboardList,
+      iconBg: "bg-primary/10",
+      iconColor: "text-primary",
+    },
+    {
+      label: "Verified Records",
+      value: verified.toLocaleString(),
+      subtitle: `${verifiedPct}% of total`,
+      icon: IconShieldCheck,
+      iconBg: "bg-primary/10",
+      iconColor: "text-primary",
+    },
+    {
+      label: "Needs Review",
+      value: flagged.toLocaleString(),
+      subtitle: "Flagged by admin",
+      icon: IconFlag,
+      iconBg: "bg-destructive/10",
+      iconColor: "text-destructive",
+    },
+    {
+      label: "Active LGAs",
+      value: enabledLgaCount.toLocaleString(),
+      subtitle: "Currently collecting",
+      icon: IconMapPin,
+      iconBg: "bg-primary/10",
+      iconColor: "text-primary",
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {cards.map((card) => (
+        <Card
+          key={card.label}
+          className="border-border/60 min-w-0 rounded-sm shadow-none"
+        >
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
+            <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+              {card.label}
+            </CardTitle>
+            <div
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-sm sm:h-9 sm:w-9 ${card.iconBg}`}
+            >
+              <card.icon
+                className={`h-4 w-4 sm:h-5 sm:w-5 ${card.iconColor}`}
+              />
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
+              {card.value}
+            </div>
+            <p className="text-muted-foreground mt-1 text-xs">
+              {card.subtitle}
+            </p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function NowCard({
+  formStatus,
+  lastSubmissionAt,
+  recentWindowCount,
+  verificationRate,
+}: {
+  formStatus: string;
+  lastSubmissionAt: string | null;
+  recentWindowCount: number;
+  verificationRate: number;
+}) {
+  const badge = STATUS_BADGE[formStatus] ?? STATUS_BADGE.draft;
+
+  const items = [
+    { label: "Status", value: badge.label },
+    {
+      label: "Last activity",
+      value: lastSubmissionAt ? timeAgo(lastSubmissionAt) : "No activity yet",
+    },
+    {
+      label: "Last 7 days",
+      value: `${recentWindowCount.toLocaleString()} captured`,
+    },
+    {
+      label: "Verification",
+      value: `${verificationRate}% verified`,
+    },
+  ];
+
+  return (
+    <OverviewPanel title="Now">
+      <div className="flex items-center gap-2">
+        <p className="text-foreground text-sm font-medium">
+          {STATUS_COPY[formStatus] ?? STATUS_COPY.draft}
+        </p>
+        <Badge
+          variant="outline"
+          className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${badge.style}`}
+        >
+          {badge.label}
+        </Badge>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {items.map((item) => (
+          <div
+            key={item.label}
+            className="border-border/60 rounded-sm border border-dashed px-3 py-3"
+          >
+            <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+              {item.label}
+            </p>
+            <p className="text-foreground mt-2 text-sm font-semibold">
+              {item.value}
+            </p>
+          </div>
+        ))}
+      </div>
+    </OverviewPanel>
+  );
+}
+
+function HotspotsCard({
+  byLga,
+  byWard,
+}: {
+  byLga: { lga: string; count: number }[];
+  byWard: { ward: string; count: number }[];
+}) {
+  const topLga = byLga[0];
+  const topWard = byWard[0];
+
+  const summary =
+    topLga && topWard
+      ? `Most registrations are currently coming from ${formatGeoDisplayName(topLga.lga)}, with ${formatGeoDisplayName(topWard.ward)} leading at ward level.`
+      : topLga
+        ? `${formatGeoDisplayName(topLga.lga)} is currently leading supporter capture.`
+        : "Geography insights will appear here once submissions start coming in.";
+
+  return (
+    <OverviewPanel title="Hotspots">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="border-border/60 rounded-sm border px-3 py-3">
+          <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+            Top LGA
+          </p>
+          <p className="text-foreground mt-2 text-base font-semibold">
+            {topLga ? formatGeoDisplayName(topLga.lga) : "No data yet"}
+          </p>
+          {topLga && (
+            <p className="text-muted-foreground mt-1 text-xs">
+              {topLga.count.toLocaleString()} submissions
+            </p>
+          )}
+        </div>
+
+        <div className="border-border/60 rounded-sm border px-3 py-3">
+          <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+            Top Ward
+          </p>
+          <p className="text-foreground mt-2 text-base font-semibold">
+            {topWard ? formatGeoDisplayName(topWard.ward) : "No data yet"}
+          </p>
+          {topWard && (
+            <p className="text-muted-foreground mt-1 text-xs">
+              {topWard.count.toLocaleString()} submissions
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-muted/20 border-border/60 rounded-sm border px-3 py-3">
+        <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+          Insight
+        </p>
+        <p className="text-foreground mt-2 text-sm leading-relaxed">
+          {summary}
+        </p>
+      </div>
+    </OverviewPanel>
+  );
+}
+
+function SnapshotRows({
+  items,
+}: {
+  items: { label: string; value: string }[];
+}) {
+  if (items.length === 0) {
+    return (
+      <div className="border-border/60 rounded-sm border border-dashed px-3 py-8 text-center">
+        <p className="text-muted-foreground text-sm">No data yet</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {items.map((item, index) => (
+        <div
+          key={`${item.label}-${index}`}
+          className="border-border/60 flex items-center justify-between gap-3 rounded-sm border border-dashed px-3 py-2.5"
+        >
+          <span className="min-w-0 truncate text-sm font-medium">
+            <span className="text-muted-foreground mr-1.5 font-mono text-xs">
+              {index + 1}.
+            </span>
+            {item.label}
+          </span>
+          <span className="font-mono text-xs font-semibold tabular-nums">
+            {item.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function GeographicSnapshotCard({
+  byLga,
+  byWard,
+}: {
+  byLga: { lga: string; count: number }[];
+  byWard: { ward: string; count: number }[];
+}) {
+  const lgaItems = byLga.slice(0, 3).map((item) => ({
+    label: formatGeoDisplayName(item.lga),
+    value: item.count.toLocaleString(),
+  }));
+  const wardItems = byWard.slice(0, 3).map((item) => ({
+    label: formatGeoDisplayName(item.ward),
+    value: item.count.toLocaleString(),
+  }));
+
+  return (
+    <OverviewPanel title="Geographic Snapshot">
+      <div className="grid gap-5 lg:grid-cols-2">
+        <div className="space-y-3">
+          <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+            Leading LGAs
+          </p>
+          <SnapshotRows items={lgaItems} />
+        </div>
+        <div className="space-y-3">
+          <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+            Leading Wards
+          </p>
+          <SnapshotRows items={wardItems} />
+        </div>
+      </div>
+    </OverviewPanel>
+  );
+}
+
+function AudienceSnapshotCard({
+  byRole,
+  bySex,
+}: {
+  byRole: { role: string; count: number }[];
+  bySex: { sex: string; count: number }[];
+}) {
+  const mixTotal = bySex.reduce((sum, item) => sum + item.count, 0);
+  const roleItems = byRole.slice(0, 3).map((item) => ({
+    label: titleCase(item.role),
+    value: item.count.toLocaleString(),
+  }));
+  const mixItems = bySex.slice(0, 3).map((item) => ({
+    label: titleCase(item.sex),
+    value:
+      mixTotal > 0
+        ? `${Math.round((item.count / mixTotal) * 100)}%`
+        : item.count.toLocaleString(),
+  }));
+
+  return (
+    <OverviewPanel title="Audience Snapshot">
+      <div className="grid gap-5 lg:grid-cols-2">
+        <div className="space-y-3">
+          <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+            Supporter Roles
+          </p>
+          <SnapshotRows items={roleItems} />
+        </div>
+        <div className="space-y-3">
+          <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+            Supporter Mix
+          </p>
+          <SnapshotRows items={mixItems} />
+        </div>
+      </div>
+    </OverviewPanel>
+  );
+}
+
+function FieldTeamPerformanceCard({
+  health,
+}: {
+  health: {
+    canvasserCount: number;
+    topCanvassers: { name: string; phone: string; count: number }[];
+  };
+}) {
+  const lead = health.topCanvassers[0];
+  const leaderboard = health.topCanvassers.slice(0, 3);
+
+  return (
+    <OverviewPanel title="Field Team Performance">
+      {health.topCanvassers.length === 0 ? (
+        <div className="border-border/60 flex flex-col items-center rounded-sm border border-dashed px-3 py-8 text-center">
+          <IconUsersGroup className="text-muted-foreground/40 mb-2 h-7 w-7" />
+          <p className="text-muted-foreground text-sm font-medium">
+            No canvasser activity yet
+          </p>
+          <p className="text-muted-foreground/70 mt-1 text-xs">
+            Once canvassers submit records, their contribution will appear here.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="border-border/60 rounded-sm border px-3 py-3">
+              <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                Active Canvassers
+              </p>
+              <p className="text-foreground mt-2 font-mono text-2xl font-semibold">
+                {health.canvasserCount.toLocaleString()}
+              </p>
+            </div>
+
+            <div className="border-border/60 rounded-sm border px-3 py-3">
+              <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                Top Canvasser
+              </p>
+              <p className="text-foreground mt-2 text-base font-semibold">
+                {lead.name}
+              </p>
+              <p className="text-muted-foreground mt-1 text-xs">
+                {lead.count.toLocaleString()} submissions
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {leaderboard.map((canvasser, index) => (
+              <div
+                key={`${canvasser.name}-${index}`}
+                className="border-border/60 flex items-center justify-between gap-4 rounded-sm border border-dashed px-3 py-2.5"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">
+                    <span className="text-muted-foreground mr-1.5 font-mono text-xs">
+                      {index + 1}.
+                    </span>
+                    {canvasser.name}
+                  </p>
+                </div>
+                <span className="font-mono text-xs font-semibold tabular-nums">
+                  {canvasser.count}
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </OverviewPanel>
+  );
+}
+
+function RecentActivityCard({
+  submissions,
+  loading,
+  error,
+}: {
+  submissions: CampaignReportSubmission[];
+  loading: boolean;
+  error: Error | null;
+}) {
+  return (
+    <OverviewPanel title="Recent Activity">
+      {loading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Skeleton key={index} className="h-16 rounded-sm" />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="rounded-sm border border-orange-500/20 bg-orange-500/10 px-3 py-4">
+          <p className="text-sm font-medium text-orange-600">
+            Unable to load recent activity right now.
+          </p>
+        </div>
+      ) : submissions.length === 0 ? (
+        <div className="border-border/60 rounded-sm border border-dashed px-3 py-8 text-center">
+          <p className="text-muted-foreground text-sm">
+            Recent submissions will appear here once the campaign is live.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          {submissions.map((submission) => (
+            <div
+              key={submission.id}
+              className="border-border/60 flex flex-col gap-3 rounded-sm border px-3 py-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-foreground text-sm font-semibold">
+                    {submission.fullName}
+                  </p>
+                  <SubmissionStatusBadge
+                    isVerified={submission.isVerified}
+                    isFlagged={submission.isFlagged}
+                  />
+                </div>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  {formatGeoDisplayName(submission.lgaName)} •{" "}
+                  {formatGeoDisplayName(submission.wardName)}
+                </p>
+              </div>
+
+              <div className="text-muted-foreground shrink-0 text-xs font-medium">
+                {timeAgo(submission.createdAt)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </OverviewPanel>
+  );
+}
+
+function ReadyToCollectState({
+  slug,
+  candidateName,
+  party,
+}: {
+  slug: string;
+  candidateName: string;
+  party: string;
+}) {
+  const formUrl =
+    typeof window !== "undefined"
+      ? `${process.env.NEXT_PUBLIC_COLLECT_BASE_URL || window.location.origin}/c/${slug}`
+      : "";
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(formUrl).then(
+      () => toast.success("Form link copied"),
+      () => toast.error("Failed to copy"),
+    );
+  };
+
+  return (
+    <StepCard>
+      <CardSectionHeader
+        title="Ready to Collect"
+        subtitle="Campaign Insights"
+        statusLabel="Awaiting First Submission"
+        icon={<IconSparkles className="size-4.5" />}
+      />
+
+      <div className="space-y-5">
+        <div className="border-border/60 bg-muted/15 flex flex-col items-center justify-center rounded-sm border border-dashed px-6 py-10 text-center">
+          <div className="bg-muted mb-4 flex h-14 w-14 items-center justify-center rounded-full">
+            <IconChartBar className="text-muted-foreground h-7 w-7" />
+          </div>
+          <h2 className="text-foreground text-xl font-semibold tracking-tight">
+            No supporter registrations yet
+          </h2>
+          <p className="text-muted-foreground mx-auto mt-2 max-w-lg text-sm leading-relaxed">
+            The public form is live and this report is ready. Once submissions
+            start coming in, you&apos;ll see momentum, hotspots, field-team
+            performance, and supporter records appear here automatically.
+          </p>
+          <Button
+            size="sm"
+            variant="outline"
+            className="mt-6 h-9 rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            onClick={handleCopy}
+          >
+            <IconCopy className="mr-1.5 h-3.5 w-3.5" />
+            Copy Form Link
+          </Button>
+        </div>
+
+        <ShareInviteCard
+          campaignSlug={slug}
+          candidateName={candidateName}
+          party={party}
+          qrSize={180}
+        />
+      </div>
+    </StepCard>
+  );
+}
+
+export function CampaignInsights({ token }: { token: string }) {
+  const {
+    data: summary,
+    isLoading: loading,
+    error,
+  } = useCampaignReportSummary(token);
+  const {
+    data: recentData,
+    isLoading: recentLoading,
+    error: recentError,
+  } = useCampaignReportSubmissions(token, {
+    page: 1,
+    pageSize: 5,
+  });
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <Skeleton className="h-[220px] rounded-sm" />
+        <div className="border-border/60 bg-muted/30 h-11 w-full rounded-sm border sm:w-md" />
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-28 rounded-sm" />
+          ))}
+        </div>
+        <div className="space-y-6">
+          <Skeleton className="h-[240px] rounded-sm" />
+          <Skeleton className="h-[240px] rounded-sm" />
+        </div>
+        <div className="space-y-6">
+          <Skeleton className="h-[280px] rounded-sm" />
+          <Skeleton className="h-[280px] rounded-sm" />
+        </div>
+        <Skeleton className="h-[260px] rounded-sm" />
+      </div>
+    );
+  }
+
+  if (error || !summary) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <p className="text-muted-foreground text-sm">
+          {error instanceof Error ? error.message : "Unable to load report"}
+        </p>
+      </div>
+    );
+  }
+
+  const isEmpty = summary.stats.total === 0;
+  const verifiedRate = getVerificationRate(
+    summary.stats.total,
+    summary.stats.verified,
+  );
+  const recentWindowCount = getSevenDayCount(summary.stats.daily);
+
+  return (
+    <div className="space-y-8">
+      <InsightsHero
+        campaign={summary.campaign}
+        total={summary.stats.total}
+        health={summary.health}
+        recentWindowCount={recentWindowCount}
+        verifiedRate={verifiedRate}
+      />
+
+      <Tabs defaultValue="overview" className="space-y-5">
+        <TabsList className="bg-muted w-full justify-start overflow-x-auto rounded-sm p-1 [scrollbar-width:none] sm:w-fit [&::-webkit-scrollbar]:hidden">
+          <TabsTrigger
+            className="rounded-sm px-4 font-mono text-[10px] font-bold tracking-widest uppercase"
+            value="overview"
+          >
+            <BarChart3 className="h-4 w-4" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger
+            className="rounded-sm px-4 font-mono text-[10px] font-bold tracking-widest uppercase"
+            value="supporters"
+          >
+            <ClipboardList className="h-4 w-4" />
+            Supporters
+          </TabsTrigger>
+          <TabsTrigger
+            className="rounded-sm px-4 font-mono text-[10px] font-bold tracking-widest uppercase"
+            value="analytics"
+          >
+            <Activity className="h-4 w-4" />
+            Analytics
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          {isEmpty ? (
+            <ReadyToCollectState
+              slug={summary.campaign.slug}
+              candidateName={summary.campaign.candidateName}
+              party={summary.campaign.party}
+            />
+          ) : (
+            <>
+              <StatsGrid
+                total={summary.stats.total}
+                verified={summary.stats.verified}
+                flagged={summary.stats.flagged}
+                enabledLgaCount={summary.campaign.enabledLgaCount}
+              />
+
+              <div className="space-y-6">
+                <NowCard
+                  formStatus={summary.health.formStatus}
+                  lastSubmissionAt={summary.health.lastSubmissionAt}
+                  recentWindowCount={recentWindowCount}
+                  verificationRate={verifiedRate}
+                />
+
+                <HotspotsCard
+                  byLga={summary.stats.byLga}
+                  byWard={summary.stats.byWard}
+                />
+
+                <FieldTeamPerformanceCard health={summary.health} />
+
+                <RecentActivityCard
+                  submissions={recentData?.submissions ?? []}
+                  loading={recentLoading}
+                  error={recentError instanceof Error ? recentError : null}
+                />
+
+                <GeographicSnapshotCard
+                  byLga={summary.stats.byLga}
+                  byWard={summary.stats.byWard}
+                />
+
+                <AudienceSnapshotCard
+                  byRole={summary.stats.byRole}
+                  bySex={summary.stats.bySex}
+                />
+
+                <ShareInviteCard
+                  campaignSlug={summary.campaign.slug}
+                  candidateName={summary.campaign.candidateName}
+                  party={summary.campaign.party}
+                  qrSize={180}
+                />
+              </div>
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="supporters">
+          <InsightsSupporters token={token} />
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-6">
+          {isEmpty ? (
+            <ReadyToCollectState
+              slug={summary.campaign.slug}
+              candidateName={summary.campaign.candidateName}
+              party={summary.campaign.party}
+            />
+          ) : (
+            <>
+              <InsightsMomentum daily={summary.stats.daily} />
+              <InsightsGeography
+                byLga={summary.stats.byLga}
+                byWard={summary.stats.byWard}
+              />
+              <InsightsBreakdown
+                byRole={summary.stats.byRole}
+                bySex={summary.stats.bySex}
+              />
+            </>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useCreateCandidate } from "@/hooks/use-admin";
+import { track } from "@/lib/analytics/client";
 
 import {
   Breadcrumb,
@@ -105,9 +106,19 @@ export function CreateCandidateForm() {
         title: data.title || undefined,
       },
       {
-        onSuccess: (result) => setCredentialsData(result),
-        onError: (error: Error) =>
-          toast.error(error.message || "Failed to create candidate"),
+        onSuccess: (result) => {
+          track("admin_candidate_created", {
+            candidate_id: result.candidate.id,
+            position: data.position,
+          });
+          setCredentialsData(result);
+        },
+        onError: (error: Error) => {
+          track("admin_candidate_creation_failed", {
+            error_category: "request_failed",
+          });
+          toast.error(error.message || "Failed to create candidate");
+        },
       },
     );
   }

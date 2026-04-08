@@ -71,7 +71,9 @@ export async function buildCanvasserLeaderboardExportTable(
     sanitizeSpreadsheetText(summary.canvasserName),
     sanitizeSpreadsheetText(summary.canvasserPhone),
     summary.total,
-    summary.total > 0 ? Math.round((summary.verified / summary.total) * 100) : 0,
+    summary.total > 0
+      ? Math.round((summary.verified / summary.total) * 100)
+      : 0,
     summary.total > 0 ? Math.round((summary.flagged / summary.total) * 100) : 0,
     sanitizeSpreadsheetText(summary.lastActive),
   ]);

@@ -26,6 +26,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { resetAnalyticsIdentity } from "@/lib/analytics/client";
 
 export function AdminNavUser() {
   const { data: session, status } = useSession();
@@ -37,6 +38,7 @@ export function AdminNavUser() {
   }, []);
 
   const handleSignOut = () => {
+    resetAnalyticsIdentity();
     signOut({ callbackUrl: "/" });
   };
 

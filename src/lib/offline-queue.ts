@@ -22,17 +22,20 @@ function openDb(): Promise<IDBDatabase> {
 export interface PendingSubmission {
   id?: number;
   data: Record<string, unknown>;
+  analyticsId?: string;
   createdAt: string;
 }
 
 export async function queueSubmission(
   data: Record<string, unknown>,
+  options?: { analyticsId?: string },
 ): Promise<void> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
     tx.objectStore(STORE_NAME).add({
       data,
+      analyticsId: options?.analyticsId,
       createdAt: new Date().toISOString(),
     });
     tx.oncomplete = () => resolve();
@@ -75,14 +78,16 @@ const PERMANENT_FAILURE_CODES = new Set([400, 403, 404, 409, 410, 422]);
 
 export type SyncResult = {
   synced: number;
-  failed: { id: number; error: string }[];
+  syncedEntries: { id: number; analyticsId?: string }[];
+  failed: { id: number; analyticsId?: string; error: string }[];
 };
 
 /** Flush all pending submissions to the server. Returns synced count and permanent failures. */
 export async function syncPendingSubmissions(): Promise<SyncResult> {
   const pending = await getPendingSubmissions();
   let synced = 0;
-  const failed: { id: number; error: string }[] = [];
+  const syncedEntries: { id: number; analyticsId?: string }[] = [];
+  const failed: { id: number; analyticsId?: string; error: string }[] = [];
 
   for (const entry of pending) {
     try {
@@ -94,13 +99,14 @@ export async function syncPendingSubmissions(): Promise<SyncResult> {
       if (response.ok) {
         await removePendingSubmission(entry.id!);
         synced++;
+        syncedEntries.push({ id: entry.id!, analyticsId: entry.analyticsId });
       } else if (PERMANENT_FAILURE_CODES.has(response.status)) {
         // Permanent failure — remove from queue, report to user
         const body = await response.json().catch(() => ({}));
         const error =
           body.error || `Server rejected submission (${response.status})`;
         await removePendingSubmission(entry.id!);
-        failed.push({ id: entry.id!, error });
+        failed.push({ id: entry.id!, analyticsId: entry.analyticsId, error });
       }
       // 5xx / other transient errors: leave in queue for next sync
     } catch {
@@ -109,5 +115,5 @@ export async function syncPendingSubmissions(): Promise<SyncResult> {
     }
   }
 
-  return { synced, failed };
+  return { synced, syncedEntries, failed };
 }

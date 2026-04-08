@@ -5,7 +5,7 @@
  * The structure follows industry standards and should be reviewed
  * and finalized by legal counsel before production deployment.
  *
- * Last Updated: January 2026
+ * Last Updated: April 2026
  */
 
 // ============================================================================
@@ -17,7 +17,7 @@
  * Date when legal documents were last updated.
  * Update this whenever you modify the legal content.
  */
-export const LEGAL_LAST_UPDATED = new Date("2026-03-17");
+export const LEGAL_LAST_UPDATED = new Date("2026-04-07");
 export function formatLegalDate(date: Date): string {
   return date.toLocaleDateString("en-US", {
     year: "numeric",
@@ -224,7 +224,7 @@ export const cookiePolicySections: LegalSection[] = [
     title: "What Are Cookies?",
     content: [
       "Cookies are small text files stored on your device when you visit a website. They help websites remember your preferences and improve your experience.",
-      "WardWise uses cookies and similar technologies (local storage, session storage) to operate effectively.",
+      "WardWise uses cookies and similar technologies to operate effectively, remember your consent choices, and improve the product experience where permitted.",
     ],
   },
   {
@@ -232,7 +232,8 @@ export const cookiePolicySections: LegalSection[] = [
     title: "Cookies We Use",
     content: [
       "**Essential Cookies:** Required for the Platform to function. These include authentication tokens and session management. You cannot opt out of these.",
-      "**Analytics Cookies:** Help us understand how users interact with the Platform. We use this data to improve our services.",
+      "**Consent Cookies:** We store a first-party cookie to remember whether you accepted or declined optional analytics tracking.",
+      "**Analytics Cookies:** If you accept analytics cookies, we use PostHog to understand aggregate product usage and improve our services.",
       "**Preference Cookies:** Remember your settings, such as theme preference (light/dark mode) and language settings.",
     ],
   },
@@ -242,16 +243,16 @@ export const cookiePolicySections: LegalSection[] = [
     content: [
       "Most browsers allow you to control cookies through their settings. You can block or delete cookies, but this may affect Platform functionality.",
       "Essential cookies cannot be disabled as they are necessary for core Platform features.",
-      "You can manage your cookie preferences through your browser settings or our cookie consent banner.",
+      "You can manage your analytics cookie preference through our cookie settings controls, including the banner, footer links, and in-app navigation. If you clear your cookies, WardWise may ask for your preference again on your next visit.",
     ],
   },
   {
     id: "third-party-cookies",
     title: "Third-Party Cookies",
     content: [
-      "We may use third-party services that set their own cookies, such as analytics providers (e.g., Vercel Analytics).",
-      "These third parties have their own privacy policies governing the use of their cookies.",
-      "We do not control third-party cookies and are not responsible for their practices.",
+      "If you opt in to analytics, WardWise uses PostHog as a third-party analytics provider to help us measure page views and product usage trends.",
+      "These third parties have their own privacy policies governing how they process analytics data.",
+      "We do not use analytics cookies until you provide consent through our banner.",
     ],
   },
 ];

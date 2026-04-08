@@ -94,7 +94,11 @@ export function buildSubmissionWhere(
 
 export async function buildSubmissionsExportTable(
   campaignId: string,
-  options: { filters: SubmissionFilters; redacted?: boolean },
+  options: {
+    filters: SubmissionFilters;
+    redacted?: boolean;
+    excludeAdminNotes?: boolean;
+  },
 ): Promise<ExportTable | null> {
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },
@@ -112,6 +116,8 @@ export async function buildSubmissionsExportTable(
       pollingUnit: { select: { code: true } },
     },
   });
+
+  const includeAdminNotes = !options.excludeAdminNotes;
 
   const headers = [
     "First Name",
@@ -137,7 +143,7 @@ export async function buildSubmissionsExportTable(
     "Canvasser Phone",
     "Verified",
     "Flagged",
-    "Admin Notes",
+    ...(includeAdminNotes ? ["Admin Notes"] : []),
     "Date",
   ];
 
@@ -155,9 +161,15 @@ export async function buildSubmissionsExportTable(
       sanitizeSpreadsheetText(
         redacted ? redactName(name.lastName) : name.lastName,
       ),
-      sanitizeSpreadsheetText(redacted ? redactName(name.fullName) : name.fullName),
-      sanitizeSpreadsheetText(redacted ? redactPhone(submission.phone) : submission.phone),
-      sanitizeSpreadsheetText(redacted ? redactEmail(submission.email) : submission.email),
+      sanitizeSpreadsheetText(
+        redacted ? redactName(name.fullName) : name.fullName,
+      ),
+      sanitizeSpreadsheetText(
+        redacted ? redactPhone(submission.phone) : submission.phone,
+      ),
+      sanitizeSpreadsheetText(
+        redacted ? redactEmail(submission.email) : submission.email,
+      ),
       sanitizeSpreadsheetText(submission.sex),
       submission.age,
       sanitizeSpreadsheetText(submission.occupation),
@@ -193,7 +205,9 @@ export async function buildSubmissionsExportTable(
       ),
       submission.isVerified ? "Yes" : "No",
       submission.isFlagged ? "Yes" : "No",
-      sanitizeSpreadsheetText(submission.adminNotes),
+      ...(includeAdminNotes
+        ? [sanitizeSpreadsheetText(submission.adminNotes)]
+        : []),
       submission.createdAt.toISOString(),
     ];
   });

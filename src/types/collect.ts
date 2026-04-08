@@ -12,6 +12,9 @@ export type Campaign = {
   customQuestion1: string | null;
   customQuestion2: string | null;
   status: string; // "draft" | "active" | "paused" | "closed"
+  clientReportEnabled: boolean;
+  clientReportToken: string | null;
+  clientReportLastViewedAt: string | null;
   currentCandidateBoundaryLgaIds?: number[];
   candidateBoundaryError?: string | null;
   isBoundaryOutOfSync?: boolean;

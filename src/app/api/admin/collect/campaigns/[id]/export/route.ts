@@ -21,13 +21,18 @@ export async function GET(
     if (error) return error;
 
     const { id } = await params;
-    const format = parseExportFormat(request.nextUrl.searchParams.get("format"));
+    const format = parseExportFormat(
+      request.nextUrl.searchParams.get("format"),
+    );
     const redacted = request.nextUrl.searchParams.get("redacted") === "true";
     const filters = parseSubmissionFilters(request.nextUrl.searchParams);
 
     const table = await buildSubmissionsExportTable(id, { filters, redacted });
     if (!table) {
-      return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Campaign not found" },
+        { status: 404 },
+      );
     }
 
     const headers = {

@@ -18,12 +18,17 @@ export async function GET(
     if (error) return error;
 
     const { id } = await params;
-    const format = parseExportFormat(request.nextUrl.searchParams.get("format"));
+    const format = parseExportFormat(
+      request.nextUrl.searchParams.get("format"),
+    );
     const search = request.nextUrl.searchParams.get("search") || undefined;
 
     const table = await buildCanvasserLeaderboardExportTable(id, { search });
     if (!table) {
-      return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Campaign not found" },
+        { status: 404 },
+      );
     }
 
     const headers = {

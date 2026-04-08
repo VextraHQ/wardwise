@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   useCampaignCanvassers,
@@ -49,6 +49,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { addCampaignCanvasserSchema } from "@/lib/schemas/collect-schemas";
 import { adminCollectApi } from "@/lib/api/collect";
+import { track } from "@/lib/analytics/client";
 import type { ExportFormat } from "@/lib/exports/shared";
 import {
   getOrderedExportFormats,
@@ -75,8 +76,6 @@ const exportFormatMeta = {
   ExportFormat,
   { label: string; icon: React.ComponentType<{ className?: string }> }
 >;
-
-// ── Helpers ──
 
 function relativeTime(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -123,8 +122,6 @@ function StatPill({
   );
 }
 
-// ── Main Component ──
-
 export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
   const router = useRouter();
   const { data, isLoading } = useCampaignCanvassers(campaignId);
@@ -147,7 +144,9 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
     description: string;
     onConfirm: () => void;
   } | null>(null);
-  const [preferredFormat, setPreferredFormat] = useState<ExportFormat>("csv");
+  const [preferredFormat, setPreferredFormat] = useState<ExportFormat>(() =>
+    readPreferredExportFormat(),
+  );
 
   const preloaded = data?.preloaded || [];
   const canvassers = useMemo(() => data?.canvassers || [], [data?.canvassers]);
@@ -162,10 +161,6 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
         c.canvasserPhone.toLowerCase().includes(q),
     );
   }, [canvassers, leaderboardSearch]);
-
-  useEffect(() => {
-    setPreferredFormat(readPreferredExportFormat());
-  }, []);
 
   const handleAdd = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -192,6 +187,10 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
       },
       {
         onSuccess: () => {
+          track("admin_canvasser_added", {
+            campaign_id: campaignId,
+            has_zone: Boolean(result.data.zone),
+          });
           toast.success("Canvasser added");
           setName("");
           setPhone("");
@@ -234,7 +233,12 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
       description: `This removes them from the public form dropdown for future registrations. Existing submissions already attributed to this canvasser will remain in reports and leaderboard history.${referralNote}`,
       onConfirm: () => {
         removeMutation.mutate(canvasserId, {
-          onSuccess: () => toast.success(`${canvasserName} removed`),
+          onSuccess: () => {
+            track("admin_canvasser_removed", {
+              campaign_id: campaignId,
+            });
+            toast.success(`${canvasserName} removed`);
+          },
           onError: (e) => toast.error(e.message),
         });
       },

@@ -100,13 +100,15 @@ function parseCSV(text: string): Record<string, string>[] {
   });
 }
 
-function normalizeSheetRows(
-  rows: unknown[][],
-): Record<string, string>[] {
+function normalizeSheetRows(rows: unknown[][]): Record<string, string>[] {
   if (rows.length === 0) return [];
 
   const [headerRow, ...dataRows] = rows;
-  const headers = headerRow.map((value) => String(value ?? "").trim().toLowerCase());
+  const headers = headerRow.map((value) =>
+    String(value ?? "")
+      .trim()
+      .toLowerCase(),
+  );
 
   if (headers.every((header) => !header)) return [];
 
@@ -223,7 +225,9 @@ export function BulkImportDialog({
       const { format, rows: parsed } = await parseSpreadsheetFile(file);
 
       if (parsed.length === 0) {
-        toast.error(`${format === "excel" ? "Excel" : "CSV"} file has no data rows`);
+        toast.error(
+          `${format === "excel" ? "Excel" : "CSV"} file has no data rows`,
+        );
         setState("idle");
         return;
       }
@@ -319,10 +323,14 @@ export function BulkImportDialog({
 
         <div className="-mt-2 space-y-1">
           {IMPORT_NOTES[level] && (
-            <p className="text-muted-foreground text-xs">{IMPORT_NOTES[level]}</p>
+            <p className="text-muted-foreground text-xs">
+              {IMPORT_NOTES[level]}
+            </p>
           )}
           {EXCEL_NOTES[level] && (
-            <p className="text-muted-foreground text-xs">{EXCEL_NOTES[level]}</p>
+            <p className="text-muted-foreground text-xs">
+              {EXCEL_NOTES[level]}
+            </p>
           )}
         </div>
 

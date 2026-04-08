@@ -63,6 +63,10 @@ Optional:
 ```env
 UPSTASH_REDIS_REST_URL=""
 UPSTASH_REDIS_REST_TOKEN=""
+NEXT_PUBLIC_POSTHOG_KEY=""
+# NEXT_PUBLIC_POSTHOG_TOKEN can be used instead if you copied PostHog's docs
+NEXT_PUBLIC_POSTHOG_HOST="https://eu.i.posthog.com"
+NEXT_PUBLIC_ENABLE_ANALYTICS_DEV="false"
 ```
 
 ### 3. Push the database schema
@@ -155,6 +159,7 @@ The `/docs` folder contains product and implementation notes for the app, includ
 
 - Prisma client is generated automatically on install via `postinstall`
 - Upstash Redis is optional; the app falls back gracefully when rate-limit env vars are not set
+- PostHog analytics is optional and only starts after explicit cookie consent
 - This project uses `pnpm` as the package manager
 
 ## Deployment

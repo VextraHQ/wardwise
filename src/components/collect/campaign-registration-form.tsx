@@ -14,6 +14,7 @@ import {
 import { useCollectServiceWorker } from "@/hooks/use-collect-service-worker";
 import { useCollectFormPersistence } from "@/hooks/use-collect-form-persistence";
 import { useOffline } from "@/hooks/use-offline";
+import { createAnalyticsId, track } from "@/lib/analytics/client";
 import { queueSubmission } from "@/lib/offline-queue";
 import {
   submitRegistrationSchema,
@@ -44,6 +45,45 @@ const STEP_TITLES = [
   "Confirmation",
 ];
 
+const STEP_KEYS = [
+  "welcome",
+  "personal_details",
+  "location",
+  "party_information",
+  "role",
+  "canvasser",
+  "confirmation",
+] as const;
+
+function getCollectErrorCategory(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("already registered") ||
+    normalized.includes("duplicate")
+  ) {
+    return "duplicate";
+  }
+
+  if (normalized.includes("validation")) {
+    return "validation";
+  }
+
+  if (normalized.includes("too many requests")) {
+    return "rate_limited";
+  }
+
+  if (
+    normalized.includes("paused") ||
+    normalized.includes("closed") ||
+    normalized.includes("forbidden")
+  ) {
+    return "campaign_unavailable";
+  }
+
+  return "unknown";
+}
+
 // Party info is always shown now (APC/NIN + VIN are required)
 const TOTAL_SCREENS = 7; // 0=splash, 1=personal, 2=location, 3=party, 4=role, 5=canvasser, 6=confirmation
 
@@ -59,6 +99,9 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     prefilledCanvasserName ? true : null,
   );
   const [canvasserStepError, setCanvasserStepError] = useState<string>("");
+  const [syncSource, setSyncSource] = useState<"automatic" | "manual">(
+    "automatic",
+  );
   const [occupationMode, setOccupationMode] = useState<"select" | "custom">(
     "select",
   );
@@ -79,6 +122,28 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   // Surface auto-sync results (from reconnect) as toasts
   useEffect(() => {
     if (!lastSyncResult) return;
+
+    track("collect_sync_completed", {
+      source: syncSource,
+      synced_count: lastSyncResult.synced,
+      failed_count: lastSyncResult.failed.length,
+    });
+
+    for (const entry of lastSyncResult.syncedEntries) {
+      track("collect_submission_succeeded", {
+        analytics_id: entry.analyticsId,
+        submission_source: "offline_queue",
+      });
+    }
+
+    for (const entry of lastSyncResult.failed) {
+      track("collect_submission_failed", {
+        analytics_id: entry.analyticsId,
+        error_category: getCollectErrorCategory(entry.error),
+        submission_source: "offline_queue",
+      });
+    }
+
     if (lastSyncResult.synced > 0) {
       toast.success(`${lastSyncResult.synced} submission(s) synced`);
     }
@@ -88,8 +153,11 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
         duration: 8000,
       });
     }
+    window.setTimeout(() => {
+      setSyncSource("automatic");
+    }, 0);
     clearLastSyncResult();
-  }, [lastSyncResult, clearLastSyncResult]);
+  }, [clearLastSyncResult, lastSyncResult, syncSource]);
 
   const form = useForm<RegistrationFormData>({
     resolver: zodResolver(submitRegistrationSchema),
@@ -123,6 +191,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   const lgaId = useWatch({ control: form.control, name: "lgaId" });
   const wardId = useWatch({ control: form.control, name: "wardId" });
   const skipLocationResetRef = useRef(false);
+  const lastTrackedStepRef = useRef<string | null>(null);
 
   // Holds pending location values that need to be re-applied once query data loads
   const pendingRestoreRef = useRef<{
@@ -260,17 +329,41 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   const role = useWatch({ control: form.control, name: "role" });
   const skipCanvasserStep = role === "canvasser";
 
+  useEffect(() => {
+    if (screen <= 0 || screen >= TOTAL_SCREENS - 1) return;
+
+    const stepViewKey = `${screen}:${skipCanvasserStep ? "skip" : "full"}`;
+    if (lastTrackedStepRef.current === stepViewKey) return;
+
+    track("collect_step_viewed", {
+      step_index: screen,
+      step_key: STEP_KEYS[screen],
+      skips_canvasser_step: skipCanvasserStep,
+    });
+    lastTrackedStepRef.current = stepViewKey;
+  }, [screen, skipCanvasserStep]);
+
   const doSubmit = async () => {
     const values = form.getValues();
+    const analyticsId = createAnalyticsId();
     saveProgress(values);
     const payload = { ...values, campaignSlug: campaign.slug };
+    const submissionProperties = {
+      analytics_id: analyticsId,
+      has_canvasser: Boolean(values.canvasserName || values.canvasserPhone),
+      has_custom_questions: Boolean(
+        campaign.customQuestion1 || campaign.customQuestion2,
+      ),
+      role: values.role,
+    };
 
     // Offline: queue in IndexedDB
     if (isOffline) {
       try {
-        await queueSubmission(payload);
+        await queueSubmission(payload, { analyticsId });
         await refreshPendingCount();
         clearProgress();
+        track("collect_submission_queued_offline", submissionProperties);
         toast.success("Saved offline", {
           description:
             "Your registration will be submitted automatically when you reconnect.",
@@ -287,6 +380,10 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
         setSubmittedCount(result.count);
         setSubmissionId(result.submission.id);
         clearProgress();
+        track("collect_submission_succeeded", {
+          ...submissionProperties,
+          submission_source: "online",
+        });
 
         // Persist submission for returning visitor recognition
         const refCode = generateRefCode(result.submission.id);
@@ -304,6 +401,11 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       },
       onError: (error) => {
         const msg = error.message || "";
+        track("collect_submission_failed", {
+          analytics_id: analyticsId,
+          error_category: getCollectErrorCategory(msg),
+          submission_source: "online",
+        });
         if (msg.includes("already registered")) {
           toast.error("Duplicate Registration", {
             description:
@@ -354,6 +456,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     setHasCanvasser(prefilledCanvasserName ? true : null);
     setCanvasserStepError("");
     setOccupationMode("select");
+    lastTrackedStepRef.current = null;
     clearProgress();
   };
 
@@ -481,6 +584,33 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     resetToFreshRegistration(1);
   };
 
+  const handleStart = () => {
+    track("collect_started", {
+      source: "new",
+      has_saved_progress: hasSavedProgress,
+      has_prefilled_canvasser: Boolean(prefilledCanvasserName),
+    });
+    lastTrackedStepRef.current = null;
+    setScreen(1);
+  };
+
+  const handleStartFresh = () => {
+    track("collect_started", {
+      source: "fresh",
+      has_saved_progress: hasSavedProgress,
+      has_prefilled_canvasser: Boolean(prefilledCanvasserName),
+    });
+    resetToFreshRegistration(1);
+  };
+
+  const handleRestoreProgress = () => {
+    track("collect_progress_restored", {
+      has_saved_progress: hasSavedProgress,
+    });
+    lastTrackedStepRef.current = null;
+    restoreProgress();
+  };
+
   // Paused/Closed states
   if (campaign.status === "paused") {
     return (
@@ -575,6 +705,11 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
           <button
             type="button"
             onClick={async () => {
+              track("collect_sync_requested", {
+                pending_count: pendingCount,
+                source: "manual",
+              });
+              setSyncSource("manual");
               const result = await trySync();
               if (result) {
                 if (result.synced > 0) {
@@ -611,9 +746,9 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
           campaign={campaign}
           hasSavedProgress={hasSavedProgress}
           deviceSubmission={deviceSubmission}
-          onStart={() => setScreen(1)}
-          onStartFresh={() => resetToFreshRegistration(1)}
-          onRestore={restoreProgress}
+          onStart={handleStart}
+          onStartFresh={handleStartFresh}
+          onRestore={handleRestoreProgress}
           onCopyReference={handleCopyLastReference}
         />
       )}
