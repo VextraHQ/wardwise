@@ -5,6 +5,7 @@ import {
   buildSubmissionWhere,
   parseSubmissionFilters,
 } from "@/lib/exports/submissions";
+import { generateRefCode } from "@/lib/utils";
 
 export async function GET(
   request: NextRequest,
@@ -40,6 +41,7 @@ export async function GET(
 
     const serialized = submissions.map((s) => ({
       ...s,
+      refCode: generateRefCode(s.id),
       createdAt: s.createdAt.toISOString(),
     }));
 

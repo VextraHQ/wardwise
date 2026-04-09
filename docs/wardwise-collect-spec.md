@@ -75,6 +75,13 @@
 - **Service worker scope is now constrained to Collect**: the offline worker is registered for `/c/` only, and development sessions clean up old Collect workers/caches so stale JS/CSS does not leak into admin or local UI work.
 - **Name capture is now split in the public form**: the personal details step uses `First Name`, `Middle Name` (optional), and `Last Name`. The backend stores both the split fields and the composed `fullName`, so admin views, search, and CSV exports can support either format.
 
+### What Changed (Batch 6 — Registration References + Admin Lookup)
+
+- **Confirmation screen shifted to receipt UX**: public confirmation now emphasizes successful receipt and verification review, not ordinal supporter counts.
+- **Registration reference is now first-class**: completed submissions show a copyable `Registration Reference` (`WW-XXXXXXXX`) on the confirmation screen.
+- **Admin/support can use the same reference**: the admin submissions search now accepts registration references in addition to name, phone, and email.
+- **Reference surfaced in admin submissions UI**: each row shows a compact reference under the supporter name, and the detail sheet includes a copyable `Registration Reference` block for support workflows.
+
 ### What Changed (Batch 2)
 
 - **LGA dropdown**: Shows only the campaign's `enabledLgaIds` (inherited from candidate's constituency boundary, or restricted subset).
@@ -156,15 +163,15 @@
 
 ### Screen Flow
 
-| Screen | Content                                                                                                                        |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| 0      | Campaign splash → Begin Registration                                                                                           |
-| 1      | Personal details: first name, middle name?, last name, phone, email?, sex, age, occupation, marital status, custom questions   |
-| 2      | Location: cascading LGA → Ward → Polling Unit (with INEC codes)                                                                |
-| 3      | Party info: APC/NIN (required) + VIN (required)                                                                                |
-| 4      | Role: Volunteer / Member / Canvasser (3 cards)                                                                                 |
-| 5      | Canvasser: Yes/No toggle → name + phone if Yes (required when Yes)                                                             |
-| 6      | Confirmation: animated checkmark, confetti, supporter count, New Registration button, share (WhatsApp/SMS/Email/Copy), QR code |
+| Screen | Content                                                                                                                                   |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| 0      | Campaign splash → Begin Registration                                                                                                      |
+| 1      | Personal details: first name, middle name?, last name, phone, email?, sex, age, occupation, marital status, custom questions              |
+| 2      | Location: cascading LGA → Ward → Polling Unit (with INEC codes)                                                                           |
+| 3      | Party info: APC/NIN (required) + VIN (required)                                                                                           |
+| 4      | Role: Volunteer / Member / Canvasser (3 cards)                                                                                            |
+| 5      | Canvasser: Yes/No toggle → name + phone if Yes (required when Yes)                                                                        |
+| 6      | Confirmation: animated checkmark, receipt copy, registration reference, New Registration button, share (WhatsApp/SMS/Email/Copy), QR code |
 
 ### Persistence
 
@@ -173,6 +180,7 @@
 - Completed submissions are still stored in the database, but splash no longer auto-personalizes the experience as a returning-user takeover.
 - Instead, same-device completion metadata is stored under `collect-submitted-${slug}` and used only for a subtle `Last registration on this device` utility card with the reference code.
 - Saved progress includes lightweight UI state needed to restore the flow accurately (for example canvasser yes/no choice and occupation input mode).
+- The confirmation screen now also shows a copyable `Registration Reference` and explains that the campaign team will review and verify the registration.
 
 ### Validation
 
@@ -257,7 +265,7 @@ model PollingUnit {
 | ----------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------- |
 | `/api/admin/collect/campaigns`                  | GET + POST           | List with `_count`; GET accepts `?candidateId=` filter; create with slug uniqueness |
 | `/api/admin/collect/campaigns/[id]`             | GET + PATCH + DELETE |                                                                                     |
-| `/api/admin/collect/campaigns/[id]/submissions` | GET                  | Paginated, filterable; includes PU code                                             |
+| `/api/admin/collect/campaigns/[id]/submissions` | GET                  | Paginated, filterable; includes PU code and derived registration reference support  |
 | `/api/admin/collect/campaigns/[id]/export`      | GET                  | CSV with PU code column; sanitizes `=+-@`                                           |
 | `/api/admin/collect/campaigns/[id]/canvassers`  | GET                  | Aggregation                                                                         |
 | `/api/admin/collect/lgas`                       | GET                  | All LGAs for campaign wizard                                                        |
@@ -295,6 +303,13 @@ src/components/admin/collect/
   campaign-settings.tsx
   campaign-wizard.tsx
 ```
+
+### Admin Support Workflow
+
+- Supporters can share their `Registration Reference` from the public confirmation screen.
+- Admins can paste that reference into the existing submissions search field.
+- The submissions list derives the same `WW-XXXXXXXX` code from the submission UUID, so support can quickly locate the exact record without a new support dashboard.
+- The submission detail sheet repeats the reference and makes it copyable for follow-up.
 
 ## Validation Checklist
 

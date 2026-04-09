@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, type ReactNode } from "react";
+import { useMemo } from "react";
 import { useAdminCandidates } from "@/hooks/use-admin";
 import { useCampaigns } from "@/hooks/use-collect";
 import Link from "next/link";
@@ -27,55 +27,6 @@ import {
   CandidateCardSkeleton,
   StatCardSkeleton,
 } from "@/components/admin/admin-skeletons";
-import { cn } from "@/lib/utils";
-
-function pluralize(value: number, singular: string, plural = `${singular}s`) {
-  return value === 1 ? singular : plural;
-}
-
-interface AdminMetricCardProps {
-  title: string;
-  icon: ReactNode;
-  children: ReactNode;
-  interactive?: boolean;
-}
-
-function AdminMetricCard({
-  title,
-  icon,
-  children,
-  interactive = false,
-}: AdminMetricCardProps) {
-  return (
-    <Card
-      className={cn(
-        "border-border/60 gap-0 rounded-sm py-5 shadow-none",
-        interactive &&
-          "hover:border-border group relative overflow-hidden transition-colors",
-      )}
-    >
-      {interactive ? (
-        <div className="bg-primary/20 absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
-      ) : null}
-
-      <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 px-5 pb-4">
-        <CardTitle className="text-muted-foreground min-w-0 flex-1 font-mono text-[10px] leading-[1.45] font-bold tracking-widest uppercase">
-          {title}
-        </CardTitle>
-        <div
-          className={cn(
-            "bg-primary/10 border-primary/20 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border",
-            interactive && "group-hover:bg-primary/20 transition-colors",
-          )}
-        >
-          {icon}
-        </div>
-      </CardHeader>
-
-      <CardContent className="px-5 pt-0">{children}</CardContent>
-    </Card>
-  );
-}
 
 export function AdminDashboard() {
   const { data: candidates = [], isLoading, error } = useAdminCandidates();
@@ -104,8 +55,6 @@ export function AdminDashboard() {
     () => candidates.filter((candidate) => candidate.isNational).length,
     [candidates],
   );
-
-  const constituencyCandidates = candidates.length - nationalCandidates;
 
   const totalCollectSubmissions = useMemo(
     () => campaigns.reduce((sum, c) => sum + (c._count?.submissions ?? 0), 0),
@@ -185,7 +134,7 @@ export function AdminDashboard() {
         </Alert>
       )}
 
-      <div className="grid [grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))] gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
         {isLoading ? (
           <>
             <StatCardSkeleton />
@@ -196,84 +145,108 @@ export function AdminDashboard() {
           </>
         ) : (
           <>
-            <AdminMetricCard
-              title="Total Candidates"
-              icon={<HiOutlineUserGroup className="text-primary h-5 w-5" />}
-            >
-              <div className="font-mono text-[2.75rem] leading-none font-semibold tracking-tight tabular-nums">
-                {candidates.length}
-              </div>
-              <p className="text-muted-foreground mt-3 text-sm">
-                Candidate accounts
-              </p>
-            </AdminMetricCard>
+            <Card className="border-border/60 rounded-sm shadow-none">
+              <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-3">
+                <CardTitle className="text-muted-foreground min-w-0 pr-2 font-mono text-[10px] leading-relaxed font-bold tracking-widest uppercase">
+                  Total Candidates
+                </CardTitle>
+                <div className="bg-primary/10 border-primary/20 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border">
+                  <HiOutlineUserGroup className="text-primary h-5 w-5" />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="font-mono text-[2rem] leading-none font-semibold tracking-tight tabular-nums">
+                  {candidates.length}
+                </div>
+                <p className="text-muted-foreground mt-2 text-sm">
+                  Candidate accounts
+                </p>
+              </CardContent>
+            </Card>
 
-            <AdminMetricCard
-              title="Total Supporters"
-              icon={<HiOutlineUsers className="text-primary h-5 w-5" />}
-            >
-              <div className="font-mono text-[2.75rem] leading-none font-semibold tracking-tight tabular-nums">
-                {totalSupporters.toLocaleString()}
-              </div>
-              <p className="text-muted-foreground mt-3 text-sm">
-                Across all candidates
-              </p>
-            </AdminMetricCard>
+            <Card className="border-border/60 rounded-sm shadow-none">
+              <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-3">
+                <CardTitle className="text-muted-foreground min-w-0 pr-2 font-mono text-[10px] leading-relaxed font-bold tracking-widest uppercase">
+                  Total Supporters
+                </CardTitle>
+                <div className="bg-primary/10 border-primary/20 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border">
+                  <HiOutlineUsers className="text-primary h-5 w-5" />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="font-mono text-[2rem] leading-none font-semibold tracking-tight tabular-nums">
+                  {totalSupporters.toLocaleString()}
+                </div>
+                <p className="text-muted-foreground mt-2 text-sm">
+                  Across all candidates
+                </p>
+              </CardContent>
+            </Card>
 
-            <AdminMetricCard
-              title="Coverage"
-              icon={<HiOutlineBriefcase className="text-primary h-5 w-5" />}
-            >
-              <div className="font-mono text-[2.75rem] leading-none font-semibold tracking-tight tabular-nums">
-                {uniqueParties.length}
-              </div>
-              <p className="mt-3 text-sm font-medium">
-                {pluralize(uniqueParties.length, "Party", "Parties")}{" "}
-                represented
-              </p>
-              <p className="text-muted-foreground mt-1 text-xs">
-                {nationalCandidates} national, {constituencyCandidates}{" "}
-                constituency
-              </p>
-            </AdminMetricCard>
+            <Card className="border-border/60 rounded-sm shadow-none">
+              <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-3">
+                <CardTitle className="text-muted-foreground min-w-0 pr-2 font-mono text-[10px] leading-relaxed font-bold tracking-widest uppercase">
+                  Coverage
+                </CardTitle>
+                <div className="bg-primary/10 border-primary/20 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border">
+                  <HiOutlineBriefcase className="text-primary h-5 w-5" />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="font-mono text-[2rem] leading-none font-semibold tracking-tight tabular-nums">
+                  {uniqueParties.length} parties
+                </div>
+                <p className="text-muted-foreground mt-2 text-sm">
+                  {nationalCandidates} national,{" "}
+                  {candidates.length - nationalCandidates} constituency
+                </p>
+              </CardContent>
+            </Card>
 
-            <AdminMetricCard
-              title="Collect Campaigns"
-              icon={<HiOutlineClipboardList className="text-primary h-5 w-5" />}
-              interactive
-            >
-              <div className="font-mono text-[2.75rem] leading-none font-semibold tracking-tight tabular-nums">
-                {campaigns.length}
-              </div>
-              <div className="text-muted-foreground mt-3 flex items-start gap-2 text-sm">
-                {activeCampaigns > 0 ? (
-                  <span className="relative mt-1 flex h-1.5 w-1.5 shrink-0">
-                    <span className="bg-victory absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"></span>
-                    <span className="bg-victory relative inline-flex h-1.5 w-1.5 rounded-full"></span>
-                  </span>
-                ) : null}
-                <span>
-                  {activeCampaigns}{" "}
-                  {pluralize(
-                    activeCampaigns,
-                    "live campaign",
-                    "live campaigns",
+            <Card className="border-border/60 hover:border-border group relative overflow-hidden rounded-sm shadow-none transition-colors">
+              <div className="bg-primary/20 absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
+              <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-3">
+                <CardTitle className="text-muted-foreground min-w-0 pr-2 font-mono text-[10px] leading-relaxed font-bold tracking-widest uppercase">
+                  Collect Campaigns
+                </CardTitle>
+                <div className="bg-primary/10 border-primary/20 group-hover:bg-primary/20 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border transition-colors">
+                  <HiOutlineClipboardList className="text-primary h-5 w-5" />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="font-mono text-[2rem] leading-none font-semibold tracking-tight tabular-nums">
+                  {campaigns.length}
+                </div>
+                <div className="text-muted-foreground mt-2 flex items-start gap-2 text-sm">
+                  {activeCampaigns > 0 && (
+                    <span className="relative mt-1 flex h-1.5 w-1.5 shrink-0">
+                      <span className="bg-victory absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"></span>
+                      <span className="bg-victory relative inline-flex h-1.5 w-1.5 rounded-full"></span>
+                    </span>
                   )}
-                </span>
-              </div>
-            </AdminMetricCard>
+                  <span>{activeCampaigns} live campaigns</span>
+                </div>
+              </CardContent>
+            </Card>
 
-            <AdminMetricCard
-              title="Collect Registrations"
-              icon={<HiOutlineUsers className="text-primary h-5 w-5" />}
-            >
-              <div className="font-mono text-[2.75rem] leading-none font-semibold tracking-tight tabular-nums">
-                {totalCollectSubmissions.toLocaleString()}
-              </div>
-              <p className="text-muted-foreground mt-3 text-sm">
-                Supporter registrations
-              </p>
-            </AdminMetricCard>
+            <Card className="border-border/60 rounded-sm shadow-none">
+              <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-3">
+                <CardTitle className="text-muted-foreground min-w-0 pr-2 font-mono text-[10px] leading-relaxed font-bold tracking-widest uppercase">
+                  Collect Registrations
+                </CardTitle>
+                <div className="bg-primary/10 border-primary/20 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border">
+                  <HiOutlineUsers className="text-primary h-5 w-5" />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="font-mono text-[2rem] leading-none font-semibold tracking-tight tabular-nums">
+                  {totalCollectSubmissions.toLocaleString()}
+                </div>
+                <p className="text-muted-foreground mt-2 text-sm">
+                  Total supporter registrations
+                </p>
+              </CardContent>
+            </Card>
           </>
         )}
       </div>

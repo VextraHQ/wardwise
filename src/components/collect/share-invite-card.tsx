@@ -26,6 +26,8 @@ interface ShareInviteCardProps {
   campaignSlug: string;
   /** Candidate name for share text */
   candidateName: string;
+  /** Optional candidate title for share text */
+  candidateTitle?: string | null;
   /** Party name for share text */
   party: string;
   /** Wrap in motion.div with fade-in animation? */
@@ -39,13 +41,25 @@ interface ShareInviteCardProps {
 export function ShareInviteCard({
   campaignSlug,
   candidateName,
+  candidateTitle,
   party,
   animated = false,
   animationDelay = 0,
   qrSize = 120,
 }: ShareInviteCardProps) {
   const shareUrl = useShareUrl(campaignSlug);
-  const shareText = `I just registered as a supporter for ${candidateName} (${party}) on WardWise! Join here: ${shareUrl}`;
+  const displayName = candidateTitle
+    ? `${candidateTitle} ${candidateName}`
+    : candidateName;
+  const campaignLabel = `${displayName} (${party})`;
+  const shareText = `Support ${campaignLabel}. Complete your registration on WardWise here: ${shareUrl}`;
+  const emailSubject = `${displayName} Campaign Registration via WardWise`;
+  const emailBody = `Hello,
+
+You can register your support for ${campaignLabel} on WardWise here:
+${shareUrl}
+
+Thank you.`;
   const qrUrl = shareUrl
     ? `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(shareUrl)}&size=${qrSize}x${qrSize}`
     : "";
@@ -68,10 +82,10 @@ export function ShareInviteCard({
         </div>
         <div>
           <h3 className="text-foreground text-xs font-bold tracking-widest uppercase">
-            Share & Invite Others
+            Share Registration Link
           </h3>
           <p className="text-muted-foreground text-[10px] font-medium">
-            Spread the word with your network
+            Send the campaign form to supporters and volunteers
           </p>
         </div>
       </div>
@@ -111,7 +125,7 @@ export function ShareInviteCard({
           aria-label="Share via Email"
           className="border-primary/30 text-primary hover:bg-primary/10 h-9 gap-1.5 rounded-sm px-3 text-[10px] font-bold tracking-widest uppercase"
           onClick={() => {
-            window.location.href = `mailto:?subject=${encodeURIComponent(`Support ${candidateName}`)}&body=${encodeURIComponent(shareText)}`;
+            window.location.href = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
           }}
         >
           <HiMail className="h-3.5 w-3.5" />

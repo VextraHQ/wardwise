@@ -32,6 +32,7 @@ export type CampaignSummary = Campaign & {
 // Collect submission type
 export type CollectSubmission = {
   id: string;
+  refCode?: string;
   campaignId: string;
   firstName: string | null;
   middleName: string | null;

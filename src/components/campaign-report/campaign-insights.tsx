@@ -42,16 +42,19 @@ import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
 import { ShareInviteCard } from "@/components/collect/share-invite-card";
 import type { CampaignReportSubmission } from "@/types/campaign-report";
 import {
+  IconArrowsExchange,
   IconCalendar,
   IconChartBar,
   IconClipboardList,
   IconCopy,
+  IconFilter,
   IconFlag,
   IconMapPin,
   IconRefresh,
   IconShieldCheck,
   IconSparkles,
   IconUsersGroup,
+  IconX,
 } from "@tabler/icons-react";
 import { SubmissionStatusBadge } from "./insights-helpers";
 
@@ -75,6 +78,7 @@ const STATUS_BADGE: Record<string, { label: string; style: string }> = {
 };
 
 const DATE_PRESETS = [
+  { label: "Today", value: "today" },
   { label: "7d", value: "7d" },
   { label: "30d", value: "30d" },
   { label: "All time", value: "all" },
@@ -200,12 +204,14 @@ function StatsGrid({
 function NowCard({
   formStatus,
   lastSubmissionAt,
-  recentWindowCount,
+  periodCount,
+  periodLabel,
   verificationRate,
 }: {
   formStatus: string;
   lastSubmissionAt: string | null;
-  recentWindowCount: number;
+  periodCount: number;
+  periodLabel: string;
   verificationRate: number;
 }) {
   const badge = STATUS_BADGE[formStatus] ?? STATUS_BADGE.draft;
@@ -217,8 +223,8 @@ function NowCard({
       value: lastSubmissionAt ? timeAgo(lastSubmissionAt) : "No activity yet",
     },
     {
-      label: "Last 7 days",
-      value: `${recentWindowCount.toLocaleString()} captured`,
+      label: periodLabel,
+      value: `${periodCount.toLocaleString()} captured`,
     },
     {
       label: "Verification",
@@ -460,10 +466,12 @@ function RecentActivityCard({
 function ReadyToCollectState({
   slug,
   candidateName,
+  candidateTitle,
   party,
 }: {
   slug: string;
   candidateName: string;
+  candidateTitle: string | null;
   party: string;
 }) {
   const formUrl =
@@ -514,6 +522,7 @@ function ReadyToCollectState({
         <ShareInviteCard
           campaignSlug={slug}
           candidateName={candidateName}
+          candidateTitle={candidateTitle}
           party={party}
           qrSize={180}
         />
@@ -527,6 +536,12 @@ export function CampaignInsights({ token }: { token: string }) {
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [fromOpen, setFromOpen] = useState(false);
   const [toOpen, setToOpen] = useState(false);
+  const [compareOn, setCompareOn] = useState(false);
+  const [filterLga, setFilterLga] = useState<string | null>(null);
+  const [filterRole, setFilterRole] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const hasFilters = !!filterLga || !!filterRole;
 
   const range = {
     ...(dateFrom && { from: formatQueryDate(dateFrom) }),
@@ -541,19 +556,16 @@ export function CampaignInsights({ token }: { token: string }) {
     dataUpdatedAt,
     refetch,
     isFetching,
-  } = useCampaignReportSummary(
-    token,
-    hasRange ? range : undefined,
-  );
+  } = useCampaignReportSummary(token, hasRange ? range : undefined);
 
-  const priorRange = getPriorRange(dateFrom, dateTo);
+  const priorRange = compareOn ? getPriorRange(dateFrom, dateTo) : null;
   const { data: priorSummary } = useCampaignReportSummary(
     priorRange ? token : "",
     priorRange ?? undefined,
   );
 
   const deltas =
-    priorSummary && summary && dateFrom
+    compareOn && priorSummary && summary && dateFrom
       ? {
           total: computeDelta(summary.stats.total, priorSummary.stats.total),
           verified: computeDelta(
@@ -609,9 +621,30 @@ export function CampaignInsights({ token }: { token: string }) {
   if (error || !summary) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <p className="text-muted-foreground text-sm">
-          {error instanceof Error ? error.message : "Unable to load report"}
-        </p>
+        <Card className="border-border/60 w-full max-w-md rounded-sm shadow-none">
+          <CardContent className="flex flex-col items-center text-center">
+            <div className="bg-destructive/10 mb-4 flex h-12 w-12 items-center justify-center rounded-full">
+              <IconFlag className="text-destructive h-6 w-6" />
+            </div>
+            <h2 className="text-foreground text-lg font-semibold">
+              Unable to load report
+            </h2>
+            <p className="text-muted-foreground mt-2 max-w-xs text-sm leading-relaxed">
+              {error instanceof Error
+                ? error.message
+                : "Something went wrong while loading this report. Please try again."}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-5 h-9 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
+              onClick={() => window.location.reload()}
+            >
+              <IconRefresh className="mr-1.5 h-3.5 w-3.5" />
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -625,92 +658,224 @@ export function CampaignInsights({ token }: { token: string }) {
 
   return (
     <div className="space-y-8">
-      <InsightsHero
-        campaign={summary.campaign}
-        total={summary.stats.total}
-      />
+      <InsightsHero campaign={summary.campaign} total={summary.stats.total} />
 
-      <div className="flex flex-wrap items-center gap-2">
-        <IconCalendar className="text-muted-foreground hidden h-4 w-4 shrink-0 sm:block" />
-        <Popover open={fromOpen} onOpenChange={setFromOpen}>
-          <PopoverTrigger asChild>
+      <div className="space-y-2">
+        {/* Row 1: date presets */}
+        <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {DATE_PRESETS.map((p) => (
             <Button
-              variant="outline"
+              key={p.value}
+              variant="ghost"
               size="sm"
-              className="h-7 rounded-sm px-3 text-xs font-medium"
-            >
-              {dateFrom ? format(dateFrom, "dd MMM yyyy") : "From"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={dateFrom}
-              onSelect={(d) => {
-                setDateFrom(d);
-                setFromOpen(false);
+              className="h-7 shrink-0 rounded-sm px-2.5 text-[10px] font-medium tracking-wide uppercase"
+              onClick={() => {
+                const r = getPresetRange(p.value);
+                setDateFrom(r.from);
+                setDateTo(r.to);
               }}
-              disabled={(date) => (dateTo ? date > dateTo : false)}
-            />
-          </PopoverContent>
-        </Popover>
-        <span className="text-muted-foreground text-xs">to</span>
-        <Popover open={toOpen} onOpenChange={setToOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 rounded-sm px-3 text-xs font-medium"
             >
-              {dateTo ? format(dateTo, "dd MMM yyyy") : "To"}
+              {p.label}
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={dateTo}
-              onSelect={(d) => {
-                setDateTo(d);
-                setToOpen(false);
-              }}
-              disabled={(date) => (dateFrom ? date < dateFrom : false)}
-            />
-          </PopoverContent>
-        </Popover>
+          ))}
 
-        <div className="bg-border hidden h-4 w-px sm:block" />
+          <div className="bg-border mx-0.5 hidden h-4 w-px shrink-0 sm:block" />
 
-        {DATE_PRESETS.map((p) => (
+          <Popover open={fromOpen} onOpenChange={setFromOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 shrink-0 rounded-sm px-2.5 text-xs font-medium"
+              >
+                <IconCalendar className="mr-1 h-3.5 w-3.5 sm:mr-1.5" />
+                {dateFrom ? format(dateFrom, "dd MMM") : "From"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateFrom}
+                onSelect={(d) => {
+                  setDateFrom(d);
+                  setFromOpen(false);
+                }}
+                disabled={(date) => (dateTo ? date > dateTo : false)}
+              />
+            </PopoverContent>
+          </Popover>
+          <Popover open={toOpen} onOpenChange={setToOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 shrink-0 rounded-sm px-2.5 text-xs font-medium"
+              >
+                {dateTo ? format(dateTo, "dd MMM") : "To"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateTo}
+                onSelect={(d) => {
+                  setDateTo(d);
+                  setToOpen(false);
+                }}
+                disabled={(date) => (dateFrom ? date < dateFrom : false)}
+              />
+            </PopoverContent>
+          </Popover>
+
+          <div className="bg-border mx-0.5 hidden h-4 w-px shrink-0 sm:block" />
+
           <Button
-            key={p.value}
-            variant="ghost"
+            variant={compareOn ? "default" : "ghost"}
             size="sm"
-            className="h-7 rounded-sm px-2.5 text-[10px] font-medium tracking-wide uppercase"
-            onClick={() => {
-              const r = getPresetRange(p.value);
-              setDateFrom(r.from);
-              setDateTo(r.to);
-            }}
+            className="h-7 shrink-0 rounded-sm px-2.5 text-[10px] font-medium tracking-wide uppercase"
+            onClick={() => setCompareOn((prev) => !prev)}
+            disabled={!hasRange}
           >
-            {p.label}
+            <IconArrowsExchange className="mr-1 h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Compare</span>
           </Button>
-        ))}
 
-        {dataUpdatedAt > 0 && (
-          <div className="text-muted-foreground ml-auto flex items-center gap-1.5 text-xs">
-            <span className="hidden sm:inline">
-              Refreshed {formatUpdatedAgo(dataUpdatedAt)}
-            </span>
+          <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant={hasFilters ? "default" : "ghost"}
+                size="sm"
+                className="h-7 shrink-0 rounded-sm px-2.5 text-[10px] font-medium tracking-wide uppercase"
+              >
+                <IconFilter className="mr-1 h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Filters</span>
+                {hasFilters && (
+                  <span className="bg-background text-foreground ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold">
+                    {(filterLga ? 1 : 0) + (filterRole ? 1 : 0)}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 space-y-3 p-3" align="start">
+              <p className="font-mono text-[10px] font-bold tracking-widest uppercase">
+                Filter by
+              </p>
+              {summary && (
+                <>
+                  <div className="space-y-1.5">
+                    <p className="text-muted-foreground text-xs font-medium">
+                      LGA
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {summary.stats.byLga.slice(0, 8).map((item) => (
+                        <Button
+                          key={item.lga}
+                          variant={
+                            filterLga === item.lga ? "default" : "outline"
+                          }
+                          size="sm"
+                          className="h-6 rounded-sm px-2 text-[10px]"
+                          onClick={() =>
+                            setFilterLga(
+                              filterLga === item.lga ? null : item.lga,
+                            )
+                          }
+                        >
+                          {formatGeoDisplayName(item.lga)}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="text-muted-foreground text-xs font-medium">
+                      Role
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {summary.stats.byRole.slice(0, 6).map((item) => (
+                        <Button
+                          key={item.role}
+                          variant={
+                            filterRole === item.role ? "default" : "outline"
+                          }
+                          size="sm"
+                          className="h-6 rounded-sm px-2 text-[10px] capitalize"
+                          onClick={() =>
+                            setFilterRole(
+                              filterRole === item.role ? null : item.role,
+                            )
+                          }
+                        >
+                          {item.role}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </PopoverContent>
+          </Popover>
+
+          {dataUpdatedAt > 0 && (
+            <div className="text-muted-foreground ml-auto flex items-center gap-1.5 text-xs">
+              <span className="hidden sm:inline">
+                Refreshed {formatUpdatedAgo(dataUpdatedAt)}
+              </span>
+              <button
+                type="button"
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors disabled:opacity-50"
+              >
+                <IconRefresh
+                  className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`}
+                />
+                <span className="hidden sm:inline">Refresh</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {hasFilters && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {filterLga && (
+              <Badge
+                variant="secondary"
+                className="h-6 gap-1 rounded-sm pr-1 text-xs font-medium"
+              >
+                {formatGeoDisplayName(filterLga)}
+                <button
+                  type="button"
+                  onClick={() => setFilterLga(null)}
+                  className="hover:text-foreground rounded-sm p-0.5"
+                >
+                  <IconX className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+            {filterRole && (
+              <Badge
+                variant="secondary"
+                className="h-6 gap-1 rounded-sm pr-1 text-xs font-medium capitalize"
+              >
+                {filterRole}
+                <button
+                  type="button"
+                  onClick={() => setFilterRole(null)}
+                  className="hover:text-foreground rounded-sm p-0.5"
+                >
+                  <IconX className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
             <button
               type="button"
-              onClick={() => refetch()}
-              disabled={isFetching}
-              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors disabled:opacity-50"
+              onClick={() => {
+                setFilterLga(null);
+                setFilterRole(null);
+              }}
+              className="text-muted-foreground hover:text-foreground text-xs underline"
             >
-              <IconRefresh
-                className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`}
-              />
-              <span className="hidden sm:inline">Refresh</span>
+              Clear all
             </button>
           </div>
         )}
@@ -746,6 +911,7 @@ export function CampaignInsights({ token }: { token: string }) {
             <ReadyToCollectState
               slug={summary.campaign.slug}
               candidateName={summary.campaign.candidateName}
+              candidateTitle={summary.campaign.candidateTitle}
               party={summary.campaign.party}
             />
           ) : (
@@ -762,7 +928,10 @@ export function CampaignInsights({ token }: { token: string }) {
                 <NowCard
                   formStatus={summary.health.formStatus}
                   lastSubmissionAt={summary.health.lastSubmissionAt}
-                  recentWindowCount={recentWindowCount}
+                  periodCount={
+                    hasRange ? summary.stats.total : recentWindowCount
+                  }
+                  periodLabel={hasRange ? "Selected period" : "Last 7 days"}
                   verificationRate={verifiedRate}
                 />
 
@@ -782,6 +951,7 @@ export function CampaignInsights({ token }: { token: string }) {
                 <ShareInviteCard
                   campaignSlug={summary.campaign.slug}
                   candidateName={summary.campaign.candidateName}
+                  candidateTitle={summary.campaign.candidateTitle}
                   party={summary.campaign.party}
                   qrSize={180}
                 />
@@ -799,6 +969,7 @@ export function CampaignInsights({ token }: { token: string }) {
             <ReadyToCollectState
               slug={summary.campaign.slug}
               candidateName={summary.campaign.candidateName}
+              candidateTitle={summary.campaign.candidateTitle}
               party={summary.campaign.party}
             />
           ) : (
@@ -816,7 +987,6 @@ export function CampaignInsights({ token }: { token: string }) {
           )}
         </TabsContent>
       </Tabs>
-
     </div>
   );
 }

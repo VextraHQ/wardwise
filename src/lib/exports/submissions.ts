@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { composeFullName } from "@/lib/utils";
+import { composeFullName, parseRefCodePrefix } from "@/lib/utils";
 import {
   buildExportFilename,
   parseBooleanParam,
@@ -66,6 +66,8 @@ export function buildSubmissionWhere(
   const where: Prisma.CollectSubmissionWhereInput = { campaignId };
 
   if (filters.search) {
+    const refCodePrefix = parseRefCodePrefix(filters.search);
+
     where.OR = [
       { fullName: { contains: filters.search, mode: "insensitive" } },
       { firstName: { contains: filters.search, mode: "insensitive" } },
@@ -73,6 +75,7 @@ export function buildSubmissionWhere(
       { lastName: { contains: filters.search, mode: "insensitive" } },
       { phone: { contains: filters.search } },
       { email: { contains: filters.search, mode: "insensitive" } },
+      ...(refCodePrefix ? [{ id: { startsWith: refCodePrefix } }] : []),
     ];
   }
 

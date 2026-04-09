@@ -61,6 +61,7 @@ import { toast } from "sonner";
 import { track } from "@/lib/analytics/client";
 import {
   IconChevronDown,
+  IconCopy,
   IconFileExport,
   IconFlag,
   IconFlagOff,
@@ -73,6 +74,7 @@ import {
 } from "@tabler/icons-react";
 import type { CollectSubmission } from "@/types/collect";
 import { formatGeoDisplayName } from "@/lib/utils/geo-display";
+import { generateRefCode } from "@/lib/utils";
 import type { ExportFormat } from "@/lib/exports/shared";
 import {
   getOrderedExportFormats,
@@ -98,6 +100,10 @@ function formatPU(sub: SubmissionWithPU) {
   const displayName = formatGeoDisplayName(sub.pollingUnitName);
   if (code) return `${code.padStart(3, "0")} - ${displayName}`;
   return displayName;
+}
+
+function getSubmissionRefCode(submission: SubmissionWithPU) {
+  return submission.refCode || generateRefCode(submission.id);
 }
 
 function buildExportToastMessage(args: {
@@ -278,6 +284,15 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
 
   const orderedFormats = getOrderedExportFormats(preferredFormat);
 
+  const handleCopyReference = async (refCode: string) => {
+    try {
+      await navigator.clipboard.writeText(refCode);
+      toast.success("Reference copied");
+    } catch {
+      toast.error("Could not copy reference");
+    }
+  };
+
   const handleToggleFlag = (sub: SubmissionWithPU) => {
     const newFlagged = !sub.isFlagged;
     updateMutation.mutate(
@@ -342,7 +357,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
         <div className="relative min-w-0 sm:flex-1">
           <IconSearch className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
-            placeholder="Search by name, phone, or email..."
+            placeholder="Search by name, phone, email, or reference..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -715,6 +730,25 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                   </Badge>
                 )}
               </div>
+              {selected && (
+                <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                  <span className="text-muted-foreground font-medium">Ref</span>
+                  <code className="text-muted-foreground font-mono tracking-[0.18em] uppercase">
+                    {getSubmissionRefCode(selected)}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-foreground h-6 rounded-sm px-1.5"
+                    onClick={() =>
+                      handleCopyReference(getSubmissionRefCode(selected))
+                    }
+                    aria-label="Copy registration reference"
+                  >
+                    <IconCopy className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              )}
             </SheetHeader>
           </div>
 

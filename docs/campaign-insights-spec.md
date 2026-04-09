@@ -930,14 +930,14 @@ The report follows existing campaign reporting rules:
 ### Phase 7 — IA and visual refinement
 
 - [x] Align the UI label and component/doc naming to `Campaign Insights`
-- [ ] Add a single global control row for date range, compare, filters, and freshness
-- [ ] Keep the hero focused on identity + one headline metric
-- [ ] Reduce repeated overview blocks into `Now`, `Hotspots`, `Field Team Performance`, and `Recent Activity`
-- [ ] Keep sharing as a compact overview utility, not a destination
-- [ ] Ensure all analytics charts remain readable on both desktop and mobile
-- [ ] Keep visible date ticks under momentum charts
-- [ ] Keep canvasser insight lightweight and performance-focused
-- [ ] Add compare-aware chart and KPI behavior without making Overview feel busy
+- [x] Add a single global control row for date range, compare, filters, and freshness
+- [x] Keep the hero focused on identity + one headline metric
+- [x] Reduce repeated overview blocks into `Now`, `Hotspots`, `Field Team Performance`, and `Recent Activity`
+- [x] Keep sharing as a compact overview utility, not a destination
+- [x] Ensure all analytics charts remain readable on both desktop and mobile
+- [x] Keep visible date ticks under momentum charts
+- [x] Keep canvasser insight lightweight and performance-focused
+- [x] Add compare-aware chart and KPI behavior without making Overview feel busy
 - [x] Clean up internal module and route naming to `campaign-report`
 
 ## Next Polishing Ideas

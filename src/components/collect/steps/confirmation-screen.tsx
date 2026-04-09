@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { HiCheckCircle, HiShieldCheck } from "react-icons/hi";
 import { HiLockClosed } from "react-icons/hi2";
 import { PartyPopper } from "lucide-react";
-import { IconPlus } from "@tabler/icons-react";
+import { IconCopy, IconPlus } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import confetti from "canvas-confetti";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RegistrationStepHeader } from "@/components/collect/registration-step-header";
@@ -42,6 +43,17 @@ export function ConfirmationScreen({
       return () => clearTimeout(timer);
     }
   }, [hasTriggeredConfetti, submittedCount]);
+
+  const handleCopyReference = async () => {
+    if (!refCode) return;
+    try {
+      await navigator.clipboard.writeText(refCode);
+      toast.success("Reference copied");
+    } catch {
+      toast.error("Could not copy reference code");
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Animated Checkmark */}
@@ -61,20 +73,40 @@ export function ConfirmationScreen({
           title="You're All Set!"
           description={
             submittedCount !== null
-              ? `Thank you for registering as a supporter. You are supporter #${submittedCount}.`
+              ? "Thank you for registering your support. Your details have been received."
               : "Your registration is saved and will be submitted when you're back online."
           }
         />
 
+        {submittedCount !== null && (
+          <p className="text-muted-foreground mx-auto max-w-md text-center text-sm leading-relaxed">
+            The campaign team will review and verify your registration.
+          </p>
+        )}
+
         {refCode && (
-          <div className="border-border/60 bg-muted/30 inline-flex items-center gap-3 rounded-sm border border-dashed px-5 py-2.5">
-            <span className="text-muted-foreground/60 text-[10px] font-bold tracking-[0.2em] uppercase">
-              Ref:
-            </span>
-            <div className="bg-border/50 h-3 w-px" />
-            <span className="text-foreground font-mono text-sm font-bold tracking-widest">
-              {refCode}
-            </span>
+          <div className="mt-2 space-y-2">
+            <div className="border-border/60 bg-muted/30 inline-flex items-center gap-3 rounded-sm border border-dashed px-5 py-2.5">
+              <span className="text-muted-foreground/60 text-[10px] font-bold tracking-[0.2em] uppercase">
+                Registration Reference
+              </span>
+              <div className="bg-border/50 h-3 w-px" />
+              <span className="text-foreground font-mono text-sm font-bold tracking-widest">
+                {refCode}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyReference}
+                className="text-muted-foreground hover:text-foreground h-7 rounded-sm px-2 text-[10px] font-bold tracking-widest uppercase"
+              >
+                <IconCopy className="mr-1 h-3.5 w-3.5" />
+                Copy
+              </Button>
+            </div>
+            <p className="text-muted-foreground text-center text-xs leading-relaxed">
+              Keep this reference if you need help with this registration.
+            </p>
           </div>
         )}
       </section>
@@ -150,6 +182,7 @@ export function ConfirmationScreen({
       <ShareInviteCard
         campaignSlug={campaign.slug}
         candidateName={campaign.candidateName}
+        candidateTitle={campaign.candidateTitle}
         party={campaign.party}
         animated
         animationDelay={0.2}

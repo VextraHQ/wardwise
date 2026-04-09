@@ -274,6 +274,7 @@ UX audit and post-submission improvements for the public registration form:
 - [x] **History section scroll** — Added `max-h-40 overflow-y-auto` to submission detail History section to prevent unbounded growth.
 - [x] **Canvasser tab overhaul** — Redesigned layout hierarchy: Referral Leaderboard is now the hero content above the fold with search/export toolbar. Pre-loaded canvasser management moved to a side Sheet ("Public Form Canvassers"). Self-identified canvassers shown as compact stat pill. Added Zod validation, AlertDialog confirmations with referral count context, leaderboard CSV export with `sanitizeCell()`, keyboard-accessible row click-through to submissions filtered by `canvasserName`+`canvasserPhone` (exact match). Submissions tab reads `canvasserName`, `canvasserPhone`, and `role` from URL params with dismissable filter chip.
 - [x] **Public form canvasser dropdown** — Replaced plain `<Select>` with searchable `ComboboxSelect` in `canvasser-step.tsx`. Scales to 50+ preloaded canvassers with type-to-search.
+- [x] **Admin reference lookup** — Admin submissions search now accepts registration references (`WW-XXXXXXXX`), and the submissions table/detail sheet surface the same reference code used on the public confirmation screen. This gives support/admin a simple lookup flow without introducing a separate support console.
 
 ---
 

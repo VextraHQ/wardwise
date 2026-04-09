@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 
-export type CampaignReportRangePreset = "7d" | "30d" | "all";
+export type CampaignReportRangePreset = "today" | "7d" | "30d" | "all";
 
 export type CampaignReportDelta = { value: string; positive: boolean };
 
@@ -28,6 +28,11 @@ export function getPresetRange(
   now = new Date(),
 ): { from?: Date; to?: Date } {
   switch (preset) {
+    case "today": {
+      const from = new Date(now);
+      from.setHours(0, 0, 0, 0);
+      return { from, to: now };
+    }
     case "7d": {
       const from = new Date(now);
       from.setDate(from.getDate() - 6);
