@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/table";
 
 type ImportLevel = "lga" | "ward" | "polling-unit";
+type ImportFileFormat = "csv" | "excel";
 
 interface BulkImportDialogProps {
   open: boolean;
@@ -38,7 +39,7 @@ const LEVEL_LABELS: Record<ImportLevel, string> = {
   "polling-unit": "Polling Units",
 };
 
-const CSV_HEADERS: Record<ImportLevel, string[]> = {
+const IMPORT_HEADERS: Record<ImportLevel, string[]> = {
   lga: ["name", "stateCode"],
   ward: ["code", "name", "lgaName", "stateCode"],
   "polling-unit": [
@@ -55,6 +56,12 @@ const IMPORT_NOTES: Partial<Record<ImportLevel, string>> = {
   ward: "Include official ward codes when a ward name is reused inside the same LGA.",
   "polling-unit":
     "Include wardCode whenever the ward name is duplicated inside the same LGA.",
+};
+
+const EXCEL_NOTES: Partial<Record<ImportLevel, string>> = {
+  ward: "If you edit the Excel template, format code columns as Text so leading zeros are preserved.",
+  "polling-unit":
+    "If you edit the Excel template, format code columns as Text so leading zeros are preserved.",
 };
 
 function splitCSVLine(line: string): string[] {
@@ -91,6 +98,32 @@ function parseCSV(text: string): Record<string, string>[] {
     const values = splitCSVLine(line);
     return Object.fromEntries(headers.map((h, i) => [h, values[i] || ""]));
   });
+}
+
+function normalizeSheetRows(rows: unknown[][]): Record<string, string>[] {
+  if (rows.length === 0) return [];
+
+  const [headerRow, ...dataRows] = rows;
+  const headers = headerRow.map((value) =>
+    String(value ?? "")
+      .trim()
+      .toLowerCase(),
+  );
+
+  if (headers.every((header) => !header)) return [];
+
+  return dataRows
+    .map((row) =>
+      Object.fromEntries(
+        headers.map((header, index) => [
+          header,
+          String(row[index] ?? "").trim(),
+        ]),
+      ),
+    )
+    .filter((row) =>
+      Object.values(row).some((value) => value.trim().length > 0),
+    );
 }
 
 type DialogState =
@@ -142,17 +175,59 @@ export function BulkImportDialog({
     onOpenChange(newOpen);
   };
 
+  const parseSpreadsheetFile = async (
+    file: File,
+  ): Promise<{
+    format: ImportFileFormat;
+    rows: Record<string, string>[];
+  }> => {
+    const lowerName = file.name.toLowerCase();
+
+    if (lowerName.endsWith(".csv")) {
+      const text = await file.text();
+      return { format: "csv", rows: parseCSV(text) };
+    }
+
+    if (lowerName.endsWith(".xlsx") || lowerName.endsWith(".xls")) {
+      const XLSX = await import("xlsx");
+      const workbook = XLSX.read(await file.arrayBuffer(), {
+        type: "array",
+        raw: false,
+      });
+      const firstSheetName = workbook.SheetNames[0];
+      if (!firstSheetName) {
+        return { format: "excel", rows: [] };
+      }
+
+      const firstSheet = workbook.Sheets[firstSheetName];
+      const sheetRows = XLSX.utils.sheet_to_json<unknown[]>(firstSheet, {
+        header: 1,
+        defval: "",
+        blankrows: false,
+        raw: false,
+      });
+
+      return {
+        format: "excel",
+        rows: normalizeSheetRows(sheetRows),
+      };
+    }
+
+    throw new Error("Unsupported file type. Please upload CSV or Excel.");
+  };
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setState("parsing");
     try {
-      const text = await file.text();
-      const parsed = parseCSV(text);
+      const { format, rows: parsed } = await parseSpreadsheetFile(file);
 
       if (parsed.length === 0) {
-        toast.error("CSV file has no data rows");
+        toast.error(
+          `${format === "excel" ? "Excel" : "CSV"} file has no data rows`,
+        );
         setState("idle");
         return;
       }
@@ -170,7 +245,9 @@ export function BulkImportDialog({
       setSummary(result.summary);
       setState("preview");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to parse CSV");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to parse import file",
+      );
       setState("idle");
     }
   };
@@ -190,8 +267,8 @@ export function BulkImportDialog({
     }
   };
 
-  const downloadTemplate = () => {
-    const headers = CSV_HEADERS[level];
+  const downloadCsvTemplate = () => {
+    const headers = IMPORT_HEADERS[level];
     const blob = new Blob([headers.join(",") + "\n"], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -201,7 +278,29 @@ export function BulkImportDialog({
     URL.revokeObjectURL(url);
   };
 
-  const columns = CSV_HEADERS[level].map((h) => h.toLowerCase());
+  const downloadExcelTemplate = async () => {
+    const XLSX = await import("xlsx");
+    const headers = IMPORT_HEADERS[level];
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet([headers]);
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      LEVEL_LABELS[level].replace(/\s+/g, ""),
+    );
+    const content = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([content], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${level}-import-template.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const columns = IMPORT_HEADERS[level].map((h) => h.toLowerCase());
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -213,20 +312,27 @@ export function BulkImportDialog({
               variant="outline"
               className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
             >
-              CSV
+              CSV / Excel
             </Badge>
           </DialogTitle>
           <DialogDescription>
-            Upload a CSV file to bulk import {LEVEL_LABELS[level].toLowerCase()}
-            .
+            Upload a CSV or Excel file to bulk import{" "}
+            {LEVEL_LABELS[level].toLowerCase()}.
           </DialogDescription>
         </DialogHeader>
 
-        {IMPORT_NOTES[level] && (
-          <p className="text-muted-foreground -mt-2 text-xs">
-            {IMPORT_NOTES[level]}
-          </p>
-        )}
+        <div className="-mt-2 space-y-1">
+          {IMPORT_NOTES[level] && (
+            <p className="text-muted-foreground text-xs">
+              {IMPORT_NOTES[level]}
+            </p>
+          )}
+          {EXCEL_NOTES[level] && (
+            <p className="text-muted-foreground text-xs">
+              {EXCEL_NOTES[level]}
+            </p>
+          )}
+        </div>
 
         {(state === "idle" || state === "parsing") && (
           <div className="space-y-4 py-4">
@@ -236,27 +342,39 @@ export function BulkImportDialog({
             >
               <HiOutlineUpload className="text-muted-foreground mb-2 h-8 w-8" />
               <p className="text-sm font-medium">
-                {state === "parsing" ? "Parsing..." : "Click to upload CSV"}
+                {state === "parsing"
+                  ? "Parsing..."
+                  : "Click to upload CSV or Excel"}
               </p>
               <p className="text-muted-foreground mt-1 text-xs">
-                .csv files up to 5,000 rows
+                .csv, .xlsx, or .xls files up to 5,000 rows
               </p>
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".csv"
+                accept=".csv,.xlsx,.xls"
                 className="hidden"
                 onChange={handleFileSelect}
               />
             </div>
-            <button
-              type="button"
-              onClick={downloadTemplate}
-              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-xs transition-colors"
-            >
-              <HiOutlineDownload className="h-3.5 w-3.5" />
-              Download template
-            </button>
+            <div className="flex flex-wrap gap-3 text-xs">
+              <button
+                type="button"
+                onClick={downloadCsvTemplate}
+                className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
+              >
+                <HiOutlineDownload className="h-3.5 w-3.5" />
+                Download CSV template
+              </button>
+              <button
+                type="button"
+                onClick={downloadExcelTemplate}
+                className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
+              >
+                <HiOutlineDownload className="h-3.5 w-3.5" />
+                Download Excel template
+              </button>
+            </div>
           </div>
         )}
 

@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { HiClock, HiMail } from "react-icons/hi";
 import { HiArrowUpRight } from "react-icons/hi2";
 import { Header } from "@/components/layout/header";
+import { CookieSettingsButton } from "@/components/layout/cookie-consent";
 import {
   COMPANY_INFO,
   legalNavigation,
@@ -257,18 +258,33 @@ export function LegalPageLayout({
               <span className="text-muted-foreground/40 hidden sm:inline">
                 ·
               </span>
-              <p className="text-muted-foreground/60 font-mono text-[10px]">
-                A Product of {COMPANY_INFO.legalName}
+              <p className="text-muted-foreground/70 font-mono text-[10px]">
+                A Product of{" "}
+                <Link
+                  href={COMPANY_INFO.companyWebsite}
+                  className="text-primary hover:text-primary/80 font-medium transition-colors duration-200 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {COMPANY_INFO.legalName}
+                </Link>
               </p>
             </div>
-            <Link
-              href={`mailto:${COMPANY_INFO.supportEmail}`}
-              className="group border-border/60 bg-background/50 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary flex items-center gap-2 rounded-sm border px-4 py-2 transition-all"
-            >
-              <HiMail className="size-4" />
-              <span className="text-xs font-medium">Get in Touch</span>
-              <HiArrowUpRight className="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </Link>
+            <div className="flex flex-col items-center gap-2 sm:flex-row">
+              <CookieSettingsButton
+                variant="outline"
+                size="sm"
+                className="border-border/60 bg-background/50 hover:border-primary/50 hover:bg-primary/5 text-xs"
+              />
+              <Link
+                href={`mailto:${COMPANY_INFO.supportEmail}`}
+                className="group border-border/60 bg-background/50 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary flex items-center gap-2 rounded-sm border px-4 py-2 transition-all"
+              >
+                <HiMail className="size-4" />
+                <span className="text-xs font-medium">Get in Touch</span>
+                <HiArrowUpRight className="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
+            </div>
           </div>
         </div>
       </footer>

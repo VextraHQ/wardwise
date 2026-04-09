@@ -36,6 +36,18 @@ export const authRateLimit = redis
   : null;
 
 /**
+ * Rate limiter for report passcode unlock attempts.
+ * 5 attempts per minute per IP.
+ */
+export const reportUnlockRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, "1 m"),
+      prefix: "rl:report-unlock",
+    })
+  : null;
+
+/**
  * Extract client IP from request headers.
  */
 export function getClientIp(request: Request): string {

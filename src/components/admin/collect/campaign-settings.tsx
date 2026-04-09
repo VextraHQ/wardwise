@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   useCampaign,
   useUpdateCampaign,
@@ -21,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { track } from "@/lib/analytics/client";
 import {
   IconTrash,
   IconPlayerPlay,
@@ -28,7 +30,14 @@ import {
   IconLock,
   IconFileDescription,
   IconRefresh,
+  IconEye,
+  IconCopy,
+  IconShieldCheck,
+  IconExternalLink,
+  IconRotateClockwise,
+  IconKey,
 } from "@tabler/icons-react";
+import { adminCollectApi } from "@/lib/api/collect";
 import type { Campaign } from "@/types/collect";
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
@@ -42,16 +51,41 @@ function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+function copyToClipboard(text: string, label: string) {
+  navigator.clipboard.writeText(text).then(
+    () => toast.success(`${label} copied`),
+    () => toast.error("Failed to copy"),
+  );
+}
+
 export function CampaignSettings({ campaignId }: { campaignId: string }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const { data: campaign, isLoading } = useCampaign(campaignId) as {
     data: Campaign | undefined;
     isLoading: boolean;
   };
   const updateMutation = useUpdateCampaign(campaignId);
   const deleteMutation = useDeleteCampaign();
+
+  // Local state
   const [deleteSlug, setDeleteSlug] = useState("");
+  const [visiblePasscode, setVisiblePasscode] = useState<string | null>(null);
+  const [regeneratingToken, setRegeneratingToken] = useState(false);
+  const [resettingPasscode, setResettingPasscode] = useState(false);
+
   const submissionCount = campaign?._count?.submissions ?? 0;
+
+  // Client report derived state
+  const isEnabled = campaign?.clientReportEnabled ?? false;
+  const baseUrl =
+    typeof window !== "undefined"
+      ? process.env.NEXT_PUBLIC_COLLECT_BASE_URL || window.location.origin
+      : "";
+  const reportUrl = campaign?.clientReportToken
+    ? `${baseUrl}/r/${campaign.clientReportToken}`
+    : "";
 
   if (isLoading || !campaign) {
     return (
@@ -65,7 +99,14 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
     updateMutation.mutate(
       { status },
       {
-        onSuccess: () => toast.success(`Campaign ${status}`),
+        onSuccess: () => {
+          track("admin_campaign_updated", {
+            action: "status_changed",
+            campaign_id: campaignId,
+            next_status: status,
+          });
+          toast.success(`Campaign ${status}`);
+        },
         onError: (e) => toast.error(e.message),
       },
     );
@@ -78,6 +119,9 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
     }
     deleteMutation.mutate(campaignId, {
       onSuccess: () => {
+        track("admin_campaign_deleted", {
+          campaign_id: campaignId,
+        });
         toast.success("Campaign deleted");
         router.push("/admin/collect");
       },
@@ -102,11 +146,95 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
       { enabledLgaIds: currentCandidateBoundaryIds },
       {
         onSuccess: () => {
+          track("admin_campaign_updated", {
+            action: "boundary_reset",
+            campaign_id: campaignId,
+          });
           toast.success("Campaign boundary reset to the candidate boundary");
         },
         onError: (e) => toast.error(e.message),
       },
     );
+  };
+
+  const handleEnableClientAccess = () => {
+    updateMutation.mutate(
+      { clientReportEnabled: true },
+      {
+        onSuccess: (data) => {
+          track("admin_campaign_updated", {
+            action: "client_report_enabled",
+            campaign_id: campaignId,
+          });
+          const passcode = (data as { clientReportPasscode?: string })
+            ?.clientReportPasscode;
+          if (passcode) setVisiblePasscode(passcode);
+          toast.success("Client report enabled");
+        },
+        onError: (e) => toast.error(e.message),
+      },
+    );
+  };
+
+  const handleRevokeClientAccess = () => {
+    setVisiblePasscode(null);
+    updateMutation.mutate(
+      { clientReportEnabled: false },
+      {
+        onSuccess: () => {
+          track("admin_campaign_updated", {
+            action: "client_report_revoked",
+            campaign_id: campaignId,
+          });
+          toast.success("Client report access revoked");
+        },
+        onError: (e) => toast.error(e.message),
+      },
+    );
+  };
+
+  const handleRegenerateToken = async () => {
+    setRegeneratingToken(true);
+    try {
+      await adminCollectApi.regenerateReportToken(campaignId);
+      track("admin_campaign_updated", {
+        action: "client_report_token_regenerated",
+        campaign_id: campaignId,
+      });
+      setVisiblePasscode(null);
+      updateMutation.reset();
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["admin-campaign", campaignId],
+        }),
+        queryClient.invalidateQueries({ queryKey: ["admin-campaigns"] }),
+      ]);
+      toast.success("Client report link regenerated");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to regenerate");
+    } finally {
+      setRegeneratingToken(false);
+    }
+  };
+
+  const handleResetPasscode = async () => {
+    setResettingPasscode(true);
+    try {
+      const data = await adminCollectApi.resetReportPasscode(campaignId);
+      track("admin_campaign_updated", {
+        action: "client_report_passcode_reset",
+        campaign_id: campaignId,
+      });
+      setVisiblePasscode(data.passcode);
+      await queryClient.invalidateQueries({
+        queryKey: ["admin-campaign", campaignId],
+      });
+      toast.success("Passcode reset — copy the new one now");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to reset passcode");
+    } finally {
+      setResettingPasscode(false);
+    }
   };
 
   return (
@@ -303,6 +431,184 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           </CardContent>
         </Card>
       )}
+
+      {/* Client Access */}
+      <Card className="border-border/60 rounded-sm shadow-none">
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-sm font-semibold tracking-tight">
+                Client Access
+              </CardTitle>
+              <CardDescription className="text-muted-foreground mt-1 text-sm">
+                Give the candidate a private read-only results view for this
+                campaign.
+              </CardDescription>
+            </div>
+            {isEnabled && (
+              <Badge
+                variant="outline"
+                className="rounded-sm border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-emerald-600 uppercase"
+              >
+                Enabled
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!isEnabled ? (
+            <div className="space-y-3">
+              {campaign.status === "draft" ? (
+                <p className="text-sm text-amber-700">
+                  Activate the campaign before enabling the client report. Draft
+                  campaigns are not accessible to clients.
+                </p>
+              ) : (
+                <p className="text-muted-foreground text-sm">
+                  Enable to generate a private report link with a passcode that
+                  you can share with the candidate.
+                </p>
+              )}
+              <Button
+                size="sm"
+                className="h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
+                onClick={handleEnableClientAccess}
+                disabled={
+                  updateMutation.isPending || campaign.status === "draft"
+                }
+              >
+                <IconShieldCheck className="mr-1.5 h-3.5 w-3.5" />
+                {updateMutation.isPending
+                  ? "Enabling..."
+                  : "Enable Client Report"}
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              {/* Report URL */}
+              <div className="space-y-1.5">
+                <Label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                  Report URL
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    readOnly
+                    value={reportUrl}
+                    className="h-9 rounded-sm font-mono text-xs"
+                    onFocus={(e) => e.target.select()}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-9 shrink-0 rounded-sm"
+                    onClick={() => copyToClipboard(reportUrl, "Report link")}
+                  >
+                    <IconCopy className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-9 shrink-0 rounded-sm"
+                    onClick={() => window.open(reportUrl, "_blank")}
+                  >
+                    <IconExternalLink className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Passcode */}
+              <div className="space-y-1.5">
+                <Label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                  Passcode
+                </Label>
+                {visiblePasscode ? (
+                  <div className="flex items-center gap-2">
+                    <div className="bg-muted/50 flex h-9 items-center rounded-sm border px-3 font-mono text-sm font-bold tracking-[0.3em]">
+                      {visiblePasscode}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-9 shrink-0 rounded-sm"
+                      onClick={() =>
+                        copyToClipboard(visiblePasscode, "Passcode")
+                      }
+                    >
+                      <IconCopy className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-xs">
+                    Passcode is hidden. Reset it to generate a new one you can
+                    copy.
+                  </p>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
+                  onClick={handleResetPasscode}
+                  disabled={resettingPasscode}
+                >
+                  <IconKey className="mr-1.5 h-3.5 w-3.5" />
+                  {resettingPasscode ? "Resetting..." : "Reset Passcode"}
+                </Button>
+              </div>
+
+              {/* Security Info */}
+              <div className="space-y-2 text-sm">
+                <Separator />
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                  <span className="text-muted-foreground">Last viewed</span>
+                  <span className="text-left sm:text-right">
+                    {campaign.clientReportLastViewedAt
+                      ? new Date(
+                          campaign.clientReportLastViewedAt,
+                        ).toLocaleString("en-NG", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })
+                      : "Never"}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                  <span className="text-muted-foreground">Access mode</span>
+                  <span className="text-left sm:text-right">
+                    Private link + passcode
+                  </span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
+                  onClick={handleRegenerateToken}
+                  disabled={regeneratingToken}
+                >
+                  <IconRotateClockwise className="mr-1.5 h-3.5 w-3.5" />
+                  {regeneratingToken ? "Regenerating..." : "Regenerate Link"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 w-full rounded-sm font-mono text-[11px] tracking-widest text-orange-600 uppercase hover:bg-orange-500/10 hover:text-orange-700 sm:w-auto"
+                  onClick={handleRevokeClientAccess}
+                  disabled={updateMutation.isPending}
+                >
+                  <IconEye className="mr-1.5 h-3.5 w-3.5" />
+                  Revoke Access
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Danger Zone */}
       <Card className="border-destructive rounded-sm shadow-none">

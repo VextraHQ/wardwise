@@ -32,6 +32,8 @@ interface ShareInviteCardProps {
   animated?: boolean;
   /** Delay for the animation (seconds) */
   animationDelay?: number;
+  /** Optional QR code size in px */
+  qrSize?: number;
 }
 
 export function ShareInviteCard({
@@ -40,11 +42,12 @@ export function ShareInviteCard({
   party,
   animated = false,
   animationDelay = 0,
+  qrSize = 120,
 }: ShareInviteCardProps) {
   const shareUrl = useShareUrl(campaignSlug);
   const shareText = `I just registered as a supporter for ${candidateName} (${party}) on WardWise! Join here: ${shareUrl}`;
   const qrUrl = shareUrl
-    ? `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(shareUrl)}&size=200x200`
+    ? `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(shareUrl)}&size=${qrSize}x${qrSize}`
     : "";
 
   const handleCopyLink = async () => {
@@ -135,8 +138,8 @@ export function ShareInviteCard({
           <Image
             src={qrUrl}
             alt="Registration QR Code"
-            width={120}
-            height={120}
+            width={qrSize}
+            height={qrSize}
             className="rounded"
           />
           <p className="text-muted-foreground max-w-full truncate text-[10px]">

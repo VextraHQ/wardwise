@@ -168,6 +168,7 @@ export type CreateCampaignData = z.infer<typeof createCampaignSchema>;
 
 export const updateCampaignSchema = createCampaignSchema.partial().extend({
   status: z.enum(["draft", "active", "paused", "closed"]).optional(),
+  clientReportEnabled: z.boolean().optional(),
 });
 
 export type UpdateCampaignData = z.infer<typeof updateCampaignSchema>;

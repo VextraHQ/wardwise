@@ -9,6 +9,11 @@ import {
   positionRequiresLgas,
 } from "@/lib/utils/constituency";
 import { resolveCandidateCampaignLgaIds } from "@/lib/utils/constituency-server";
+import {
+  generateReportToken,
+  generatePasscode,
+  hashPasscode,
+} from "@/lib/server/report-access";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -57,7 +62,11 @@ export async function GET(_request: Request, { params }: RouteParams) {
     const isBoundaryOutOfSync =
       JSON.stringify(currentBoundary) !== JSON.stringify(campaignBoundary);
 
-    const { candidate: _candidate, ...campaignRecord } = campaign;
+    const {
+      candidate: _candidate,
+      clientReportPasscodeHash: _hash,
+      ...campaignRecord
+    } = campaign;
 
     return NextResponse.json({
       campaign: {
@@ -67,6 +76,8 @@ export async function GET(_request: Request, { params }: RouteParams) {
         isBoundaryOutOfSync,
         createdAt: campaignRecord.createdAt.toISOString(),
         updatedAt: campaignRecord.updatedAt.toISOString(),
+        clientReportLastViewedAt:
+          campaignRecord.clientReportLastViewedAt?.toISOString() ?? null,
       },
     });
   } catch (error) {
@@ -100,7 +111,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const currentCampaign = await prisma.campaign.findUnique({
       where: { id },
-      select: { candidateId: true },
+      select: { candidateId: true, clientReportEnabled: true },
     });
     if (!currentCampaign) {
       return NextResponse.json(
@@ -181,6 +192,34 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       }
     }
 
+    // Build client report data if enabling/disabling
+    let clientReportData: Record<string, unknown> = {};
+    let rawPasscode: string | undefined;
+
+    if (d.clientReportEnabled !== undefined) {
+      const isEnabling =
+        d.clientReportEnabled && !currentCampaign.clientReportEnabled;
+      const isDisabling =
+        !d.clientReportEnabled && currentCampaign.clientReportEnabled;
+
+      if (isEnabling) {
+        rawPasscode = generatePasscode();
+        clientReportData = {
+          clientReportEnabled: true,
+          clientReportToken: generateReportToken(),
+          clientReportPasscodeHash: await hashPasscode(rawPasscode),
+          clientReportLastViewedAt: null,
+        };
+      } else if (isDisabling) {
+        clientReportData = {
+          clientReportEnabled: false,
+          clientReportToken: null,
+          clientReportPasscodeHash: null,
+          clientReportLastViewedAt: null,
+        };
+      }
+    }
+
     const campaign = await prisma.campaign.update({
       where: { id },
       data: {
@@ -195,6 +234,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           customQuestion2: d.customQuestion2 || null,
         }),
         ...(d.status !== undefined && { status: d.status }),
+        ...clientReportData,
       },
     });
 
@@ -204,12 +244,18 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       ),
     });
 
+    const { clientReportPasscodeHash: _patchHash, ...campaignWithoutHash } =
+      campaign;
+
     return NextResponse.json({
       campaign: {
-        ...campaign,
+        ...campaignWithoutHash,
         createdAt: campaign.createdAt.toISOString(),
         updatedAt: campaign.updatedAt.toISOString(),
+        clientReportLastViewedAt:
+          campaign.clientReportLastViewedAt?.toISOString() ?? null,
       },
+      ...(rawPasscode && { clientReportPasscode: rawPasscode }),
     });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {

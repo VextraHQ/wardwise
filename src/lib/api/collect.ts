@@ -128,10 +128,22 @@ export const adminCollectApi = {
     }),
 
   updateCampaign: (id: string, data: Record<string, unknown>) =>
-    adminApiCall<{ campaign: Campaign }>(`/campaigns/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    }),
+    adminApiCall<{ campaign: Campaign; clientReportPasscode?: string }>(
+      `/campaigns/${id}`,
+      { method: "PATCH", body: JSON.stringify(data) },
+    ),
+
+  regenerateReportToken: (id: string) =>
+    adminApiCall<{ clientReportToken: string }>(
+      `/campaigns/${id}/campaign-report/regenerate`,
+      { method: "POST" },
+    ),
+
+  resetReportPasscode: (id: string) =>
+    adminApiCall<{ passcode: string }>(
+      `/campaigns/${id}/campaign-report/reset-passcode`,
+      { method: "POST" },
+    ),
 
   deleteCampaign: (id: string) =>
     adminApiCall<void>(`/campaigns/${id}`, { method: "DELETE" }),

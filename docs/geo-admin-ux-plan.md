@@ -13,6 +13,48 @@ This document defines the intended split between scripts, database data, static 
 
 ---
 
+## Alignment Check (2026-04-07)
+
+This plan still points in the right direction, but it now needs to be read as a
+`remaining geo admin UX work` document, not a from-scratch redesign.
+
+### Already true now
+
+- `/admin/geo` is no longer just a bare CRUD browser
+- the app already has DB-backed admin geo APIs
+- state overview + hierarchy drill-down already exist
+- bulk corrections import already exists in admin
+- shared geo display formatting is already in use across admin geo surfaces
+
+### Still worth doing
+
+- add a stronger state-level operations header
+- add clearer sync/audit entry points for state-level work
+- surface drift/status warnings more explicitly
+- separate `official sync` from day-to-day correction imports in the UX
+- add change history / operator visibility where it matters
+
+### What should be tweaked
+
+- Phase 2 is still useful, but it should focus on state operations and review UX,
+  not re-describing the existing drill-down tables
+- Phase 3 is partly done already because the shared display formatter exists; the
+  remaining work is about consistency and raw-name visibility in audit contexts
+- the old wording around `Import CSV` should now be read more broadly as
+  `bulk corrections import`, which can support CSV and Excel templates without
+  replacing the script-based official sync pipeline
+
+### Recommendation
+
+Yes, we should still do this plan, but as a narrower follow-on:
+
+1. keep scripts as the canonical full-state sync path
+2. keep admin geo as the operator console for review, corrections, and exports
+3. redesign the next pass around `state operations`, not around deeper CRUD
+4. trim or mark completed any items that are already in the product
+
+---
+
 ## Current Reality
 
 ### Canonical / active now
@@ -170,9 +212,9 @@ And the page should show a summary:
 - duplicate-name/code issues
 - last successful sync
 
-### Level C: Replace generic CSV import with guided import modes
+### Level C: Replace generic corrections import with guided import modes
 
-The current `Import CSV` button is useful, but too generic for large official corrections.
+The current bulk import action is useful, but too generic for large official corrections.
 
 Recommended import choices:
 
@@ -181,7 +223,7 @@ Recommended import choices:
    - preview diff
    - replace/merge by state
 2. `Bulk corrections`
-   - upload CSV for ward/PU fixes
+   - upload CSV or Excel for ward/PU fixes
    - add/update targeted rows
 3. `Manual CRUD`
    - small one-off edits only
@@ -254,7 +296,7 @@ For Bauchi, the recommended path is:
 That is more scalable and safer than:
 
 - manually editing dozens or hundreds of wards/PUs
-- relying on generic CSV import alone
+- relying on generic corrections import alone
 
 ---
 
@@ -294,7 +336,7 @@ That is more scalable and safer than:
 - add state-level operations header
 - add state sync preview/apply entry point
 - add drift/status panel
-- distinguish `official sync` from `CSV import`
+- distinguish `official sync` from `bulk corrections import`
 
 ### Phase 3: Add display-name polish
 

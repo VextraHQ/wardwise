@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 interface RegistrationStepHeaderProps {
   icon: React.ElementType | React.ReactNode;
-  badge: string;
+  badge?: string;
   title: string;
   description: string;
   className?: string;
@@ -36,23 +36,25 @@ export function RegistrationStepHeader({
 }: RegistrationStepHeaderProps) {
   return (
     <div className={cn("mb-4 space-y-5 text-center", className)}>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
-        className="flex justify-center"
-      >
-        <div className="bg-muted/30 border-border/60 flex items-center gap-3 rounded-full border py-1.5 pr-4 pl-1.5 backdrop-blur-sm">
-          <div className="bg-background border-border/40 text-primary flex h-8 w-8 items-center justify-center rounded-full border shadow-sm">
-            {renderIcon(Icon)}
+      {badge && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          className="flex justify-center"
+        >
+          <div className="bg-muted/30 border-border/60 flex items-center gap-3 rounded-full border py-1.5 pr-4 pl-1.5 backdrop-blur-sm">
+            <div className="bg-background border-border/40 text-primary flex h-8 w-8 items-center justify-center rounded-full border shadow-sm">
+              {renderIcon(Icon)}
+            </div>
+            <div className="flex flex-col text-left">
+              <p className="text-foreground text-[10px] font-black tracking-widest uppercase">
+                {badge}
+              </p>
+            </div>
           </div>
-          <div className="flex flex-col text-left">
-            <p className="text-foreground text-[10px] font-black tracking-widest uppercase">
-              {badge}
-            </p>
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      )}
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}

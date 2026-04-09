@@ -58,6 +58,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { toast } from "sonner";
+import { track } from "@/lib/analytics/client";
 import {
   IconChevronDown,
   IconFileExport,
@@ -144,7 +145,9 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     description: string;
     onConfirm: () => void;
   } | null>(null);
-  const [preferredFormat, setPreferredFormat] = useState<ExportFormat>("csv");
+  const [preferredFormat, setPreferredFormat] = useState<ExportFormat>(() =>
+    readPreferredExportFormat(),
+  );
 
   // Clear one-shot URL params after consuming them
   useEffect(() => {
@@ -158,10 +161,6 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
       router.replace(`?${sp.toString()}`);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    setPreferredFormat(readPreferredExportFormat());
-  }, []);
 
   const { data, isLoading } = useCampaignSubmissions(campaignId, {
     page,
@@ -204,6 +203,11 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
       { ids: Array.from(selectedIds), action },
       {
         onSuccess: (result) => {
+          track("admin_submission_bulk_action", {
+            action,
+            affected_count: result.affected,
+            campaign_id: campaignId,
+          });
           const actionLabels: Record<string, string> = {
             delete: "deleted",
             verify: "verified",
@@ -280,6 +284,10 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
       { sid: sub.id, data: { isFlagged: newFlagged } },
       {
         onSuccess: () => {
+          track("admin_submission_updated", {
+            action: newFlagged ? "flagged" : "unflagged",
+            submission_id: sub.id,
+          });
           toast.success(newFlagged ? "Flagged" : "Unflagged");
           if (selected?.id === sub.id) {
             setSelected({ ...selected, isFlagged: newFlagged });
@@ -296,6 +304,9 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
       onConfirm: () => {
         deleteMutation.mutate(sub.id, {
           onSuccess: () => {
+            track("admin_submission_deleted", {
+              submission_id: sub.id,
+            });
             toast.success("Submission deleted");
             setSelected(null);
           },
@@ -311,6 +322,10 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
       { sid: sub.id, data: { isVerified: newVerified } },
       {
         onSuccess: () => {
+          track("admin_submission_updated", {
+            action: newVerified ? "verified" : "unverified",
+            submission_id: sub.id,
+          });
           toast.success(newVerified ? "Verified" : "Unverified");
           if (selected?.id === sub.id) {
             setSelected({ ...selected, isVerified: newVerified });
@@ -794,6 +809,10 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                           },
                           {
                             onSuccess: () => {
+                              track("admin_submission_updated", {
+                                action: "notes_saved",
+                                submission_id: selected.id,
+                              });
                               toast.success("Notes saved");
                               setSelected({
                                 ...selected,
