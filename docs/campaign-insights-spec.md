@@ -1,7 +1,7 @@
 # Campaign Insights Spec
 
 > Private read-only campaign reporting for clients on top of Collect.
-> Branch: `develop` | Last updated: 2026-04-08
+> Branch: `develop` | Last updated: 2026-04-09
 > See also: `wardwise-collect-spec.md`, `wardwise-collect-v2-spec.md`, `wardwise-hardening-spec.md`
 
 ---
@@ -280,6 +280,11 @@ Use the same architectural quality bar as `/login`:
 
 ### 2. Hero
 
+The hero should answer two things only:
+
+- whose report this is
+- how many supporters have been captured
+
 Show:
 
 - candidate name
@@ -287,14 +292,58 @@ Show:
 - position
 - constituency
 - campaign status
+- one headline metric: `Supporters Captured`
 - `Copy Form Link`
-- one short contextual line under campaign status, for example:
-  - last activity
-  - registrations in the last 7 days
-  - verification rate
-- avoid oversized stacked text and avoid turning the hero into a giant poster block
+- optional secondary utility:
+  - `Snapshot PDF`
+  - `Download Brief`
+  - only if a briefing export exists
 
-### 3. Tabs
+Do not keep these in the hero:
+
+- last activity
+- canvasser count
+- verification rate
+- last 7 days registrations
+- campaign health detail cards
+
+Those belong in the briefing modules below.
+
+### 3. Global controls
+
+Place a single control row between the hero and the tabs.
+
+This is the only place where global dashboard controls should live.
+
+Show:
+
+- date presets:
+  - `Today`
+  - `7D`
+  - `30D`
+  - `All Time`
+- `From` date
+- `To` date
+- `Compare` toggle
+- `Filters` action
+- freshness line:
+  - `Refreshed 8s ago`
+  - `Refresh`
+
+Active filters should render as chips directly below the controls, for example:
+
+- `Girei ×`
+- `Volunteer ×`
+- `Clear all`
+
+Rules:
+
+- `Overview` and `Analytics` follow the same date range and compare state
+- `Supporters` keeps its own table filters
+- range changes should never blank the whole page or look like a hard refresh
+- preserve current data while the new range loads in the background
+
+### 4. Tabs
 
 Use clear top-level tabs:
 
@@ -302,7 +351,7 @@ Use clear top-level tabs:
 - `Supporters`
 - `Analytics`
 
-### 4. Overview
+### 5. Overview
 
 The overview should work even for candidates who do not like reading charts
 first. It should feel like an executive briefing.
@@ -316,14 +365,24 @@ Show:
 - Needs Review
 - Active LGAs
 
+When compare mode is active and the selected range is bounded, show subtle
+supporting deltas below the numbers.
+
+Rules:
+
+- keep the raw number as the primary signal
+- `Active LGAs` should not show a delta
+- do not treat a higher `Needs Review` count as automatically positive
+
 #### `Now`
 
 Show:
 
 - campaign status
 - last activity
-- submissions in the last 7 days
+- submissions in the selected period
 - verification rate
+- one short sentence that tells the candidate what is happening right now
 
 #### `Hotspots`
 
@@ -340,11 +399,13 @@ Show:
 - active canvassers
 - top canvasser
 - canvasser-led submission percentage if available
+- direct vs canvasser-led split if available
 
 Rules:
 
 - keep this as performance insight, not canvasser management
-- hide the block entirely if there is no canvasser activity
+- if there is no canvasser activity, show a compact empty state rather than
+  making the section disappear entirely
 - do not expose admin-style canvasser controls here
 
 #### `Recent Activity`
@@ -370,24 +431,6 @@ Rules:
 - keep this utility compact
 - it belongs inside `Overview`
 - it should not be a top-level destination or oversized separate tab
-
-### 5. Analytics
-
-Show:
-
-- `Momentum` full width
-- `Submissions by LGA`
-- `Top Wards`
-- `Supporter Roles`
-- `Supporter Mix`
-
-Rules:
-
-- charts must remain responsive on mobile and desktop
-- momentum must always show visible x-axis dates under the chart
-- avoid cramped multi-chart rows that cause overflow
-- donut/pie charts should use a legend below rather than labels floating outside the card
-- if a chart is not readable on mobile, degrade to a ranked list or lighter summary rather than forcing overflow
 
 ### 6. Supporter records
 
@@ -415,6 +458,37 @@ Rules:
 - candidates should not receive admin moderation powers from this surface
 - if bulk actions stay, they should support follow-up utilities, not admin workflows
 
+### 7. Analytics
+
+Analytics should be detailed and evidence-heavy.
+
+Overview should brief.
+
+Analytics should explain.
+
+Show:
+
+- `Momentum` full width
+- `Submissions by LGA`
+- `Top Wards`
+- `Supporter Roles`
+- `Acquisition Mix`
+
+Optional later:
+
+- comparison line against previous period when `Compare` is on
+- click-to-filter interactions from charts into global filter chips
+
+Rules:
+
+- charts must remain responsive on mobile and desktop
+- momentum must always show visible x-axis dates under the chart
+- if compare mode is on, momentum should show current period and prior period
+  clearly without becoming visually noisy
+- avoid cramped multi-chart rows that cause overflow
+- donut/pie charts should use a legend below rather than labels floating outside the card
+- if a chart is not readable on mobile, degrade to a ranked list or lighter summary rather than forcing overflow
+
 ### 7. What not to repeat
 
 Avoid repeating the same data across:
@@ -426,6 +500,122 @@ Avoid repeating the same data across:
 
 The page should feel intentional. If a block does not add a new decision-making
 angle, remove or merge it.
+
+### 8. Final wireframe direction
+
+#### Desktop
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [APC] Hon. Mohammad Gidado Mohammad                                      [Copy Form Link]   │
+│ Yola North / Yola South / Girei Federal Constituency                     [Snapshot PDF]     │
+│ Status: Active   Supporters Captured: 1,284                                                   │
+├──────────────────────────────────────────────────────────────────────────────────────────────┤
+│ [Today] [7D] [30D] [All Time]   [From] [To]   [Compare]   [Filters]   Refreshed 8s ago    │
+│ Active filters: [Girei ×] [Volunteer ×] [Clear all]                                         │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [Overview]   [Supporters]   [Analytics]                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+OVERVIEW
+
+┌──────────────────────┬──────────────────────┬──────────────────────┬──────────────────────┐
+│ SUPPORTERS CAPTURED  │ VERIFIED RECORDS     │ NEEDS REVIEW         │ ACTIVE LGAs          │
+│ 1,284                │ 1,102                │ 38                   │ 3                    │
+│ +12% vs prior period │ +6% vs prior period  │ +2 flagged           │ no change            │
+└──────────────────────┴──────────────────────┴──────────────────────┴──────────────────────┘
+
+┌────────────────────────────────────────────┬───────────────────────────────────────────────┐
+│ NOW                                        │ HOTSPOTS                                      │
+│ Campaign is actively collecting.           │ Top LGA: Girei                               │
+│ 84 registrations in selected period.       │ Top ward: Jera Bakari                        │
+│ Verification rate: 86%                     │ Most registrations are currently coming      │
+│ Last submission: 8m ago                    │ from Girei, with Jera Bakari leading.        │
+└────────────────────────────────────────────┴───────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────┬───────────────────────────────────────────────┐
+│ FIELD TEAM PERFORMANCE                     │ RECENT ACTIVITY                               │
+│ Active canvassers: 6                       │ A. Bello   Girei / Jera Bakari    Verified    │
+│ Canvasser-led share: 58%                   │ M. Usman   Yola North / Doubeli   Pending     │
+│ Top canvasser: Hauwa Ibrahim (74)          │ R. Musa    Girei / Damare         Verified    │
+│ Direct vs field: 42% / 58%                 │ [View all supporters]                         │
+└────────────────────────────────────────────┴───────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│ SHARE FORM / BRIEFING                                                                       │
+│ [ QR ]   Copy form link   WhatsApp   SMS                                  [Download Brief] │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+SUPPORTERS
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Search supporters...     [Status] [LGA] [Ward] [Role]                       [Export]       │
+│ Selected: 12   [Copy Contacts]                                                                │
+├──────────────────────────────────────────────────────────────────────────────────────────────┤
+│ □ Name              LGA         Ward         PU           Role        Date        Status     │
+│ □ A. Bello          Girei       Jera Bakari  PU 014       Volunteer   08 Apr      Verified   │
+│ □ M. Usman          Yola North  Doubeli      PU 102       Member      08 Apr      Pending    │
+│ □ H. Ahmed          Girei       Damare       PU 031       Canvasser   07 Apr      Flagged    │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+ANALYTICS
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│ MOMENTUM                                                                                     │
+│ Current period + previous period line when Compare is on                                     │
+│ 2 Apr     4 Apr     6 Apr     8 Apr                                                          │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────┬───────────────────────────────────────────────┐
+│ SUBMISSIONS BY LGA                         │ TOP WARDS                                      │
+└────────────────────────────────────────────┴───────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────┬───────────────────────────────────────────────┐
+│ SUPPORTER ROLES                            │ ACQUISITION MIX                                │
+└────────────────────────────────────────────┴───────────────────────────────────────────────┘
+```
+
+#### Mobile
+
+```text
+┌──────────────────────────────┐
+│ [APC]                        │
+│ Hon. Mohammad Gidado         │
+│ Yola North / Yola South /    │
+│ Girei Federal Constituency   │
+│ Status: Active               │
+│ Supporters Captured: 1,284   │
+│ [Copy Link] [Snapshot]       │
+└──────────────────────────────┘
+
+┌──────────────────────────────┐
+│ [7D] [30D] [All] [Compare]   │
+│ [From] [To] [Filters]        │
+│ Refreshed 8s ago             │
+│ Girei ×   Volunteer ×        │
+└──────────────────────────────┘
+
+┌──────────────────────────────┐
+│ Overview Supporters Analytics│
+└──────────────────────────────┘
+
+Overview stacks:
+- KPI cards
+- Now
+- Hotspots
+- Field Team Performance
+- Recent Activity
+- Share Form / Briefing
+
+Analytics stacks:
+- Momentum
+- Submissions by LGA
+- Top Wards
+- Supporter Roles
+- Acquisition Mix
+```
 
 ---
 
@@ -740,17 +930,22 @@ The report follows existing campaign reporting rules:
 ### Phase 7 — IA and visual refinement
 
 - [x] Align the UI label and component/doc naming to `Campaign Insights`
+- [ ] Add a single global control row for date range, compare, filters, and freshness
+- [ ] Keep the hero focused on identity + one headline metric
 - [ ] Reduce repeated overview blocks into `Now`, `Hotspots`, `Field Team Performance`, and `Recent Activity`
 - [ ] Keep sharing as a compact overview utility, not a destination
 - [ ] Ensure all analytics charts remain readable on both desktop and mobile
 - [ ] Keep visible date ticks under momentum charts
 - [ ] Keep canvasser insight lightweight and performance-focused
+- [ ] Add compare-aware chart and KPI behavior without making Overview feel busy
 - [x] Clean up internal module and route naming to `campaign-report`
 
 ## Next Polishing Ideas
 
-- allow client-facing date range filters on the Overview tab
+- add click-to-filter chips from charts and ranked lists into the global filter bar
 - add a cleaner print / share summary mode for candidate briefings
+- add a compare toggle against the prior period
+- add a direct vs field-team acquisition split that feels editorial, not operational
 - add optional report branding per campaign if needed later
 
 ---

@@ -25,8 +25,12 @@ export async function GET(request: Request, { params }: RouteParams) {
     // Update last viewed on authorized access
     void touchReportLastViewed(campaign.id);
 
+    const url = new URL(request.url);
+    const from = url.searchParams.get("from") || undefined;
+    const to = url.searchParams.get("to") || undefined;
+
     const [stats, health] = await Promise.all([
-      getCampaignStats(campaign.id),
+      getCampaignStats(campaign.id, { from, to }),
       getCampaignHealth(campaign.id),
     ]);
 

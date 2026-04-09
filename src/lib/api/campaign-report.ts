@@ -37,8 +37,11 @@ export const campaignReportApi = {
       body: JSON.stringify({ passcode }),
     }),
 
-  getSummary: (token: string) =>
-    campaignReportApiCall<CampaignReportSummary>(token, "/summary"),
+  getSummary: (token: string, params?: { from?: string; to?: string }) =>
+    campaignReportApiCall<CampaignReportSummary>(
+      token,
+      `/summary${qs({ from: params?.from, to: params?.to })}`,
+    ),
 
   getSubmissions: (
     token: string,

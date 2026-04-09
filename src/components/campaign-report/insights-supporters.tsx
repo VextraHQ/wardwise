@@ -31,10 +31,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
+import { formatRole } from "@/lib/helpers/campaign-report";
 import { InsightsExportMenu } from "./insights-export-menu";
 import { formatGeoDisplayName } from "@/lib/utils/geo-display";
 import { useCampaignReportSubmissions } from "@/hooks/use-campaign-report";
-import { SubmissionStatusBadge, formatRole } from "./insights-helpers";
+import { SubmissionStatusBadge } from "./insights-helpers";
 import type { CampaignReportSubmission } from "@/types/campaign-report";
 
 const EMPTY_SUPPORTERS: CampaignReportSubmission[] = [];

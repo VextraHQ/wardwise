@@ -1,10 +1,18 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
 import { Activity, BarChart3, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { InsightsHero } from "./insights-hero";
@@ -16,26 +24,36 @@ import {
   useCampaignReportSubmissions,
   useCampaignReportSummary,
 } from "@/hooks/use-campaign-report";
+import {
+  computeDelta,
+  formatQueryDate,
+  formatUpdatedAgo,
+  getPresetRange,
+  getPriorRange,
+  getRecentWindowCount,
+  getVerificationRate,
+  STATUS_COPY,
+  timeAgo,
+  type CampaignReportDelta,
+  type CampaignReportRangePreset,
+} from "@/lib/helpers/campaign-report";
 import { formatGeoDisplayName } from "@/lib/utils/geo-display";
-import { titleCase } from "@/lib/utils/text";
 import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
 import { ShareInviteCard } from "@/components/collect/share-invite-card";
 import type { CampaignReportSubmission } from "@/types/campaign-report";
 import {
+  IconCalendar,
   IconChartBar,
   IconClipboardList,
   IconCopy,
   IconFlag,
   IconMapPin,
+  IconRefresh,
   IconShieldCheck,
   IconSparkles,
   IconUsersGroup,
 } from "@tabler/icons-react";
-import {
-  timeAgo,
-  STATUS_COPY,
-  SubmissionStatusBadge,
-} from "./insights-helpers";
+import { SubmissionStatusBadge } from "./insights-helpers";
 
 const STATUS_BADGE: Record<string, { label: string; style: string }> = {
   active: {
@@ -56,22 +74,14 @@ const STATUS_BADGE: Record<string, { label: string; style: string }> = {
   },
 };
 
-function getSevenDayCount(
-  daily: { date: string; count: number; cumulative: number }[],
-) {
-  const cutoff = new Date();
-  cutoff.setHours(0, 0, 0, 0);
-  cutoff.setDate(cutoff.getDate() - 6);
-
-  return daily.reduce((sum, entry) => {
-    const entryDate = new Date(entry.date);
-    return entryDate >= cutoff ? sum + entry.count : sum;
-  }, 0);
-}
-
-function getVerificationRate(total: number, verified: number) {
-  return total > 0 ? Math.round((verified / total) * 100) : 0;
-}
+const DATE_PRESETS = [
+  { label: "7d", value: "7d" },
+  { label: "30d", value: "30d" },
+  { label: "All time", value: "all" },
+] as const satisfies ReadonlyArray<{
+  label: string;
+  value: CampaignReportRangePreset;
+}>;
 
 function OverviewPanel({
   title,
@@ -97,11 +107,17 @@ function StatsGrid({
   verified,
   flagged,
   enabledLgaCount,
+  deltas,
 }: {
   total: number;
   verified: number;
   flagged: number;
   enabledLgaCount: number;
+  deltas?: {
+    total: CampaignReportDelta | null;
+    verified: CampaignReportDelta | null;
+    flagged: CampaignReportDelta | null;
+  };
 }) {
   const verifiedPct = getVerificationRate(total, verified);
   const cards = [
@@ -112,22 +128,24 @@ function StatsGrid({
       icon: IconClipboardList,
       iconBg: "bg-primary/10",
       iconColor: "text-primary",
+      delta: deltas?.total,
     },
     {
       label: "Verified Records",
       value: verified.toLocaleString(),
       subtitle: `${verifiedPct}% of total`,
       icon: IconShieldCheck,
-      iconBg: "bg-primary/10",
-      iconColor: "text-primary",
+      iconBg: "bg-emerald-500/10",
+      iconColor: "text-emerald-600",
+      delta: deltas?.verified,
     },
     {
       label: "Needs Review",
       value: flagged.toLocaleString(),
       subtitle: "Flagged by admin",
       icon: IconFlag,
-      iconBg: "bg-destructive/10",
-      iconColor: "text-destructive",
+      iconBg: "bg-amber-500/10",
+      iconColor: "text-amber-600",
     },
     {
       label: "Active LGAs",
@@ -162,9 +180,16 @@ function StatsGrid({
             <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
               {card.value}
             </div>
-            <p className="text-muted-foreground mt-1 text-xs">
-              {card.subtitle}
-            </p>
+            <div className="mt-1 flex items-center gap-2">
+              <p className="text-muted-foreground text-xs">{card.subtitle}</p>
+              {card.delta && (
+                <span
+                  className={`font-mono text-[10px] font-bold ${card.delta.positive ? "text-primary" : "text-destructive"}`}
+                >
+                  {card.delta.value}
+                </span>
+              )}
+            </div>
           </CardContent>
         </Card>
       ))}
@@ -290,117 +315,6 @@ function HotspotsCard({
         <p className="text-foreground mt-2 text-sm leading-relaxed">
           {summary}
         </p>
-      </div>
-    </OverviewPanel>
-  );
-}
-
-function SnapshotRows({
-  items,
-}: {
-  items: { label: string; value: string }[];
-}) {
-  if (items.length === 0) {
-    return (
-      <div className="border-border/60 rounded-sm border border-dashed px-3 py-8 text-center">
-        <p className="text-muted-foreground text-sm">No data yet</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-2">
-      {items.map((item, index) => (
-        <div
-          key={`${item.label}-${index}`}
-          className="border-border/60 flex items-center justify-between gap-3 rounded-sm border border-dashed px-3 py-2.5"
-        >
-          <span className="min-w-0 truncate text-sm font-medium">
-            <span className="text-muted-foreground mr-1.5 font-mono text-xs">
-              {index + 1}.
-            </span>
-            {item.label}
-          </span>
-          <span className="font-mono text-xs font-semibold tabular-nums">
-            {item.value}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function GeographicSnapshotCard({
-  byLga,
-  byWard,
-}: {
-  byLga: { lga: string; count: number }[];
-  byWard: { ward: string; count: number }[];
-}) {
-  const lgaItems = byLga.slice(0, 3).map((item) => ({
-    label: formatGeoDisplayName(item.lga),
-    value: item.count.toLocaleString(),
-  }));
-  const wardItems = byWard.slice(0, 3).map((item) => ({
-    label: formatGeoDisplayName(item.ward),
-    value: item.count.toLocaleString(),
-  }));
-
-  return (
-    <OverviewPanel title="Geographic Snapshot">
-      <div className="grid gap-5 lg:grid-cols-2">
-        <div className="space-y-3">
-          <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-            Leading LGAs
-          </p>
-          <SnapshotRows items={lgaItems} />
-        </div>
-        <div className="space-y-3">
-          <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-            Leading Wards
-          </p>
-          <SnapshotRows items={wardItems} />
-        </div>
-      </div>
-    </OverviewPanel>
-  );
-}
-
-function AudienceSnapshotCard({
-  byRole,
-  bySex,
-}: {
-  byRole: { role: string; count: number }[];
-  bySex: { sex: string; count: number }[];
-}) {
-  const mixTotal = bySex.reduce((sum, item) => sum + item.count, 0);
-  const roleItems = byRole.slice(0, 3).map((item) => ({
-    label: titleCase(item.role),
-    value: item.count.toLocaleString(),
-  }));
-  const mixItems = bySex.slice(0, 3).map((item) => ({
-    label: titleCase(item.sex),
-    value:
-      mixTotal > 0
-        ? `${Math.round((item.count / mixTotal) * 100)}%`
-        : item.count.toLocaleString(),
-  }));
-
-  return (
-    <OverviewPanel title="Audience Snapshot">
-      <div className="grid gap-5 lg:grid-cols-2">
-        <div className="space-y-3">
-          <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-            Supporter Roles
-          </p>
-          <SnapshotRows items={roleItems} />
-        </div>
-        <div className="space-y-3">
-          <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-            Supporter Mix
-          </p>
-          <SnapshotRows items={mixItems} />
-        </div>
       </div>
     </OverviewPanel>
   );
@@ -609,11 +523,50 @@ function ReadyToCollectState({
 }
 
 export function CampaignInsights({ token }: { token: string }) {
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [fromOpen, setFromOpen] = useState(false);
+  const [toOpen, setToOpen] = useState(false);
+
+  const range = {
+    ...(dateFrom && { from: formatQueryDate(dateFrom) }),
+    ...(dateTo && { to: formatQueryDate(dateTo) }),
+  };
+  const hasRange = !!dateFrom || !!dateTo;
+
   const {
     data: summary,
     isLoading: loading,
     error,
-  } = useCampaignReportSummary(token);
+    dataUpdatedAt,
+    refetch,
+    isFetching,
+  } = useCampaignReportSummary(
+    token,
+    hasRange ? range : undefined,
+  );
+
+  const priorRange = getPriorRange(dateFrom, dateTo);
+  const { data: priorSummary } = useCampaignReportSummary(
+    priorRange ? token : "",
+    priorRange ?? undefined,
+  );
+
+  const deltas =
+    priorSummary && summary && dateFrom
+      ? {
+          total: computeDelta(summary.stats.total, priorSummary.stats.total),
+          verified: computeDelta(
+            summary.stats.verified,
+            priorSummary.stats.verified,
+          ),
+          flagged: computeDelta(
+            summary.stats.flagged,
+            priorSummary.stats.flagged,
+          ),
+        }
+      : undefined;
+
   const {
     data: recentData,
     isLoading: recentLoading,
@@ -622,6 +575,13 @@ export function CampaignInsights({ token }: { token: string }) {
     page: 1,
     pageSize: 5,
   });
+
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!dataUpdatedAt) return;
+    const id = setInterval(() => setTick((t) => t + 1), 10_000);
+    return () => clearInterval(id);
+  }, [dataUpdatedAt]);
 
   if (loading) {
     return (
@@ -661,20 +621,103 @@ export function CampaignInsights({ token }: { token: string }) {
     summary.stats.total,
     summary.stats.verified,
   );
-  const recentWindowCount = getSevenDayCount(summary.stats.daily);
+  const recentWindowCount = getRecentWindowCount(summary.stats.daily);
 
   return (
     <div className="space-y-8">
       <InsightsHero
         campaign={summary.campaign}
         total={summary.stats.total}
-        health={summary.health}
-        recentWindowCount={recentWindowCount}
-        verifiedRate={verifiedRate}
       />
 
+      <div className="flex flex-wrap items-center gap-2">
+        <IconCalendar className="text-muted-foreground hidden h-4 w-4 shrink-0 sm:block" />
+        <Popover open={fromOpen} onOpenChange={setFromOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 rounded-sm px-3 text-xs font-medium"
+            >
+              {dateFrom ? format(dateFrom, "dd MMM yyyy") : "From"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dateFrom}
+              onSelect={(d) => {
+                setDateFrom(d);
+                setFromOpen(false);
+              }}
+              disabled={(date) => (dateTo ? date > dateTo : false)}
+            />
+          </PopoverContent>
+        </Popover>
+        <span className="text-muted-foreground text-xs">to</span>
+        <Popover open={toOpen} onOpenChange={setToOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 rounded-sm px-3 text-xs font-medium"
+            >
+              {dateTo ? format(dateTo, "dd MMM yyyy") : "To"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dateTo}
+              onSelect={(d) => {
+                setDateTo(d);
+                setToOpen(false);
+              }}
+              disabled={(date) => (dateFrom ? date < dateFrom : false)}
+            />
+          </PopoverContent>
+        </Popover>
+
+        <div className="bg-border hidden h-4 w-px sm:block" />
+
+        {DATE_PRESETS.map((p) => (
+          <Button
+            key={p.value}
+            variant="ghost"
+            size="sm"
+            className="h-7 rounded-sm px-2.5 text-[10px] font-medium tracking-wide uppercase"
+            onClick={() => {
+              const r = getPresetRange(p.value);
+              setDateFrom(r.from);
+              setDateTo(r.to);
+            }}
+          >
+            {p.label}
+          </Button>
+        ))}
+
+        {dataUpdatedAt > 0 && (
+          <div className="text-muted-foreground ml-auto flex items-center gap-1.5 text-xs">
+            <span className="hidden sm:inline">
+              Refreshed {formatUpdatedAgo(dataUpdatedAt)}
+            </span>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors disabled:opacity-50"
+            >
+              <IconRefresh
+                className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`}
+              />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+          </div>
+        )}
+      </div>
+
       <Tabs defaultValue="overview" className="space-y-5">
-        <TabsList className="bg-muted w-full justify-start overflow-x-auto rounded-sm p-1 [scrollbar-width:none] sm:w-fit [&::-webkit-scrollbar]:hidden">
+        <TabsList className="bg-muted sticky top-0 z-20 w-full justify-start overflow-x-auto rounded-sm border-b border-transparent p-1 [scrollbar-width:none] sm:w-fit [&::-webkit-scrollbar]:hidden">
           <TabsTrigger
             className="rounded-sm px-4 font-mono text-[10px] font-bold tracking-widest uppercase"
             value="overview"
@@ -712,6 +755,7 @@ export function CampaignInsights({ token }: { token: string }) {
                 verified={summary.stats.verified}
                 flagged={summary.stats.flagged}
                 enabledLgaCount={summary.campaign.enabledLgaCount}
+                deltas={deltas}
               />
 
               <div className="space-y-6">
@@ -733,16 +777,6 @@ export function CampaignInsights({ token }: { token: string }) {
                   submissions={recentData?.submissions ?? []}
                   loading={recentLoading}
                   error={recentError instanceof Error ? recentError : null}
-                />
-
-                <GeographicSnapshotCard
-                  byLga={summary.stats.byLga}
-                  byWard={summary.stats.byWard}
-                />
-
-                <AudienceSnapshotCard
-                  byRole={summary.stats.byRole}
-                  bySex={summary.stats.bySex}
                 />
 
                 <ShareInviteCard
@@ -782,6 +816,7 @@ export function CampaignInsights({ token }: { token: string }) {
           )}
         </TabsContent>
       </Tabs>
+
     </div>
   );
 }

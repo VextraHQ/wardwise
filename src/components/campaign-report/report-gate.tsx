@@ -17,12 +17,14 @@ export function ReportGate({
   candidateTitle,
   party,
   constituency,
+  expiredSession = false,
 }: {
   token: string;
   candidateName: string;
   candidateTitle: string | null;
   party: string;
   constituency: string;
+  expiredSession?: boolean;
 }) {
   const router = useRouter();
   const [passcode, setPasscode] = useState(["", "", "", "", "", ""]);
@@ -73,7 +75,7 @@ export function ReportGate({
     if (!isRefreshing) return;
     const timer = window.setTimeout(() => {
       router.refresh();
-    }, 180);
+    }, 360);
     return () => window.clearTimeout(timer);
   }, [isRefreshing, router]);
 
@@ -106,9 +108,9 @@ export function ReportGate({
     return (
       <div className="mx-auto flex min-h-[60vh] w-full max-w-md flex-col justify-center">
         <AuthCard
-          title="Validating Access"
+          title="Unlocking Report"
           subtitle="Campaign Insights"
-          status="Refreshing"
+          status="Protected"
           icon={IconLoader}
         >
           <div className="flex h-[300px] flex-col items-center justify-center space-y-6 text-center">
@@ -118,10 +120,10 @@ export function ReportGate({
             </div>
             <div className="space-y-2">
               <p className="text-primary font-mono text-xs font-black tracking-widest uppercase">
-                Refreshing Secure Report
+                Unlocking private access
               </p>
-              <p className="text-muted-foreground/70 font-mono text-[10px] font-bold tracking-widest uppercase">
-                Verifying private session
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Validating your access and loading the latest campaign data.
               </p>
             </div>
           </div>
@@ -136,13 +138,17 @@ export function ReportGate({
         icon={IconKey}
         badge="Campaign Insights"
         title="Private Access"
-        description={`Secure reporting for ${candidateName} (${party}) in ${constituency}.`}
+        description={
+          expiredSession
+            ? `For your privacy, this report needs the passcode again for ${candidateName} (${party}).`
+            : `Secure reporting for ${candidateName} (${party}) in ${constituency}.`
+        }
       />
 
       <AuthCard
-        title="Access Passcode"
+        title={expiredSession ? "Re-enter Passcode" : "Access Passcode"}
         subtitle="Campaign Insights"
-        status="Protected"
+        status={expiredSession ? "Session expired" : "Protected"}
         icon={IconKey}
       >
         <div className="space-y-6 text-center">
@@ -169,6 +175,12 @@ export function ReportGate({
               </p>
             </div>
           </div>
+
+          <p className="text-muted-foreground mx-auto max-w-sm text-sm leading-relaxed">
+            {expiredSession
+              ? "For your privacy, this report needs the 6-digit passcode again."
+              : "This private campaign report is protected by an access code. Enter the 6-digit passcode shared by your campaign admin."}
+          </p>
 
           <div className="flex justify-center gap-2" onPaste={handlePaste}>
             {passcode.map((digit, i) => (
@@ -201,16 +213,21 @@ export function ReportGate({
             {unlockMutation.isPending ? "Unlocking..." : "Unlock Report"}
           </Button>
 
-          <p className="text-muted-foreground text-xs leading-relaxed">
-            Trouble accessing? Contact your campaign admin or{" "}
-            <Link
-              href={`/contact?email=${encodeURIComponent(COMPANY_INFO.supportEmail)}`}
-              className="text-primary decoration-primary/30 font-semibold underline underline-offset-4"
-            >
-              WardWise Support
-            </Link>
-            .
-          </p>
+          <div className="space-y-2">
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              Stays unlocked on this device for 24 hours.
+            </p>
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              Trouble accessing it? Contact your campaign admin or{" "}
+              <Link
+                href={`/contact?email=${encodeURIComponent(COMPANY_INFO.supportEmail)}`}
+                className="text-primary decoration-primary/30 font-semibold underline underline-offset-4"
+              >
+                WardWise Support
+              </Link>
+              .
+            </p>
+          </div>
         </div>
       </AuthCard>
     </div>

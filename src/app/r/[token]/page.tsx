@@ -65,6 +65,7 @@ export default async function ReportPage({ params }: PageProps) {
         candidateTitle={campaign.candidateTitle}
         party={campaign.party}
         constituency={campaign.constituency}
+        expiredSession={Boolean(cookieValue)}
       />
     );
   }
