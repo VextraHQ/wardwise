@@ -30,12 +30,12 @@ export function getPresetRange(
   switch (preset) {
     case "7d": {
       const from = new Date(now);
-      from.setDate(from.getDate() - 7);
+      from.setDate(from.getDate() - 6);
       return { from, to: now };
     }
     case "30d": {
       const from = new Date(now);
-      from.setDate(from.getDate() - 30);
+      from.setDate(from.getDate() - 29);
       return { from, to: now };
     }
     default:
@@ -94,10 +94,10 @@ export function getRecentWindowCount(
   const cutoff = new Date();
   cutoff.setHours(0, 0, 0, 0);
   cutoff.setDate(cutoff.getDate() - (days - 1));
+  const cutoffKey = format(cutoff, "yyyy-MM-dd");
 
   return daily.reduce((sum, entry) => {
-    const entryDate = new Date(entry.date);
-    return entryDate >= cutoff ? sum + entry.count : sum;
+    return entry.date >= cutoffKey ? sum + entry.count : sum;
   }, 0);
 }
 

@@ -65,12 +65,12 @@ function getPresetRange(preset: string): {
   switch (preset) {
     case "7d": {
       const from = new Date(now);
-      from.setDate(from.getDate() - 7);
+      from.setDate(from.getDate() - 6);
       return { from, to: now };
     }
     case "30d": {
       const from = new Date(now);
-      from.setDate(from.getDate() - 30);
+      from.setDate(from.getDate() - 29);
       return { from, to: now };
     }
     case "month": {
