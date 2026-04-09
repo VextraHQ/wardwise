@@ -4,6 +4,17 @@ import {
   type SubmissionFilters,
 } from "@/lib/exports/submissions";
 
+const REPORT_TIME_ZONE = "Africa/Lagos";
+const REPORT_UTC_OFFSET = "+01:00";
+
+function parseReportDateStart(value: string): Date {
+  return new Date(`${value}T00:00:00.000${REPORT_UTC_OFFSET}`);
+}
+
+function parseReportDateEnd(value: string): Date {
+  return new Date(`${value}T23:59:59.999${REPORT_UTC_OFFSET}`);
+}
+
 export type CampaignStats = {
   total: number;
   verified: number;
@@ -67,9 +78,10 @@ export async function getCampaignStats(
   const from = options?.from;
   const to = options?.to;
 
-  const toEndOfDay = to ? new Date(to + "T23:59:59.999Z") : undefined;
+  const fromStartOfDay = from ? parseReportDateStart(from) : undefined;
+  const toEndOfDay = to ? parseReportDateEnd(to) : undefined;
   const dateFilter = {
-    ...(from && { gte: new Date(from) }),
+    ...(fromStartOfDay && { gte: fromStartOfDay }),
     ...(toEndOfDay && { lte: toEndOfDay }),
   };
   const hasDateFilter = from || to;
@@ -99,33 +111,33 @@ export async function getCampaignStats(
       }),
 
     // Daily submissions (group by date)
-    from && toEndOfDay
+    fromStartOfDay && toEndOfDay
       ? prisma.$queryRaw<{ date: string; count: bigint }[]>`
-          SELECT DATE("createdAt")::text as date, COUNT(*)::bigint as count
+          SELECT DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE})::text as date, COUNT(*)::bigint as count
           FROM "CollectSubmission"
           WHERE "campaignId" = ${campaignId}
-            AND "createdAt" >= ${new Date(from)} AND "createdAt" <= ${toEndOfDay}
-          GROUP BY DATE("createdAt") ORDER BY date ASC
+            AND "createdAt" >= ${fromStartOfDay} AND "createdAt" <= ${toEndOfDay}
+          GROUP BY DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE}) ORDER BY date ASC
         `
-      : from
+      : fromStartOfDay
         ? prisma.$queryRaw<{ date: string; count: bigint }[]>`
-            SELECT DATE("createdAt")::text as date, COUNT(*)::bigint as count
+            SELECT DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE})::text as date, COUNT(*)::bigint as count
             FROM "CollectSubmission"
-            WHERE "campaignId" = ${campaignId} AND "createdAt" >= ${new Date(from)}
-            GROUP BY DATE("createdAt") ORDER BY date ASC
+            WHERE "campaignId" = ${campaignId} AND "createdAt" >= ${fromStartOfDay}
+            GROUP BY DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE}) ORDER BY date ASC
           `
         : toEndOfDay
           ? prisma.$queryRaw<{ date: string; count: bigint }[]>`
-              SELECT DATE("createdAt")::text as date, COUNT(*)::bigint as count
+              SELECT DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE})::text as date, COUNT(*)::bigint as count
               FROM "CollectSubmission"
               WHERE "campaignId" = ${campaignId} AND "createdAt" <= ${toEndOfDay}
-              GROUP BY DATE("createdAt") ORDER BY date ASC
+              GROUP BY DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE}) ORDER BY date ASC
             `
           : prisma.$queryRaw<{ date: string; count: bigint }[]>`
-              SELECT DATE("createdAt")::text as date, COUNT(*)::bigint as count
+              SELECT DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE})::text as date, COUNT(*)::bigint as count
               FROM "CollectSubmission"
               WHERE "campaignId" = ${campaignId}
-              GROUP BY DATE("createdAt") ORDER BY date ASC
+              GROUP BY DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE}) ORDER BY date ASC
             `,
 
     // By LGA
