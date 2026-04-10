@@ -1,5 +1,5 @@
 import type { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/core/prisma";
 import { composeFullName, parseRefCodePrefix } from "@/lib/utils";
 import {
   buildExportFilename,

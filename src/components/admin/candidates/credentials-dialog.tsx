@@ -13,9 +13,9 @@ import {
 } from "@/components/ui/dialog";
 import {
   IconCopy,
-  IconEye,
-  IconEyeOff,
   IconExternalLink,
+  IconMail,
+  IconShieldLock,
 } from "@tabler/icons-react";
 
 interface CredentialsDialogProps {
@@ -23,7 +23,9 @@ interface CredentialsDialogProps {
   onOpenChange: (open: boolean) => void;
   candidateName: string;
   email: string;
-  password: string;
+  setupUrl: string;
+  expiresAt: string;
+  deliveryMethod: "email" | "manual";
 }
 
 export function CredentialsDialog({
@@ -31,14 +33,16 @@ export function CredentialsDialog({
   onOpenChange,
   candidateName,
   email,
-  password,
+  setupUrl,
+  expiresAt,
+  deliveryMethod,
 }: CredentialsDialogProps) {
-  const [showPassword, setShowPassword] = useState(false);
+  const [showFullLink, setShowFullLink] = useState(false);
 
   function copyCredentials() {
-    const text = `WardWise Account Credentials\n\nCandidate: ${candidateName}\nEmail: ${email}\nPassword: ${password}\n\nLogin at: ${window.location.origin}/login`;
+    const text = `WardWise Account Setup\n\nCandidate: ${candidateName}\nEmail: ${email}\nSecure setup link: ${setupUrl}\n\nThis link expires on ${new Date(expiresAt).toLocaleString("en-NG")}.`;
     navigator.clipboard.writeText(text);
-    toast.success("Credentials copied to clipboard");
+    toast.success("Setup link copied to clipboard");
   }
 
   return (
@@ -47,7 +51,9 @@ export function CredentialsDialog({
         <DialogHeader>
           <DialogTitle>Account Created</DialogTitle>
           <DialogDescription>
-            Save these credentials now — the password will not be shown again.
+            {deliveryMethod === "email"
+              ? "A secure setup link has been emailed and is also available here for manual sharing."
+              : "A secure setup link is ready. Share it with the candidate to finish account activation."}
           </DialogDescription>
         </DialogHeader>
 
@@ -63,30 +69,39 @@ export function CredentialsDialog({
                 <span className="font-mono text-xs">{email}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Password</span>
+                <span className="text-muted-foreground">Delivery</span>
+                <span className="font-medium capitalize">{deliveryMethod}</span>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-muted-foreground">Setup Link</span>
                 <div className="flex items-center gap-1.5">
                   <span className="font-mono text-xs">
-                    {showPassword ? password : "••••••••••••"}
+                    {showFullLink
+                      ? setupUrl
+                      : `${setupUrl.slice(0, 34)}...${setupUrl.slice(-12)}`}
                   </span>
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowFullLink((current) => !current)}
                     className="text-muted-foreground hover:text-foreground"
                   >
-                    {showPassword ? (
-                      <IconEyeOff className="h-3.5 w-3.5" />
-                    ) : (
-                      <IconEye className="h-3.5 w-3.5" />
-                    )}
+                    <IconShieldLock className="h-3.5 w-3.5" />
                   </button>
                 </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Expires</span>
+                <span className="font-mono text-xs">
+                  {new Date(expiresAt).toLocaleString("en-NG")}
+                </span>
               </div>
             </div>
           </div>
 
           <div className="border-destructive/30 bg-destructive/10 text-destructive rounded-sm border p-2.5 text-xs">
-            This password will not be shown again. Copy it now or use Reset
-            Password later.
+            This secure link can only be used once and expires automatically. If
+            it becomes invalid, send a fresh reset link from the candidate
+            account page.
           </div>
         </div>
 
@@ -103,8 +118,14 @@ export function CredentialsDialog({
             className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
             onClick={copyCredentials}
           >
-            <IconCopy className="mr-2 h-4 w-4" />
-            Copy Credentials
+            {deliveryMethod === "email" ? (
+              <IconMail className="mr-2 h-4 w-4" />
+            ) : (
+              <IconCopy className="mr-2 h-4 w-4" />
+            )}
+            {deliveryMethod === "email"
+              ? "Copy Backup Link"
+              : "Copy Setup Link"}
           </Button>
         </DialogFooter>
       </DialogContent>

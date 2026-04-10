@@ -1,19 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth-helpers";
-import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/guards";
+import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import { updateCampaignSchema } from "@/lib/schemas/collect-schemas";
-import { logAudit } from "@/lib/audit";
+import { logAudit } from "@/lib/core/audit";
 import {
   normalizeConstituencyLgaIds,
   positionRequiresLgas,
-} from "@/lib/utils/constituency";
-import { resolveCandidateCampaignLgaIds } from "@/lib/utils/constituency-server";
+} from "@/lib/geo/constituency";
+import { resolveCandidateCampaignLgaIds } from "@/lib/geo/constituency-server";
 import {
   generateReportToken,
   generatePasscode,
   hashPasscode,
 } from "@/lib/server/report-access";
+import { normalizeCampaignDisplayName } from "@/lib/collect/branding";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -91,7 +92,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
-    const { error, session } = await requireAdmin();
+    const { error, user } = await requireAdmin();
     if (error) return error;
 
     const { id } = await params;
@@ -224,6 +225,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       where: { id },
       data: {
         ...(d.slug !== undefined && { slug: d.slug }),
+        ...(d.brandingType !== undefined && { brandingType: d.brandingType }),
+        ...(d.displayName !== undefined && {
+          displayName: normalizeCampaignDisplayName(d.displayName),
+        }),
         ...(d.enabledLgaIds !== undefined && {
           enabledLgaIds: d.enabledLgaIds,
         }),
@@ -238,7 +243,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       },
     });
 
-    void logAudit("campaign.update", "campaign", id, session!.user.id, {
+    void logAudit("campaign.update", "campaign", id, user!.id, {
       changedFields: Object.keys(d).filter(
         (k) => d[k as keyof typeof d] !== undefined,
       ),
@@ -282,14 +287,14 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
   try {
-    const { error, session } = await requireAdmin();
+    const { error, user } = await requireAdmin();
     if (error) return error;
 
     const { id } = await params;
 
     await prisma.campaign.delete({ where: { id } });
 
-    void logAudit("campaign.delete", "campaign", id, session!.user.id);
+    void logAudit("campaign.delete", "campaign", id, user!.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

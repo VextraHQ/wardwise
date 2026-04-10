@@ -40,7 +40,7 @@ type Candidate = {
 const STEP_TITLES = ["Select Candidate", "Questions & Review"];
 
 const stepFieldMap: Record<number, (keyof CreateCampaignData)[]> = {
-  0: ["candidateId", "slug"],
+  0: ["candidateId", "slug", "brandingType", "displayName"],
   1: [],
 };
 
@@ -61,6 +61,8 @@ export function CampaignWizard() {
     defaultValues: {
       candidateId: "",
       slug: "",
+      brandingType: "candidate",
+      displayName: "",
       enabledLgaIds: [],
       customQuestion1: "",
       customQuestion2: "",
@@ -121,6 +123,8 @@ export function CampaignWizard() {
       const result = await createCampaign.mutateAsync({
         candidateId: data.candidateId,
         slug: data.slug.trim(),
+        brandingType: data.brandingType,
+        displayName: data.displayName?.trim() || null,
         enabledLgaIds: data.enabledLgaIds,
         customQuestion1: data.customQuestion1?.trim() || null,
         customQuestion2: data.customQuestion2?.trim() || null,

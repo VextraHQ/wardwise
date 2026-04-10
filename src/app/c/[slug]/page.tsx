@@ -1,13 +1,17 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/core/prisma";
 import { CampaignRegistrationForm } from "@/components/collect/campaign-registration-form";
 import type { PublicCampaign } from "@/types/collect";
 import {
   createDefaultOpenGraph,
   createDefaultTwitter,
   getSiteUrl,
-} from "@/lib/metadata";
+} from "@/lib/core/metadata";
+import {
+  getCampaignBrandingType,
+  getEffectiveCampaignName,
+} from "@/lib/collect/branding";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -19,15 +23,21 @@ export async function generateMetadata({
   const { slug } = await params;
   const campaign = await prisma.campaign.findUnique({
     where: { slug },
-    select: { candidateName: true, party: true, constituency: true },
+    select: {
+      candidateName: true,
+      displayName: true,
+      party: true,
+      constituency: true,
+    },
   });
 
   if (!campaign) {
     return { title: "Campaign Not Found" };
   }
 
-  const title = `Register — ${campaign.candidateName} (${campaign.party})`;
-  const description = `Join ${campaign.candidateName}'s supporter registration for ${campaign.constituency} on WardWise.`;
+  const campaignName = getEffectiveCampaignName(campaign);
+  const title = `Register — ${campaignName} (${campaign.party})`;
+  const description = `Join ${campaignName} on WardWise for supporter registration in ${campaign.constituency}.`;
   const url = `${getSiteUrl()}/c/${slug}`;
 
   return {
@@ -55,6 +65,8 @@ export default async function CampaignPage({ params }: PageProps) {
       slug: true,
       candidateName: true,
       candidateTitle: true,
+      brandingType: true,
+      displayName: true,
       party: true,
       constituency: true,
       constituencyType: true,
@@ -73,7 +85,10 @@ export default async function CampaignPage({ params }: PageProps) {
     notFound();
   }
 
-  const initialCampaign: PublicCampaign = campaign;
+  const initialCampaign: PublicCampaign = {
+    ...campaign,
+    brandingType: getCampaignBrandingType(campaign.brandingType),
+  };
 
   return <CampaignRegistrationForm initialCampaign={initialCampaign} />;
 }

@@ -1,3 +1,5 @@
+import type { CampaignBrandingType } from "@/lib/collect/branding";
+
 // Campaign type (matches API response — dates as ISO strings)
 export type Campaign = {
   id: string;
@@ -5,6 +7,8 @@ export type Campaign = {
   slug: string;
   candidateName: string;
   candidateTitle: string | null;
+  brandingType: CampaignBrandingType;
+  displayName: string | null;
   party: string;
   constituency: string;
   constituencyType: string; // "federal" | "state" | "lga"
@@ -69,6 +73,8 @@ export type PublicCampaign = {
   slug: string;
   candidateName: string;
   candidateTitle: string | null;
+  brandingType: CampaignBrandingType;
+  displayName: string | null;
   party: string;
   constituency: string;
   constituencyType: string;

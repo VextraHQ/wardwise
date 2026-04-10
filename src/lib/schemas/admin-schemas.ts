@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { emailSchema, phoneSchema } from "@/lib/schemas/common-schemas";
-import { getPositionStateValidationMessage } from "@/lib/utils/constituency";
+import { getPositionStateValidationMessage } from "@/lib/geo/constituency";
 
 // Candidate position enum
 export const candidatePositionSchema = z.enum([

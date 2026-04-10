@@ -9,15 +9,34 @@ datasource db {
 }
 
 model User {
-  id          String     @id @default(cuid())
-  name        String?
-  email       String     @unique
-  password    String?
-  role        String     @default("candidate")
-  candidateId String?    @unique
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  candidate   Candidate? @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  id                String      @id @default(cuid())
+  name              String?
+  email             String      @unique
+  password          String?
+  role              String      @default("candidate")
+  candidateId       String?     @unique
+  sessionVersion    Int         @default(0)
+  passwordChangedAt DateTime?
+  lastLoginAt       DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  candidate         Candidate?  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  authTokens        AuthToken[]
+}
+
+model AuthToken {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // "invite" | "password_reset"
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime @default(now())
+  createdById String?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([expiresAt])
 }
 
 model Candidate {
@@ -144,6 +163,8 @@ model Campaign {
   slug             String   @unique
   candidateName    String
   candidateTitle   String?
+  brandingType     String   @default("candidate")
+  displayName      String?
   party            String
   constituency     String
   constituencyType String   // "federal" | "state" | "lga"

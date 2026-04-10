@@ -17,11 +17,15 @@ import {
 } from "@/components/ui/table";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { IconPlus, IconClipboardList } from "@tabler/icons-react";
+import type { CampaignBrandingType } from "@/lib/collect/branding";
+import { getEffectiveCampaignName } from "@/lib/collect/branding";
 
 type CampaignSummary = {
   id: string;
   slug: string;
   candidateName: string;
+  brandingType: CampaignBrandingType;
+  displayName: string | null;
   party: string;
   constituency: string;
   status: string;
@@ -167,11 +171,16 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
                 <TableCell>
                   <div>
                     <span className="text-sm font-medium">
-                      {campaign.candidateName}
+                      {getEffectiveCampaignName(campaign)}
                     </span>
                     <span className="text-muted-foreground block font-mono text-xs">
                       /c/{campaign.slug}
                     </span>
+                    {campaign.displayName && (
+                      <span className="text-muted-foreground block text-xs">
+                        Anchor: {campaign.candidateName}
+                      </span>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell>

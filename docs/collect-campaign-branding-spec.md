@@ -1,8 +1,8 @@
-# WardWise Collect Campaign Presentation Spec
+# WardWise Collect Campaign Branding Spec
 
 > Narrow bridge for movement/team-branded Collect campaigns without introducing a new Organizations system.
 > Branch: `develop` | Last updated: 2026-04-08
-> Future changes: branch off `develop` → `feature/collect-presentation-*`
+> Future changes: branch off `develop` → `feature/collect-branding-*`
 
 ---
 
@@ -15,9 +15,9 @@ That works for real candidates like Governor Fintiri, but it becomes awkward for
 - `City Boy Movement Adamawa`
 - `Fintiri Canvassers`
 
-The geo model already supports these campaigns operationally through the Governor path (`Governor` + `Adamawa` = all Adamawa LGAs). The gap is not geography. The gap is presentation.
+The geo model already supports these campaigns operationally through the Governor path (`Governor` + `Adamawa` = all Adamawa LGAs). The gap is not geography. The gap is branding.
 
-This spec introduces a small campaign-level presentation layer so a campaign can be branded as a movement or team while still using the existing candidate anchor underneath.
+This spec introduces a small campaign-level branding layer so a campaign can be branded as a movement or team while still using the existing candidate anchor underneath.
 
 ---
 
@@ -26,7 +26,7 @@ This spec introduces a small campaign-level presentation layer so a campaign can
 ### Do Now
 
 - Keep using the existing `Governor` + `Adamawa` candidate path for statewide Adamawa campaigns.
-- Ship a small campaign-presentation feature next, so Collect surfaces can show a movement/team label instead of always showing the underlying candidate name.
+- Ship a small campaign-branding feature next, so Collect surfaces can show a movement/team label instead of always showing the underlying candidate name.
 
 ### Do Not Do Yet
 
@@ -51,17 +51,17 @@ Separate these concerns explicitly:
 
 - `Candidate` = internal scope and campaign anchor
 - `Campaign` = Collect workflow and submissions
-- `Campaign presentation` = what the campaign is called on public/admin Collect surfaces
+- `Campaign branding` = what the campaign is called on public/admin Collect surfaces
 - `Account/login` = later phase, separate concern
 
 ### Chosen Design
 
 Add two fields to `Campaign`:
 
-| Field              | Type                           | Purpose                                                                                    |
-| ------------------ | ------------------------------ | ------------------------------------------------------------------------------------------ |
-| `presentationType` | `String @default("candidate")` | Describes how the campaign should be presented: `candidate`, `movement`, or `team`         |
-| `displayName`      | `String?`                      | Optional campaign-facing label such as `City Boy Movement Adamawa` or `Fintiri Canvassers` |
+| Field          | Type                           | Purpose                                                                                    |
+| -------------- | ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `brandingType` | `String @default("candidate")` | Describes how the campaign should be branded: `candidate`, `movement`, or `team`           |
+| `displayName`  | `String?`                      | Optional campaign-facing label such as `City Boy Movement Adamawa` or `Fintiri Canvassers` |
 
 ### Effective Name Rule
 
@@ -97,8 +97,8 @@ That is valid later, but too heavy for the current need.
 Add to `Campaign`:
 
 ```prisma
-presentationType String @default("candidate")
-displayName      String?
+brandingType String @default("candidate")
+displayName  String?
 ```
 
 `candidateId` remains required.
@@ -107,9 +107,9 @@ displayName      String?
 
 Campaign create/update schemas should support:
 
-- `presentationType`: `candidate | movement | team`
-- `displayName`: optional when `presentationType = candidate`
-- `displayName`: required and trimmed when `presentationType = movement` or `team`
+- `brandingType`: `candidate | movement | team`
+- `displayName`: optional when `brandingType = candidate`
+- `displayName`: required and trimmed when `brandingType = movement` or `team`
 
 ### API Contract
 
@@ -117,7 +117,7 @@ Do not remove `candidateName`.
 
 Return the new fields in campaign APIs:
 
-- `presentationType`
+- `brandingType`
 - `displayName`
 
 Collect clients should derive `effectiveCampaignName` from `displayName ?? candidateName`.
@@ -132,9 +132,9 @@ This keeps the change additive and low-risk.
 
 Keep candidate selection exactly as it is today.
 
-Add a small "Campaign Presentation" section to the campaign wizard:
+Add a small "Campaign Branding" section to the campaign wizard:
 
-- Presentation type: `Candidate`, `Movement`, `Team`
+- Branding type: `Candidate`, `Movement`, `Team`
 - Display name: text input
 - Default behavior:
   - `Candidate` selected
@@ -144,7 +144,7 @@ Add a small "Campaign Presentation" section to the campaign wizard:
 Examples:
 
 - Candidate anchor: `Ahmadu Umaru Fintiri`
-- Presentation type: `team`
+- Branding type: `team`
 - Display name: `Fintiri Canvassers`
 
 Result:
@@ -162,7 +162,7 @@ Update Collect-facing copy to use `effectiveCampaignName`:
 - share/invite card text
 - any user-facing header badge
 
-When `presentationType !== candidate`, avoid copy that implies the label is a person. Use neutral phrasing like:
+When `brandingType !== candidate`, avoid copy that implies the label is a person. Use neutral phrasing like:
 
 - `Supporter registration for {effectiveCampaignName}`
 - `Join {effectiveCampaignName} on WardWise`
@@ -188,7 +188,7 @@ Candidate admin remains unchanged. The underlying anchor still appears in candid
 
 ### In Scope
 
-- Campaign presentation fields
+- Campaign branding fields
 - Collect public naming/copy
 - Collect admin campaign naming/copy
 - Additive schema and API changes only
@@ -214,7 +214,7 @@ Until this feature ships:
 
 Once this feature ships:
 
-- existing campaigns can be updated with `presentationType` + `displayName`
+- existing campaigns can be updated with `brandingType` + `displayName`
 - no geo migration is required
 - no submission migration is required
 
@@ -227,9 +227,9 @@ Once this feature ships:
 - Continue using the Governor workaround for statewide Adamawa campaigns
 - Do not build a new section or ownership model yet
 
-### Phase 1 — Presentation Bridge
+### Phase 1 — Branding Bridge
 
-- Add `presentationType` and `displayName` to `Campaign`
+- Add `brandingType` and `displayName` to `Campaign`
 - Update schemas, API types, and campaign routes
 - Update Collect public/admin naming surfaces to use `displayName ?? candidateName`
 
@@ -264,11 +264,11 @@ Build a first-class org/movement entity only when at least one of these becomes 
 
 | File                                                | Purpose                                           |
 | --------------------------------------------------- | ------------------------------------------------- |
-| `prisma/schema.prisma`                              | Add campaign presentation fields                  |
-| `src/lib/schemas/collect-schemas.ts`                | Validate `presentationType` and `displayName`     |
+| `prisma/schema.prisma`                              | Add campaign branding fields                      |
+| `src/lib/schemas/collect-schemas.ts`                | Validate `brandingType` and `displayName`         |
 | `src/app/api/admin/collect/campaigns/route.ts`      | Persist new fields on create                      |
 | `src/app/api/admin/collect/campaigns/[id]/route.ts` | Persist new fields on update                      |
-| `src/app/api/collect/campaign/[slug]/route.ts`      | Return presentation fields to public form         |
+| `src/app/api/collect/campaign/[slug]/route.ts`      | Return branding fields to public form             |
 | `src/components/admin/collect/*`                    | Show effective campaign name in Collect admin UI  |
 | `src/components/collect/*`                          | Show effective campaign name in public Collect UI |
 
@@ -276,10 +276,10 @@ Build a first-class org/movement entity only when at least one of these becomes 
 
 ## Summary
 
-The best move now is not a full organizations system. It is a small, additive campaign-presentation bridge:
+The best move now is not a full organizations system. It is a small, additive campaign-branding bridge:
 
 - keep the current candidate-backed scope model
-- add campaign-facing presentation fields
+- add campaign-facing branding fields
 - use them only on Collect surfaces
 - defer ownership, auth, and org CRUD until the product truly needs them
 

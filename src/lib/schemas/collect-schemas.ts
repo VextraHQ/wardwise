@@ -3,6 +3,10 @@ import {
   phoneSchema,
   normalizeNigerianPhoneInput,
 } from "@/lib/schemas/common-schemas";
+import {
+  campaignBrandingTypes,
+  normalizeCampaignDisplayName,
+} from "@/lib/collect/branding";
 
 // ── VIN regex (INEC standard: 19 alphanumeric characters) ──
 const vinRegex = /^[A-Za-z0-9]{19}$/;
@@ -152,17 +156,36 @@ export type RegistrationFormData = {
 
 // ── Admin: Campaign schemas (single source of truth) ──
 
-export const createCampaignSchema = z.object({
-  candidateId: z.string().min(1, "Select a candidate"),
-  slug: z
-    .string()
-    .min(3, "Slug must be at least 3 characters")
-    .max(60, "Slug too long")
-    .regex(/^[a-z0-9-]+$/, "Only lowercase letters, numbers, and hyphens"),
-  enabledLgaIds: z.array(z.number()),
-  customQuestion1: z.string().nullish().or(z.literal("")),
-  customQuestion2: z.string().nullish().or(z.literal("")),
-});
+export const createCampaignSchema = z
+  .object({
+    candidateId: z.string().min(1, "Select a candidate"),
+    slug: z
+      .string()
+      .min(3, "Slug must be at least 3 characters")
+      .max(60, "Slug too long")
+      .regex(/^[a-z0-9-]+$/, "Only lowercase letters, numbers, and hyphens"),
+    brandingType: z.enum(campaignBrandingTypes),
+    displayName: z
+      .string()
+      .max(120, "Public campaign name must not exceed 120 characters")
+      .nullish()
+      .or(z.literal("")),
+    enabledLgaIds: z.array(z.number()),
+    customQuestion1: z.string().nullish().or(z.literal("")),
+    customQuestion2: z.string().nullish().or(z.literal("")),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.brandingType !== "candidate" &&
+      !normalizeCampaignDisplayName(data.displayName)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["displayName"],
+        message: "Enter a public campaign name for movement or team branding",
+      });
+    }
+  });
 
 export type CreateCampaignData = z.infer<typeof createCampaignSchema>;
 

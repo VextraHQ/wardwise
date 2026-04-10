@@ -6,8 +6,8 @@ import {
   touchReportLastViewed,
   REPORT_COOKIE_NAME,
 } from "@/lib/server/report-access";
-import { reportUnlockRateLimit, getClientIp } from "@/lib/rate-limit";
-import { logAudit } from "@/lib/audit";
+import { reportUnlockRateLimit, getClientIp } from "@/lib/core/rate-limit";
+import { logAudit } from "@/lib/core/audit";
 
 type RouteParams = { params: Promise<unknown> };
 

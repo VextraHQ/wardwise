@@ -1,8 +1,14 @@
 import { z } from "zod";
 
+export function normalizeEmailInput(input: string) {
+  return input.trim().toLowerCase();
+}
+
 // Email validation schema
 export const emailSchema = z
   .string()
+  .trim()
+  .toLowerCase()
   .min(1, "Email is required")
   .email("Please enter a valid email address");
 

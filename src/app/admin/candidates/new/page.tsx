@@ -1,5 +1,5 @@
 import { CreateCandidateForm } from "@/components/admin/candidates/create-candidate-form";
-import { createAdminMetadata } from "@/lib/metadata";
+import { createAdminMetadata } from "@/lib/core/metadata";
 
 export const metadata = createAdminMetadata({
   title: "New Candidate",

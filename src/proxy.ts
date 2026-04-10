@@ -1,4 +1,5 @@
 import { withAuth } from "next-auth/middleware";
+import { isSessionWithinLifetime } from "@/lib/auth/session";
 
 export default withAuth(
   function proxy(_req) {
@@ -7,16 +8,23 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
+        const isSessionActive = token ? isSessionWithinLifetime(token) : false;
+
         // Protect candidate dashboard routes
         if (
           req.nextUrl.pathname.startsWith("/dashboard") ||
           req.nextUrl.pathname.startsWith("/(candidate)")
         ) {
-          return !!token && token.role === "candidate";
+          return (
+            !!token &&
+            isSessionActive &&
+            token.role === "candidate" &&
+            token.onboardingStatus === "active"
+          );
         }
         // Protect admin routes
         if (req.nextUrl.pathname.startsWith("/admin")) {
-          return !!token && token.role === "admin";
+          return !!token && isSessionActive && token.role === "admin";
         }
         return true;
       },

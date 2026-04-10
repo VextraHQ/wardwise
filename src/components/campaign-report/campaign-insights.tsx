@@ -36,8 +36,9 @@ import {
   timeAgo,
   type CampaignReportDelta,
   type CampaignReportRangePreset,
-} from "@/lib/helpers/campaign-report";
-import { formatGeoDisplayName } from "@/lib/utils/geo-display";
+} from "@/lib/collect/reporting";
+import { getEffectiveCampaignName } from "@/lib/collect/branding";
+import { formatGeoDisplayName } from "@/lib/geo/display";
 import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
 import { ShareInviteCard } from "@/components/collect/share-invite-card";
 import type { CampaignReportSubmission } from "@/types/campaign-report";
@@ -465,13 +466,11 @@ function RecentActivityCard({
 
 function ReadyToCollectState({
   slug,
-  candidateName,
-  candidateTitle,
+  campaignName,
   party,
 }: {
   slug: string;
-  candidateName: string;
-  candidateTitle: string | null;
+  campaignName: string;
   party: string;
 }) {
   const formUrl =
@@ -521,8 +520,7 @@ function ReadyToCollectState({
 
         <ShareInviteCard
           campaignSlug={slug}
-          candidateName={candidateName}
-          candidateTitle={candidateTitle}
+          campaignName={campaignName}
           party={party}
           qrSize={180}
         />
@@ -650,6 +648,7 @@ export function CampaignInsights({ token }: { token: string }) {
   }
 
   const isEmpty = summary.stats.total === 0;
+  const campaignName = getEffectiveCampaignName(summary.campaign);
   const verifiedRate = getVerificationRate(
     summary.stats.total,
     summary.stats.verified,
@@ -910,8 +909,7 @@ export function CampaignInsights({ token }: { token: string }) {
           {isEmpty ? (
             <ReadyToCollectState
               slug={summary.campaign.slug}
-              candidateName={summary.campaign.candidateName}
-              candidateTitle={summary.campaign.candidateTitle}
+              campaignName={campaignName}
               party={summary.campaign.party}
             />
           ) : (
@@ -950,8 +948,7 @@ export function CampaignInsights({ token }: { token: string }) {
 
                 <ShareInviteCard
                   campaignSlug={summary.campaign.slug}
-                  candidateName={summary.campaign.candidateName}
-                  candidateTitle={summary.campaign.candidateTitle}
+                  campaignName={campaignName}
                   party={summary.campaign.party}
                   qrSize={180}
                 />
@@ -968,8 +965,7 @@ export function CampaignInsights({ token }: { token: string }) {
           {isEmpty ? (
             <ReadyToCollectState
               slug={summary.campaign.slug}
-              candidateName={summary.campaign.candidateName}
-              candidateTitle={summary.campaign.candidateTitle}
+              campaignName={campaignName}
               party={summary.campaign.party}
             />
           ) : (

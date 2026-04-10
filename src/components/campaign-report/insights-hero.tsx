@@ -2,7 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { capitalize } from "@/lib/helpers/campaign-report";
+import { capitalize } from "@/lib/collect/reporting";
+import type { CampaignBrandingType } from "@/lib/collect/branding";
+import {
+  getEffectiveCampaignName,
+  shouldShowCandidateTitle,
+} from "@/lib/collect/branding";
 import { IconCopy } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { STATUS_STYLES } from "./insights-helpers";
@@ -14,6 +19,8 @@ export function InsightsHero({
   campaign: {
     candidateName: string;
     candidateTitle: string | null;
+    brandingType: CampaignBrandingType;
+    displayName: string | null;
     party: string;
     constituency: string;
     constituencyType: string;
@@ -27,6 +34,8 @@ export function InsightsHero({
     typeof window !== "undefined"
       ? `${process.env.NEXT_PUBLIC_COLLECT_BASE_URL || window.location.origin}/c/${campaign.slug}`
       : "";
+  const campaignName = getEffectiveCampaignName(campaign);
+  const showCandidateTitle = shouldShowCandidateTitle(campaign);
 
   const handleCopyFormLink = async () => {
     try {
@@ -82,12 +91,12 @@ export function InsightsHero({
 
             <div className="space-y-1">
               <h1 className="text-foreground text-[1.5rem] leading-tight font-black tracking-tight text-balance sm:text-[1.95rem] lg:text-[2.15rem]">
-                {campaign.candidateTitle && (
+                {showCandidateTitle && campaign.candidateTitle && (
                   <span className="text-muted-foreground mr-2 text-[0.68em] font-medium">
                     {campaign.candidateTitle}
                   </span>
                 )}
-                {campaign.candidateName}
+                {campaignName}
               </h1>
               <p className="text-muted-foreground max-w-3xl text-[11px] leading-relaxed font-semibold tracking-[0.22em] uppercase">
                 {campaign.constituency}

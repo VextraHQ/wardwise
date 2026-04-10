@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth-helpers";
+import { requireAdmin } from "@/lib/auth/guards";
 import { buildCanvasserLeaderboardExportTable } from "@/lib/exports/canvasser-leaderboard";
 import { renderCsv } from "@/lib/exports/csv";
 import {

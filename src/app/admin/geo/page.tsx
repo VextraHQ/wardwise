@@ -1,5 +1,5 @@
 import { GeoManagement } from "@/components/admin/geo/geo-management";
-import { createAdminMetadata } from "@/lib/metadata";
+import { createAdminMetadata } from "@/lib/core/metadata";
 
 export const metadata = createAdminMetadata({
   title: "Geo Data",

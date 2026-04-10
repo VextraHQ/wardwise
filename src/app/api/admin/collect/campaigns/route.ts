@@ -1,14 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth-helpers";
-import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/guards";
+import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import { createCampaignSchema } from "@/lib/schemas/collect-schemas";
-import { logAudit } from "@/lib/audit";
+import { logAudit } from "@/lib/core/audit";
 import {
   positionToConstituencyType,
   positionRequiresLgas,
-} from "@/lib/utils/constituency";
-import { resolveCandidateCampaignLgaIds } from "@/lib/utils/constituency-server";
+} from "@/lib/geo/constituency";
+import { resolveCandidateCampaignLgaIds } from "@/lib/geo/constituency-server";
+import { normalizeCampaignDisplayName } from "@/lib/collect/branding";
 
 export async function GET(request: NextRequest) {
   try {
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { error, session } = await requireAdmin();
+    const { error, user } = await requireAdmin();
     if (error) return error;
 
     const body = await request.json();
@@ -153,6 +154,8 @@ export async function POST(request: NextRequest) {
         slug: data.slug,
         candidateName: candidate.name,
         candidateTitle: candidate.title || null,
+        brandingType: data.brandingType,
+        displayName: normalizeCampaignDisplayName(data.displayName),
         party: candidate.party,
         constituency: candidate.constituency || "",
         constituencyType,
@@ -162,16 +165,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    void logAudit(
-      "campaign.create",
-      "campaign",
-      campaign.id,
-      session!.user.id,
-      {
-        slug: data.slug,
-        candidateName: candidate.name,
-      },
-    );
+    void logAudit("campaign.create", "campaign", campaign.id, user!.id, {
+      slug: data.slug,
+      candidateName: candidate.name,
+    });
 
     const { clientReportPasscodeHash: _createHash, ...campaignWithoutHash } =
       campaign;

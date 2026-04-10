@@ -19,8 +19,12 @@ import {
 } from "@/components/collect/form-ui";
 import { LgaCheckboxGrid } from "@/components/admin/shared/lga-checkbox-grid";
 import { useGeoLgas } from "@/hooks/use-geo";
-import { positionRequiresLgas } from "@/lib/utils/constituency";
+import { positionRequiresLgas } from "@/lib/geo/constituency";
 import type { CreateCampaignData } from "@/lib/schemas/collect-schemas";
+import {
+  getCampaignBrandingLabel,
+  getEffectiveCampaignName,
+} from "@/lib/collect/branding";
 
 type CandidateInfo = {
   id: string;
@@ -51,9 +55,17 @@ export function StepQuestionsReview({
   const [restrictMode, setRestrictMode] = useState(false);
 
   const slug = watch("slug");
+  const brandingType = watch("brandingType");
+  const displayName = watch("displayName");
   const enabledLgaIds = watch("enabledLgaIds");
   const customQuestion1 = watch("customQuestion1");
   const customQuestion2 = watch("customQuestion2");
+  const campaignName = selectedCandidate
+    ? getEffectiveCampaignName({
+        candidateName: selectedCandidate.name,
+        displayName,
+      })
+    : displayName?.trim() || "—";
 
   // Only fetch LGAs when candidate has constituency LGAs and we might need to show the grid
   const needsLgas =
@@ -207,8 +219,13 @@ export function StepQuestionsReview({
           />
 
           <div className="bg-muted/30 divide-border/40 divide-y rounded-sm border">
+            <ReviewRow label="Public Name" value={campaignName} />
             <ReviewRow
-              label="Candidate"
+              label="Branding"
+              value={getCampaignBrandingLabel(brandingType)}
+            />
+            <ReviewRow
+              label="Anchor Candidate"
               value={selectedCandidate?.name || "—"}
             />
             <ReviewRow label="Party" value={selectedCandidate?.party || "—"} />

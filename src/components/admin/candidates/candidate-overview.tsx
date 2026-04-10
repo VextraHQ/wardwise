@@ -55,7 +55,7 @@ import {
   getConstituencyBoundaryWarnings,
   matchPresetToSeededIds,
   findMatchingPreset,
-} from "@/lib/utils/constituency";
+} from "@/lib/geo/constituency";
 import {
   getPresetsForState,
   getUnsupportedPresetsForState,

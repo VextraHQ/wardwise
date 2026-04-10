@@ -24,10 +24,8 @@ function useShareUrl(slug: string) {
 interface ShareInviteCardProps {
   /** Campaign slug used to build the share URL */
   campaignSlug: string;
-  /** Candidate name for share text */
-  candidateName: string;
-  /** Optional candidate title for share text */
-  candidateTitle?: string | null;
+  /** Effective campaign name for share text */
+  campaignName: string;
   /** Party name for share text */
   party: string;
   /** Wrap in motion.div with fade-in animation? */
@@ -40,20 +38,16 @@ interface ShareInviteCardProps {
 
 export function ShareInviteCard({
   campaignSlug,
-  candidateName,
-  candidateTitle,
+  campaignName,
   party,
   animated = false,
   animationDelay = 0,
   qrSize = 120,
 }: ShareInviteCardProps) {
   const shareUrl = useShareUrl(campaignSlug);
-  const displayName = candidateTitle
-    ? `${candidateTitle} ${candidateName}`
-    : candidateName;
-  const campaignLabel = `${displayName} (${party})`;
-  const shareText = `Support ${campaignLabel}. Complete your registration on WardWise here: ${shareUrl}`;
-  const emailSubject = `${displayName} Campaign Registration via WardWise`;
+  const campaignLabel = `${campaignName} (${party})`;
+  const shareText = `Join ${campaignLabel} on WardWise. Complete your supporter registration here: ${shareUrl}`;
+  const emailSubject = `${campaignName} Supporter Registration`;
   const emailBody = `Hello,
 
 You can register your support for ${campaignLabel} on WardWise here:

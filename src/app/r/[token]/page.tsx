@@ -9,10 +9,14 @@ import {
   createDefaultOpenGraph,
   createDefaultTwitter,
   getSiteUrl,
-} from "@/lib/metadata";
+} from "@/lib/core/metadata";
 import { ReportGate } from "@/components/campaign-report/report-gate";
 import { ReportUnavailable } from "@/components/campaign-report/report-unavailable";
 import { CampaignInsights } from "@/components/campaign-report/campaign-insights";
+import {
+  getCampaignBrandingType,
+  getEffectiveCampaignName,
+} from "@/lib/collect/branding";
 
 type PageProps = {
   params: Promise<{ token: string }>;
@@ -28,8 +32,9 @@ export async function generateMetadata({
     return { title: "Report Unavailable" };
   }
 
-  const title = `Campaign Insights — ${campaign.candidateName} (${campaign.party})`;
-  const description = `Private campaign reporting for ${campaign.candidateName} in ${campaign.constituency}.`;
+  const campaignName = getEffectiveCampaignName(campaign);
+  const title = `Campaign Insights — ${campaignName} (${campaign.party})`;
+  const description = `Private campaign reporting for ${campaignName} in ${campaign.constituency}.`;
   const url = `${getSiteUrl()}/r/${token}`;
 
   return {
@@ -63,6 +68,8 @@ export default async function ReportPage({ params }: PageProps) {
         token={token}
         candidateName={campaign.candidateName}
         candidateTitle={campaign.candidateTitle}
+        brandingType={getCampaignBrandingType(campaign.brandingType)}
+        displayName={campaign.displayName}
         party={campaign.party}
         constituency={campaign.constituency}
         expiredSession={Boolean(cookieValue)}

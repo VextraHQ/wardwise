@@ -5,6 +5,7 @@ import { HiArrowUpRight } from "react-icons/hi2";
 import { Header } from "@/components/layout/header";
 import { COMPANY_INFO } from "@/lib/data/legal-data";
 import type { PublicCampaign } from "@/types/collect";
+import { getEffectiveCampaignName } from "@/lib/collect/branding";
 
 export function FormShell({
   children,
@@ -13,13 +14,12 @@ export function FormShell({
   children: React.ReactNode;
   campaign: PublicCampaign;
 }) {
+  const campaignName = getEffectiveCampaignName(campaign);
+
   return (
     <div className="bg-background relative min-h-screen overflow-hidden">
       <div className="relative z-10 flex min-h-screen flex-col">
-        <Header
-          badge={`${campaign.candidateName} — ${campaign.party}`}
-          hideMobileBadge={true}
-        />
+        <Header badge={`${campaignName} — ${campaign.party}`} hideMobileBadge />
 
         <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-start px-4 py-8">
           {children}

@@ -16,7 +16,7 @@
 
 import type { Candidate } from "@/types/candidate";
 import { candidates } from "@/lib/mock/data/candidates";
-import { getCandidateByIdWithSupporters } from "@/lib/helpers/candidate-helpers";
+import { getCandidateByIdWithSupporters } from "@/lib/candidate/directory";
 
 // Simple helper for API calls (for real API)
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {

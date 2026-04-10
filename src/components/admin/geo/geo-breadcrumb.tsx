@@ -9,7 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { getStateByCode } from "@/lib/data/state-lga-locations";
-import { formatGeoDisplayName } from "@/lib/utils/geo-display";
+import { formatGeoDisplayName } from "@/lib/geo/display";
 
 interface GeoBreadcrumbProps {
   stateCode: string | null;

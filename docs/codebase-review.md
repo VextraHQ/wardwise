@@ -35,7 +35,6 @@ src/
 
 **Areas for improvement:**
 
-- The `proxy.ts` middleware file is in `src/` rather than the standard `middleware.ts` location in the Next.js app root. This means **Next.js won't auto-detect it** — it needs to be at `src/middleware.ts`.
 - Some schema duplication: `createCandidateSchema` / `updateCandidateSchema` share ~80% of their field definitions. Could use `.partial()` + `.extend()` pattern (already done for campaign schemas — should standardise).
 - No `lib/api/` barrel file to match the schemas barrel.
 
@@ -77,7 +76,6 @@ src/
 - **Credentials-only auth** (NextAuth v4) — no CSRF token rotation by default for credential-based flows; no account lockout after N failed attempts.
 - `remotePatterns: [{ hostname: "**" }]` in `next.config.ts` allows **any** remote image host — potential for abuse in production.
 - **No Content Security Policy** headers configured.
-- `.env` file exists in the project root (should only be `.env.local` and `.env.example` checked in).
 - The `onboardingStatus` field is a plain string in Prisma, not a Prisma enum — allows invalid states to be written directly to the DB outside of Zod validation.
 
 ---
@@ -199,7 +197,6 @@ This is the single biggest gap in the codebase. At minimum, the following should
 ### Priority Action Items
 
 1. **Add tests** — start with Zod schema tests and API route integration tests (Vitest + MSW or similar)
-2. **Fix middleware location** — rename `src/proxy.ts` → `src/middleware.ts` for Next.js auto-detection
-3. **Tighten image remote patterns** — replace `hostname: "**"` with specific allowed domains
-4. **Consolidate icon libraries** — pick one (lucide-react pairs best with shadcn/ui) and migrate
-5. **Configure QueryClient defaults** — add global error handler, retry config, default staleTime
+2. **Tighten image remote patterns** — replace `hostname: "**"` with specific allowed domains
+3. **Consolidate icon libraries** — pick one (lucide-react pairs best with shadcn/ui) and migrate
+4. **Configure QueryClient defaults** — add global error handler, retry config, default staleTime

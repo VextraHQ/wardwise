@@ -11,7 +11,7 @@ import { CookieConsentBanner } from "@/components/layout/cookie-consent";
 export function AppProviders({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
   return (
-    <SessionProvider>
+    <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus>
       <QueryClientProvider client={queryClient}>
         {children}
         <AnalyticsProvider />

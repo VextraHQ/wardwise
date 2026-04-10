@@ -1,7 +1,7 @@
 # WardWise Production Hardening Spec
 
 > Security, data integrity, and architecture hardening for production launch.
-> Branch: `main` | Last updated: 2026-03-28
+> Branch: `main` | Last updated: 2026-04-10
 > Future changes: branch off `main` → `fix/<area>-*` or `feature/<area>-*`
 
 ---
@@ -12,7 +12,8 @@
 
 - [x] **Cascade deletes** — Candidate → User, Campaign, Submissions all cascade properly
 - [x] **Centralized auth helper** — `requireAdmin()` replaces 24 manual auth checks
-- [x] **Server middleware** — `src/middleware.ts` protects `/admin/*` and `/dashboard/*` at Edge
+- [x] **Server route guard** — `src/proxy.ts` protects `/admin/*` and `/dashboard/*` at Edge
+- [x] **Secure account lifecycle** — candidate setup and recovery now use one-time auth links instead of admin-shared passwords
 - [x] **Server-side Zod validation** — Candidate create/update, Campaign create/update, Submission update all validated
 - [x] **Rate limiting** — Upstash Redis on `/api/collect/submit` (10/min) and `/api/auth` (5/min)
 - [x] **Geo validation** — Submit verifies pollingUnit → ward → LGA hierarchy
@@ -26,7 +27,9 @@
 
 ### Auth: NextAuth (kept)
 
-NextAuth v4 with JWT strategy and Credentials provider. Works well for the current admin + candidate two-role system. No change needed until Phase 2 (multi-tenant candidate dashboards), at which point evaluate Clerk for built-in org/tenant management.
+NextAuth v4 with JWT strategy and Credentials provider. The production hardening pass keeps this stack, but upgrades it with secure setup/reset links, session-version checks, and a shared auth wrapper layer. No provider change is needed until the product genuinely needs org-managed auth.
+
+For the current canonical auth flow, see `docs/auth-system-spec.md`.
 
 **Canvasser mobile app** (Phase 3) will need a separate auth endpoint (`/api/auth/canvasser-login`) since NextAuth is web-only. NextAuth won't interfere with this.
 
@@ -42,14 +45,15 @@ Chosen over in-memory because the app deploys to Vercel (serverless — no share
 
 ## Key Files
 
-| File                               | Purpose                                              |
-| ---------------------------------- | ---------------------------------------------------- |
-| `src/lib/auth-helpers.ts`          | `requireAdmin()` — centralized auth check            |
-| `src/proxy.ts`                     | Server-side Edge route protection (Next.js 16 proxy) |
-| `src/lib/rate-limit.ts`            | Upstash rate limiters (submit + auth)                |
-| `src/lib/audit.ts`                 | `logAudit()` fire-and-forget utility                 |
-| `src/lib/schemas/admin-schemas.ts` | All Zod schemas (candidate, canvasser, campaign)     |
-| `.env.example`                     | Environment variable template                        |
+| File                               | Purpose                                                   |
+| ---------------------------------- | --------------------------------------------------------- |
+| `src/lib/auth/links.ts`            | One-time invite/reset link lifecycle                      |
+| `src/lib/auth/guards.ts`           | Shared auth wrapper layer (`requireAdmin()`, page guards) |
+| `src/proxy.ts`                     | Server-side Edge route protection (Next.js 16 proxy)      |
+| `src/lib/core/rate-limit.ts`       | Upstash rate limiters (submit + auth)                     |
+| `src/lib/core/audit.ts`            | `logAudit()` fire-and-forget utility                      |
+| `src/lib/schemas/admin-schemas.ts` | All Zod schemas (candidate, canvasser, campaign)          |
+| `.env.example`                     | Environment variable template                             |
 
 ---
 

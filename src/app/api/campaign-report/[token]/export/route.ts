@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { validateReportRequest } from "@/lib/server/report-access";
-import { logAudit } from "@/lib/audit";
-import { getClientIp } from "@/lib/rate-limit";
+import { logAudit } from "@/lib/core/audit";
+import { getClientIp } from "@/lib/core/rate-limit";
 import { buildSubmissionsExportTable } from "@/lib/exports/submissions";
 import {
   parseExportFormat,

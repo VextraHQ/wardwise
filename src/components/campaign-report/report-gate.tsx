@@ -4,17 +4,23 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthCard } from "@/components/auth/auth-card";
-import { RegistrationStepHeader } from "@/components/collect/registration-step-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { IconKey, IconLoader } from "@tabler/icons-react";
 import { COMPANY_INFO } from "@/lib/data/legal-data";
 import { useUnlockCampaignReport } from "@/hooks/use-campaign-report";
+import type { CampaignBrandingType } from "@/lib/collect/branding";
+import {
+  getEffectiveCampaignName,
+  shouldShowCandidateTitle,
+} from "@/lib/collect/branding";
 
 export function ReportGate({
   token,
   candidateName,
   candidateTitle,
+  brandingType,
+  displayName,
   party,
   constituency,
   expiredSession = false,
@@ -22,6 +28,8 @@ export function ReportGate({
   token: string;
   candidateName: string;
   candidateTitle: string | null;
+  brandingType: CampaignBrandingType;
+  displayName: string | null;
   party: string;
   constituency: string;
   expiredSession?: boolean;
@@ -32,6 +40,11 @@ export function ReportGate({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const unlockMutation = useUnlockCampaignReport(token);
+  const campaignName = getEffectiveCampaignName({ candidateName, displayName });
+  const showCandidateTitle = shouldShowCandidateTitle({
+    brandingType,
+    displayName,
+  });
 
   const handleDigitChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
@@ -134,17 +147,6 @@ export function ReportGate({
 
   return (
     <div className="mx-auto flex min-h-[60vh] w-full max-w-md flex-col justify-center">
-      <RegistrationStepHeader
-        icon={IconKey}
-        badge="Campaign Insights"
-        title="Private Access"
-        description={
-          expiredSession
-            ? `For your privacy, this report needs the passcode again for ${candidateName} (${party}).`
-            : `Secure reporting for ${candidateName} (${party}) in ${constituency}.`
-        }
-      />
-
       <AuthCard
         title={expiredSession ? "Re-enter Passcode" : "Access Passcode"}
         subtitle="Campaign Insights"
@@ -163,12 +165,12 @@ export function ReportGate({
 
             <div className="flex flex-col items-center justify-center space-y-2">
               <h2 className="text-foreground text-2xl font-black tracking-tight text-balance sm:text-[2rem]">
-                {candidateTitle && (
+                {showCandidateTitle && candidateTitle && (
                   <span className="text-muted-foreground mr-2 text-[0.78em] font-medium">
                     {candidateTitle}
                   </span>
                 )}
-                {candidateName}
+                {campaignName}
               </h2>
               <p className="text-muted-foreground max-w-sm text-[11px] leading-relaxed font-semibold tracking-widest text-balance uppercase">
                 {constituency}

@@ -1,7 +1,7 @@
 "use client";
 
 import { IconAlertTriangle, IconInfoCircle } from "@tabler/icons-react";
-import type { ConstituencyBoundaryWarning } from "@/lib/utils/constituency";
+import type { ConstituencyBoundaryWarning } from "@/lib/geo/constituency";
 
 interface ConstituencyBoundaryAlertsProps {
   warnings: ConstituencyBoundaryWarning[];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { toast } from "sonner";
 import { track } from "@/lib/analytics/client";
 import {
@@ -39,6 +40,11 @@ import {
 } from "@tabler/icons-react";
 import { adminCollectApi } from "@/lib/api/collect";
 import type { Campaign } from "@/types/collect";
+import {
+  campaignBrandingTypes,
+  getCampaignBrandingLabel,
+  getEffectiveCampaignName,
+} from "@/lib/collect/branding";
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border/60",
@@ -74,6 +80,9 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
   const [visiblePasscode, setVisiblePasscode] = useState<string | null>(null);
   const [regeneratingToken, setRegeneratingToken] = useState(false);
   const [resettingPasscode, setResettingPasscode] = useState(false);
+  const [brandingType, setBrandingType] =
+    useState<Campaign["brandingType"]>("candidate");
+  const [displayName, setDisplayName] = useState("");
 
   const submissionCount = campaign?._count?.submissions ?? 0;
 
@@ -86,6 +95,12 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
   const reportUrl = campaign?.clientReportToken
     ? `${baseUrl}/r/${campaign.clientReportToken}`
     : "";
+
+  useEffect(() => {
+    if (!campaign) return;
+    setBrandingType(campaign.brandingType);
+    setDisplayName(campaign.displayName ?? "");
+  }, [campaign]);
 
   if (isLoading || !campaign) {
     return (
@@ -237,6 +252,36 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
     }
   };
 
+  const campaignName = getEffectiveCampaignName(campaign);
+  const brandingDirty =
+    brandingType !== campaign.brandingType ||
+    displayName !== (campaign.displayName ?? "");
+
+  const handleSaveBranding = () => {
+    if (brandingType !== "candidate" && displayName.trim().length === 0) {
+      toast.error("Enter a public campaign name for movement or team branding");
+      return;
+    }
+
+    updateMutation.mutate(
+      {
+        brandingType,
+        displayName: displayName.trim() || null,
+      },
+      {
+        onSuccess: () => {
+          track("admin_campaign_updated", {
+            action: "branding_updated",
+            campaign_id: campaignId,
+            branding_type: brandingType,
+          });
+          toast.success("Campaign branding updated");
+        },
+        onError: (e) => toast.error(e.message),
+      },
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Status Control */}
@@ -309,6 +354,88 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
         </CardContent>
       </Card>
 
+      {/* Campaign Branding */}
+      <Card className="border-border/60 rounded-sm shadow-none">
+        <CardHeader>
+          <CardTitle className="text-sm font-semibold tracking-tight">
+            Campaign Branding
+          </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-sm">
+            Control how this campaign appears on Collect pages while keeping the
+            underlying candidate anchor unchanged.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+              Runs As
+            </Label>
+            <ToggleGroup
+              type="single"
+              value={brandingType}
+              onValueChange={(value) => {
+                if (!value) return;
+                setBrandingType(value as Campaign["brandingType"]);
+              }}
+              variant="outline"
+              className="grid w-full grid-cols-1 rounded-sm sm:grid-cols-3"
+            >
+              {campaignBrandingTypes.map((type) => (
+                <ToggleGroupItem
+                  key={type}
+                  value={type}
+                  className="h-10 rounded-none font-mono text-[10px] font-bold tracking-widest uppercase first:rounded-t-sm last:rounded-b-sm sm:first:rounded-l-sm sm:first:rounded-tr-none sm:last:rounded-r-sm sm:last:rounded-bl-none"
+                >
+                  {getCampaignBrandingLabel(type)}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+              Public Campaign Name
+            </Label>
+            <Input
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder={
+                brandingType === "movement"
+                  ? "e.g. City Boy Movement"
+                  : brandingType === "team"
+                    ? "e.g. Fintiri Canvassers"
+                    : "Optional if you want a public campaign name different from the candidate"
+              }
+              className="h-9 rounded-sm"
+            />
+            <p className="text-muted-foreground text-xs">
+              Public preview:{" "}
+              <span className="text-foreground font-medium">
+                {getEffectiveCampaignName({
+                  candidateName: campaign.candidateName,
+                  displayName,
+                })}
+              </span>
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              Anchor candidate stays linked for scope, analytics, and campaign
+              rules.
+            </p>
+            <Button
+              size="sm"
+              className="h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
+              onClick={handleSaveBranding}
+              disabled={!brandingDirty || updateMutation.isPending}
+            >
+              {updateMutation.isPending ? "Saving..." : "Save Branding"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Campaign Details */}
       <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>
@@ -318,13 +445,25 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+            <span className="text-muted-foreground">Public name</span>
+            <span className="max-w-full text-left wrap-break-word sm:max-w-[65%] sm:text-right">
+              {campaignName}
+            </span>
+          </div>
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+            <span className="text-muted-foreground">Branding</span>
+            <span className="text-left sm:text-right">
+              {getCampaignBrandingLabel(campaign.brandingType)}
+            </span>
+          </div>
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <span className="text-muted-foreground">Slug</span>
             <span className="max-w-full text-left font-mono wrap-break-word sm:max-w-[65%] sm:text-right">
               {campaign.slug}
             </span>
           </div>
           <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-            <span className="text-muted-foreground">Candidate</span>
+            <span className="text-muted-foreground">Anchor candidate</span>
             <span className="max-w-full text-left wrap-break-word sm:max-w-[65%] sm:text-right">
               {campaign.candidateName}
             </span>
@@ -441,7 +580,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
                 Client Access
               </CardTitle>
               <CardDescription className="text-muted-foreground mt-1 text-sm">
-                Give the candidate a private read-only results view for this
+                Give the client a private read-only results view for this
                 campaign.
               </CardDescription>
             </div>
@@ -466,7 +605,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
               ) : (
                 <p className="text-muted-foreground text-sm">
                   Enable to generate a private report link with a passcode that
-                  you can share with the candidate.
+                  you can share with the client.
                 </p>
               )}
               <Button

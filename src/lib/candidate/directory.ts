@@ -1,8 +1,8 @@
 /**
- * Candidate Helper Functions
+ * Candidate Directory Helpers
  *
- * Utility functions for querying and filtering candidate data.
- * These helpers make it easy to access candidates by different criteria
+ * Domain helpers for querying and filtering candidate data.
+ * These functions make it easy to access candidates by different criteria
  * without restructuring the underlying data source.
  *
  * NOTE: Supporter counts are now calculated dynamically from voter data.
@@ -15,7 +15,7 @@
 
 import type { Candidate } from "@/types/candidate";
 import { candidates } from "@/lib/mock/data/candidates";
-import { getSupportersCount } from "@/lib/helpers/voter-analytics";
+import { getSupportersCount } from "@/lib/candidate/analytics";
 
 // ============================================================================
 // FILTERING FUNCTIONS

@@ -8,7 +8,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { formatGeoDisplayName } from "@/lib/utils/geo-display";
+import { formatGeoDisplayName } from "@/lib/geo/display";
 
 const lgaChartConfig: ChartConfig = {
   count: { label: "Submissions", color: "var(--chart-2)" },
