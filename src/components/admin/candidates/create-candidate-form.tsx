@@ -186,7 +186,9 @@ export function CreateCandidateForm() {
           }}
           candidateName={credentialsData.candidate.name}
           email={credentialsData.candidate.email}
-          password={credentialsData.generatedPassword || ""}
+          setupUrl={credentialsData.setupUrl}
+          expiresAt={credentialsData.setupExpiresAt}
+          deliveryMethod={credentialsData.deliveryMethod}
         />
       )}
     </>

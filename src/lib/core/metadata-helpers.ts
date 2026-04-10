@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth/config";
+import { prisma } from "@/lib/core/prisma";
 
 /**
  * Fetches the authenticated candidate's name for use in metadata.

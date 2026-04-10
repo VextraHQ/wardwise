@@ -10,7 +10,7 @@ import {
   useSubmissionAudit,
 } from "@/hooks/use-collect";
 import { adminCollectApi } from "@/lib/api/collect";
-import { roleLabels } from "@/lib/helpers/collect-analytics";
+import { roleLabels } from "@/lib/collect/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -73,7 +73,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import type { CollectSubmission } from "@/types/collect";
-import { formatGeoDisplayName } from "@/lib/utils/geo-display";
+import { formatGeoDisplayName } from "@/lib/geo/display";
 import { generateRefCode } from "@/lib/utils";
 import type { ExportFormat } from "@/lib/exports/shared";
 import {

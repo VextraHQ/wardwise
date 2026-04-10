@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth-helpers";
-import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/guards";
+import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
-import { logAudit } from "@/lib/audit";
+import { logAudit } from "@/lib/core/audit";
 
 const updateSubmissionSchema = z.object({
   isFlagged: z.boolean().optional(),
@@ -32,7 +32,7 @@ export async function DELETE(
   { params }: { params: Promise<{ sid: string }> },
 ) {
   try {
-    const { error, session } = await requireAdmin();
+    const { error, user } = await requireAdmin();
     if (error) return error;
 
     const { sid } = await params;
@@ -65,7 +65,7 @@ export async function DELETE(
       data: {
         submissionId: sid,
         action: "deleted",
-        userId: session!.user.id,
+        userId: user!.id,
       },
     });
 
@@ -73,7 +73,7 @@ export async function DELETE(
       where: { id: sid },
     });
 
-    void logAudit("submission.delete", "submission", sid, session!.user.id);
+    void logAudit("submission.delete", "submission", sid, user!.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -99,7 +99,7 @@ export async function PATCH(
   { params }: { params: Promise<{ sid: string }> },
 ) {
   try {
-    const { error, session } = await requireAdmin();
+    const { error, user } = await requireAdmin();
     if (error) return error;
 
     const { sid } = await params;
@@ -164,7 +164,7 @@ export async function PATCH(
       auditEntries.push({
         submissionId: sid,
         action: d.isVerified ? "verified" : "unverified",
-        userId: session!.user.id,
+        userId: user!.id,
         details: JSON.stringify({
           field: "isVerified",
           from: current.isVerified,
@@ -180,7 +180,7 @@ export async function PATCH(
       auditEntries.push({
         submissionId: sid,
         action: d.isFlagged ? "flagged" : "unflagged",
-        userId: session!.user.id,
+        userId: user!.id,
         details: JSON.stringify({
           field: "isFlagged",
           from: current.isFlagged,
@@ -196,7 +196,7 @@ export async function PATCH(
       auditEntries.push({
         submissionId: sid,
         action: "note_added",
-        userId: session!.user.id,
+        userId: user!.id,
         details: JSON.stringify({ note: d.adminNotes }),
       });
     }

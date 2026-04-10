@@ -14,7 +14,9 @@ export interface CandidateWithUser extends Candidate {
 
 export interface CreateCandidateResponse {
   candidate: CandidateWithUser;
-  generatedPassword?: string;
+  setupUrl: string;
+  setupExpiresAt: string;
+  deliveryMethod: "email" | "manual";
 }
 
 export interface CreateCandidateData {
@@ -164,11 +166,16 @@ export const adminApi = {
 
     resetPassword: async (
       id: string,
-    ): Promise<{ generatedPassword: string }> => {
-      return apiCall<{ generatedPassword: string }>(
-        `/candidates/${id}/reset-password`,
-        { method: "POST" },
-      );
+    ): Promise<{
+      resetUrl: string;
+      expiresAt: string;
+      deliveryMethod: "email" | "manual";
+    }> => {
+      return apiCall<{
+        resetUrl: string;
+        expiresAt: string;
+        deliveryMethod: "email" | "manual";
+      }>(`/candidates/${id}/reset-password`, { method: "POST" });
     },
 
     update: async (data: UpdateCandidateData): Promise<CandidateWithUser> => {

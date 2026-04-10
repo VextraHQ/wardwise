@@ -1,12 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth-helpers";
-import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/guards";
+import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import type { Candidate } from "@/types/candidate";
 import { updateCandidateSchema } from "@/lib/schemas/admin-schemas";
-import { logAudit } from "@/lib/audit";
-import { sanitizeCandidateConstituencyLgaIds } from "@/lib/utils/constituency-server";
-import { getPositionStateValidationMessage } from "@/lib/utils/constituency";
+import { logAudit } from "@/lib/core/audit";
+import { bumpCandidateSessionVersions } from "@/lib/auth/storage";
+import { sanitizeCandidateConstituencyLgaIds } from "@/lib/geo/constituency-server";
+import { getPositionStateValidationMessage } from "@/lib/geo/constituency";
 
 const CANDIDATE_INCLUDE = {
   user: {
@@ -81,7 +82,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { error, session } = await requireAdmin();
+    const { error, user } = await requireAdmin();
     if (error) return error;
 
     const { id } = await params;
@@ -123,7 +124,18 @@ export async function PUT(
     }
 
     if (email) {
-      const emailExists = await prisma.user.findUnique({ where: { email } });
+      const emailExists = await prisma.user.findFirst({
+        where: {
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
+        },
+        select: {
+          id: true,
+          candidateId: true,
+        },
+      });
       if (emailExists && emailExists.candidateId !== id) {
         return NextResponse.json(
           { error: "Email already exists" },
@@ -186,6 +198,13 @@ export async function PUT(
 
     await prisma.candidate.update({ where: { id }, data: updateData });
 
+    if (
+      onboardingStatus !== undefined &&
+      onboardingStatus !== existingCandidate.onboardingStatus
+    ) {
+      await bumpCandidateSessionVersions(id);
+    }
+
     if (email) {
       await prisma.user.updateMany({
         where: { candidateId: id },
@@ -205,7 +224,7 @@ export async function PUT(
       );
     }
 
-    void logAudit("candidate.update", "candidate", id, session!.user.id, {
+    void logAudit("candidate.update", "candidate", id, user!.id, {
       changedFields: Object.keys(updateData),
     });
 
@@ -240,7 +259,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { error, session } = await requireAdmin();
+    const { error, user } = await requireAdmin();
     if (error) return error;
 
     const { id } = await params;
@@ -254,7 +273,7 @@ export async function DELETE(
 
     await prisma.candidate.delete({ where: { id } });
 
-    void logAudit("candidate.delete", "candidate", id, session!.user.id, {
+    void logAudit("candidate.delete", "candidate", id, user!.id, {
       candidateName: candidate.name,
     });
 

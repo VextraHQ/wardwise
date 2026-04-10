@@ -20,7 +20,7 @@ import {
   getConstituencyBoundaryWarnings,
   positionRequiresLgas,
   findMatchingPreset,
-} from "@/lib/utils/constituency";
+} from "@/lib/geo/constituency";
 import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituency-boundary-alerts";
 import { getPresetsForState } from "@/lib/data/nigerian-constituencies";
 

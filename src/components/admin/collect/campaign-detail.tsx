@@ -24,6 +24,10 @@ import { CampaignOverview } from "./campaign-overview";
 import { CampaignSubmissions } from "./campaign-submissions";
 import { CampaignCanvassers } from "./campaign-canvassers";
 import { CampaignSettings } from "./campaign-settings";
+import {
+  getCampaignBrandingLabel,
+  getEffectiveCampaignName,
+} from "@/lib/collect/branding";
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border/60",
@@ -49,6 +53,7 @@ export function CampaignDetail({
 
   const currentTab = searchParams.get("tab") ?? "overview";
   const { data: campaign, isLoading } = useCampaign(id);
+  const campaignName = campaign ? getEffectiveCampaignName(campaign) : "";
 
   function handleTabChange(value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -107,7 +112,7 @@ export function CampaignDetail({
             </BreadcrumbSeparator>
             <BreadcrumbItem>
               <BreadcrumbPage className="text-foreground/40 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
-                {campaign.candidateName}
+                {campaignName}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -117,8 +122,14 @@ export function CampaignDetail({
           <div className="min-w-0 space-y-3">
             <div className="flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
               <h1 className="text-foreground text-[1.9rem] leading-none font-extrabold tracking-tighter sm:text-4xl">
-                {campaign.candidateName}
+                {campaignName}
               </h1>
+              <Badge
+                variant="outline"
+                className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+              >
+                {getCampaignBrandingLabel(campaign.brandingType)}
+              </Badge>
               <Badge
                 variant="outline"
                 className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${CAMPAIGN_STATUS_STYLES[campaign.status] ?? ""}`}
@@ -132,6 +143,14 @@ export function CampaignDetail({
                 <span className="bg-primary/40 size-1.5 rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
                 <span>{campaign.party}</span>
               </div>
+              {campaign.displayName && (
+                <div className="flex max-w-full items-center gap-2">
+                  <span className="bg-border size-1.5 rounded-full" />
+                  <span className="wrap-break-word">
+                    Anchor: {campaign.candidateName}
+                  </span>
+                </div>
+              )}
               <div className="flex max-w-full items-center gap-2">
                 <span className="bg-border size-1.5 rounded-full" />
                 <span className="wrap-break-word">{campaign.constituency}</span>

@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import { submitRateLimit, getClientIp } from "@/lib/rate-limit";
+import { submitRateLimit, getClientIp } from "@/lib/core/rate-limit";
 import { serverSubmitSchema } from "@/lib/schemas/collect-schemas";
 import { composeFullName } from "@/lib/utils";
 

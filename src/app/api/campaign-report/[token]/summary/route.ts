@@ -7,6 +7,7 @@ import {
   getCampaignStats,
   getCampaignHealth,
 } from "@/lib/server/collect-reporting";
+import { getCampaignBrandingType } from "@/lib/collect/branding";
 
 type RouteParams = { params: Promise<unknown> };
 
@@ -38,6 +39,8 @@ export async function GET(request: Request, { params }: RouteParams) {
       campaign: {
         candidateName: campaign.candidateName,
         candidateTitle: campaign.candidateTitle,
+        brandingType: getCampaignBrandingType(campaign.brandingType),
+        displayName: campaign.displayName,
         party: campaign.party,
         constituency: campaign.constituency,
         constituencyType: campaign.constituencyType,

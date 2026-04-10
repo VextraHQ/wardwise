@@ -1,7 +1,11 @@
+import type { CampaignBrandingType } from "@/lib/collect/branding";
+
 export type CampaignReportSummary = {
   campaign: {
     candidateName: string;
     candidateTitle: string | null;
+    brandingType: CampaignBrandingType;
+    displayName: string | null;
     party: string;
     constituency: string;
     constituencyType: string;

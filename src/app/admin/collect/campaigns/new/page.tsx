@@ -1,5 +1,5 @@
 import { CampaignWizard } from "@/components/admin/collect/wizard/campaign-wizard";
-import { createAdminMetadata } from "@/lib/metadata";
+import { createAdminMetadata } from "@/lib/core/metadata";
 
 export const metadata = createAdminMetadata({
   title: "New Campaign",

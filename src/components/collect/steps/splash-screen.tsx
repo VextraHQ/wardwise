@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button";
 import type { PublicCampaign } from "@/types/collect";
 import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
 import type { DeviceSubmissionData } from "@/hooks/use-collect-form-persistence";
+import {
+  getEffectiveCampaignName,
+  shouldShowCandidateTitle,
+} from "@/lib/collect/branding";
 
 function formatSubmittedDate(value: string) {
   const date = new Date(value);
@@ -39,6 +43,8 @@ export function SplashScreen({
   const formattedDate = deviceSubmission
     ? formatSubmittedDate(deviceSubmission.submittedAt)
     : null;
+  const campaignName = getEffectiveCampaignName(campaign);
+  const showCandidateTitle = shouldShowCandidateTitle(campaign);
 
   return (
     <motion.div
@@ -72,12 +78,12 @@ export function SplashScreen({
 
             <div className="flex flex-col items-center justify-center space-y-3">
               <h1 className="text-foreground text-3xl font-black tracking-tight text-balance sm:text-4xl">
-                {campaign.candidateTitle && (
+                {showCandidateTitle && campaign.candidateTitle && (
                   <span className="text-muted-foreground mr-2 font-medium">
                     {campaign.candidateTitle}
                   </span>
                 )}
-                {campaign.candidateName}
+                {campaignName}
               </h1>
               <p className="text-muted-foreground mx-auto max-w-sm text-xs leading-relaxed font-semibold tracking-widest text-balance uppercase">
                 {campaign.constituency}

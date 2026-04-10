@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth-helpers";
-import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/guards";
+import { prisma } from "@/lib/core/prisma";
 import { z } from "zod";
-import { logAudit } from "@/lib/audit";
+import { logAudit } from "@/lib/core/audit";
 
 const bulkActionSchema = z.object({
   ids: z.array(z.string()).min(1).max(500),
@@ -11,7 +11,7 @@ const bulkActionSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const { error, session } = await requireAdmin();
+    const { error, user } = await requireAdmin();
     if (error) return error;
 
     const body = await request.json();
@@ -102,19 +102,16 @@ export async function POST(request: NextRequest) {
         data: ids.map((sid) => ({
           submissionId: sid,
           action: auditAction,
-          userId: session!.user.id,
+          userId: user!.id,
           details: JSON.stringify({ source: "bulk", count: affected }),
         })),
       });
     }
 
-    void logAudit(
-      `submission.bulk_${action}`,
-      "submission",
-      ids[0],
-      session!.user.id,
-      { count: affected, action },
-    );
+    void logAudit(`submission.bulk_${action}`, "submission", ids[0], user!.id, {
+      count: affected,
+      action,
+    });
 
     return NextResponse.json({ affected });
   } catch (error) {

@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth-helpers";
-import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/guards";
+import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
-import { logAudit } from "@/lib/audit";
+import { logAudit } from "@/lib/core/audit";
 import {
   phoneSchema,
   normalizeNigerianPhoneInput,
@@ -87,7 +87,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
-    const { error, session } = await requireAdmin();
+    const { error, user } = await requireAdmin();
     if (error) return error;
 
     const { id } = await params;
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       "canvasser.add",
       "campaignCanvasser",
       canvasser.id,
-      session!.user.id,
+      user!.id,
       { campaignId: id, name: canvasser.name },
     );
 

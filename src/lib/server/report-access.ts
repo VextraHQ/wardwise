@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { hash, compare } from "bcryptjs";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/core/prisma";
 
 /**
  * Generate a URL-safe random token for report access.
@@ -43,6 +43,8 @@ export async function validateReportToken(token: string) {
       slug: true,
       candidateName: true,
       candidateTitle: true,
+      brandingType: true,
+      displayName: true,
       party: true,
       constituency: true,
       constituencyType: true,

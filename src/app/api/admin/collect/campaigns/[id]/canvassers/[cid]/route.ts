@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth-helpers";
-import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/guards";
+import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import { logAudit } from "@/lib/audit";
+import { logAudit } from "@/lib/core/audit";
 
 type RouteParams = { params: Promise<{ id: string; cid: string }> };
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
   try {
-    const { error, session } = await requireAdmin();
+    const { error, user } = await requireAdmin();
     if (error) return error;
 
     const { id, cid } = await params;
@@ -17,13 +17,9 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
       where: { id: cid, campaignId: id },
     });
 
-    void logAudit(
-      "canvasser.remove",
-      "campaignCanvasser",
-      cid,
-      session!.user.id,
-      { campaignId: id },
-    );
+    void logAudit("canvasser.remove", "campaignCanvasser", cid, user!.id, {
+      campaignId: id,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

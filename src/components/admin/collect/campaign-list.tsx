@@ -36,6 +36,10 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { AdminPagination } from "@/components/admin/admin-pagination";
+import {
+  getCampaignBrandingLabel,
+  getEffectiveCampaignName,
+} from "@/lib/collect/branding";
 
 function relativeTime(dateStr: string | null): string {
   if (!dateStr) return "No activity";
@@ -295,7 +299,7 @@ export function CampaignList() {
                     S/N
                   </TableHead>
                   <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                    Candidate
+                    Campaign
                   </TableHead>
                   <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase sm:table-cell">
                     Constituency
@@ -317,104 +321,126 @@ export function CampaignList() {
               </TableHeader>
               <TableBody>
                 {paginatedCampaigns.map(
-                  (campaign: CampaignSummary, idx: number) => (
-                    <TableRow
-                      key={campaign.id}
-                      className="hover:bg-muted/50 cursor-pointer transition-colors"
-                      onClick={() =>
-                        router.push(`/admin/collect/campaigns/${campaign.id}`)
-                      }
-                    >
-                      <TableCell className="text-foreground/50 text-center font-mono text-xs font-bold tabular-nums">
-                        {snOffset + idx + 1}
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">
-                            {campaign.candidateName}
-                          </p>
-                          <p className="text-muted-foreground text-xs">
-                            {campaign.party} &middot;{" "}
-                            <code className="text-[11px]">
-                              /c/{campaign.slug}
-                            </code>
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell">
-                        {campaign.constituency}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${CAMPAIGN_STATUS_STYLES[campaign.status] ?? ""}`}
-                        >
-                          {campaign.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right font-mono font-medium tabular-nums">
-                        {campaign._count.submissions.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-muted-foreground text-xs">
-                            {relativeTime(campaign.lastSubmissionAt)}
-                          </span>
-                          {isStale(campaign) && (
-                            <IconAlertTriangle
-                              className="h-3.5 w-3.5 text-amber-500"
-                              title="No submissions in 48h"
-                            />
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground hidden md:table-cell">
-                        {new Date(campaign.createdAt).toLocaleDateString(
-                          "en-NG",
-                          {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          },
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            asChild
-                            onClick={(e) => e.stopPropagation()}
+                  (campaign: CampaignSummary, idx: number) => {
+                    const campaignName = getEffectiveCampaignName(campaign);
+                    const brandingLabel = getCampaignBrandingLabel(
+                      campaign.brandingType,
+                    );
+
+                    return (
+                      <TableRow
+                        key={campaign.id}
+                        className="hover:bg-muted/50 cursor-pointer transition-colors"
+                        onClick={() =>
+                          router.push(`/admin/collect/campaigns/${campaign.id}`)
+                        }
+                      >
+                        <TableCell className="text-foreground/50 text-center font-mono text-xs font-bold tabular-nums">
+                          {snOffset + idx + 1}
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">{campaignName}</p>
+                              {campaign.brandingType !== "candidate" && (
+                                <Badge
+                                  variant="outline"
+                                  className="rounded-sm px-2 py-0.5 font-mono text-[9px] font-bold tracking-widest uppercase"
+                                >
+                                  {brandingLabel}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-muted-foreground text-xs">
+                              {campaign.party} &middot;{" "}
+                              <code className="text-[11px]">
+                                /c/{campaign.slug}
+                              </code>
+                            </p>
+                            {campaign.displayName && (
+                              <p className="text-muted-foreground text-xs">
+                                Anchor: {campaign.candidateName}
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                          {campaign.constituency}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${CAMPAIGN_STATUS_STYLES[campaign.status] ?? ""}`}
                           >
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
+                            {campaign.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right font-mono font-medium tabular-nums">
+                          {campaign._count.submissions.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-muted-foreground text-xs">
+                              {relativeTime(campaign.lastSubmissionAt)}
+                            </span>
+                            {isStale(campaign) && (
+                              <IconAlertTriangle
+                                className="h-3.5 w-3.5 text-amber-500"
+                                title="No submissions in 48h"
+                              />
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground hidden md:table-cell">
+                          {new Date(campaign.createdAt).toLocaleDateString(
+                            "en-NG",
+                            {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger
+                              asChild
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              <IconDotsVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                router.push(
-                                  `/admin/collect/campaigns/${campaign.id}`,
-                                );
-                              }}
-                            >
-                              <IconEye className="mr-2 h-4 w-4 hover:text-gray-500" />
-                              View Detail
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => handleCopyLink(e, campaign.slug)}
-                            >
-                              <IconCopy className="mr-2 h-4 w-4 hover:text-gray-500" />
-                              Copy Link
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ),
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
+                                <IconDotsVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push(
+                                    `/admin/collect/campaigns/${campaign.id}`,
+                                  );
+                                }}
+                              >
+                                <IconEye className="mr-2 h-4 w-4 hover:text-gray-500" />
+                                View Detail
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) =>
+                                  handleCopyLink(e, campaign.slug)
+                                }
+                              >
+                                <IconCopy className="mr-2 h-4 w-4 hover:text-gray-500" />
+                                Copy Link
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  },
                 )}
               </TableBody>
             </Table>

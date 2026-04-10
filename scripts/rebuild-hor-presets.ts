@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import XLSX from "xlsx";
 import { nigeriaStates } from "../src/lib/data/state-lga-locations";
-import { formatGeoDisplayName } from "../src/lib/utils/geo-display";
+import { formatGeoDisplayName } from "../src/lib/geo/display";
 import {
   findCanonicalLgasInComposition,
   getStateLgaNames,

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/core/prisma";
+import { getCampaignBrandingType } from "@/lib/collect/branding";
 
 export async function GET(
   _request: Request,
@@ -14,6 +15,8 @@ export async function GET(
         slug: true,
         candidateName: true,
         candidateTitle: true,
+        brandingType: true,
+        displayName: true,
         party: true,
         constituency: true,
         constituencyType: true,
@@ -42,7 +45,12 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ campaign });
+    return NextResponse.json({
+      campaign: {
+        ...campaign,
+        brandingType: getCampaignBrandingType(campaign.brandingType),
+      },
+    });
   } catch (error) {
     console.error("Error fetching campaign:", error);
     return NextResponse.json(

@@ -1,4 +1,4 @@
-import { createAdminMetadata } from "@/lib/metadata";
+import { createAdminMetadata } from "@/lib/core/metadata";
 import { AdminDashboard } from "@/components/admin/admin-dashboard";
 
 export const metadata = createAdminMetadata({

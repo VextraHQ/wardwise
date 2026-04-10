@@ -62,8 +62,12 @@ interface CandidateAccountProps {
 
 export function CandidateAccount({ candidate }: CandidateAccountProps) {
   const router = useRouter();
-  const [newPassword, setNewPassword] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
+  const [resetLinkData, setResetLinkData] = useState<{
+    url: string;
+    expiresAt: string;
+    deliveryMethod: "email" | "manual";
+  } | null>(null);
+  const [showFullLink, setShowFullLink] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(
     candidate.onboardingStatus,
   );
@@ -75,10 +79,10 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
 
   const updateStatusMutation = useUpdateCandidateStatus();
 
-  function copyPassword() {
-    if (!newPassword) return;
-    navigator.clipboard.writeText(newPassword);
-    toast.success("Password copied to clipboard");
+  function copyResetLink() {
+    if (!resetLinkData) return;
+    navigator.clipboard.writeText(resetLinkData.url);
+    toast.success("Reset link copied to clipboard");
   }
 
   function handleStatusSave() {
@@ -218,23 +222,26 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-muted-foreground text-xs">
-            Generate a new readable password for this candidate. The old
-            password will be invalidated immediately.
+            Issue a fresh secure reset link for this candidate. The link can be
+            emailed automatically when configured, or copied manually for ops
+            handoff.
           </p>
 
-          {newPassword && (
+          {resetLinkData && (
             <div className="bg-muted/50 border-border/60 flex items-center justify-between rounded-sm border p-3">
               <span className="font-mono text-sm">
-                {showPassword ? newPassword : "••••••••••••"}
+                {showFullLink
+                  ? resetLinkData.url
+                  : `${resetLinkData.url.slice(0, 34)}...${resetLinkData.url.slice(-12)}`}
               </span>
               <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowFullLink((current) => !current)}
                 >
-                  {showPassword ? (
+                  {showFullLink ? (
                     <IconEyeOff className="h-3.5 w-3.5" />
                   ) : (
                     <IconEye className="h-3.5 w-3.5" />
@@ -244,11 +251,30 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7"
-                  onClick={copyPassword}
+                  onClick={copyResetLink}
                 >
                   <IconCopy className="h-3.5 w-3.5" />
                 </Button>
               </div>
+            </div>
+          )}
+
+          {resetLinkData && (
+            <div className="border-border/50 bg-muted/15 rounded-sm border px-3 py-2 text-xs">
+              <p className="text-foreground font-mono text-[10px] font-bold tracking-[0.18em] uppercase">
+                Delivery status
+              </p>
+              <p className="text-muted-foreground mt-1 leading-relaxed">
+                {resetLinkData.deliveryMethod === "email"
+                  ? "The reset link was emailed and is also available here as a backup."
+                  : "Email delivery is not configured, so share this link manually."}
+              </p>
+              <p className="text-muted-foreground mt-1">
+                Expires{" "}
+                <span className="font-medium">
+                  {new Date(resetLinkData.expiresAt).toLocaleString("en-NG")}
+                </span>
+              </p>
             </div>
           )}
 
@@ -260,19 +286,27 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
             onClick={() =>
               resetPasswordMutation.mutate(candidate.id, {
                 onSuccess: (data) => {
-                  setNewPassword(data.generatedPassword);
-                  setShowPassword(true);
-                  toast.success("Password has been reset");
+                  setResetLinkData({
+                    url: data.resetUrl,
+                    expiresAt: data.expiresAt,
+                    deliveryMethod: data.deliveryMethod,
+                  });
+                  setShowFullLink(true);
+                  toast.success(
+                    data.deliveryMethod === "email"
+                      ? "Reset email sent"
+                      : "Reset link created",
+                  );
                 },
                 onError: (error: Error) =>
-                  toast.error(error.message || "Failed to reset password"),
+                  toast.error(error.message || "Failed to create reset link"),
               })
             }
           >
             <IconKey className="mr-1.5 h-3.5 w-3.5" />
             {resetPasswordMutation.isPending
-              ? "Resetting..."
-              : "Reset Password"}
+              ? "Creating..."
+              : "Send Reset Link"}
           </Button>
         </CardContent>
       </Card>

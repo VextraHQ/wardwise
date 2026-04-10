@@ -63,7 +63,7 @@ import {
 import { AdminSearchBar } from "@/components/admin/admin-search-bar";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { BulkImportDialog } from "@/components/admin/geo/geo-dialogs/bulk-import-dialog";
-import { formatGeoDisplayName } from "@/lib/utils/geo-display";
+import { formatGeoDisplayName } from "@/lib/geo/display";
 
 interface GeoLevelPollingUnitsProps {
   wardId: number;

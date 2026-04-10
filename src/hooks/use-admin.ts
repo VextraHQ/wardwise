@@ -70,7 +70,7 @@ export function useDeleteCandidate() {
   });
 }
 
-// Generates a new password for a candidate and invalidates their old one.
+// Issues a fresh secure reset link for a candidate account.
 export function useResetCandidatePassword() {
   return useMutation({
     mutationFn: (id: string) => adminApi.candidates.resetPassword(id),

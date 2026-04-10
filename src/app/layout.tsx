@@ -6,7 +6,7 @@ import {
   createDefaultOpenGraph,
   createDefaultTwitter,
   getMetadataBase,
-} from "@/lib/metadata";
+} from "@/lib/core/metadata";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

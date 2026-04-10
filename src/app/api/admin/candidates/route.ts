@@ -1,33 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth-helpers";
-import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
-import crypto from "crypto";
+import { requireAdmin } from "@/lib/auth/guards";
+import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import type { Candidate } from "@/types/candidate";
 import { createCandidateSchema } from "@/lib/schemas/admin-schemas";
-import { logAudit } from "@/lib/audit";
-import { sanitizeCandidateConstituencyLgaIds } from "@/lib/utils/constituency-server";
-
-// Generate a readable password like WARD-7842-BETA
-function generateReadablePassword(): string {
-  const words = [
-    "WARD",
-    "VOTE",
-    "POLL",
-    "TEAM",
-    "SAFE",
-    "CORE",
-    "LINK",
-    "PEAK",
-    "DATA",
-    "PLAN",
-  ];
-  const w1 = words[crypto.randomInt(words.length)];
-  const w2 = words[crypto.randomInt(words.length)];
-  const digits = String(crypto.randomInt(1000, 9999));
-  return `${w1}-${digits}-${w2}`;
-}
+import { logAudit } from "@/lib/core/audit";
+import { sanitizeCandidateConstituencyLgaIds } from "@/lib/geo/constituency-server";
+import { issueAuthLink, sendAuthLinkEmail } from "@/lib/auth/links";
 
 // Transform Prisma candidate to API response shape
 function transformCandidate(c: {
@@ -91,7 +70,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { error, session } = await requireAdmin();
+    const { error, user } = await requireAdmin();
     if (error) return error;
 
     const body = await request.json();
@@ -120,7 +99,15 @@ export async function POST(request: NextRequest) {
       title,
     } = parsed.data;
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: email,
+          mode: "insensitive",
+        },
+      },
+      select: { id: true },
+    });
     if (existingUser) {
       return NextResponse.json(
         { error: "Email already exists" },
@@ -138,35 +125,58 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: constituencyError }, { status: 400 });
     }
 
-    // Generate readable password
-    const generatedPassword = generateReadablePassword();
-    const hashedPassword = await bcrypt.hash(generatedPassword, 12);
+    const { candidate, invite } = await prisma.$transaction(async (tx) => {
+      const candidate = await tx.candidate.create({
+        data: {
+          name,
+          party,
+          position,
+          isNational: position === "President",
+          stateCode: stateCode || null,
+          lga: lga || null,
+          constituency: constituency || null,
+          constituencyLgaIds: sanitizedConstituencyLgaIds,
+          description: description || null,
+          phone: phone || null,
+          title: title || null,
+          onboardingStatus: "credentials_sent",
+        },
+      });
 
-    const candidate = await prisma.candidate.create({
-      data: {
-        name,
-        party,
-        position,
-        isNational: position === "President",
-        stateCode: stateCode || null,
-        lga: lga || null,
-        constituency: constituency || null,
-        constituencyLgaIds: sanitizedConstituencyLgaIds,
-        description: description || null,
-        phone: phone || null,
-        title: title || null,
-      },
+      const newUser = await tx.user.create({
+        data: {
+          email,
+          name,
+          role: "candidate",
+          candidateId: candidate.id,
+        },
+      });
+
+      const invite = await issueAuthLink({
+        userId: newUser.id,
+        type: "invite",
+        createdById: user!.id,
+        db: tx,
+      });
+
+      return { candidate, newUser, invite };
     });
 
-    await prisma.user.create({
-      data: {
-        email,
+    let deliveryMethod: "email" | "manual" = "manual";
+
+    try {
+      const emailResult = await sendAuthLinkEmail({
+        to: email,
         name,
-        password: hashedPassword,
-        role: "candidate",
-        candidateId: candidate.id,
-      },
-    });
+        url: invite.url,
+        type: "invite",
+        expiresAt: invite.expiresAt,
+      });
+
+      deliveryMethod = emailResult.sent ? "email" : "manual";
+    } catch {
+      deliveryMethod = "manual";
+    }
 
     const candidateWithUser = await prisma.candidate.findUnique({
       where: { id: candidate.id },
@@ -180,21 +190,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    void logAudit(
-      "candidate.create",
-      "candidate",
-      candidate.id,
-      session!.user.id,
-      {
-        candidateName: name,
-        email,
-        position,
-      },
-    );
+    void logAudit("candidate.create", "candidate", candidate.id, user!.id, {
+      candidateName: name,
+      email,
+      position,
+      deliveryMethod,
+    });
 
     return NextResponse.json({
       candidate: transformCandidate(candidateWithUser),
-      generatedPassword, // One-time only — never stored in plaintext
+      setupUrl: invite.url,
+      setupExpiresAt: invite.expiresAt.toISOString(),
+      deliveryMethod,
     });
   } catch (error) {
     console.error("Error creating candidate:", error);

@@ -1,14 +1,14 @@
 # WardWise Candidate Management Spec
 
 > Living reference for the candidate management and onboarding system.
-> Branch: `main` | Last updated: 2026-04-03
+> Branch: `main` | Last updated: 2026-04-10
 > Future changes: branch off `main` → `fix/candidates-*` or `feature/candidates-*`
 
 ---
 
 ## Overview
 
-Candidate Management is the B2B entry point for WardWise. When a client pays, Vextra creates their candidate account, shares credentials, and begins onboarding. The system uses geo-backed location selects (State/LGA from the Geo API) instead of free-text inputs to ensure data consistency with the Collect system.
+Candidate Management is the B2B entry point for WardWise. When a client pays, Vextra creates their candidate account, issues a secure setup link, and begins onboarding. The system uses geo-backed location selects (State/LGA from the Geo API) instead of free-text inputs to ensure data consistency with the Collect system.
 
 ### Production Hardening (2026-03-27)
 
@@ -81,17 +81,13 @@ pending → credentials_sent → active → suspended
 
 ---
 
-## Password Generation
+## Secure Access Delivery
 
-Readable format for easy sharing via WhatsApp/phone call:
-
-```
-WORD-NNNN-WORD   (e.g., WARD-7842-BETA)
-```
-
-Word pool: WARD, VOTE, POLL, TEAM, SAFE, CORE, LINK, PEAK
-Number range: 1000-9999
-Generated using `crypto.randomInt` for security.
+- Candidate creation issues a one-time **setup link**, not a readable password
+- Candidate password reset issues a one-time **reset link**
+- Links are emailed when delivery is configured and always exposed to admins for manual sharing
+- Completing the setup/reset flow updates the candidate to `active` and invalidates older unused auth links
+- See `docs/auth-system-spec.md` for the canonical auth lifecycle details
 
 ---
 
@@ -103,9 +99,9 @@ Returns all candidates with user accounts and computed supporter counts.
 
 ### `POST /api/admin/candidates`
 
-Creates candidate + user account with generated readable password.
+Creates candidate + user account with a secure account-setup link.
 
-- Returns `{ candidate, generatedPassword }` (password shown once)
+- Returns `{ candidate, setupUrl, setupExpiresAt, deliveryMethod }`
 
 ### `GET /api/admin/candidates/[id]`
 
@@ -121,7 +117,7 @@ Deletes candidate and associated user account.
 
 ### `POST /api/admin/candidates/[id]/reset-password`
 
-Generates new readable password, hashes and saves. Returns `{ generatedPassword }`.
+Issues a fresh secure reset link. Returns `{ resetUrl, expiresAt, deliveryMethod }`.
 
 ---
 
@@ -166,7 +162,7 @@ Multi-step wizard with `StepProgress` bar — same architecture as the Collect c
 
 **UI Architecture**: Uses `StepCard`, `CardSectionHeader`, `SectionLabel`, `FieldLabel`, `NavButtons` from `form-ui.tsx` — matching the Collect wizard's premium card design. Step-level field validation via `stepFieldMap`.
 
-On success → **Credentials Dialog** with copy button and warning.
+On success → **Credentials Dialog** showing the secure setup link, expiry, delivery method, and copy/share fallback.
 
 ### Candidate Detail (`/admin/candidates/[id]`)
 
@@ -194,7 +190,7 @@ Three tabs: **Overview** | **Campaigns** | **Account**
 
 - Account info: Email, phone, created date, role
 - Onboarding status: Select with colored, themed items (per-status focus/checked styles)
-- Password reset: generates new readable password, show/copy with bordered display box
+- Password management: issues a fresh secure reset link, shows expiry/delivery state, and supports manual copy when needed
 - Danger zone: Delete candidate account with confirmation dialog
 
 ---
@@ -218,18 +214,18 @@ The shared `ComboboxSelect` component (`src/components/ui/combobox-select.tsx`) 
 | `src/lib/api/admin.ts`                                           | Client-side API helpers                                                                             |
 | `src/lib/data/nigerian-parties.ts`                               | Party + title options                                                                               |
 | `src/lib/data/nigerian-constituencies.ts`                        | Official constituency presets (Senator: 109 shipped, HoR: 350 shipped + 10 unsupported split seats) |
-| `src/lib/utils/constituency.ts`                                  | Shared isomorphic helpers (position→type, warnings, auto-suggest, preset matching)                  |
-| `src/lib/utils/constituency-server.ts`                           | Server-side constituency LGA validation + state matching                                            |
+| `src/lib/geo/constituency.ts`                                    | Shared isomorphic helpers (position→type, warnings, auto-suggest, preset matching)                  |
+| `src/lib/geo/constituency-server.ts`                             | Server-side constituency LGA validation + state matching                                            |
 | `src/app/api/admin/candidates/route.ts`                          | GET + POST endpoints                                                                                |
 | `src/app/api/admin/candidates/[id]/route.ts`                     | GET + PUT + DELETE                                                                                  |
-| `src/app/api/admin/candidates/[id]/reset-password/route.ts`      | Password reset                                                                                      |
+| `src/app/api/admin/candidates/[id]/reset-password/route.ts`      | Secure reset-link issuing                                                                           |
 | `src/app/admin/candidates/new/page.tsx`                          | Create route                                                                                        |
 | `src/app/admin/candidates/[id]/page.tsx`                         | Detail route                                                                                        |
 | `src/components/admin/candidates/create-candidate-form.tsx`      | Wizard orchestrator (step state, validation, submission)                                            |
 | `src/components/admin/candidates/wizard/step-identity.tsx`       | Step 1: name, email, phone, party                                                                   |
 | `src/components/admin/candidates/wizard/step-position.tsx`       | Step 2: position, state, constituency LGAs, boundary warnings                                       |
 | `src/components/admin/candidates/wizard/step-review.tsx`         | Step 3: summary review + boundary warnings + description                                            |
-| `src/components/admin/candidates/credentials-dialog.tsx`         | Post-create credential display                                                                      |
+| `src/components/admin/candidates/credentials-dialog.tsx`         | Post-create secure setup-link display                                                               |
 | `src/components/admin/candidates/candidate-detail.tsx`           | Detail page with tabs                                                                               |
 | `src/components/admin/candidates/candidate-overview.tsx`         | Overview tab (with boundary edit + warnings)                                                        |
 | `src/components/admin/candidates/candidate-campaigns.tsx`        | Campaigns tab                                                                                       |
@@ -254,6 +250,7 @@ The shared `ComboboxSelect` component (`src/components/ui/combobox-select.tsx`) 
 
 | Date       | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-10 | Candidate auth rollout aligned with secure-link onboarding. New accounts now issue one-time setup links instead of readable passwords, and admin reset now issues one-time reset links with email/manual delivery modes. Candidate account UI, create flow, and supporting docs were updated to match the shared auth system.                                                                                                                                                                                                                                           |
 | 2026-04-01 | Candidate-driven geo scope: `constituencyLgaIds Int[]` on Candidate defines constituency boundary. Searchable checkbox grid for LGA selection. Auto-suggested constituency name with manual override. Boundary warnings (full-state, very broad, custom label, incomplete). Partial LGA seeding indicator. Soft block: candidates saveable without LGAs, campaign creation blocked until defined. Server-side validation via `sanitizeCandidateConstituencyLgaIds()`. FCT invalid combos blocked. See `collect-candidate-geo-rethink.md`.                               |
 | 2026-03-25 | Governor auto-fill, Location column, newest-first default. Detail page UI overhaul: stat cards aligned to admin standard (Pattern 2 — icon top-right, value below), overview grouped into sections with dividers, campaigns tab rewritten as table, account tab typography standardized. Text contrast audit: bumped faint labels from opacity-40/50 to foreground/70-80, font-semibold section titles, reverted font-mono from body text (reserved for codes/IDs/badges/column headers). Onboarding status select uses colored dots instead of badges for clean hover. |
 | 2026-03-24 | Fixed ComboboxSelect search (custom filter searches label+value+description). President can optionally select "home state". Create form rewritten as 3-step wizard with StepProgress bar, matching Collect campaign wizard pattern. Added phone field to candidate edit form. Account tab danger zone with delete.                                                                                                                                                                                                                                                      |

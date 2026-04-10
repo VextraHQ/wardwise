@@ -12,8 +12,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
-import { roleLabels } from "@/lib/helpers/collect-analytics";
-import { formatGeoDisplayName } from "@/lib/utils/geo-display";
+import { roleLabels } from "@/lib/collect/analytics";
+import { formatGeoDisplayName } from "@/lib/geo/display";
 import {
   ChartContainer,
   ChartTooltip,

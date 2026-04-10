@@ -2,9 +2,9 @@
 //
 // NOTE: The `supporterCount` field in this array is hardcoded for demo/mock purposes.
 // For accurate, real-time supporter counts, use:
-// - getCandidateByIdWithSupporters() from @/lib/helpers/candidate-helpers
-// - getCandidatesWithSupporters() from @/lib/helpers/candidate-helpers
-// - getSupportersCount(candidateId) from @/lib/helpers/voter-analytics
+// - getCandidateByIdWithSupporters() from @/lib/candidate/directory
+// - getCandidatesWithSupporters() from @/lib/candidate/directory
+// - getSupportersCount(candidateId) from @/lib/candidate/analytics
 //
 // These functions calculate supporters dynamically from actual voter data.
 import type { Candidate } from "@/types/candidate";

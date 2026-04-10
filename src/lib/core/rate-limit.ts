@@ -24,14 +24,38 @@ export const submitRateLimit = redis
   : null;
 
 /**
- * Rate limiter for authentication attempts.
+ * Rate limiter for login attempts.
  * 5 login attempts per minute per IP.
  */
-export const authRateLimit = redis
+export const loginRateLimit = redis
   ? new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(5, "1 m"),
-      prefix: "rl:auth",
+      prefix: "rl:auth-login",
+    })
+  : null;
+
+/**
+ * Rate limiter for recovery requests.
+ * 3 attempts per 15 minutes per IP.
+ */
+export const recoveryRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(3, "15 m"),
+      prefix: "rl:auth-recovery",
+    })
+  : null;
+
+/**
+ * Rate limiter for password setup / reset completion attempts.
+ * 5 attempts per 10 minutes per IP.
+ */
+export const passwordSetupRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, "10 m"),
+      prefix: "rl:auth-password-setup",
     })
   : null;
 

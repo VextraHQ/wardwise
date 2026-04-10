@@ -14,6 +14,7 @@ import { RegistrationStepHeader } from "@/components/collect/registration-step-h
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { ShareInviteCard } from "@/components/collect/share-invite-card";
 import type { PublicCampaign } from "@/types/collect";
+import { getEffectiveCampaignName } from "@/lib/collect/branding";
 
 export function ConfirmationScreen({
   campaign,
@@ -27,6 +28,7 @@ export function ConfirmationScreen({
   onNewRegistration: () => void;
 }) {
   const [hasTriggeredConfetti, setHasTriggeredConfetti] = useState(false);
+  const campaignName = getEffectiveCampaignName(campaign);
 
   useEffect(() => {
     // Only trigger confetti for confirmed online submissions, not offline queued ones
@@ -138,7 +140,7 @@ export function ConfirmationScreen({
           <div className="border-border/40 border-b pb-6">
             <div className="space-y-1">
               <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
-                {campaign.candidateName}
+                {campaignName}
               </h2>
               <div className="flex items-center gap-2">
                 <Badge
@@ -181,8 +183,7 @@ export function ConfirmationScreen({
       {/* Share + QR Card */}
       <ShareInviteCard
         campaignSlug={campaign.slug}
-        candidateName={campaign.candidateName}
-        candidateTitle={campaign.candidateTitle}
+        campaignName={campaignName}
         party={campaign.party}
         animated
         animationDelay={0.2}

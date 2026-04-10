@@ -1,66 +1,42 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth-helpers";
-import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
-import crypto from "crypto";
-import { logAudit } from "@/lib/audit";
-
-function generateReadablePassword(): string {
-  const words = [
-    "WARD",
-    "VOTE",
-    "POLL",
-    "TEAM",
-    "SAFE",
-    "CORE",
-    "LINK",
-    "PEAK",
-    "DATA",
-    "PLAN",
-  ];
-  const w1 = words[crypto.randomInt(words.length)];
-  const w2 = words[crypto.randomInt(words.length)];
-  const digits = String(crypto.randomInt(1000, 9999));
-  return `${w1}-${digits}-${w2}`;
-}
+import { requireAdmin } from "@/lib/auth/guards";
+import { prisma } from "@/lib/core/prisma";
+import { logAudit } from "@/lib/core/audit";
+import { createPasswordResetForUser } from "@/lib/auth/links";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { error, session } = await requireAdmin();
+    const { error, user } = await requireAdmin();
     if (error) return error;
 
     const { id } = await params;
 
-    const user = await prisma.user.findFirst({
+    const targetUser = await prisma.user.findFirst({
       where: { candidateId: id },
     });
 
-    if (!user) {
+    if (!targetUser) {
       return NextResponse.json(
         { error: "Candidate account not found" },
         { status: 404 },
       );
     }
 
-    const generatedPassword = generateReadablePassword();
-    const hashedPassword = await bcrypt.hash(generatedPassword, 12);
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { password: hashedPassword },
+    const resetLink = await createPasswordResetForUser({
+      userId: targetUser.id,
+      createdById: user!.id,
     });
 
-    void logAudit(
-      "candidate.password_reset",
-      "candidate",
-      id,
-      session!.user.id,
-    );
+    void logAudit("candidate.password_reset", "candidate", id, user!.id);
 
-    return NextResponse.json({ generatedPassword });
+    return NextResponse.json({
+      resetUrl: resetLink.url,
+      expiresAt: resetLink.expiresAt.toISOString(),
+      deliveryMethod: resetLink.deliveryMethod,
+    });
   } catch (error) {
     console.error("Error resetting password:", error);
     return NextResponse.json(
