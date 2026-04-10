@@ -194,7 +194,8 @@ export function AdminDashboard() {
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="font-mono text-[2rem] leading-none font-semibold tracking-tight tabular-nums">
-                  {uniqueParties.length} parties
+                  {uniqueParties.length}{" "}
+                  {uniqueParties.length === 1 ? "party" : "parties"}
                 </div>
                 <p className="text-muted-foreground mt-2 text-sm">
                   {nationalCandidates} national,{" "}

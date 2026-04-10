@@ -11,7 +11,7 @@ import {
   HiKey,
   HiMail,
 } from "react-icons/hi";
-import { Loader2 } from "lucide-react";
+
 import { requestPasswordReset } from "@/lib/auth/client";
 import { AuthCard } from "@/components/auth/auth-card";
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
@@ -160,26 +160,20 @@ export function ForgotPasswordScreen() {
               )}
             </div>
 
-            {isLoading ? (
-              <div className="bg-primary/5 border-primary/20 flex flex-col items-center justify-center gap-3 rounded-sm border py-6">
-                <Loader2 className="text-primary size-5 animate-spin" />
-                <div className="text-center">
-                  <p className="text-foreground text-xs font-bold tracking-wider uppercase">
-                    Sending Recovery Link
-                  </p>
-                  <p className="text-muted-foreground pt-1 font-mono text-[10px] font-medium tracking-widest uppercase">
-                    Secure Email Dispatch
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <Button
-                type="submit"
-                className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 w-full rounded-sm font-mono text-[11px] font-bold tracking-[0.18em] uppercase shadow-none transition-all active:scale-95"
-              >
-                Send Reset Link
-              </Button>
-            )}
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 w-full rounded-sm font-mono text-[11px] font-bold tracking-[0.18em] uppercase shadow-none transition-all active:scale-95"
+            >
+              {isLoading ? (
+                <>
+                  <div className="mr-2 size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Sending Link...
+                </>
+              ) : (
+                "Send Reset Link"
+              )}
+            </Button>
           </form>
         )}
       </AuthCard>

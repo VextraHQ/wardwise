@@ -244,13 +244,16 @@ export function PasswordSetupScreen({
               disabled={isLoading}
               className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 w-full rounded-sm font-mono text-[11px] font-bold tracking-[0.18em] uppercase shadow-none transition-all active:scale-95"
             >
-              {isLoading
-                ? isInvite
-                  ? "Saving Password..."
-                  : "Resetting Password..."
-                : isInvite
-                  ? "Activate Account"
-                  : "Update Password"}
+              {isLoading ? (
+                <>
+                  <div className="mr-2 size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  {isInvite ? "Saving Password..." : "Resetting Password..."}
+                </>
+              ) : isInvite ? (
+                "Activate Account"
+              ) : (
+                "Update Password"
+              )}
             </Button>
           </form>
         )}

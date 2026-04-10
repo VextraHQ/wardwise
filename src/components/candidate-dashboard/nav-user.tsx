@@ -74,10 +74,10 @@ export function NavUser() {
               <div className="grid flex-1 text-left text-sm leading-tight">
                 {isLoadingSession ? (
                   <>
-                    <span className="text-muted-foreground/60 animate-pulse truncate font-mono text-[10px] font-bold tracking-widest uppercase">
+                    <span className="text-sidebar-foreground/60 animate-pulse truncate font-mono text-[10px] font-bold tracking-widest uppercase">
                       Syncing...
                     </span>
-                    <span className="text-muted-foreground/40 truncate font-mono text-[9px] tracking-widest uppercase">
+                    <span className="text-sidebar-foreground/40 truncate font-mono text-[9px] tracking-widest uppercase">
                       ID_FETCH
                     </span>
                   </>
@@ -86,7 +86,7 @@ export function NavUser() {
                     <span className="truncate text-sm font-semibold tracking-tight">
                       {user.name}
                     </span>
-                    <span className="text-muted-foreground truncate text-xs">
+                    <span className="text-sidebar-foreground/40 truncate text-xs">
                       {user.email}
                     </span>
                   </>
