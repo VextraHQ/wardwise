@@ -1,7 +1,7 @@
 # WardWise Candidate Management Spec
 
 > Living reference for the candidate management and onboarding system.
-> Branch: `main` | Last updated: 2026-04-10
+> Branch: `main` | Last updated: 2026-04-15
 > Future changes: branch off `main` → `fix/candidates-*` or `feature/candidates-*`
 
 ---
@@ -75,7 +75,7 @@ pending → credentials_sent → active → suspended
 ```
 
 1. **Pending**: Account created, no credentials shared yet
-2. **Credentials Sent**: Password shared with client (via WhatsApp/phone)
+2. **Credentials Sent**: Secure setup link issued to the client, with email delivery when configured and manual sharing as fallback
 3. **Active**: Client has logged in and is using the platform
 4. **Suspended**: Account disabled (non-payment, policy violation, etc.)
 
@@ -250,6 +250,7 @@ The shared `ComboboxSelect` component (`src/components/ui/combobox-select.tsx`) 
 
 | Date       | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-15 | Docs synced to the production auth rollout. Candidate onboarding language now reflects secure setup links instead of shared passwords, and hardening/auth references now match the current token-revocation and rate-limit behavior.                                                                                                                                                                                                                                                                                                                                 |
 | 2026-04-10 | Candidate auth rollout aligned with secure-link onboarding. New accounts now issue one-time setup links instead of readable passwords, and admin reset now issues one-time reset links with email/manual delivery modes. Candidate account UI, create flow, and supporting docs were updated to match the shared auth system.                                                                                                                                                                                                                                           |
 | 2026-04-01 | Candidate-driven geo scope: `constituencyLgaIds Int[]` on Candidate defines constituency boundary. Searchable checkbox grid for LGA selection. Auto-suggested constituency name with manual override. Boundary warnings (full-state, very broad, custom label, incomplete). Partial LGA seeding indicator. Soft block: candidates saveable without LGAs, campaign creation blocked until defined. Server-side validation via `sanitizeCandidateConstituencyLgaIds()`. FCT invalid combos blocked. See `collect-candidate-geo-rethink.md`.                               |
 | 2026-03-25 | Governor auto-fill, Location column, newest-first default. Detail page UI overhaul: stat cards aligned to admin standard (Pattern 2 — icon top-right, value below), overview grouped into sections with dividers, campaigns tab rewritten as table, account tab typography standardized. Text contrast audit: bumped faint labels from opacity-40/50 to foreground/70-80, font-semibold section titles, reverted font-mono from body text (reserved for codes/IDs/badges/column headers). Onboarding status select uses colored dots instead of badges for clean hover. |

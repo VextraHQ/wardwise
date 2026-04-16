@@ -10,9 +10,9 @@ import {
   IconHelp,
   IconMapPin,
 } from "@tabler/icons-react";
-import { NavMain } from "@/components/candidate-dashboard/nav-main";
-import { NavSecondary } from "@/components/candidate-dashboard/nav-secondary";
-import { AdminNavUser } from "@/components/admin/admin-nav-user";
+import { NavMain } from "@/components/layout/sidebar/nav-main";
+import { NavSecondary } from "@/components/layout/sidebar/nav-secondary";
+import { NavUser } from "@/components/layout/sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -97,7 +97,7 @@ export function AdminSidebar({
         <NavSecondary items={adminSecondaryItems} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <AdminNavUser />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

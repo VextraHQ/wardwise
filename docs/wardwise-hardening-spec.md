@@ -1,7 +1,7 @@
 # WardWise Production Hardening Spec
 
 > Security, data integrity, and architecture hardening for production launch.
-> Branch: `main` | Last updated: 2026-04-10
+> Branch: `main` | Last updated: 2026-04-15
 > Future changes: branch off `main` → `fix/<area>-*` or `feature/<area>-*`
 
 ---
@@ -15,7 +15,7 @@
 - [x] **Server route guard** — `src/proxy.ts` protects `/admin/*` and `/dashboard/*` at Edge
 - [x] **Secure account lifecycle** — candidate setup and recovery now use one-time auth links instead of admin-shared passwords
 - [x] **Server-side Zod validation** — Candidate create/update, Campaign create/update, Submission update all validated
-- [x] **Rate limiting** — Upstash Redis on `/api/collect/submit` (10/min) and `/api/auth` (5/min)
+- [x] **Rate limiting** — Upstash Redis on `/api/collect/submit` plus split auth protection for login, recovery, and password setup flows
 - [x] **Geo validation** — Submit verifies pollingUnit → ward → LGA hierarchy
 - [x] **Submission delete context** — Optional `?campaignId` param prevents cross-campaign deletes
 - [x] **Audit logging** — DB table + utility for candidate CRUD, campaign CRUD, password reset, submission delete
@@ -50,7 +50,7 @@ Chosen over in-memory because the app deploys to Vercel (serverless — no share
 | `src/lib/auth/links.ts`            | One-time invite/reset link lifecycle                      |
 | `src/lib/auth/guards.ts`           | Shared auth wrapper layer (`requireAdmin()`, page guards) |
 | `src/proxy.ts`                     | Server-side Edge route protection (Next.js 16 proxy)      |
-| `src/lib/core/rate-limit.ts`       | Upstash rate limiters (submit + auth)                     |
+| `src/lib/core/rate-limit.ts`       | Upstash rate limiters (submit + split auth flows)         |
 | `src/lib/core/audit.ts`            | `logAudit()` fire-and-forget utility                      |
 | `src/lib/schemas/admin-schemas.ts` | All Zod schemas (candidate, canvasser, campaign)          |
 | `.env.example`                     | Environment variable template                             |

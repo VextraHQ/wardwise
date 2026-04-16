@@ -1,7 +1,7 @@
 # WardWise Auth System Spec
 
 > Living reference for WardWise authentication, account lifecycle, and access control.
-> Branch: `main` | Last updated: 2026-04-10
+> Branch: `main` | Last updated: 2026-04-15
 
 ---
 
@@ -134,7 +134,7 @@ WardWise now stores invite and reset links in `AuthToken`.
 - tokens are stored hashed
 - tokens expire automatically
 - tokens are one-time use
-- issuing a fresh link revokes previous unused links of the same type
+- issuing a fresh invite or reset link revokes previous unused auth links for that user
 - successful password setup consumes the token and revokes other outstanding auth links for that user
 
 ---

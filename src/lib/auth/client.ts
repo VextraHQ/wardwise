@@ -36,7 +36,14 @@ function getLoginErrorMessage(error: string) {
     return "This account is suspended. Please contact admin.";
   }
 
-  return "Invalid email or password";
+  if (
+    normalized.includes("credentialssignin") ||
+    normalized.includes("invalid")
+  ) {
+    return "Invalid email or password";
+  }
+
+  return "Sign-in could not be completed. Please refresh and try again.";
 }
 
 function wait(ms: number) {
@@ -81,7 +88,7 @@ export async function loginWithCredentials({
   rememberMe,
 }: LoginCredentials): Promise<LoginSuccessResult | LoginFailureResult> {
   const result = await signIn("credentials", {
-    email,
+    email: email.trim().toLowerCase(),
     password,
     rememberMe: rememberMe ? "true" : "false",
     redirect: false,

@@ -58,10 +58,10 @@ export function SiteHeader({ className }: SiteHeaderProps) {
                   href={`#${link.section}`}
                   className="group relative flex flex-col items-center px-4 py-2"
                 >
-                  <span className="text-muted-foreground/40 group-hover:text-primary/60 hidden font-mono text-[8px] font-black tracking-[0.3em] transition-colors xl:inline-block">
+                  <span className="text-muted-foreground/50 group-hover:text-primary/60 hidden font-mono text-[8px] font-black tracking-[0.3em] transition-colors lg:inline-block">
                     0{i + 1}
                   </span>
-                  <span className="text-muted-foreground group-hover:text-foreground font-mono text-[9px] font-black tracking-widest uppercase transition-colors xl:text-[10.5px]">
+                  <span className="text-muted-foreground group-hover:text-foreground font-mono text-[9px] font-black tracking-widest uppercase transition-colors lg:text-[10.5px]">
                     {link.label}
                   </span>
                   <div className="bg-primary absolute -bottom-1 h-1 w-1 rounded-full opacity-0 transition-opacity group-hover:opacity-100" />
