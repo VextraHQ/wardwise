@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const stepRoleInfo = {
   "01": {
-    actor: "Constituents",
+    actor: "Supporters",
     theme: "primary",
     accent: "bg-primary",
     textClass: "text-primary",
