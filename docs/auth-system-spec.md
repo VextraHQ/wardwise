@@ -1,7 +1,7 @@
 # WardWise Auth System Spec
 
 > Living reference for WardWise authentication, account lifecycle, and access control.
-> Branch: `main` | Last updated: 2026-04-15
+> Branch: `main` | Last updated: 2026-04-16
 
 ---
 
@@ -50,6 +50,13 @@ This is intentionally simple for the current model. If WardWise later needs sepa
 - Email delivery is recommended for production via Resend
 - Manual copy/share remains supported as an ops fallback
 
+### Auth Page UX / Metadata
+
+- Auth pages use minimal, non-indexable metadata via `createAuthMetadata()`
+- `/login` and `/forgot-password` include generic titles/descriptions only
+- `/reset-password/[token]` uses generic no-index metadata with no account, email, candidate, or token-specific details
+- The login session-policy helper uses a click/tap popover so the explanation works on mobile and keyboard-accessible devices
+
 ---
 
 ## Main Flows
@@ -73,6 +80,8 @@ This is intentionally simple for the current model. If WardWise later needs sepa
 5. Link is emailed only when delivery is configured and available
 6. If email delivery is unavailable, the candidate is directed to contact their campaign admin for a manual reset
 7. Candidate sets a new password from `/reset-password/[token]`
+
+**Note:** A candidate in `credentials_sent` (or `pending`) can use the forgot-password flow to complete their account setup. This is intentional — both the invite link and the reset link prove email ownership and set a password, so the forgot-password flow acts as an equivalent path to setup completion. The candidate is promoted to `active` upon successful password creation, the same as if they had used their original invite link.
 
 ### Admin Resets Candidate Access
 
@@ -103,6 +112,8 @@ It checks:
 - role
 - current session lifetime policy
 - candidate active status from the JWT payload
+
+**Revalidation window:** The proxy reads JWT claims only — it does not hit the database on every request. The JWT callback refreshes DB state every `SESSION_REVALIDATION_WINDOW_MS` (currently 5 minutes). This means that after a password reset, suspension, or email change, the proxy may still allow routing for up to 5 minutes based on stale JWT claims. This is routing-only — server guards recheck the database before rendering pages or serving API responses, so no data is exposed during this window.
 
 ### Server Guards
 
@@ -162,6 +173,7 @@ If email delivery is not configured, WardWise still supports manual invite/reset
 | `src/lib/auth/storage.ts`                                   | Auth-specific user/session persistence helpers            |
 | `src/lib/auth/links.ts`                                     | Invite/reset token issuing, hashing, consuming, emailing  |
 | `src/lib/auth/client.ts`                                    | Browser auth client for login, forgot-password, and setup |
+| `src/lib/core/metadata.ts`                                  | Shared metadata helpers, including non-indexable auth metadata |
 | `src/proxy.ts`                                              | Entry guard for protected routes                          |
 | `src/app/(auth)/layout.tsx`                                 | Shared auth-page wrapper and redirect behavior            |
 | `src/app/(auth)/login/page.tsx`                             | Shared login route                                        |

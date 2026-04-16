@@ -3,6 +3,12 @@ import {
   PasswordSetupScreen,
   PasswordSetupUnavailable,
 } from "@/components/auth/password-setup-screen";
+import { createAuthMetadata } from "@/lib/core/metadata";
+
+export const metadata = createAuthMetadata({
+  title: "Reset password",
+  noArchive: true,
+});
 
 export default async function ResetPasswordPage({
   params,

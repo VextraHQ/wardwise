@@ -25,10 +25,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { loginSchema, type LoginFormData } from "@/lib/schemas/auth-schemas";
 
 export function LoginScreen() {
@@ -201,24 +201,23 @@ export function LoginScreen() {
               >
                 Keep me signed in on this device
               </Label>
-              <Tooltip>
-                <TooltipTrigger
+              <Popover>
+                <PopoverTrigger
                   type="button"
-                  tabIndex={-1}
                   className="text-muted-foreground hover:text-foreground focus-visible:ring-primary mt-0.5 rounded-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
                 >
                   <HiOutlineInformationCircle className="size-4" />
                   <span className="sr-only">Session policy details</span>
-                </TooltipTrigger>
-                <TooltipContent
+                </PopoverTrigger>
+                <PopoverContent
                   side="top"
                   sideOffset={8}
-                  className="max-w-[230px] text-center font-sans text-[11px] leading-relaxed font-medium"
+                  className="w-auto max-w-[230px] rounded-sm border px-3 py-2 text-center font-sans text-[11px] leading-relaxed font-medium shadow-sm"
                 >
                   For your security, standard sign-ins use short sessions. This
                   extends your active window on this local device only.
-                </TooltipContent>
-              </Tooltip>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 

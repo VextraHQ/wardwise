@@ -206,10 +206,17 @@ export async function PUT(
     }
 
     if (email) {
-      await prisma.user.updateMany({
+      const currentUser = await prisma.user.findFirst({
         where: { candidateId: id },
-        data: { email },
+        select: { email: true },
       });
+      if (currentUser?.email.toLowerCase() !== email.toLowerCase()) {
+        await prisma.user.updateMany({
+          where: { candidateId: id },
+          data: { email },
+        });
+        await bumpCandidateSessionVersions(id);
+      }
     }
 
     const candidateWithUser = await prisma.candidate.findUnique({
