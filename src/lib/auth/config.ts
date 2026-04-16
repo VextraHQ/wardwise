@@ -11,6 +11,7 @@ import {
   recordSuccessfulLogin,
 } from "@/lib/auth/storage";
 import { normalizeEmailInput } from "@/lib/schemas/common-schemas";
+import { getCandidateStatusLoginError } from "@/lib/auth/errors";
 
 function logCredentialsRejection({
   email,
@@ -59,12 +60,15 @@ export const authOptions: NextAuthOptions = {
 
         if (!user || !user.password) {
           if (user?.role === "candidate" && user.candidate) {
+            const errorCode = getCandidateStatusLoginError(
+              user.candidate.onboardingStatus,
+            );
             logCredentialsRejection({
               email,
-              reason: "candidate_setup_required",
+              reason: errorCode.toLowerCase(),
               startedAt,
             });
-            throw new Error("ACCOUNT_SETUP_REQUIRED");
+            throw new Error(errorCode);
           }
           logCredentialsRejection({
             email,
@@ -77,22 +81,14 @@ export const authOptions: NextAuthOptions = {
         if (user.role === "candidate") {
           const onboardingStatus = user.candidate?.onboardingStatus;
 
-          if (onboardingStatus === "suspended") {
-            logCredentialsRejection({
-              email,
-              reason: "candidate_suspended",
-              startedAt,
-            });
-            throw new Error("ACCOUNT_SUSPENDED");
-          }
-
           if (onboardingStatus !== "active") {
+            const errorCode = getCandidateStatusLoginError(onboardingStatus);
             logCredentialsRejection({
               email,
-              reason: `candidate_${onboardingStatus ?? "missing"}_inactive`,
+              reason: errorCode.toLowerCase(),
               startedAt,
             });
-            throw new Error("ACCOUNT_SETUP_REQUIRED");
+            throw new Error(errorCode);
           }
         }
 

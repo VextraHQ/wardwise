@@ -10,6 +10,20 @@ export interface CandidateWithUser extends Candidate {
     role: string;
     createdAt: string;
   };
+  campaignCount?: number;
+  collectCampaign?: CandidateCollectCampaignSummary | null;
+}
+
+export interface CandidateCollectCampaignSummary {
+  id: string;
+  slug: string;
+  status: string;
+  submissionsCount: number;
+  clientReportEnabled: boolean;
+  clientReportToken: string | null;
+  clientReportLastViewedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateCandidateResponse {

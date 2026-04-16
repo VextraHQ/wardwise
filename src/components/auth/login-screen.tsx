@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -32,7 +31,7 @@ import {
 import { loginSchema, type LoginFormData } from "@/lib/schemas/auth-schemas";
 
 export function LoginScreen() {
-  const router = useRouter();
+  const isSubmittingRef = useRef(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -52,6 +51,9 @@ export function LoginScreen() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
+    if (isSubmittingRef.current) return;
+
+    isSubmittingRef.current = true;
     setIsLoading(true);
     setError("");
     track("login_submitted", { has_remember_me: data.rememberMe });
@@ -68,12 +70,13 @@ export function LoginScreen() {
         return;
       }
 
-      track("login_succeeded", { role: result.role });
-      router.replace(result.redirectTo);
+      track("login_succeeded", { role: result.role ?? "pending" });
+      window.location.replace(result.redirectTo);
     } catch {
       track("login_failed", { error_category: "unknown" });
       setError("We hit an unexpected error. Please try again.");
     } finally {
+      isSubmittingRef.current = false;
       setIsLoading(false);
     }
   };

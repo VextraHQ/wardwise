@@ -1,4 +1,6 @@
 import { getSession, signIn } from "next-auth/react";
+import { getLoginErrorMessage } from "@/lib/auth/errors";
+import { isSessionWithinLifetime } from "@/lib/auth/session";
 
 type LoginCredentials = {
   email: string;
@@ -10,7 +12,7 @@ type LoginRole = "admin" | "candidate";
 
 type LoginSuccessResult = {
   ok: true;
-  role: LoginRole;
+  role?: LoginRole;
   redirectTo: string;
 };
 
@@ -23,28 +25,7 @@ type JsonErrorResponse = {
   error?: string;
 };
 
-const SESSION_REFRESH_DELAYS_MS = [0, 120, 240, 400];
-
-function getLoginErrorMessage(error: string) {
-  const normalized = error.toLowerCase();
-
-  if (normalized.includes("account_setup_required")) {
-    return "Finish your account setup from the secure link sent to you before signing in.";
-  }
-
-  if (normalized.includes("account_suspended")) {
-    return "This account is suspended. Please contact admin.";
-  }
-
-  if (
-    normalized.includes("credentialssignin") ||
-    normalized.includes("invalid")
-  ) {
-    return "Invalid email or password";
-  }
-
-  return "Sign-in could not be completed. Please refresh and try again.";
-}
+const SESSION_REFRESH_DELAYS_MS = [0, 150, 300, 600, 1000, 1500, 2500];
 
 function wait(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -61,6 +42,10 @@ async function resolveWorkspace(): Promise<{
 
     const session = await getSession();
     const role = session?.user?.role;
+
+    if (!session?.user || !isSessionWithinLifetime(session.user)) {
+      continue;
+    }
 
     if (role === "admin") {
       return { role, redirectTo: "/admin" };
@@ -105,8 +90,8 @@ export async function loginWithCredentials({
 
   if (!workspace) {
     return {
-      ok: false,
-      error: "We couldn’t determine your workspace. Please try again.",
+      ok: true,
+      redirectTo: "/login",
     };
   }
 

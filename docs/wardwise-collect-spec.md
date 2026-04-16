@@ -111,7 +111,8 @@
 
 - Collect v1 is admin-only on the management side.
 - Hassan / Vextra is the only admin role in scope for v1.
-- Candidate self-service access to Collect data is explicitly out of scope for v1.
+- Candidate self-service write access to Collect data is explicitly out of scope for v1.
+- Campaign Insights provides a private read-only report; verification, canvasser management, and record edits require authenticated admin or future candidate-portal permissions.
 
 ### Campaign Ownership
 
@@ -279,6 +280,12 @@ model PollingUnit {
 | `/api/admin/collect/campaigns/[id]/canvassers`  | GET                  | Aggregation                                                                         |
 | `/api/admin/collect/lgas`                       | GET                  | All LGAs for campaign wizard                                                        |
 | `/api/admin/collect/submissions/[sid]`          | PATCH                | Flag, verify, notes                                                                 |
+
+### Export Rules
+
+- Submission and canvasser exports use human-readable Nigeria time instead of raw ISO timestamps.
+- Redacted submission exports keep operational names, phone numbers, and canvasser details visible.
+- Redacted submission exports mask sensitive voter identity fields such as `APC/NIN` and `VIN`.
 
 ## File Structure
 

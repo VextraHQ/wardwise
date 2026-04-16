@@ -198,7 +198,8 @@ export async function PUT(
 
     const campaignIdentityData: Prisma.CampaignUpdateManyMutationInput = {};
     if (name !== undefined) campaignIdentityData.candidateName = name;
-    if (title !== undefined) campaignIdentityData.candidateTitle = title || null;
+    if (title !== undefined)
+      campaignIdentityData.candidateTitle = title || null;
     if (party !== undefined) campaignIdentityData.party = party;
     if (constituency !== undefined)
       campaignIdentityData.constituency = constituency || "";

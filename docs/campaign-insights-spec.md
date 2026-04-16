@@ -1,7 +1,7 @@
 # Campaign Insights Spec
 
 > Private read-only campaign reporting for clients on top of Collect.
-> Branch: `develop` | Last updated: 2026-04-09
+> Branch: `develop` | Last updated: 2026-04-16
 > See also: `wardwise-collect-spec.md`, `wardwise-collect-v2-spec.md`, `wardwise-hardening-spec.md`
 
 ---
@@ -14,7 +14,8 @@
 - **Product label** — `Campaign Insights`
 - **Implementation principle** — reuse current Collect stats/export/submission infrastructure via shared server-side query helpers
 - **UI direction chosen** — match the `/c/[slug]` public form architecture and use `/login`-quality access states rather than an “admin lite” dashboard
-- **Implementation state** — core experience implemented; information architecture and visual polish still being refined
+- **Access boundary reaffirmed** — passcode reports remain read-only; candidate write actions belong in a future authenticated candidate portal
+- **Implementation state** — core experience implemented; global reporting controls now drive Overview and Analytics consistently
 
 ---
 
@@ -82,6 +83,11 @@ Export should become a secondary utility action, not the main outcome.
 - copy public form link
 - QR code and compact share utility inside overview
 - tabbed report navigation
+- global reporting controls:
+  - date range
+  - LGA filter
+  - role filter
+  - prior-period compare
 - admin controls to enable/disable/revoke report access
 
 ### Out of scope
@@ -90,6 +96,8 @@ Export should become a secondary utility action, not the main outcome.
 - candidate account management
 - candidate-side campaign editing
 - candidate-side moderation / verification
+- candidate-side canvasser management
+- write actions from shared passcode links
 - multi-campaign client workspace
 - notifications / messaging / billing
 
@@ -103,6 +111,45 @@ Export should become a secondary utility action, not the main outcome.
 | 2. Private read-only report (chosen) | Candidate/client sees a private results page with charts + export | Strong value, fast enough, safe, premium feel | Needs light access model + polished UI          | Best current option |
 | 3. Light candidate portal            | Candidate logs in and sees only their own report pages            | More premium, closer to full product          | Auth and permissions overhead                   | Good later step     |
 | 4. Full candidate dashboard          | Candidate-facing campaign OS                                      | Long-term ideal                               | Too much for this launch phase                  | Future phase        |
+
+---
+
+## Read-Only vs Write Access Decision
+
+Campaign Insights must remain read-only while it is protected by a shared private
+link and passcode.
+
+This is intentional:
+
+- report links can be forwarded
+- passcodes can be shared across campaign stakeholders
+- verification, canvasser management, and record edits are real data-changing
+  actions
+- write actions require named users, permissions, and audit trails
+
+Allowed in Campaign Insights:
+
+- view metrics
+- view charts
+- view supporter records
+- copy selected contacts for follow-up
+- export data
+- copy/share the public collection form link
+
+Not allowed in Campaign Insights:
+
+- verify or unverify submissions
+- flag or unflag submissions
+- edit supporter records
+- add or remove canvassers
+- change campaign settings
+
+Future path:
+
+- build an authenticated candidate portal/dashboard
+- grant candidate users specific permissions
+- log each write action against a named user
+- optionally let admin decide which actions each candidate account can perform
 
 ---
 
@@ -241,6 +288,14 @@ The same shared export menu should expose:
 - `Export Redacted CSV`
 - `Export Redacted Excel`
 
+Export formatting rules:
+
+- exported dates use human-readable Nigeria time, not raw ISO timestamps
+- redacted exports keep operational names, phone numbers, and canvasser details
+- redacted exports mask high-risk voter identity fields such as `APC/NIN` and
+  `VIN`
+- keep the UI wording as `Redacted`, but treat it as sensitive-ID redaction
+
 ---
 
 ## UX Direction
@@ -309,6 +364,12 @@ Do not keep these in the hero:
 
 Those belong in the briefing modules below.
 
+Rules:
+
+- the hero headline total stays all-time and unfiltered
+- date, LGA, role, and compare controls affect the briefing modules and
+  analytics below the hero
+
 ### 3. Global controls
 
 Place a single control row between the hero and the tabs.
@@ -338,8 +399,12 @@ Active filters should render as chips directly below the controls, for example:
 
 Rules:
 
-- `Overview` and `Analytics` follow the same date range and compare state
+- `Overview` and `Analytics` follow the same date range, LGA filter, role
+  filter, and compare state
 - `Supporters` keeps its own table filters
+- summary API calls include `from`, `to`, `lga`, and `role` when selected
+- compare queries use the same selected LGA/role filters against the immediately
+  prior date period
 - range changes should never blank the whole page or look like a hard refresh
 - preserve current data while the new range loads in the background
 
@@ -483,8 +548,10 @@ Rules:
 
 - charts must remain responsive on mobile and desktop
 - momentum must always show visible x-axis dates under the chart
-- if compare mode is on, momentum should show current period and prior period
-  clearly without becoming visually noisy
+- if compare mode is on, momentum shows the selected period as the primary
+  filled area and the prior period as a subtle dashed line
+- geography and audience charts use the currently selected date/LGA/role filter
+  context
 - avoid cramped multi-chart rows that cause overflow
 - donut/pie charts should use a legend below rather than labels floating outside the card
 - if a chart is not readable on mobile, degrade to a ranked list or lighter summary rather than forcing overflow
@@ -792,8 +859,13 @@ This keeps:
   - verify passcode, set access cookie/session
 - `GET /api/campaign-report/[token]/summary`
   - stat cards + charts + health
+  - accepts `from`, `to`, `lga`, and `role`
+  - date/LGA/role filters apply to stats, daily momentum, geography, role, and
+    sex breakdowns
 - `GET /api/campaign-report/[token]/submissions`
   - recent submissions list
+  - accepts `from`, `to`, `lga`, `role`, `search`, and `status` where used by
+    the report UI
 - `GET /api/campaign-report/[token]/export`
   - read-only CSV / Excel export
 
@@ -937,15 +1009,17 @@ The report follows existing campaign reporting rules:
 - [x] Ensure all analytics charts remain readable on both desktop and mobile
 - [x] Keep visible date ticks under momentum charts
 - [x] Keep canvasser insight lightweight and performance-focused
-- [x] Add compare-aware chart and KPI behavior without making Overview feel busy
+- [x] Add compare-aware KPI behavior without making Overview feel busy
+- [x] Add prior-period compare overlay to the momentum chart
+- [x] Make date/LGA/role controls drive the summary API and analytics charts
 - [x] Clean up internal module and route naming to `campaign-report`
 
 ## Next Polishing Ideas
 
 - add click-to-filter chips from charts and ranked lists into the global filter bar
 - add a cleaner print / share summary mode for candidate briefings
-- add a compare toggle against the prior period
 - add a direct vs field-team acquisition split that feels editorial, not operational
+- design the authenticated candidate portal for future write actions
 - add optional report branding per campaign if needed later
 
 ---

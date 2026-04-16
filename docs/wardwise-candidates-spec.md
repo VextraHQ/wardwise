@@ -1,7 +1,7 @@
 # WardWise Candidate Management Spec
 
 > Living reference for the candidate management and onboarding system.
-> Branch: `main` | Last updated: 2026-04-15
+> Branch: `main` | Last updated: 2026-04-16
 > Future changes: branch off `main` → `fix/candidates-*` or `feature/candidates-*`
 
 ---
@@ -9,6 +9,11 @@
 ## Overview
 
 Candidate Management is the B2B entry point for WardWise. When a client pays, Vextra creates their candidate account, issues a secure setup link, and begins onboarding. The system uses geo-backed location selects (State/LGA from the Geo API) instead of free-text inputs to ensure data consistency with the Collect system.
+
+Candidate Management also acts as the admin's operations launcher for each
+client: from the list view, admin can jump into Collect, copy the public form,
+open Campaign Insights, or continue campaign setup without first drilling into
+the candidate detail page.
 
 ### Production Hardening (2026-03-27)
 
@@ -46,11 +51,13 @@ Candidate Management is the B2B entry point for WardWise. When a client pays, Ve
 
 ### Computed Fields (API response only)
 
-| Field               | Source                                           |
-| ------------------- | ------------------------------------------------ |
-| `supporterCount`    | Sum of `_count.submissions` across all campaigns |
-| `_count.campaigns`  | Prisma nested count                              |
-| `_count.canvassers` | Prisma nested count                              |
+| Field               | Source                                            |
+| ------------------- | ------------------------------------------------- |
+| `supporterCount`    | Sum of `_count.submissions` across all campaigns  |
+| `_count.campaigns`  | Prisma nested count                               |
+| `_count.canvassers` | Prisma nested count                               |
+| `collectCampaign`   | Primary campaign shortcut for list-row operations |
+| `campaignCount`     | Number of Collect campaigns attached to candidate |
 
 ---
 
@@ -95,7 +102,8 @@ pending → credentials_sent → active → suspended
 
 ### `GET /api/admin/candidates`
 
-Returns all candidates with user accounts and computed supporter counts.
+Returns all candidates with user accounts, computed supporter counts, and a
+sanitized primary Collect campaign summary for list-row shortcuts.
 
 ### `POST /api/admin/candidates`
 
@@ -125,11 +133,24 @@ Issues a fresh secure reset link. Returns `{ resetUrl, expiresAt, deliveryMethod
 
 ### Candidate List (`/admin` → Candidates tab)
 
-- **Table view** with columns: S/N, Name, Party (badge), Position, Location (two-line: state name + constituency), Onboarding Status (colored badge), Date Added, Actions
+- **Table view** with columns: S/N, Name, Party (badge), Position, Location (two-line: state name + constituency), Collect status, Campaign Insights status, Onboarding Status, Date Added, Actions
 - Search, filter by party/position, sort by name/supporters/date
 - "Create Candidate" button → navigates to `/admin/candidates/new`
 - Row click → navigates to `/admin/candidates/[id]`
-- Actions dropdown: View, Delete
+- The Actions column uses one consistent `Manage` dropdown per row to keep the table visually stable at scale.
+- The first dropdown item is contextual:
+  - `Create Campaign` when no Collect campaign exists
+  - `Continue Setup` for draft campaigns
+  - `View Collect` for active/paused/closed campaigns
+- Actions dropdown:
+  - View Candidate
+  - View Collect
+  - Open Public Form
+  - Copy Form Link
+  - Campaign Settings
+  - Open/Copy Campaign Insights when enabled
+  - Enable Campaign Insights shortcut when disabled
+- Creating a campaign from a candidate row passes `candidateId` to the campaign wizard so the candidate is preselected.
 
 ### Create Candidate (`/admin/candidates/new`)
 
@@ -251,7 +272,7 @@ The shared `ComboboxSelect` component (`src/components/ui/combobox-select.tsx`) 
 
 | Date       | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-04-16 | Candidate identity correction workflow added. Candidate name/title/party/constituency edits now sync to existing Collect campaign snapshot fields while preserving public slugs, so already-shared links keep working after spelling/title corrections.                                                                                                                                                                                                                                                                                                                  |
+| 2026-04-16 | Candidate identity correction workflow added. Candidate name/title/party/constituency edits now sync to existing Collect campaign snapshot fields while preserving public slugs, so already-shared links keep working after spelling/title corrections.                                                                                                                                                                                                                                                                                                                 |
 | 2026-04-15 | Docs synced to the production auth rollout. Candidate onboarding language now reflects secure setup links instead of shared passwords, and hardening/auth references now match the current token-revocation and rate-limit behavior.                                                                                                                                                                                                                                                                                                                                    |
 | 2026-04-10 | Candidate auth rollout aligned with secure-link onboarding. New accounts now issue one-time setup links instead of readable passwords, and admin reset now issues one-time reset links with email/manual delivery modes. Candidate account UI, create flow, and supporting docs were updated to match the shared auth system.                                                                                                                                                                                                                                           |
 | 2026-04-01 | Candidate-driven geo scope: `constituencyLgaIds Int[]` on Candidate defines constituency boundary. Searchable checkbox grid for LGA selection. Auto-suggested constituency name with manual override. Boundary warnings (full-state, very broad, custom label, incomplete). Partial LGA seeding indicator. Soft block: candidates saveable without LGAs, campaign creation blocked until defined. Server-side validation via `sanitizeCandidateConstituencyLgaIds()`. FCT invalid combos blocked. See `collect-candidate-geo-rethink.md`.                               |

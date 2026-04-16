@@ -29,9 +29,11 @@ export async function GET(request: Request, { params }: RouteParams) {
     const url = new URL(request.url);
     const from = url.searchParams.get("from") || undefined;
     const to = url.searchParams.get("to") || undefined;
+    const lga = url.searchParams.get("lga") || undefined;
+    const role = url.searchParams.get("role") || undefined;
 
     const [stats, health] = await Promise.all([
-      getCampaignStats(campaign.id, { from, to }),
+      getCampaignStats(campaign.id, { from, to, lga, role }),
       getCampaignHealth(campaign.id),
     ]);
 

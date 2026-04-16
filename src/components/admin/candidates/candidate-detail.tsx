@@ -164,7 +164,7 @@ export function CandidateDetail({
 
       {/* Tabs */}
       <Tabs value={currentTab} onValueChange={handleTabChange}>
-        <TabsList className="bg-muted w-full justify-start overflow-x-auto rounded-sm p-1 [scrollbar-width:none] sm:w-fit sm:overflow-visible [&::-webkit-scrollbar]:hidden">
+        <TabsList className="bg-muted w-fit justify-start overflow-x-auto rounded-sm [scrollbar-width:none] sm:overflow-visible [&::-webkit-scrollbar]:hidden">
           {TABS.map((tab) => (
             <TabsTrigger
               key={tab}

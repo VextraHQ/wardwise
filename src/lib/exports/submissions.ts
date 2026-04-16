@@ -3,12 +3,10 @@ import { prisma } from "@/lib/core/prisma";
 import { composeFullName, parseRefCodePrefix } from "@/lib/utils";
 import {
   buildExportFilename,
+  formatExportDateTime,
   parseBooleanParam,
   parseIntegerParam,
-  redactEmail,
   redactId,
-  redactName,
-  redactPhone,
   sanitizeSpreadsheetText,
   type ExportTable,
 } from "./shared";
@@ -155,24 +153,12 @@ export async function buildSubmissionsExportTable(
     const redacted = Boolean(options.redacted);
 
     return [
-      sanitizeSpreadsheetText(
-        redacted ? redactName(name.firstName) : name.firstName,
-      ),
-      sanitizeSpreadsheetText(
-        redacted ? redactName(name.middleName) : name.middleName,
-      ),
-      sanitizeSpreadsheetText(
-        redacted ? redactName(name.lastName) : name.lastName,
-      ),
-      sanitizeSpreadsheetText(
-        redacted ? redactName(name.fullName) : name.fullName,
-      ),
-      sanitizeSpreadsheetText(
-        redacted ? redactPhone(submission.phone) : submission.phone,
-      ),
-      sanitizeSpreadsheetText(
-        redacted ? redactEmail(submission.email) : submission.email,
-      ),
+      sanitizeSpreadsheetText(name.firstName),
+      sanitizeSpreadsheetText(name.middleName),
+      sanitizeSpreadsheetText(name.lastName),
+      sanitizeSpreadsheetText(name.fullName),
+      sanitizeSpreadsheetText(submission.phone),
+      sanitizeSpreadsheetText(submission.email),
       sanitizeSpreadsheetText(submission.sex),
       submission.age,
       sanitizeSpreadsheetText(submission.occupation),
@@ -196,22 +182,14 @@ export async function buildSubmissionsExportTable(
       ...(campaign.customQuestion2
         ? [sanitizeSpreadsheetText(submission.customAnswer2)]
         : []),
-      sanitizeSpreadsheetText(
-        redacted
-          ? redactName(submission.canvasserName)
-          : submission.canvasserName,
-      ),
-      sanitizeSpreadsheetText(
-        redacted
-          ? redactPhone(submission.canvasserPhone)
-          : submission.canvasserPhone,
-      ),
+      sanitizeSpreadsheetText(submission.canvasserName),
+      sanitizeSpreadsheetText(submission.canvasserPhone),
       submission.isVerified ? "Yes" : "No",
       submission.isFlagged ? "Yes" : "No",
       ...(includeAdminNotes
         ? [sanitizeSpreadsheetText(submission.adminNotes)]
         : []),
-      submission.createdAt.toISOString(),
+      formatExportDateTime(submission.createdAt),
     ];
   });
 

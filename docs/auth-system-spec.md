@@ -56,6 +56,7 @@ This is intentionally simple for the current model. If WardWise later needs sepa
 - `/login` and `/forgot-password` include generic titles/descriptions only
 - `/reset-password/[token]` uses generic no-index metadata with no account, email, candidate, or token-specific details
 - The login session-policy helper uses a click/tap popover so the explanation works on mobile and keyboard-accessible devices
+- Login errors use balanced account-state feedback: invalid credentials stay generic, while pending/setup/suspended candidate states get clear next-step copy
 
 ---
 

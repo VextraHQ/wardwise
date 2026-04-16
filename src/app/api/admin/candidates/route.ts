@@ -15,8 +15,19 @@ function transformCandidate(c: {
   createdAt: Date;
   updatedAt: Date;
   user?: { createdAt: Date; [key: string]: unknown } | null;
-  campaigns?: { _count: { submissions: number } }[];
+  campaigns?: {
+    id: string;
+    slug: string;
+    status: string;
+    clientReportEnabled: boolean;
+    clientReportToken: string | null;
+    clientReportLastViewedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+    _count: { submissions: number };
+  }[];
 }) {
+  const campaigns = c.campaigns ?? [];
   const supporterCount = c.campaigns
     ? c.campaigns.reduce(
         (sum: number, cam: { _count: { submissions: number } }) =>
@@ -24,12 +35,42 @@ function transformCandidate(c: {
         0,
       )
     : 0;
+  const campaignPriority: Record<string, number> = {
+    active: 0,
+    paused: 1,
+    draft: 2,
+    closed: 3,
+  };
+  const collectCampaign = [...campaigns]
+    .sort((left, right) => {
+      const leftPriority = campaignPriority[left.status] ?? 9;
+      const rightPriority = campaignPriority[right.status] ?? 9;
+      if (leftPriority !== rightPriority) return leftPriority - rightPriority;
+      return right.updatedAt.getTime() - left.updatedAt.getTime();
+    })
+    .at(0);
+
   return {
     ...c,
     campaigns: undefined, // Don't leak nested campaign data
     position: c.position as Candidate["position"],
     email: (c.user?.email as string) || "",
     supporterCount,
+    campaignCount: campaigns.length,
+    collectCampaign: collectCampaign
+      ? {
+          id: collectCampaign.id,
+          slug: collectCampaign.slug,
+          status: collectCampaign.status,
+          submissionsCount: collectCampaign._count.submissions,
+          clientReportEnabled: collectCampaign.clientReportEnabled,
+          clientReportToken: collectCampaign.clientReportToken,
+          clientReportLastViewedAt:
+            collectCampaign.clientReportLastViewedAt?.toISOString() ?? null,
+          createdAt: collectCampaign.createdAt.toISOString(),
+          updatedAt: collectCampaign.updatedAt.toISOString(),
+        }
+      : null,
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
     user: c.user
@@ -43,7 +84,17 @@ const CANDIDATE_INCLUDE = {
     select: { id: true, email: true, name: true, role: true, createdAt: true },
   },
   campaigns: {
-    select: { _count: { select: { submissions: true } } },
+    select: {
+      id: true,
+      slug: true,
+      status: true,
+      clientReportEnabled: true,
+      clientReportToken: true,
+      clientReportLastViewedAt: true,
+      createdAt: true,
+      updatedAt: true,
+      _count: { select: { submissions: true } },
+    },
   },
 } as const;
 
