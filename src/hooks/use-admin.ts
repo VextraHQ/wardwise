@@ -40,6 +40,8 @@ export function useUpdateCandidate() {
         queryKey: ["admin", "candidates", variables.id],
       });
       qc.invalidateQueries({ queryKey: ["admin", "candidates"] });
+      qc.invalidateQueries({ queryKey: ["admin-campaigns"] });
+      qc.invalidateQueries({ queryKey: ["admin-campaign"] });
     },
   });
 }

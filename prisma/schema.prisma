@@ -39,20 +39,27 @@ model AuthToken {
   @@index([expiresAt])
 }
 
+enum OnboardingStatus {
+  pending
+  credentials_sent
+  active
+  suspended
+}
+
 model Candidate {
-  id               String   @id @default(cuid())
+  id               String           @id @default(cuid())
   name             String
   party            String
   position         String
-  isNational       Boolean  @default(false)
-  stateCode        String?  // 2-letter code (e.g. "AD", "LA")
+  isNational       Boolean          @default(false)
+  stateCode        String?          // 2-letter code (e.g. "AD", "LA")
   lga              String?
   constituency     String?
-  constituencyLgaIds Int[]  @default([])
+  constituencyLgaIds Int[]          @default([])
   description      String?
   phone            String?
-  title            String?  // Honorific: Hon., Sen., Dr., Chief, Alh.
-  onboardingStatus String   @default("pending") // "pending" | "credentials_sent" | "active" | "suspended"
+  title            String?          // Honorific: Hon., Sen., Dr., Chief, Alh.
+  onboardingStatus OnboardingStatus @default(pending)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   user             User?

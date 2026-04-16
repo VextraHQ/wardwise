@@ -35,7 +35,7 @@ export function isSessionWithinLifetime(session: SessionLike): boolean {
   const loginAt = parseNumber(session.loginAt);
 
   if (!loginAt) {
-    return true;
+    return false;
   }
 
   return Date.now() - loginAt <= getSessionLifetimeMs(session.rememberMe);

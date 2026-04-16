@@ -24,23 +24,23 @@ Candidate Management is the B2B entry point for WardWise. When a client pays, Ve
 
 ### Candidate (Prisma)
 
-| Field                | Type                          | Notes                                                                                                        |
-| -------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `id`                 | `String @id @default(cuid())` |                                                                                                              |
-| `name`               | `String`                      | Full name (without honorific)                                                                                |
-| `party`              | `String`                      | Political party code (APC, PDP, LP, etc.)                                                                    |
-| `position`           | `String`                      | President, Governor, Senator, House of Representatives, State Assembly                                       |
-| `isNational`         | `Boolean @default(false)`     | True for President                                                                                           |
-| `stateCode`          | `String?`                     | 2-letter code (e.g. "AD"). Null for President                                                                |
-| `lga`                | `String?`                     | Deprecated — kept for backward compat, not used in new flows                                                 |
-| `constituency`       | `String?`                     | Human-readable constituency name (auto-suggested from LGAs)                                                  |
-| `constituencyLgaIds` | `Int[] @default([])`          | LGA IDs defining constituency boundary. Empty for President/Governor. See `collect-candidate-geo-rethink.md` |
-| `description`        | `String?`                     | Brief bio                                                                                                    |
-| `phone`              | `String?`                     | Nigerian phone number                                                                                        |
-| `title`              | `String?`                     | Honorific: Hon., Sen., Dr., Chief, Alh., etc.                                                                |
-| `onboardingStatus`   | `String @default("pending")`  | pending, credentials_sent, active, suspended                                                                 |
-| `createdAt`          | `DateTime`                    |                                                                                                              |
-| `updatedAt`          | `DateTime`                    |                                                                                                              |
+| Field                | Type                                 | Notes                                                                                                        |
+| -------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `id`                 | `String @id @default(cuid())`        |                                                                                                              |
+| `name`               | `String`                             | Full name (without honorific)                                                                                |
+| `party`              | `String`                             | Political party code (APC, PDP, LP, etc.)                                                                    |
+| `position`           | `String`                             | President, Governor, Senator, House of Representatives, State Assembly                                       |
+| `isNational`         | `Boolean @default(false)`            | True for President                                                                                           |
+| `stateCode`          | `String?`                            | 2-letter code (e.g. "AD"). Null for President                                                                |
+| `lga`                | `String?`                            | Deprecated — kept for backward compat, not used in new flows                                                 |
+| `constituency`       | `String?`                            | Human-readable constituency name (auto-suggested from LGAs)                                                  |
+| `constituencyLgaIds` | `Int[] @default([])`                 | LGA IDs defining constituency boundary. Empty for President/Governor. See `collect-candidate-geo-rethink.md` |
+| `description`        | `String?`                            | Brief bio                                                                                                    |
+| `phone`              | `String?`                            | Nigerian phone number                                                                                        |
+| `title`              | `String?`                            | Honorific: Hon., Sen., Dr., Chief, Alh., etc.                                                                |
+| `onboardingStatus`   | `OnboardingStatus @default(pending)` | pending, credentials_sent, active, suspended                                                                 |
+| `createdAt`          | `DateTime`                           |                                                                                                              |
+| `updatedAt`          | `DateTime`                           |                                                                                                              |
 
 **Relations**: `user` (1:1 User), `canvassers` (1:N), `campaigns` (1:N Campaign)
 
@@ -175,6 +175,7 @@ Three tabs: **Overview** | **Campaigns** | **Account**
 - Electoral Boundary section shows state, constituency name, and LGA count with boundary warnings (read-only)
 - Edit form with matching section grouping, geo-backed selects, and searchable checkbox grid for constituency LGAs
 - Boundary warnings shown in both read-only and edit modes (via `ConstituencyBoundaryAlerts`)
+- Saving candidate identity corrections syncs existing Collect campaign snapshot fields for name, title, party, and constituency. Campaign slugs are never regenerated, so already-shared links stay valid.
 
 **Campaigns Tab:**
 
@@ -250,7 +251,8 @@ The shared `ComboboxSelect` component (`src/components/ui/combobox-select.tsx`) 
 
 | Date       | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-04-15 | Docs synced to the production auth rollout. Candidate onboarding language now reflects secure setup links instead of shared passwords, and hardening/auth references now match the current token-revocation and rate-limit behavior.                                                                                                                                                                                                                                                                                                                                 |
+| 2026-04-16 | Candidate identity correction workflow added. Candidate name/title/party/constituency edits now sync to existing Collect campaign snapshot fields while preserving public slugs, so already-shared links keep working after spelling/title corrections.                                                                                                                                                                                                                                                                                                                  |
+| 2026-04-15 | Docs synced to the production auth rollout. Candidate onboarding language now reflects secure setup links instead of shared passwords, and hardening/auth references now match the current token-revocation and rate-limit behavior.                                                                                                                                                                                                                                                                                                                                    |
 | 2026-04-10 | Candidate auth rollout aligned with secure-link onboarding. New accounts now issue one-time setup links instead of readable passwords, and admin reset now issues one-time reset links with email/manual delivery modes. Candidate account UI, create flow, and supporting docs were updated to match the shared auth system.                                                                                                                                                                                                                                           |
 | 2026-04-01 | Candidate-driven geo scope: `constituencyLgaIds Int[]` on Candidate defines constituency boundary. Searchable checkbox grid for LGA selection. Auto-suggested constituency name with manual override. Boundary warnings (full-state, very broad, custom label, incomplete). Partial LGA seeding indicator. Soft block: candidates saveable without LGAs, campaign creation blocked until defined. Server-side validation via `sanitizeCandidateConstituencyLgaIds()`. FCT invalid combos blocked. See `collect-candidate-geo-rethink.md`.                               |
 | 2026-03-25 | Governor auto-fill, Location column, newest-first default. Detail page UI overhaul: stat cards aligned to admin standard (Pattern 2 — icon top-right, value below), overview grouped into sections with dividers, campaigns tab rewritten as table, account tab typography standardized. Text contrast audit: bumped faint labels from opacity-40/50 to foreground/70-80, font-semibold section titles, reverted font-mono from body text (reserved for codes/IDs/badges/column headers). Onboarding status select uses colored dots instead of badges for clean hover. |

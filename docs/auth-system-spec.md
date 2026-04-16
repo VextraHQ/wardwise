@@ -165,25 +165,25 @@ If email delivery is not configured, WardWise still supports manual invite/reset
 
 ## Key Files
 
-| File                                                        | Purpose                                                   |
-| ----------------------------------------------------------- | --------------------------------------------------------- |
-| `src/lib/auth/config.ts`                                    | NextAuth config, login rules, JWT/session fields          |
-| `src/lib/auth/guards.ts`                                    | Shared server auth wrapper and role guards                |
-| `src/lib/auth/session.ts`                                   | Session lifetime policy helpers                           |
-| `src/lib/auth/storage.ts`                                   | Auth-specific user/session persistence helpers            |
-| `src/lib/auth/links.ts`                                     | Invite/reset token issuing, hashing, consuming, emailing  |
-| `src/lib/auth/client.ts`                                    | Browser auth client for login, forgot-password, and setup |
+| File                                                        | Purpose                                                        |
+| ----------------------------------------------------------- | -------------------------------------------------------------- |
+| `src/lib/auth/config.ts`                                    | NextAuth config, login rules, JWT/session fields               |
+| `src/lib/auth/guards.ts`                                    | Shared server auth wrapper and role guards                     |
+| `src/lib/auth/session.ts`                                   | Session lifetime policy helpers                                |
+| `src/lib/auth/storage.ts`                                   | Auth-specific user/session persistence helpers                 |
+| `src/lib/auth/links.ts`                                     | Invite/reset token issuing, hashing, consuming, emailing       |
+| `src/lib/auth/client.ts`                                    | Browser auth client for login, forgot-password, and setup      |
 | `src/lib/core/metadata.ts`                                  | Shared metadata helpers, including non-indexable auth metadata |
-| `src/proxy.ts`                                              | Entry guard for protected routes                          |
-| `src/app/(auth)/layout.tsx`                                 | Shared auth-page wrapper and redirect behavior            |
-| `src/app/(auth)/login/page.tsx`                             | Shared login route                                        |
-| `src/app/(auth)/forgot-password/page.tsx`                   | Password recovery route                                   |
-| `src/app/(auth)/reset-password/[token]/page.tsx`            | Setup/reset password route                                |
-| `src/components/auth/*`                                     | Shared auth screens and architectural auth card shell     |
-| `src/app/api/auth/forgot-password/route.ts`                 | Forgot-password API                                       |
-| `src/app/api/auth/complete-password-setup/route.ts`         | Password completion API                                   |
-| `src/app/api/admin/candidates/route.ts`                     | Candidate creation + invite issuing                       |
-| `src/app/api/admin/candidates/[id]/reset-password/route.ts` | Admin reset-link issuing                                  |
+| `src/proxy.ts`                                              | Entry guard for protected routes                               |
+| `src/app/(auth)/layout.tsx`                                 | Shared auth-page wrapper and redirect behavior                 |
+| `src/app/(auth)/login/page.tsx`                             | Shared login route                                             |
+| `src/app/(auth)/forgot-password/page.tsx`                   | Password recovery route                                        |
+| `src/app/(auth)/reset-password/[token]/page.tsx`            | Setup/reset password route                                     |
+| `src/components/auth/*`                                     | Shared auth screens and architectural auth card shell          |
+| `src/app/api/auth/forgot-password/route.ts`                 | Forgot-password API                                            |
+| `src/app/api/auth/complete-password-setup/route.ts`         | Password completion API                                        |
+| `src/app/api/admin/candidates/route.ts`                     | Candidate creation + invite issuing                            |
+| `src/app/api/admin/candidates/[id]/reset-password/route.ts` | Admin reset-link issuing                                       |
 
 ---
 

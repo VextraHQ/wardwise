@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient, Prisma, OnboardingStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 config();
@@ -25,7 +25,7 @@ async function main() {
       description: "Presidential candidate for the All Progressives Congress",
       title: null,
       phone: null,
-      onboardingStatus: "active",
+      onboardingStatus: OnboardingStatus.active,
       email: "bola.tinubu@wardwise.ng",
     },
     {
@@ -40,7 +40,7 @@ async function main() {
       description: "Presidential candidate for the People's Democratic Party",
       title: null,
       phone: null,
-      onboardingStatus: "active",
+      onboardingStatus: OnboardingStatus.active,
       email: "atiku.abubakar@wardwise.ng",
     },
     {
@@ -55,7 +55,7 @@ async function main() {
       description: "Presidential candidate for the Labour Party",
       title: null,
       phone: null,
-      onboardingStatus: "active",
+      onboardingStatus: OnboardingStatus.active,
       email: "peter.obi@wardwise.ng",
     },
     {
@@ -70,7 +70,7 @@ async function main() {
       description: "Presidential candidate for the New Nigeria People's Party",
       title: null,
       phone: null,
-      onboardingStatus: "active",
+      onboardingStatus: OnboardingStatus.active,
       email: "rabiu.kwankwaso@wardwise.ng",
     },
   ];
@@ -91,7 +91,7 @@ async function main() {
       description: "Experienced leader focused on development and security.",
       title: "Dr.",
       phone: null,
-      onboardingStatus: "active",
+      onboardingStatus: OnboardingStatus.active,
       email: "ahmadu.fintiri@wardwise.ng",
     },
     {
@@ -106,7 +106,7 @@ async function main() {
       description: "Progressive leader committed to education and healthcare.",
       title: "Sen.",
       phone: null,
-      onboardingStatus: "active",
+      onboardingStatus: OnboardingStatus.active,
       email: "aishatu.binani@wardwise.ng",
     },
     {
@@ -122,7 +122,7 @@ async function main() {
         "Healthcare professional dedicated to women's empowerment and community welfare.",
       title: "Dr.",
       phone: null,
-      onboardingStatus: "active",
+      onboardingStatus: OnboardingStatus.active,
       email: "maryam.ciroma@wardwise.ng",
     },
     {
@@ -137,7 +137,7 @@ async function main() {
       description: "Youth advocate and infrastructure development champion.",
       title: "Hon.",
       phone: null,
-      onboardingStatus: "active",
+      onboardingStatus: OnboardingStatus.active,
       email: "abdulrazak.namdas@wardwise.ng",
     },
     {
@@ -153,7 +153,7 @@ async function main() {
         "Former ALGON Chairman and Executive Chairman of Fufore LGA.",
       title: "Hon.",
       phone: null,
-      onboardingStatus: "active",
+      onboardingStatus: OnboardingStatus.active,
       email: "aliyu.boya@wardwise.ng",
     },
     {
@@ -169,7 +169,7 @@ async function main() {
         "Grassroots leader focused on local development and community empowerment.",
       title: "Hon.",
       phone: null,
-      onboardingStatus: "active",
+      onboardingStatus: OnboardingStatus.active,
       email: "ibrahim.usman@wardwise.ng",
     },
     {
@@ -185,7 +185,7 @@ async function main() {
         "Education advocate and women's rights champion at the state level.",
       title: "Hon.",
       phone: null,
-      onboardingStatus: "active",
+      onboardingStatus: OnboardingStatus.active,
       email: "fatima.bello@wardwise.ng",
     },
   ];
