@@ -7,19 +7,30 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, Line, XAxis, YAxis } from "recharts";
 import { IconChartBar } from "@tabler/icons-react";
+import { formatDateKey } from "@/lib/collect/reporting";
 
 const chartConfig: ChartConfig = {
-  count: { label: "Registrations", color: "var(--chart-1)" },
+  count: { label: "Current period", color: "var(--chart-1)" },
+  priorCount: { label: "Prior period", color: "var(--muted-foreground)" },
 };
 
 export function InsightsMomentum({
   daily,
+  comparisonDaily,
+  periodLabel,
 }: {
   daily: { date: string; count: number; cumulative: number }[];
+  comparisonDaily?: { date: string; count: number; cumulative: number }[];
+  periodLabel?: string;
 }) {
   const hasData = daily.length > 0;
+  const chartData = daily.map((entry, index) => ({
+    ...entry,
+    priorCount: comparisonDaily?.[index]?.count ?? null,
+    priorDate: comparisonDaily?.[index]?.date ?? null,
+  }));
   const tickIndices = Array.from(
     new Set([0, Math.floor((daily.length - 1) / 2), daily.length - 1]),
   ).filter((index) => index >= 0);
@@ -27,18 +38,19 @@ export function InsightsMomentum({
     .map((index) => daily[index]?.date)
     .filter(Boolean);
 
-  const formatTick = (value: string) =>
-    new Date(value).toLocaleDateString("en-NG", {
-      day: "numeric",
-      month: "short",
-    });
+  const formatTick = (value: string) => formatDateKey(value);
 
   return (
     <Card className="border-border/60 min-w-0 overflow-hidden rounded-sm shadow-none">
       <CardHeader>
-        <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-          Momentum
-        </CardTitle>
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+            Momentum
+          </CardTitle>
+          {periodLabel && (
+            <p className="text-muted-foreground text-xs">{periodLabel}</p>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         {hasData ? (
@@ -47,7 +59,7 @@ export function InsightsMomentum({
             className="h-[230px] w-full md:h-[250px]"
           >
             <AreaChart
-              data={daily}
+              data={chartData}
               accessibilityLayer
               margin={{ left: 0, right: 8, top: 8, bottom: 4 }}
             >
@@ -99,6 +111,17 @@ export function InsightsMomentum({
                 strokeWidth={2}
                 fill="url(#pulseGrad)"
               />
+              {comparisonDaily && comparisonDaily.length > 0 && (
+                <Line
+                  type="monotone"
+                  dataKey="priorCount"
+                  stroke="var(--muted-foreground)"
+                  strokeWidth={2}
+                  strokeDasharray="4 4"
+                  dot={false}
+                  activeDot={false}
+                />
+              )}
             </AreaChart>
           </ChartContainer>
         ) : (

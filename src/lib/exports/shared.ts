@@ -65,6 +65,19 @@ export function sanitizeSpreadsheetText(
   return /^[=+\-@]/.test(stringValue) ? `'${stringValue}` : stringValue;
 }
 
+export function formatExportDateTime(date: Date | null | undefined): string {
+  if (!date) return "";
+  return new Intl.DateTimeFormat("en-NG", {
+    timeZone: "Africa/Lagos",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+}
+
 export function redactName(name: string | null | undefined): string {
   if (!name) return "";
   return name

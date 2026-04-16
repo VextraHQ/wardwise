@@ -104,6 +104,19 @@ className="bg-primary/10 text-primary border-primary/20 rounded-sm border"
 
 - Always `rounded-sm`, never `rounded-lg`.
 
+### Icon Library Policy
+
+| Library               | Role                      | When to use                                    |
+| --------------------- | ------------------------- | ---------------------------------------------- |
+| `@tabler/icons-react` | Primary app/cockpit icons | Default choice for dashboard, admin, and forms |
+| `lucide-react`        | shadcn/ui primitives      | Only inside shadcn components that import it   |
+| `react-icons/hi`      | Legacy / auth pages       | Existing usage is fine, prefer Tabler for new  |
+| `@heroicons/react`    | Landing / showroom pages  | Existing usage is fine, prefer Tabler for new  |
+
+- **New features** should use Tabler icons unless a specific icon only exists in another set.
+- Do not mass-migrate existing icon imports — that creates noisy diffs for no functional gain.
+- When touching a file for other reasons, opportunistically switch to Tabler if straightforward.
+
 ---
 
 ## Typography Rules

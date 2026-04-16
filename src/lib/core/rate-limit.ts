@@ -2,6 +2,12 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
 function createRedis() {
+  const shouldUseDevRateLimits =
+    process.env.NODE_ENV !== "development" ||
+    process.env.ENABLE_DEV_RATE_LIMITS === "true";
+
+  if (!shouldUseDevRateLimits) return null;
+
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 

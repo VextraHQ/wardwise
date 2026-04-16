@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { NotFoundContent } from "@/components/ui/not-found-content";
+import { NotFoundStatusScreen } from "@/components/system/not-found-status-screen";
 
 export const metadata: Metadata = {
   title: "Page Not Found",
@@ -11,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function NotFound() {
-  return <NotFoundContent />;
+  return <NotFoundStatusScreen />;
 }

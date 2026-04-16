@@ -196,7 +196,24 @@ export async function PUT(
     if (onboardingStatus !== undefined)
       updateData.onboardingStatus = onboardingStatus;
 
-    await prisma.candidate.update({ where: { id }, data: updateData });
+    const campaignIdentityData: Prisma.CampaignUpdateManyMutationInput = {};
+    if (name !== undefined) campaignIdentityData.candidateName = name;
+    if (title !== undefined)
+      campaignIdentityData.candidateTitle = title || null;
+    if (party !== undefined) campaignIdentityData.party = party;
+    if (constituency !== undefined)
+      campaignIdentityData.constituency = constituency || "";
+
+    await prisma.$transaction(async (tx) => {
+      await tx.candidate.update({ where: { id }, data: updateData });
+
+      if (Object.keys(campaignIdentityData).length > 0) {
+        await tx.campaign.updateMany({
+          where: { candidateId: id },
+          data: campaignIdentityData,
+        });
+      }
+    });
 
     if (
       onboardingStatus !== undefined &&
@@ -206,10 +223,17 @@ export async function PUT(
     }
 
     if (email) {
-      await prisma.user.updateMany({
+      const currentUser = await prisma.user.findFirst({
         where: { candidateId: id },
-        data: { email },
+        select: { email: true },
       });
+      if (currentUser?.email.toLowerCase() !== email.toLowerCase()) {
+        await prisma.user.updateMany({
+          where: { candidateId: id },
+          data: { email },
+        });
+        await bumpCandidateSessionVersions(id);
+      }
     }
 
     const candidateWithUser = await prisma.candidate.findUnique({

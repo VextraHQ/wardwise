@@ -88,6 +88,17 @@ const DATE_PRESETS = [
   value: CampaignReportRangePreset;
 }>;
 
+function getPeriodLabel(dateFrom?: Date, dateTo?: Date) {
+  if (!dateFrom && !dateTo) return "All time";
+  if (dateFrom && dateTo) {
+    const fromLabel = format(dateFrom, "dd MMM yyyy");
+    const toLabel = format(dateTo, "dd MMM yyyy");
+    return fromLabel === toLabel ? fromLabel : `${fromLabel} - ${toLabel}`;
+  }
+  if (dateFrom) return `From ${format(dateFrom, "dd MMM yyyy")}`;
+  return `To ${format(dateTo as Date, "dd MMM yyyy")}`;
+}
+
 function OverviewPanel({
   title,
   children,
@@ -405,10 +416,12 @@ function RecentActivityCard({
   submissions,
   loading,
   error,
+  emptyCopy = "Recent submissions will appear here once the campaign is live.",
 }: {
   submissions: CampaignReportSubmission[];
   loading: boolean;
   error: Error | null;
+  emptyCopy?: string;
 }) {
   return (
     <OverviewPanel title="Recent Activity">
@@ -426,9 +439,7 @@ function RecentActivityCard({
         </div>
       ) : submissions.length === 0 ? (
         <div className="border-border/60 rounded-sm border border-dashed px-3 py-8 text-center">
-          <p className="text-muted-foreground text-sm">
-            Recent submissions will appear here once the campaign is live.
-          </p>
+          <p className="text-muted-foreground text-sm">{emptyCopy}</p>
         </div>
       ) : (
         <div className="space-y-2.5">
@@ -540,12 +551,20 @@ export function CampaignInsights({ token }: { token: string }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const hasFilters = !!filterLga || !!filterRole;
+  const canCompare = !!dateFrom && !!dateTo;
+  const effectiveCompareOn = compareOn && canCompare;
 
   const range = {
     ...(dateFrom && { from: formatQueryDate(dateFrom) }),
     ...(dateTo && { to: formatQueryDate(dateTo) }),
   };
   const hasRange = !!dateFrom || !!dateTo;
+  const summaryParams = {
+    ...range,
+    ...(filterLga && { lga: filterLga }),
+    ...(filterRole && { role: filterRole }),
+  };
+  const activeParams = hasRange || hasFilters ? summaryParams : undefined;
 
   const {
     data: summary,
@@ -554,16 +573,31 @@ export function CampaignInsights({ token }: { token: string }) {
     dataUpdatedAt,
     refetch,
     isFetching,
-  } = useCampaignReportSummary(token, hasRange ? range : undefined);
+  } = useCampaignReportSummary(token, activeParams);
 
-  const priorRange = compareOn ? getPriorRange(dateFrom, dateTo) : null;
+  const { data: filterOptionSummary } = useCampaignReportSummary(
+    token,
+    hasRange ? range : undefined,
+  );
+  const { data: allTimeSummary } = useCampaignReportSummary(token);
+
+  const priorRange = effectiveCompareOn
+    ? getPriorRange(dateFrom, dateTo)
+    : null;
+  const priorParams = priorRange
+    ? {
+        ...priorRange,
+        ...(filterLga && { lga: filterLga }),
+        ...(filterRole && { role: filterRole }),
+      }
+    : undefined;
   const { data: priorSummary } = useCampaignReportSummary(
-    priorRange ? token : "",
-    priorRange ?? undefined,
+    priorParams ? token : "",
+    priorParams,
   );
 
   const deltas =
-    compareOn && priorSummary && summary && dateFrom
+    effectiveCompareOn && priorSummary && summary
       ? {
           total: computeDelta(summary.stats.total, priorSummary.stats.total),
           verified: computeDelta(
@@ -584,6 +618,9 @@ export function CampaignInsights({ token }: { token: string }) {
   } = useCampaignReportSubmissions(token, {
     page: 1,
     pageSize: 5,
+    ...(hasRange && range),
+    ...(filterLga && { lga: filterLga }),
+    ...(filterRole && { role: filterRole }),
   });
 
   const [, setTick] = useState(0);
@@ -647,17 +684,32 @@ export function CampaignInsights({ token }: { token: string }) {
     );
   }
 
-  const isEmpty = summary.stats.total === 0;
   const campaignName = getEffectiveCampaignName(summary.campaign);
   const verifiedRate = getVerificationRate(
     summary.stats.total,
     summary.stats.verified,
   );
   const recentWindowCount = getRecentWindowCount(summary.stats.daily);
+  const isFilteredView = hasRange || hasFilters;
+  const allTimeTotal = allTimeSummary?.stats.total ?? summary.stats.total;
+  const isEmpty = allTimeTotal === 0 && !isFilteredView;
+  const periodLabel = getPeriodLabel(dateFrom, dateTo);
+  const activeScopeLabel = [
+    periodLabel,
+    filterLga ? formatGeoDisplayName(filterLga) : null,
+    filterRole ? filterRole : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const momentumLabel =
+    effectiveCompareOn && priorSummary
+      ? `${activeScopeLabel} vs prior period`
+      : activeScopeLabel;
+  const filterSource = filterOptionSummary ?? summary;
 
   return (
     <div className="space-y-8">
-      <InsightsHero campaign={summary.campaign} total={summary.stats.total} />
+      <InsightsHero campaign={summary.campaign} total={allTimeTotal} />
 
       <div className="space-y-2">
         {/* Row 1: date presets */}
@@ -672,6 +724,7 @@ export function CampaignInsights({ token }: { token: string }) {
                 const r = getPresetRange(p.value);
                 setDateFrom(r.from);
                 setDateTo(r.to);
+                if (!r.from || !r.to) setCompareOn(false);
               }}
             >
               {p.label}
@@ -729,11 +782,11 @@ export function CampaignInsights({ token }: { token: string }) {
           <div className="bg-border mx-0.5 hidden h-4 w-px shrink-0 sm:block" />
 
           <Button
-            variant={compareOn ? "default" : "ghost"}
+            variant={effectiveCompareOn ? "default" : "ghost"}
             size="sm"
             className="h-7 shrink-0 rounded-sm px-2.5 text-[10px] font-medium tracking-wide uppercase"
             onClick={() => setCompareOn((prev) => !prev)}
-            disabled={!hasRange}
+            disabled={!canCompare}
           >
             <IconArrowsExchange className="mr-1 h-3.5 w-3.5" />
             <span className="hidden sm:inline">Compare</span>
@@ -759,14 +812,14 @@ export function CampaignInsights({ token }: { token: string }) {
               <p className="font-mono text-[10px] font-bold tracking-widest uppercase">
                 Filter by
               </p>
-              {summary && (
+              {filterSource && (
                 <>
                   <div className="space-y-1.5">
                     <p className="text-muted-foreground text-xs font-medium">
                       LGA
                     </p>
                     <div className="flex flex-wrap gap-1">
-                      {summary.stats.byLga.slice(0, 8).map((item) => (
+                      {filterSource.stats.byLga.slice(0, 8).map((item) => (
                         <Button
                           key={item.lga}
                           variant={
@@ -790,7 +843,7 @@ export function CampaignInsights({ token }: { token: string }) {
                       Role
                     </p>
                     <div className="flex flex-wrap gap-1">
-                      {summary.stats.byRole.slice(0, 6).map((item) => (
+                      {filterSource.stats.byRole.slice(0, 6).map((item) => (
                         <Button
                           key={item.role}
                           variant={
@@ -927,9 +980,9 @@ export function CampaignInsights({ token }: { token: string }) {
                   formStatus={summary.health.formStatus}
                   lastSubmissionAt={summary.health.lastSubmissionAt}
                   periodCount={
-                    hasRange ? summary.stats.total : recentWindowCount
+                    isFilteredView ? summary.stats.total : recentWindowCount
                   }
-                  periodLabel={hasRange ? "Selected period" : "Last 7 days"}
+                  periodLabel={isFilteredView ? "Selected view" : "Last 7 days"}
                   verificationRate={verifiedRate}
                 />
 
@@ -944,6 +997,11 @@ export function CampaignInsights({ token }: { token: string }) {
                   submissions={recentData?.submissions ?? []}
                   loading={recentLoading}
                   error={recentError instanceof Error ? recentError : null}
+                  emptyCopy={
+                    isFilteredView
+                      ? "No recent submissions match this date range or filter."
+                      : undefined
+                  }
                 />
 
                 <ShareInviteCard
@@ -970,7 +1028,15 @@ export function CampaignInsights({ token }: { token: string }) {
             />
           ) : (
             <>
-              <InsightsMomentum daily={summary.stats.daily} />
+              <InsightsMomentum
+                daily={summary.stats.daily}
+                comparisonDaily={
+                  effectiveCompareOn && priorSummary
+                    ? priorSummary.stats.daily
+                    : undefined
+                }
+                periodLabel={momentumLabel}
+              />
               <InsightsGeography
                 byLga={summary.stats.byLga}
                 byWard={summary.stats.byWard}

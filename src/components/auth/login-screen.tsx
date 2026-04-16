@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -25,14 +24,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { loginSchema, type LoginFormData } from "@/lib/schemas/auth-schemas";
 
 export function LoginScreen() {
-  const router = useRouter();
+  const isSubmittingRef = useRef(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -52,6 +51,9 @@ export function LoginScreen() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
+    if (isSubmittingRef.current) return;
+
+    isSubmittingRef.current = true;
     setIsLoading(true);
     setError("");
     track("login_submitted", { has_remember_me: data.rememberMe });
@@ -68,12 +70,13 @@ export function LoginScreen() {
         return;
       }
 
-      track("login_succeeded", { role: result.role });
-      router.replace(result.redirectTo);
+      track("login_succeeded", { role: result.role ?? "pending" });
+      window.location.replace(result.redirectTo);
     } catch {
       track("login_failed", { error_category: "unknown" });
       setError("We hit an unexpected error. Please try again.");
     } finally {
+      isSubmittingRef.current = false;
       setIsLoading(false);
     }
   };
@@ -123,6 +126,7 @@ export function LoginScreen() {
               <Input
                 id="email"
                 type="email"
+                autoComplete="email"
                 placeholder="example@email.com"
                 disabled={isLoading}
                 className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary h-12 rounded-sm pl-12 font-mono text-sm font-medium transition-all"
@@ -158,6 +162,7 @@ export function LoginScreen() {
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
                 placeholder="••••••••••••"
                 disabled={isLoading}
                 className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary h-12 rounded-sm pr-12 pl-12 font-mono text-sm font-medium transition-all"
@@ -199,24 +204,23 @@ export function LoginScreen() {
               >
                 Keep me signed in on this device
               </Label>
-              <Tooltip>
-                <TooltipTrigger
+              <Popover>
+                <PopoverTrigger
                   type="button"
-                  tabIndex={-1}
                   className="text-muted-foreground hover:text-foreground focus-visible:ring-primary mt-0.5 rounded-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
                 >
                   <HiOutlineInformationCircle className="size-4" />
                   <span className="sr-only">Session policy details</span>
-                </TooltipTrigger>
-                <TooltipContent
+                </PopoverTrigger>
+                <PopoverContent
                   side="top"
                   sideOffset={8}
-                  className="max-w-[230px] text-center font-sans text-[11px] leading-relaxed font-medium"
+                  className="w-auto max-w-[230px] rounded-sm border px-3 py-2 text-center font-sans text-[11px] leading-relaxed font-medium shadow-sm"
                 >
                   For your security, standard sign-ins use short sessions. This
                   extends your active window on this local device only.
-                </TooltipContent>
-              </Tooltip>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/candidate-dashboard/app-sidebar";
+import { CandidateSidebar } from "@/components/candidate-dashboard/candidate-sidebar";
 import { SiteHeader } from "@/components/candidate-dashboard/site-header";
 
 export function CandidateShell({ children }: { children: React.ReactNode }) {
@@ -14,7 +14,7 @@ export function CandidateShell({ children }: { children: React.ReactNode }) {
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <CandidateSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">{children}</div>

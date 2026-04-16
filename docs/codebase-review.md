@@ -76,7 +76,7 @@ src/
 - **Credentials-only auth** (NextAuth v4) — no CSRF token rotation by default for credential-based flows; no account lockout after N failed attempts.
 - `remotePatterns: [{ hostname: "**" }]` in `next.config.ts` allows **any** remote image host — potential for abuse in production.
 - **No Content Security Policy** headers configured.
-- The `onboardingStatus` field is a plain string in Prisma, not a Prisma enum — allows invalid states to be written directly to the DB outside of Zod validation.
+- The `onboardingStatus` field is now a Prisma enum, which prevents invalid auth-sensitive candidate states at the DB/schema level.
 
 ---
 
@@ -92,7 +92,7 @@ src/
 
 **Areas for improvement:**
 
-- String-based enums everywhere (`onboardingStatus`, `role`, `status`, `constituencyType`). Prisma supports native enums — using them would add DB-level constraint validation.
+- Some string-based enums remain (`role`, campaign `status`, `constituencyType`). `onboardingStatus` has been promoted to a Prisma enum because it is now auth-sensitive.
 - No `migrations/` directory visible — suggests `db push` is used in development, which is fine, but migration files should be committed before production.
 - The `Voter` model appears to be a legacy model (with `canvasserCode` FK) that overlaps with the newer `CollectSubmission` model — potential confusion about which is the canonical data model.
 

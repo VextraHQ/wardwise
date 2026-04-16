@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/core/prisma";
 import {
   buildExportFilename,
+  formatExportDateTime,
   sanitizeSpreadsheetText,
   type ExportTable,
 } from "./shared";
@@ -56,7 +57,7 @@ export async function buildCanvasserLeaderboardExportTable(
       total: Number(row.total),
       verified: Number(row.verified),
       flagged: Number(row.flagged),
-      lastActive: row.lastActive?.toISOString() || "",
+      lastActive: formatExportDateTime(row.lastActive),
     }))
     .filter((summary) => {
       if (!searchQuery) return true;

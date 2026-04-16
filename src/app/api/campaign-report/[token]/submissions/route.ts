@@ -22,6 +22,9 @@ export async function GET(request: Request, { params }: RouteParams) {
     const status = searchParams.get("status") || undefined;
     const page = parseIntegerParam(searchParams.get("page")) ?? 1;
     const pageSize = parseIntegerParam(searchParams.get("pageSize")) ?? 20;
+    const from = searchParams.get("from") || undefined;
+    const to = searchParams.get("to") || undefined;
+    const lga = searchParams.get("lga") || undefined;
 
     const isVerified =
       status === "verified"
@@ -40,6 +43,9 @@ export async function GET(request: Request, { params }: RouteParams) {
     const data = await getRecentSubmissions(campaign.id, {
       page,
       pageSize,
+      from,
+      to,
+      lga,
       filters: {
         search: searchParams.get("search") || undefined,
         role: searchParams.get("role") || undefined,

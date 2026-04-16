@@ -13,10 +13,10 @@ import {
   IconBell,
 } from "@tabler/icons-react";
 
-import { NavDocuments } from "@/components/candidate-dashboard/nav-documents";
-import { NavMain } from "@/components/candidate-dashboard/nav-main";
-import { NavSecondary } from "@/components/candidate-dashboard/nav-secondary";
-import { NavUser } from "@/components/candidate-dashboard/nav-user";
+import { NavDocuments } from "@/components/layout/sidebar/nav-documents";
+import { NavMain } from "@/components/layout/sidebar/nav-main";
+import { NavSecondary } from "@/components/layout/sidebar/nav-secondary";
+import { NavUser } from "@/components/layout/sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -89,7 +89,9 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function CandidateSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>

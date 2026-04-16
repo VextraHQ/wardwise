@@ -23,6 +23,18 @@ export function formatQueryDate(date: Date | undefined): string | undefined {
   return date ? format(date, "yyyy-MM-dd") : undefined;
 }
 
+export function parseDateKey(value: string): Date {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+export function formatDateKey(
+  value: string,
+  options: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" },
+): string {
+  return parseDateKey(value).toLocaleDateString("en-NG", options);
+}
+
 export function getPresetRange(
   preset: CampaignReportRangePreset,
   now = new Date(),

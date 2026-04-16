@@ -16,22 +16,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AdminPagination } from "@/components/admin/admin-pagination";
-import { IconPlus, IconClipboardList } from "@tabler/icons-react";
-import type { CampaignBrandingType } from "@/lib/collect/branding";
+import { CampaignActionsMenu } from "@/components/admin/collect/campaign-actions-menu";
+import { IconClipboardList, IconPlus } from "@tabler/icons-react";
 import { getEffectiveCampaignName } from "@/lib/collect/branding";
-
-type CampaignSummary = {
-  id: string;
-  slug: string;
-  candidateName: string;
-  brandingType: CampaignBrandingType;
-  displayName: string | null;
-  party: string;
-  constituency: string;
-  status: string;
-  _count: { submissions: number };
-  createdAt: string;
-};
+import type { CampaignSummary } from "@/types/collect";
 
 const STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border/60",
@@ -39,6 +27,60 @@ const STATUS_STYLES: Record<string, string> = {
   paused: "bg-orange-500/10 text-orange-600 border-orange-500/20",
   closed: "bg-destructive/10 text-destructive border-destructive/30",
 };
+
+const REPORT_STATUS_STYLES: Record<string, string> = {
+  enabled: "bg-primary/10 text-primary border-primary/30",
+  disabled: "bg-muted text-muted-foreground border-border/60",
+};
+
+function formatStatusLabel(value: string) {
+  return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function relativeTime(dateStr: string | null): string {
+  if (!dateStr) return "No activity yet";
+
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+
+  return new Date(dateStr).toLocaleDateString("en-NG", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function CampaignReportBadge({ campaign }: { campaign: CampaignSummary }) {
+  const enabled = Boolean(
+    campaign.clientReportEnabled && campaign.clientReportToken,
+  );
+
+  return (
+    <div className="space-y-1">
+      <Badge
+        variant="outline"
+        className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${
+          enabled ? REPORT_STATUS_STYLES.enabled : REPORT_STATUS_STYLES.disabled
+        }`}
+      >
+        {enabled ? "Insights On" : "Off"}
+      </Badge>
+      {campaign.clientReportLastViewedAt && (
+        <p className="text-muted-foreground text-[10px]">
+          Viewed {relativeTime(campaign.clientReportLastViewedAt)}
+        </p>
+      )}
+    </div>
+  );
+}
 
 interface CandidateCampaignsProps {
   candidateId: string;
@@ -49,7 +91,11 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const { data: campaigns, isLoading } = useQuery<CampaignSummary[]>({
+  const {
+    data: campaigns,
+    isLoading,
+    error,
+  } = useQuery<CampaignSummary[]>({
     queryKey: ["admin", "candidates", candidateId, "campaigns"],
     queryFn: async () => {
       const res = await fetch(
@@ -61,6 +107,8 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
     },
     staleTime: 1000 * 60,
   });
+
+  const createCampaignHref = `/admin/collect/campaigns/new?candidateId=${candidateId}`;
 
   const totalPages = Math.max(
     1,
@@ -77,34 +125,56 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
 
   if (isLoading) {
     return (
-      <div className="space-y-3 pt-4">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-48 w-full" />
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <Skeleton className="h-5 w-48 rounded-sm" />
+          <Skeleton className="h-9 w-36 rounded-sm" />
+        </div>
+        <div className="rounded-sm border border-dashed">
+          <Skeleton className="h-10 w-full rounded-none" />
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={index} className="mx-4 my-4 h-8 rounded-sm" />
+          ))}
+        </div>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="border-destructive/30 bg-destructive/5 rounded-sm border-dashed shadow-none">
+        <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
+          <IconClipboardList className="text-destructive h-9 w-9" />
+          <p className="text-foreground text-sm font-medium">
+            Failed to load campaigns
+          </p>
+          <p className="text-muted-foreground max-w-sm text-sm">
+            Please refresh the page or try again in a moment.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
   if (!campaigns || campaigns.length === 0) {
     return (
-      <div className="pt-4">
-        <Card className="border-border rounded-sm border-dashed shadow-none">
-          <CardContent className="flex flex-col items-center gap-3 py-12">
-            <IconClipboardList className="text-muted-foreground h-10 w-10" />
-            <p className="text-muted-foreground text-sm">
-              No campaigns created for this candidate yet.
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
-              onClick={() => router.push("/admin/collect/campaigns/new")}
-            >
-              <IconPlus className="mr-1.5 h-3.5 w-3.5" />
-              Create Campaign
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="border-border rounded-sm border-dashed shadow-none">
+        <CardContent className="flex flex-col items-center gap-3 py-12">
+          <IconClipboardList className="text-muted-foreground h-10 w-10" />
+          <p className="text-muted-foreground text-sm">
+            No campaigns created for this candidate yet.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            onClick={() => router.push(createCampaignHref)}
+          >
+            <IconPlus className="mr-1.5 h-3.5 w-3.5" />
+            Create Campaign
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -114,18 +184,28 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
   );
 
   return (
-    <div className="space-y-4 pt-4">
+    <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-muted-foreground text-sm">
-          {campaigns.length} campaign{campaigns.length !== 1 ? "s" : ""}{" "}
-          <span className="text-muted-foreground/50">·</span> {totalSubmissions}{" "}
-          submission{totalSubmissions !== 1 ? "s" : ""}
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge
+            variant="outline"
+            className="bg-background rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+          >
+            {campaigns.length.toLocaleString()} total
+          </Badge>
+          <Badge
+            variant="outline"
+            className="border-primary/30 bg-primary/10 text-primary rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+          >
+            {totalSubmissions.toLocaleString()} submissions
+          </Badge>
+        </div>
+
         <Button
           variant="outline"
           size="sm"
-          className="h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
-          onClick={() => router.push("/admin/collect/campaigns/new")}
+          className="h-8 w-full rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
+          onClick={() => router.push(createCampaignHref)}
         >
           <IconPlus className="mr-1.5 h-3.5 w-3.5" />
           Create Campaign
@@ -148,11 +228,14 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
               <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
                 Submissions
               </TableHead>
-              <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase lg:table-cell">
-                Constituency
+              <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase xl:table-cell">
+                Report
               </TableHead>
               <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase sm:table-cell">
-                Created
+                Last Activity
+              </TableHead>
+              <TableHead className="text-muted-foreground hidden h-10 w-12 text-right font-mono text-[10px] font-bold tracking-widest uppercase sm:table-cell">
+                Actions
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -188,21 +271,26 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
                     variant="outline"
                     className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${STATUS_STYLES[campaign.status] ?? ""}`}
                   >
-                    {campaign.status}
+                    {formatStatusLabel(campaign.status)}
                   </Badge>
                 </TableCell>
                 <TableCell className="hidden font-mono text-sm tabular-nums md:table-cell">
-                  {campaign._count.submissions}
+                  {campaign._count.submissions.toLocaleString()}
                 </TableCell>
-                <TableCell className="text-muted-foreground hidden text-xs lg:table-cell">
-                  {campaign.constituency || "—"}
+                <TableCell className="hidden xl:table-cell">
+                  <CampaignReportBadge campaign={campaign} />
                 </TableCell>
                 <TableCell className="text-muted-foreground hidden text-xs sm:table-cell">
-                  {new Date(campaign.createdAt).toLocaleDateString("en-NG", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
+                  {relativeTime(campaign.lastSubmissionAt)}
+                </TableCell>
+                <TableCell
+                  className="w-12 text-right"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <CampaignActionsMenu
+                    campaign={campaign}
+                    ariaLabel={`Open actions for ${getEffectiveCampaignName(campaign)}`}
+                  />
                 </TableCell>
               </TableRow>
             ))}
@@ -210,20 +298,18 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
         </Table>
       </div>
 
-      <div className="pt-4">
-        <AdminPagination
-          currentPage={safePage}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={campaigns.length}
-          itemLabel="campaigns"
-          onPageChange={setPage}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
-          }}
-        />
-      </div>
+      <AdminPagination
+        currentPage={safePage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={campaigns.length}
+        itemLabel="campaigns"
+        onPageChange={setPage}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+      />
     </div>
   );
 }

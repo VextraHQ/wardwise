@@ -82,6 +82,12 @@
 - **Admin/support can use the same reference**: the admin submissions search now accepts registration references in addition to name, phone, and email.
 - **Reference surfaced in admin submissions UI**: each row shows a compact reference under the supporter name, and the detail sheet includes a copyable `Registration Reference` block for support workflows.
 
+### What Changed (Batch 7 — Candidate Identity Corrections)
+
+- **Candidate identity edits now sync to campaigns**: when admin corrects candidate name, title, party, or constituency from Candidate Management, existing Collect campaigns update their stored identity snapshot fields.
+- **Public links stay stable**: campaign `slug` is intentionally not regenerated, so already-shared `/c/[slug]` links continue working.
+- **Display-name overrides still win**: campaigns with `displayName` continue showing the campaign-facing name; synced `candidateName` remains the underlying anchor/fallback.
+
 ### What Changed (Batch 2)
 
 - **LGA dropdown**: Shows only the campaign's `enabledLgaIds` (inherited from candidate's constituency boundary, or restricted subset).
@@ -105,12 +111,15 @@
 
 - Collect v1 is admin-only on the management side.
 - Hassan / Vextra is the only admin role in scope for v1.
-- Candidate self-service access to Collect data is explicitly out of scope for v1.
+- Candidate self-service write access to Collect data is explicitly out of scope for v1.
+- Campaign Insights provides a private read-only report; verification, canvasser management, and record edits require authenticated admin or future candidate-portal permissions.
 
 ### Campaign Ownership
 
 - A Collect campaign links to an existing `Candidate` record (FK).
-- A Collect campaign stores snapshot fields (candidateName, party) so public form is decoupled from live candidate edits.
+- A Collect campaign stores snapshot fields (`candidateName`, `candidateTitle`, `party`, `constituency`) for stable public rendering.
+- Candidate identity edits sync those snapshot fields forward for spelling/title/party/constituency corrections, but never change the campaign slug.
+- `displayName` remains the public override for movement/team/campaign-facing naming.
 
 ### Form Configuration
 
@@ -237,6 +246,7 @@ model PollingUnit {
 - `enabledLgaIds Int[]` — empty for President/Governor (national/state scope), populated for constituency-level positions
 - `status`: draft | active | paused | closed
 - `slug`: unique, used in public URL
+- Candidate identity corrections sync `candidateName`, `candidateTitle`, `party`, and `constituency`; `slug` remains stable.
 
 ### CollectSubmission
 
@@ -270,6 +280,12 @@ model PollingUnit {
 | `/api/admin/collect/campaigns/[id]/canvassers`  | GET                  | Aggregation                                                                         |
 | `/api/admin/collect/lgas`                       | GET                  | All LGAs for campaign wizard                                                        |
 | `/api/admin/collect/submissions/[sid]`          | PATCH                | Flag, verify, notes                                                                 |
+
+### Export Rules
+
+- Submission and canvasser exports use human-readable Nigeria time instead of raw ISO timestamps.
+- Redacted submission exports keep operational names, phone numbers, and canvasser details visible.
+- Redacted submission exports mask sensitive voter identity fields such as `APC/NIN` and `VIN`.
 
 ## File Structure
 

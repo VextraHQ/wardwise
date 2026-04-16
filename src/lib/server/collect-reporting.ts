@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/core/prisma";
 import {
   buildSubmissionWhere,
@@ -73,10 +74,12 @@ function disambiguateWards(
 
 export async function getCampaignStats(
   campaignId: string,
-  options?: { from?: string; to?: string },
+  options?: { from?: string; to?: string; lga?: string; role?: string },
 ): Promise<CampaignStats> {
   const from = options?.from;
   const to = options?.to;
+  const lga = options?.lga;
+  const role = options?.role;
 
   const fromStartOfDay = from ? parseReportDateStart(from) : undefined;
   const toEndOfDay = to ? parseReportDateEnd(to) : undefined;
@@ -86,10 +89,20 @@ export async function getCampaignStats(
   };
   const hasDateFilter = from || to;
 
-  const baseWhere = {
+  const baseWhere: Prisma.CollectSubmissionWhereInput = {
     campaignId,
     ...(hasDateFilter && { createdAt: dateFilter }),
+    ...(lga && { lgaName: lga }),
+    ...(role && { role }),
   };
+  const dailyWhereConditions = [
+    Prisma.sql`"campaignId" = ${campaignId}`,
+    ...(fromStartOfDay ? [Prisma.sql`"createdAt" >= ${fromStartOfDay}`] : []),
+    ...(toEndOfDay ? [Prisma.sql`"createdAt" <= ${toEndOfDay}`] : []),
+    ...(lga ? [Prisma.sql`"lgaName" = ${lga}`] : []),
+    ...(role ? [Prisma.sql`"role" = ${role}`] : []),
+  ];
+  const dailyWhereSql = Prisma.join(dailyWhereConditions, " AND ");
 
   const [totals, dailyRaw, byLga, byWard, byRole, bySex] = await Promise.all([
     // Total, verified, flagged counts
@@ -111,34 +124,12 @@ export async function getCampaignStats(
       }),
 
     // Daily submissions (group by date)
-    fromStartOfDay && toEndOfDay
-      ? prisma.$queryRaw<{ date: string; count: bigint }[]>`
-          SELECT DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE})::text as date, COUNT(*)::bigint as count
-          FROM "CollectSubmission"
-          WHERE "campaignId" = ${campaignId}
-            AND "createdAt" >= ${fromStartOfDay} AND "createdAt" <= ${toEndOfDay}
-          GROUP BY 1 ORDER BY 1 ASC
-        `
-      : fromStartOfDay
-        ? prisma.$queryRaw<{ date: string; count: bigint }[]>`
-            SELECT DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE})::text as date, COUNT(*)::bigint as count
-            FROM "CollectSubmission"
-            WHERE "campaignId" = ${campaignId} AND "createdAt" >= ${fromStartOfDay}
-            GROUP BY 1 ORDER BY 1 ASC
-          `
-        : toEndOfDay
-          ? prisma.$queryRaw<{ date: string; count: bigint }[]>`
-              SELECT DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE})::text as date, COUNT(*)::bigint as count
-              FROM "CollectSubmission"
-              WHERE "campaignId" = ${campaignId} AND "createdAt" <= ${toEndOfDay}
-              GROUP BY 1 ORDER BY 1 ASC
-            `
-          : prisma.$queryRaw<{ date: string; count: bigint }[]>`
-              SELECT DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE})::text as date, COUNT(*)::bigint as count
-              FROM "CollectSubmission"
-              WHERE "campaignId" = ${campaignId}
-              GROUP BY 1 ORDER BY 1 ASC
-            `,
+    prisma.$queryRaw<{ date: string; count: bigint }[]>`
+      SELECT DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE})::text as date, COUNT(*)::bigint as count
+      FROM "CollectSubmission"
+      WHERE ${dailyWhereSql}
+      GROUP BY 1 ORDER BY 1 ASC
+    `,
 
     // By LGA
     prisma.collectSubmission.groupBy({
@@ -198,11 +189,26 @@ export async function getRecentSubmissions(
     page?: number;
     pageSize?: number;
     filters?: SubmissionFilters;
+    from?: string;
+    to?: string;
+    lga?: string;
   },
 ): Promise<{ submissions: LightSubmission[]; total: number }> {
   const page = Math.max(1, options?.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, options?.pageSize ?? 20));
   const where = buildSubmissionWhere(campaignId, options?.filters ?? {});
+  const fromStartOfDay = options?.from
+    ? parseReportDateStart(options.from)
+    : undefined;
+  const toEndOfDay = options?.to ? parseReportDateEnd(options.to) : undefined;
+
+  if (fromStartOfDay || toEndOfDay) {
+    where.createdAt = {
+      ...(fromStartOfDay && { gte: fromStartOfDay }),
+      ...(toEndOfDay && { lte: toEndOfDay }),
+    };
+  }
+  if (options?.lga) where.lgaName = options.lga;
 
   const [rows, total] = await Promise.all([
     prisma.collectSubmission.findMany({

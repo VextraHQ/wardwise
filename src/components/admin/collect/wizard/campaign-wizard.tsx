@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,6 +53,7 @@ function toSlug(name: string) {
 
 export function CampaignWizard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const createCampaign = useCreateCampaign();
   const [step, setStep] = useState(0);
 
@@ -99,6 +100,15 @@ export function CampaignWizard() {
     form.setValue("candidateId", candidate.id, { shouldValidate: true });
     form.setValue("slug", toSlug(candidate.name), { shouldValidate: true });
   }
+
+  useEffect(() => {
+    const candidateId = searchParams.get("candidateId");
+    if (!candidateId || !candidates || form.getValues("candidateId")) return;
+    const candidate = candidates.find((c) => c.id === candidateId);
+    if (!candidate) return;
+    form.setValue("candidateId", candidate.id, { shouldValidate: true });
+    form.setValue("slug", toSlug(candidate.name), { shouldValidate: true });
+  }, [candidates, form, searchParams]);
 
   async function validateAndNext() {
     const fields = stepFieldMap[step];

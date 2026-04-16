@@ -10,8 +10,31 @@ import {
   readAuthUserById,
   recordSuccessfulLogin,
 } from "@/lib/auth/storage";
+import { normalizeEmailInput } from "@/lib/schemas/common-schemas";
+import { getCandidateStatusLoginError } from "@/lib/auth/errors";
+
+function logCredentialsRejection({
+  email,
+  reason,
+  startedAt,
+}: {
+  email?: string;
+  reason: string;
+  startedAt: number;
+}) {
+  if (process.env.NODE_ENV === "production") {
+    return;
+  }
+
+  console.warn("[auth] Credentials sign-in rejected", {
+    email: email ? normalizeEmailInput(email) : "missing",
+    reason,
+    elapsedMs: Date.now() - startedAt,
+  });
+}
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -21,28 +44,51 @@ export const authOptions: NextAuthOptions = {
         rememberMe: { label: "Remember Me", type: "text" },
       },
       async authorize(credentials) {
+        const startedAt = Date.now();
+
         if (!credentials?.email || !credentials?.password) {
+          logCredentialsRejection({
+            email: credentials?.email,
+            reason: "missing_credentials",
+            startedAt,
+          });
           return null;
         }
 
-        const { user } = await readAuthUserByEmail(credentials.email);
+        const email = normalizeEmailInput(credentials.email);
+        const { user } = await readAuthUserByEmail(email);
 
         if (!user || !user.password) {
           if (user?.role === "candidate" && user.candidate) {
-            throw new Error("ACCOUNT_SETUP_REQUIRED");
+            const errorCode = getCandidateStatusLoginError(
+              user.candidate.onboardingStatus,
+            );
+            logCredentialsRejection({
+              email,
+              reason: errorCode.toLowerCase(),
+              startedAt,
+            });
+            throw new Error(errorCode);
           }
+          logCredentialsRejection({
+            email,
+            reason: user ? "password_missing" : "user_not_found",
+            startedAt,
+          });
           return null;
         }
 
         if (user.role === "candidate") {
           const onboardingStatus = user.candidate?.onboardingStatus;
 
-          if (onboardingStatus === "suspended") {
-            throw new Error("ACCOUNT_SUSPENDED");
-          }
-
           if (onboardingStatus !== "active") {
-            throw new Error("ACCOUNT_SETUP_REQUIRED");
+            const errorCode = getCandidateStatusLoginError(onboardingStatus);
+            logCredentialsRejection({
+              email,
+              reason: errorCode.toLowerCase(),
+              startedAt,
+            });
+            throw new Error(errorCode);
           }
         }
 
@@ -52,6 +98,11 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isPasswordValid) {
+          logCredentialsRejection({
+            email,
+            reason: "password_mismatch",
+            startedAt,
+          });
           return null;
         }
 

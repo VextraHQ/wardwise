@@ -3,6 +3,24 @@ import type {
   CampaignReportSummary,
 } from "@/types/campaign-report";
 
+export type CampaignReportSummaryParams = {
+  from?: string;
+  to?: string;
+  lga?: string;
+  role?: string;
+};
+
+export type CampaignReportSubmissionsParams = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: string;
+  from?: string;
+  to?: string;
+  lga?: string;
+  role?: string;
+};
+
 async function campaignReportApiCall<T>(
   token: string,
   endpoint: string,
@@ -37,21 +55,18 @@ export const campaignReportApi = {
       body: JSON.stringify({ passcode }),
     }),
 
-  getSummary: (token: string, params?: { from?: string; to?: string }) =>
+  getSummary: (token: string, params?: CampaignReportSummaryParams) =>
     campaignReportApiCall<CampaignReportSummary>(
       token,
-      `/summary${qs({ from: params?.from, to: params?.to })}`,
+      `/summary${qs({
+        from: params?.from,
+        to: params?.to,
+        lga: params?.lga,
+        role: params?.role,
+      })}`,
     ),
 
-  getSubmissions: (
-    token: string,
-    params?: {
-      page?: number;
-      pageSize?: number;
-      search?: string;
-      status?: string;
-    },
-  ) =>
+  getSubmissions: (token: string, params?: CampaignReportSubmissionsParams) =>
     campaignReportApiCall<CampaignReportSubmissionsResponse>(
       token,
       `/submissions${qs({
@@ -59,6 +74,10 @@ export const campaignReportApi = {
         pageSize: params?.pageSize,
         search: params?.search,
         status: params?.status,
+        from: params?.from,
+        to: params?.to,
+        lga: params?.lga,
+        role: params?.role,
       })}`,
     ),
 

@@ -66,6 +66,32 @@ export function createDefaultTwitter({
 }
 
 /**
+ * Creates metadata for auth pages (/login, /forgot-password, /reset-password).
+ * Non-indexable by default — auth routes should never appear in search results.
+ */
+export function createAuthMetadata({
+  title,
+  description,
+  noArchive = false,
+}: {
+  title: string;
+  description?: string;
+  noArchive?: boolean;
+}): Metadata {
+  return {
+    title: {
+      absolute: `${title} | WardWise`,
+    },
+    description,
+    robots: {
+      index: false,
+      follow: false,
+      ...(noArchive && { nocache: true }),
+    },
+  };
+}
+
+/**
  * Creates metadata for admin dashboard pages (/admin/*).
  */
 export function createAdminMetadata({

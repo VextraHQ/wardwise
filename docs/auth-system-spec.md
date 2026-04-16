@@ -1,7 +1,7 @@
 # WardWise Auth System Spec
 
 > Living reference for WardWise authentication, account lifecycle, and access control.
-> Branch: `main` | Last updated: 2026-04-10
+> Branch: `main` | Last updated: 2026-04-16
 
 ---
 
@@ -50,6 +50,14 @@ This is intentionally simple for the current model. If WardWise later needs sepa
 - Email delivery is recommended for production via Resend
 - Manual copy/share remains supported as an ops fallback
 
+### Auth Page UX / Metadata
+
+- Auth pages use minimal, non-indexable metadata via `createAuthMetadata()`
+- `/login` and `/forgot-password` include generic titles/descriptions only
+- `/reset-password/[token]` uses generic no-index metadata with no account, email, candidate, or token-specific details
+- The login session-policy helper uses a click/tap popover so the explanation works on mobile and keyboard-accessible devices
+- Login errors use balanced account-state feedback: invalid credentials stay generic, while pending/setup/suspended candidate states get clear next-step copy
+
 ---
 
 ## Main Flows
@@ -73,6 +81,8 @@ This is intentionally simple for the current model. If WardWise later needs sepa
 5. Link is emailed only when delivery is configured and available
 6. If email delivery is unavailable, the candidate is directed to contact their campaign admin for a manual reset
 7. Candidate sets a new password from `/reset-password/[token]`
+
+**Note:** A candidate in `credentials_sent` (or `pending`) can use the forgot-password flow to complete their account setup. This is intentional — both the invite link and the reset link prove email ownership and set a password, so the forgot-password flow acts as an equivalent path to setup completion. The candidate is promoted to `active` upon successful password creation, the same as if they had used their original invite link.
 
 ### Admin Resets Candidate Access
 
@@ -104,6 +114,8 @@ It checks:
 - current session lifetime policy
 - candidate active status from the JWT payload
 
+**Revalidation window:** The proxy reads JWT claims only — it does not hit the database on every request. The JWT callback refreshes DB state every `SESSION_REVALIDATION_WINDOW_MS` (currently 5 minutes). This means that after a password reset, suspension, or email change, the proxy may still allow routing for up to 5 minutes based on stale JWT claims. This is routing-only — server guards recheck the database before rendering pages or serving API responses, so no data is exposed during this window.
+
 ### Server Guards
 
 `src/lib/auth/guards.ts` is the main auth wrapper layer.
@@ -134,7 +146,7 @@ WardWise now stores invite and reset links in `AuthToken`.
 - tokens are stored hashed
 - tokens expire automatically
 - tokens are one-time use
-- issuing a fresh link revokes previous unused links of the same type
+- issuing a fresh invite or reset link revokes previous unused auth links for that user
 - successful password setup consumes the token and revokes other outstanding auth links for that user
 
 ---
@@ -154,24 +166,25 @@ If email delivery is not configured, WardWise still supports manual invite/reset
 
 ## Key Files
 
-| File                                                        | Purpose                                                   |
-| ----------------------------------------------------------- | --------------------------------------------------------- |
-| `src/lib/auth/config.ts`                                    | NextAuth config, login rules, JWT/session fields          |
-| `src/lib/auth/guards.ts`                                    | Shared server auth wrapper and role guards                |
-| `src/lib/auth/session.ts`                                   | Session lifetime policy helpers                           |
-| `src/lib/auth/storage.ts`                                   | Auth-specific user/session persistence helpers            |
-| `src/lib/auth/links.ts`                                     | Invite/reset token issuing, hashing, consuming, emailing  |
-| `src/lib/auth/client.ts`                                    | Browser auth client for login, forgot-password, and setup |
-| `src/proxy.ts`                                              | Entry guard for protected routes                          |
-| `src/app/(auth)/layout.tsx`                                 | Shared auth-page wrapper and redirect behavior            |
-| `src/app/(auth)/login/page.tsx`                             | Shared login route                                        |
-| `src/app/(auth)/forgot-password/page.tsx`                   | Password recovery route                                   |
-| `src/app/(auth)/reset-password/[token]/page.tsx`            | Setup/reset password route                                |
-| `src/components/auth/*`                                     | Shared auth screens and architectural auth card shell     |
-| `src/app/api/auth/forgot-password/route.ts`                 | Forgot-password API                                       |
-| `src/app/api/auth/complete-password-setup/route.ts`         | Password completion API                                   |
-| `src/app/api/admin/candidates/route.ts`                     | Candidate creation + invite issuing                       |
-| `src/app/api/admin/candidates/[id]/reset-password/route.ts` | Admin reset-link issuing                                  |
+| File                                                        | Purpose                                                        |
+| ----------------------------------------------------------- | -------------------------------------------------------------- |
+| `src/lib/auth/config.ts`                                    | NextAuth config, login rules, JWT/session fields               |
+| `src/lib/auth/guards.ts`                                    | Shared server auth wrapper and role guards                     |
+| `src/lib/auth/session.ts`                                   | Session lifetime policy helpers                                |
+| `src/lib/auth/storage.ts`                                   | Auth-specific user/session persistence helpers                 |
+| `src/lib/auth/links.ts`                                     | Invite/reset token issuing, hashing, consuming, emailing       |
+| `src/lib/auth/client.ts`                                    | Browser auth client for login, forgot-password, and setup      |
+| `src/lib/core/metadata.ts`                                  | Shared metadata helpers, including non-indexable auth metadata |
+| `src/proxy.ts`                                              | Entry guard for protected routes                               |
+| `src/app/(auth)/layout.tsx`                                 | Shared auth-page wrapper and redirect behavior                 |
+| `src/app/(auth)/login/page.tsx`                             | Shared login route                                             |
+| `src/app/(auth)/forgot-password/page.tsx`                   | Password recovery route                                        |
+| `src/app/(auth)/reset-password/[token]/page.tsx`            | Setup/reset password route                                     |
+| `src/components/auth/*`                                     | Shared auth screens and architectural auth card shell          |
+| `src/app/api/auth/forgot-password/route.ts`                 | Forgot-password API                                            |
+| `src/app/api/auth/complete-password-setup/route.ts`         | Password completion API                                        |
+| `src/app/api/admin/candidates/route.ts`                     | Candidate creation + invite issuing                            |
+| `src/app/api/admin/candidates/[id]/reset-password/route.ts` | Admin reset-link issuing                                       |
 
 ---
 

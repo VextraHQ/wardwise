@@ -1,16 +1,17 @@
 "use client";
 
 import * as React from "react";
-
 import { signOut, useSession } from "next-auth/react";
 import {
+  IconCreditCard,
   IconDotsVertical,
   IconLogout,
+  IconNotification,
   IconUserCircle,
   IconSettings,
 } from "@tabler/icons-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +29,7 @@ import {
 } from "@/components/ui/sidebar";
 import { resetAnalyticsIdentity } from "@/lib/analytics/client";
 
-export function AdminNavUser() {
+export function NavUser() {
   const { data: session, status } = useSession();
   const { isMobile } = useSidebar();
   const [mounted, setMounted] = React.useState(false);
@@ -42,9 +43,14 @@ export function AdminNavUser() {
     signOut({ callbackUrl: "/" });
   };
 
+  const isAdmin = session?.user?.role === "admin";
+
   const user = {
-    name: session?.user?.name || "Admin",
-    email: session?.user?.email || "admin@wardwise.ng",
+    name: session?.user?.name || (isAdmin ? "Admin" : "Candidate"),
+    email:
+      session?.user?.email ||
+      (isAdmin ? "admin@wardwise.ng" : "candidate@wardwise.ng"),
+    avatar: session?.user?.image || (isAdmin ? "" : "/avatars/candidate.jpg"),
   };
 
   const isLoadingSession = status === "loading" || !mounted;
@@ -62,9 +68,14 @@ export function AdminNavUser() {
                 {isLoadingSession ? (
                   <div className="bg-muted/30 border-border/50 size-full animate-pulse rounded-sm border" />
                 ) : (
-                  <AvatarFallback className="text-primary-foreground bg-primary rounded-sm">
-                    {user.name.charAt(0)}
-                  </AvatarFallback>
+                  <>
+                    {!isAdmin && (
+                      <AvatarImage src={user.avatar} alt={user.name} />
+                    )}
+                    <AvatarFallback className="text-primary-foreground bg-primary rounded-sm">
+                      {user.name.charAt(0)}
+                    </AvatarFallback>
+                  </>
                 )}
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -79,7 +90,9 @@ export function AdminNavUser() {
                   </>
                 ) : (
                   <>
-                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="truncate text-sm font-semibold tracking-tight">
+                      {user.name}
+                    </span>
                     <span className="text-sidebar-foreground/40 truncate text-xs">
                       {user.email}
                     </span>
@@ -98,12 +111,17 @@ export function AdminNavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-sm">
+                  {!isAdmin && (
+                    <AvatarImage src={user.avatar} alt={user.name} />
+                  )}
                   <AvatarFallback className="rounded-sm">
                     {user.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate text-sm font-semibold tracking-tight">
+                    {user.name}
+                  </span>
                   <span className="text-muted-foreground truncate text-xs">
                     {user.email}
                   </span>
@@ -116,10 +134,23 @@ export function AdminNavUser() {
                 <IconUserCircle className="hover:text-primary-foreground" />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconSettings className="hover:text-primary-foreground" />
-                Settings
-              </DropdownMenuItem>
+              {isAdmin ? (
+                <DropdownMenuItem>
+                  <IconSettings className="hover:text-primary-foreground" />
+                  Settings
+                </DropdownMenuItem>
+              ) : (
+                <>
+                  <DropdownMenuItem>
+                    <IconCreditCard className="hover:text-primary-foreground" />
+                    Billing
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <IconNotification className="hover:text-primary-foreground" />
+                    Notifications
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem

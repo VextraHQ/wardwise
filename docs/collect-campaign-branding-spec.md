@@ -1,7 +1,7 @@
 # WardWise Collect Campaign Branding Spec
 
 > Narrow bridge for movement/team-branded Collect campaigns without introducing a new Organizations system.
-> Branch: `develop` | Last updated: 2026-04-08
+> Branch: `develop` | Last updated: 2026-04-16
 > Future changes: branch off `develop` → `feature/collect-branding-*`
 
 ---
@@ -71,7 +71,7 @@ All Collect-facing surfaces should use:
 const effectiveCampaignName = campaign.displayName ?? campaign.candidateName;
 ```
 
-This keeps the current candidate snapshot intact while allowing cleaner campaign branding.
+This uses the campaign's current candidate snapshot while allowing cleaner campaign branding. Candidate identity corrections can refresh the snapshot fields, but they must not regenerate the public slug.
 
 ### Why Not `ownerType` Yet
 
@@ -122,7 +122,7 @@ Return the new fields in campaign APIs:
 
 Collect clients should derive `effectiveCampaignName` from `displayName ?? candidateName`.
 
-This keeps the change additive and low-risk.
+This keeps the change additive and low-risk. `candidateName` remains the fallback/anchor copy, and `displayName` remains the explicit public override.
 
 ---
 
@@ -217,6 +217,7 @@ Once this feature ships:
 - existing campaigns can be updated with `brandingType` + `displayName`
 - no geo migration is required
 - no submission migration is required
+- candidate spelling/title corrections can sync into existing campaign snapshots without changing already-shared links
 
 ---
 
@@ -255,6 +256,7 @@ Build a first-class org/movement entity only when at least one of these becomes 
 - A campaign can be labeled `Fintiri Canvassers` or `City Boy Movement Adamawa` without changing its geo behavior.
 - Public Collect pages show `displayName` when present, otherwise fall back to `candidateName`.
 - Collect admin campaign views show `displayName` when present, otherwise fall back to `candidateName`.
+- Candidate identity edits can refresh `candidateName`, `candidateTitle`, `party`, and `constituency` snapshots while preserving `slug`.
 - Existing campaigns continue working unchanged without requiring backfill.
 - Candidate management and auth flows remain untouched.
 

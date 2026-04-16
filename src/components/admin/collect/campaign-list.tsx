@@ -225,6 +225,11 @@ export function CampaignList() {
   const [pageSize, setPageSize] = useState(10);
 
   const totalItems = campaigns?.length ?? 0;
+  const activeCampaignCount = useMemo(
+    () =>
+      campaigns?.filter((campaign) => campaign.status === "active").length ?? 0,
+    [campaigns],
+  );
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
   const paginatedCampaigns = useMemo(() => {
@@ -252,28 +257,48 @@ export function CampaignList() {
       ) : null}
 
       {/* Header + action */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="border-border/60 flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Campaigns</h2>
-          {!isLoading && campaigns && campaigns.length > 0 && (
-            <p className="text-foreground/60 text-sm">
-              {campaigns.length} campaign{campaigns.length !== 1 ? "s" : ""}{" "}
-              total
-            </p>
+          <p className="text-primary mb-1 font-mono text-[10px] font-bold tracking-widest uppercase">
+            Registration Directory
+          </p>
+          <h2 className="text-foreground text-lg font-semibold tracking-tight">
+            Campaigns
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Registration links, campaign status, and submission activity.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2 sm:items-end">
+          <div className="flex flex-wrap gap-2 sm:justify-end">
+            <Badge
+              variant="outline"
+              className="bg-background rounded-sm px-2.5 py-1 font-mono text-[10px] font-bold tracking-widest uppercase"
+            >
+              {isLoading ? "--" : totalItems.toLocaleString()} total
+            </Badge>
+            <Badge
+              variant="outline"
+              className="border-primary/30 bg-primary/10 text-primary rounded-sm px-2.5 py-1 font-mono text-[10px] font-bold tracking-widest uppercase"
+            >
+              {isLoading ? "--" : activeCampaignCount.toLocaleString()} active
+            </Badge>
+          </div>
+
+          {(!campaigns || campaigns.length > 0) && (
+            <Button
+              asChild
+              size="sm"
+              className="h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
+            >
+              <Link href="/admin/collect/campaigns/new">
+                <IconPlus className="mr-1.5 h-4 w-4" />
+                New Campaign
+              </Link>
+            </Button>
           )}
         </div>
-        {(!campaigns || campaigns.length > 0) && (
-          <Button
-            asChild
-            size="sm"
-            className="h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
-          >
-            <Link href="/admin/collect/campaigns/new">
-              <IconPlus className="mr-1.5 h-4 w-4" />
-              New Campaign
-            </Link>
-          </Button>
-        )}
       </div>
 
       {/* Table */}
