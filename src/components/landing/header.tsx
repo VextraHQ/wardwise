@@ -29,7 +29,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 40);
+      setScrolled(window.scrollY > 10);
     };
 
     handleScroll();
