@@ -1,5 +1,6 @@
 import { LoginScreen } from "@/components/auth/login-screen";
 import { redirectAuthenticatedUser } from "@/lib/auth/guards";
+import { sanitizeAuthCallbackUrl } from "@/lib/auth/redirects";
 import { createAuthMetadata } from "@/lib/core/metadata";
 
 export const metadata = createAuthMetadata({
@@ -7,8 +8,17 @@ export const metadata = createAuthMetadata({
   description: "Secure access for WardWise admins and candidates.",
 });
 
-export default async function LoginPage() {
-  await redirectAuthenticatedUser();
+type LoginPageProps = {
+  searchParams?: Promise<{
+    callbackUrl?: string | string[];
+  }>;
+};
 
-  return <LoginScreen />;
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const params = searchParams ? await searchParams : undefined;
+  const callbackUrl = sanitizeAuthCallbackUrl(params?.callbackUrl);
+
+  await redirectAuthenticatedUser(callbackUrl);
+
+  return <LoginScreen callbackUrl={callbackUrl ?? undefined} />;
 }

@@ -130,6 +130,17 @@ Current responsibilities:
 
 This is the source of truth for server-side auth decisions.
 
+### Login Return-To Flow
+
+Protected routes may redirect unauthenticated users to `/login` with a `callbackUrl`.
+The login page sanitizes that value before passing it to the client:
+
+- external origins are rejected to avoid open redirects
+- auth pages such as `/login`, `/forgot-password`, and `/reset-password/*` are rejected to avoid loops
+- admin users can only return to `/admin/*`
+- candidate users can only return to `/dashboard/*`
+- if the callback is missing, unsafe, or role-mismatched, the user falls back to their default home route
+
 ---
 
 ## Auth Tokens
@@ -171,6 +182,7 @@ If email delivery is not configured, WardWise still supports manual invite/reset
 | `src/lib/auth/config.ts`                                    | NextAuth config, login rules, JWT/session fields               |
 | `src/lib/auth/guards.ts`                                    | Shared server auth wrapper and role guards                     |
 | `src/lib/auth/session.ts`                                   | Session lifetime policy helpers                                |
+| `src/lib/auth/redirects.ts`                                 | Safe post-login callback URL and default home resolution        |
 | `src/lib/auth/storage.ts`                                   | Auth-specific user/session persistence helpers                 |
 | `src/lib/auth/links.ts`                                     | Invite/reset token issuing, hashing, consuming, emailing       |
 | `src/lib/auth/client.ts`                                    | Browser auth client for login, forgot-password, and setup      |

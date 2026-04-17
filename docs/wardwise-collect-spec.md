@@ -80,13 +80,21 @@
 - **Confirmation screen shifted to receipt UX**: public confirmation now emphasizes successful receipt and verification review, not ordinal supporter counts.
 - **Registration reference is now first-class**: completed submissions show a copyable `Registration Reference` (`WW-XXXXXXXX`) on the confirmation screen.
 - **Admin/support can use the same reference**: the admin submissions search now accepts registration references in addition to name, phone, and email.
-- **Reference surfaced in admin submissions UI**: each row shows a compact reference under the supporter name, and the detail sheet includes a copyable `Registration Reference` block for support workflows.
+- **Reference surfaced in admin submissions UI**: the detail sheet includes a subtle, copyable `Registration Reference` block for support workflows without crowding the table.
 
 ### What Changed (Batch 7 — Candidate Identity Corrections)
 
 - **Candidate identity edits now sync to campaigns**: when admin corrects candidate name, title, party, or constituency from Candidate Management, existing Collect campaigns update their stored identity snapshot fields.
 - **Public links stay stable**: campaign `slug` is intentionally not regenerated, so already-shared `/c/[slug]` links continue working.
 - **Display-name overrides still win**: campaigns with `displayName` continue showing the campaign-facing name; synced `candidateName` remains the underlying anchor/fallback.
+
+### What Changed (Batch 8 — Admin Review Queue)
+
+- **Submissions open to `All` with status filter chips**: admin submissions default to the full list for predictable search/lookup; inline chips for `All`, `Pending`, `Verified`, `Flagged` (counts shown inline) let admins jump into the review queue when needed.
+- **Table stays lean**: APC/NIN and VIN remain in the detail sheet/export instead of crowding the main scanning table.
+- **Bulk verification is safer**: admins can verify/flag selected rows as before, or escalate from selected-page rows to all records matching the current filters.
+- **Filtered bulk actions are confirmed**: all-matching actions show the count and active filters before applying changes.
+- **Audit trail preserved**: filtered bulk verify/flag/unverify/unflag writes per-submission audit entries and logs the campaign-level bulk action.
 
 ### What Changed (Batch 2)
 

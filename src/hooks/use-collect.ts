@@ -2,7 +2,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   publicCollectApi,
   adminCollectApi,
+  type BulkSubmissionActionInput,
   type CampaignStats,
+  type SubmissionListFilters,
 } from "@/lib/api/collect";
 
 // Fetches a specific campaign by public slug (used for canvasser registration).
@@ -129,18 +131,7 @@ export function useDeleteCampaign() {
 // Fetches paginated, filterable constituent submissions for a campaign.
 export function useCampaignSubmissions(
   campaignId: string,
-  params?: {
-    page?: number;
-    pageSize?: number;
-    search?: string;
-    lgaId?: number;
-    wardId?: number;
-    role?: string;
-    isFlagged?: boolean;
-    isVerified?: boolean;
-    canvasserName?: string;
-    canvasserPhone?: string;
-  },
+  params?: SubmissionListFilters,
 ) {
   return useQuery({
     queryKey: ["campaign-submissions", campaignId, params],
@@ -168,8 +159,8 @@ export function useDeleteSubmission() {
 export function useBulkSubmissionAction() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ ids, action }: { ids: string[]; action: string }) =>
-      adminCollectApi.bulkAction(ids, action),
+    mutationFn: (input: BulkSubmissionActionInput) =>
+      adminCollectApi.bulkAction(input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["campaign-submissions"] });
       qc.invalidateQueries({ queryKey: ["campaign-stats"] });

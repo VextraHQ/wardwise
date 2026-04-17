@@ -4,6 +4,12 @@ import { NextResponse } from "next/server";
 import { isSessionWithinLifetime } from "@/lib/auth/session";
 import { type AuthUserRecord, readAuthUserById } from "@/lib/auth/storage";
 import { authOptions } from "@/lib/auth/config";
+import {
+  getDefaultHomePath,
+  resolvePostLoginRedirect,
+} from "@/lib/auth/redirects";
+
+export { getDefaultHomePath };
 
 export type AppRole = "admin" | "candidate";
 type AuthSession = Session;
@@ -50,12 +56,6 @@ type RequireRoleResult = AuthorizedRoleResult | UnauthorizedRoleResult;
 
 function unauthorized(message: string, status = 401) {
   return NextResponse.json({ error: message }, { status });
-}
-
-export function getDefaultHomePath(role?: string | null) {
-  if (role === "admin") return "/admin";
-  if (role === "candidate") return "/dashboard";
-  return "/login";
 }
 
 export async function getAuthContext(): Promise<AuthContext> {
@@ -172,10 +172,10 @@ export async function requirePageRole(role: AppRole) {
   return context;
 }
 
-export async function redirectAuthenticatedUser() {
+export async function redirectAuthenticatedUser(callbackUrl?: string | null) {
   const context = await getAuthContext();
 
   if (context.reason === "ok" && context.user) {
-    redirect(getDefaultHomePath(context.user.role));
+    redirect(resolvePostLoginRedirect(context.user.role, callbackUrl));
   }
 }

@@ -36,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -95,6 +96,35 @@ const exportFormatMeta = {
   { label: string; icon: React.ComponentType<{ className?: string }> }
 >;
 
+type ReviewStatus = "pending" | "verified" | "flagged" | "all";
+
+const REVIEW_STATUSES = [
+  { value: "all", label: "All" },
+  { value: "pending", label: "Pending" },
+  { value: "verified", label: "Verified" },
+  { value: "flagged", label: "Flagged" },
+] as const satisfies ReadonlyArray<{
+  value: ReviewStatus;
+  label: string;
+}>;
+
+function getReviewStatusFilters(status: ReviewStatus) {
+  switch (status) {
+    case "pending":
+      return { isVerified: false, isFlagged: false };
+    case "verified":
+      return { isVerified: true, isFlagged: false };
+    case "flagged":
+      return { isFlagged: true };
+    default:
+      return {};
+  }
+}
+
+function getReviewStatusLabel(status: ReviewStatus) {
+  return REVIEW_STATUSES.find((item) => item.value === status)?.label ?? "All";
+}
+
 function formatPU(sub: SubmissionWithPU) {
   const code = sub.pollingUnit?.code;
   const displayName = formatGeoDisplayName(sub.pollingUnitName);
@@ -112,10 +142,12 @@ function buildExportToastMessage(args: {
   hasSearch: boolean;
   hasRoleFilter: boolean;
   hasCanvasserFilter: boolean;
+  hasStatusFilter: boolean;
 }) {
   const label = `${args.redacted ? "Redacted " : ""}${exportFormatMeta[args.format].label}`;
   const activeFilters = [
     args.hasSearch ? "search" : null,
+    args.hasStatusFilter ? "review status" : null,
     args.hasRoleFilter ? "role" : null,
     args.hasCanvasserFilter ? "canvasser" : null,
   ].filter(Boolean);
@@ -135,6 +167,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [search, setSearch] = useState("");
+  const [reviewStatus, setReviewStatus] = useState<ReviewStatus>("all");
   const [roleFilter, setRoleFilter] = useState<string>(
     () => searchParams.get("role") || "all",
   );
@@ -150,10 +183,14 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     title: string;
     description: string;
     onConfirm: () => void;
+    confirmLabel?: string;
+    destructive?: boolean;
   } | null>(null);
   const [preferredFormat, setPreferredFormat] = useState<ExportFormat>(() =>
     readPreferredExportFormat(),
   );
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [allMatchingSelected, setAllMatchingSelected] = useState(false);
 
   // Clear one-shot URL params after consuming them
   useEffect(() => {
@@ -168,13 +205,52 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const { data, isLoading } = useCampaignSubmissions(campaignId, {
-    page,
-    pageSize,
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+    setAllMatchingSelected(false);
+  };
+
+  const baseFilters = {
     search: search || undefined,
     role: roleFilter !== "all" ? roleFilter : undefined,
     canvasserName: canvasserFilter || undefined,
     canvasserPhone: canvasserPhoneFilter || undefined,
+  };
+  const statusFilters = getReviewStatusFilters(reviewStatus);
+  const activeFilters = {
+    ...baseFilters,
+    ...statusFilters,
+  };
+
+  const { data, isLoading } = useCampaignSubmissions(campaignId, {
+    page,
+    pageSize,
+    ...activeFilters,
+  });
+  const { data: pendingCountData } = useCampaignSubmissions(campaignId, {
+    page: 1,
+    pageSize: 1,
+    ...baseFilters,
+    isVerified: false,
+    isFlagged: false,
+  });
+  const { data: verifiedCountData } = useCampaignSubmissions(campaignId, {
+    page: 1,
+    pageSize: 1,
+    ...baseFilters,
+    isVerified: true,
+    isFlagged: false,
+  });
+  const { data: flaggedCountData } = useCampaignSubmissions(campaignId, {
+    page: 1,
+    pageSize: 1,
+    ...baseFilters,
+    isFlagged: true,
+  });
+  const { data: allCountData } = useCampaignSubmissions(campaignId, {
+    page: 1,
+    pageSize: 1,
+    ...baseFilters,
   });
 
   const updateMutation = useUpdateSubmission();
@@ -183,17 +259,23 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
   const { data: auditData } = useSubmissionAudit(selected?.id || null);
   const submissions = (data?.submissions || []) as SubmissionWithPU[];
   const total = data?.total || 0;
-  const totalPages = Math.ceil(total / pageSize);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const reviewCounts = {
+    pending: pendingCountData?.total ?? 0,
+    verified: verifiedCountData?.total ?? 0,
+    flagged: flaggedCountData?.total ?? 0,
+    all: allCountData?.total ?? 0,
+  } satisfies Record<ReviewStatus, number>;
 
   const allOnPageSelected =
     submissions.length > 0 && submissions.every((s) => selectedIds.has(s.id));
 
   const toggleSelectAll = () => {
     if (allOnPageSelected) {
-      setSelectedIds(new Set());
+      clearSelection();
     } else {
       setSelectedIds(new Set(submissions.map((s) => s.id)));
+      setAllMatchingSelected(false);
     }
   };
 
@@ -202,11 +284,22 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     if (next.has(id)) next.delete(id);
     else next.add(id);
     setSelectedIds(next);
+    setAllMatchingSelected(false);
   };
 
-  const executeBulkAction = (action: string) => {
+  const executeBulkAction = (
+    action: string,
+    scope: "selected" | "filtered" = "selected",
+  ) => {
     bulkMutation.mutate(
-      { ids: Array.from(selectedIds), action },
+      scope === "filtered"
+        ? {
+            action,
+            scope: "filtered",
+            campaignId,
+            filters: activeFilters,
+          }
+        : { ids: Array.from(selectedIds), action, scope: "selected" },
       {
         onSuccess: (result) => {
           track("admin_submission_bulk_action", {
@@ -224,7 +317,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
           toast.success(
             `${result.affected} submission(s) ${actionLabels[action] ?? action}`,
           );
-          setSelectedIds(new Set());
+          clearSelection();
         },
         onError: (e) => toast.error(e.message),
       },
@@ -236,6 +329,8 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
       setConfirmDialog({
         title: "Delete submissions?",
         description: `This will permanently delete ${selectedIds.size} submission(s). This action cannot be undone.`,
+        confirmLabel: "Delete",
+        destructive: true,
         onConfirm: () => executeBulkAction("delete"),
       });
       return;
@@ -243,12 +338,44 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     executeBulkAction(action);
   };
 
+  const handleFilteredBulkAction = (action: string) => {
+    const actionLabels: Record<string, string> = {
+      verify: "Verify",
+      unverify: "Unverify",
+      flag: "Flag",
+      unflag: "Unflag",
+    };
+    const filters = [
+      `Status: ${getReviewStatusLabel(reviewStatus)}`,
+      search.trim() ? `Search: "${search.trim()}"` : null,
+      roleFilter !== "all" ? `Role: ${roleLabels[roleFilter] || roleFilter}` : null,
+      canvasserFilter ? `Canvasser: ${canvasserFilter}` : null,
+    ].filter(Boolean);
+
+    setConfirmDialog({
+      title: `${actionLabels[action] ?? "Update"} ${total.toLocaleString()} matching records?`,
+      description: `This will apply to every record matching the current review filters. ${filters.length > 0 ? `Filters: ${filters.join("; ")}.` : ""} The action will be logged.`,
+      confirmLabel: `${actionLabels[action] ?? "Update"} ${total.toLocaleString()} records`,
+      destructive: action === "flag",
+      onConfirm: () => executeBulkAction(action, "filtered"),
+    });
+  };
+
   // Compute which bulk actions to show based on selected rows' states
   const selectedSubs = submissions.filter((s) => selectedIds.has(s.id));
-  const hasUnverified = selectedSubs.some((s) => !s.isVerified);
-  const hasVerified = selectedSubs.some((s) => s.isVerified);
-  const hasUnflagged = selectedSubs.some((s) => !s.isFlagged);
-  const hasFlagged = selectedSubs.some((s) => s.isFlagged);
+  const selectedCount = allMatchingSelected ? total : selectedIds.size;
+  const hasUnverified = allMatchingSelected
+    ? reviewStatus !== "verified"
+    : selectedSubs.some((s) => !s.isVerified);
+  const hasVerified = allMatchingSelected
+    ? reviewStatus === "verified"
+    : selectedSubs.some((s) => s.isVerified);
+  const hasUnflagged = allMatchingSelected
+    ? reviewStatus !== "flagged"
+    : selectedSubs.some((s) => !s.isFlagged);
+  const hasFlagged = allMatchingSelected
+    ? reviewStatus === "flagged"
+    : selectedSubs.some((s) => s.isFlagged);
 
   const handleExport = async ({
     format,
@@ -259,10 +386,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
   }) => {
     try {
       await adminCollectApi.exportSubmissions(campaignId, {
-        search: search || undefined,
-        role: roleFilter !== "all" ? roleFilter : undefined,
-        canvasserName: canvasserFilter || undefined,
-        canvasserPhone: canvasserPhoneFilter || undefined,
+        ...activeFilters,
         format,
         redacted,
       });
@@ -273,6 +397,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
           format,
           redacted,
           hasSearch: search.trim().length > 0,
+          hasStatusFilter: reviewStatus !== "all",
           hasRoleFilter: roleFilter !== "all",
           hasCanvasserFilter: Boolean(canvasserFilter || canvasserPhoneFilter),
         }),
@@ -316,6 +441,8 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     setConfirmDialog({
       title: "Delete submission?",
       description: `This will permanently delete the submission from ${sub.fullName}. This action cannot be undone.`,
+      confirmLabel: "Delete",
+      destructive: true,
       onConfirm: () => {
         deleteMutation.mutate(sub.id, {
           onSuccess: () => {
@@ -354,6 +481,45 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+        <div
+          role="group"
+          aria-label="Filter by review status"
+          className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {REVIEW_STATUSES.map((status) => {
+            const isActive = reviewStatus === status.value;
+            return (
+              <button
+                key={status.value}
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => {
+                  setReviewStatus(status.value);
+                  setPage(1);
+                  clearSelection();
+                }}
+                className={cn(
+                  "inline-flex shrink-0 items-center gap-1.5 rounded-sm px-2.5 py-1.5 font-mono text-[10px] font-bold tracking-widest whitespace-nowrap uppercase transition-colors",
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <span>{status.label}</span>
+                <span
+                  className={cn(
+                    "tabular-nums",
+                    isActive
+                      ? "text-primary/70"
+                      : "text-muted-foreground/60",
+                  )}
+                >
+                  {reviewCounts[status.value].toLocaleString()}
+                </span>
+              </button>
+            );
+          })}
+        </div>
         <div className="relative min-w-0 sm:flex-1">
           <IconSearch className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
@@ -362,6 +528,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
             onChange={(e) => {
               setSearch(e.target.value);
               setPage(1);
+              clearSelection();
             }}
             className="rounded-sm pl-9"
           />
@@ -372,6 +539,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
             onValueChange={(v) => {
               setRoleFilter(v);
               setPage(1);
+              clearSelection();
             }}
           >
             <SelectTrigger className="w-full rounded-sm sm:w-40">
@@ -447,6 +615,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                 setCanvasserFilter(null);
                 setCanvasserPhoneFilter(null);
                 setPage(1);
+                clearSelection();
               }}
             >
               &times;
@@ -456,21 +625,39 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
       )}
 
       {/* Bulk Actions Toolbar */}
-      {selectedIds.size > 0 && (
+      {selectedCount > 0 && (
         <div className="bg-primary/5 border-primary/20 flex flex-wrap items-center gap-2 rounded-sm border px-3 py-2">
           <span className="text-primary w-full text-xs font-bold sm:w-auto">
-            {selectedIds.size} selected
+            {allMatchingSelected
+              ? `${selectedCount.toLocaleString()} matching records selected`
+              : `${selectedCount} selected`}
           </span>
+          {!allMatchingSelected &&
+            allOnPageSelected &&
+            total > selectedIds.size &&
+            reviewStatus !== "all" && (
+              <button
+                type="button"
+                className="text-primary hover:text-primary/80 text-xs font-semibold underline"
+                onClick={() => setAllMatchingSelected(true)}
+              >
+                Select all {total.toLocaleString()} matching records
+              </button>
+            )}
           {hasUnverified && (
             <Button
               size="sm"
               variant="outline"
               className="h-8 flex-1 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase sm:h-7 sm:flex-none"
-              onClick={() => handleBulkAction("verify")}
+              onClick={() =>
+                allMatchingSelected
+                  ? handleFilteredBulkAction("verify")
+                  : handleBulkAction("verify")
+              }
               disabled={bulkMutation.isPending}
             >
               <IconShieldCheck className="mr-1 h-3 w-3" />
-              Verify
+              {allMatchingSelected ? "Verify Matching" : "Verify Selected"}
             </Button>
           )}
           {hasVerified && (
@@ -478,11 +665,15 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
               size="sm"
               variant="outline"
               className="h-8 flex-1 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase sm:h-7 sm:flex-none"
-              onClick={() => handleBulkAction("unverify")}
+              onClick={() =>
+                allMatchingSelected
+                  ? handleFilteredBulkAction("unverify")
+                  : handleBulkAction("unverify")
+              }
               disabled={bulkMutation.isPending}
             >
               <IconShieldX className="mr-1 h-3 w-3" />
-              Unverify
+              {allMatchingSelected ? "Unverify Matching" : "Unverify Selected"}
             </Button>
           )}
           {hasUnflagged && (
@@ -490,11 +681,15 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
               size="sm"
               variant="outline"
               className="h-8 flex-1 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase sm:h-7 sm:flex-none"
-              onClick={() => handleBulkAction("flag")}
+              onClick={() =>
+                allMatchingSelected
+                  ? handleFilteredBulkAction("flag")
+                  : handleBulkAction("flag")
+              }
               disabled={bulkMutation.isPending}
             >
               <IconFlag className="mr-1 h-3 w-3" />
-              Flag
+              {allMatchingSelected ? "Flag Matching" : "Flag Selected"}
             </Button>
           )}
           {hasFlagged && (
@@ -502,28 +697,34 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
               size="sm"
               variant="outline"
               className="h-8 flex-1 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase sm:h-7 sm:flex-none"
-              onClick={() => handleBulkAction("unflag")}
+              onClick={() =>
+                allMatchingSelected
+                  ? handleFilteredBulkAction("unflag")
+                  : handleBulkAction("unflag")
+              }
               disabled={bulkMutation.isPending}
             >
               <IconFlagOff className="mr-1 h-3 w-3" />
-              Unflag
+              {allMatchingSelected ? "Unflag Matching" : "Unflag Selected"}
+            </Button>
+          )}
+          {!allMatchingSelected && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 flex-1 rounded-sm border-red-500/20 px-2 text-[10px] font-bold tracking-wider text-red-600 uppercase hover:bg-red-600 hover:text-white sm:h-7 sm:flex-none"
+              onClick={() => handleBulkAction("delete")}
+              disabled={bulkMutation.isPending}
+            >
+              <IconTrash className="mr-1 h-3 w-3" />
+              Delete Selected
             </Button>
           )}
           <Button
             size="sm"
-            variant="outline"
-            className="h-8 flex-1 rounded-sm border-red-500/20 px-2 text-[10px] font-bold tracking-wider text-red-600 uppercase hover:bg-red-600 hover:text-white sm:h-7 sm:flex-none"
-            onClick={() => handleBulkAction("delete")}
-            disabled={bulkMutation.isPending}
-          >
-            <IconTrash className="mr-1 h-3 w-3" />
-            Delete
-          </Button>
-          <Button
-            size="sm"
             variant="ghost"
             className="h-8 w-full px-2 text-[10px] font-bold tracking-wider uppercase sm:ml-auto sm:h-7 sm:w-auto"
-            onClick={() => setSelectedIds(new Set())}
+            onClick={clearSelection}
           >
             Clear
           </Button>
@@ -539,7 +740,9 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
         </div>
       ) : submissions.length === 0 ? (
         <div className="border-border rounded-sm border border-dashed py-12 text-center">
-          <p className="text-muted-foreground">No submissions found.</p>
+          <p className="text-muted-foreground">
+            No {getReviewStatusLabel(reviewStatus).toLowerCase()} records found.
+          </p>
         </div>
       ) : (
         <>
@@ -562,12 +765,6 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                   </TableHead>
                   <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                     Phone
-                  </TableHead>
-                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase 2xl:table-cell">
-                    APC/NIN
-                  </TableHead>
-                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase 2xl:table-cell">
-                    VIN
                   </TableHead>
                   <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
                     LGA
@@ -622,12 +819,6 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                     <TableCell className="font-mono text-xs">
                       {s.phone}
                     </TableCell>
-                    <TableCell className="hidden font-mono text-xs 2xl:table-cell">
-                      {s.apcRegNumber || "—"}
-                    </TableCell>
-                    <TableCell className="hidden font-mono text-xs 2xl:table-cell">
-                      {s.voterIdNumber || "—"}
-                    </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {formatGeoDisplayName(s.lgaName)}
                     </TableCell>
@@ -670,7 +861,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                             variant="outline"
                             className="rounded-sm border-orange-500/20 bg-orange-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-orange-600 uppercase"
                           >
-                            Pending
+                            Pending Review
                           </Badge>
                         )}
                       </div>
@@ -697,10 +888,14 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
             pageSize={pageSize}
             totalItems={total}
             itemLabel="submissions"
-            onPageChange={setPage}
+            onPageChange={(nextPage) => {
+              setPage(nextPage);
+              clearSelection();
+            }}
             onPageSizeChange={(size) => {
               setPageSize(size);
               setPage(1);
+              clearSelection();
             }}
           />
         </>
@@ -951,13 +1146,17 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive hover:bg-destructive/90 rounded-sm font-mono text-[11px] tracking-widest uppercase"
+              className={`rounded-sm font-mono text-[11px] tracking-widest uppercase ${
+                confirmDialog?.destructive
+                  ? "bg-destructive hover:bg-destructive/90"
+                  : ""
+              }`}
               onClick={() => {
                 confirmDialog?.onConfirm();
                 setConfirmDialog(null);
               }}
             >
-              Delete
+              {confirmDialog?.confirmLabel ?? "Confirm"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

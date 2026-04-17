@@ -1,11 +1,13 @@
 import { getSession, signIn } from "next-auth/react";
 import { getLoginErrorMessage } from "@/lib/auth/errors";
+import { resolvePostLoginRedirect } from "@/lib/auth/redirects";
 import { isSessionWithinLifetime } from "@/lib/auth/session";
 
 type LoginCredentials = {
   email: string;
   password: string;
   rememberMe: boolean;
+  callbackUrl?: string | null;
 };
 
 type LoginRole = "admin" | "candidate";
@@ -31,7 +33,13 @@ function wait(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
-async function resolveWorkspace(): Promise<{
+function getLoginFallbackPath(callbackUrl?: string | null) {
+  if (!callbackUrl) return "/login";
+
+  return `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+}
+
+async function resolveWorkspace(callbackUrl?: string | null): Promise<{
   role: LoginRole;
   redirectTo: string;
 } | null> {
@@ -48,11 +56,11 @@ async function resolveWorkspace(): Promise<{
     }
 
     if (role === "admin") {
-      return { role, redirectTo: "/admin" };
+      return { role, redirectTo: resolvePostLoginRedirect(role, callbackUrl) };
     }
 
     if (role === "candidate") {
-      return { role, redirectTo: "/dashboard" };
+      return { role, redirectTo: resolvePostLoginRedirect(role, callbackUrl) };
     }
   }
 
@@ -71,11 +79,13 @@ export async function loginWithCredentials({
   email,
   password,
   rememberMe,
+  callbackUrl,
 }: LoginCredentials): Promise<LoginSuccessResult | LoginFailureResult> {
   const result = await signIn("credentials", {
     email: email.trim().toLowerCase(),
     password,
     rememberMe: rememberMe ? "true" : "false",
+    callbackUrl: getLoginFallbackPath(callbackUrl),
     redirect: false,
   });
 
@@ -86,12 +96,12 @@ export async function loginWithCredentials({
     };
   }
 
-  const workspace = await resolveWorkspace();
+  const workspace = await resolveWorkspace(callbackUrl);
 
   if (!workspace) {
     return {
       ok: true,
-      redirectTo: "/login",
+      redirectTo: getLoginFallbackPath(callbackUrl),
     };
   }
 

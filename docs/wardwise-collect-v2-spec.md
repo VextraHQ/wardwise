@@ -104,7 +104,7 @@ model CampaignCanvasser {
 
 **Approach:**
 
-- New bulk endpoint: `{ ids: string[], action: "verify" | "flag" | "unflag" | "delete" }`
+- Bulk endpoint supports selected IDs and filtered campaign scope: `{ ids?: string[], campaignId?: string, filters?: SubmissionFilters, scope: "selected" | "filtered", action: "verify" | "unverify" | "flag" | "unflag" | "delete" }`
 - Checkbox column in submissions table
 - Bulk action toolbar appears when items selected
 
@@ -286,6 +286,17 @@ UX audit and post-submission improvements for the public registration form:
 - [x] **Filter alignment improved** — Submissions list and submissions export now share the same filter parsing/building path for `search`, geo filters, verification/flag status, role, and canvasser filters.
 - [x] **Admin export UI expanded** — Submissions dropdown now exposes CSV, Excel, redacted CSV, and redacted Excel. Both export menus also remember the last-used format locally and surface it as the preferred option in the dropdown.
 - [x] **Verification complete** — `pnpm typecheck` and `pnpm build` passed. Smoke test confirmed empty export headers, blank optional cells, escaped multiline CSV content, and spreadsheet formula sanitization. Manual browser QA also confirmed CSV/XLSX downloads, redacted exports, and filter-aligned output. Unauthenticated requests to both export routes were verified to return `401 Unauthorized`.
+
+---
+
+## Completed v2.5 — Admin Review Queue (2026-04-17)
+
+- [x] **Review-first submissions UX** — Submissions tab now frames verification as a `Review Queue` with inline status chips for Pending Review, Verified, Flagged, and All Records.
+- [x] **All-records default with discoverable Pending count** — Submissions open to `All` so search/lookup works predictably; the `Pending` chip shows the pending count so admins can jump into the review queue when needed.
+- [x] **Lean table scanning** — The main table keeps scan-friendly fields only. APC/NIN and VIN remain available in the detail sheet and exports, not the primary table.
+- [x] **All matching bulk actions** — After selecting the current page, admin can escalate to all records matching the active review filters, then verify/flag/unverify/unflag with confirmation.
+- [x] **Filtered bulk endpoint** — Bulk API now supports `scope: "filtered"` with campaign-scoped filters while preserving selected-ID actions.
+- [x] **Audit preserved** — Filtered bulk actions create per-submission audit entries and a campaign-level audit log entry with count, action, scope, and filters.
 
 ---
 

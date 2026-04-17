@@ -30,7 +30,11 @@ import {
 } from "@/components/ui/popover";
 import { loginSchema, type LoginFormData } from "@/lib/schemas/auth-schemas";
 
-export function LoginScreen() {
+type LoginScreenProps = {
+  callbackUrl?: string;
+};
+
+export function LoginScreen({ callbackUrl }: LoginScreenProps) {
   const isSubmittingRef = useRef(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -62,6 +66,7 @@ export function LoginScreen() {
       const result = await loginWithCredentials({
         ...data,
         rememberMe: data.rememberMe ?? false,
+        callbackUrl,
       });
 
       if (!result.ok) {

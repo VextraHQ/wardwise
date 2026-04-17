@@ -10,6 +10,27 @@ import type {
   CampaignCanvasserRecord,
 } from "@/types/collect";
 
+export type SubmissionListFilters = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  lgaId?: number;
+  wardId?: number;
+  role?: string;
+  isFlagged?: boolean;
+  isVerified?: boolean;
+  canvasserName?: string;
+  canvasserPhone?: string;
+};
+
+export type BulkSubmissionActionInput = {
+  action: string;
+  ids?: string[];
+  campaignId?: string;
+  filters?: Omit<SubmissionListFilters, "page" | "pageSize">;
+  scope?: "selected" | "filtered";
+};
+
 // --- Helpers ---
 async function publicApiCall<T>(
   endpoint: string,
@@ -151,18 +172,7 @@ export const adminCollectApi = {
   // Submissions
   getSubmissions: (
     campaignId: string,
-    params?: {
-      page?: number;
-      pageSize?: number;
-      search?: string;
-      lgaId?: number;
-      wardId?: number;
-      role?: string;
-      isFlagged?: boolean;
-      isVerified?: boolean;
-      canvasserName?: string;
-      canvasserPhone?: string;
-    },
+    params?: SubmissionListFilters,
   ) =>
     adminApiCall<{
       submissions: CollectSubmission[];
@@ -204,10 +214,10 @@ export const adminCollectApi = {
       method: "DELETE",
     }),
 
-  bulkAction: (ids: string[], action: string) =>
+  bulkAction: (input: BulkSubmissionActionInput) =>
     adminApiCall<{ affected: number }>("/submissions/bulk", {
       method: "POST",
-      body: JSON.stringify({ ids, action }),
+      body: JSON.stringify(input),
     }),
 
   getSubmissionAudit: (sid: string) =>
