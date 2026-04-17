@@ -2,16 +2,11 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
 import {
   IconPlus,
-  IconEye,
   IconClipboardList,
   IconPlayerPlay,
   IconUsers,
-  IconClipboard,
-  IconDotsVertical,
-  IconCopy,
   IconAlertTriangle,
 } from "@tabler/icons-react";
 import { useCampaigns } from "@/hooks/use-collect";
@@ -27,22 +22,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { AdminPagination } from "@/components/admin/admin-pagination";
+import { CampaignActionsMenu } from "@/components/admin/collect/campaign-actions-menu";
 import {
   getCampaignBrandingLabel,
   getEffectiveCampaignName,
 } from "@/lib/collect/branding";
+import {
+  AdminResourceState,
+  adminResourceStateIcons,
+} from "@/components/admin/shared/admin-resource-state";
 
 function relativeTime(dateStr: string | null): string {
-  if (!dateStr) return "No activity";
+  if (!dateStr) return "No activity yet";
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "Just now";
@@ -67,6 +61,39 @@ const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
   paused: "bg-orange-500/10 text-orange-600 border-orange-500/20",
   closed: "bg-destructive/10 text-destructive border-destructive/30",
 };
+
+const REPORT_STATUS_STYLES: Record<string, string> = {
+  enabled: "bg-primary/10 text-primary border-primary/30",
+  disabled: "bg-muted text-muted-foreground border-border/60",
+};
+
+function formatStatusLabel(value: string) {
+  return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function CampaignReportBadge({ campaign }: { campaign: CampaignSummary }) {
+  const enabled = Boolean(
+    campaign.clientReportEnabled && campaign.clientReportToken,
+  );
+
+  return (
+    <div className="space-y-1">
+      <Badge
+        variant="outline"
+        className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${
+          enabled ? REPORT_STATUS_STYLES.enabled : REPORT_STATUS_STYLES.disabled
+        }`}
+      >
+        {enabled ? "Insights On" : "Off"}
+      </Badge>
+      {campaign.clientReportLastViewedAt && (
+        <p className="text-muted-foreground text-[10px]">
+          Viewed {relativeTime(campaign.clientReportLastViewedAt)}
+        </p>
+      )}
+    </div>
+  );
+}
 
 function StatsBar({ campaigns }: { campaigns: CampaignSummary[] }) {
   const totalCampaigns = campaigns.length;
@@ -159,7 +186,7 @@ function TableSkeleton() {
               S/N
             </TableHead>
             <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-              Candidate
+              Campaign
             </TableHead>
             <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
               Constituency
@@ -171,9 +198,14 @@ function TableSkeleton() {
               Submissions
             </TableHead>
             <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-              Created
+              Report
             </TableHead>
-            <TableHead />
+            <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+              Last Activity
+            </TableHead>
+            <TableHead className="text-muted-foreground h-10 w-12 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
+              Actions
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -182,7 +214,7 @@ function TableSkeleton() {
               <TableCell className="text-center">
                 <Skeleton className="mx-auto h-4 w-4" />
               </TableCell>
-              {Array.from({ length: 6 }).map((_, j) => (
+              {Array.from({ length: 7 }).map((_, j) => (
                 <TableCell key={j}>
                   <Skeleton className="h-4 w-24" />
                 </TableCell>
@@ -197,24 +229,17 @@ function TableSkeleton() {
 
 function EmptyState() {
   return (
-    <div className="border-border flex flex-col items-center gap-3 rounded-sm border border-dashed py-12 text-center">
-      <IconClipboard className="text-muted-foreground h-10 w-10" />
-      <p className="text-muted-foreground text-sm">
-        No campaigns yet. Create your first campaign to start collecting
-        registrations.
-      </p>
-      <Button
-        asChild
-        variant="outline"
-        size="sm"
-        className="mt-2 rounded-sm font-mono text-[11px] tracking-widest uppercase"
-      >
-        <Link href="/admin/collect/campaigns/new">
-          <IconPlus className="mr-1.5 h-3.5 w-3.5" />
-          Create Campaign
-        </Link>
-      </Button>
-    </div>
+    <AdminResourceState
+      icon={IconClipboardList}
+      title="No campaigns yet"
+      description="Create your first Collect campaign to start collecting supporter registrations."
+      action={{
+        label: "Create Campaign",
+        href: "/admin/collect/campaigns/new",
+        icon: adminResourceStateIcons.plus,
+        variant: "outline",
+      }}
+    />
   );
 }
 
@@ -239,13 +264,6 @@ export function CampaignList() {
   }, [campaigns, page, pageSize]);
 
   const snOffset = (page - 1) * pageSize;
-
-  const handleCopyLink = (e: React.MouseEvent, slug: string) => {
-    e.stopPropagation();
-    const url = `${window.location.origin}/c/${slug}`;
-    void navigator.clipboard.writeText(url);
-    toast.success("Campaign link copied to clipboard");
-  };
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
@@ -307,13 +325,19 @@ export function CampaignList() {
           <TableSkeleton />
         </div>
       ) : error ? (
-        <div className="rounded-sm border p-6">
-          <p className="text-destructive text-sm">Failed to load campaigns.</p>
-        </div>
+        <AdminResourceState
+          tone="error"
+          title="Failed to load campaigns"
+          description="We couldn’t load the campaign list. Please refresh the page or try again."
+          action={{
+            label: "Refresh",
+            onClick: () => window.location.reload(),
+            icon: adminResourceStateIcons.alert,
+            variant: "outline",
+          }}
+        />
       ) : campaigns && campaigns.length === 0 ? (
-        <div className="rounded-sm border">
-          <EmptyState />
-        </div>
+        <EmptyState />
       ) : (
         <>
           <div className="overflow-x-auto rounded-sm border">
@@ -335,13 +359,15 @@ export function CampaignList() {
                   <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
                     Submissions
                   </TableHead>
+                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase xl:table-cell">
+                    Report
+                  </TableHead>
                   <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase lg:table-cell">
                     Last Activity
                   </TableHead>
-                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
-                    Created
+                  <TableHead className="text-muted-foreground h-10 w-12 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
+                    Actions
                   </TableHead>
-                  <TableHead className="h-10 w-12" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -397,11 +423,14 @@ export function CampaignList() {
                             variant="outline"
                             className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${CAMPAIGN_STATUS_STYLES[campaign.status] ?? ""}`}
                           >
-                            {campaign.status}
+                            {formatStatusLabel(campaign.status)}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right font-mono font-medium tabular-nums">
                           {campaign._count.submissions.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="hidden xl:table-cell">
+                          <CampaignReportBadge campaign={campaign} />
                         </TableCell>
                         <TableCell className="hidden lg:table-cell">
                           <div className="flex items-center gap-1.5">
@@ -416,52 +445,14 @@ export function CampaignList() {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground hidden md:table-cell">
-                          {new Date(campaign.createdAt).toLocaleDateString(
-                            "en-NG",
-                            {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            },
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger
-                              asChild
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                              >
-                                <IconDotsVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  router.push(
-                                    `/admin/collect/campaigns/${campaign.id}`,
-                                  );
-                                }}
-                              >
-                                <IconEye className="mr-2 h-4 w-4 hover:text-gray-500" />
-                                View Detail
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={(e) =>
-                                  handleCopyLink(e, campaign.slug)
-                                }
-                              >
-                                <IconCopy className="mr-2 h-4 w-4 hover:text-gray-500" />
-                                Copy Link
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                        <TableCell
+                          className="w-12 text-right"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <CampaignActionsMenu
+                            campaign={campaign}
+                            ariaLabel={`Open actions for ${campaignName}`}
+                          />
                         </TableCell>
                       </TableRow>
                     );

@@ -3,11 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminCandidates } from "@/hooks/use-admin";
-import {
-  HiExclamationCircle,
-  HiOutlineUserAdd,
-  HiOutlineUserGroup,
-} from "react-icons/hi";
+import { HiOutlineUserAdd, HiOutlineUserGroup } from "react-icons/hi";
 import {
   IconClipboardList,
   IconDotsVertical,
@@ -18,7 +14,6 @@ import type { Candidate } from "@/types/candidate";
 import type { CandidateWithUser } from "@/lib/api/admin";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
@@ -41,6 +36,10 @@ import { AdminSearchBar } from "@/components/admin/admin-search-bar";
 import { CandidateFilters } from "@/components/admin/admin-filters/candidate-filters";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { CampaignActionMenuItems } from "@/components/admin/collect/campaign-actions-menu";
+import {
+  AdminResourceState,
+  adminResourceStateIcons,
+} from "@/components/admin/shared/admin-resource-state";
 
 import { nigeriaStates } from "@/lib/data/state-lga-locations";
 
@@ -320,6 +319,7 @@ export function CandidateManagement() {
   const [candidatePageSize, setCandidatePageSize] = useState(10);
 
   const { data: candidates = [], isLoading, error } = useAdminCandidates();
+  const hasSearchQuery = searchQuery.trim().length > 0;
 
   const activeCandidateCount = useMemo(
     () =>
@@ -392,10 +392,12 @@ export function CandidateManagement() {
   }, [filteredCandidates, safeCandidatePage, candidatePageSize]);
 
   const activeFilters =
-    searchQuery.length > 0 ||
+    hasSearchQuery ||
     partyFilter !== "all" ||
     positionFilter !== "all" ||
     candidateSort !== "date";
+  const hasActiveCandidateFilters =
+    hasSearchQuery || partyFilter !== "all" || positionFilter !== "all";
 
   // S/N offset for current page
   const snOffset = (safeCandidatePage - 1) * candidatePageSize;
@@ -406,23 +408,6 @@ export function CandidateManagement() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      {error && (
-        <Alert
-          variant="destructive"
-          className="border-destructive/30 bg-destructive/10 rounded-sm shadow-none"
-        >
-          <HiExclamationCircle className="h-4 w-4" />
-          <AlertTitle className="font-mono text-[11px] font-bold tracking-widest uppercase">
-            Failed to load candidate accounts
-          </AlertTitle>
-          <AlertDescription className="text-destructive/80 text-xs">
-            {error instanceof Error
-              ? error.message
-              : "An unexpected error occurred while loading candidates."}
-          </AlertDescription>
-        </Alert>
-      )}
-
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
           <div className="flex-1">
@@ -503,42 +488,59 @@ export function CandidateManagement() {
         {isLoading ? (
           <CandidateTableSkeleton />
         ) : error ? (
-          <div className="rounded-sm border p-6 text-center">
-            <HiExclamationCircle className="text-destructive mx-auto mb-3 h-12 w-12" />
-            <p className="text-muted-foreground mb-1 font-medium">
-              Failed to load candidates
-            </p>
-            <p className="text-muted-foreground text-sm">
-              Please try refreshing the page
-            </p>
-          </div>
+          <AdminResourceState
+            tone="error"
+            title="Failed to load candidates"
+            description="We couldn’t load the candidate list. Please refresh the page or try again."
+            action={{
+              label: "Refresh",
+              onClick: () => window.location.reload(),
+              icon: adminResourceStateIcons.alert,
+              variant: "outline",
+            }}
+          />
         ) : filteredCandidates.length === 0 ? (
-          <div className="border-border flex flex-col items-center gap-3 rounded-sm border border-dashed py-12 text-center">
-            <HiOutlineUserGroup className="text-muted-foreground h-10 w-10" />
-            <div>
-              <p className="text-foreground mb-1 font-medium">
-                {searchQuery
-                  ? "No candidates match your search"
-                  : "No candidates found"}
-              </p>
-              <p className="text-muted-foreground text-sm">
-                {searchQuery
-                  ? "Try adjusting your search terms"
-                  : "Create your first candidate to get started"}
-              </p>
-            </div>
-            {!searchQuery && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push("/admin/candidates/new")}
-                className="mt-2 rounded-sm font-mono text-[11px] tracking-widest uppercase"
-              >
-                <HiOutlineUserAdd className="mr-1.5 h-3.5 w-3.5" />
-                Create Candidate
-              </Button>
-            )}
-          </div>
+          <AdminResourceState
+            icon={HiOutlineUserGroup}
+            title={
+              hasSearchQuery
+                ? "No candidates match your search"
+                : hasActiveCandidateFilters
+                  ? "No candidates match your filters"
+                  : "No candidates found"
+            }
+            description={
+              hasSearchQuery
+                ? "Try adjusting your search terms or clearing filters."
+                : hasActiveCandidateFilters
+                  ? "Try clearing the selected party or position filters."
+                  : "Create your first candidate to start managing campaigns, account access, and Collect setup."
+            }
+            action={
+              hasActiveCandidateFilters
+                ? {
+                    label: "Clear Filters",
+                    onClick: () => {
+                      setSearchQuery("");
+                      setPartyFilter("all");
+                      setPositionFilter("all");
+                      setCandidateSort("date");
+                      setCandidatePage(1);
+                    },
+                    variant: "outline",
+                  }
+                : !hasSearchQuery
+                  ? {
+                      label: "Create Candidate",
+                      onClick: () => router.push("/admin/candidates/new"),
+                      icon: (
+                        <HiOutlineUserAdd className="mr-1.5 h-3.5 w-3.5" />
+                      ),
+                      variant: "outline",
+                    }
+                  : undefined
+            }
+          />
         ) : (
           <>
             <div className="overflow-x-auto rounded-sm border">

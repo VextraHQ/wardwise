@@ -587,7 +587,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
             {isEnabled && (
               <Badge
                 variant="outline"
-                className="rounded-sm border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-emerald-600 uppercase"
+                className="border-primary/30 bg-primary/10 text-primary rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
               >
                 Enabled
               </Badge>

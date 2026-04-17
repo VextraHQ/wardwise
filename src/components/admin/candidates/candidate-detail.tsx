@@ -22,6 +22,10 @@ import { nigeriaStates } from "@/lib/data/state-lga-locations";
 import { CandidateOverview } from "./candidate-overview";
 import { CandidateCampaigns } from "./candidate-campaigns";
 import { CandidateAccount } from "./candidate-account";
+import {
+  AdminResourceState,
+  adminResourceStateIcons,
+} from "@/components/admin/shared/admin-resource-state";
 
 const ONBOARDING_STATUS_STYLES: Record<string, string> = {
   pending: "bg-orange-500/10 text-orange-600 border-orange-500/20",
@@ -73,13 +77,17 @@ export function CandidateDetail({
   if (!candidate) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 md:p-6">
-        <p className="text-muted-foreground">Candidate not found.</p>
-        <Link
-          href="/admin/candidates"
-          className="text-primary mt-2 inline-block underline"
-        >
-          Back to candidates
-        </Link>
+        <AdminResourceState
+          tone="missing"
+          title="Candidate not found"
+          description="This candidate may have been deleted, or the link may be incorrect."
+          action={{
+            label: "Back to Candidates",
+            href: "/admin/candidates",
+            icon: adminResourceStateIcons.back,
+            variant: "outline",
+          }}
+        />
       </div>
     );
   }

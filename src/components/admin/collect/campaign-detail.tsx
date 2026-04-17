@@ -28,6 +28,10 @@ import {
   getCampaignBrandingLabel,
   getEffectiveCampaignName,
 } from "@/lib/collect/branding";
+import {
+  AdminResourceState,
+  adminResourceStateIcons,
+} from "@/components/admin/shared/admin-resource-state";
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border/60",
@@ -82,13 +86,17 @@ export function CampaignDetail({
   if (!campaign) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 md:p-6">
-        <p className="text-muted-foreground">Campaign not found.</p>
-        <Link
-          href="/admin/collect"
-          className="text-primary mt-2 inline-block underline"
-        >
-          Back to campaigns
-        </Link>
+        <AdminResourceState
+          tone="missing"
+          title="Campaign not found"
+          description="This Collect campaign may have been deleted, or the link may be incorrect."
+          action={{
+            label: "Back to Campaigns",
+            href: "/admin/collect",
+            icon: adminResourceStateIcons.back,
+            variant: "outline",
+          }}
+        />
       </div>
     );
   }

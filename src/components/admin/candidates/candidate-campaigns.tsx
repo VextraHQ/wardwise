@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -18,6 +17,10 @@ import {
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { CampaignActionsMenu } from "@/components/admin/collect/campaign-actions-menu";
 import { IconClipboardList, IconPlus } from "@tabler/icons-react";
+import {
+  AdminResourceState,
+  adminResourceStateIcons,
+} from "@/components/admin/shared/admin-resource-state";
 import { getEffectiveCampaignName } from "@/lib/collect/branding";
 import type { CampaignSummary } from "@/types/collect";
 
@@ -142,39 +145,33 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
 
   if (error) {
     return (
-      <Card className="border-destructive/30 bg-destructive/5 rounded-sm border-dashed shadow-none">
-        <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
-          <IconClipboardList className="text-destructive h-9 w-9" />
-          <p className="text-foreground text-sm font-medium">
-            Failed to load campaigns
-          </p>
-          <p className="text-muted-foreground max-w-sm text-sm">
-            Please refresh the page or try again in a moment.
-          </p>
-        </CardContent>
-      </Card>
+      <AdminResourceState
+        tone="error"
+        title="Failed to load campaigns"
+        description="We couldn’t load this candidate’s campaigns. Please refresh the page or try again."
+        action={{
+          label: "Refresh",
+          onClick: () => window.location.reload(),
+          icon: adminResourceStateIcons.alert,
+          variant: "outline",
+        }}
+      />
     );
   }
 
   if (!campaigns || campaigns.length === 0) {
     return (
-      <Card className="border-border rounded-sm border-dashed shadow-none">
-        <CardContent className="flex flex-col items-center gap-3 py-12">
-          <IconClipboardList className="text-muted-foreground h-10 w-10" />
-          <p className="text-muted-foreground text-sm">
-            No campaigns created for this candidate yet.
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
-            onClick={() => router.push(createCampaignHref)}
-          >
-            <IconPlus className="mr-1.5 h-3.5 w-3.5" />
-            Create Campaign
-          </Button>
-        </CardContent>
-      </Card>
+      <AdminResourceState
+        icon={IconClipboardList}
+        title="No campaigns yet"
+        description="Create a Collect campaign for this candidate to start collecting supporter registrations."
+        action={{
+          label: "Create Campaign",
+          onClick: () => router.push(createCampaignHref),
+          icon: adminResourceStateIcons.plus,
+          variant: "outline",
+        }}
+      />
     );
   }
 
