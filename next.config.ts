@@ -31,6 +31,23 @@ const nextConfig: NextConfig = {
     return crypto.randomBytes(6).toString("hex");
   },
 
+  // Required so PostHog's trailing-slash API requests reach the proxy
+  skipTrailingSlashRedirect: true,
+
+  // Reverse proxy PostHog through our own domain to avoid ad-blocker ERR_BLOCKED_BY_CLIENT
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://eu-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://eu.i.posthog.com/:path*",
+      },
+    ];
+  },
+
   // Prevent browsers from caching sw.js itself
   async headers() {
     return [

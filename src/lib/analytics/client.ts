@@ -125,6 +125,7 @@ export function enableAnalytics() {
   if (!analyticsInitialized) {
     posthog.init(projectKey, {
       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+      ui_host: "https://eu.posthog.com",
       autocapture: false,
       capture_pageview: false,
       capture_pageleave: false,

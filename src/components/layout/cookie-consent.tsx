@@ -225,7 +225,7 @@ export function CookieConsentBanner() {
                       onClick={() => applyConsent("accepted")}
                       className="h-10 w-full rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
                     >
-                      Accept Analytics
+                      Accept all
                     </Button>
                     <Button
                       variant="outline"
@@ -241,7 +241,7 @@ export function CookieConsentBanner() {
                       onClick={() => applyConsent("declined")}
                       className="h-10 w-full rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
                     >
-                      Decline Analytics
+                      Reject all
                     </Button>
                   </div>
                 </div>
@@ -355,7 +355,7 @@ export function CookieConsentBanner() {
                 onClick={() => applyConsent("declined")}
                 className="w-full rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
               >
-                Decline Analytics
+                Reject all
               </Button>
               <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                 <Button
@@ -363,7 +363,7 @@ export function CookieConsentBanner() {
                   onClick={() => applyConsent("accepted")}
                   className="w-full rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
                 >
-                  Allow Analytics
+                  Accept all
                 </Button>
                 <Button
                   onClick={handleSavePreferences}
