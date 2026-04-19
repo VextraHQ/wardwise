@@ -182,7 +182,7 @@ If email delivery is not configured, WardWise still supports manual invite/reset
 | `src/lib/auth/config.ts`                                    | NextAuth config, login rules, JWT/session fields               |
 | `src/lib/auth/guards.ts`                                    | Shared server auth wrapper and role guards                     |
 | `src/lib/auth/session.ts`                                   | Session lifetime policy helpers                                |
-| `src/lib/auth/redirects.ts`                                 | Safe post-login callback URL and default home resolution        |
+| `src/lib/auth/redirects.ts`                                 | Safe post-login callback URL and default home resolution       |
 | `src/lib/auth/storage.ts`                                   | Auth-specific user/session persistence helpers                 |
 | `src/lib/auth/links.ts`                                     | Invite/reset token issuing, hashing, consuming, emailing       |
 | `src/lib/auth/client.ts`                                    | Browser auth client for login, forgot-password, and setup      |

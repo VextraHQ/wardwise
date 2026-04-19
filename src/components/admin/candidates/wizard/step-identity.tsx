@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ComboboxSelect } from "@/components/ui/combobox-select";
 import {
   StepCard,
   CardSectionHeader,
@@ -19,7 +16,10 @@ import type { CreateCandidateFormValues } from "@/lib/schemas/admin-schemas";
 import {
   NIGERIAN_PARTIES,
   CANDIDATE_TITLES,
+  CANDIDATE_PARTY_OTHER_OPTION,
+  CANDIDATE_TITLE_OTHER_OPTION,
 } from "@/lib/data/nigerian-parties";
+import { ListOrCustomField } from "@/components/admin/shared/list-or-custom-field";
 
 interface StepIdentityProps {
   form: UseFormReturn<CreateCandidateFormValues>;
@@ -27,32 +27,16 @@ interface StepIdentityProps {
   onNext: () => void;
 }
 
-const partyOptions = [
-  ...NIGERIAN_PARTIES,
-  {
-    value: "__other__",
-    label: "Other...",
-    description: "Enter a custom party name",
-  },
-];
+const partyOptions = [...NIGERIAN_PARTIES, CANDIDATE_PARTY_OTHER_OPTION];
+const titleOptions = [...CANDIDATE_TITLES, CANDIDATE_TITLE_OTHER_OPTION];
 
 export function StepIdentity({ form, onBack, onNext }: StepIdentityProps) {
   const {
     watch,
     setValue,
+    trigger,
     formState: { errors },
   } = form;
-  const [showOtherParty, setShowOtherParty] = useState(false);
-
-  function handlePartySelect(value: string) {
-    if (value === "__other__") {
-      setShowOtherParty(true);
-      setValue("party", "");
-    } else {
-      setShowOtherParty(false);
-      setValue("party", value, { shouldValidate: true });
-    }
-  }
 
   return (
     <StepCard>
@@ -73,22 +57,30 @@ export function StepIdentity({ form, onBack, onNext }: StepIdentityProps) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <FieldLabel optional>Title</FieldLabel>
-              <ComboboxSelect
-                options={CANDIDATE_TITLES}
+              <ListOrCustomField
+                options={titleOptions}
                 value={watch("title") || ""}
-                onValueChange={(val) => setValue("title", val)}
+                onChange={(next) =>
+                  setValue("title", next, { shouldValidate: true })
+                }
+                triggerAriaLabel="Title"
+                inputAriaLabel="Title"
                 placeholder="Select title..."
                 searchPlaceholder="Search titles..."
                 emptyMessage="No title found."
+                customPlaceholder="Enter title"
+                customHintId="custom-title-hint"
+                error={errors.title?.message}
               />
             </div>
             <div className="space-y-1.5">
               <FieldLabel>Full Name</FieldLabel>
               <Input
+                name="name"
+                autoComplete="name"
                 value={watch("name")}
-                onChange={(e) =>
-                  setValue("name", e.target.value, { shouldValidate: true })
-                }
+                onChange={(e) => setValue("name", e.target.value)}
+                onBlur={() => trigger("name")}
                 placeholder="e.g., Ahmadu Umaru Fintiri"
                 className="border-border/60 h-11 rounded-sm"
               />
@@ -108,10 +100,11 @@ export function StepIdentity({ form, onBack, onNext }: StepIdentityProps) {
               <FieldLabel>Email</FieldLabel>
               <Input
                 type="email"
+                name="email"
+                autoComplete="email"
                 value={watch("email")}
-                onChange={(e) =>
-                  setValue("email", e.target.value, { shouldValidate: true })
-                }
+                onChange={(e) => setValue("email", e.target.value)}
+                onBlur={() => trigger("email")}
                 placeholder="candidate@wardwise.ng"
                 className="border-border/60 h-11 rounded-sm"
               />
@@ -120,8 +113,13 @@ export function StepIdentity({ form, onBack, onNext }: StepIdentityProps) {
             <div className="space-y-1.5">
               <FieldLabel optional>Phone</FieldLabel>
               <Input
+                type="tel"
+                inputMode="tel"
+                name="phone"
+                autoComplete="tel"
                 value={watch("phone") || ""}
                 onChange={(e) => setValue("phone", e.target.value)}
+                onBlur={() => trigger("phone")}
                 placeholder="08012345678"
                 className="border-border/60 h-11 rounded-sm"
               />
@@ -136,44 +134,21 @@ export function StepIdentity({ form, onBack, onNext }: StepIdentityProps) {
             title="Political Party"
             subtitle="The party the candidate is running under"
           />
-          <div className="space-y-1.5">
-            <span className="sr-only">Party</span>
-            {showOtherParty ? (
-              <div className="flex gap-2">
-                <Input
-                  aria-label="Party"
-                  value={watch("party")}
-                  onChange={(e) =>
-                    setValue("party", e.target.value, { shouldValidate: true })
-                  }
-                  placeholder="Enter party name"
-                  className="border-border/60 h-11 rounded-sm"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-11 shrink-0 rounded-sm text-xs"
-                  onClick={() => {
-                    setShowOtherParty(false);
-                    setValue("party", "");
-                  }}
-                >
-                  Cancel
-                </Button>
-              </div>
-            ) : (
-              <ComboboxSelect
-                options={partyOptions}
-                value={watch("party") || ""}
-                onValueChange={handlePartySelect}
-                triggerAriaLabel="Party"
-                placeholder="Select party..."
-                searchPlaceholder="Search parties..."
-                emptyMessage="No party found."
-              />
-            )}
-            <FieldError error={errors.party?.message} />
-          </div>
+          <ListOrCustomField
+            options={partyOptions}
+            value={watch("party") || ""}
+            onChange={(next) =>
+              setValue("party", next, { shouldValidate: true })
+            }
+            triggerAriaLabel="Party"
+            inputAriaLabel="Party"
+            placeholder="Select party..."
+            searchPlaceholder="Search parties..."
+            emptyMessage="No party found."
+            customPlaceholder="Enter party name"
+            customHintId="custom-party-hint"
+            error={errors.party?.message}
+          />
         </div>
       </div>
 

@@ -25,18 +25,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ComboboxSelect } from "@/components/ui/combobox-select";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useGeoLgas } from "@/hooks/use-geo";
 import {
   NIGERIAN_PARTIES,
   CANDIDATE_TITLES,
+  CANDIDATE_PARTY_OTHER_OPTION,
+  CANDIDATE_TITLE_OTHER_OPTION,
 } from "@/lib/data/nigerian-parties";
+import { ListOrCustomField } from "@/components/admin/shared/list-or-custom-field";
 import {
   IconEdit,
   IconX,
@@ -60,6 +57,7 @@ import {
   getPresetsForState,
   getUnsupportedPresetsForState,
 } from "@/lib/data/nigerian-constituencies";
+import { cn } from "@/lib/utils";
 
 function resolveStateName(stateCode: string | null): string {
   if (!stateCode) return "—";
@@ -73,6 +71,15 @@ const POSITIONS = [
   "House of Representatives",
   "State Assembly",
 ] as const;
+
+const PARTY_OPTIONS_WITH_OTHER = [
+  ...NIGERIAN_PARTIES,
+  CANDIDATE_PARTY_OTHER_OPTION,
+];
+const TITLE_OPTIONS_WITH_OTHER = [
+  ...CANDIDATE_TITLES,
+  CANDIDATE_TITLE_OTHER_OPTION,
+];
 
 interface CandidateOverviewProps {
   candidate: CandidateWithUser;
@@ -193,6 +200,16 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     string | null
   >(null);
   const [customBoundaryMode, setCustomBoundaryMode] = useState(false);
+  const initialPartyMode: "list" | "custom" =
+    candidate.party &&
+    !NIGERIAN_PARTIES.some((option) => option.value === candidate.party)
+      ? "custom"
+      : "list";
+  const initialTitleMode: "list" | "custom" =
+    candidate.title &&
+    !CANDIDATE_TITLES.some((option) => option.value === candidate.title)
+      ? "custom"
+      : "list";
 
   const availablePresets = useMemo(
     () =>
@@ -475,6 +492,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
   }
 
   function handleEditPositionChange(value: string) {
+    if (value === selectedPosition) return;
     form.setValue("position", value, { shouldValidate: true });
     form.setValue("stateCode", "", { shouldValidate: true });
     form.setValue("lga", "");
@@ -601,11 +619,18 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                           <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
                             Title
                           </FormLabel>
-                          <ComboboxSelect
-                            options={CANDIDATE_TITLES}
+                          <ListOrCustomField
+                            options={TITLE_OPTIONS_WITH_OTHER}
                             value={field.value || ""}
-                            onValueChange={(val) => field.onChange(val)}
+                            onChange={field.onChange}
+                            triggerAriaLabel="Title"
+                            inputAriaLabel="Title"
                             placeholder="Select title..."
+                            searchPlaceholder="Search titles..."
+                            emptyMessage="No title found."
+                            customPlaceholder="Enter title"
+                            customHintId="edit-custom-title-hint"
+                            initialMode={initialTitleMode}
                           />
                           <FormMessage />
                         </FormItem>
@@ -639,11 +664,18 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                           <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
                             Party
                           </FormLabel>
-                          <ComboboxSelect
-                            options={NIGERIAN_PARTIES}
+                          <ListOrCustomField
+                            options={PARTY_OPTIONS_WITH_OTHER}
                             value={field.value || ""}
-                            onValueChange={(val) => field.onChange(val)}
+                            onChange={field.onChange}
+                            triggerAriaLabel="Party"
+                            inputAriaLabel="Party"
                             placeholder="Select party..."
+                            searchPlaceholder="Search parties..."
+                            emptyMessage="No party found."
+                            customPlaceholder="Enter party name"
+                            customHintId="edit-custom-party-hint"
+                            initialMode={initialPartyMode}
                           />
                           <FormMessage />
                         </FormItem>
@@ -657,23 +689,37 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                           <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
                             Position
                           </FormLabel>
-                          <Select
-                            onValueChange={handleEditPositionChange}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="border-border/60 rounded-sm">
-                                <SelectValue placeholder="Select position" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {POSITIONS.map((pos) => (
-                                <SelectItem key={pos} value={pos}>
-                                  {pos}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <FormControl>
+                            <RadioGroup
+                              value={field.value ?? ""}
+                              onValueChange={handleEditPositionChange}
+                              className="flex flex-col gap-1.5"
+                              aria-label="Electoral position"
+                            >
+                              {POSITIONS.map((pos) => {
+                                const selected = field.value === pos;
+                                return (
+                                  <label
+                                    key={pos}
+                                    className={cn(
+                                      "focus-within:ring-primary/30 flex cursor-pointer items-start gap-3 rounded-sm border-2 px-3 py-2.5 transition-[border-color,background-color,color] focus-within:ring-2 focus-within:ring-offset-1 sm:items-center sm:px-4 sm:py-3",
+                                      selected
+                                        ? "border-primary bg-primary/5 text-primary"
+                                        : "border-border/60 bg-card text-foreground hover:border-primary/40",
+                                    )}
+                                  >
+                                    <RadioGroupItem
+                                      value={pos}
+                                      className="mt-0.5 shadow-none sm:mt-0"
+                                    />
+                                    <span className="min-w-0 flex-1 text-left text-sm font-medium leading-snug">
+                                      {pos}
+                                    </span>
+                                  </label>
+                                );
+                              })}
+                            </RadioGroup>
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -801,20 +847,40 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                   <FormField
                     control={form.control}
                     name="constituency"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
-                          Constituency Name
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="border-border/60 rounded-sm"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      const locked =
+                        selectedPosition === "President" ||
+                        selectedPosition === "Governor";
+                      const subtitle =
+                        selectedPosition === "President"
+                          ? "Locked — every president represents the federation"
+                          : selectedPosition === "Governor"
+                            ? "Locked — derived from the state above"
+                            : null;
+                      return (
+                        <FormItem>
+                          <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
+                            Constituency Name
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              readOnly={locked}
+                              className={cn(
+                                "border-border/60 rounded-sm",
+                                locked && "bg-muted/30 cursor-not-allowed",
+                              )}
+                              {...field}
+                            />
+                          </FormControl>
+                          {subtitle && (
+                            <p className="text-muted-foreground text-[11px]">
+                              {subtitle}
+                            </p>
+                          )}
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   <ConstituencyBoundaryAlerts warnings={editBoundaryWarnings} />

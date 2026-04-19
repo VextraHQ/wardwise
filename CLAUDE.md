@@ -58,6 +58,7 @@ Living specs in `docs/` — update these when making decisions or completing fea
 - `docs/wardwise-hardening-spec.md` — Security & architecture decisions
 - `docs/geo-management-spec.md` — Geo drill-down UI
 - `docs/cockpit-design-system.md` — UI/UX design tokens
+- `docs/admin-dashboard-command-center-spec.md` — Admin dashboard command-center redesign
 
 ## Branch Convention
 
@@ -72,3 +73,12 @@ Living specs in `docs/` — update these when making decisions or completing fea
 - Polished, professional UI — match the existing app theme, not generic defaults
 - Semantic hardcoded colors (emerald for success, amber for warning, orange for alerts) stay as-is — don't replace with theme tokens
 - INEC Code is the primary PU identifier — show it first, name is secondary
+
+## Working Workflow
+
+- For larger UI/product changes, read the relevant docs first, then implement against the spec/checklist.
+- Keep implementation senior but simple: avoid overengineering, avoid broad abstractions, and only DRY repeated behavior that is clearly shared.
+- Match loading skeletons to the final UI structure, not generic blocks.
+- Use existing app patterns before creating new components, helpers, or folders.
+- After each meaningful phase, summarize in beginner-friendly terms what changed and why.
+- Verification should include formatting plus checks when code changes: `pnpm exec prettier --write <changed files>`, targeted `pnpm exec eslint <changed files>`, and `pnpm exec tsc --noEmit --pretty false`.

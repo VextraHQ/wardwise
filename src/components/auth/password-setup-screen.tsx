@@ -167,6 +167,7 @@ export function PasswordSetupScreen({
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
                   placeholder="Create a strong password"
                   disabled={isLoading}
                   className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary h-12 rounded-sm pr-12 pl-12 font-mono text-sm font-medium transition-all"
@@ -205,6 +206,7 @@ export function PasswordSetupScreen({
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
                   placeholder="Repeat your password"
                   disabled={isLoading}
                   className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary h-12 rounded-sm pr-12 pl-12 font-mono text-sm font-medium transition-all"

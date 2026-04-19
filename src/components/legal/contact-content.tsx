@@ -119,6 +119,7 @@ export function ContactContent() {
                     <FormControl>
                       <Input
                         placeholder="Enter your name"
+                        autoComplete="name"
                         className="border-border/60 h-11 rounded-sm"
                         {...field}
                       />
@@ -137,6 +138,7 @@ export function ContactContent() {
                     <FormControl>
                       <Input
                         type="email"
+                        autoComplete="email"
                         placeholder="you@example.com"
                         className="border-border/60 h-11 rounded-sm"
                         {...field}

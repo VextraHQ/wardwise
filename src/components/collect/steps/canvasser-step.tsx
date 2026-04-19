@@ -232,6 +232,7 @@ export function CanvasserStep({
                     </InputIcon>
                     <Input
                       {...register("canvasserName")}
+                      autoComplete="name"
                       placeholder="Canvasser's name"
                       className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-medium transition-all placeholder:text-xs"
                     />
@@ -248,6 +249,8 @@ export function CanvasserStep({
                       {...register("canvasserPhone")}
                       placeholder="08012345678"
                       type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
                       className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-mono font-medium tracking-wider transition-all placeholder:text-xs"
                     />
                   </div>

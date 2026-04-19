@@ -33,8 +33,8 @@ export async function generateMetadata({
   }
 
   const campaignName = getEffectiveCampaignName(campaign);
-  const title = `Campaign Insights — ${campaignName} (${campaign.party})`;
-  const description = `Private campaign reporting for ${campaignName} in ${campaign.constituency}.`;
+  const title = `${campaignName} Campaign Insights`;
+  const description = `Access secure campaign insights for ${campaignName} in ${campaign.constituency} on WardWise, including supporter activity, field performance, and local reporting.`;
   const url = `${getSiteUrl()}/r/${token}`;
 
   return {

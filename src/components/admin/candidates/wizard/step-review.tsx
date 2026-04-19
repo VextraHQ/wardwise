@@ -11,7 +11,7 @@ import {
   SectionLabel,
   NavButtons,
 } from "@/components/collect/form-ui";
-import { IconChecklist } from "@tabler/icons-react";
+import { IconChecklist, IconPencil } from "@tabler/icons-react";
 import type { CreateCandidateFormValues } from "@/lib/schemas/admin-schemas";
 import { nigeriaStates, getLGAsByState } from "@/lib/data/state-lga-locations";
 import { useGeoLgas } from "@/hooks/use-geo";
@@ -29,11 +29,64 @@ function resolveStateName(stateCode: string | null | undefined): string {
   return nigeriaStates.find((s) => s.code === stateCode)?.name ?? stateCode;
 }
 
+const LGA_CHIP_DISPLAY_LIMIT = 4;
+
 interface StepReviewProps {
   form: UseFormReturn<CreateCandidateFormValues>;
   isSubmitting: boolean;
   onBack: () => void;
   onSubmit: () => void;
+  onEditStep?: (stepIndex: number) => void;
+}
+
+interface ReviewSectionProps {
+  eyebrow: string;
+  editStep?: number;
+  onEditStep?: (stepIndex: number) => void;
+  children: React.ReactNode;
+}
+
+function ReviewSection({
+  eyebrow,
+  editStep,
+  onEditStep,
+  children,
+}: ReviewSectionProps) {
+  const canEdit = onEditStep && typeof editStep === "number";
+  return (
+    <div className="space-y-2.5">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-foreground/70 font-mono text-[10px] font-bold tracking-widest uppercase">
+          {eyebrow}
+        </p>
+        {canEdit && (
+          <button
+            type="button"
+            onClick={() => onEditStep!(editStep!)}
+            aria-label={`Edit ${eyebrow.toLowerCase()}`}
+            className="text-muted-foreground hover:text-foreground hover:bg-muted/60 focus-visible:ring-primary/40 inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          >
+            Edit
+            <IconPencil className="size-2.5" />
+          </button>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function ReviewField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="space-y-0.5">
+      <p className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
+        {label}
+      </p>
+      <p className="text-foreground text-xs font-medium wrap-break-word">
+        {value || "—"}
+      </p>
+    </div>
+  );
 }
 
 export function StepReview({
@@ -41,6 +94,7 @@ export function StepReview({
   isSubmitting,
   onBack,
   onSubmit,
+  onEditStep,
 }: StepReviewProps) {
   const { watch, setValue } = form;
 
@@ -114,29 +168,17 @@ export function StepReview({
     ],
   );
 
-  const reviewFields = [
-    { label: "Title", value: data.title || "—" },
-    { label: "Name", value: data.name },
-    { label: "Email", value: data.email },
-    { label: "Phone", value: data.phone || "—" },
-    { label: "Position", value: data.position },
-    { label: "State", value: resolveStateName(data.stateCode) },
-    ...(data.constituencyLgaIds.length > 0
-      ? [
-          {
-            label: "Boundary LGAs",
-            value: `${data.constituencyLgaIds.length} selected`,
-          },
-        ]
-      : []),
-    { label: "Constituency", value: data.constituency },
-  ];
+  const visibleLgaChips = selectedLgaNames.slice(0, LGA_CHIP_DISPLAY_LIMIT);
+  const remainingLgaCount = Math.max(
+    0,
+    selectedLgaNames.length - visibleLgaChips.length,
+  );
 
   return (
     <StepCard>
       <CardSectionHeader
         title="Review & Submit"
-        subtitle="Step 3"
+        subtitle="Step 4"
         statusLabel="Candidate Registration"
         icon={<IconChecklist className="size-5" />}
       />
@@ -148,9 +190,10 @@ export function StepReview({
             title="Candidate Summary"
             subtitle="Review the details before creating the account"
           />
-          <div className="bg-muted/50 space-y-3 rounded-sm border p-4">
+          <div className="bg-muted/50 space-y-4 rounded-sm border p-4">
+            {/* Hero — name + party */}
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-medium">
+              <p className="text-foreground min-w-0 truncate text-sm font-medium">
                 {data.title ? `${data.title} ` : ""}
                 {data.name || "—"}
               </p>
@@ -164,17 +207,74 @@ export function StepReview({
               )}
             </div>
 
-            <div className="border-border/40 grid grid-cols-2 gap-x-6 gap-y-2 border-t pt-3">
-              {reviewFields.map((field) => (
-                <div key={field.label} className="space-y-0.5">
-                  <p className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
-                    {field.label}
-                  </p>
-                  <p className="text-foreground text-xs font-medium">
-                    {field.value || "—"}
-                  </p>
+            {/* Identity section */}
+            <div className="border-border/40 border-t pt-3">
+              <ReviewSection
+                eyebrow="Identity"
+                editStep={0}
+                onEditStep={onEditStep}
+              >
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+                  <ReviewField label="Title" value={data.title || "—"} />
+                  <ReviewField label="Name" value={data.name} />
+                  <ReviewField label="Email" value={data.email} />
+                  <ReviewField label="Phone" value={data.phone || "—"} />
                 </div>
-              ))}
+              </ReviewSection>
+            </div>
+
+            {/* Office section */}
+            <div className="border-border/40 border-t pt-3">
+              <ReviewSection
+                eyebrow="Electoral Office"
+                editStep={1}
+                onEditStep={onEditStep}
+              >
+                <ReviewField label="Position" value={data.position} />
+              </ReviewSection>
+            </div>
+
+            {/* Boundary section */}
+            <div className="border-border/40 border-t pt-3">
+              <ReviewSection
+                eyebrow="Electoral Boundary"
+                editStep={2}
+                onEditStep={onEditStep}
+              >
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+                  <ReviewField
+                    label="State"
+                    value={resolveStateName(data.stateCode)}
+                  />
+                  <ReviewField label="Constituency" value={data.constituency} />
+                </div>
+                {selectedLgaNames.length > 0 && (
+                  <div className="mt-3 space-y-1.5">
+                    <p className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
+                      Boundary LGAs ({selectedLgaNames.length})
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {visibleLgaChips.map((name) => (
+                        <Badge
+                          key={name}
+                          variant="outline"
+                          className="border-border/60 bg-card rounded-sm px-2 py-0.5 text-[10px] font-medium"
+                        >
+                          {name}
+                        </Badge>
+                      ))}
+                      {remainingLgaCount > 0 && (
+                        <Badge
+                          variant="outline"
+                          className="border-border/60 bg-muted/40 text-muted-foreground rounded-sm px-2 py-0.5 text-[10px] font-medium"
+                        >
+                          +{remainingLgaCount} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </ReviewSection>
             </div>
           </div>
         </div>

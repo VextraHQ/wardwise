@@ -533,9 +533,7 @@ export function CandidateManagement() {
                   ? {
                       label: "Create Candidate",
                       onClick: () => router.push("/admin/candidates/new"),
-                      icon: (
-                        <HiOutlineUserAdd className="mr-1.5 h-3.5 w-3.5" />
-                      ),
+                      icon: <HiOutlineUserAdd className="mr-1.5 h-3.5 w-3.5" />,
                       variant: "outline",
                     }
                   : undefined

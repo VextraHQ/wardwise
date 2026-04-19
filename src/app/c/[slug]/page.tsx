@@ -36,8 +36,8 @@ export async function generateMetadata({
   }
 
   const campaignName = getEffectiveCampaignName(campaign);
-  const title = `Register — ${campaignName} (${campaign.party})`;
-  const description = `Join ${campaignName} on WardWise for supporter registration in ${campaign.constituency}.`;
+  const title = `${campaignName} Supporter Registration`;
+  const description = `Register your support for ${campaignName} in ${campaign.constituency} on WardWise, Nigeria's campaign intelligence platform for supporter mobilisation and field insights.`;
   const url = `${getSiteUrl()}/c/${slug}`;
 
   return {

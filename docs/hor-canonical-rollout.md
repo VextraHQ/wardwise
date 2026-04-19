@@ -93,7 +93,7 @@ Reason:
 | `scripts/rebuild-hor-presets.ts`                           | Generates safe HoR presets and unsupported split-seat list |
 | `src/lib/data/nigerian-federal-constituencies.ts`          | Generated HoR preset data                                  |
 | `src/lib/data/nigerian-constituencies.ts`                  | Runtime wrapper exposing Senator + HoR presets             |
-| `src/components/admin/candidates/wizard/step-position.tsx` | Candidate create preset UX                                 |
+| `src/components/admin/candidates/wizard/step-boundary.tsx` | Candidate create Step 3 preset / boundary UX               |
 | `src/components/admin/candidates/candidate-overview.tsx`   | Candidate edit preset UX                                   |
 
 ---

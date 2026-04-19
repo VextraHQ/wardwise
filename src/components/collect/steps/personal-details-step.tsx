@@ -65,6 +65,8 @@ const MARITAL_OPTIONS: ComboboxSelectOption[] = [
   { value: "divorced", label: "Divorced" },
   { value: "widowed", label: "Widowed" },
 ];
+const toggleToListActionClass =
+  "border-border/70 bg-muted/40 text-foreground/80 hover:bg-muted/70 h-6 rounded-sm border px-2 text-[11px] font-medium transition-colors";
 
 export function PersonalDetailsStep({
   form,
@@ -127,6 +129,7 @@ export function PersonalDetailsStep({
                     </InputIcon>
                     <Input
                       {...register("firstName")}
+                      autoComplete="given-name"
                       placeholder="Enter your first name"
                       className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-medium transition-all placeholder:text-xs"
                     />
@@ -142,6 +145,7 @@ export function PersonalDetailsStep({
                     </InputIcon>
                     <Input
                       {...register("lastName")}
+                      autoComplete="family-name"
                       placeholder="Enter your last name"
                       className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-medium transition-all placeholder:text-xs"
                     />
@@ -158,6 +162,7 @@ export function PersonalDetailsStep({
                   </InputIcon>
                   <Input
                     {...register("middleName")}
+                    autoComplete="additional-name"
                     placeholder="Enter your middle name"
                     className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-medium transition-all placeholder:text-xs"
                   />
@@ -177,6 +182,7 @@ export function PersonalDetailsStep({
                       placeholder="08031234567"
                       type="tel"
                       inputMode="tel"
+                      autoComplete="tel"
                       className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-mono font-medium tracking-wider transition-all placeholder:text-xs"
                     />
                   </div>
@@ -193,6 +199,7 @@ export function PersonalDetailsStep({
                       {...register("email")}
                       placeholder="your@email.com"
                       type="email"
+                      autoComplete="email"
                       className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-medium transition-all placeholder:text-xs"
                     />
                   </div>
@@ -305,19 +312,28 @@ export function PersonalDetailsStep({
                     />
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Input
                       {...register("occupation")}
+                      aria-describedby="custom-occupation-hint"
                       placeholder="Type your occupation"
                       className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 font-medium transition-all placeholder:text-xs"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setOccupationMode("select")}
-                      className="text-primary text-xs font-medium underline"
-                    >
-                      Back to dropdown
-                    </button>
+                    <div className="flex items-center justify-between gap-2">
+                      <p
+                        id="custom-occupation-hint"
+                        className="text-muted-foreground text-[11px]"
+                      >
+                        Typed manually
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setOccupationMode("select")}
+                        className={toggleToListActionClass}
+                      >
+                        Use list
+                      </button>
+                    </div>
                   </div>
                 )}
                 <FieldError error={errors.occupation?.message} />

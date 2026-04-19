@@ -737,6 +737,19 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
           currentStep={skipCanvasserStep && screen > 4 ? screen - 1 : screen}
           totalSteps={TOTAL_SCREENS - 2 - (skipCanvasserStep ? 1 : 0)}
           stepTitle={STEP_TITLES[screen] || ""}
+          stepTitles={
+            skipCanvasserStep
+              ? STEP_TITLES.slice(1, 5)
+              : STEP_TITLES.slice(1, 6)
+          }
+          onStepClick={(index) => {
+            // StepProgress only invokes this for completed segments.
+            // Step index is 0-based over the progress-bar slice; +1 maps
+            // it back to the form's screen index (since screen 0 is the
+            // splash which the bar never represents).
+            const targetScreen = index + 1;
+            if (targetScreen < screen) setScreen(targetScreen);
+          }}
           className="mb-6"
         />
       )}

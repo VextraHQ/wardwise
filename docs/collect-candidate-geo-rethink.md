@@ -174,7 +174,7 @@ Public form: LGA dropdown shows Fufore and Song only
 ### Phase 2: Candidate Creation — Add Boundary LGA Selection
 
 - [x] Update `createCandidateSchema` — add `constituencyLgaIds`
-- [x] Update `step-position.tsx` — replace single LGA dropdown with searchable checkbox-grid constituency picker
+- [x] Update admin candidate boundary step (`wizard/step-boundary.tsx`; LGA/boundary UI was split out of the earlier combined `step-position.tsx`) — replace single LGA dropdown with searchable checkbox-grid constituency picker. Electoral office / `position` remains in `wizard/step-position.tsx`.
 - [x] Update candidate creation API — persist `constituencyLgaIds`
 - [x] Update candidate detail page — display/edit constituency LGAs
 - [x] Update `useCreateCandidate` and `useUpdateCandidate` hooks in `use-admin.ts`
@@ -234,8 +234,8 @@ This exception is intentional for faster Collect launch. It allows admins to onb
 | `src/components/admin/shared/constituency-boundary-alerts.tsx` | Reusable UI for soft warning banners                                          |
 | `src/lib/schemas/admin-schemas.ts`                             | Candidate validation — add `constituencyLgaIds`                               |
 | `src/lib/schemas/collect-schemas.ts`                           | Campaign validation — simplify                                                |
-| `src/components/admin/candidates/wizard/step-position.tsx`     | Candidate LGA selection                                                       |
-| `src/components/admin/candidates/wizard/step-review.tsx`       | Candidate review step — boundary warning summary                              |
+| `src/components/admin/candidates/wizard/step-boundary.tsx`   | Candidate create Step 3: LGA boundary + presets                             |
+| `src/components/admin/candidates/wizard/step-review.tsx`       | Candidate create Step 4 — review + boundary warning summary                  |
 | `src/components/admin/candidates/candidate-overview.tsx`       | Candidate edit page — same boundary UX + warnings                             |
 | `src/components/admin/collect/wizard/campaign-wizard.tsx`      | Simplified 2-step flow                                                        |
 | `src/components/admin/collect/wizard/step-candidate-setup.tsx` | Candidate scope summary + inherited boundary warnings                         |

@@ -131,7 +131,7 @@ export function LoginScreen({ callbackUrl }: LoginScreenProps) {
               <Input
                 id="email"
                 type="email"
-                autoComplete="email"
+                autoComplete="username"
                 placeholder="example@email.com"
                 disabled={isLoading}
                 className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary h-12 rounded-sm pl-12 font-mono text-sm font-medium transition-all"

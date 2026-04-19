@@ -322,6 +322,10 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 
 ### Admin Dashboard (`src/components/admin/`)
 
+> Admin dashboard redesign direction: see `docs/admin-dashboard-command-center-spec.md`.
+> The dashboard should behave as an operations command center: actions first,
+> problems second, metrics third, live previews next, coverage/context last.
+
 | Component                                | Status                                                    |
 | ---------------------------------------- | --------------------------------------------------------- |
 | `admin-header.tsx`                       | ✅ `Admin //` prefix, Super Admin badge, mono description |

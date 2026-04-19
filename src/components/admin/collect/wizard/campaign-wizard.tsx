@@ -191,9 +191,13 @@ export function CampaignWizard() {
       {/* Step Progress */}
       <StepProgress
         currentStep={step + 1}
-        totalSteps={2}
+        totalSteps={STEP_TITLES.length}
         stepTitle={STEP_TITLES[step]}
+        stepTitles={STEP_TITLES}
         contextLabel="Campaign Setup"
+        onStepClick={(index) => {
+          if (index < step) setStep(index);
+        }}
       />
 
       {/* Steps */}
