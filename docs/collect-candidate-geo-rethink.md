@@ -90,10 +90,13 @@ Why checkbox grid instead of compact multi-select:
 2. LGA coverage — shows ALL state LGAs (broken)
 3. Questions + review
 
-**After (2 steps):**
+**After (2 steps, then 3 steps from 2026-04):**
 
 1. Select candidate → slug → read-only scope summary (inherited from candidate)
-2. Questions + review → optional "Restrict to part of constituency" toggle
+2. Collect configuration — custom questions + optional "Restrict to part of constituency" toggle
+3. Review & create — read-only summary with section Edit + submit
+
+_(Earlier geo-rethink shipped a 2-step variant: questions + restrict lived on one screen with inline review; see `wardwise-collect-spec.md` for the current 3-step UX.)_
 
 ### Public Form
 
@@ -234,10 +237,10 @@ This exception is intentional for faster Collect launch. It allows admins to onb
 | `src/components/admin/shared/constituency-boundary-alerts.tsx` | Reusable UI for soft warning banners                                          |
 | `src/lib/schemas/admin-schemas.ts`                             | Candidate validation — add `constituencyLgaIds`                               |
 | `src/lib/schemas/collect-schemas.ts`                           | Campaign validation — simplify                                                |
-| `src/components/admin/candidates/wizard/step-boundary.tsx`   | Candidate create Step 3: LGA boundary + presets                             |
-| `src/components/admin/candidates/wizard/step-review.tsx`       | Candidate create Step 4 — review + boundary warning summary                  |
+| `src/components/admin/candidates/wizard/step-boundary.tsx`     | Candidate create Step 3: LGA boundary + presets                               |
+| `src/components/admin/candidates/wizard/step-review.tsx`       | Candidate create Step 4 — review + boundary warning summary                   |
 | `src/components/admin/candidates/candidate-overview.tsx`       | Candidate edit page — same boundary UX + warnings                             |
-| `src/components/admin/collect/wizard/campaign-wizard.tsx`      | Simplified 2-step flow                                                        |
+| `src/components/admin/collect/wizard/campaign-wizard.tsx`      | 3-step flow: candidate setup → collect config → review & create               |
 | `src/components/admin/collect/wizard/step-candidate-setup.tsx` | Candidate scope summary + inherited boundary warnings                         |
 | `src/app/api/admin/collect/campaigns/route.ts`                 | Server-side field derivation                                                  |
 | `src/app/api/admin/candidates/route.ts`                        | Candidate create validation + persistence                                     |

@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { toast } from "sonner";
 import { track } from "@/lib/analytics/client";
@@ -95,6 +96,14 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
   const reportUrl = campaign?.clientReportToken
     ? `${baseUrl}/r/${campaign.clientReportToken}`
     : "";
+
+  const updatePatch = updateMutation.variables as
+    | { clientReportEnabled?: boolean }
+    | undefined;
+  const isEnablingClientReport =
+    updateMutation.isPending && updatePatch?.clientReportEnabled === true;
+  const isRevokingClientReport =
+    updateMutation.isPending && updatePatch?.clientReportEnabled === false;
 
   useEffect(() => {
     if (!campaign) return;
@@ -616,8 +625,12 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
                   updateMutation.isPending || campaign.status === "draft"
                 }
               >
-                <IconShieldCheck className="mr-1.5 h-3.5 w-3.5" />
-                {updateMutation.isPending
+                {isEnablingClientReport ? (
+                  <Spinner className="mr-1.5 size-3.5" />
+                ) : (
+                  <IconShieldCheck className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                {isEnablingClientReport
                   ? "Enabling..."
                   : "Enable Client Report"}
               </Button>
@@ -740,8 +753,12 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
                   onClick={handleRevokeClientAccess}
                   disabled={updateMutation.isPending}
                 >
-                  <IconEye className="mr-1.5 h-3.5 w-3.5" />
-                  Revoke Access
+                  {isRevokingClientReport ? (
+                    <Spinner className="mr-1.5 size-3.5" />
+                  ) : (
+                    <IconEye className="mr-1.5 h-3.5 w-3.5" />
+                  )}
+                  {isRevokingClientReport ? "Revoking..." : "Revoke Access"}
                 </Button>
               </div>
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   ChevronDownIcon,
@@ -55,6 +55,8 @@ interface StepProgressProps {
    * must use Continue so per-step validation runs.
    */
   onStepClick?: (stepIndex: number) => void;
+  /** Increment to briefly highlight the bar after a validation failure */
+  validationFlashNonce?: number;
 }
 
 interface NavListProps {
@@ -196,11 +198,27 @@ export function StepProgress({
   stepTitles,
   stepSubtitles,
   onStepClick,
+  validationFlashNonce = 0,
 }: StepProgressProps) {
   const percentage = Math.round((currentStep / totalSteps) * 100);
   const navigable = Boolean(onStepClick) && Boolean(stepTitles);
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [liveMessage, setLiveMessage] = useState("");
+  const [flashBar, setFlashBar] = useState(false);
+
+  useEffect(() => {
+    setLiveMessage(
+      `Now on step ${currentStep} of ${totalSteps}: ${stepTitle}.`,
+    );
+  }, [currentStep, totalSteps, stepTitle]);
+
+  useEffect(() => {
+    if (!validationFlashNonce) return;
+    setFlashBar(true);
+    const t = window.setTimeout(() => setFlashBar(false), 700);
+    return () => window.clearTimeout(t);
+  }, [validationFlashNonce]);
 
   const handleSelect = (index: number) => {
     onStepClick?.(index);
@@ -209,7 +227,7 @@ export function StepProgress({
 
   // Shared trigger button so it looks identical in both dropdown and drawer modes.
   const triggerClass = cn(
-    "inline-flex min-h-[32px] items-center gap-1 rounded-sm px-2 -ml-2 text-[11px] font-extrabold tracking-widest uppercase sm:text-xs hover:bg-muted/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+    "inline-flex min-h-[32px] items-center gap-1 rounded-sm px-2 -ml-2 text-[11px] font-extrabold tracking-widest uppercase whitespace-nowrap sm:text-xs hover:bg-muted/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
     canvasser
       ? "text-amber-600 focus-visible:ring-amber-600/40"
       : "text-primary focus-visible:ring-primary/40",
@@ -222,7 +240,16 @@ export function StepProgress({
   );
 
   return (
-    <div className={cn("mx-auto w-full space-y-4", className)}>
+    <div
+      className={cn(
+        "mx-auto w-full space-y-4 rounded-sm transition-shadow duration-300",
+        flashBar && "ring-destructive/40 ring-2",
+        className,
+      )}
+    >
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {liveMessage}
+      </span>
       <div className="flex items-end justify-between px-0.5">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2.5">
@@ -295,7 +322,7 @@ export function StepProgress({
             ) : (
               <span
                 className={cn(
-                  "text-[11px] font-extrabold tracking-widest uppercase sm:text-xs",
+                  "text-[11px] font-extrabold tracking-widest whitespace-nowrap uppercase sm:text-xs",
                   canvasser ? "text-amber-600" : "text-primary",
                 )}
               >
@@ -303,7 +330,7 @@ export function StepProgress({
               </span>
             )}
             <div className="bg-border h-3 w-px" />
-            <span className="text-muted-foreground text-xs font-bold tracking-widest">
+            <span className="text-muted-foreground text-[11px] font-bold tracking-widest whitespace-nowrap sm:text-xs">
               {contextLabel}
             </span>
           </div>
@@ -313,24 +340,17 @@ export function StepProgress({
           </h3>
         </div>
 
-        <div className="ml-4 shrink-0 text-right">
-          <div className="flex items-center gap-1.5 opacity-70 grayscale">
+        <div className="ml-2 shrink-0 text-right sm:ml-4">
+          <div className="flex items-center gap-1 opacity-70 grayscale sm:gap-1.5">
             <div className="bg-primary size-1 rounded-full" />
-            <span className="text-muted-foreground font-mono text-[12px] font-bold tracking-tighter uppercase italic">
-              Progress: {percentage}%
+            <span className="text-muted-foreground font-mono text-xs font-bold tracking-tighter whitespace-nowrap uppercase italic">
+              <span className="hidden sm:inline">Progress: </span>
+              {percentage}%
             </span>
           </div>
         </div>
       </div>
 
-      {/*
-       * Segment row — rendered with `items-center` so the slightly taller
-       * "completed pill" segments visually align with the current/future bars
-       * rather than pushing the row down. The pill shape on completed segments
-       * is the universal "I'm a button" affordance (works on mobile + desktop
-       * without relying on hover); the desktop tooltip is a layered cue that
-       * tells hover users exactly which step they'll jump back to.
-       */}
       <div className="flex h-2 items-center gap-1.5">
         {Array.from({ length: totalSteps }).map((_, i) => {
           const stepIndex = i + 1;
@@ -340,10 +360,6 @@ export function StepProgress({
           const clickable = Boolean(onStepClick) && isCompleted;
           const title = stepTitles?.[i];
 
-          // Completed (clickable) segments adopt a pill shape and a touch more
-          // height to read as "press me"; current/future stay as crisp 1px
-          // bars to read as passive indicators. This is the at-rest cue that
-          // works for all users, no hover required.
           const segmentClass = cn(
             "relative flex-1 transition-all duration-300",
             isCompleted ? "h-1.5 rounded-full" : "h-1 rounded-[1px]",
@@ -364,6 +380,11 @@ export function StepProgress({
           );
 
           if (clickable) {
+            const inner = (
+              <div className={cn(segmentClass, "pointer-events-none w-full")}>
+                {overlay}
+              </div>
+            );
             const button = (
               <button
                 key={i}
@@ -373,18 +394,13 @@ export function StepProgress({
                   title ? `Go back to ${title}` : `Go back to step ${stepIndex}`
                 }
                 className={cn(
-                  segmentClass,
-                  "focus-visible:ring-primary/40 cursor-pointer hover:brightness-110 hover:saturate-150 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                  "focus-visible:ring-primary/40 flex flex-1 cursor-pointer items-center justify-center py-4 hover:brightness-110 hover:saturate-150 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:py-0",
                 )}
               >
-                {overlay}
+                {inner}
               </button>
             );
 
-            // Tooltip is layered on top of the at-rest pill cue — gives hover
-            // users an explicit destination label. Mobile users skip the
-            // tooltip entirely (no hover) and rely on the pill shape + the
-            // primary nav menu/drawer to discover back-jump capability.
             return (
               <Tooltip key={i}>
                 <TooltipTrigger asChild>{button}</TooltipTrigger>

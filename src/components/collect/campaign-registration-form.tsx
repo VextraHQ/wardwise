@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -55,6 +55,24 @@ const STEP_KEYS = [
   "confirmation",
 ] as const;
 
+function focusFirstFieldError(
+  form: UseFormReturn<RegistrationFormData>,
+  fields: (keyof RegistrationFormData)[],
+) {
+  const errs = form.formState.errors;
+  for (const f of fields) {
+    if (!errs[f]) continue;
+    void form.setFocus(f);
+    window.requestAnimationFrame(() => {
+      document.activeElement?.scrollIntoView?.({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
+    return;
+  }
+}
+
 function getCollectErrorCategory(message: string) {
   const normalized = message.toLowerCase();
 
@@ -105,6 +123,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   const [occupationMode, setOccupationMode] = useState<"select" | "custom">(
     "select",
   );
+  const [validationFlashNonce, setValidationFlashNonce] = useState(0);
 
   const {
     isOffline,
@@ -343,6 +362,18 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     lastTrackedStepRef.current = stepViewKey;
   }, [screen, skipCanvasserStep]);
 
+  useEffect(() => {
+    const onPageHide = () => {
+      if (screen <= 0 || screen >= TOTAL_SCREENS - 1) return;
+      track("collect_flow_abandoned", {
+        step_index: screen,
+        step_key: STEP_KEYS[screen] ?? "unknown",
+      });
+    };
+    window.addEventListener("pagehide", onPageHide);
+    return () => window.removeEventListener("pagehide", onPageHide);
+  }, [screen]);
+
   const doSubmit = async () => {
     const values = form.getValues();
     const analyticsId = createAnalyticsId();
@@ -375,8 +406,17 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       return;
     }
 
+    const submitStarted = performance.now();
+    submitMutation.reset();
+
     submitMutation.mutate(payload, {
       onSuccess: (result) => {
+        const elapsed = performance.now() - submitStarted;
+        if (elapsed > 8000) {
+          track("collect_submit_slow", {
+            duration_ms: Math.round(elapsed),
+          });
+        }
         setSubmittedCount(result.count);
         setSubmissionId(result.submission.id);
         clearProgress();
@@ -471,11 +511,27 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     }
   };
 
+  const recordValidationFailure = (failedFieldKeys: string[]) => {
+    track("collect_validation_failed", {
+      step_index: screen,
+      step_key: STEP_KEYS[screen] ?? "unknown",
+      failed_fields: failedFieldKeys.slice(0, 24).join(","),
+      failed_count: failedFieldKeys.length,
+    });
+    setValidationFlashNonce((n) => n + 1);
+  };
+
   const validateAndNext = async () => {
     const fields = screenFieldMap[screen];
     if (fields) {
       const valid = await trigger(fields);
-      if (!valid) return;
+      if (!valid) {
+        const errs = form.formState.errors;
+        const failed = fields.filter((f) => Boolean(errs[f]));
+        recordValidationFailure(failed.map(String));
+        focusFirstFieldError(form, fields);
+        return;
+      }
     }
 
     // Extra guardrail: ComboboxSelect fields set via setValue may not
@@ -485,14 +541,20 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       const vals = form.getValues();
       if (!vals.occupation || vals.occupation.trim() === "") {
         form.setError("occupation", { message: "Occupation is required" });
+        recordValidationFailure(["occupation"]);
+        focusFirstFieldError(form, screenFieldMap[1]);
         return;
       }
       if (!vals.sex) {
         form.setError("sex", { message: "Please select your sex" });
+        recordValidationFailure(["sex"]);
+        focusFirstFieldError(form, screenFieldMap[1]);
         return;
       }
       if (!vals.maritalStatus) {
         form.setError("maritalStatus", { message: "Select marital status" });
+        recordValidationFailure(["maritalStatus"]);
+        focusFirstFieldError(form, screenFieldMap[1]);
         return;
       }
     }
@@ -501,14 +563,20 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       const vals = form.getValues();
       if (!vals.lgaId) {
         form.setError("lgaId", { message: "Select your LGA" });
+        recordValidationFailure(["lgaId"]);
+        focusFirstFieldError(form, screenFieldMap[2]);
         return;
       }
       if (!vals.wardId) {
         form.setError("wardId", { message: "Select your ward" });
+        recordValidationFailure(["wardId"]);
+        focusFirstFieldError(form, screenFieldMap[2]);
         return;
       }
       if (!vals.pollingUnitId) {
         form.setError("pollingUnitId", { message: "Select your polling unit" });
+        recordValidationFailure(["pollingUnitId"]);
+        focusFirstFieldError(form, screenFieldMap[2]);
         return;
       }
     }
@@ -517,6 +585,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     if (screen === 5) {
       if (hasCanvasser === null) {
         setCanvasserStepError("Please select Yes or No before submitting.");
+        recordValidationFailure(["canvasser_yes_no"]);
         return;
       }
 
@@ -546,6 +615,11 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
               message: "Canvasser phone is required",
             });
           }
+          const failed: string[] = [];
+          if (!trimmedName) failed.push("canvasserName");
+          if (!trimmedPhone) failed.push("canvasserPhone");
+          recordValidationFailure(failed);
+          focusFirstFieldError(form, ["canvasserName", "canvasserPhone"]);
           return;
         }
       }
@@ -673,180 +747,183 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
 
   return (
     <FormShell campaign={campaign}>
-      {/* Offline / Sync banners */}
-      {isOffline && (
-        <div className="mb-4 overflow-hidden rounded-sm border border-dashed border-amber-500/30 bg-amber-500/5 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="size-1.5 shrink-0 animate-pulse rounded-full bg-amber-500" />
-            <p className="font-mono text-[10px] font-bold tracking-widest text-amber-700 uppercase dark:text-amber-400">
-              Connection Lost
-            </p>
-          </div>
-          <p className="text-muted-foreground mt-1 text-xs">
-            You're currently offline. Any submissions will be secured locally
-            and queued for when you reconnect.
-          </p>
-        </div>
-      )}
-      {!isOffline && pendingCount > 0 && (
-        <div className="mb-4 flex flex-col justify-between gap-3 overflow-hidden rounded-sm border border-dashed border-emerald-500/30 bg-emerald-500/5 px-4 py-3 sm:flex-row sm:items-center">
-          <div className="space-y-1">
+      <div>
+        {/* Offline / Sync banners */}
+        {isOffline && (
+          <div className="mb-4 overflow-hidden rounded-sm border border-dashed border-amber-500/30 bg-amber-500/5 px-4 py-3">
             <div className="flex items-center gap-2">
-              <div className="size-1.5 shrink-0 rounded-full bg-emerald-500" />
-              <p className="font-mono text-[10px] font-bold tracking-widest text-emerald-700 uppercase dark:text-emerald-400">
-                Ready to Sync
+              <div className="size-1.5 shrink-0 animate-pulse rounded-full bg-amber-500" />
+              <p className="font-mono text-[10px] font-bold tracking-widest text-amber-700 uppercase dark:text-amber-400">
+                Connection Lost
               </p>
             </div>
-            <p className="text-muted-foreground text-xs">
-              {pendingCount} offline submission{pendingCount !== 1 ? "s" : ""}{" "}
-              waiting to be uploaded.
+            <p className="text-muted-foreground mt-1 text-xs">
+              You're currently offline. Any submissions will be secured locally
+              and queued for when you reconnect.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={async () => {
-              track("collect_sync_requested", {
-                pending_count: pendingCount,
-                source: "manual",
-              });
-              setSyncSource("manual");
-              const result = await trySync();
-              if (result) {
-                if (result.synced > 0) {
-                  toast.success(`${result.synced} submission(s) synced`);
-                }
-                for (const f of result.failed) {
-                  toast.error("Submission rejected", {
-                    description: f.error,
-                    duration: 8000,
-                  });
-                }
-              }
-            }}
-            disabled={isSyncing}
-            className="flex h-8 items-center justify-center rounded-sm border border-emerald-500/20 bg-emerald-500/10 px-3 font-mono text-[10px] font-bold tracking-widest text-emerald-700 uppercase transition-colors hover:bg-emerald-500/20 disabled:opacity-50 dark:text-emerald-400"
-          >
-            {isSyncing ? "Syncing..." : "Sync Now"}
-          </button>
-        </div>
-      )}
-
-      {/* Progress Bar — hide on splash and confirmation */}
-      {screen > 0 && screen < TOTAL_SCREENS - 1 && (
-        <StepProgress
-          currentStep={skipCanvasserStep && screen > 4 ? screen - 1 : screen}
-          totalSteps={TOTAL_SCREENS - 2 - (skipCanvasserStep ? 1 : 0)}
-          stepTitle={STEP_TITLES[screen] || ""}
-          stepTitles={
-            skipCanvasserStep
-              ? STEP_TITLES.slice(1, 5)
-              : STEP_TITLES.slice(1, 6)
-          }
-          onStepClick={(index) => {
-            // StepProgress only invokes this for completed segments.
-            // Step index is 0-based over the progress-bar slice; +1 maps
-            // it back to the form's screen index (since screen 0 is the
-            // splash which the bar never represents).
-            const targetScreen = index + 1;
-            if (targetScreen < screen) setScreen(targetScreen);
-          }}
-          className="mb-6"
-        />
-      )}
-
-      {screen === 0 && (
-        <SplashScreen
-          campaign={campaign}
-          hasSavedProgress={hasSavedProgress}
-          deviceSubmission={deviceSubmission}
-          onStart={handleStart}
-          onStartFresh={handleStartFresh}
-          onRestore={handleRestoreProgress}
-          onCopyReference={handleCopyLastReference}
-        />
-      )}
-
-      {screen === 1 && (
-        <PersonalDetailsStep
-          form={form}
-          campaign={campaign}
-          occupationMode={occupationMode}
-          setOccupationMode={setOccupationMode}
-          onBack={goBack}
-          onNext={validateAndNext}
-        />
-      )}
-
-      {screen === 2 && (
-        <LocationStep
-          form={form}
-          lgas={lgas}
-          wards={wards}
-          pollingUnits={pollingUnits}
-          lgasLoading={lgasLoading}
-          wardsLoading={wardsLoading}
-          unitsLoading={unitsLoading}
-          lgasError={lgasError}
-          wardsError={wardsError}
-          unitsError={unitsError}
-          onBack={goBack}
-          onNext={validateAndNext}
-        />
-      )}
-
-      {screen === 3 && (
-        <PartyInfoStep form={form} onBack={goBack} onNext={validateAndNext} />
-      )}
-
-      {screen === 4 && (
-        <RoleStep
-          form={form}
-          onBack={goBack}
-          onNext={validateAndNext}
-          isSubmitting={skipCanvasserStep && submitMutation.isPending}
-          submitError={
-            skipCanvasserStep ? submitMutation.error?.message : undefined
-          }
-        />
-      )}
-
-      {screen === 5 && (
-        <CanvasserStep
-          form={form}
-          hasCanvasser={hasCanvasser}
-          setHasCanvasser={(value) => {
-            setHasCanvasser(value);
-            setCanvasserStepError("");
-          }}
-          selectionError={canvasserStepError}
-          isSubmitting={submitMutation.isPending}
-          submitError={submitMutation.error?.message}
-          onBack={goBack}
-          onNext={validateAndNext}
-          nextDisabled={hasCanvasser === null}
-          preloadedCanvassers={campaign.campaignCanvassers}
-        />
-      )}
-
-      {screen === 6 && (
-        <>
-          {submittedCount === null && (
-            <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm text-amber-800">
-              <p className="font-bold">Saved offline</p>
-              <p className="mt-1 text-xs">
-                Your registration has been queued and will be submitted
-                automatically when you reconnect to the internet.
+        )}
+        {!isOffline && pendingCount > 0 && (
+          <div className="mb-4 flex flex-col justify-between gap-3 overflow-hidden rounded-sm border border-dashed border-emerald-500/30 bg-emerald-500/5 px-4 py-3 sm:flex-row sm:items-center">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="size-1.5 shrink-0 rounded-full bg-emerald-500" />
+                <p className="font-mono text-[10px] font-bold tracking-widest text-emerald-700 uppercase dark:text-emerald-400">
+                  Ready to Sync
+                </p>
+              </div>
+              <p className="text-muted-foreground text-xs">
+                {pendingCount} offline submission{pendingCount !== 1 ? "s" : ""}{" "}
+                waiting to be uploaded.
               </p>
             </div>
-          )}
-          <ConfirmationScreen
-            campaign={campaign}
-            submittedCount={submittedCount}
-            refCode={submissionId ? generateRefCode(submissionId) : null}
-            onNewRegistration={handleNewRegistration}
+            <button
+              type="button"
+              onClick={async () => {
+                track("collect_sync_requested", {
+                  pending_count: pendingCount,
+                  source: "manual",
+                });
+                setSyncSource("manual");
+                const result = await trySync();
+                if (result) {
+                  if (result.synced > 0) {
+                    toast.success(`${result.synced} submission(s) synced`);
+                  }
+                  for (const f of result.failed) {
+                    toast.error("Submission rejected", {
+                      description: f.error,
+                      duration: 8000,
+                    });
+                  }
+                }
+              }}
+              disabled={isSyncing}
+              className="flex h-8 items-center justify-center rounded-sm border border-emerald-500/20 bg-emerald-500/10 px-3 font-mono text-[10px] font-bold tracking-widest text-emerald-700 uppercase transition-colors hover:bg-emerald-500/20 disabled:opacity-50 dark:text-emerald-400"
+            >
+              {isSyncing ? "Syncing..." : "Sync Now"}
+            </button>
+          </div>
+        )}
+
+        {/* Progress Bar — hide on splash and confirmation */}
+        {screen > 0 && screen < TOTAL_SCREENS - 1 && (
+          <StepProgress
+            currentStep={skipCanvasserStep && screen > 4 ? screen - 1 : screen}
+            totalSteps={TOTAL_SCREENS - 2 - (skipCanvasserStep ? 1 : 0)}
+            stepTitle={STEP_TITLES[screen] || ""}
+            stepTitles={
+              skipCanvasserStep
+                ? STEP_TITLES.slice(1, 5)
+                : STEP_TITLES.slice(1, 6)
+            }
+            onStepClick={(index) => {
+              // StepProgress only invokes this for completed segments.
+              // Step index is 0-based over the progress-bar slice; +1 maps
+              // it back to the form's screen index (since screen 0 is the
+              // splash which the bar never represents).
+              const targetScreen = index + 1;
+              if (targetScreen < screen) setScreen(targetScreen);
+            }}
+            validationFlashNonce={validationFlashNonce}
+            className="mb-6"
           />
-        </>
-      )}
+        )}
+
+        {screen === 0 && (
+          <SplashScreen
+            campaign={campaign}
+            hasSavedProgress={hasSavedProgress}
+            deviceSubmission={deviceSubmission}
+            onStart={handleStart}
+            onStartFresh={handleStartFresh}
+            onRestore={handleRestoreProgress}
+            onCopyReference={handleCopyLastReference}
+          />
+        )}
+
+        {screen === 1 && (
+          <PersonalDetailsStep
+            form={form}
+            campaign={campaign}
+            occupationMode={occupationMode}
+            setOccupationMode={setOccupationMode}
+            onBack={goBack}
+            onNext={validateAndNext}
+          />
+        )}
+
+        {screen === 2 && (
+          <LocationStep
+            form={form}
+            lgas={lgas}
+            wards={wards}
+            pollingUnits={pollingUnits}
+            lgasLoading={lgasLoading}
+            wardsLoading={wardsLoading}
+            unitsLoading={unitsLoading}
+            lgasError={lgasError}
+            wardsError={wardsError}
+            unitsError={unitsError}
+            onBack={goBack}
+            onNext={validateAndNext}
+          />
+        )}
+
+        {screen === 3 && (
+          <PartyInfoStep form={form} onBack={goBack} onNext={validateAndNext} />
+        )}
+
+        {screen === 4 && (
+          <RoleStep
+            form={form}
+            onBack={goBack}
+            onNext={validateAndNext}
+            isSubmitting={skipCanvasserStep && submitMutation.isPending}
+            submitError={
+              skipCanvasserStep ? submitMutation.error?.message : undefined
+            }
+          />
+        )}
+
+        {screen === 5 && (
+          <CanvasserStep
+            form={form}
+            hasCanvasser={hasCanvasser}
+            setHasCanvasser={(value) => {
+              setHasCanvasser(value);
+              setCanvasserStepError("");
+            }}
+            selectionError={canvasserStepError}
+            isSubmitting={submitMutation.isPending}
+            submitError={submitMutation.error?.message}
+            onBack={goBack}
+            onNext={validateAndNext}
+            nextDisabled={hasCanvasser === null}
+            preloadedCanvassers={campaign.campaignCanvassers}
+          />
+        )}
+
+        {screen === 6 && (
+          <>
+            {submittedCount === null && (
+              <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm text-amber-800">
+                <p className="font-bold">Saved offline</p>
+                <p className="mt-1 text-xs">
+                  Your registration has been queued and will be submitted
+                  automatically when you reconnect to the internet.
+                </p>
+              </div>
+            )}
+            <ConfirmationScreen
+              campaign={campaign}
+              submittedCount={submittedCount}
+              refCode={submissionId ? generateRefCode(submissionId) : null}
+              onNewRegistration={handleNewRegistration}
+            />
+          </>
+        )}
+      </div>
     </FormShell>
   );
 }

@@ -170,10 +170,7 @@ export const adminCollectApi = {
     adminApiCall<void>(`/campaigns/${id}`, { method: "DELETE" }),
 
   // Submissions
-  getSubmissions: (
-    campaignId: string,
-    params?: SubmissionListFilters,
-  ) =>
+  getSubmissions: (campaignId: string, params?: SubmissionListFilters) =>
     adminApiCall<{
       submissions: CollectSubmission[];
       total: number;

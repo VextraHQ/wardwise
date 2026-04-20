@@ -7,6 +7,7 @@ import { AuthCard } from "@/components/auth/auth-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { IconKey, IconLoader } from "@tabler/icons-react";
+import { Spinner } from "@/components/ui/spinner";
 import { COMPANY_INFO } from "@/lib/data/legal-data";
 import { useUnlockCampaignReport } from "@/hooks/use-campaign-report";
 import type { CampaignBrandingType } from "@/lib/collect/branding";
@@ -211,8 +212,16 @@ export function ReportGate({
             className="h-10 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase"
             onClick={handleUnlock}
             disabled={unlockMutation.isPending || !allFilled}
+            aria-busy={unlockMutation.isPending}
           >
-            {unlockMutation.isPending ? "Unlocking..." : "Unlock Report"}
+            {unlockMutation.isPending ? (
+              <>
+                <Spinner className="mr-2 size-4" />
+                Unlocking…
+              </>
+            ) : (
+              "Unlock Report"
+            )}
           </Button>
 
           <div className="space-y-2">

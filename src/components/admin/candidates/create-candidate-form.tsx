@@ -32,11 +32,11 @@ import {
   type CreateCandidateFormValues,
 } from "@/lib/schemas/admin-schemas";
 import { type CreateCandidateResponse } from "@/lib/api/admin";
-import { CredentialsDialog } from "./credentials-dialog";
-import { StepIdentity } from "./wizard/step-identity";
-import { StepPosition } from "./wizard/step-position";
-import { StepBoundary } from "./wizard/step-boundary";
-import { StepReview } from "./wizard/step-review";
+import { CredentialsDialog } from "@/components/admin/candidates/credentials-dialog";
+import { StepIdentity } from "@/components/admin/candidates/wizard/step-identity";
+import { StepPosition } from "@/components/admin/candidates/wizard/step-position";
+import { StepBoundary } from "@/components/admin/candidates/wizard/step-boundary";
+import { StepReview } from "@/components/admin/candidates/wizard/step-review";
 
 const STEP_TITLES = [
   "Identity",

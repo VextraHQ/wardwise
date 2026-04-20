@@ -130,11 +130,11 @@ export function SiteFooter() {
             />
           </div>
           <Link
-            href={`mailto:${COMPANY_INFO.supportEmail}`}
+            href="/contact"
             className="group border-border bg-background/50 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary flex items-center gap-2 rounded-full border px-4 py-2 transition-all"
           >
             <HiMail className="h-4 w-4" />
-            <span className="text-xs font-medium">Get in Touch</span>
+            <span className="text-xs font-medium">Contact us</span>
             <HiArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         </div>

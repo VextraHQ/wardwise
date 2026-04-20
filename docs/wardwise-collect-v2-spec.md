@@ -1,7 +1,7 @@
 # WardWise Collect v2 — Feature Roadmap Spec
 
 > Living document. Update as features are built or priorities shift.
-> Last updated: 2026-04-07
+> Last updated: 2026-04-19
 > See also: `wardwise-collect-spec.md` (v1), `wardwise-hardening-spec.md`, `collect-admin-export-plan.md`
 
 ## Status
@@ -151,7 +151,7 @@ model CampaignCanvasser {
 - **Cross-campaign phone check** — Flag returning supporters across campaigns for same candidate
 - **Duplicate attempt log** — Show blocked duplicate registration attempts
 - **Submission lag warning** — "No submissions in 48h" auto-alert on active campaigns
-- **Template custom questions** — Library of pre-made question sets to copy between campaigns
+- **Template custom questions** — Library of pre-made question sets to copy between campaigns (admin **Collect setup** step 2 is structured to absorb more fields / presets without another full wizard redesign)
 - **Geographic heatmap** — Map visualization of submission density by ward/LGA
 
 ---
@@ -297,6 +297,14 @@ UX audit and post-submission improvements for the public registration form:
 - [x] **All matching bulk actions** — After selecting the current page, admin can escalate to all records matching the active review filters, then verify/flag/unverify/unflag with confirmation.
 - [x] **Filtered bulk endpoint** — Bulk API now supports `scope: "filtered"` with campaign-scoped filters while preserving selected-ID actions.
 - [x] **Audit preserved** — Filtered bulk actions create per-submission audit entries and a campaign-level audit log entry with count, action, scope, and filters.
+
+---
+
+## Completed v2.6 — Campaign wizard + public form parity (2026-04-19)
+
+- [x] **Admin New Campaign wizard — 3 steps** — `Select Candidate` → **Collect setup** (custom questions + optional LGA restrict; headroom for more / prebuilt question sets) → **Review & create** (summary card with section-level **Edit**, same pattern as create-candidate review). Files: `campaign-wizard.tsx`, `step-campaign-collect-config.tsx`, `step-campaign-review.tsx` (replaces the old combined questions+review step).
+- [x] **Campaign draft persistence** — `useWizardDraft` with key `wardwise:campaign-wizard:draft:v2` (version bump invalidates prior 2-step drafts), restore banner + Discard, `clear()` on successful create. See `wardwise-collect-spec.md` for full detail.
+- [x] **Public `/c/[slug]` Party Information step** — Renders the same footer **TrustIndicators** strip as Personal Details and Location (`DATA_PRIVACY`, `SECURE_ENCRYPTION`, `VERIFIED_CAMPAIGN`) so identity-heavy steps feel consistent.
 
 ---
 

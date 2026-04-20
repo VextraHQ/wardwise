@@ -712,7 +712,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                                       value={pos}
                                       className="mt-0.5 shadow-none sm:mt-0"
                                     />
-                                    <span className="min-w-0 flex-1 text-left text-sm font-medium leading-snug">
+                                    <span className="min-w-0 flex-1 text-left text-sm leading-snug font-medium">
                                       {pos}
                                     </span>
                                   </label>

@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { Activity, BarChart3, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -479,10 +480,12 @@ function ReadyToCollectState({
   slug,
   campaignName,
   party,
+  constituency,
 }: {
   slug: string;
   campaignName: string;
   party: string;
+  constituency: string;
 }) {
   const formUrl =
     typeof window !== "undefined"
@@ -533,6 +536,7 @@ function ReadyToCollectState({
           campaignSlug={slug}
           campaignName={campaignName}
           party={party}
+          constituency={constituency}
           qrSize={180}
         />
       </div>
@@ -573,6 +577,7 @@ export function CampaignInsights({ token }: { token: string }) {
     dataUpdatedAt,
     refetch,
     isFetching,
+    isRefetching,
   } = useCampaignReportSummary(token, activeParams);
 
   const { data: filterOptionSummary } = useCampaignReportSummary(
@@ -710,6 +715,17 @@ export function CampaignInsights({ token }: { token: string }) {
   return (
     <div className="space-y-8">
       <InsightsHero campaign={summary.campaign} total={allTimeTotal} />
+
+      {isRefetching && (
+        <div
+          className="border-border/60 bg-muted/40 text-muted-foreground flex items-center gap-2 rounded-sm border px-3 py-2 text-xs font-medium"
+          role="status"
+          aria-live="polite"
+        >
+          <Spinner className="text-primary size-3.5 shrink-0" />
+          Updating insights for the selected range and filters…
+        </div>
+      )}
 
       <div className="space-y-2">
         {/* Row 1: date presets */}
@@ -964,6 +980,7 @@ export function CampaignInsights({ token }: { token: string }) {
               slug={summary.campaign.slug}
               campaignName={campaignName}
               party={summary.campaign.party}
+              constituency={summary.campaign.constituency}
             />
           ) : (
             <>
@@ -1008,6 +1025,7 @@ export function CampaignInsights({ token }: { token: string }) {
                   campaignSlug={summary.campaign.slug}
                   campaignName={campaignName}
                   party={summary.campaign.party}
+                  constituency={summary.campaign.constituency}
                   qrSize={180}
                 />
               </div>
@@ -1025,6 +1043,7 @@ export function CampaignInsights({ token }: { token: string }) {
               slug={summary.campaign.slug}
               campaignName={campaignName}
               party={summary.campaign.party}
+              constituency={summary.campaign.constituency}
             />
           ) : (
             <>

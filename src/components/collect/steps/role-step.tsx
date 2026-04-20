@@ -1,13 +1,20 @@
 "use client";
 
-import { HiUsers, HiUserCircle, HiClipboardList } from "react-icons/hi";
+import {
+  HiUsers,
+  HiUserCircle,
+  HiClipboardList,
+  HiShieldCheck,
+} from "react-icons/hi";
 import { Users } from "lucide-react";
 import { motion } from "motion/react";
 import type { UseFormReturn } from "react-hook-form";
 import type { RegistrationFormData } from "@/lib/schemas/collect-schemas";
 import { Separator } from "@/components/ui/separator";
+import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { RegistrationStepHeader } from "@/components/collect/registration-step-header";
 import {
+  CollectMobilePrivacyNote,
   FieldError,
   NavButtons,
   SubmitError,
@@ -113,7 +120,7 @@ export function RoleStep({
               onNext={onNext}
               nextLabel={
                 selectedRole === "canvasser"
-                  ? "Submit Registration"
+                  ? "Submit registration"
                   : "Continue"
               }
               isLoading={isSubmitting}
@@ -123,6 +130,16 @@ export function RoleStep({
           </div>
         </StepCard>
       </motion.div>
+
+      <CollectMobilePrivacyNote />
+
+      <TrustIndicators
+        items={[
+          { icon: <HiUsers />, label: "ROLE_FOR_ORGANIZING" },
+          { icon: <HiUserCircle />, label: "NO_PUBLIC_DIRECTORY" },
+          { icon: <HiShieldCheck />, label: "INTERNAL_USE_ONLY" },
+        ]}
+      />
     </div>
   );
 }

@@ -50,7 +50,7 @@ export function ConfirmationScreen({
     if (!refCode) return;
     try {
       await navigator.clipboard.writeText(refCode);
-      toast.success("Reference copied");
+      toast.success("Reference code copied");
     } catch {
       toast.error("Could not copy reference code");
     }
@@ -192,7 +192,7 @@ export function ConfirmationScreen({
       <TrustIndicators
         items={[
           { icon: <HiShieldCheck />, label: "COMPLETE_REGISTRATION" },
-          { icon: <HiLockClosed />, label: "SECURE_DATA" },
+          { icon: <HiLockClosed />, label: "SECURE_ENCRYPTION" },
           { icon: <HiCheckCircle />, label: "VERIFIED_SUPPORTER" },
         ]}
       />

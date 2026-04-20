@@ -10,6 +10,7 @@ import Link from "next/link";
 
 import { track } from "@/lib/analytics/client";
 import { useCreateCampaign } from "@/hooks/use-collect";
+import { useWizardDraft } from "@/hooks/use-wizard-draft";
 import {
   createCampaignSchema,
   type CreateCampaignData,
@@ -24,7 +25,8 @@ import {
 } from "@/components/ui/breadcrumb";
 import { StepProgress } from "@/components/ui/step-progress";
 import { StepCandidateSetup } from "./step-candidate-setup";
-import { StepQuestionsReview } from "./step-questions-review";
+import { StepCampaignCollectConfig } from "./step-campaign-collect-config";
+import { StepCampaignReview } from "./step-campaign-review";
 
 type Candidate = {
   id: string;
@@ -37,11 +39,36 @@ type Candidate = {
   constituencyLgaIds: number[];
 };
 
-const STEP_TITLES = ["Select Candidate", "Questions & Review"];
+const STEP_TITLES = ["Select Candidate", "Collect setup", "Review & create"];
+
+/** Bumped when wizard step shape changes so stale drafts are not mis-applied. */
+const DRAFT_STORAGE_KEY = "wardwise:campaign-wizard:draft:v2";
+
+const DEFAULT_CAMPAIGN_FORM_VALUES: CreateCampaignData = {
+  candidateId: "",
+  slug: "",
+  brandingType: "candidate",
+  displayName: "",
+  enabledLgaIds: [],
+  customQuestion1: "",
+  customQuestion2: "",
+};
+
+function isMeaningfulCampaignDraft(values: CreateCampaignData): boolean {
+  return Boolean(
+    values.candidateId?.trim() ||
+    values.slug?.trim() ||
+    values.displayName?.trim() ||
+    values.customQuestion1?.trim() ||
+    values.customQuestion2?.trim() ||
+    (values.enabledLgaIds && values.enabledLgaIds.length > 0),
+  );
+}
 
 const stepFieldMap: Record<number, (keyof CreateCampaignData)[]> = {
   0: ["candidateId", "slug", "brandingType", "displayName"],
   1: [],
+  2: [],
 };
 
 function toSlug(name: string) {
@@ -59,14 +86,23 @@ export function CampaignWizard() {
 
   const form = useForm<CreateCampaignData>({
     resolver: zodResolver(createCampaignSchema),
-    defaultValues: {
-      candidateId: "",
-      slug: "",
-      brandingType: "candidate",
-      displayName: "",
-      enabledLgaIds: [],
-      customQuestion1: "",
-      customQuestion2: "",
+    defaultValues: DEFAULT_CAMPAIGN_FORM_VALUES,
+  });
+
+  const {
+    restoredAt: draftRestoredAt,
+    discard: discardDraft,
+    clear: clearDraftStorage,
+  } = useWizardDraft({
+    form,
+    step,
+    storageKey: DRAFT_STORAGE_KEY,
+    defaultValues: DEFAULT_CAMPAIGN_FORM_VALUES,
+    isMeaningful: isMeaningfulCampaignDraft,
+    maxStep: STEP_TITLES.length - 1,
+    onRestored: (_savedAt, restoredStep) => {
+      setStep(restoredStep);
+      track("admin_campaign_wizard_draft_restored", { step: restoredStep });
     },
   });
 
@@ -101,6 +137,14 @@ export function CampaignWizard() {
     form.setValue("slug", toSlug(candidate.name), { shouldValidate: true });
   }
 
+  function handleDiscardCampaignDraft() {
+    discardDraft();
+    setStep(0);
+    track("admin_campaign_wizard_draft_discarded", {});
+  }
+
+  // URL preselect runs after candidates load; skips when a candidate is already
+  // chosen (including from a restored `useWizardDraft` snapshot).
   useEffect(() => {
     const candidateId = searchParams.get("candidateId");
     if (!candidateId || !candidates || form.getValues("candidateId")) return;
@@ -117,12 +161,20 @@ export function CampaignWizard() {
     setStep((s) => s + 1);
   }
 
+  function advanceToReview() {
+    setStep(2);
+  }
+
   function goBack() {
     if (step === 0) {
       router.push("/admin/collect");
     } else {
       setStep((s) => s - 1);
     }
+  }
+
+  function handleEditFromReview(targetIndex: number) {
+    setStep(targetIndex);
   }
 
   async function handleSubmit() {
@@ -143,6 +195,7 @@ export function CampaignWizard() {
         campaign_id: result.campaign.id,
         candidate_id: data.candidateId,
       });
+      clearDraftStorage();
       toast.success("Campaign created successfully");
       router.push(`/admin/collect/campaigns/${result.campaign.id}`);
     } catch (err) {
@@ -157,16 +210,32 @@ export function CampaignWizard() {
     }
   }
 
-  // Get selected candidate for summary card
   const candidateId = useWatch({ control: form.control, name: "candidateId" });
+  const watchedForm = useWatch({ control: form.control });
   const selectedCandidate = useMemo(
     () => candidates?.find((c) => c.id === candidateId),
     [candidates, candidateId],
   );
 
+  const stepSubtitles = useMemo((): (string | undefined)[] => {
+    const v = watchedForm as CreateCampaignData;
+    const anchor =
+      selectedCandidate?.name?.trim() || v?.candidateId?.trim() || undefined;
+    const slugLine = v?.slug?.trim() ? `/c/${v.slug.trim()}` : undefined;
+    const q1 = v?.customQuestion1?.trim();
+    const q2 = v?.customQuestion2?.trim();
+    const qBits = [q1, q2].filter(Boolean);
+    return [
+      [anchor, slugLine].filter(Boolean).join(" · ") || undefined,
+      qBits.length
+        ? `${qBits.length} custom question${qBits.length === 1 ? "" : "s"}`
+        : undefined,
+      anchor ? "Ready to create" : undefined,
+    ];
+  }, [watchedForm, selectedCandidate?.name]);
+
   return (
     <div className="mx-auto w-full max-w-xl space-y-6 pb-8">
-      {/* Breadcrumb */}
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -188,19 +257,47 @@ export function CampaignWizard() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Step Progress */}
+      {draftRestoredAt && (
+        <div
+          className="border-border/60 bg-primary/5 flex items-center justify-between gap-3 rounded-sm border px-3 py-2"
+          role="status"
+          aria-live="polite"
+        >
+          <p className="text-muted-foreground text-xs">
+            <span className="text-primary font-mono text-[10px] font-bold tracking-widest uppercase">
+              Draft restored
+            </span>{" "}
+            <span className="ml-1">
+              Campaign setup resumed (
+              {new Date(draftRestoredAt).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+              )
+            </span>
+          </p>
+          <button
+            type="button"
+            onClick={handleDiscardCampaignDraft}
+            className="border-border/70 bg-card text-foreground/80 hover:bg-muted/60 h-6 shrink-0 rounded-sm border px-2 text-[10px] font-bold tracking-widest uppercase transition-colors"
+          >
+            Discard
+          </button>
+        </div>
+      )}
+
       <StepProgress
         currentStep={step + 1}
         totalSteps={STEP_TITLES.length}
         stepTitle={STEP_TITLES[step]}
         stepTitles={STEP_TITLES}
+        stepSubtitles={stepSubtitles}
         contextLabel="Campaign Setup"
         onStepClick={(index) => {
           if (index < step) setStep(index);
         }}
       />
 
-      {/* Steps */}
       {step === 0 && (
         <StepCandidateSetup
           form={form}
@@ -214,12 +311,23 @@ export function CampaignWizard() {
       )}
 
       {step === 1 && (
-        <StepQuestionsReview
+        <StepCampaignCollectConfig
+          key={candidateId || "pending"}
+          form={form}
+          selectedCandidate={selectedCandidate}
+          onBack={goBack}
+          onNext={advanceToReview}
+        />
+      )}
+
+      {step === 2 && (
+        <StepCampaignReview
           form={form}
           isSubmitting={createCampaign.isPending}
           selectedCandidate={selectedCandidate}
           onBack={goBack}
           onSubmit={handleSubmit}
+          onEditStep={handleEditFromReview}
         />
       )}
     </div>

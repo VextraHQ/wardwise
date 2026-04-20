@@ -14,6 +14,7 @@ import {
 import { RegistrationStepHeader } from "@/components/collect/registration-step-header";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import {
+  CollectMobilePrivacyNote,
   FieldLabel,
   FieldError,
   NavButtons,
@@ -179,10 +180,16 @@ export function LocationStep({
         </StepCard>
       </motion.div>
 
+      <CollectMobilePrivacyNote />
+
       <TrustIndicators
         items={[
-          { icon: <HiLocationMarker />, label: "LOCATION_VERIFIED" },
-          { icon: <HiShieldCheck />, label: "SECURE_DATA" },
+          { icon: <HiLocationMarker />, label: "OFFICIAL_GEO_SOURCE" },
+          {
+            icon: <MapPin className="size-3.5" />,
+            label: "POLLING_UNIT_ACCURATE",
+          },
+          { icon: <HiShieldCheck />, label: "AREA_SELECTION_SECURE" },
         ]}
       />
     </div>

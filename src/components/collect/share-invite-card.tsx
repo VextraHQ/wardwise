@@ -28,6 +28,8 @@ interface ShareInviteCardProps {
   campaignName: string;
   /** Party name for share text */
   party: string;
+  /** Constituency label when available (matches public page metadata) */
+  constituency?: string;
   /** Wrap in motion.div with fade-in animation? */
   animated?: boolean;
   /** Delay for the animation (seconds) */
@@ -40,17 +42,23 @@ export function ShareInviteCard({
   campaignSlug,
   campaignName,
   party,
+  constituency,
   animated = false,
   animationDelay = 0,
   qrSize = 120,
 }: ShareInviteCardProps) {
   const shareUrl = useShareUrl(campaignSlug);
   const campaignLabel = `${campaignName} (${party})`;
-  const shareText = `Join ${campaignLabel} on WardWise. Complete your supporter registration here: ${shareUrl}`;
+  const locationClause = constituency ? ` in ${constituency}` : "";
+  const wardWisePitch =
+    "Nigeria's campaign intelligence platform for supporter mobilisation and field insights";
+  const shareBody = `Register your support for ${campaignLabel}${locationClause} on WardWise, ${wardWisePitch}.`;
+  const shareText = `${shareBody}\n\n${shareUrl}`;
   const emailSubject = `${campaignName} Supporter Registration`;
   const emailBody = `Hello,
 
-You can register your support for ${campaignLabel} on WardWise here:
+${shareBody}
+
 ${shareUrl}
 
 Thank you.`;
@@ -76,10 +84,11 @@ Thank you.`;
         </div>
         <div>
           <h3 className="text-foreground text-xs font-bold tracking-widest uppercase">
-            Share Registration Link
+            Share supporter registration
           </h3>
           <p className="text-muted-foreground text-[10px] font-medium">
-            Send the campaign form to supporters and volunteers
+            Send the WardWise link so supporters and volunteers can register in
+            minutes.
           </p>
         </div>
       </div>
@@ -141,11 +150,11 @@ Thank you.`;
       {qrUrl && (
         <div className="border-border/40 flex flex-col items-center gap-2 border-t pt-4">
           <p className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
-            Scan to Register
+            Scan to register
           </p>
           <Image
             src={qrUrl}
-            alt="Registration QR Code"
+            alt={`QR code to register support for ${campaignName} on WardWise`}
             width={qrSize}
             height={qrSize}
             className="rounded"

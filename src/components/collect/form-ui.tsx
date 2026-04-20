@@ -1,7 +1,25 @@
+import type { ReactNode } from "react";
+import Link from "next/link";
 import { HiArrowRight, HiArrowLeft } from "react-icons/hi";
 import { IconLoader } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+/** Mobile-only line below a collect step card (trust strip is hidden there). */
+export function CollectMobilePrivacyNote() {
+  return (
+    <p className="text-muted-foreground/90 px-1 pt-2 text-center text-[11px] leading-relaxed font-medium sm:hidden">
+      Encrypted connection. How we use your data:{" "}
+      <Link
+        href="/privacy"
+        className="text-primary font-semibold underline-offset-2 hover:underline"
+      >
+        Privacy
+      </Link>
+      .
+    </p>
+  );
+}
 
 export function SectionLabel({
   title,
@@ -49,7 +67,20 @@ export function InputIcon({ children }: { children: React.ReactNode }) {
 
 export function FieldError({ error }: { error?: string }) {
   if (!error) return null;
-  return <p className="text-destructive text-[11px] font-medium">{error}</p>;
+  return (
+    <p className="text-destructive text-[11px] leading-snug font-semibold">
+      {error}
+    </p>
+  );
+}
+
+/** Short reassurance / “why we ask” — quiet caption under the field */
+export function FieldHint({ children }: { children: ReactNode }) {
+  return (
+    <p className="text-muted-foreground/65 border-border/50 border-l pl-2.5 text-[10px] leading-relaxed font-normal tracking-wide">
+      {children}
+    </p>
+  );
 }
 
 export function NavButtons({
@@ -66,16 +97,16 @@ export function NavButtons({
   isLoading?: boolean;
 }) {
   return (
-    <div className="flex gap-4">
+    <div className="flex w-full gap-3 sm:gap-4">
       <Button
         type="button"
         variant="outline"
         onClick={onBack}
         disabled={isLoading}
         aria-label="Go back to previous step"
-        className="hover:bg-muted/10 h-11 shrink-0 rounded-sm px-4 text-xs font-bold tracking-widest uppercase sm:px-8"
+        className="hover:bg-muted/10 h-12 min-h-12 shrink-0 rounded-sm px-4 text-xs font-bold tracking-widest uppercase sm:h-11 sm:min-h-0 sm:px-8"
       >
-        <HiArrowLeft className="mr-2 h-4 w-4" />
+        <HiArrowLeft className="mr-2 h-4 w-4 shrink-0" />
         Back
       </Button>
       <Button
@@ -83,17 +114,17 @@ export function NavButtons({
         onClick={onNext}
         disabled={nextDisabled || isLoading}
         aria-label={nextLabel}
-        className="bg-primary text-primary-foreground hover:bg-primary/95 h-11 min-w-0 flex-1 rounded-sm text-[10px] font-bold tracking-widest uppercase transition-all active:scale-95 sm:text-xs"
+        className="bg-primary text-primary-foreground hover:bg-primary/95 h-12 min-h-12 min-w-0 flex-1 rounded-sm text-[10px] font-bold tracking-widest uppercase transition-all active:scale-95 sm:h-11 sm:min-h-0 sm:text-xs"
       >
         {isLoading ? (
           <>
-            <IconLoader className="mr-2 h-4 w-4 animate-spin" />
+            <IconLoader className="mr-2 h-4 w-4 shrink-0 animate-spin" />
             Submitting...
           </>
         ) : (
           <>
-            {nextLabel}
-            <HiArrowRight className="ml-2 h-4 w-4" />
+            <span className="truncate">{nextLabel}</span>
+            <HiArrowRight className="ml-2 h-4 w-4 shrink-0" />
           </>
         )}
       </Button>
@@ -102,13 +133,19 @@ export function NavButtons({
 }
 
 /** Inline submit-error alert — reused on any step that triggers form submission */
-export function SubmitError({ error }: { error?: string }) {
+export function SubmitError({
+  error,
+  onRetry,
+}: {
+  error?: string;
+  onRetry?: () => void;
+}) {
   if (!error) return null;
   const isDuplicate = error.includes("already registered");
   return (
     <div
       className={cn(
-        "rounded-sm border p-4 text-center",
+        "mt-6 rounded-sm border p-4 text-center",
         isDuplicate
           ? "border-orange-500/30 bg-orange-500/10"
           : "bg-destructive/10 border-destructive/30",
@@ -136,6 +173,17 @@ export function SubmitError({ error }: { error?: string }) {
           ? "This phone number or Voter ID (VIN) has already been submitted for this campaign. Each supporter can only register once."
           : error}
       </p>
+      {!isDuplicate && onRetry ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="mt-4 min-h-10"
+          onClick={onRetry}
+        >
+          Try again
+        </Button>
+      ) : null}
     </div>
   );
 }

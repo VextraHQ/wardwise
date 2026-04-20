@@ -137,7 +137,7 @@ export function SplashScreen({
                 onClick={onStart}
                 className="bg-primary text-primary-foreground hover:bg-primary/95 h-12 w-full max-w-sm rounded-sm text-xs font-bold tracking-widest uppercase transition-all active:scale-95"
               >
-                Begin Registration
+                Begin registration
                 <HiArrowRight className="ml-2 h-4 w-4" />
               </Button>
             )}

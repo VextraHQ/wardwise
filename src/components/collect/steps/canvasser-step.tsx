@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { HiUser, HiPhone, HiUsers } from "react-icons/hi";
+import { HiUser, HiPhone, HiUsers, HiCheckCircle } from "react-icons/hi";
 import { Users } from "lucide-react";
 import { motion } from "motion/react";
 import type { UseFormReturn } from "react-hook-form";
@@ -12,8 +12,10 @@ import {
   type ComboboxSelectOption,
 } from "@/components/ui/combobox-select";
 import { Separator } from "@/components/ui/separator";
+import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { RegistrationStepHeader } from "@/components/collect/registration-step-header";
 import {
+  CollectMobilePrivacyNote,
   FieldLabel,
   InputIcon,
   FieldError,
@@ -264,7 +266,7 @@ export function CanvasserStep({
             <NavButtons
               onBack={onBack}
               onNext={onNext}
-              nextLabel="Submit Registration"
+              nextLabel="Submit registration"
               isLoading={isSubmitting}
               nextDisabled={nextDisabled}
             />
@@ -273,6 +275,16 @@ export function CanvasserStep({
           </div>
         </StepCard>
       </motion.div>
+
+      <CollectMobilePrivacyNote />
+
+      <TrustIndicators
+        items={[
+          { icon: <HiUsers />, label: "REFERRAL_FULLY_OPTIONAL" },
+          { icon: <HiPhone />, label: "CANVASS_CONTACT_FIELD" },
+          { icon: <HiCheckCircle />, label: "AUTHORIZED_FIELD_TEAM" },
+        ]}
+      />
     </div>
   );
 }

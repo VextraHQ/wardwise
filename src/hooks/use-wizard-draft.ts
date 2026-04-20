@@ -54,8 +54,8 @@ export interface UseWizardDraftResult {
  * - Clears the draft automatically when values stop being meaningful
  *
  * Designed to be agnostic of the form schema, so the same hook can power any
- * admin multi-step RHF flow (today: create candidate with
- * `wardwise:create-candidate:draft:v1`; tomorrow: e.g. campaign wizard) without
+ * admin multi-step RHF flow (create candidate: `wardwise:create-candidate:draft:v1`;
+ * new campaign: `wardwise:campaign-wizard:draft:v1`) without
  * renaming. A candidate-specific name would mislead once a second consumer
  * exists — keep domain in `storageKey` + `isMeaningful`, not in the hook name.
  *

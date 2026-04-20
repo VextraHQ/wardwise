@@ -35,6 +35,7 @@ import { formatRole } from "@/lib/collect/reporting";
 import { InsightsExportMenu } from "./insights-export-menu";
 import { formatGeoDisplayName } from "@/lib/geo/display";
 import { useCampaignReportSubmissions } from "@/hooks/use-campaign-report";
+import { useIsPortraitMobile } from "@/hooks/use-mobile";
 import { SubmissionStatusBadge } from "./insights-helpers";
 import type { CampaignReportSubmission } from "@/types/campaign-report";
 
@@ -74,14 +75,14 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <h4 className="text-foreground font-mono text-[10px] font-bold tracking-widest whitespace-nowrap uppercase">
+    <div className="min-w-0 space-y-4">
+      <div className="flex min-w-0 items-center gap-2">
+        <h4 className="text-foreground max-w-[85%] font-mono text-[10px] font-bold tracking-widest uppercase sm:max-w-none sm:whitespace-nowrap">
           {label}
         </h4>
-        <div className="bg-border/70 h-px flex-1" />
+        <div className="bg-border/70 h-px min-w-0 flex-1" />
       </div>
-      <div className="grid gap-2.5">{children}</div>
+      <div className="grid min-w-0 gap-2.5">{children}</div>
     </div>
   );
 }
@@ -96,12 +97,12 @@ function Field({
   mono?: boolean;
 }) {
   return (
-    <div className="flex items-baseline justify-between gap-4">
-      <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+    <div className="flex min-w-0 items-start justify-between gap-3">
+      <span className="text-muted-foreground max-w-[46%] shrink-0 text-[10px] font-bold tracking-widest uppercase sm:max-w-[40%]">
         {label}
       </span>
       <span
-        className={`text-foreground text-right text-sm font-bold ${mono ? "font-mono text-xs tabular-nums" : ""}`}
+        className={`text-foreground min-w-0 flex-1 text-right text-sm font-bold wrap-anywhere ${mono ? "font-mono text-xs break-all tabular-nums" : "wrap-break-word"}`}
       >
         {value}
       </span>
@@ -110,6 +111,7 @@ function Field({
 }
 
 export function InsightsSupporters({ token }: { token: string }) {
+  const isPortraitMobile = useIsPortraitMobile();
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -459,20 +461,23 @@ export function InsightsSupporters({ token }: { token: string }) {
         open={!!selectedSubmission}
         onOpenChange={(open) => !open && setSelectedSubmission(null)}
       >
-        <SheetContent className="flex flex-col gap-0 p-0 sm:max-w-md">
+        <SheetContent
+          side={isPortraitMobile ? "bottom" : "right"}
+          className="flex min-w-0 flex-col gap-0 overflow-x-hidden p-0 sm:max-w-md"
+        >
           <div className="bg-muted/10 border-b">
-            <SheetHeader className="space-y-1">
-              <SheetTitle className="text-lg font-extrabold tracking-tight sm:text-xl">
+            <SheetHeader className="min-w-0 space-y-1">
+              <SheetTitle className="min-w-0 text-lg font-extrabold tracking-tight wrap-break-word sm:text-xl">
                 {selectedSubmission?.fullName}
               </SheetTitle>
-              <div className="flex items-center gap-2">
-                <code className="text-muted-foreground/80 bg-muted/60 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <code className="text-muted-foreground/80 bg-muted/60 max-w-full rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold break-all">
                   {selectedSubmission?.phone}
                 </code>
                 {selectedSubmission?.role && (
                   <Badge
                     variant="outline"
-                    className="bg-primary/5 border-primary/20 text-primary rounded-sm px-1.5 py-0 font-mono text-[9px] font-bold tracking-widest uppercase"
+                    className="bg-primary/5 border-primary/20 text-primary shrink-0 rounded-sm px-1.5 py-0 font-mono text-[9px] font-bold tracking-widest uppercase"
                   >
                     {formatRole(selectedSubmission.role)}
                   </Badge>
@@ -481,9 +486,9 @@ export function InsightsSupporters({ token }: { token: string }) {
             </SheetHeader>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-5">
+          <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain p-5">
             {selectedSubmission && (
-              <div className="space-y-6">
+              <div className="min-w-0 space-y-6">
                 <Section label="Personal Details">
                   <Field
                     label="Email"
@@ -559,7 +564,7 @@ export function InsightsSupporters({ token }: { token: string }) {
           </div>
 
           {selectedSubmission && (
-            <div className="border-t p-4">
+            <div className="bg-background shrink-0 border-t p-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
               <Button
                 size="sm"
                 variant="outline"

@@ -5,7 +5,6 @@ import {
   HiPhone,
   HiMail,
   HiUserCircle,
-  HiCheckCircle,
   HiShieldCheck,
 } from "react-icons/hi";
 import { FaMale, FaFemale } from "react-icons/fa";
@@ -23,8 +22,10 @@ import {
 import { RegistrationStepHeader } from "@/components/collect/registration-step-header";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import {
+  CollectMobilePrivacyNote,
   SectionLabel,
   FieldLabel,
+  FieldHint,
   InputIcon,
   FieldError,
   NavButtons,
@@ -171,7 +172,7 @@ export function PersonalDetailsStep({
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <FieldLabel>Phone Number</FieldLabel>
                   <div className="relative">
                     <InputIcon>
@@ -186,10 +187,16 @@ export function PersonalDetailsStep({
                       className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-mono font-medium tracking-wider transition-all placeholder:text-xs"
                     />
                   </div>
-                  <FieldError error={errors.phone?.message} />
+                  <div className="flex flex-col gap-2.5 pt-0.5">
+                    <FieldError error={errors.phone?.message} />
+                    <FieldHint>
+                      We use this to verify your registration and contact you if
+                      needed.
+                    </FieldHint>
+                  </div>
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <FieldLabel optional>Email Address</FieldLabel>
                   <div className="relative">
                     <InputIcon>
@@ -203,7 +210,12 @@ export function PersonalDetailsStep({
                       className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-medium transition-all placeholder:text-xs"
                     />
                   </div>
-                  <FieldError error={errors.email?.message} />
+                  <div className="flex flex-col gap-2.5 pt-0.5">
+                    <FieldError error={errors.email?.message} />
+                    <FieldHint>
+                      Optional. Helps if we can&apos;t reach you by phone.
+                    </FieldHint>
+                  </div>
                 </div>
               </div>
             </div>
@@ -379,11 +391,13 @@ export function PersonalDetailsStep({
         </StepCard>
       </motion.div>
 
+      <CollectMobilePrivacyNote />
+
       <TrustIndicators
         items={[
-          { icon: <HiUser />, label: "DATA_PRIVACY" },
-          { icon: <HiShieldCheck />, label: "SECURE_ENCRYPTION" },
-          { icon: <HiCheckCircle />, label: "VERIFIED_CAMPAIGN" },
+          { icon: <HiUserCircle />, label: "YOUR_PROFILE_PRIVATE" },
+          { icon: <HiShieldCheck />, label: "SESSION_TLS_PROTECTED" },
+          { icon: <HiMail />, label: "YOU_CONTROL_CONTACTS" },
         ]}
       />
     </div>

@@ -8,58 +8,60 @@ import {
   type SubmissionFilters,
 } from "@/lib/exports/submissions";
 
-const bulkActionSchema = z.object({
-  ids: z.array(z.string()).max(500).optional(),
-  campaignId: z.string().optional(),
-  action: z.enum(["verify", "unverify", "flag", "unflag", "delete"]),
-  scope: z.enum(["selected", "filtered"]).default("selected"),
-  filters: z
-    .object({
-      search: z.string().optional(),
-      lgaId: z.number().int().optional(),
-      wardId: z.number().int().optional(),
-      role: z.string().optional(),
-      isFlagged: z.boolean().optional(),
-      isVerified: z.boolean().optional(),
-      canvasserName: z.string().optional(),
-      canvasserPhone: z.string().optional(),
-    })
-    .optional(),
-}).superRefine((value, ctx) => {
-  if (value.scope === "selected" && (!value.ids || value.ids.length === 0)) {
-    ctx.addIssue({
-      code: "custom",
-      path: ["ids"],
-      message: "Select at least one submission.",
-    });
-  }
-  if (value.scope === "filtered" && !value.campaignId) {
-    ctx.addIssue({
-      code: "custom",
-      path: ["campaignId"],
-      message: "Campaign is required for filtered bulk actions.",
-    });
-  }
-  if (value.scope === "filtered" && value.action === "delete") {
-    ctx.addIssue({
-      code: "custom",
-      path: ["action"],
-      message: "Filtered delete is not supported.",
-    });
-  }
-  if (value.scope === "filtered") {
-    const hasActiveFilter = Object.values(value.filters ?? {}).some(
-      (filterValue) => filterValue !== undefined && filterValue !== "",
-    );
-    if (!hasActiveFilter) {
+const bulkActionSchema = z
+  .object({
+    ids: z.array(z.string()).max(500).optional(),
+    campaignId: z.string().optional(),
+    action: z.enum(["verify", "unverify", "flag", "unflag", "delete"]),
+    scope: z.enum(["selected", "filtered"]).default("selected"),
+    filters: z
+      .object({
+        search: z.string().optional(),
+        lgaId: z.number().int().optional(),
+        wardId: z.number().int().optional(),
+        role: z.string().optional(),
+        isFlagged: z.boolean().optional(),
+        isVerified: z.boolean().optional(),
+        canvasserName: z.string().optional(),
+        canvasserPhone: z.string().optional(),
+      })
+      .optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.scope === "selected" && (!value.ids || value.ids.length === 0)) {
       ctx.addIssue({
         code: "custom",
-        path: ["filters"],
-        message: "Filtered bulk actions require at least one active filter.",
+        path: ["ids"],
+        message: "Select at least one submission.",
       });
     }
-  }
-});
+    if (value.scope === "filtered" && !value.campaignId) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["campaignId"],
+        message: "Campaign is required for filtered bulk actions.",
+      });
+    }
+    if (value.scope === "filtered" && value.action === "delete") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["action"],
+        message: "Filtered delete is not supported.",
+      });
+    }
+    if (value.scope === "filtered") {
+      const hasActiveFilter = Object.values(value.filters ?? {}).some(
+        (filterValue) => filterValue !== undefined && filterValue !== "",
+      );
+      if (!hasActiveFilter) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["filters"],
+          message: "Filtered bulk actions require at least one active filter.",
+        });
+      }
+    }
+  });
 
 function getAuditAction(action: string) {
   return action === "verify"

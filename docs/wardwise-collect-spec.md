@@ -61,8 +61,8 @@
 - **Public LGA API**: 3-branch scope logic — national (all seeded LGAs), state (all LGAs in candidate's state), constituency (only `enabledLgaIds`).
 - **Bug fix**: Constituency-scoped campaigns now correctly return only enabled LGAs (not all state LGAs).
 - **Candidate-driven geo scope**: Constituency, constituency type, candidate name, and party are now derived server-side from the candidate — no longer editable in the campaign wizard.
-- **2-step campaign wizard**: Step 1 = candidate + slug + read-only scope summary (inherited from candidate). Step 2 = questions + review. Old 3-step flow with manual constituency/LGA entry removed.
-- **Restrict toggle**: Optional "Restrict to part of constituency" in step 1 lets admin deselect LGAs from the inherited set. Must keep at least one LGA selected.
+- **3-step campaign wizard**: Step 1 = candidate + slug + branding (read-only scope summary inherited from candidate). Step 2 = **Collect configuration** — custom questions (room for more / prebuilt later) + optional LGA restrict. Step 3 = **Review & create** — summary card with section-level **Edit** (same pattern as create-candidate review) + Create Campaign. Draft key `wardwise:campaign-wizard:draft:v2` (bumped when moving from two steps to three so old drafts are not mis-applied).
+- **Restrict toggle**: Optional "Restrict to part of constituency" in **collect configuration (step 2)** lets admin deselect LGAs from the inherited set. Must keep at least one LGA selected when restriction is on.
 - **Campaign boundary guard**: Campaign create/update API validates `enabledLgaIds` is a subset of the candidate's `constituencyLgaIds`. Constituency positions with empty `constituencyLgaIds` return 400.
 - **PATCH guard**: Campaign update rejects LGAs outside the candidate boundary; blocks activating when another active campaign exists.
 
@@ -326,7 +326,20 @@ src/components/admin/collect/
   campaign-canvassers.tsx
   campaign-settings.tsx
   campaign-wizard.tsx
+  step-candidate-setup.tsx            — step 1: candidate + slug + branding
+  step-campaign-collect-config.tsx    — step 2: questions + LGA restrict
+  step-campaign-review.tsx            — step 3: read-only summary + Edit + create
 ```
+
+**New Campaign wizard (`campaign-wizard.tsx`) — draft autosave**
+
+- Uses the shared `useWizardDraft` hook (`src/hooks/use-wizard-draft.ts`) with storage key `wardwise:campaign-wizard:draft:v2`, `defaultValues` aligned to `createCampaignSchema`, and `isMeaningfulCampaignDraft` so empty shells are not restored.
+- Debounced (400ms) writes, 24h TTL, restore-on-mount including **wizard step** (resume on step 2 or 3 if that was saved).
+- `StepProgress` receives `stepSubtitles` from `useWatch` for the same recap pattern as create-candidate.
+- **Draft restored** banner + **Discard** (clears storage + resets form + step 0), matching the create-candidate UX.
+- Successful create calls `clear()` only (storage wipe; form already navigates away).
+- `?candidateId=` URL preselect still runs when candidates load, but **skips if `candidateId` is already set** (e.g. from a restored draft) so draft and deep-link compose safely.
+- Analytics: `admin_campaign_wizard_draft_restored`, `admin_campaign_wizard_draft_discarded`.
 
 ### Admin Support Workflow
 
