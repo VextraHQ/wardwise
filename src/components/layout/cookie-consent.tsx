@@ -66,6 +66,25 @@ export function CookieSettingsButton({
   );
 }
 
+export function FooterCookieSettingsButton({
+  label = "Cookie settings",
+  className,
+  ...props
+}: CookieSettingsButtonProps) {
+  return (
+    <CookieSettingsButton
+      label={label}
+      variant="ghost"
+      size="sm"
+      className={cn(
+        "text-muted-foreground hover:text-primary h-auto rounded-sm px-2 py-1.5 text-[11px] font-semibold sm:px-1 sm:py-0.5",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
 export function CookieConsentBanner() {
   const [consent, setConsent] = useState<ConsentValue>(null);
   const [showBanner, setShowBanner] = useState(false);

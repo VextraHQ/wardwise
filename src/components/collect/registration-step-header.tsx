@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 interface RegistrationStepHeaderProps {
   icon: React.ElementType | React.ReactNode;
   badge?: string;
+  /** Applied to the badge label text (e.g. amber for pending-upload state). */
+  badgeClassName?: string;
   title: string;
   description: string;
   className?: string;
@@ -30,6 +32,7 @@ function renderIcon(
 export function RegistrationStepHeader({
   icon: Icon,
   badge,
+  badgeClassName,
   title,
   description,
   className,
@@ -48,7 +51,12 @@ export function RegistrationStepHeader({
               {renderIcon(Icon)}
             </div>
             <div className="flex flex-col text-left">
-              <p className="text-foreground text-[10px] font-black tracking-widest uppercase">
+              <p
+                className={cn(
+                  "text-foreground text-[10px] font-black tracking-widest uppercase",
+                  badgeClassName,
+                )}
+              >
                 {badge}
               </p>
             </div>

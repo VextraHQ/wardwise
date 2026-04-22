@@ -12,9 +12,9 @@ import { heroSupportingCopy } from "@/lib/landing-data";
 import { cn } from "@/lib/utils";
 
 const benefitPoints = [
-  "Monitor campaign metrics with ward-level precision",
-  "Candidates drive strategy with real-time field data",
-  "Every canvasser interaction tracked to your dashboard",
+  "See where you are winning wards, and where to invest next",
+  "Align candidates, managers, and canvassers around the same numbers",
+  "Field activity shows up in your view as it happens, not days later",
 ];
 
 export function HeroSection() {
@@ -56,11 +56,11 @@ export function HeroSection() {
             >
               <div className="border-primary/40 flex items-center gap-3 border-l-2 pl-4">
                 <span className="text-primary text-[10px] font-black tracking-[0.4em] uppercase">
-                  Campaign Intelligence
+                  Ward-level intelligence
                 </span>
                 <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
-                <span className="text-muted-foreground/50 font-mono text-[9px] font-bold tracking-widest uppercase">
-                  STAGED_SYNC_V1
+                <span className="text-muted-foreground/50 text-[9px] font-bold tracking-widest uppercase">
+                  From the ground up
                 </span>
               </div>
             </motion.div>
@@ -115,7 +115,7 @@ export function HeroSection() {
               <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
                 <Button
                   size="lg"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 h-13 min-w-[200px] rounded-xl px-10 text-base font-black transition-all duration-300"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 h-13 min-w-[200px] rounded-sm px-10 text-base font-black transition-all duration-300"
                   asChild
                 >
                   <Link
@@ -128,25 +128,25 @@ export function HeroSection() {
                 </Button>
 
                 {status === "loading" ? (
-                  <div className="border-border bg-muted/10 flex h-13 w-full min-w-[200px] cursor-wait items-center justify-center gap-3 rounded-xl border px-6 transition-all duration-300 sm:w-auto">
+                  <div className="border-border bg-muted/10 flex h-13 w-full min-w-[200px] cursor-wait items-center justify-center gap-3 rounded-sm border px-6 transition-all duration-300 sm:w-auto">
                     <div className="flex flex-col items-start leading-none opacity-50">
                       <span className="text-muted-foreground mb-1 flex items-center gap-1.5 text-[8px] font-black tracking-widest uppercase">
                         <div className="bg-primary/70 size-1.5 animate-pulse rounded-full" />
-                        System Check
+                        Campaign portal
                       </span>
                       <span className="text-foreground text-sm font-bold">
-                        Authenticating...
+                        Signing you in…
                       </span>
                     </div>
                   </div>
                 ) : (
                   <Link
                     href={loginHref}
-                    className="group border-border bg-muted/30 hover:bg-muted/50 flex h-13 items-center justify-center gap-3 rounded-xl border px-6 transition-all duration-300"
+                    className="group border-border bg-muted/30 hover:bg-muted/50 flex h-13 items-center justify-center gap-3 rounded-sm border px-6 transition-all duration-300"
                   >
                     <div className="flex flex-col items-start leading-none">
                       <span className="text-muted-foreground mb-1 text-[8px] font-black tracking-widest uppercase">
-                        Existing System?
+                        Already on WardWise?
                       </span>
                       <span className="text-foreground text-sm font-bold">
                         {loginText}
@@ -162,23 +162,25 @@ export function HeroSection() {
             <div className="border-border/60 flex flex-wrap items-center gap-8 border-t pt-8">
               <div className="flex flex-col gap-1.5">
                 <span className="text-muted-foreground text-[10px] font-black tracking-[0.2em] uppercase">
-                  Platform Foundation
+                  Built for the trail
                 </span>
                 <span className="text-foreground text-xs font-bold">
-                  WardWise Strategic V1.0
+                  From ward teams to state strategy
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-5">
-                {["Encrypted Data", "Real-Time Sync", "Field-Optimized"].map(
-                  (item) => (
-                    <div key={item} className="flex items-center gap-2.5">
-                      <div className="size-1.5 rounded-full bg-orange-500" />
-                      <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
-                        {item}
-                      </span>
-                    </div>
-                  ),
-                )}
+                {[
+                  "Secure field records",
+                  "Same-day ground picture",
+                  "Tough on weak signal",
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-2.5">
+                    <div className="size-1.5 rounded-full bg-orange-500" />
+                    <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                      {item}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

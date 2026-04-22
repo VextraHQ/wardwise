@@ -3,7 +3,7 @@
 import { Header } from "@/components/layout/header";
 import type { PublicCampaign } from "@/types/collect";
 import { getEffectiveCampaignName } from "@/lib/collect/branding";
-import { CollectFooter } from "@/components/collect/collect-footer";
+import { AppFooter } from "@/components/layout/app-footer";
 
 export function FormShell({
   children,
@@ -23,7 +23,7 @@ export function FormShell({
           {children}
         </div>
 
-        <CollectFooter />
+        <AppFooter />
       </div>
     </div>
   );

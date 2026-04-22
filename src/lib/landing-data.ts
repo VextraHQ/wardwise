@@ -180,14 +180,14 @@ export const nigeriaGradient =
 export const heroBackgroundGradient =
   "bg-[linear-gradient(140deg,_#F5F5ED_0%,_#ffffff_55%,_#F5F5ED_100%)]";
 
-export const heroPlaceholder = {
-  imageUrl:
-    "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=900&q=80",
-  alt: "Illustration of data points across Nigeria",
-};
+// export const heroPlaceholder = {
+//   imageUrl:
+//     "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=900&q=80",
+//   alt: "Illustration of data points across Nigeria",
+// };
 
 export const heroSupportingCopy =
-  "Empowering canvassers and candidates with ward-level precision. From field-verified data to strategic victory, WardWise is Nigeria's premier campaign intelligence platform.";
+  "Give your campaign a clear picture of every ward, polling unit, and field team. WardWise helps candidates and organizers move from ground truth to better decisions, without drowning in spreadsheets.";
 
 export type EcosystemRole = {
   role: string;

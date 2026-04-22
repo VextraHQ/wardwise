@@ -14,12 +14,17 @@ type AnalyticsEventName =
   | "collect_step_viewed"
   | "collect_validation_failed"
   | "collect_flow_abandoned"
+  | "collect_confirmation_viewed"
   | "collect_submit_slow"
   | "collect_submission_queued_offline"
   | "collect_sync_requested"
   | "collect_sync_completed"
   | "collect_submission_succeeded"
   | "collect_submission_failed"
+  | "collect_failed_notice_dismissed"
+  | "collect_failed_review_opened"
+  | "collect_failed_record_dismissed"
+  | "collect_failed_active_rehydrated"
   | "admin_candidate_created"
   | "admin_candidate_creation_failed"
   | "admin_candidate_wizard_step_changed"
@@ -206,4 +211,34 @@ export function resetAnalyticsIdentity() {
     posthog.clear_opt_in_out_capturing();
     posthog.opt_in_capturing({ captureEventName: false });
   }
+}
+
+/** Buckets server/offline error messages for analytics (no PII). */
+export function getCollectErrorCategory(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("already registered") ||
+    normalized.includes("duplicate")
+  ) {
+    return "duplicate";
+  }
+
+  if (normalized.includes("validation")) {
+    return "validation";
+  }
+
+  if (normalized.includes("too many requests")) {
+    return "rate_limited";
+  }
+
+  if (
+    normalized.includes("paused") ||
+    normalized.includes("closed") ||
+    normalized.includes("forbidden")
+  ) {
+    return "campaign_unavailable";
+  }
+
+  return "unknown";
 }

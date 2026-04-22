@@ -1,10 +1,12 @@
-import { COMPANY_INFO } from "@/lib/data/legal-data";
+"use client";
+
 import Link from "next/link";
 import { HiMail } from "react-icons/hi";
 import { HiArrowUpRight } from "react-icons/hi2";
-import { CookieSettingsButton } from "@/components/layout/cookie-consent";
+import { FooterCookieSettingsButton } from "@/components/layout/cookie-consent";
+import { COMPANY_INFO } from "@/lib/data/legal-data";
 
-export function CollectFooter() {
+export function AppFooter() {
   return (
     <footer className="border-border/40 relative border-t">
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-10">
@@ -65,11 +67,7 @@ export function CollectFooter() {
               <span className="text-muted-foreground/35 hidden px-0.5 select-none sm:inline sm:px-1">
                 ·
               </span>
-              <CookieSettingsButton
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-primary h-auto rounded-sm px-2 py-1.5 text-[11px] font-semibold sm:px-1 sm:py-0.5"
-              />
+              <FooterCookieSettingsButton />
             </nav>
           </div>
 

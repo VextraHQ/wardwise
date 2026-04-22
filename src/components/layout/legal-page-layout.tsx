@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
-import { HiClock, HiMail } from "react-icons/hi";
-import { HiArrowUpRight } from "react-icons/hi2";
+import { HiClock } from "react-icons/hi";
 import { Header } from "@/components/layout/header";
-import { CookieSettingsButton } from "@/components/layout/cookie-consent";
+import { LegalFooter } from "@/components/legal/legal-footer";
 import {
   COMPANY_INFO,
   legalNavigation,
@@ -17,7 +16,6 @@ import type { LegalSection } from "@/lib/data/legal-data";
 import { cn } from "@/lib/utils";
 import type { IconType } from "react-icons";
 import type { LucideIcon } from "lucide-react";
-import { Logo } from "@/components/layout/logo";
 
 /**
  * LegalPageLayout - Shared layout component for legal and support pages.
@@ -161,133 +159,7 @@ export function LegalPageLayout({
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-border/40 mt-12 border-t py-10 print:hidden">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          {/* Main footer content */}
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-            {/* Brand section */}
-            <div className="max-w-xs space-y-3">
-              <Logo size="md" />
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                Nigeria&apos;s leading civic intelligence platform for
-                ward-level accuracy.
-              </p>
-            </div>
-
-            {/* Links */}
-            <div className="grid grid-cols-2 gap-8 text-sm sm:grid-cols-3">
-              {/* Legal */}
-              <div className="space-y-3">
-                <h4 className="text-foreground text-[11px] font-black tracking-[0.15em] uppercase">
-                  Legal
-                </h4>
-                <ul className="space-y-2">
-                  {legalNavigation.slice(0, 3).map((item) => (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        className={cn(
-                          "text-muted-foreground hover:text-primary font-medium transition-colors",
-                          pathname === item.href && "text-primary",
-                        )}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Support */}
-              <div className="space-y-3">
-                <h4 className="text-foreground text-[11px] font-black tracking-[0.15em] uppercase">
-                  Support
-                </h4>
-                <ul className="space-y-2">
-                  {legalNavigation.slice(3).map((item) => (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        className={cn(
-                          "text-muted-foreground hover:text-primary font-medium transition-colors",
-                          pathname === item.href && "text-primary",
-                        )}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Quick Links */}
-              <div className="space-y-3">
-                <h4 className="text-foreground text-[11px] font-black tracking-[0.15em] uppercase">
-                  Navigate
-                </h4>
-                <ul className="space-y-2">
-                  <li>
-                    <Link
-                      href="/"
-                      className="text-muted-foreground hover:text-primary font-medium transition-colors"
-                    >
-                      Home
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/contact"
-                      className="text-muted-foreground hover:text-primary font-medium transition-colors"
-                    >
-                      Request a Demo
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom bar */}
-          <div className="border-border/40 mt-8 flex flex-col items-center justify-between gap-4 border-t pt-6 sm:flex-row">
-            <div className="flex flex-col items-center gap-1 sm:flex-row sm:gap-3">
-              <p className="text-muted-foreground text-xs font-semibold tracking-wide">
-                © {new Date().getFullYear()} {COMPANY_INFO.name}. All rights
-                reserved.
-              </p>
-              <span className="text-muted-foreground/40 hidden sm:inline">
-                ·
-              </span>
-              <p className="text-muted-foreground/70 font-mono text-[10px]">
-                A Product of{" "}
-                <Link
-                  href={COMPANY_INFO.companyWebsite}
-                  className="text-primary hover:text-primary/80 font-medium transition-colors duration-200 hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {COMPANY_INFO.legalName}
-                </Link>
-              </p>
-            </div>
-            <div className="flex flex-col items-center gap-2 sm:flex-row">
-              <CookieSettingsButton
-                variant="outline"
-                size="sm"
-                className="border-border/60 bg-background/50 hover:border-primary/50 hover:bg-primary/5 text-xs"
-              />
-              <Link
-                href={`mailto:${COMPANY_INFO.supportEmail}`}
-                className="group border-border/60 bg-background/50 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary flex items-center gap-2 rounded-sm border px-4 py-2 transition-all"
-              >
-                <HiMail className="size-4" />
-                <span className="text-xs font-medium">Get in Touch</span>
-                <HiArrowUpRight className="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <LegalFooter pathname={pathname} />
     </div>
   );
 }

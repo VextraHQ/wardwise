@@ -60,7 +60,7 @@ export function Header({
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 className={cn(
-                  "hidden items-center gap-1.5 rounded-xl border px-4 py-2 sm:flex",
+                  "hidden items-center gap-1.5 rounded-sm border px-4 py-2 sm:flex",
                   styles.badge,
                 )}
               >

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { HiMail } from "react-icons/hi";
 import { HiArrowUpRight } from "react-icons/hi2";
 import { Logo } from "@/components/layout/logo";
-import { CookieSettingsButton } from "@/components/layout/cookie-consent";
+import { FooterCookieSettingsButton } from "@/components/layout/cookie-consent";
 import { Button } from "@/components/ui/button";
 import { legalNavigation, COMPANY_INFO } from "@/lib/data/legal-data";
 
@@ -123,11 +123,7 @@ export function SiteFooter() {
               </Link>
             </p>
             <span className="text-muted-foreground/40 hidden sm:inline">·</span>
-            <CookieSettingsButton
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-primary h-auto rounded-none px-0 text-[11px] font-semibold"
-            />
+            <FooterCookieSettingsButton className="rounded-sm px-0" />
           </div>
           <Link
             href="/contact"

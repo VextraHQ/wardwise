@@ -1,7 +1,7 @@
 # WardWise Collect v2 — Feature Roadmap Spec
 
 > Living document. Update as features are built or priorities shift.
-> Last updated: 2026-04-19
+> Last updated: 2026-04-21
 > See also: `wardwise-collect-spec.md` (v1), `wardwise-hardening-spec.md`, `collect-admin-export-plan.md`
 
 ## Status
@@ -10,6 +10,7 @@
 - **Collect v2 features complete** — merged to `develop`, hardened via v2.1 pass (see below)
 - **v2.1 hardening pass complete** — offline queue, cache invalidation, bulk audit, UI polish
 - **v2.2 post-submission polish complete** — OpenGraph, returning visitor recognition, reference IDs, form UX audit fixes
+- **v2.7 offline queue UX complete** — queued/confirmed/failed confirmation states, failed review sheet, and reload rehydration
 
 ---
 
@@ -138,9 +139,12 @@ model CampaignCanvasser {
 **Approach:**
 
 - `src/app/manifest.ts` — Next.js App Router metadata manifest (type-safe, auto-detected)
-- Service worker for caching public form pages
-- IndexedDB-based submission queue, syncs on reconnect
-- Visual sync status indicator on form
+- Service worker scoped to `/c/` for static assets and GET API fallback caching; navigations/HTML stay network-first to avoid stale pages
+- IndexedDB-based submission queue, syncs on reconnect when the Collect page is open
+- Distinct confirmation states for `confirmed`, `queued`, and `failed` submissions
+- Failed review sheet for permanently rejected offline submissions, with per-record dismiss and bulk clear
+- Visual sync, pending, and needs-attention indicators on form
+- Current limitation: geo lookup data (LGAs, wards, polling units) is only available offline after those API responses have already been fetched and cached on that device
 
 ---
 
@@ -153,6 +157,7 @@ model CampaignCanvasser {
 - **Submission lag warning** — "No submissions in 48h" auto-alert on active campaigns
 - **Template custom questions** — Library of pre-made question sets to copy between campaigns (admin **Collect setup** step 2 is structured to absorb more fields / presets without another full wizard redesign)
 - **Geographic heatmap** — Map visualization of submission density by ward/LGA
+- **Offline geo catalogue preload** — Let field teams open a campaign while online and cache the campaign's LGA/ward/polling-unit catalogue for later offline starts. This should be scoped separately from submission queueing because it changes read-side caching and stale-data rules.
 
 ---
 
@@ -181,7 +186,7 @@ These were fixed in the `fix/collect-hardening` branch:
 
 Post-merge polish and Codex-identified bug fixes applied on `develop`:
 
-- [x] **Offline queue permanent failures** — 4xx responses now removed from IndexedDB queue, surfaced as toasts on reconnect
+- [x] **Offline queue permanent failures** — Superseded by v2.7: 4xx responses are retained locally as failed rows, surfaced in the form, and excluded from retry until dismissed
 - [x] **Date range end-of-day** — `to` date now includes `T23:59:59.999Z` so same-day ranges work correctly
 - [x] **Bulk audit trail** — Bulk verify/flag/unflag now creates per-submission `SubmissionAuditEntry` records
 - [x] **Cache invalidation** — `campaign-stats`, `campaign-canvassers`, and `submission-audit` queries invalidated after all mutations
@@ -305,6 +310,24 @@ UX audit and post-submission improvements for the public registration form:
 - [x] **Admin New Campaign wizard — 3 steps** — `Select Candidate` → **Collect setup** (custom questions + optional LGA restrict; headroom for more / prebuilt question sets) → **Review & create** (summary card with section-level **Edit**, same pattern as create-candidate review). Files: `campaign-wizard.tsx`, `step-campaign-collect-config.tsx`, `step-campaign-review.tsx` (replaces the old combined questions+review step).
 - [x] **Campaign draft persistence** — `useWizardDraft` with key `wardwise:campaign-wizard:draft:v2` (version bump invalidates prior 2-step drafts), restore banner + Discard, `clear()` on successful create. See `wardwise-collect-spec.md` for full detail.
 - [x] **Public `/c/[slug]` Party Information step** — Renders the same footer **TrustIndicators** strip as Personal Details and Location (`DATA_PRIVACY`, `SECURE_ENCRYPTION`, `VERIFIED_CAMPAIGN`) so identity-heavy steps feel consistent.
+
+---
+
+## Completed v2.7 — Offline Queue Confirmation + Failed Review (2026-04-21)
+
+- [x] **Queued confirmation is distinct from confirmed success** — Offline submits now show an amber `Pending Upload` confirmation instead of the green `Registration Complete` receipt. Queued state hides reference codes, share actions, and confetti until the server accepts the record.
+- [x] **Queued to confirmed flip** — When a queued submission syncs successfully, the UI can flip to the confirmed state with the real `WW-XXXXXXXX` reference because the sync result carries the server `submissionId` and count.
+- [x] **Failed records stay visible** — Permanent 4xx sync failures are no longer deleted from IndexedDB. Rows are marked `status: "failed"` with `lastError` and `failedAt`, excluded from future retries, and counted separately from pending uploads.
+- [x] **Failed confirmation state** — The active queued confirmation flips to a red `Needs Attention` / `Upload Failed` state when that record is rejected. It shows the server error and avoids any "complete", "verified", or "uploaded" language.
+- [x] **Persistent failed banner** — A destructive banner appears whenever `failedCount > 0`, so missed toasts no longer hide rejected offline records.
+- [x] **Failed review sheet** — The banner's `Review` action opens a sheet listing failed rows newest-first with registrant name when available, rejection time, server error, per-record `Dismiss`, and bulk `Clear all failed notices`.
+- [x] **Active failed rehydration** — The form stores a slug-scoped `{ id }` pointer for the active failed row. On reload, if that row still exists, the user returns to the red failed confirmation with the current `lastError`; stale pointers are removed silently.
+- [x] **Analytics** — Added events for confirmation state views, failed notice dismiss, failed review open, failed row dismiss, and active failed rehydrate. Rehydrate/dismiss paths include `error_category`.
+- [x] **Back-compat** — Legacy queue rows without `status` are treated as pending. `TrustIndicators` keeps the old `canvasser` prop while adding explicit variants.
+
+**Files:** `src/lib/offline-queue.ts`, `src/hooks/use-offline.ts`, `src/components/collect/campaign-registration-form.tsx`, `src/components/collect/steps/confirmation-screen.tsx`, `src/components/collect/failed-review-sheet.tsx`, `src/components/ui/trust-indicators.tsx`, `src/lib/analytics/client.ts`
+
+**Deliberately not included:** edit-and-retry from a failed row, background sync with the tab closed, CSV export of failed local rows, IndexedDB indexes on `status`, and user-controlled failed-list filtering.
 
 ---
 

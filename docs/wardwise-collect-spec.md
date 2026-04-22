@@ -96,6 +96,14 @@
 - **Filtered bulk actions are confirmed**: all-matching actions show the count and active filters before applying changes.
 - **Audit trail preserved**: filtered bulk verify/flag/unverify/unflag writes per-submission audit entries and logs the campaign-level bulk action.
 
+### What Changed (Batch 9 — Offline Queue UX)
+
+- **Queued and confirmed states are separated**: offline submits show an amber `Pending Upload` confirmation, while server-accepted submits show the green confirmed receipt with reference code, share actions, and confetti.
+- **Offline queue sync can complete the receipt**: successful queued syncs return the server submission ID/count so the active screen can flip to the confirmed receipt with a real `WW-XXXXXXXX` reference.
+- **Permanent sync failures are retained locally**: 4xx rejections are marked `failed` in IndexedDB with `lastError`/`failedAt` instead of being deleted after a toast.
+- **Failed records are reviewable**: a persistent needs-attention banner opens a failed review sheet with per-record error details, per-record dismiss, and bulk clear.
+- **Active failed screen rehydrates**: if the user refreshes after seeing `Upload Failed`, the form can return to that red confirmation as long as the failed row still exists locally.
+
 ### What Changed (Batch 2)
 
 - **LGA dropdown**: Shows only the campaign's `enabledLgaIds` (inherited from candidate's constituency boundary, or restricted subset).
@@ -188,7 +196,7 @@
 | 3      | Party info: APC/NIN (required) + VIN (required)                                                                                           |
 | 4      | Role: Volunteer / Member / Canvasser (3 cards)                                                                                            |
 | 5      | Canvasser: Yes/No toggle → name + phone if Yes (required when Yes)                                                                        |
-| 6      | Confirmation: animated checkmark, receipt copy, registration reference, New Registration button, share (WhatsApp/SMS/Email/Copy), QR code |
+| 6      | Confirmation: state-aware receipt (`confirmed`, `queued`, or `failed`), registration reference only after server acceptance, New Registration button, share actions only after confirmed |
 
 ### Persistence
 
@@ -198,6 +206,8 @@
 - Instead, same-device completion metadata is stored under `collect-submitted-${slug}` and used only for a subtle `Last registration on this device` utility card with the reference code.
 - Saved progress includes lightweight UI state needed to restore the flow accurately (for example canvasser yes/no choice and occupation input mode).
 - The confirmation screen now also shows a copyable `Registration Reference` and explains that the campaign team will review and verify the registration.
+- Offline submissions are stored in IndexedDB until sync. Pending rows show an amber queued confirmation; successful sync removes the row and can flip to confirmed; permanent 4xx failures remain locally as failed rows for review/dismiss.
+- Active failed confirmations store a slug-scoped local pointer (`collect-active-failed-${slug}`) so reload can return to the same failed row while it still exists.
 
 ### Validation
 
@@ -207,17 +217,22 @@
 
 ### Edge Cases
 
-| Case                     | Behavior                                         |
-| ------------------------ | ------------------------------------------------ |
-| Invalid/missing slug     | `notFound()`                                     |
-| Draft campaign           | `notFound()`                                     |
-| Paused campaign          | Static "Registration Paused" message             |
-| Closed campaign          | Static "Registration Closed" message             |
-| Duplicate phone          | 409 → "Already Registered" error box             |
-| Duplicate VIN            | 409 → "Already Registered" error box             |
-| Missing canvasser Yes/No | Submit button stays disabled on canvasser step   |
-| Invalid submit payload   | 400 → first field-level validation message shown |
-| Network error            | Error displayed, localStorage preserves progress |
+| Case                              | Behavior                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------ |
+| Invalid/missing slug              | `notFound()`                                                                               |
+| Draft campaign                    | `notFound()`                                                                               |
+| Paused campaign                   | Static "Registration Paused" message                                                       |
+| Closed campaign                   | Static "Registration Closed" message                                                       |
+| Duplicate phone                   | 409 → "Already Registered" error box                                                       |
+| Duplicate VIN                     | 409 → "Already Registered" error box                                                       |
+| Missing canvasser Yes/No          | Submit button stays disabled on canvasser step                                             |
+| Invalid submit payload            | 400 → first field-level validation message shown                                           |
+| Network error during online submit | Error displayed, localStorage preserves progress                                           |
+| Offline submit                    | Submission is queued in IndexedDB and the confirmation shows `Pending Upload`              |
+| Queued sync success               | Row is removed locally; active confirmation flips to confirmed when server receipt is known |
+| Queued sync permanent failure     | Row is marked failed, excluded from retry, and surfaced via failed confirmation/banner      |
+| Failed records on same device     | Banner opens a failed review sheet with errors, per-record dismiss, and bulk clear         |
+| Offline start without cached geo  | Location dropdowns cannot populate until the device has fetched the campaign geo catalogue |
 
 ## Data Model
 
@@ -302,6 +317,7 @@ model PollingUnit {
 ```
 src/components/collect/
   campaign-registration-form.tsx  — orchestrator (form state + screen routing)
+  failed-review-sheet.tsx         — failed offline submission review + dismiss sheet
   form-shell.tsx                  — header, context bar, layout wrapper
   form-ui.tsx                     — shared: FieldLabel, FieldError, InputIcon, NavButtons, StepCard, etc.
   registration-step-header.tsx    — animated step header component
