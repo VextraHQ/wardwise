@@ -36,7 +36,7 @@ export async function generateMetadata({
   }
 
   const campaignName = getEffectiveCampaignName(campaign);
-  const title = `${campaignName} Supporter Registration`;
+  const title = `${campaignName} - Supporter Registration`;
   const description = `Register your support for ${campaignName} in ${campaign.constituency} on WardWise, Nigeria's campaign intelligence platform for supporter mobilisation and field insights.`;
   const url = `${getSiteUrl()}/c/${slug}`;
 
