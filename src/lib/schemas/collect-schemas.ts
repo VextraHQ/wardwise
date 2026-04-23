@@ -1,7 +1,7 @@
 import { z } from "zod";
 import {
+  optionalNigerianPhoneSchema,
   phoneSchema,
-  normalizeNigerianPhoneInput,
 } from "@/lib/schemas/common-schemas";
 import {
   campaignBrandingTypes,
@@ -26,7 +26,7 @@ export const screen1Schema = z.object({
     .string()
     .min(2, "Last name is required")
     .transform((v) => v.trim()),
-  phone: phoneSchema.transform(normalizeNigerianPhoneInput),
+  phone: phoneSchema,
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   sex: z.enum(["male", "female"], { message: "Please select your sex" }),
   age: z
@@ -108,11 +108,7 @@ export const screen5Schema = z.object({
     .transform((v) => v?.trim() || "")
     .optional()
     .or(z.literal("")),
-  canvasserPhone: z
-    .string()
-    .transform((v) => v?.trim() || "")
-    .optional()
-    .or(z.literal("")),
+  canvasserPhone: optionalNigerianPhoneSchema,
 });
 
 // Custom questions
@@ -203,7 +199,7 @@ export const addCampaignCanvasserSchema = z.object({
     .string()
     .min(1, "Name is required")
     .transform((v) => v.trim()),
-  phone: phoneSchema.transform(normalizeNigerianPhoneInput),
+  phone: phoneSchema,
   zone: z
     .string()
     .optional()

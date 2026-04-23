@@ -104,6 +104,14 @@
 - **Failed records are reviewable**: a persistent needs-attention banner opens a failed review sheet with per-record error details, per-record dismiss, and bulk clear.
 - **Active failed screen rehydrates**: if the user refreshes after seeing `Upload Failed`, the form can return to that red confirmation as long as the failed row still exists locally.
 
+### What Changed (Batch 10 — Phone Canonicalization)
+
+- **Shared phone canonicalization**: `phoneSchema` now validates and returns canonical Nigerian mobile numbers in `+234XXXXXXXXXX` format. It accepts common user input forms like `08031234567`, `8031234567`, `2348031234567`, `+2348031234567`, and visually separated values like `0803 123 4567`.
+- **No silent truncation**: overlong or malformed values are rejected instead of being sliced into a valid-looking number.
+- **Optional phone helper**: `optionalNigerianPhoneSchema` preserves empty optional fields but canonicalizes valid values when present. Use it for optional attribution/contact fields.
+- **Collect canvasser attribution fixed for future writes**: public submissions now canonicalize `canvasserPhone` when a referrer is provided, matching the already-canonical supporter `phone` field.
+- **Existing live data left untouched**: this hardening affects future writes only. Historical rows should be handled by a separate dry-run audit/backfill so campaign data is not merged or deleted accidentally.
+
 ### What Changed (Batch 2)
 
 - **LGA dropdown**: Shows only the campaign's `enabledLgaIds` (inherited from candidate's constituency boundary, or restricted subset).

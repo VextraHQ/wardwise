@@ -4,14 +4,11 @@ import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { logAudit } from "@/lib/core/audit";
-import {
-  phoneSchema,
-  normalizeNigerianPhoneInput,
-} from "@/lib/schemas/common-schemas";
+import { phoneSchema } from "@/lib/schemas/common-schemas";
 
 const addCanvasserSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  phone: phoneSchema.transform(normalizeNigerianPhoneInput),
+  phone: phoneSchema,
   zone: z.string().optional(),
 });
 

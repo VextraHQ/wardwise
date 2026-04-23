@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
+import { phoneSchema } from "@/lib/schemas/common-schemas";
 
 // GET /api/admin/canvassers - Get all canvassers with optional filtering
 export async function GET(request: NextRequest) {
@@ -97,6 +98,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const parsedPhone = phoneSchema.safeParse(phone);
+    if (!parsedPhone.success) {
+      return NextResponse.json(
+        {
+          error: parsedPhone.error.issues[0]?.message || "Invalid phone number",
+        },
+        { status: 400 },
+      );
+    }
+
     const existingCanvasser = await prisma.canvasser.findUnique({
       where: { code },
     });
@@ -111,7 +122,7 @@ export async function POST(request: NextRequest) {
       data: {
         code,
         name,
-        phone,
+        phone: parsedPhone.data,
         candidateId,
         ward: ward || null,
         lga: lga || null,

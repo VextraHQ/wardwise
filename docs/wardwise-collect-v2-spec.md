@@ -179,6 +179,7 @@ These were fixed in the `fix/collect-hardening` branch:
 | Server-side analytics                       | Charts wrong after 100 submissions                         |
 | Schema consolidation                        | Dual campaign schemas causing drift and 400 errors         |
 | Dead config removal                         | `requireApcReg`/`requireVoterId` causing confusion         |
+| Canonical phone schema                      | Mixed `080...`/`+234...` phone storage on future writes    |
 
 ---
 
@@ -190,7 +191,7 @@ Post-merge polish and Codex-identified bug fixes applied on `develop`:
 - [x] **Date range end-of-day** — `to` date now includes `T23:59:59.999Z` so same-day ranges work correctly
 - [x] **Bulk audit trail** — Bulk verify/flag/unflag now creates per-submission `SubmissionAuditEntry` records
 - [x] **Cache invalidation** — `campaign-stats`, `campaign-canvassers`, and `submission-audit` queries invalidated after all mutations
-- [x] **Canvasser phone normalization** — Admin canvasser add endpoint uses `phoneSchema.transform(normalizeNigerianPhoneInput)`
+- [x] **Canvasser phone normalization** — Admin and Collect canvasser phone write paths use the shared canonical phone schema
 - [x] **Form header redesign** — Fixed text overlap, removed duplicate candidate name, responsive stacking
 - [x] **Form footer redesign** — Matches landing footer pattern, `/contact` CTA, Vextra branding
 - [x] **Export dropdown indicator** — Chevron icon on export button shows it's a dropdown

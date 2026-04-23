@@ -19,6 +19,7 @@
 - [x] **Geo validation** — Submit verifies pollingUnit → ward → LGA hierarchy
 - [x] **Submission delete context** — Optional `?campaignId` param prevents cross-campaign deletes
 - [x] **Audit logging** — DB table + utility for candidate CRUD, campaign CRUD, password reset, submission delete
+- [x] **Canonical phone schema** — Phone write paths normalize valid Nigerian mobile numbers to `+234XXXXXXXXXX`
 - [x] **Environment template** — `.env.example` with all required vars documented
 
 ---
@@ -45,15 +46,16 @@ Chosen over in-memory because the app deploys to Vercel (serverless — no share
 
 ## Key Files
 
-| File                               | Purpose                                                   |
-| ---------------------------------- | --------------------------------------------------------- |
-| `src/lib/auth/links.ts`            | One-time invite/reset link lifecycle                      |
-| `src/lib/auth/guards.ts`           | Shared auth wrapper layer (`requireAdmin()`, page guards) |
-| `src/proxy.ts`                     | Server-side Edge route protection (Next.js 16 proxy)      |
-| `src/lib/core/rate-limit.ts`       | Upstash rate limiters (submit + split auth flows)         |
-| `src/lib/core/audit.ts`            | `logAudit()` fire-and-forget utility                      |
-| `src/lib/schemas/admin-schemas.ts` | All Zod schemas (candidate, canvasser, campaign)          |
-| `.env.example`                     | Environment variable template                             |
+| File                                | Purpose                                                   |
+| ----------------------------------- | --------------------------------------------------------- |
+| `src/lib/auth/links.ts`             | One-time invite/reset link lifecycle                      |
+| `src/lib/auth/guards.ts`            | Shared auth wrapper layer (`requireAdmin()`, page guards) |
+| `src/proxy.ts`                      | Server-side Edge route protection (Next.js 16 proxy)      |
+| `src/lib/core/rate-limit.ts`        | Upstash rate limiters (submit + split auth flows)         |
+| `src/lib/core/audit.ts`             | `logAudit()` fire-and-forget utility                      |
+| `src/lib/schemas/common-schemas.ts` | Shared email, phone, NIN, and VIN validation helpers      |
+| `src/lib/schemas/admin-schemas.ts`  | All Zod schemas (candidate, canvasser, campaign)          |
+| `.env.example`                      | Environment variable template                             |
 
 ---
 

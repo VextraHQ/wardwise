@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { emailSchema, phoneSchema } from "@/lib/schemas/common-schemas";
+import {
+  emailSchema,
+  optionalNigerianPhoneSchema,
+  phoneSchema,
+} from "@/lib/schemas/common-schemas";
 import { getPositionStateValidationMessage } from "@/lib/geo/constituency";
 
 // Candidate position enum
@@ -53,7 +57,7 @@ export const createCandidateSchema = z
       .max(1000, "Description must not exceed 1000 characters")
       .optional()
       .or(z.literal("")),
-    phone: phoneSchema.optional().or(z.literal("")),
+    phone: optionalNigerianPhoneSchema,
     title: z
       .string()
       .max(50, "Title must not exceed 50 characters")
@@ -135,7 +139,7 @@ export const updateCandidateSchema = z
       .max(1000, "Description must not exceed 1000 characters")
       .optional()
       .or(z.literal("")),
-    phone: phoneSchema.optional().or(z.literal("")),
+    phone: optionalNigerianPhoneSchema,
     title: z
       .string()
       .max(50, "Title must not exceed 50 characters")
@@ -226,7 +230,7 @@ export const updateCanvasserSchema = z.object({
     .max(100, "Full name must not exceed 100 characters")
     .trim()
     .optional(),
-  phone: phoneSchema.optional(),
+  phone: optionalNigerianPhoneSchema,
   candidateId: z.string().min(1, "Please select a candidate").optional(),
   ward: z
     .string()

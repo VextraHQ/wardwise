@@ -12,15 +12,62 @@ export const emailSchema = z
   .min(1, "Email is required")
   .email("Please enter a valid email address");
 
-// Nigerian phone number validation
-// Accepts formats: +2348031234567, 08031234567, 8031234567
-export const phoneSchema = z
+// Nigerian phone number validation and canonicalization.
+// Accepts: +2348031234567, 2348031234567, 08031234567, 8031234567
+// Also accepts spaces, hyphens, dots, and parentheses as visual separators.
+const NIGERIAN_PHONE_ERROR =
+  "Enter a valid Nigerian mobile number (e.g., 08031234567 or +2348031234567)";
+const CANONICAL_NIGERIAN_PHONE_RE = /^\+234[789]\d{9}$/;
+const LOCAL_NIGERIAN_MOBILE_RE = /^[789]\d{9}$/;
+const PHONE_INPUT_CHARS_RE = /^\+?[\d\s().-]+$/;
+
+function canonicalizeNigerianPhoneInput(input: string): string | null {
+  const trimmed = input.trim();
+  if (!trimmed || !PHONE_INPUT_CHARS_RE.test(trimmed)) {
+    return null;
+  }
+
+  const digits = trimmed.replace(/\D/g, "");
+  let localPart: string | null = null;
+
+  if (digits.length === 13 && digits.startsWith("234")) {
+    localPart = digits.slice(3);
+  } else if (digits.length === 11 && digits.startsWith("0")) {
+    localPart = digits.slice(1);
+  } else if (digits.length === 10) {
+    localPart = digits;
+  }
+
+  if (!localPart || !LOCAL_NIGERIAN_MOBILE_RE.test(localPart)) {
+    return null;
+  }
+
+  return `+234${localPart}`;
+}
+
+export const nigerianPhoneSchema = z.string().transform((input, ctx) => {
+  const canonical = canonicalizeNigerianPhoneInput(input);
+  if (!canonical) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: input.trim() ? NIGERIAN_PHONE_ERROR : "Phone number is required",
+    });
+    return "";
+  }
+  return canonical;
+});
+
+// Backward-compatible name used across the app. Successful parses return +234...
+export const phoneSchema = nigerianPhoneSchema;
+
+const emptyPhoneSchema = z
   .string()
-  .min(1, "Phone number is required")
-  .regex(
-    /^(\+234|0)?(7\d{2}|8\d{2}|9\d{2})\d{7}$/,
-    "Enter a valid Nigerian mobile number (e.g., 08031234567 or +2348031234567)",
-  );
+  .transform((input) => input.trim())
+  .pipe(z.literal(""));
+
+export const optionalNigerianPhoneSchema = z
+  .union([nigerianPhoneSchema, emptyPhoneSchema])
+  .optional();
 
 // NIN (National Identification Number) validation
 // NIN is an 11-digit number issued by NIMC
@@ -63,31 +110,11 @@ export const normalizeNINInput = (input: string): string => {
 
 // Helper functions for phone
 export const isValidNigerianPhone = (phone: string): boolean => {
-  return /^(\+234|0)?(7\d{2}|8\d{2}|9\d{2})\d{7}$/.test(phone);
+  return canonicalizeNigerianPhoneInput(phone) !== null;
 };
 
 export const normalizeNigerianPhoneInput = (input: string): string => {
-  const digits = input.replace(/\D/g, "");
-
-  if (!digits) {
-    return "";
-  }
-
-  // Already has 234 country code
-  if (digits.startsWith("234")) {
-    const localPart = digits.slice(3, 13);
-    return localPart ? `+234${localPart}` : "";
-  }
-
-  // Local format starting with 0 (e.g., 08031234567)
-  if (digits.startsWith("0")) {
-    const localPart = digits.slice(1, 11);
-    return localPart ? `+234${localPart}` : "";
-  }
-
-  // Assume it's missing the 0 prefix (e.g., 8031234567)
-  const localPart = digits.slice(0, 10);
-  return localPart ? `+234${localPart}` : "";
+  return canonicalizeNigerianPhoneInput(input) ?? input.trim();
 };
 
 export const toLocalPhoneDisplay = (phone: string): string => {
@@ -95,14 +122,9 @@ export const toLocalPhoneDisplay = (phone: string): string => {
     return "";
   }
 
-  if (!phone.startsWith("+234")) {
+  if (!CANONICAL_NIGERIAN_PHONE_RE.test(phone)) {
     return phone;
   }
 
-  const digits = phone.slice(4);
-  if (digits.length >= 10) {
-    return `0${digits.slice(-10)}`;
-  }
-
-  return phone;
+  return `0${phone.slice(4)}`;
 };

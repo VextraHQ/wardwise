@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
+import { phoneSchema } from "@/lib/schemas/common-schemas";
 
 // GET /api/admin/canvassers/[id] - Get canvasser by ID
 export async function GET(
@@ -104,13 +105,28 @@ export async function PUT(
       }
     }
 
+    let normalizedPhone: string | undefined;
+    if (phone) {
+      const parsedPhone = phoneSchema.safeParse(phone);
+      if (!parsedPhone.success) {
+        return NextResponse.json(
+          {
+            error:
+              parsedPhone.error.issues[0]?.message || "Invalid phone number",
+          },
+          { status: 400 },
+        );
+      }
+      normalizedPhone = parsedPhone.data;
+    }
+
     // Update canvasser
     const updatedCanvasser = await prisma.canvasser.update({
       where: { id },
       data: {
         ...(code && { code }),
         ...(name && { name }),
-        ...(phone && { phone }),
+        ...(normalizedPhone && { phone: normalizedPhone }),
         ...(candidateId && { candidateId }),
         ...(ward !== undefined && { ward: ward || null }),
         ...(lga !== undefined && { lga: lga || null }),

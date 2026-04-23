@@ -10,6 +10,8 @@ import {
 export {
   ninSchema,
   phoneSchema,
+  nigerianPhoneSchema,
+  optionalNigerianPhoneSchema,
   vinSchema,
   emailSchema,
   formatNINForDisplay,
