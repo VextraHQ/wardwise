@@ -318,6 +318,11 @@ model PollingUnit {
 - Redacted submission exports keep operational names, phone numbers, and canvasser details visible.
 - Redacted submission exports mask sensitive voter identity fields such as `APC/NIN` and `VIN`.
 
+### Submission Filter Plumbing
+
+- `SubmissionFilters`, `parseSubmissionFilters`, and `buildSubmissionWhere` live in `src/lib/collect/submission-query.ts` (not in `src/lib/exports/submissions.ts`, which is now export/spreadsheet only).
+- The filter parser uses the shared query-param helpers in `src/lib/server/query-params.ts`, so `?lgaId=12abc` is rejected instead of silently truncating to `12`.
+
 ## File Structure
 
 ### Public Form (refactored)

@@ -1,20 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/core/prisma";
+import { parseRequiredIntegerParam } from "@/lib/server/query-params";
 
 export async function GET(request: NextRequest) {
   try {
-    const wardIdParam = request.nextUrl.searchParams.get("wardId");
-    if (!wardIdParam) {
-      return NextResponse.json(
-        { error: "wardId is required" },
-        { status: 400 },
-      );
+    const wardIdResult = parseRequiredIntegerParam(
+      request.nextUrl.searchParams,
+      "wardId",
+      "wardId",
+    );
+    if ("error" in wardIdResult) {
+      return NextResponse.json({ error: wardIdResult.error }, { status: 400 });
     }
-
-    const wardId = parseInt(wardIdParam, 10);
-    if (isNaN(wardId)) {
-      return NextResponse.json({ error: "Invalid wardId" }, { status: 400 });
-    }
+    const wardId = wardIdResult.value;
 
     const pollingUnits = await prisma.pollingUnit.findMany({
       where: { wardId },

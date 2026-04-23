@@ -3,6 +3,11 @@ import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import { createPollingUnitSchema } from "@/lib/schemas/geo-schemas";
+import {
+  parseOptionalStringParam,
+  parsePaginationParams,
+  parseRequiredIntegerParam,
+} from "@/lib/server/query-params";
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,24 +15,17 @@ export async function GET(request: NextRequest) {
     if (error) return error;
 
     const { searchParams } = new URL(request.url);
-    const wardIdParam = searchParams.get("wardId");
-    if (!wardIdParam) {
-      return NextResponse.json(
-        { error: "wardId is required" },
-        { status: 400 },
-      );
-    }
-
-    const wardId = parseInt(wardIdParam, 10);
-    if (isNaN(wardId)) {
-      return NextResponse.json({ error: "Invalid wardId" }, { status: 400 });
-    }
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const pageSize = Math.min(
-      100,
-      Math.max(1, parseInt(searchParams.get("pageSize") || "20", 10)),
+    const wardIdResult = parseRequiredIntegerParam(
+      searchParams,
+      "wardId",
+      "wardId",
     );
-    const search = searchParams.get("search") || undefined;
+    if ("error" in wardIdResult) {
+      return NextResponse.json({ error: wardIdResult.error }, { status: 400 });
+    }
+    const wardId = wardIdResult.value;
+    const { page, pageSize } = parsePaginationParams(searchParams);
+    const search = parseOptionalStringParam(searchParams, "search");
 
     const where: Prisma.PollingUnitWhereInput = {
       wardId,

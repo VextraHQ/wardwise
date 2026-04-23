@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { validateReportRequest } from "@/lib/server/report-access";
 import { getRecentSubmissions } from "@/lib/server/collect-reporting";
-import { parseBooleanParam, parseIntegerParam } from "@/lib/exports/shared";
+import {
+  parseBooleanParam,
+  parseOptionalStringParam,
+  parsePaginationParams,
+} from "@/lib/server/query-params";
 
 type RouteParams = { params: Promise<unknown> };
 
@@ -19,12 +23,11 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     const url = new URL(request.url);
     const searchParams = url.searchParams;
-    const status = searchParams.get("status") || undefined;
-    const page = parseIntegerParam(searchParams.get("page")) ?? 1;
-    const pageSize = parseIntegerParam(searchParams.get("pageSize")) ?? 20;
-    const from = searchParams.get("from") || undefined;
-    const to = searchParams.get("to") || undefined;
-    const lga = searchParams.get("lga") || undefined;
+    const status = parseOptionalStringParam(searchParams, "status");
+    const { page, pageSize } = parsePaginationParams(searchParams);
+    const from = parseOptionalStringParam(searchParams, "from");
+    const to = parseOptionalStringParam(searchParams, "to");
+    const lga = parseOptionalStringParam(searchParams, "lga");
 
     const isVerified =
       status === "verified"
@@ -47,8 +50,8 @@ export async function GET(request: Request, { params }: RouteParams) {
       to,
       lga,
       filters: {
-        search: searchParams.get("search") || undefined,
-        role: searchParams.get("role") || undefined,
+        search: parseOptionalStringParam(searchParams, "search"),
+        role: parseOptionalStringParam(searchParams, "role"),
         isVerified,
         isFlagged,
       },

@@ -3,6 +3,10 @@ import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import { createLgaSchema } from "@/lib/schemas/geo-schemas";
+import {
+  parseOptionalStringParam,
+  parsePaginationParams,
+} from "@/lib/server/query-params";
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,12 +22,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const pageSize = Math.min(
-      100,
-      Math.max(1, parseInt(searchParams.get("pageSize") || "20", 10)),
-    );
-    const search = searchParams.get("search") || null;
+    const { page, pageSize } = parsePaginationParams(searchParams);
+    const search = parseOptionalStringParam(searchParams, "search") ?? null;
     const offset = (page - 1) * pageSize;
 
     const rows = await prisma.$queryRaw<

@@ -28,18 +28,6 @@ export function buildExportFilename(
   return normalized.join("-") || "export";
 }
 
-export function parseBooleanParam(value: string | null): boolean | undefined {
-  if (value === "true") return true;
-  if (value === "false") return false;
-  return undefined;
-}
-
-export function parseIntegerParam(value: string | null): number | undefined {
-  if (!value) return undefined;
-  const parsed = Number.parseInt(value, 10);
-  return Number.isFinite(parsed) ? parsed : undefined;
-}
-
 export function parseExportFormat(value: string | null): ExportFormat {
   return value === "xlsx" ? "xlsx" : "csv";
 }

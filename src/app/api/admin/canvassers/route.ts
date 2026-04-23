@@ -3,6 +3,10 @@ import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import { createCanvasserSchema } from "@/lib/schemas/admin-schemas";
+import {
+  parseLimitOffsetParams,
+  parseOptionalStringParam,
+} from "@/lib/server/query-params";
 
 // GET /api/admin/canvassers - Get all canvassers with optional filtering
 export async function GET(request: NextRequest) {
@@ -11,11 +15,13 @@ export async function GET(request: NextRequest) {
     if (error) return error;
 
     const { searchParams } = new URL(request.url);
-    const candidateId = searchParams.get("candidateId");
-    const state = searchParams.get("state");
-    const lga = searchParams.get("lga");
-    const limit = Math.min(parseInt(searchParams.get("limit") || "100"), 100);
-    const offset = Math.max(parseInt(searchParams.get("offset") || "0"), 0);
+    const candidateId = parseOptionalStringParam(searchParams, "candidateId");
+    const state = parseOptionalStringParam(searchParams, "state");
+    const lga = parseOptionalStringParam(searchParams, "lga");
+    const { limit, offset } = parseLimitOffsetParams(searchParams, {
+      defaultLimit: 100,
+      maxLimit: 100,
+    });
 
     // Build where clause for filters
     const where: Prisma.CanvasserWhereInput = {};
