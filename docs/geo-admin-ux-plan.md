@@ -64,7 +64,7 @@ Yes, we should still do this plan, but as a narrower follow-on:
 - `prisma/seed-states-lgas.ts`
   - add-only canonical state/LGA seed
 - `prisma/audit-geo.ts`
-  - audit script for coverage, missing rows, duplicates, drift
+  - audit script for coverage, missing rows, duplicates, drift, and spreadsheet-escape artifact detection
 - `scripts/extract_state_geo_from_inec_pdf.py`
   - extractor for official state ward/PU PDFs
 - `scripts/sync_state_wards_pus.mjs`

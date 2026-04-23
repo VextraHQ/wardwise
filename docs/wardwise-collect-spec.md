@@ -20,7 +20,7 @@
 - Prisma schema: Campaign, CollectSubmission, Lga, Ward, PollingUnit models with unique constraints
 - Canonical geo foundation added:
   - `prisma/seed-states-lgas.ts` — idempotent national LGA seed
-  - `prisma/audit-geo.ts` — live-vs-canonical geo audit
+  - `prisma/audit-geo.ts` — live-vs-canonical geo audit plus spreadsheet-escape artifact check
   - `scripts/sync_state_wards_pus.mjs` — official state ward/PU sync pipeline
 - Public form at `/c/[slug]`: 7-screen multi-step registration with localStorage persistence
 - Admin: Campaign CRUD, submissions table with PU codes, CSV export, QR codes, canvasser aggregation
