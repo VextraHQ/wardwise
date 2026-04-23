@@ -46,6 +46,7 @@ import {
   getCampaignBrandingLabel,
   getEffectiveCampaignName,
 } from "@/lib/collect/branding";
+import { formatPersonName } from "@/lib/utils";
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border/60",
@@ -474,7 +475,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <span className="text-muted-foreground">Anchor candidate</span>
             <span className="max-w-full text-left wrap-break-word sm:max-w-[65%] sm:text-right">
-              {campaign.candidateName}
+              {formatPersonName(campaign.candidateName)}
             </span>
           </div>
           <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">

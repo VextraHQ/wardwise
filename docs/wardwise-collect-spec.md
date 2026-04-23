@@ -188,14 +188,14 @@
 
 ### Screen Flow
 
-| Screen | Content                                                                                                                                   |
-| ------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| 0      | Campaign splash → Begin Registration                                                                                                      |
-| 1      | Personal details: first name, middle name?, last name, phone, email?, sex, age, occupation, marital status, custom questions              |
-| 2      | Location: cascading LGA → Ward → Polling Unit (with INEC codes)                                                                           |
-| 3      | Party info: APC/NIN (required) + VIN (required)                                                                                           |
-| 4      | Role: Volunteer / Member / Canvasser (3 cards)                                                                                            |
-| 5      | Canvasser: Yes/No toggle → name + phone if Yes (required when Yes)                                                                        |
+| Screen | Content                                                                                                                                                                                  |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0      | Campaign splash → Begin Registration                                                                                                                                                     |
+| 1      | Personal details: first name, middle name?, last name, phone, email?, sex, age, occupation, marital status, custom questions                                                             |
+| 2      | Location: cascading LGA → Ward → Polling Unit (with INEC codes)                                                                                                                          |
+| 3      | Party info: APC/NIN (required) + VIN (required)                                                                                                                                          |
+| 4      | Role: Volunteer / Member / Canvasser (3 cards)                                                                                                                                           |
+| 5      | Canvasser: Yes/No toggle → name + phone if Yes (required when Yes)                                                                                                                       |
 | 6      | Confirmation: state-aware receipt (`confirmed`, `queued`, or `failed`), registration reference only after server acceptance, New Registration button, share actions only after confirmed |
 
 ### Persistence
@@ -217,22 +217,22 @@
 
 ### Edge Cases
 
-| Case                              | Behavior                                                                                   |
-| --------------------------------- | ------------------------------------------------------------------------------------------ |
-| Invalid/missing slug              | `notFound()`                                                                               |
-| Draft campaign                    | `notFound()`                                                                               |
-| Paused campaign                   | Static "Registration Paused" message                                                       |
-| Closed campaign                   | Static "Registration Closed" message                                                       |
-| Duplicate phone                   | 409 → "Already Registered" error box                                                       |
-| Duplicate VIN                     | 409 → "Already Registered" error box                                                       |
-| Missing canvasser Yes/No          | Submit button stays disabled on canvasser step                                             |
-| Invalid submit payload            | 400 → first field-level validation message shown                                           |
-| Network error during online submit | Error displayed, localStorage preserves progress                                           |
-| Offline submit                    | Submission is queued in IndexedDB and the confirmation shows `Pending Upload`              |
-| Queued sync success               | Row is removed locally; active confirmation flips to confirmed when server receipt is known |
-| Queued sync permanent failure     | Row is marked failed, excluded from retry, and surfaced via failed confirmation/banner      |
-| Failed records on same device     | Banner opens a failed review sheet with errors, per-record dismiss, and bulk clear         |
-| Offline start without cached geo  | Location dropdowns cannot populate until the device has fetched the campaign geo catalogue |
+| Case                               | Behavior                                                                                    |
+| ---------------------------------- | ------------------------------------------------------------------------------------------- |
+| Invalid/missing slug               | `notFound()`                                                                                |
+| Draft campaign                     | `notFound()`                                                                                |
+| Paused campaign                    | Static "Registration Paused" message                                                        |
+| Closed campaign                    | Static "Registration Closed" message                                                        |
+| Duplicate phone                    | 409 → "Already Registered" error box                                                        |
+| Duplicate VIN                      | 409 → "Already Registered" error box                                                        |
+| Missing canvasser Yes/No           | Submit button stays disabled on canvasser step                                              |
+| Invalid submit payload             | 400 → first field-level validation message shown                                            |
+| Network error during online submit | Error displayed, localStorage preserves progress                                            |
+| Offline submit                     | Submission is queued in IndexedDB and the confirmation shows `Pending Upload`               |
+| Queued sync success                | Row is removed locally; active confirmation flips to confirmed when server receipt is known |
+| Queued sync permanent failure      | Row is marked failed, excluded from retry, and surfaced via failed confirmation/banner      |
+| Failed records on same device      | Banner opens a failed review sheet with errors, per-record dismiss, and bulk clear          |
+| Offline start without cached geo   | Location dropdowns cannot populate until the device has fetched the campaign geo catalogue  |
 
 ## Data Model
 

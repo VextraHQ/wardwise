@@ -34,6 +34,7 @@ import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
 import { formatRole } from "@/lib/collect/reporting";
 import { InsightsExportMenu } from "./insights-export-menu";
 import { formatGeoDisplayName } from "@/lib/geo/display";
+import { formatPersonName } from "@/lib/utils";
 import { useCampaignReportSubmissions } from "@/hooks/use-campaign-report";
 import { useIsPortraitMobile } from "@/hooks/use-mobile";
 import { SubmissionStatusBadge } from "./insights-helpers";
@@ -62,7 +63,7 @@ function buildContactSheet(rows: CampaignReportSubmission[]) {
   return rows
     .map(
       (row) =>
-        `${row.fullName} — ${row.phone} — ${formatGeoDisplayName(row.lgaName)} / ${formatGeoDisplayName(row.wardName)} — ${formatPU(row)}`,
+        `${formatPersonName(row.fullName)} — ${row.phone} — ${formatGeoDisplayName(row.lgaName)} / ${formatGeoDisplayName(row.wardName)} — ${formatPU(row)}`,
     )
     .join("\n");
 }
@@ -336,14 +337,14 @@ export function InsightsSupporters({ token }: { token: string }) {
                         <Checkbox
                           checked={selectedIds.has(submission.id)}
                           onCheckedChange={() => toggleSelect(submission.id)}
-                          aria-label={`Select ${submission.fullName}`}
+                          aria-label={`Select ${formatPersonName(submission.fullName)}`}
                         />
                       </TableCell>
                       <TableCell className="text-muted-foreground text-center text-xs font-medium">
                         {(page - 1) * pageSize + idx + 1}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {submission.fullName}
+                        {formatPersonName(submission.fullName)}
                       </TableCell>
                       <TableCell className="font-mono text-xs">
                         {submission.phone}
@@ -400,7 +401,7 @@ export function InsightsSupporters({ token }: { token: string }) {
                       <Checkbox
                         checked={selectedIds.has(submission.id)}
                         onCheckedChange={() => toggleSelect(submission.id)}
-                        aria-label={`Select ${submission.fullName}`}
+                        aria-label={`Select ${formatPersonName(submission.fullName)}`}
                         className="mt-1"
                       />
                     </div>
@@ -408,7 +409,7 @@ export function InsightsSupporters({ token }: { token: string }) {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium">
-                            {submission.fullName}
+                            {formatPersonName(submission.fullName)}
                           </p>
                           <p className="text-muted-foreground font-mono text-[10px]">
                             {submission.phone}
@@ -468,7 +469,7 @@ export function InsightsSupporters({ token }: { token: string }) {
           <div className="bg-muted/10 border-b">
             <SheetHeader className="min-w-0 space-y-1">
               <SheetTitle className="min-w-0 text-lg font-extrabold tracking-tight wrap-break-word sm:text-xl">
-                {selectedSubmission?.fullName}
+                {formatPersonName(selectedSubmission?.fullName)}
               </SheetTitle>
               <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <code className="text-muted-foreground/80 bg-muted/60 max-w-full rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold break-all">
@@ -571,7 +572,7 @@ export function InsightsSupporters({ token }: { token: string }) {
                 className="h-9 w-full rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
                 onClick={async () => {
                   const s = selectedSubmission;
-                  const text = `${s.fullName} — ${s.phone} — ${formatGeoDisplayName(s.lgaName)} / ${formatGeoDisplayName(s.wardName)} — ${formatPU(s)}`;
+                  const text = `${formatPersonName(s.fullName)} — ${s.phone} — ${formatGeoDisplayName(s.lgaName)} / ${formatGeoDisplayName(s.wardName)} — ${formatPU(s)}`;
                   try {
                     await navigator.clipboard.writeText(text);
                     toast.success("Contact copied");

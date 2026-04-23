@@ -5,7 +5,7 @@
  */
 
 /**
- * NIN Validation Result Type
+ * Type for NIN validation result
  */
 export type NINValidationResult = {
   isValid: boolean;
@@ -14,7 +14,7 @@ export type NINValidationResult = {
 };
 
 /**
- * Validates Nigerian National Identification Number (NIN)
+ * Validates a Nigerian National Identification Number (NIN)
  *
  * Rules:
  * - Must be exactly 11 digits
@@ -79,7 +79,7 @@ export function validateNIN(nin: string): NINValidationResult {
 }
 
 /**
- * Quick check if NIN is valid (returns boolean only)
+ * Checks if an NIN is valid (returns boolean only)
  * @param nin - The NIN string to validate
  * @returns true if valid, false otherwise
  */
@@ -88,7 +88,7 @@ export function isValidNIN(nin: string): boolean {
 }
 
 /**
- * Formats NIN for display (adds spaces for readability)
+ * Formats an NIN for display (adds spaces for readability)
  * @param nin - The NIN string to format
  * @returns Formatted NIN (e.g., "123 4567 8901")
  *
@@ -101,7 +101,7 @@ export function formatNINForDisplay(nin: string): string {
 }
 
 /**
- * Masks NIN for privacy (shows only last 4 digits)
+ * Masks an NIN for privacy (shows only last 4 digits)
  * @param nin - The NIN string to mask
  * @returns Masked NIN (e.g., "*******8901")
  *

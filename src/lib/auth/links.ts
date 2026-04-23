@@ -8,8 +8,8 @@ export type AuthLinkType = "invite" | "password_reset";
 type AuthDbClient = Prisma.TransactionClient | typeof prisma;
 
 const AUTH_LINK_TTL_MS: Record<AuthLinkType, number> = {
-  invite: 7 * 24 * 60 * 60 * 1000,
-  password_reset: 60 * 60 * 1000,
+  invite: 7 * 24 * 60 * 60 * 1000, // 7 days
+  password_reset: 60 * 60 * 1000, // 1 hour
 };
 
 type AuthUserRecord = {

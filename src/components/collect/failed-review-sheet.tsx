@@ -23,7 +23,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getCollectErrorCategory, track } from "@/lib/analytics/client";
 import type { PendingSubmission } from "@/lib/offline-queue";
-import { composeFullName } from "@/lib/utils";
+import { composeFullName, formatPersonName } from "@/lib/utils";
 
 function sortFailedNewestFirst(rows: PendingSubmission[]): PendingSubmission[] {
   return [...rows].sort((a, b) => {
@@ -41,7 +41,7 @@ function formatRowDisplayName(data: Record<string, unknown>): string {
       typeof data.middleName === "string" ? data.middleName : undefined,
     lastName: typeof data.lastName === "string" ? data.lastName : undefined,
   });
-  return name.trim() || "Unnamed registration";
+  return formatPersonName(name) || "Unnamed registration";
 }
 
 type Props = {

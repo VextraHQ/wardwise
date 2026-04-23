@@ -1,9 +1,12 @@
+import { formatPersonName } from "@/lib/utils";
+
 export const campaignBrandingTypes = ["candidate", "movement", "team"] as const;
 
 export type CampaignBrandingType = (typeof campaignBrandingTypes)[number];
 
 export const defaultCampaignBrandingType: CampaignBrandingType = "candidate";
 
+/** Gets the campaign branding type */
 export function getCampaignBrandingType(
   brandingType: string | null | undefined,
 ): CampaignBrandingType {
@@ -17,6 +20,7 @@ export function getCampaignBrandingType(
   return defaultCampaignBrandingType;
 }
 
+/** Normalizes the campaign display name */
 export function normalizeCampaignDisplayName(
   displayName: string | null | undefined,
 ): string | null {
@@ -24,6 +28,7 @@ export function normalizeCampaignDisplayName(
   return trimmed ? trimmed : null;
 }
 
+/** Gets the effective campaign name */
 export function getEffectiveCampaignName({
   candidateName,
   displayName,
@@ -31,9 +36,12 @@ export function getEffectiveCampaignName({
   candidateName: string;
   displayName?: string | null;
 }): string {
-  return normalizeCampaignDisplayName(displayName) ?? candidateName;
+  return (
+    normalizeCampaignDisplayName(displayName) ?? formatPersonName(candidateName)
+  );
 }
 
+/** Checks if the candidate title should be shown */
 export function shouldShowCandidateTitle({
   brandingType,
   displayName,
@@ -47,6 +55,7 @@ export function shouldShowCandidateTitle({
   );
 }
 
+/** Gets the branding label for a campaign */
 export function getCampaignBrandingLabel(
   brandingType: string | null | undefined,
 ): string {

@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn, formatPersonName } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -444,7 +444,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
   const handleDelete = (sub: SubmissionWithPU) => {
     setConfirmDialog({
       title: "Delete submission?",
-      description: `This will permanently delete the submission from ${sub.fullName}. This action cannot be undone.`,
+      description: `This will permanently delete the submission from ${formatPersonName(sub.fullName)}. This action cannot be undone.`,
       confirmLabel: "Delete",
       destructive: true,
       onConfirm: () => {
@@ -811,13 +811,15 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                       <Checkbox
                         checked={selectedIds.has(s.id)}
                         onCheckedChange={() => toggleSelect(s.id)}
-                        aria-label={`Select ${s.fullName}`}
+                        aria-label={`Select ${formatPersonName(s.fullName)}`}
                       />
                     </TableCell>
                     <TableCell className="text-muted-foreground text-center text-xs font-medium">
                       {(page - 1) * pageSize + idx + 1}
                     </TableCell>
-                    <TableCell className="font-medium">{s.fullName}</TableCell>
+                    <TableCell className="font-medium">
+                      {formatPersonName(s.fullName)}
+                    </TableCell>
                     <TableCell className="font-mono text-xs">
                       {s.phone}
                     </TableCell>
@@ -915,7 +917,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
           <div className="bg-muted/10 border-b">
             <SheetHeader className="min-w-0 space-y-1">
               <SheetTitle className="min-w-0 text-lg font-extrabold tracking-tight wrap-break-word sm:text-xl">
-                {selected?.fullName}
+                {formatPersonName(selected?.fullName)}
               </SheetTitle>
               <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <code className="text-muted-foreground/80 bg-muted/60 max-w-full rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold break-all">

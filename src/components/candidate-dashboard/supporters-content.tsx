@@ -40,6 +40,7 @@ import {
   IconArrowRight,
 } from "@tabler/icons-react";
 import Link from "next/link";
+import { composeFullName, formatPersonName } from "@/lib/utils";
 
 // Mock tier — in production, fetch from subscription API
 const CURRENT_TIER: "starter" | "standard" | "premium" = "starter";
@@ -212,8 +213,13 @@ export function SupportersContent() {
                     {supporters.map((supporter) => (
                       <TableRow key={supporter.id}>
                         <TableCell className="font-medium">
-                          {supporter.firstName} {supporter.middleName || ""}{" "}
-                          {supporter.lastName}
+                          {formatPersonName(
+                            composeFullName({
+                              firstName: supporter.firstName,
+                              middleName: supporter.middleName,
+                              lastName: supporter.lastName,
+                            }),
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col">

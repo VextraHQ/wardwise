@@ -40,6 +40,7 @@ import {
 } from "@/lib/collect/reporting";
 import { getEffectiveCampaignName } from "@/lib/collect/branding";
 import { formatGeoDisplayName } from "@/lib/geo/display";
+import { formatPersonName } from "@/lib/utils";
 import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
 import { ShareInviteCard } from "@/components/collect/share-invite-card";
 import type { CampaignReportSubmission } from "@/types/campaign-report";
@@ -452,7 +453,7 @@ function RecentActivityCard({
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-foreground text-sm font-semibold">
-                    {submission.fullName}
+                    {formatPersonName(submission.fullName)}
                   </p>
                   <SubmissionStatusBadge
                     isVerified={submission.isVerified}

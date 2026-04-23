@@ -2,6 +2,7 @@ const DB_NAME = "wardwise-offline";
 const STORE_NAME = "pending-submissions";
 const DB_VERSION = 1;
 
+/** Opens the database */
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -32,10 +33,12 @@ export interface PendingSubmission {
   failedAt?: string;
 }
 
+/** Checks if a row is failed */
 function isFailed(row: PendingSubmission): boolean {
   return row.status === "failed";
 }
 
+/** Queues a submission for offline storage */
 export async function queueSubmission(
   data: Record<string, unknown>,
   options?: { analyticsId?: string },
@@ -55,6 +58,7 @@ export async function queueSubmission(
   });
 }
 
+/** Gets all rows from the database */
 async function getAllRows(): Promise<PendingSubmission[]> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
@@ -97,6 +101,7 @@ export async function getFailedSubmissionById(
   });
 }
 
+/** Removes a pending submission by id */
 export async function removePendingSubmission(id: number): Promise<void> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
@@ -123,11 +128,13 @@ export async function removeFailedSubmissions(): Promise<number> {
   });
 }
 
+/** Gets the number of pending submissions */
 export async function getPendingCount(): Promise<number> {
   const rows = await getPendingSubmissions();
   return rows.length;
 }
 
+/** Gets the number of failed submissions */
 export async function getFailedCount(): Promise<number> {
   const rows = await getFailedSubmissions();
   return rows.length;

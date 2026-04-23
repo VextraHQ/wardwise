@@ -22,6 +22,7 @@ import {
   adminResourceStateIcons,
 } from "@/components/admin/shared/admin-resource-state";
 import { getEffectiveCampaignName } from "@/lib/collect/branding";
+import { formatPersonName } from "@/lib/utils";
 import type { CampaignSummary } from "@/types/collect";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -258,7 +259,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
                     </span>
                     {campaign.displayName && (
                       <span className="text-muted-foreground block text-xs">
-                        Anchor: {campaign.candidateName}
+                        Anchor: {formatPersonName(campaign.candidateName)}
                       </span>
                     )}
                   </div>

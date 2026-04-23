@@ -32,6 +32,7 @@ import {
   AdminResourceState,
   adminResourceStateIcons,
 } from "@/components/admin/shared/admin-resource-state";
+import { formatPersonName } from "@/lib/utils";
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border/60",
@@ -155,7 +156,7 @@ export function CampaignDetail({
                 <div className="flex max-w-full items-center gap-2">
                   <span className="bg-border size-1.5 rounded-full" />
                   <span className="wrap-break-word">
-                    Anchor: {campaign.candidateName}
+                    Anchor: {formatPersonName(campaign.candidateName)}
                   </span>
                 </div>
               )}

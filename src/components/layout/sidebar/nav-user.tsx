@@ -28,6 +28,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { resetAnalyticsIdentity } from "@/lib/analytics/client";
+import { formatPersonName } from "@/lib/utils";
 
 export function NavUser() {
   const { data: session, status } = useSession();
@@ -46,7 +47,9 @@ export function NavUser() {
   const isAdmin = session?.user?.role === "admin";
 
   const user = {
-    name: session?.user?.name || (isAdmin ? "Admin" : "Candidate"),
+    name: formatPersonName(
+      session?.user?.name || (isAdmin ? "Admin" : "Candidate"),
+    ),
     email:
       session?.user?.email ||
       (isAdmin ? "admin@wardwise.ng" : "candidate@wardwise.ng"),

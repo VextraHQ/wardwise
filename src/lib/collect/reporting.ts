@@ -19,15 +19,18 @@ export const STATUS_COPY: Record<string, string> = {
   draft: "This campaign has not started collecting live registrations yet.",
 };
 
+/** Formats a query date */
 export function formatQueryDate(date: Date | undefined): string | undefined {
   return date ? format(date, "yyyy-MM-dd") : undefined;
 }
 
+/** Parses a date key */
 export function parseDateKey(value: string): Date {
   const [year, month, day] = value.split("-").map(Number);
   return new Date(year, month - 1, day);
 }
 
+/** Formats a date key */
 export function formatDateKey(
   value: string,
   options: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" },
@@ -35,6 +38,7 @@ export function formatDateKey(
   return parseDateKey(value).toLocaleDateString("en-NG", options);
 }
 
+/** Gets the preset range for a campaign report */
 export function getPresetRange(
   preset: CampaignReportRangePreset,
   now = new Date(),
@@ -60,6 +64,7 @@ export function getPresetRange(
   }
 }
 
+/** Gets the prior range for a campaign report if a date range is provided */
 export function getPriorRange(
   dateFrom?: Date,
   dateTo?: Date,
@@ -79,6 +84,7 @@ export function getPriorRange(
   };
 }
 
+/** Computes the delta between two numbers if the previous value is not zero */
 export function computeDelta(
   current: number,
   previous: number,
@@ -95,6 +101,7 @@ export function computeDelta(
   };
 }
 
+/** Formats the updated ago for a timestamp */
 export function formatUpdatedAgo(timestamp: number): string {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
   if (seconds < 10) return "just now";
@@ -104,6 +111,7 @@ export function formatUpdatedAgo(timestamp: number): string {
   return `${minutes}m ago`;
 }
 
+/** Gets the recent window count for a campaign report if a daily point is provided */
 export function getRecentWindowCount(
   daily: CampaignReportDailyPoint[],
   days = 7,
@@ -118,10 +126,12 @@ export function getRecentWindowCount(
   }, 0);
 }
 
+/** Gets the verification rate for a campaign report if a total and verified count are provided */
 export function getVerificationRate(total: number, verified: number): number {
   return total > 0 ? Math.round((verified / total) * 100) : 0;
 }
 
+/** Formats the time ago for a ISO date */
 export function timeAgo(isoDate: string | null): string {
   if (!isoDate) return "No submissions yet";
 
@@ -146,10 +156,12 @@ export function timeAgo(isoDate: string | null): string {
   });
 }
 
+/** Capitalizes the first letter of a string */
 export function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+/** Converts a string to title case */
 export function titleCase(value: string): string {
   return value
     .split(/[\s_-]+/)
@@ -157,6 +169,7 @@ export function titleCase(value: string): string {
     .join(" ");
 }
 
+/** Formats a role name to title case */
 export function formatRole(role: string): string {
   return capitalize(role);
 }

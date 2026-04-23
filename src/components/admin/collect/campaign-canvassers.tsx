@@ -45,7 +45,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+import { cn, formatPersonName } from "@/lib/utils";
 import { toast } from "sonner";
 import { addCampaignCanvasserSchema } from "@/lib/schemas/collect-schemas";
 import { adminCollectApi } from "@/lib/api/collect";
@@ -229,7 +229,7 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
       ? `\n\nThis canvasser already has ${referralEntry._count} attributed submission${referralEntry._count !== 1 ? "s" : ""}.`
       : "";
     setConfirmDialog({
-      title: `Remove ${canvasserName}?`,
+      title: `Remove ${formatPersonName(canvasserName)}?`,
       description: `This removes them from the public form dropdown for future registrations. Existing submissions already attributed to this canvasser will remain in reports and leaderboard history.${referralNote}`,
       onConfirm: () => {
         removeMutation.mutate(canvasserId, {
@@ -237,7 +237,7 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
             track("admin_canvasser_removed", {
               campaign_id: campaignId,
             });
-            toast.success(`${canvasserName} removed`);
+            toast.success(`${formatPersonName(canvasserName)} removed`);
           },
           onError: (e) => toast.error(e.message),
         });
@@ -462,7 +462,7 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
                       <TableCell className="text-muted-foreground text-center text-xs font-medium">
                         {rankLabel}
                       </TableCell>
-                      <TableCell>{c.canvasserName}</TableCell>
+                      <TableCell>{formatPersonName(c.canvasserName)}</TableCell>
                       <TableCell className="hidden sm:table-cell">
                         {c.canvasserPhone}
                       </TableCell>

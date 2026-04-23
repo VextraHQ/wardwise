@@ -42,6 +42,7 @@ import {
 } from "@/components/admin/shared/admin-resource-state";
 
 import { nigeriaStates } from "@/lib/data/state-lga-locations";
+import { formatPersonName } from "@/lib/utils";
 
 function resolveStateName(stateCode: string | null): string {
   if (!stateCode) return "Nigeria";
@@ -180,7 +181,7 @@ function CandidateActions({
             variant="ghost"
             size="icon"
             className="h-8 w-8 rounded-sm shadow-none"
-            aria-label={`Open actions for ${candidate.name}`}
+            aria-label={`Open actions for ${formatPersonName(candidate.name)}`}
           >
             <IconDotsVertical className="h-4 w-4" />
           </Button>
@@ -600,8 +601,8 @@ export function CandidateManagement() {
                           <div>
                             <span className="text-sm font-medium">
                               {candidate.title
-                                ? `${candidate.title} ${candidate.name}`
-                                : candidate.name}
+                                ? `${candidate.title} ${formatPersonName(candidate.name)}`
+                                : formatPersonName(candidate.name)}
                             </span>
                             <span className="text-muted-foreground block text-xs">
                               {candidate.user?.email}

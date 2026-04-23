@@ -43,7 +43,7 @@ import type { CampaignSummary } from "@/types/collect";
 import type { CandidateWithUser } from "@/lib/api/admin";
 import { positionRequiresLgas } from "@/lib/geo/constituency";
 import { nigeriaStates } from "@/lib/data/state-lga-locations";
-import { cn } from "@/lib/utils";
+import { cn, formatPersonName } from "@/lib/utils";
 
 // ---------- Local helpers ----------
 
@@ -915,7 +915,8 @@ function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
             href={detailHref}
             className="hover:text-primary truncate text-sm font-semibold tracking-tight transition-colors"
           >
-            {campaign.displayName?.trim() || campaign.candidateName}
+            {campaign.displayName?.trim() ||
+              formatPersonName(campaign.candidateName)}
           </Link>
           <Badge
             variant="outline"
@@ -937,7 +938,9 @@ function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
         </div>
         <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
           {campaign.displayName?.trim() && (
-            <span className="truncate">{campaign.candidateName}</span>
+            <span className="truncate">
+              {formatPersonName(campaign.candidateName)}
+            </span>
           )}
           <span className="font-mono tabular-nums">
             {submissions.toLocaleString()}{" "}
@@ -958,7 +961,7 @@ function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
             clientReportEnabled: campaign.clientReportEnabled,
             clientReportToken: campaign.clientReportToken,
           }}
-          ariaLabel={`Actions for ${campaign.displayName?.trim() || campaign.candidateName}`}
+          ariaLabel={`Actions for ${campaign.displayName?.trim() || formatPersonName(campaign.candidateName)}`}
         />
       </div>
     </div>

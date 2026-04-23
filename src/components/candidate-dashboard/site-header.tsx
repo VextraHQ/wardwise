@@ -9,6 +9,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { IconHome } from "@tabler/icons-react";
 
 import Link from "next/link";
+import { formatPersonName } from "@/lib/utils";
 
 export function SiteHeader() {
   const { data: session, status } = useSession();
@@ -16,8 +17,9 @@ export function SiteHeader() {
 
   const isResolving = status === "loading" || isLoading;
 
-  const candidateName =
-    candidateProfile?.name || session?.user?.name || "Candidate";
+  const candidateName = formatPersonName(
+    candidateProfile?.name || session?.user?.name || "Candidate",
+  );
   const candidatePosition = candidateProfile?.position || "";
 
   return (

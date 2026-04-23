@@ -34,6 +34,7 @@ import {
   AdminResourceState,
   adminResourceStateIcons,
 } from "@/components/admin/shared/admin-resource-state";
+import { formatPersonName } from "@/lib/utils";
 
 function relativeTime(dateStr: string | null): string {
   if (!dateStr) return "No activity yet";
@@ -410,7 +411,8 @@ export function CampaignList() {
                             </p>
                             {campaign.displayName && (
                               <p className="text-muted-foreground text-xs">
-                                Anchor: {campaign.candidateName}
+                                Anchor:{" "}
+                                {formatPersonName(campaign.candidateName)}
                               </p>
                             )}
                           </div>
