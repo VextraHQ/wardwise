@@ -110,7 +110,7 @@
 - **No silent truncation**: overlong or malformed values are rejected instead of being sliced into a valid-looking number.
 - **Optional phone helper**: `optionalNigerianPhoneSchema` preserves empty optional fields but canonicalizes valid values when present. Use it for optional attribution/contact fields.
 - **Collect canvasser attribution fixed for future writes**: public submissions now canonicalize `canvasserPhone` when a referrer is provided, matching the already-canonical supporter `phone` field.
-- **Existing live data left untouched**: this hardening affects future writes only. Historical rows should be handled by a separate dry-run audit/backfill so campaign data is not merged or deleted accidentally.
+- **Existing live data cleaned safely**: the initial `canvasserPhone` backfill found two valid local-format values, normalized both to `+234XXXXXXXXXX`, and found no invalid/skipped rows or mixed-format groups. The one-time cleanup script was removed after verification.
 
 ### What Changed (Batch 2)
 
