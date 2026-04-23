@@ -10,7 +10,7 @@ import {
   readAuthUserById,
   recordSuccessfulLogin,
 } from "@/lib/auth/storage";
-import { normalizeEmailInput } from "@/lib/schemas/common-schemas";
+import { normalizeEmailInput } from "@/lib/schemas/field-schemas";
 import { getCandidateStatusLoginError } from "@/lib/auth/errors";
 
 function logCredentialsRejection({

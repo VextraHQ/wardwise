@@ -12,6 +12,21 @@ export const emailSchema = z
   .min(1, "Email is required")
   .email("Please enter a valid email address");
 
+// Optional email: blank stays "" (not undefined). The Collect form round-trips
+// empty strings from react-hook-form, and the submit route converts
+// `data.email || null` at the DB boundary. Non-blank values are trimmed and
+// lowercased before validation.
+export const optionalEmailSchema = z
+  .string()
+  .optional()
+  .transform((v) => (v ?? "").trim().toLowerCase())
+  .pipe(
+    z.union([
+      z.literal(""),
+      z.string().email("Please enter a valid email address"),
+    ]),
+  );
+
 // Nigerian phone number validation and canonicalization.
 // Accepts: +2348031234567, 2348031234567, 08031234567, 8031234567
 // Also accepts spaces, hyphens, dots, and parentheses as visual separators.
@@ -57,9 +72,6 @@ export const nigerianPhoneSchema = z.string().transform((input, ctx) => {
   return canonical;
 });
 
-// Backward-compatible name used across the app. Successful parses return +234...
-export const phoneSchema = nigerianPhoneSchema;
-
 const emptyPhoneSchema = z
   .string()
   .transform((input) => input.trim())
@@ -69,8 +81,7 @@ export const optionalNigerianPhoneSchema = z
   .union([nigerianPhoneSchema, emptyPhoneSchema])
   .optional();
 
-// NIN (National Identification Number) validation
-// NIN is an 11-digit number issued by NIMC
+// NIN (National Identification Number): 11-digit number issued by NIMC.
 const NIN_REGEX = /^\d{11}$/;
 export const ninSchema = z
   .string()
@@ -84,13 +95,90 @@ export const ninSchema = z
     message: "Please enter a valid NIN (sequential patterns not allowed)",
   });
 
-// VIN (Voter Identification Number) validation - 19-20 digits
-const VIN_REGEX = /^\d{19,20}$/;
-export const vinSchema = z
+// Voter ID / VIN per INEC spec: exactly 19 alphanumeric characters, uppercased.
+export const voterIdVinSchema = z
   .string()
   .trim()
-  .regex(VIN_REGEX, "Please enter a valid VIN/PVC number (19-20 digits)")
-  .optional();
+  .transform((v) => v.toUpperCase())
+  .refine(
+    (v) => /^[A-Z0-9]{19}$/.test(v),
+    "VIN must be exactly 19 alphanumeric characters",
+  );
+
+// APC-or-NIN hybrid validator used on the Collect form.
+// - Exactly 11 digits → validated as NIN (reject all-same-digit and sequential dummies)
+// - Otherwise → min 5 chars, alphanumeric with optional "/" or "-" (APC format)
+const APC_REGEX = /^[A-Za-z0-9/-]+$/;
+export const apcOrNinSchema = z
+  .string()
+  .trim()
+  .min(1, "APC Registration Number or NIN is required")
+  .refine((val) => {
+    if (NIN_REGEX.test(val)) {
+      if (/^(\d)\1{10}$/.test(val)) return false;
+      if (val === "12345678901" || val === "01234567890") return false;
+      return true;
+    }
+    return val.length >= 5 && APC_REGEX.test(val);
+  }, "Enter a valid NIN (11 digits) or APC number (min 5 chars, alphanumeric)");
+
+// Trimmed text helpers — shared primitives for Collect and admin inputs.
+// Trim happens BEFORE min/max so whitespace-only input cannot satisfy min.
+export function requiredTrimmedText({
+  min = 1,
+  max,
+  label,
+}: {
+  min?: number;
+  max: number;
+  label: string;
+}) {
+  const minMessage =
+    min <= 1
+      ? `${label} is required`
+      : `${label} must be at least ${min} characters`;
+  return z
+    .string()
+    .transform((v) => v.trim())
+    .pipe(
+      z
+        .string()
+        .min(min, minMessage)
+        .max(max, `${label} must not exceed ${max} characters`),
+    );
+}
+
+// Optional trimmed text: blank stays "".
+export function optionalTrimmedText({ max }: { max: number }) {
+  return z
+    .string()
+    .transform((v) => v.trim())
+    .pipe(z.string().max(max, `Must not exceed ${max} characters`))
+    .optional();
+}
+
+// Optional trimmed text that normalizes blank/whitespace to null, so the DB
+// column doesn't accumulate "" vs null drift. Missing field stays undefined so
+// PATCH routes can distinguish "not sent" from "sent blank".
+export function optionalNullableTrimmedText({ max }: { max: number }) {
+  return z
+    .union([z.string(), z.null()])
+    .optional()
+    .transform((v) => {
+      if (v === undefined) return undefined;
+      if (v === null) return null;
+      const trimmed = v.trim();
+      return trimmed === "" ? null : trimmed;
+    })
+    .pipe(
+      z
+        .union([
+          z.string().max(max, `Must not exceed ${max} characters`),
+          z.null(),
+        ])
+        .optional(),
+    );
+}
 
 // Helper functions for NIN
 export const isValidNIN = (nin: string): boolean => {

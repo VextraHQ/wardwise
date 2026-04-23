@@ -1,9 +1,11 @@
 import { z } from "zod";
 import {
   emailSchema,
+  nigerianPhoneSchema,
   optionalNigerianPhoneSchema,
-  phoneSchema,
-} from "@/lib/schemas/common-schemas";
+  optionalNullableTrimmedText,
+  requiredTrimmedText,
+} from "@/lib/schemas/field-schemas";
 import { getPositionStateValidationMessage } from "@/lib/geo/constituency";
 
 // Candidate position enum
@@ -18,17 +20,9 @@ export const candidatePositionSchema = z.enum([
 // Create Candidate Schema
 export const createCandidateSchema = z
   .object({
-    name: z
-      .string()
-      .min(2, "Candidate name must be at least 2 characters")
-      .max(100, "Candidate name must not exceed 100 characters")
-      .trim(),
+    name: requiredTrimmedText({ min: 2, max: 100, label: "Candidate name" }),
     email: emailSchema,
-    party: z
-      .string()
-      .min(2, "Political party must be at least 2 characters")
-      .max(50, "Political party must not exceed 50 characters")
-      .trim(),
+    party: requiredTrimmedText({ min: 2, max: 50, label: "Political party" }),
     position: z.string().refine(
       (val) => {
         if (!val || val === "") return false;
@@ -36,11 +30,11 @@ export const createCandidateSchema = z
       },
       { message: "Please select a position" },
     ),
-    constituency: z
-      .string()
-      .min(2, "Constituency must be at least 2 characters")
-      .max(200, "Constituency must not exceed 200 characters")
-      .trim(),
+    constituency: requiredTrimmedText({
+      min: 2,
+      max: 200,
+      label: "Constituency",
+    }),
     stateCode: z
       .string()
       .max(5, "State code must not exceed 5 characters")
@@ -94,19 +88,17 @@ export const createCandidateSchema = z
 export const updateCandidateSchema = z
   .object({
     id: z.string().min(1, "Candidate ID is required"),
-    name: z
-      .string()
-      .min(2, "Candidate name must be at least 2 characters")
-      .max(100, "Candidate name must not exceed 100 characters")
-      .trim()
-      .optional(),
+    name: requiredTrimmedText({
+      min: 2,
+      max: 100,
+      label: "Candidate name",
+    }).optional(),
     email: emailSchema.optional(),
-    party: z
-      .string()
-      .min(2, "Political party must be at least 2 characters")
-      .max(50, "Political party must not exceed 50 characters")
-      .trim()
-      .optional(),
+    party: requiredTrimmedText({
+      min: 2,
+      max: 50,
+      label: "Political party",
+    }).optional(),
     position: z
       .string()
       .refine(
@@ -117,12 +109,11 @@ export const updateCandidateSchema = z
         { message: "Please select a position" },
       )
       .optional(),
-    constituency: z
-      .string()
-      .min(2, "Constituency must be at least 2 characters")
-      .max(200, "Constituency must not exceed 200 characters")
-      .trim()
-      .optional(),
+    constituency: requiredTrimmedText({
+      min: 2,
+      max: 200,
+      label: "Constituency",
+    }).optional(),
     stateCode: z
       .string()
       .max(5, "State code must not exceed 5 characters")
@@ -187,12 +178,8 @@ export const createCanvasserSchema = z.object({
       /^[A-Z0-9-]+$/,
       "Canvasser code must contain only uppercase letters, numbers, and hyphens",
     ),
-  name: z
-    .string()
-    .min(2, "Full name must be at least 2 characters")
-    .max(100, "Full name must not exceed 100 characters")
-    .trim(),
-  phone: phoneSchema,
+  name: requiredTrimmedText({ min: 2, max: 100, label: "Full name" }),
+  phone: nigerianPhoneSchema,
   candidateId: z.string().min(1, "Please select a candidate"),
   ward: z
     .string()
@@ -224,13 +211,12 @@ export const updateCanvasserSchema = z.object({
       "Canvasser code must contain only uppercase letters, numbers, and hyphens",
     )
     .optional(),
-  name: z
-    .string()
-    .min(2, "Full name must be at least 2 characters")
-    .max(100, "Full name must not exceed 100 characters")
-    .trim()
-    .optional(),
-  phone: optionalNigerianPhoneSchema,
+  name: requiredTrimmedText({
+    min: 2,
+    max: 100,
+    label: "Full name",
+  }).optional(),
+  phone: nigerianPhoneSchema.optional(),
   candidateId: z.string().min(1, "Please select a candidate").optional(),
   ward: z
     .string()
@@ -249,7 +235,15 @@ export const updateCanvasserSchema = z.object({
     .or(z.literal("")),
 });
 
+// Update Submission Schema (admin moderation PATCH)
+export const updateSubmissionSchema = z.object({
+  isFlagged: z.boolean().optional(),
+  isVerified: z.boolean().optional(),
+  adminNotes: optionalNullableTrimmedText({ max: 2000 }),
+});
+
 // Type exports
+export type UpdateSubmissionValues = z.infer<typeof updateSubmissionSchema>;
 export type CreateCandidateFormValues = z.infer<typeof createCandidateSchema>;
 export type UpdateCandidateFormValues = z.infer<typeof updateCandidateSchema>;
 export type CreateCanvasserFormValues = z.infer<typeof createCanvasserSchema>;

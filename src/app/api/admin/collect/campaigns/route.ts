@@ -160,8 +160,8 @@ export async function POST(request: NextRequest) {
         constituency: candidate.constituency || "",
         constituencyType,
         enabledLgaIds,
-        customQuestion1: data.customQuestion1 || null,
-        customQuestion2: data.customQuestion2 || null,
+        customQuestion1: data.customQuestion1,
+        customQuestion2: data.customQuestion2,
       },
     });
 

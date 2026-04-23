@@ -106,7 +106,7 @@
 
 ### What Changed (Batch 10 — Phone Canonicalization)
 
-- **Shared phone canonicalization**: `phoneSchema` now validates and returns canonical Nigerian mobile numbers in `+234XXXXXXXXXX` format. It accepts common user input forms like `08031234567`, `8031234567`, `2348031234567`, `+2348031234567`, and visually separated values like `0803 123 4567`.
+- **Shared phone canonicalization**: `nigerianPhoneSchema` (in `src/lib/schemas/field-schemas.ts`) validates and returns canonical Nigerian mobile numbers in `+234XXXXXXXXXX` format. It accepts common user input forms like `08031234567`, `8031234567`, `2348031234567`, `+2348031234567`, and visually separated values like `0803 123 4567`.
 - **No silent truncation**: overlong or malformed values are rejected instead of being sliced into a valid-looking number.
 - **Optional phone helper**: `optionalNigerianPhoneSchema` preserves empty optional fields but canonicalizes valid values when present. Use it for optional attribution/contact fields.
 - **Collect canvasser attribution fixed for future writes**: public submissions now canonicalize `canvasserPhone` when a referrer is provided, matching the already-canonical supporter `phone` field.

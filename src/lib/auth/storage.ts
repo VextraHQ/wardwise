@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/core/prisma";
-import { normalizeEmailInput } from "@/lib/schemas/common-schemas";
+import { normalizeEmailInput } from "@/lib/schemas/field-schemas";
 
 type CandidateAuthRecord = {
   id: string;
