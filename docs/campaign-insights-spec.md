@@ -254,6 +254,9 @@ clientReportLastViewedAt DateTime?
 - `clientReportToken` is the private URL key
 - `clientReportPasscodeHash` stores hashed passcode, never raw passcode
 - `clientReportLastViewedAt` helps admin understand whether the client is actually using it
+- current implementation is intentionally **hash-only**
+- admin cannot reveal an existing passcode after the initial create/reset response
+- if a passcode is lost, the supported recovery action is to reset it and share the new one
 
 ### Why on Campaign
 
@@ -737,8 +740,28 @@ Fields / controls:
 
 - enabling access generates token + passcode
 - passcode is shown when generated or reset
-- admin can reset/regenerate the passcode at any time if the client loses it
+- stored passcodes remain hidden after the initial create/reset response
+- existing passcodes are not revealable later in admin because the server stores only a hash
+- if the client loses the passcode, admin resets it and shares the new one
+- reset passcode is a deliberate rotation action, not a reveal action
 - revoking access invalidates current token and cookie/session
+
+### Current Product Decision
+
+For now, Campaign Insights keeps the simpler hash-only passcode architecture.
+
+Why:
+
+- it matches the current secure unlock flow
+- it avoids adding encrypted passcode recovery before the pain is proven
+- it avoids introducing a second storage path just for a support edge case
+- current live campaigns continue working without migration or forced resets
+
+Operational guidance:
+
+- admins should copy the passcode when it is first generated or reset
+- if the passcode is later lost, the official recovery path is `Reset Passcode`
+- reset should be presented with clear copy because it rotates the credential for the client
 
 ---
 
@@ -1056,6 +1079,7 @@ The report follows existing campaign reporting rules:
 - add a direct vs field-team acquisition split that feels editorial, not operational
 - design the authenticated candidate portal for future write actions
 - add optional report branding per campaign if needed later
+- if passcode resets become a real support burden, consider an admin-only reveal flow backed by encrypted passcode storage in addition to the current verification hash
 
 ---
 
