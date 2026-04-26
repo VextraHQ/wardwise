@@ -6,10 +6,8 @@ import {
   getExportContentType,
   parseExportFormat,
 } from "@/lib/exports/shared";
-import {
-  buildSubmissionsExportTable,
-  parseSubmissionFilters,
-} from "@/lib/exports/submissions";
+import { buildSubmissionsExportTable } from "@/lib/exports/submissions";
+import { parseSubmissionFilters } from "@/lib/collect/submission-query";
 import { renderXlsx } from "@/lib/exports/xlsx";
 
 export async function GET(

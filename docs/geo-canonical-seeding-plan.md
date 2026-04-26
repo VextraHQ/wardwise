@@ -312,6 +312,7 @@ Checks:
 - missing LGAs by state
 - unexpected extra LGAs in DB
 - likely spelling drift / alias candidates
+- spreadsheet-escape artifacts from the old geo import bug (`'=`, `'+`, `'-`, `'@`) in `Lga.name`, `Ward.name/code`, and `PollingUnit.name/code`
 
 ### 3. `scripts/rebuild-senator-presets.ts` or equivalent utility
 

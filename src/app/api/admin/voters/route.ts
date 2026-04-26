@@ -2,6 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { type Prisma } from "@prisma/client";
+import {
+  parseLimitOffsetParams,
+  parseOptionalStringParam,
+} from "@/lib/server/query-params";
 
 // GET /api/admin/voters - Get all voters with pagination
 export async function GET(request: NextRequest) {
@@ -10,11 +14,13 @@ export async function GET(request: NextRequest) {
     if (error) return error;
 
     const { searchParams } = new URL(request.url);
-    const candidateId = searchParams.get("candidateId");
-    const state = searchParams.get("state");
-    const lga = searchParams.get("lga");
-    const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
-    const offset = Math.max(parseInt(searchParams.get("offset") || "0"), 0);
+    const candidateId = parseOptionalStringParam(searchParams, "candidateId");
+    const state = parseOptionalStringParam(searchParams, "state");
+    const lga = parseOptionalStringParam(searchParams, "lga");
+    const { limit, offset } = parseLimitOffsetParams(searchParams, {
+      defaultLimit: 50,
+      maxLimit: 100,
+    });
 
     // Build where clause
     const where: Prisma.VoterWhereInput = {};

@@ -1,33 +1,30 @@
 import { z } from "zod";
 import {
+  apcOrNinSchema,
+  nigerianPhoneSchema,
+  optionalEmailSchema,
   optionalNigerianPhoneSchema,
-  phoneSchema,
-} from "@/lib/schemas/common-schemas";
+  optionalNullableTrimmedText,
+  optionalTrimmedText,
+  requiredTrimmedText,
+  voterIdVinSchema,
+} from "@/lib/schemas/field-schemas";
 import {
   campaignBrandingTypes,
   normalizeCampaignDisplayName,
 } from "@/lib/collect/branding";
 
-// ── VIN regex (INEC standard: 19 alphanumeric characters) ──
-const vinRegex = /^[A-Za-z0-9]{19}$/;
-
 // Screen 1: Personal details
 export const screen1Schema = z.object({
-  firstName: z
-    .string()
-    .min(2, "First name is required")
-    .transform((v) => v.trim()),
+  firstName: requiredTrimmedText({ min: 2, max: 100, label: "First name" }),
   middleName: z
     .string()
     .optional()
     .or(z.literal(""))
     .transform((v) => v?.trim() || ""),
-  lastName: z
-    .string()
-    .min(2, "Last name is required")
-    .transform((v) => v.trim()),
-  phone: phoneSchema,
-  email: z.string().email("Invalid email").optional().or(z.literal("")),
+  lastName: requiredTrimmedText({ min: 2, max: 100, label: "Last name" }),
+  phone: nigerianPhoneSchema,
+  email: optionalEmailSchema,
   sex: z.enum(["male", "female"], { message: "Please select your sex" }),
   age: z
     .number({
@@ -35,10 +32,7 @@ export const screen1Schema = z.object({
     })
     .min(18, "Must be at least 18 years old")
     .max(120, "Invalid age"),
-  occupation: z
-    .string()
-    .min(1, "Occupation is required")
-    .transform((v) => v.trim()),
+  occupation: requiredTrimmedText({ max: 100, label: "Occupation" }),
   maritalStatus: z.enum(["single", "married", "divorced", "widowed"], {
     message: "Select marital status",
   }),
@@ -56,42 +50,10 @@ export const screen2Schema = z.object({
   pollingUnitName: z.string().min(1),
 });
 
-// NIN: exactly 11 digits
-const ninRegex = /^\d{11}$/;
-// APC membership numbers are alphanumeric
-const apcRegex = /^[A-Za-z0-9/\-]+$/;
-
-// Stricter APC/NIN validation:
-// - If exactly 11 digits → validate as NIN (reject all-same-digit, reject sequential)
-// - Otherwise → validate as APC number (min 5 chars, alphanumeric with optional / and -)
-function validateApcOrNin(val: string): boolean {
-  if (ninRegex.test(val)) {
-    // It's 11 digits — validate as NIN
-    if (/^(\d)\1{10}$/.test(val)) return false; // all same digit
-    if (val === "12345678901" || val === "01234567890") return false; // sequential
-    return true;
-  }
-  // Validate as APC number
-  return val.length >= 5 && apcRegex.test(val);
-}
-
 // Screen 3: Party info — APC/NIN and VIN are both required
 export const screen3Schema = z.object({
-  apcRegNumber: z
-    .string()
-    .min(1, "APC Registration Number or NIN is required")
-    .refine(
-      validateApcOrNin,
-      "Enter a valid NIN (11 digits) or APC number (min 5 chars, alphanumeric)",
-    ),
-  voterIdNumber: z
-    .string()
-    .min(1, "Voter ID (VIN) is required")
-    .transform((val) => val.toUpperCase())
-    .refine(
-      (val) => vinRegex.test(val),
-      "VIN must be exactly 19 alphanumeric characters",
-    ),
+  apcRegNumber: apcOrNinSchema,
+  voterIdNumber: voterIdVinSchema,
 });
 
 // Screen 4: Role
@@ -113,8 +75,8 @@ export const screen5Schema = z.object({
 
 // Custom questions
 export const customQuestionsSchema = z.object({
-  customAnswer1: z.string().optional().or(z.literal("")),
-  customAnswer2: z.string().optional().or(z.literal("")),
+  customAnswer1: optionalTrimmedText({ max: 500 }),
+  customAnswer2: optionalTrimmedText({ max: 500 }),
 });
 
 // Full submission schema (merge of all screens)
@@ -167,8 +129,8 @@ export const createCampaignSchema = z
       .nullish()
       .or(z.literal("")),
     enabledLgaIds: z.array(z.number()),
-    customQuestion1: z.string().nullish().or(z.literal("")),
-    customQuestion2: z.string().nullish().or(z.literal("")),
+    customQuestion1: optionalNullableTrimmedText({ max: 200 }),
+    customQuestion2: optionalNullableTrimmedText({ max: 200 }),
   })
   .superRefine((data, ctx) => {
     if (
@@ -195,11 +157,8 @@ export type UpdateCampaignData = z.infer<typeof updateCampaignSchema>;
 // ── Admin: Add canvasser to campaign (mirrors server-side schema) ──
 
 export const addCampaignCanvasserSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Name is required")
-    .transform((v) => v.trim()),
-  phone: phoneSchema,
+  name: requiredTrimmedText({ max: 100, label: "Name" }),
+  phone: nigerianPhoneSchema,
   zone: z
     .string()
     .optional()

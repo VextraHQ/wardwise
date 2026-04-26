@@ -19,6 +19,68 @@ type DbLga = {
   stateCode: string;
 };
 
+type SpreadsheetEscapeArtifact = {
+  model: "Lga" | "Ward" | "PollingUnit";
+  field: "name" | "code";
+  id: number;
+  value: string;
+  stateCode: string;
+  lgaName?: string;
+  wardName?: string;
+};
+
+const SPREADSHEET_ESCAPE_PREFIXES = ["'=", "'+", "'-", "'@"] as const;
+
+function hasSpreadsheetEscapeArtifact(
+  value: string | null | undefined,
+): value is string {
+  return Boolean(
+    value &&
+    SPREADSHEET_ESCAPE_PREFIXES.some((prefix) => value.startsWith(prefix)),
+  );
+}
+
+function countSpreadsheetEscapeArtifacts(
+  artifacts: SpreadsheetEscapeArtifact[],
+): {
+  lgaName: number;
+  wardName: number;
+  wardCode: number;
+  pollingUnitName: number;
+  pollingUnitCode: number;
+} {
+  return artifacts.reduce(
+    (counts, artifact) => {
+      if (artifact.model === "Lga" && artifact.field === "name") {
+        counts.lgaName += 1;
+      } else if (artifact.model === "Ward" && artifact.field === "name") {
+        counts.wardName += 1;
+      } else if (artifact.model === "Ward" && artifact.field === "code") {
+        counts.wardCode += 1;
+      } else if (
+        artifact.model === "PollingUnit" &&
+        artifact.field === "name"
+      ) {
+        counts.pollingUnitName += 1;
+      } else if (
+        artifact.model === "PollingUnit" &&
+        artifact.field === "code"
+      ) {
+        counts.pollingUnitCode += 1;
+      }
+
+      return counts;
+    },
+    {
+      lgaName: 0,
+      wardName: 0,
+      wardCode: 0,
+      pollingUnitName: 0,
+      pollingUnitCode: 0,
+    },
+  );
+}
+
 function printSection(title: string) {
   console.log(`\n=== ${title} ===`);
 }
@@ -37,6 +99,74 @@ async function main() {
         : undefined,
     orderBy: [{ stateCode: "asc" }, { name: "asc" }],
     select: { id: true, name: true, stateCode: true },
+  });
+  const suspiciousWards = await prisma.ward.findMany({
+    where: {
+      ...(selectedStateCodes && selectedStateCodes.length > 0
+        ? { lga: { stateCode: { in: selectedStateCodes } } }
+        : {}),
+      OR: [
+        ...SPREADSHEET_ESCAPE_PREFIXES.map((prefix) => ({
+          name: { startsWith: prefix },
+        })),
+        ...SPREADSHEET_ESCAPE_PREFIXES.map((prefix) => ({
+          code: { startsWith: prefix },
+        })),
+      ],
+    },
+    orderBy: [
+      { lga: { stateCode: "asc" } },
+      { lga: { name: "asc" } },
+      { name: "asc" },
+    ],
+    select: {
+      id: true,
+      name: true,
+      code: true,
+      lga: {
+        select: {
+          name: true,
+          stateCode: true,
+        },
+      },
+    },
+  });
+  const suspiciousPollingUnits = await prisma.pollingUnit.findMany({
+    where: {
+      ...(selectedStateCodes && selectedStateCodes.length > 0
+        ? { ward: { lga: { stateCode: { in: selectedStateCodes } } } }
+        : {}),
+      OR: [
+        ...SPREADSHEET_ESCAPE_PREFIXES.map((prefix) => ({
+          name: { startsWith: prefix },
+        })),
+        ...SPREADSHEET_ESCAPE_PREFIXES.map((prefix) => ({
+          code: { startsWith: prefix },
+        })),
+      ],
+    },
+    orderBy: [
+      { ward: { lga: { stateCode: "asc" } } },
+      { ward: { lga: { name: "asc" } } },
+      { ward: { name: "asc" } },
+      { name: "asc" },
+    ],
+    select: {
+      id: true,
+      name: true,
+      code: true,
+      ward: {
+        select: {
+          name: true,
+          lga: {
+            select: {
+              name: true,
+              stateCode: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   const canonicalKeys = new Set(
@@ -85,6 +215,75 @@ async function main() {
       Boolean(candidate),
     );
 
+  const spreadsheetEscapeArtifacts: SpreadsheetEscapeArtifact[] = [
+    ...dbLgas
+      .filter((lga) => hasSpreadsheetEscapeArtifact(lga.name))
+      .map((lga) => ({
+        model: "Lga" as const,
+        field: "name" as const,
+        id: lga.id,
+        value: lga.name,
+        stateCode: lga.stateCode,
+      })),
+    ...suspiciousWards.flatMap((ward) => [
+      ...(hasSpreadsheetEscapeArtifact(ward.name)
+        ? [
+            {
+              model: "Ward" as const,
+              field: "name" as const,
+              id: ward.id,
+              value: ward.name,
+              stateCode: ward.lga.stateCode,
+              lgaName: ward.lga.name,
+            },
+          ]
+        : []),
+      ...(hasSpreadsheetEscapeArtifact(ward.code)
+        ? [
+            {
+              model: "Ward" as const,
+              field: "code" as const,
+              id: ward.id,
+              value: ward.code,
+              stateCode: ward.lga.stateCode,
+              lgaName: ward.lga.name,
+            },
+          ]
+        : []),
+    ]),
+    ...suspiciousPollingUnits.flatMap((pollingUnit) => [
+      ...(hasSpreadsheetEscapeArtifact(pollingUnit.name)
+        ? [
+            {
+              model: "PollingUnit" as const,
+              field: "name" as const,
+              id: pollingUnit.id,
+              value: pollingUnit.name,
+              stateCode: pollingUnit.ward.lga.stateCode,
+              lgaName: pollingUnit.ward.lga.name,
+              wardName: pollingUnit.ward.name,
+            },
+          ]
+        : []),
+      ...(hasSpreadsheetEscapeArtifact(pollingUnit.code)
+        ? [
+            {
+              model: "PollingUnit" as const,
+              field: "code" as const,
+              id: pollingUnit.id,
+              value: pollingUnit.code,
+              stateCode: pollingUnit.ward.lga.stateCode,
+              lgaName: pollingUnit.ward.lga.name,
+              wardName: pollingUnit.ward.name,
+            },
+          ]
+        : []),
+    ]),
+  ];
+  const spreadsheetEscapeArtifactCounts = countSpreadsheetEscapeArtifacts(
+    spreadsheetEscapeArtifacts,
+  );
+
   const coverage = buildCoverageByState(canonicalStates, canonicalLgas, dbLgas);
   const seededStates = coverage.filter((state) => state.dbCount > 0).length;
   const fullySeededStates = coverage.filter(
@@ -106,6 +305,11 @@ async function main() {
     missingCanonical,
     unexpectedDb,
     driftCandidates,
+    spreadsheetEscapeArtifacts: {
+      total: spreadsheetEscapeArtifacts.length,
+      counts: spreadsheetEscapeArtifactCounts,
+      rows: spreadsheetEscapeArtifacts,
+    },
     coverage,
   };
 
@@ -183,6 +387,45 @@ async function main() {
     for (const drift of driftCandidates) {
       console.log(
         `${drift.stateCode} | DB "${drift.dbName}" ≈ canonical "${drift.canonicalName}"`,
+      );
+    }
+  }
+
+  printSection("Spreadsheet Escape Artifacts");
+  if (spreadsheetEscapeArtifacts.length === 0) {
+    console.log(
+      "No suspicious leading apostrophe spreadsheet-escape artifacts found.",
+    );
+  } else {
+    console.log(
+      `Found ${spreadsheetEscapeArtifacts.length} suspicious value(s) that look like spreadsheet-escape remnants.`,
+    );
+    console.log(`Lga.name: ${spreadsheetEscapeArtifactCounts.lgaName}`);
+    console.log(`Ward.name: ${spreadsheetEscapeArtifactCounts.wardName}`);
+    console.log(`Ward.code: ${spreadsheetEscapeArtifactCounts.wardCode}`);
+    console.log(
+      `PollingUnit.name: ${spreadsheetEscapeArtifactCounts.pollingUnitName}`,
+    );
+    console.log(
+      `PollingUnit.code: ${spreadsheetEscapeArtifactCounts.pollingUnitCode}`,
+    );
+
+    for (const artifact of spreadsheetEscapeArtifacts.slice(0, 40)) {
+      const scope =
+        artifact.model === "Lga"
+          ? `${artifact.stateCode}`
+          : artifact.model === "Ward"
+            ? `${artifact.stateCode} | ${artifact.lgaName}`
+            : `${artifact.stateCode} | ${artifact.lgaName} | ${artifact.wardName}`;
+
+      console.log(
+        `${artifact.model}.${artifact.field} | ${scope} | id=${artifact.id} | ${artifact.value}`,
+      );
+    }
+
+    if (spreadsheetEscapeArtifacts.length > 40) {
+      console.log(
+        `...and ${spreadsheetEscapeArtifacts.length - 40} more suspicious value(s)`,
       );
     }
   }

@@ -7,8 +7,8 @@ import {
   parseExportFormat,
   getExportContentType,
   buildAttachmentFilename,
-  parseBooleanParam,
 } from "@/lib/exports/shared";
+import { parseBooleanParam } from "@/lib/server/query-params";
 import { renderCsv } from "@/lib/exports/csv";
 import { renderXlsx } from "@/lib/exports/xlsx";
 

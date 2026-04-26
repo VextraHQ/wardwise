@@ -39,6 +39,8 @@
 - Stats endpoint accepts `from`/`to` query params
 - Add `createdAt: { gte, lte }` to all `where` clauses
 - Date range picker in overview UI
+- Shared preset-first date range control lives at `src/components/shared/date-range-filter.tsx`
+- Future dates are disabled for reporting filters; custom ranges use month/year dropdowns for historical navigation
 
 **Files:** `stats/route.ts`, `collect.ts`, `use-collect.ts`, `campaign-overview.tsx`
 

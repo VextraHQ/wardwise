@@ -164,14 +164,25 @@ WardWise now stores invite and reset links in `AuthToken`.
 
 ## Environment Variables
 
-| Variable          | Required | Purpose                                    |
-| ----------------- | -------- | ------------------------------------------ |
-| `NEXTAUTH_URL`    | Yes      | Base URL used for auth redirects and links |
-| `NEXTAUTH_SECRET` | Yes      | JWT signing secret                         |
-| `RESEND_API_KEY`  | No       | Enables production email delivery for auth |
-| `AUTH_FROM_EMAIL` | No       | Sender identity for invite/reset email     |
+| Variable          | Required | Purpose                                                                                        |
+| ----------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `NEXTAUTH_URL`    | Yes      | Base URL used for auth redirects and links                                                     |
+| `NEXTAUTH_SECRET` | Yes      | JWT signing secret                                                                             |
+| `RESEND_API_KEY`  | No       | Enables production email delivery (auth + any future transactional email)                      |
+| `EMAIL_FROM`      | No       | Primary sender identity for all WardWise email. Takes precedence over `AUTH_FROM_EMAIL`.       |
+| `AUTH_FROM_EMAIL` | No       | Legacy fallback sender. Used only when `EMAIL_FROM` is not set. Kept for existing deployments. |
 
 If email delivery is not configured, WardWise still supports manual invite/reset link sharing from the admin UI.
+
+### Email Transport
+
+Email sending is split into a generic transport and an auth-specific helper:
+
+- `src/lib/email/send.ts` is the generic Resend wrapper (`sendEmail({ to, subject, html, text?, replyTo?, from? })`). Future features like the public contact form reuse this directly.
+- `src/lib/email/auth.ts` exposes `canSendAuthLinkEmail()` and `sendAuthLinkEmail(...)` for invite/reset delivery, and delegates to `sendEmail` for the actual POST.
+- `src/lib/email/templates/auth-link.ts` owns the invite/reset HTML + text body. User-supplied fields (name, url) are HTML-escaped.
+
+WardWise intentionally keeps this layer on raw `fetch` plus plain HTML/text templates for now. Revisit the Resend SDK or React Email only when multiple templates, richer email features, or shared branded components justify the extra dependency and abstraction cost.
 
 ---
 
@@ -184,7 +195,10 @@ If email delivery is not configured, WardWise still supports manual invite/reset
 | `src/lib/auth/session.ts`                                   | Session lifetime policy helpers                                |
 | `src/lib/auth/redirects.ts`                                 | Safe post-login callback URL and default home resolution       |
 | `src/lib/auth/storage.ts`                                   | Auth-specific user/session persistence helpers                 |
-| `src/lib/auth/links.ts`                                     | Invite/reset token issuing, hashing, consuming, emailing       |
+| `src/lib/auth/links.ts`                                     | Invite/reset token issuing, hashing, consuming                 |
+| `src/lib/email/send.ts`                                     | Generic Resend wrapper shared by auth + future transactional   |
+| `src/lib/email/auth.ts`                                     | Auth email capability check + `sendAuthLinkEmail` entrypoint   |
+| `src/lib/email/templates/auth-link.ts`                      | Escaped HTML/text body for invite + password-reset email       |
 | `src/lib/auth/client.ts`                                    | Browser auth client for login, forgot-password, and setup      |
 | `src/lib/core/metadata.ts`                                  | Shared metadata helpers, including non-indexable auth metadata |
 | `src/proxy.ts`                                              | Entry guard for protected routes                               |
@@ -207,3 +221,5 @@ If email delivery is not configured, WardWise still supports manual invite/reset
 - Add candidate-facing copy in docs and support playbooks for link expiry / resend behavior
 - Evaluate whether admin accounts should also move to secure reset-link-first recovery if multiple staff accounts become common
 - Split `onboardingStatus` from auth access state only when the product truly needs both
+- Unify invite orchestration only if invite delivery policy changes or new invite entrypoints appear; the current split is acceptable now that transport/template logic lives in the shared email layer
+- When the public contact form ships, route it through `src/lib/email/send.ts` and record consistent delivery/audit events across auth and contact email flows

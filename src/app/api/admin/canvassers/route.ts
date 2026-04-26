@@ -2,7 +2,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import { phoneSchema } from "@/lib/schemas/common-schemas";
+import { createCanvasserSchema } from "@/lib/schemas/admin-schemas";
+import {
+  parseLimitOffsetParams,
+  parseOptionalStringParam,
+} from "@/lib/server/query-params";
 
 // GET /api/admin/canvassers - Get all canvassers with optional filtering
 export async function GET(request: NextRequest) {
@@ -11,11 +15,13 @@ export async function GET(request: NextRequest) {
     if (error) return error;
 
     const { searchParams } = new URL(request.url);
-    const candidateId = searchParams.get("candidateId");
-    const state = searchParams.get("state");
-    const lga = searchParams.get("lga");
-    const limit = Math.min(parseInt(searchParams.get("limit") || "100"), 100);
-    const offset = Math.max(parseInt(searchParams.get("offset") || "0"), 0);
+    const candidateId = parseOptionalStringParam(searchParams, "candidateId");
+    const state = parseOptionalStringParam(searchParams, "state");
+    const lga = parseOptionalStringParam(searchParams, "lga");
+    const { limit, offset } = parseLimitOffsetParams(searchParams, {
+      defaultLimit: 100,
+      maxLimit: 100,
+    });
 
     // Build where clause for filters
     const where: Prisma.CanvasserWhereInput = {};
@@ -88,25 +94,18 @@ export async function POST(request: NextRequest) {
     if (error) return error;
 
     const body = await request.json();
-    const { code, name, phone, candidateId, ward, lga, state } = body;
-
-    // Validate required fields
-    if (!code || !name || !phone || !candidateId) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
-    }
-
-    const parsedPhone = phoneSchema.safeParse(phone);
-    if (!parsedPhone.success) {
+    const parsed = createCanvasserSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
         {
-          error: parsedPhone.error.issues[0]?.message || "Invalid phone number",
+          error: "Validation failed",
+          details: parsed.error.flatten().fieldErrors,
         },
         { status: 400 },
       );
     }
+
+    const { code, name, phone, candidateId, ward, lga, state } = parsed.data;
 
     const existingCanvasser = await prisma.canvasser.findUnique({
       where: { code },
@@ -122,7 +121,7 @@ export async function POST(request: NextRequest) {
       data: {
         code,
         name,
-        phone: parsedPhone.data,
+        phone,
         candidateId,
         ward: ward || null,
         lga: lga || null,

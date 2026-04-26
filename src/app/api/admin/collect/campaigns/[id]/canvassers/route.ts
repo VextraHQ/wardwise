@@ -2,15 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import { z } from "zod";
 import { logAudit } from "@/lib/core/audit";
-import { phoneSchema } from "@/lib/schemas/common-schemas";
-
-const addCanvasserSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  phone: phoneSchema,
-  zone: z.string().optional(),
-});
+import { addCampaignCanvasserSchema } from "@/lib/schemas/collect-schemas";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -89,7 +82,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
     const body = await request.json();
-    const parsed = addCanvasserSchema.safeParse(body);
+    const parsed = addCampaignCanvasserSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         {
@@ -103,9 +96,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const canvasser = await prisma.campaignCanvasser.create({
       data: {
         campaignId: id,
-        name: parsed.data.name.trim(),
-        phone: parsed.data.phone.trim(),
-        zone: parsed.data.zone?.trim() || null,
+        name: parsed.data.name,
+        phone: parsed.data.phone,
+        zone: parsed.data.zone || null,
       },
     });
 

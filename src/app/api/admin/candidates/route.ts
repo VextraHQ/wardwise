@@ -6,7 +6,8 @@ import type { Candidate } from "@/types/candidate";
 import { createCandidateSchema } from "@/lib/schemas/admin-schemas";
 import { logAudit } from "@/lib/core/audit";
 import { sanitizeCandidateConstituencyLgaIds } from "@/lib/geo/constituency-server";
-import { issueAuthLink, sendAuthLinkEmail } from "@/lib/auth/links";
+import { issueAuthLink } from "@/lib/auth/links";
+import { sendAuthLinkEmail } from "@/lib/email/auth";
 
 // Transform Prisma candidate to API response shape
 function transformCandidate(c: {
@@ -215,6 +216,9 @@ export async function POST(request: NextRequest) {
 
     let deliveryMethod: "email" | "manual" = "manual";
 
+    // TODO(invites): If invite delivery policy changes, unify this orchestration
+    // with `createInviteForUser` so new-candidate and existing-user invite paths
+    // stay aligned without duplicating route-level send logic.
     try {
       const emailResult = await sendAuthLinkEmail({
         to: email,

@@ -233,10 +233,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           enabledLgaIds: d.enabledLgaIds,
         }),
         ...(d.customQuestion1 !== undefined && {
-          customQuestion1: d.customQuestion1 || null,
+          customQuestion1: d.customQuestion1,
         }),
         ...(d.customQuestion2 !== undefined && {
-          customQuestion2: d.customQuestion2 || null,
+          customQuestion2: d.customQuestion2,
         }),
         ...(d.status !== undefined && { status: d.status }),
         ...clientReportData,

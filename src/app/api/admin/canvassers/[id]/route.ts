@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import { phoneSchema } from "@/lib/schemas/common-schemas";
+import { updateCanvasserSchema } from "@/lib/schemas/admin-schemas";
 
 // GET /api/admin/canvassers/[id] - Get canvasser by ID
 export async function GET(
@@ -68,7 +68,18 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { code, name, phone, candidateId, ward, lga, state } = body;
+    const parsed = updateCanvasserSchema.safeParse({ ...body, id });
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: parsed.error.flatten().fieldErrors,
+        },
+        { status: 400 },
+      );
+    }
+
+    const { code, name, phone, candidateId, ward, lga, state } = parsed.data;
 
     // Check if canvasser exists
     const existingCanvasser = await prisma.canvasser.findUnique({
@@ -105,28 +116,13 @@ export async function PUT(
       }
     }
 
-    let normalizedPhone: string | undefined;
-    if (phone) {
-      const parsedPhone = phoneSchema.safeParse(phone);
-      if (!parsedPhone.success) {
-        return NextResponse.json(
-          {
-            error:
-              parsedPhone.error.issues[0]?.message || "Invalid phone number",
-          },
-          { status: 400 },
-        );
-      }
-      normalizedPhone = parsedPhone.data;
-    }
-
     // Update canvasser
     const updatedCanvasser = await prisma.canvasser.update({
       where: { id },
       data: {
         ...(code && { code }),
         ...(name && { name }),
-        ...(normalizedPhone && { phone: normalizedPhone }),
+        ...(phone && { phone }),
         ...(candidateId && { candidateId }),
         ...(ward !== undefined && { ward: ward || null }),
         ...(lga !== undefined && { lga: lga || null }),

@@ -61,7 +61,9 @@ export function ContactContent() {
   const onSubmit = async (data: ContactFormValues) => {
     setFormStatus("loading");
 
-    // TODO: Implement actual form submission to API endpoint
+    // TODO(contact): Wire this to a server API route that reuses
+    // `src/lib/email/send.ts` and records consistent contact/email delivery
+    // events once the public contact flow ships.
     console.log("Form data:", data);
 
     await new Promise((resolve) => setTimeout(resolve, 1500));

@@ -4,7 +4,8 @@ import { prisma } from "@/lib/core/prisma";
 import {
   buildSubmissionWhere,
   parseSubmissionFilters,
-} from "@/lib/exports/submissions";
+} from "@/lib/collect/submission-query";
+import { parsePaginationParams } from "@/lib/server/query-params";
 import { generateRefCode } from "@/lib/utils";
 
 export async function GET(
@@ -17,11 +18,7 @@ export async function GET(
 
     const { id } = await params;
     const sp = request.nextUrl.searchParams;
-    const page = Math.max(1, parseInt(sp.get("page") || "1", 10));
-    const pageSize = Math.min(
-      100,
-      Math.max(1, parseInt(sp.get("pageSize") || "20", 10)),
-    );
+    const { page, pageSize } = parsePaginationParams(sp);
     const where = buildSubmissionWhere(id, parseSubmissionFilters(sp));
 
     const [submissions, total] = await Promise.all([

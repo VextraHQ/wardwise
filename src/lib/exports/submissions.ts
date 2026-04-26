@@ -1,26 +1,16 @@
-import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/core/prisma";
-import { composeFullName, parseRefCodePrefix } from "@/lib/utils";
+import { composeFullName } from "@/lib/utils";
+import {
+  buildSubmissionWhere,
+  type SubmissionFilters,
+} from "@/lib/collect/submission-query";
 import {
   buildExportFilename,
   formatExportDateTime,
-  parseBooleanParam,
-  parseIntegerParam,
   redactId,
   sanitizeSpreadsheetText,
   type ExportTable,
 } from "./shared";
-
-export type SubmissionFilters = {
-  search?: string;
-  lgaId?: number;
-  wardId?: number;
-  role?: string;
-  isFlagged?: boolean;
-  isVerified?: boolean;
-  canvasserName?: string;
-  canvasserPhone?: string;
-};
 
 function getSubmissionNameParts(submission: {
   fullName: string | null;
@@ -40,57 +30,6 @@ function getSubmissionNameParts(submission: {
         lastName: submission.lastName,
       }),
   };
-}
-
-export function parseSubmissionFilters(
-  searchParams: URLSearchParams,
-): SubmissionFilters {
-  return {
-    search: searchParams.get("search") || undefined,
-    lgaId: parseIntegerParam(searchParams.get("lgaId")),
-    wardId: parseIntegerParam(searchParams.get("wardId")),
-    role: searchParams.get("role") || undefined,
-    isFlagged: parseBooleanParam(searchParams.get("isFlagged")),
-    isVerified: parseBooleanParam(searchParams.get("isVerified")),
-    canvasserName: searchParams.get("canvasserName") || undefined,
-    canvasserPhone: searchParams.get("canvasserPhone") || undefined,
-  };
-}
-
-export function buildSubmissionWhere(
-  campaignId: string,
-  filters: SubmissionFilters,
-): Prisma.CollectSubmissionWhereInput {
-  const where: Prisma.CollectSubmissionWhereInput = { campaignId };
-
-  if (filters.search) {
-    const refCodePrefix = parseRefCodePrefix(filters.search);
-
-    where.OR = [
-      { fullName: { contains: filters.search, mode: "insensitive" } },
-      { firstName: { contains: filters.search, mode: "insensitive" } },
-      { middleName: { contains: filters.search, mode: "insensitive" } },
-      { lastName: { contains: filters.search, mode: "insensitive" } },
-      { phone: { contains: filters.search } },
-      { email: { contains: filters.search, mode: "insensitive" } },
-      ...(refCodePrefix ? [{ id: { startsWith: refCodePrefix } }] : []),
-    ];
-  }
-
-  if (filters.lgaId) where.lgaId = filters.lgaId;
-  if (filters.wardId) where.wardId = filters.wardId;
-  if (filters.role) where.role = filters.role;
-  if (filters.isFlagged !== undefined) where.isFlagged = filters.isFlagged;
-  if (filters.isVerified !== undefined) where.isVerified = filters.isVerified;
-  if (filters.canvasserName) {
-    where.canvasserName = {
-      equals: filters.canvasserName,
-      mode: "insensitive",
-    };
-  }
-  if (filters.canvasserPhone) where.canvasserPhone = filters.canvasserPhone;
-
-  return where;
 }
 
 export async function buildSubmissionsExportTable(

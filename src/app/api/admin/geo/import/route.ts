@@ -9,14 +9,9 @@ import type {
 } from "@/types/geo";
 
 const MAX_ROWS = 5000;
-const FORMULA_CHARS = ["=", "+", "-", "@", "\t", "\r"];
 
 function sanitize(value: string): string {
-  let v = value.trim();
-  if (v.length > 0 && FORMULA_CHARS.includes(v[0])) {
-    v = "'" + v;
-  }
-  return v;
+  return value.trim();
 }
 
 type ImportLevel = "lga" | "ward" | "polling-unit";

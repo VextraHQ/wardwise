@@ -99,7 +99,7 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-4">
       {/* Account Info */}
       <Card className="border-border/60 rounded-sm shadow-none">
         <CardHeader>

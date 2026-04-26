@@ -552,7 +552,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-4">
       {/* Stats row */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
         {stats.map((stat) => (

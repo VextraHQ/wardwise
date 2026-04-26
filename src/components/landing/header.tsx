@@ -16,8 +16,8 @@ type SiteHeaderProps = {
 };
 
 export function SiteHeader({ className }: SiteHeaderProps) {
-  const [scrolled, setScrolled] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState<boolean>(false);
+  const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const { data: session, status } = useSession();
@@ -138,7 +138,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
         leaveTo="opacity-0"
       >
         <div
-          className="bg-foreground/40 absolute inset-x-0 top-full z-30 h-[200vh] lg:hidden"
+          className="from-background/70 via-background/55 to-background/40 absolute inset-x-0 top-full z-30 h-[200vh] bg-linear-to-b backdrop-blur-[2px] lg:hidden"
           onClick={() => setIsMobileOpen(false)}
           aria-hidden={true}
         />

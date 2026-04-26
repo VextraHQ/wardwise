@@ -46,16 +46,17 @@ Chosen over in-memory because the app deploys to Vercel (serverless — no share
 
 ## Key Files
 
-| File                                | Purpose                                                   |
-| ----------------------------------- | --------------------------------------------------------- |
-| `src/lib/auth/links.ts`             | One-time invite/reset link lifecycle                      |
-| `src/lib/auth/guards.ts`            | Shared auth wrapper layer (`requireAdmin()`, page guards) |
-| `src/proxy.ts`                      | Server-side Edge route protection (Next.js 16 proxy)      |
-| `src/lib/core/rate-limit.ts`        | Upstash rate limiters (submit + split auth flows)         |
-| `src/lib/core/audit.ts`             | `logAudit()` fire-and-forget utility                      |
-| `src/lib/schemas/common-schemas.ts` | Shared email, phone, NIN, and VIN validation helpers      |
-| `src/lib/schemas/admin-schemas.ts`  | All Zod schemas (candidate, canvasser, campaign)          |
-| `.env.example`                      | Environment variable template                             |
+| File                               | Purpose                                                                                            |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `src/lib/auth/links.ts`            | One-time invite/reset link lifecycle                                                               |
+| `src/lib/auth/guards.ts`           | Shared auth wrapper layer (`requireAdmin()`, page guards)                                          |
+| `src/proxy.ts`                     | Server-side Edge route protection (Next.js 16 proxy)                                               |
+| `src/lib/core/rate-limit.ts`       | Upstash rate limiters (submit + split auth flows)                                                  |
+| `src/lib/core/audit.ts`            | `logAudit()` fire-and-forget utility                                                               |
+| `src/lib/schemas/field-schemas.ts` | Shared email, phone, NIN, VIN, APC-or-NIN, and trimmed-text primitives                             |
+| `src/lib/schemas/admin-schemas.ts` | All Zod schemas (candidate, canvasser, campaign)                                                   |
+| `src/lib/server/query-params.ts`   | Shared query-param helpers (pagination, limit/offset, strict int/bool parsing — rejects `"12abc"`) |
+| `.env.example`                     | Environment variable template                                                                      |
 
 ---
 

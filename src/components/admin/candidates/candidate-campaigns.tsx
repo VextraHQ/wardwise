@@ -182,7 +182,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <Badge

@@ -2,14 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import { z } from "zod";
 import { logAudit } from "@/lib/core/audit";
-
-const updateSubmissionSchema = z.object({
-  isFlagged: z.boolean().optional(),
-  adminNotes: z.string().optional(),
-  isVerified: z.boolean().optional(),
-});
+import { updateSubmissionSchema } from "@/lib/schemas/admin-schemas";
 
 // Shared guard: fetch submission + campaign status, block if closed
 async function getSubmissionWithGuard(sid: string) {
@@ -142,9 +136,7 @@ export async function PATCH(
       where: { id: sid },
       data: {
         ...(d.isFlagged !== undefined && { isFlagged: d.isFlagged }),
-        ...(d.adminNotes !== undefined && {
-          adminNotes: d.adminNotes || null,
-        }),
+        ...(d.adminNotes !== undefined && { adminNotes: d.adminNotes }),
         ...(d.isVerified !== undefined && { isVerified: d.isVerified }),
       },
     });

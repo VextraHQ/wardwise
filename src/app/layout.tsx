@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppProviders } from "./providers";
@@ -22,6 +22,13 @@ const geistMono = Geist_Mono({
 const defaultTitle = "WardWise | From Ward to Victory";
 const defaultDescription =
   "Nigeria's first location-precise civic intelligence platform for voter insights organized by LGA, Ward, and Polling Unit.";
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f5f5ed" },
+    { media: "(prefers-color-scheme: dark)", color: "#09282a" },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: getMetadataBase(),
@@ -53,7 +60,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body
-        className={`${geistSans.variable} ${geistMono.variable} selection:bg-primary/30 antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} selection:bg-primary/30 selection:text-foreground antialiased`}
       >
         <AppProviders>{children}</AppProviders>
         <Analytics />

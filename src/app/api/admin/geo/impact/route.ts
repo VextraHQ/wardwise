@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
+import { parseRequiredIntegerParam } from "@/lib/server/query-params";
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,19 +10,19 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type");
-    const idParam = searchParams.get("id");
 
-    if (!type || !idParam) {
+    if (!type) {
       return NextResponse.json(
         { error: "type and id are required" },
         { status: 400 },
       );
     }
 
-    const id = parseInt(idParam, 10);
-    if (isNaN(id)) {
-      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    const idResult = parseRequiredIntegerParam(searchParams, "id", "id");
+    if ("error" in idResult) {
+      return NextResponse.json({ error: idResult.error }, { status: 400 });
     }
+    const id = idResult.value;
 
     let children = 0;
     let submissions = 0;

@@ -20,7 +20,7 @@
 - Prisma schema: Campaign, CollectSubmission, Lga, Ward, PollingUnit models with unique constraints
 - Canonical geo foundation added:
   - `prisma/seed-states-lgas.ts` — idempotent national LGA seed
-  - `prisma/audit-geo.ts` — live-vs-canonical geo audit
+  - `prisma/audit-geo.ts` — live-vs-canonical geo audit plus spreadsheet-escape artifact check
   - `scripts/sync_state_wards_pus.mjs` — official state ward/PU sync pipeline
 - Public form at `/c/[slug]`: 7-screen multi-step registration with localStorage persistence
 - Admin: Campaign CRUD, submissions table with PU codes, CSV export, QR codes, canvasser aggregation
@@ -106,11 +106,19 @@
 
 ### What Changed (Batch 10 — Phone Canonicalization)
 
-- **Shared phone canonicalization**: `phoneSchema` now validates and returns canonical Nigerian mobile numbers in `+234XXXXXXXXXX` format. It accepts common user input forms like `08031234567`, `8031234567`, `2348031234567`, `+2348031234567`, and visually separated values like `0803 123 4567`.
+- **Shared phone canonicalization**: `nigerianPhoneSchema` (in `src/lib/schemas/field-schemas.ts`) validates and returns canonical Nigerian mobile numbers in `+234XXXXXXXXXX` format. It accepts common user input forms like `08031234567`, `8031234567`, `2348031234567`, `+2348031234567`, and visually separated values like `0803 123 4567`.
 - **No silent truncation**: overlong or malformed values are rejected instead of being sliced into a valid-looking number.
 - **Optional phone helper**: `optionalNigerianPhoneSchema` preserves empty optional fields but canonicalizes valid values when present. Use it for optional attribution/contact fields.
 - **Collect canvasser attribution fixed for future writes**: public submissions now canonicalize `canvasserPhone` when a referrer is provided, matching the already-canonical supporter `phone` field.
-- **Existing live data left untouched**: this hardening affects future writes only. Historical rows should be handled by a separate dry-run audit/backfill so campaign data is not merged or deleted accidentally.
+- **Existing live data cleaned safely**: the initial `canvasserPhone` backfill found two valid local-format values, normalized both to `+234XXXXXXXXXX`, and found no invalid/skipped rows or mixed-format groups. The one-time cleanup script was removed after verification.
+
+### What Changed (Batch 11 — Reporting Date Filters)
+
+- **Shared reporting date utilities**: date preset ranges, query formatting, picker bounds, and display labels now live in `src/lib/date-ranges.ts`.
+- **Shared date range control**: admin campaign overview and client Campaign Insights now use `src/components/shared/date-range-filter.tsx` for the preset-first date filter (`7D`, `30D`, `This month`/`Today`, `All time`, `Custom`).
+- **Mobile picker behavior**: `Custom` opens a bottom sheet on mobile and a popover on larger screens, avoiding cramped or mispositioned mobile popovers.
+- **Reporting date bounds**: reporting filters disable future dates and cap the picker at the current month because Collect submission analytics only represent historical/current activity.
+- **Historical navigation**: the custom calendar uses month/year dropdowns so older campaign periods remain reachable as data accumulates.
 
 ### What Changed (Batch 2)
 
@@ -317,6 +325,11 @@ model PollingUnit {
 - Submission and canvasser exports use human-readable Nigeria time instead of raw ISO timestamps.
 - Redacted submission exports keep operational names, phone numbers, and canvasser details visible.
 - Redacted submission exports mask sensitive voter identity fields such as `APC/NIN` and `VIN`.
+
+### Submission Filter Plumbing
+
+- `SubmissionFilters`, `parseSubmissionFilters`, and `buildSubmissionWhere` live in `src/lib/collect/submission-query.ts` (not in `src/lib/exports/submissions.ts`, which is now export/spreadsheet only).
+- The filter parser uses the shared query-param helpers in `src/lib/server/query-params.ts`, so `?lgaId=12abc` is rejected instead of silently truncating to `12`.
 
 ## File Structure
 
