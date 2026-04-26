@@ -54,7 +54,7 @@ export function PlatformPillarsSection() {
           </motion.div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {platformPillars.map((pillar, index) => (
             <motion.article
               key={pillar.title}
@@ -65,27 +65,29 @@ export function PlatformPillarsSection() {
               className="group border-border/60 bg-card hover:border-primary/50 relative flex flex-col overflow-hidden rounded-4xl border shadow-sm transition-all duration-300 hover:shadow-sm"
             >
               {/* Module Header Area */}
-              <div className="border-border/60 bg-muted/30 flex items-center justify-between border-b px-6 py-4">
-                <div className="flex items-center gap-3">
+              <div className="border-border/60 bg-muted/30 flex flex-wrap items-start justify-between gap-2.5 border-b px-5 py-4 sm:px-6">
+                <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
                   <span className="text-primary/40 font-mono text-[10px] font-black tracking-widest uppercase">
                     MOD_CORE_0{index + 1}
                   </span>
                   <div className="bg-primary/20 h-3 w-px" />
-                  <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                  <span className="text-muted-foreground min-w-0 text-[10px] font-bold tracking-widest uppercase">
                     {pillar.focus}
                   </span>
                 </div>
                 <div
-                  className={`flex items-center gap-1.5 rounded-full border px-2 py-0.5 ${index === 2 ? "border-orange-500/20 bg-orange-500/10" : "border-primary/20 bg-primary/10"}`}
+                  className={`shrink-0 rounded-full border px-2 py-0.5 ${index === 2 ? "border-orange-500/20 bg-orange-500/10" : "border-primary/20 bg-primary/10"}`}
                 >
-                  <div
-                    className={`size-1 animate-pulse rounded-full ${index === 2 ? "bg-orange-500" : "bg-primary"}`}
-                  />
-                  <span
-                    className={`text-[8px] font-bold uppercase ${index === 2 ? "text-orange-600" : "text-primary"}`}
-                  >
-                    {index === 2 ? "Active" : "Ready"}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <div
+                      className={`size-1 animate-pulse rounded-full ${index === 2 ? "bg-orange-500" : "bg-primary"}`}
+                    />
+                    <span
+                      className={`text-[8px] font-bold uppercase ${index === 2 ? "text-orange-600" : "text-primary"}`}
+                    >
+                      {index === 2 ? "Active" : "Ready"}
+                    </span>
+                  </div>
                 </div>
               </div>
 

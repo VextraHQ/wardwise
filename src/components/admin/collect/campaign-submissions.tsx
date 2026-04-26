@@ -484,7 +484,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
   return (
     <div className="space-y-4">
       {/* Toolbar */}
-      <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+      <div className="grid grid-cols-1 gap-2 lg:grid-cols-[auto_minmax(18rem,1fr)_auto] lg:items-center lg:gap-3">
         <div
           role="group"
           aria-label="Filter by review status"
@@ -522,7 +522,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
             );
           })}
         </div>
-        <div className="relative min-w-0 sm:flex-1">
+        <div className="relative min-w-0 lg:min-w-72 xl:min-w-88">
           <IconSearch className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             placeholder="Search by name, phone, email, or reference..."
@@ -532,10 +532,10 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
               setPage(1);
               clearSelection();
             }}
-            className="rounded-sm pl-9"
+            className="rounded-sm pl-9 text-sm"
           />
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:w-auto">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-[minmax(10rem,12rem)_minmax(9rem,1fr)] lg:flex lg:w-auto lg:items-center">
           <Select
             value={roleFilter}
             onValueChange={(v) => {
@@ -544,7 +544,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
               clearSelection();
             }}
           >
-            <SelectTrigger className="w-full rounded-sm sm:w-40">
+            <SelectTrigger className="w-full rounded-sm lg:w-40">
               <SelectValue placeholder="All Roles" />
             </SelectTrigger>
             <SelectContent>
@@ -561,7 +561,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
                 size="sm"
                 disabled={total === 0}
                 title={total === 0 ? "No submissions to export" : undefined}
-                className="h-9 w-full justify-center rounded-sm px-4 font-mono text-[10px] font-bold tracking-widest uppercase shadow-sm sm:w-auto"
+                className="h-9 w-full justify-center rounded-sm px-4 font-mono text-[10px] font-bold tracking-widest uppercase shadow-sm lg:w-auto"
               >
                 <IconFileExport className="mr-2 h-4 w-4" />
                 Export

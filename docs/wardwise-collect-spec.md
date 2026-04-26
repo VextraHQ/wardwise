@@ -112,6 +112,14 @@
 - **Collect canvasser attribution fixed for future writes**: public submissions now canonicalize `canvasserPhone` when a referrer is provided, matching the already-canonical supporter `phone` field.
 - **Existing live data cleaned safely**: the initial `canvasserPhone` backfill found two valid local-format values, normalized both to `+234XXXXXXXXXX`, and found no invalid/skipped rows or mixed-format groups. The one-time cleanup script was removed after verification.
 
+### What Changed (Batch 11 — Reporting Date Filters)
+
+- **Shared reporting date utilities**: date preset ranges, query formatting, picker bounds, and display labels now live in `src/lib/date-ranges.ts`.
+- **Shared date range control**: admin campaign overview and client Campaign Insights now use `src/components/shared/date-range-filter.tsx` for the preset-first date filter (`7D`, `30D`, `This month`/`Today`, `All time`, `Custom`).
+- **Mobile picker behavior**: `Custom` opens a bottom sheet on mobile and a popover on larger screens, avoiding cramped or mispositioned mobile popovers.
+- **Reporting date bounds**: reporting filters disable future dates and cap the picker at the current month because Collect submission analytics only represent historical/current activity.
+- **Historical navigation**: the custom calendar uses month/year dropdowns so older campaign periods remain reachable as data accumulates.
+
 ### What Changed (Batch 2)
 
 - **LGA dropdown**: Shows only the campaign's `enabledLgaIds` (inherited from candidate's constituency boundary, or restricted subset).

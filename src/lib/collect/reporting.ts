@@ -1,6 +1,14 @@
 import { format } from "date-fns";
+import {
+  formatQueryDate as formatSharedQueryDate,
+  getPresetRange as getSharedPresetRange,
+  type DateRangePreset,
+} from "@/lib/date-ranges";
 
-export type CampaignReportRangePreset = "today" | "7d" | "30d" | "all";
+export type CampaignReportRangePreset = Extract<
+  DateRangePreset,
+  "today" | "7d" | "30d" | "all"
+>;
 
 export type CampaignReportDelta = { value: string; positive: boolean };
 
@@ -21,7 +29,7 @@ export const STATUS_COPY: Record<string, string> = {
 
 /** Formats a query date */
 export function formatQueryDate(date: Date | undefined): string | undefined {
-  return date ? format(date, "yyyy-MM-dd") : undefined;
+  return formatSharedQueryDate(date);
 }
 
 /** Parses a date key */
@@ -43,25 +51,7 @@ export function getPresetRange(
   preset: CampaignReportRangePreset,
   now = new Date(),
 ): { from?: Date; to?: Date } {
-  switch (preset) {
-    case "today": {
-      const from = new Date(now);
-      from.setHours(0, 0, 0, 0);
-      return { from, to: now };
-    }
-    case "7d": {
-      const from = new Date(now);
-      from.setDate(from.getDate() - 6);
-      return { from, to: now };
-    }
-    case "30d": {
-      const from = new Date(now);
-      from.setDate(from.getDate() - 29);
-      return { from, to: now };
-    }
-    default:
-      return {};
-  }
+  return getSharedPresetRange(preset, now);
 }
 
 /** Gets the prior range for a campaign report if a date range is provided */

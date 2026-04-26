@@ -97,7 +97,7 @@ export function LoginScreen({ callbackUrl }: LoginScreenProps) {
           </span>
         </>
       }
-      description="Sign in to continue into your WardWise workspace with the right role, session policy, and access controls."
+      description="Sign in to access your WardWise dashboard with secure, role-based access controls."
     >
       <AuthCard
         title="Secure Access"

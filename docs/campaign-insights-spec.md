@@ -1,7 +1,7 @@
 # Campaign Insights Spec
 
 > Private read-only campaign reporting for clients on top of Collect.
-> Branch: `develop` | Last updated: 2026-04-16
+> Branch: `develop` | Last updated: 2026-04-26
 > See also: `wardwise-collect-spec.md`, `wardwise-collect-v2-spec.md`, `wardwise-hardening-spec.md`
 
 ---
@@ -15,7 +15,30 @@
 - **Implementation principle** — reuse current Collect stats/export/submission infrastructure via shared server-side query helpers
 - **UI direction chosen** — match the `/c/[slug]` public form architecture and use `/login`-quality access states rather than an “admin lite” dashboard
 - **Access boundary reaffirmed** — passcode reports remain read-only; candidate write actions belong in a future authenticated candidate portal
-- **Implementation state** — core experience implemented; global reporting controls now drive Overview and Analytics consistently
+- **Implementation state** — core experience implemented; report-wide controls now drive Overview and Analytics consistently
+- **Current UX rule** — report is read-first: tabs stay primary, scope controls stay secondary
+- **Current architecture rule** — share date math and reporting helpers, not report/admin UI shells
+
+### What Has Been Done
+
+- Private `/r/[token]` report route, passcode gate, access cookie, and revoked/unavailable states are live
+- Hero, Overview, Supporters, and Analytics tabs are all implemented
+- Read-only export path is live through `/api/campaign-report/*`
+- Report filters now drive summary metrics, compare mode, geography, and analytics consistently
+- Admin campaign settings can enable, preview, regenerate, revoke, and observe report access
+
+### What Changed (Batch 2 — Scope + Architecture Cleanup)
+
+- **Report sticky behavior fixed**: the report shell no longer uses the overflow container that blocked sticky behavior
+- **Report header localized**: the report now owns its own site header and sticky offset token rather than widening the shared header API
+- **Report scope UI unshared**: report and admin now use separate date/filter UI shells
+- **Shared date UI removed**: `src/components/shared/date-range-filter.tsx` was intentionally deleted
+- **Live-apply semantics made explicit**: custom date changes apply immediately; `Done` closes the surface instead of implying staged apply
+- **Report file split cleaned up**:
+  - scope state lives in `src/hooks/use-campaign-insights-scope.ts`
+  - report header/scope rail lives in `src/components/campaign-report/campaign-insights-header.tsx`
+  - overview tab composition lives in `src/components/campaign-report/insights-overview.tsx`
+- **Admin kept operational**: `campaign-overview.tsx` now uses its own local date filter component instead of sharing the report UI shell
 
 ---
 
@@ -369,32 +392,41 @@ Rules:
 - the hero headline total stays all-time and unfiltered
 - date, LGA, role, and compare controls affect the briefing modules and
   analytics below the hero
+- do not put the scope row above the tabs on the report page
 
 ### 3. Global controls
 
-Place a single control row between the hero and the tabs.
+On the report page, keep a two-rail header directly under the hero:
 
-This is the only place where global dashboard controls should live.
+- first rail: tabs
+- second rail: report scope
+
+This is the only place where global reporting controls should live.
 
 Show:
 
-- date presets:
+- report-owned date range control:
   - `Today`
   - `7D`
   - `30D`
   - `All Time`
-- `From` date
-- `To` date
-- `Compare` toggle
-- `Filters` action
-- freshness line:
-  - `Refreshed 8s ago`
-  - `Refresh`
+  - `Custom`
+- `Custom` opens the report-owned range picker:
+  - mobile uses a bottom sheet
+  - tablet/desktop uses a popover
+  - future dates are disabled for reporting
+  - month/year dropdowns are enabled for historical ranges
+- date changes apply live; close actions only dismiss the sheet/popover
+- `Compare` stays beside the scope controls on desktop and inside the report scope sheet on mobile
+- `Filters` stays beside scope controls on desktop and inside the same report scope sheet on mobile
+- `Refresh` remains a quiet utility action, not a primary control
 
 Active filters should render as chips directly below the controls, for example:
 
+- `01 Apr - 26 Apr ×`
 - `Girei ×`
 - `Volunteer ×`
+- `Compare ×`
 - `Clear all`
 
 Rules:
@@ -407,6 +439,7 @@ Rules:
   prior date period
 - range changes should never blank the whole page or look like a hard refresh
 - preserve current data while the new range loads in the background
+- desktop filter popovers should anchor cleanly to the right edge of the scope rail rather than floating into card content
 
 ### 4. Tabs
 
@@ -578,12 +611,10 @@ angle, remove or merge it.
 │ Yola North / Yola South / Girei Federal Constituency                     [Snapshot PDF]     │
 │ Status: Active   Supporters Captured: 1,284                                                   │
 ├──────────────────────────────────────────────────────────────────────────────────────────────┤
-│ [Today] [7D] [30D] [All Time]   [From] [To]   [Compare]   [Filters]   Refreshed 8s ago    │
-│ Active filters: [Girei ×] [Volunteer ×] [Clear all]                                         │
-└──────────────────────────────────────────────────────────────────────────────────────────────┘
-
-┌──────────────────────────────────────────────────────────────────────────────────────────────┐
 │ [Overview]   [Supporters]   [Analytics]                                                      │
+├──────────────────────────────────────────────────────────────────────────────────────────────┤
+│ [Today] [7D] [30D] [All Time] [Custom]   [Compare]   [Filters]   [Refresh]                 │
+│ Active filters: [Girei ×] [Volunteer ×] [Clear all]                                         │
 └──────────────────────────────────────────────────────────────────────────────────────────────┘
 
 OVERVIEW
@@ -658,14 +689,12 @@ ANALYTICS
 └──────────────────────────────┘
 
 ┌──────────────────────────────┐
-│ [7D] [30D] [All] [Compare]   │
-│ [From] [To] [Filters]        │
-│ Refreshed 8s ago             │
-│ Girei ×   Volunteer ×        │
+│ Overview Supporters Analytics│
 └──────────────────────────────┘
 
 ┌──────────────────────────────┐
-│ Overview Supporters Analytics│
+│ All time   Refine   Refresh  │
+│ Girei ×   Volunteer ×        │
 └──────────────────────────────┘
 
 Overview stacks:
@@ -760,7 +789,9 @@ the app:
 - `src/lib/api/campaign-report.ts` for campaign-report API calls
 - `src/hooks/use-campaign-report.ts` for React Query hooks
 - keep top-level page composition in `campaign-insights.tsx`
-- only split out sections that have real UI weight or interaction complexity
+- keep report scope state in `src/hooks/use-campaign-insights-scope.ts`
+- keep report-only UI shells inside `src/components/campaign-report/*`
+- keep admin-only UI shells inside `src/components/admin/collect/*`
 
 ### React Query
 
@@ -781,13 +812,11 @@ Do not over-fragment the report into thin wrapper components.
 
 Preferred approach:
 
-- keep page composition and lightweight overview blocks in `campaign-insights.tsx`
-- split only heavier sections such as:
-  - hero
-  - supporters table/sheet
-  - momentum chart
-  - geography charts
-  - audience breakdown
+- keep `campaign-insights.tsx` as orchestration only
+- keep overview-only blocks grouped together in `insights-overview.tsx`
+- keep report scope/tabs/sticky header behavior grouped together in `campaign-insights-header.tsx`
+- use a hook for scope state because the complexity is state + derived values, not markup
+- allow several private subcomponents inside one feature file when they belong to one screen
 
 This keeps the report understandable for future developers.
 
@@ -808,6 +837,7 @@ This module should own:
 
 - admin routes keep admin auth and call shared helper
 - client report routes use token/passcode access and call the same shared helper
+- admin and report may share data helpers but should not be forced to share the same control shell
 
 This keeps:
 
@@ -841,6 +871,7 @@ This keeps:
 - admin tab system
 - admin moderation controls
 - admin-only language
+- report/admin date filter shells
 
 ---
 
@@ -998,11 +1029,13 @@ The report follows existing campaign reporting rules:
 - [x] Verify no admin-only actions leak through
 - [x] Verify paused/closed/empty states
 - [x] Verify export authorization through token/passcode path
+- [x] Fix sticky behavior by removing the report overflow trap
+- [x] Replace magic sticky spacing with a report-local header height token
 
 ### Phase 7 — IA and visual refinement
 
 - [x] Align the UI label and component/doc naming to `Campaign Insights`
-- [x] Add a single global control row for date range, compare, filters, and freshness
+- [x] Keep tabs first and scope second on the report page
 - [x] Keep the hero focused on identity + one headline metric
 - [x] Reduce repeated overview blocks into `Now`, `Hotspots`, `Field Team Performance`, and `Recent Activity`
 - [x] Keep sharing as a compact overview utility, not a destination
@@ -1013,6 +1046,8 @@ The report follows existing campaign reporting rules:
 - [x] Add prior-period compare overlay to the momentum chart
 - [x] Make date/LGA/role controls drive the summary API and analytics charts
 - [x] Clean up internal module and route naming to `campaign-report`
+- [x] Split report scope state into a hook and local report header module
+- [x] Replace the shared date filter UI with separate report/admin implementations
 
 ## Next Polishing Ideas
 
@@ -1029,11 +1064,13 @@ The report follows existing campaign reporting rules:
 | File                                                            | Role                                                         |
 | --------------------------------------------------------------- | ------------------------------------------------------------ |
 | `src/components/admin/collect/campaign-settings.tsx`            | Add client access controls                                   |
-| `src/components/admin/collect/campaign-overview.tsx`            | Reuse chart/data patterns                                    |
-| `src/app/api/admin/collect/campaigns/[id]/stats/route.ts`       | Current stats source to extract into shared helper           |
-| `src/app/api/admin/collect/campaigns/[id]/submissions/route.ts` | Current submissions source to extract into shared helper     |
-| `src/app/api/admin/collect/campaigns/[id]/export/route.ts`      | Current export source to extract into shared helper          |
-| `src/components/candidate-dashboard/*`                          | Visual/design reference for higher-polish reporting surfaces |
+| `src/components/campaign-report/campaign-insights.tsx`          | Report page orchestration                                    |
+| `src/components/campaign-report/campaign-insights-header.tsx`   | Report tabs + scope rail + sticky behavior                   |
+| `src/components/campaign-report/insights-overview.tsx`          | Overview tab composition and private subcomponents           |
+| `src/components/campaign-report/report-site-header.tsx`         | Report-owned site header / sticky anchor                     |
+| `src/components/admin/collect/campaign-overview-date-filter.tsx`| Admin-owned date filter shell                                |
+| `src/hooks/use-campaign-insights-scope.ts`                      | Report scope state + derived values                          |
+| `src/lib/server/collect-reporting.ts`                           | Shared reporting queries used by admin and report routes     |
 | `prisma/schema.prisma`                                          | Add client report access fields on `Campaign`                |
 
 ---

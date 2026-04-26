@@ -30,12 +30,23 @@ vi.mock("bcryptjs", () => ({
   default: { hash: vi.fn().mockResolvedValue("hashed-password") },
 }));
 
+vi.mock("@/lib/email/auth", () => ({
+  sendAuthLinkEmail: vi.fn(),
+  canSendAuthLinkEmail: vi.fn(),
+}));
+
 import {
   getAuthLinkContext,
   consumeAuthLink,
   generateAuthToken,
-  canSendAuthLinkEmail,
+  createInviteForUser,
+  createPasswordResetForUser,
 } from "./links";
+import { readAuthUserById } from "@/lib/auth/storage";
+import { sendAuthLinkEmail } from "@/lib/email/auth";
+
+const mockReadAuthUserById = vi.mocked(readAuthUserById);
+const mockSendAuthLinkEmail = vi.mocked(sendAuthLinkEmail);
 
 function makeTokenRecord(overrides: Record<string, unknown> = {}) {
   return {
@@ -63,6 +74,7 @@ function makeTokenRecord(overrides: Record<string, unknown> = {}) {
 beforeEach(() => {
   vi.clearAllMocks();
   delete process.env.RESEND_API_KEY;
+  delete process.env.EMAIL_FROM;
   delete process.env.AUTH_FROM_EMAIL;
 });
 
@@ -78,18 +90,6 @@ describe("generateAuthToken", () => {
     const a = generateAuthToken();
     const b = generateAuthToken();
     expect(a).not.toBe(b);
-  });
-});
-
-describe("canSendAuthLinkEmail", () => {
-  it("returns false when env vars are missing", () => {
-    expect(canSendAuthLinkEmail()).toBe(false);
-  });
-
-  it("returns true when both env vars are set", () => {
-    process.env.RESEND_API_KEY = "re_test";
-    process.env.AUTH_FROM_EMAIL = "test@test.com";
-    expect(canSendAuthLinkEmail()).toBe(true);
   });
 });
 
@@ -239,5 +239,74 @@ describe("consumeAuthLink", () => {
 
     expect(result.success).toBe(true);
     expect(mockPrisma.candidate.update).not.toHaveBeenCalled();
+  });
+});
+
+function setupUserForWrapper() {
+  mockReadAuthUserById.mockResolvedValue({
+    user: {
+      id: "user-1",
+      name: "Ada",
+      email: "ada@test.com",
+      role: "candidate",
+      candidateId: "cand-1",
+      candidate: {
+        id: "cand-1",
+        name: "Ada Campaign",
+        onboardingStatus: "credentials_sent",
+      },
+    },
+  } as unknown as Awaited<ReturnType<typeof readAuthUserById>>);
+  mockPrisma.authToken.deleteMany.mockResolvedValue({ count: 0 });
+  mockPrisma.authToken.create.mockResolvedValue({});
+}
+
+describe("createInviteForUser delivery fallback", () => {
+  beforeEach(setupUserForWrapper);
+
+  it("reports email when sendAuthLinkEmail resolves sent: true", async () => {
+    mockSendAuthLinkEmail.mockResolvedValue({ sent: true });
+    const result = await createInviteForUser({ userId: "user-1" });
+    expect(result.deliveryMethod).toBe("email");
+  });
+
+  it("reports manual when sendAuthLinkEmail resolves not_configured", async () => {
+    mockSendAuthLinkEmail.mockResolvedValue({
+      sent: false,
+      reason: "not_configured",
+    });
+    const result = await createInviteForUser({ userId: "user-1" });
+    expect(result.deliveryMethod).toBe("manual");
+  });
+
+  it("reports manual when sendAuthLinkEmail throws", async () => {
+    mockSendAuthLinkEmail.mockRejectedValue(new Error("boom"));
+    const result = await createInviteForUser({ userId: "user-1" });
+    expect(result.deliveryMethod).toBe("manual");
+  });
+});
+
+describe("createPasswordResetForUser delivery fallback", () => {
+  beforeEach(setupUserForWrapper);
+
+  it("reports email when sendAuthLinkEmail resolves sent: true", async () => {
+    mockSendAuthLinkEmail.mockResolvedValue({ sent: true });
+    const result = await createPasswordResetForUser({ userId: "user-1" });
+    expect(result.deliveryMethod).toBe("email");
+  });
+
+  it("reports manual when sendAuthLinkEmail resolves not_configured", async () => {
+    mockSendAuthLinkEmail.mockResolvedValue({
+      sent: false,
+      reason: "not_configured",
+    });
+    const result = await createPasswordResetForUser({ userId: "user-1" });
+    expect(result.deliveryMethod).toBe("manual");
+  });
+
+  it("reports manual when sendAuthLinkEmail throws", async () => {
+    mockSendAuthLinkEmail.mockRejectedValue(new Error("boom"));
+    const result = await createPasswordResetForUser({ userId: "user-1" });
+    expect(result.deliveryMethod).toBe("manual");
   });
 });

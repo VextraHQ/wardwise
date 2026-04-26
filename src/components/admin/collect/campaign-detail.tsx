@@ -128,23 +128,25 @@ export function CampaignDetail({
         </Breadcrumb>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="min-w-0 space-y-3">
-            <div className="flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-              <h1 className="text-foreground text-[1.9rem] leading-none font-extrabold tracking-tighter sm:text-4xl">
+          <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
+            <div className="min-w-0 space-y-2">
+              <h1 className="text-foreground text-3xl leading-tight font-extrabold tracking-tighter wrap-break-word md:text-4xl">
                 {campaignName}
               </h1>
-              <Badge
-                variant="outline"
-                className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-              >
-                {getCampaignBrandingLabel(campaign.brandingType)}
-              </Badge>
-              <Badge
-                variant="outline"
-                className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${CAMPAIGN_STATUS_STYLES[campaign.status] ?? ""}`}
-              >
-                {capitalize(campaign.status)}
-              </Badge>
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <Badge
+                  variant="outline"
+                  className="rounded-sm px-2 py-0.5 font-mono text-[9px] font-bold tracking-widest uppercase sm:text-[10px]"
+                >
+                  {getCampaignBrandingLabel(campaign.brandingType)}
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className={`rounded-sm px-2 py-0.5 font-mono text-[9px] font-bold tracking-widest uppercase sm:text-[10px] ${CAMPAIGN_STATUS_STYLES[campaign.status] ?? ""}`}
+                >
+                  {capitalize(campaign.status)}
+                </Badge>
+              </div>
             </div>
 
             <div className="text-muted-foreground/70 flex flex-col items-start gap-1.5 font-mono text-[9px] font-bold tracking-widest uppercase sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2 sm:text-[10px]">
@@ -182,7 +184,7 @@ export function CampaignDetail({
 
       {/* Tabs */}
       <Tabs value={currentTab} onValueChange={handleTabChange}>
-        <TabsList className="bg-muted w-full justify-start overflow-x-auto rounded-sm p-1 [scrollbar-width:none] sm:w-fit sm:overflow-visible [&::-webkit-scrollbar]:hidden">
+        <TabsList className="bg-muted w-fit max-w-full justify-start overflow-x-auto rounded-sm p-1 [scrollbar-width:none] sm:overflow-visible [&::-webkit-scrollbar]:hidden">
           {TABS.map((tab) => (
             <TabsTrigger
               key={tab}

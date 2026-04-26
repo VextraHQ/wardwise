@@ -19,7 +19,6 @@ vi.mock("@/lib/core/rate-limit", () => ({
 }));
 
 vi.mock("@/lib/auth/links", () => ({
-  canSendAuthLinkEmail: vi.fn().mockReturnValue(true),
   createPasswordResetForUser: vi.fn().mockResolvedValue({
     token: "test-token",
     url: "http://localhost:3000/reset-password/test-token",
@@ -29,8 +28,12 @@ vi.mock("@/lib/auth/links", () => ({
   revokeOutstandingAuthLinks: vi.fn(),
 }));
 
+vi.mock("@/lib/email/auth", () => ({
+  canSendAuthLinkEmail: vi.fn().mockReturnValue(true),
+}));
+
 import { POST } from "./route";
-import { canSendAuthLinkEmail } from "@/lib/auth/links";
+import { canSendAuthLinkEmail } from "@/lib/email/auth";
 
 const mockCanSend = vi.mocked(canSendAuthLinkEmail);
 
