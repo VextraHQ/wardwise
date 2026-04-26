@@ -18,6 +18,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { CampaignInsightsScope } from "@/hooks/use-campaign-insights-scope";
@@ -42,7 +43,6 @@ import {
   IconRefresh,
   IconX,
 } from "@tabler/icons-react";
-import { Separator } from "@radix-ui/react-separator";
 
 const REPORT_DATE_PRESETS = [
   { label: "Today", value: "today" },
@@ -560,7 +560,7 @@ export function CampaignInsightsHeader({
               <ReportDesktopDateFilter scope={scope} />
               <Separator
                 orientation="vertical"
-                className="bg-border/60 h-6 w-px shrink-0"
+                className="bg-border/80 mx-0.5 self-center data-[orientation=vertical]:h-6"
               />
               <div className="ml-auto flex shrink-0 items-center gap-1">
                 <Button
@@ -626,16 +626,16 @@ export function CampaignInsightsHeader({
               className={
                 isMobile
                   ? "text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:border-primary/30 focus-visible:ring-primary/30 inline-flex h-10 w-9 shrink-0 items-center justify-center rounded-sm transition-colors focus-visible:ring-1 focus-visible:outline-none disabled:opacity-50"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground inline-flex h-9 w-10 shrink-0 items-center justify-center rounded-sm transition-colors disabled:opacity-50"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground inline-flex h-9 max-w-[min(14rem,32vw)] min-w-0 shrink-0 items-center gap-1.5 rounded-sm px-2 font-mono text-[9px] font-bold tracking-wider uppercase transition-colors disabled:opacity-50 sm:max-w-none sm:text-[10px]"
               }
             >
               <IconRefresh
-                className={`${isMobile ? "h-3.5 w-3.5" : "mr-1 h-3.5 w-3.5"} ${isFetching ? "animate-spin" : ""}`}
+                className={`h-3.5 w-3.5 shrink-0 ${isFetching ? "animate-spin" : ""}`}
               />
               {isMobile ? (
                 <span className="sr-only">Refresh</span>
               ) : (
-                <span className="sr-only">
+                <span className="truncate">
                   Refreshed {formatUpdatedAgo(dataUpdatedAt)}
                 </span>
               )}
