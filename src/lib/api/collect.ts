@@ -10,6 +10,7 @@ import type {
   CampaignCanvasserRecord,
 } from "@/types/collect";
 
+// Filters for listing submissions (pagination & search)
 export type SubmissionListFilters = {
   page?: number;
   pageSize?: number;
@@ -23,6 +24,7 @@ export type SubmissionListFilters = {
   canvasserPhone?: string;
 };
 
+// Used for bulk actions on submissions (like bulk verify/delete)
 export type BulkSubmissionActionInput = {
   action: string;
   ids?: string[];
@@ -31,7 +33,9 @@ export type BulkSubmissionActionInput = {
   scope?: "selected" | "filtered";
 };
 
-// --- Helpers ---
+// Helpers
+
+// Used for API calls that don't need to be admin/authenticated
 async function publicApiCall<T>(
   endpoint: string,
   options?: RequestInit,
@@ -42,6 +46,7 @@ async function publicApiCall<T>(
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
+    // Try to pull out a helpful detailed error message if there is one
     const firstDetail =
       error.details && typeof error.details === "object"
         ? Object.values(error.details)
@@ -57,6 +62,7 @@ async function publicApiCall<T>(
   return response.json();
 }
 
+// Used for API calls to admin endpoints
 async function adminApiCall<T>(
   endpoint: string,
   options?: RequestInit,
@@ -72,6 +78,7 @@ async function adminApiCall<T>(
   return response.json();
 }
 
+// Helper to construct a query string from an object
 function qs(params: Record<string, string | number | undefined>) {
   const sp = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
@@ -81,16 +88,20 @@ function qs(params: Record<string, string | number | undefined>) {
   return s ? `?${s}` : "";
 }
 
+// Get a filename from the "Content-Disposition" header, if available
 function parseFilenameFromDisposition(
   disposition: string | null,
 ): string | undefined {
   if (!disposition) return undefined;
+  // Try to parse an UTF-8 filename (RFC 5987)
   const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
   if (utf8Match?.[1]) return decodeURIComponent(utf8Match[1]);
+  // Fallback to plain filename
   const basicMatch = disposition.match(/filename="?([^"]+)"?/i);
   return basicMatch?.[1];
 }
 
+// Handles downloading a file response, given a fetch Response and fallback filename
 async function downloadFileResponse(
   response: Response,
   fallbackFilename: string,
@@ -110,32 +121,49 @@ async function downloadFileResponse(
   URL.revokeObjectURL(url);
 }
 
-// --- Public API ---
+// Public API methods (for general users)
 export const publicCollectApi = {
+  // Get the details of a campaign using the slug
   getCampaign: (slug: string) =>
     publicApiCall<{ campaign: PublicCampaign }>(`/campaign/${slug}`),
 
+  // Get list of LGAs for a campaign
   getLgas: (campaignSlug: string) =>
     publicApiCall<{ lgas: GeoLga[] }>(`/lgas?campaignSlug=${campaignSlug}`),
 
+  // Get list of wards for a given LGA
   getWards: (lgaId: number) =>
     publicApiCall<{ wards: GeoWard[] }>(`/wards?lgaId=${lgaId}`),
 
+  // Get the polling units for a ward
   getPollingUnits: (wardId: number) =>
     publicApiCall<{ pollingUnits: GeoPollingUnit[] }>(
       `/units?wardId=${wardId}`,
     ),
 
+  // Submit a new record (e.g. field data)
   submit: (data: Record<string, unknown>) =>
     publicApiCall<{ submission: { id: string }; count: number }>("/submit", {
       method: "POST",
       body: JSON.stringify(data),
     }),
+
+  // Download data needed for offline usage in an LGA
+  getOfflinePack: (params: { campaignSlug: string; lgaIds: number[] }) =>
+    publicApiCall<{
+      campaignUpdatedAt: string;
+      lgas: GeoLga[];
+      wards: GeoWard[];
+      pollingUnits: GeoPollingUnit[];
+    }>("/offline-pack", {
+      method: "POST",
+      body: JSON.stringify(params),
+    }),
 };
 
-// --- Admin API ---
+// Admin API methods (for managing everything)
 export const adminCollectApi = {
-  // Campaigns
+  // ----- Campaign Management -----
   getCampaigns: () =>
     adminApiCall<{ campaigns: CampaignSummary[] }>("/campaigns"),
 
@@ -154,22 +182,26 @@ export const adminCollectApi = {
       { method: "PATCH", body: JSON.stringify(data) },
     ),
 
+  // Generate a new token for viewing reports for this campaign
   regenerateReportToken: (id: string) =>
     adminApiCall<{ clientReportToken: string }>(
       `/campaigns/${id}/campaign-report/regenerate`,
       { method: "POST" },
     ),
 
+  // Reset the client passcode for reports
   resetReportPasscode: (id: string) =>
     adminApiCall<{ passcode: string }>(
       `/campaigns/${id}/campaign-report/reset-passcode`,
       { method: "POST" },
     ),
 
+  // Delete a campaign
   deleteCampaign: (id: string) =>
     adminApiCall<void>(`/campaigns/${id}`, { method: "DELETE" }),
 
-  // Submissions
+  // ----- Submissions Management -----
+  // List submissions, support filtering & pagination
   getSubmissions: (campaignId: string, params?: SubmissionListFilters) =>
     adminApiCall<{
       submissions: CollectSubmission[];
@@ -197,6 +229,7 @@ export const adminCollectApi = {
       })}`,
     ),
 
+  // Update a single submission (e.g. verify/flag/note)
   updateSubmission: (
     sid: string,
     data: { isFlagged?: boolean; adminNotes?: string; isVerified?: boolean },
@@ -206,17 +239,20 @@ export const adminCollectApi = {
       body: JSON.stringify(data),
     }),
 
+  // Delete a single submission
   deleteSubmission: (sid: string) =>
     adminApiCall<{ success: boolean }>(`/submissions/${sid}`, {
       method: "DELETE",
     }),
 
+  // Do a bulk action (e.g. bulk verify/bulk delete)
   bulkAction: (input: BulkSubmissionActionInput) =>
     adminApiCall<{ affected: number }>("/submissions/bulk", {
       method: "POST",
       body: JSON.stringify(input),
     }),
 
+  // Get the action history / audit trail for a submission
   getSubmissionAudit: (sid: string) =>
     adminApiCall<{
       entries: {
@@ -229,7 +265,8 @@ export const adminCollectApi = {
       }[];
     }>(`/submissions/${sid}/audit`),
 
-  // Export
+  // ----- Export Data -----
+  // Export all submission data for a campaign (CSV/XLSX)
   exportSubmissions: async (
     campaignId: string,
     filters?: {
@@ -272,6 +309,7 @@ export const adminCollectApi = {
     );
   },
 
+  // Export the canvasser leaderboard for a campaign
   exportCanvasserLeaderboard: async (
     campaignId: string,
     filters?: {
@@ -292,7 +330,8 @@ export const adminCollectApi = {
     );
   },
 
-  // Canvassers
+  // ----- Canvasser Management -----
+  // Get all canvassers for a campaign
   getCanvassers: (campaignId: string) =>
     adminApiCall<{
       preloaded: CampaignCanvasserRecord[];
@@ -300,6 +339,7 @@ export const adminCollectApi = {
       selfIdentifiedCount: number;
     }>(`/campaigns/${campaignId}/canvassers`),
 
+  // Add a canvasser to a campaign
   addCanvasser: (
     campaignId: string,
     data: { name: string; phone: string; zone?: string },
@@ -309,13 +349,15 @@ export const adminCollectApi = {
       { method: "POST", body: JSON.stringify(data) },
     ),
 
+  // Remove a canvasser from the campaign
   removeCanvasser: (campaignId: string, canvasserId: string) =>
     adminApiCall<{ success: boolean }>(
       `/campaigns/${campaignId}/canvassers/${canvasserId}`,
       { method: "DELETE" },
     ),
 
-  // Stats (server-side aggregations for overview dashboard)
+  // ----- Aggregated Stats / Dashboard -----
+  // Get campaign summary stats (for graphs etc)
   getCampaignStats: (
     campaignId: string,
     params?: { from?: string; to?: string },
@@ -324,11 +366,12 @@ export const adminCollectApi = {
       `/campaigns/${campaignId}/stats${qs({ from: params?.from, to: params?.to })}`,
     ),
 
-  // Geo (all LGAs for campaign wizard)
+  // ----- Geo Data (for campaign setup flows) -----
+  // Get all LGAs for wizard screens, etc.
   getAllLgas: () => adminApiCall<{ lgas: GeoLga[] }>("/lgas"),
 };
 
-// Stats response shape
+// Shape of statistics data returned for a campaign
 export type CampaignStats = {
   total: number;
   verified: number;

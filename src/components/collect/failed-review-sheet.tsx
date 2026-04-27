@@ -25,6 +25,7 @@ import { getCollectErrorCategory, track } from "@/lib/analytics/client";
 import type { PendingSubmission } from "@/lib/offline-queue";
 import { composeFullName, formatPersonName } from "@/lib/utils";
 
+// Sorts failed submissions with the most recently failed at the top.
 function sortFailedNewestFirst(rows: PendingSubmission[]): PendingSubmission[] {
   return [...rows].sort((a, b) => {
     const fa = a.failedAt ?? "";
@@ -34,6 +35,7 @@ function sortFailedNewestFirst(rows: PendingSubmission[]): PendingSubmission[] {
   });
 }
 
+// Formats a pending row to a readable name. Falls back to a label if data is missing.
 function formatRowDisplayName(data: Record<string, unknown>): string {
   const name = composeFullName({
     firstName: typeof data.firstName === "string" ? data.firstName : undefined,
@@ -64,6 +66,7 @@ export function FailedReviewSheet({
   const isMobile = useIsMobile();
   const [rows, setRows] = useState<PendingSubmission[]>([]);
 
+  // Fetch new list of failed submissions each time the sheet opens or failedCount changes
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
@@ -75,6 +78,7 @@ export function FailedReviewSheet({
     };
   }, [open, failedCount, listFailedSubmissions]);
 
+  // Remove a single failed submission and refresh the list
   const handleDismissRow = async (row: PendingSubmission) => {
     if (typeof row.id !== "number") return;
     track("collect_failed_record_dismissed", {
@@ -85,6 +89,7 @@ export function FailedReviewSheet({
     setRows(sortFailedNewestFirst(next));
   };
 
+  // True if there are no failed submissions to review
   const empty = rows.length === 0;
 
   return (
@@ -157,7 +162,7 @@ export function FailedReviewSheet({
               <button
                 type="button"
                 disabled={empty}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 inline-flex h-9 w-full items-center justify-center rounded-sm px-4 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50"
+                className="bg-destructive hover:bg-destructive/90 inline-flex h-9 w-full items-center justify-center rounded-sm px-4 text-xs font-semibold tracking-widest text-gray-100 uppercase transition-colors disabled:pointer-events-none disabled:opacity-50"
               >
                 Clear all failed notices
               </button>

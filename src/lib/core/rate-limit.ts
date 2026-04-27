@@ -30,6 +30,18 @@ export const submitRateLimit = redis
   : null;
 
 /**
+ * Rate limiter for offline geo-pack downloads.
+ * 10 downloads per 15 minutes per IP — bulk read, anonymous endpoint.
+ */
+export const offlinePackRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(10, "15 m"),
+      prefix: "rl:offline-pack",
+    })
+  : null;
+
+/**
  * Rate limiter for login attempts.
  * 5 login attempts per minute per IP.
  */

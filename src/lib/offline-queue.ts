@@ -1,23 +1,11 @@
-const DB_NAME = "wardwise-offline";
-const STORE_NAME = "pending-submissions";
-const DB_VERSION = 1;
+import {
+  openOfflineDb,
+  PENDING_SUBMISSIONS_STORE as STORE_NAME,
+} from "@/lib/collect/offline-storage";
 
 /** Opens the database */
 function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, {
-          keyPath: "id",
-          autoIncrement: true,
-        });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+  return openOfflineDb();
 }
 
 export type PendingSubmissionStatus = "pending" | "failed";
@@ -52,13 +40,13 @@ export async function queueSubmission(
       createdAt: new Date().toISOString(),
       status: "pending",
     };
-    tx.objectStore(STORE_NAME).add(row);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
+    tx.objectStore(STORE_NAME).add(row); // Add the new row to the database
+    tx.oncomplete = () => resolve(); // Resolve the promise when the transaction is complete
+    tx.onerror = () => reject(tx.error); // Reject the promise if the transaction fails
   });
 }
 
-/** Gets all rows from the database */
+/** Gets all rows from the database. Returns all rows in the pending submissions store. */
 async function getAllRows(): Promise<PendingSubmission[]> {
   const db = await openDb();
   return new Promise((resolve, reject) => {

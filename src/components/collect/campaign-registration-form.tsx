@@ -14,6 +14,8 @@ import {
 import { useCollectServiceWorker } from "@/hooks/use-collect-service-worker";
 import { useCollectFormPersistence } from "@/hooks/use-collect-form-persistence";
 import { useOffline } from "@/hooks/use-offline";
+import { useCollectOfflineGeo } from "@/hooks/use-collect-offline-geo";
+import { useCollectGeoResolution } from "@/hooks/use-collect-geo-resolution";
 import {
   createAnalyticsId,
   getCollectErrorCategory,
@@ -35,6 +37,7 @@ import { PartyInfoStep } from "@/components/collect/steps/party-info-step";
 import { RoleStep } from "@/components/collect/steps/role-step";
 import { CanvasserStep } from "@/components/collect/steps/canvasser-step";
 import { FailedReviewSheet } from "@/components/collect/failed-review-sheet";
+import { OfflinePrepSheet } from "@/components/collect/offline-prep-sheet";
 import { ConfirmationScreen } from "@/components/collect/steps/confirmation-screen";
 import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
 import {
@@ -116,7 +119,10 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   );
   const [queuedSyncError, setQueuedSyncError] = useState<string | null>(null);
   const [failedReviewOpen, setFailedReviewOpen] = useState(false);
+  const [offlinePrepOpen, setOfflinePrepOpen] = useState(false);
   const failedRehydrateAppliedRef = useRef(false);
+
+  const offlineGeo = useCollectOfflineGeo(campaign);
 
   const {
     isOffline,
@@ -215,6 +221,19 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
 
   // Register / manage service worker lifecycle
   useCollectServiceWorker();
+
+  // Lifecycle cleanup: if this campaign is closed and we have a stored
+  // offline pack, drop it on next online open. Last-known data is fine for
+  // but the splash screen shouldn't keep showing "offline ready" for a campaign that's done.
+  const closedCleanupRef = useRef(false);
+  useEffect(() => {
+    if (closedCleanupRef.current) return;
+    if (isOffline) return;
+    if (campaign.status !== "closed") return;
+    if (!offlineGeo.isPrepared) return;
+    closedCleanupRef.current = true;
+    void offlineGeo.clear();
+  }, [campaign.status, isOffline, offlineGeo]);
 
   const form = useForm<RegistrationFormData>({
     resolver: zodResolver(submitRegistrationSchema),
@@ -398,22 +417,45 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     setScreen,
   });
 
-  // Geo dropdowns
+  // Geo dropdowns (live queries — actual data source resolution happens in
+  // useCollectGeoResolution below, which decides between live and pack data).
   const {
     data: lgas = [],
     isLoading: lgasLoading,
     isError: lgasError,
+    refetch: refetchLgas,
   } = useCampaignLgas(campaign.slug);
   const {
     data: wards = [],
     isLoading: wardsLoading,
     isError: wardsError,
+    refetch: refetchWards,
   } = useWards(lgaId);
   const {
     data: pollingUnits = [],
     isLoading: unitsLoading,
     isError: unitsError,
+    refetch: refetchUnits,
   } = usePollingUnits(wardId);
+
+  const geo = useCollectGeoResolution({
+    lgaId,
+    wardId,
+    isOffline,
+    offlineGeo,
+    liveLgas: lgas,
+    liveWards: wards,
+    livePollingUnits: pollingUnits,
+    liveLgasLoading: lgasLoading,
+    liveWardsLoading: wardsLoading,
+    liveUnitsLoading: unitsLoading,
+    liveLgasError: lgasError,
+    liveWardsError: wardsError,
+    liveUnitsError: unitsError,
+    refetchLgas: () => void refetchLgas(),
+    refetchWards: () => void refetchWards(),
+    refetchUnits: () => void refetchUnits(),
+  });
 
   // Reset cascading dropdowns (skip during restore)
   useEffect(() => {
@@ -430,12 +472,16 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     setValue("pollingUnitName", "");
   }, [wardId, setValue]);
 
-  // Re-apply saved ward once wards query finishes loading
+  // Re-apply saved ward once data is available — from the live query OR
+  // the offline pack, whichever resolves first.
   useEffect(() => {
     if (!pendingRestoreRef.current) return;
-    if (wardsLoading || !wards.length) return;
+    if (!geo.resolvedWards.length) return;
     const pending = pendingRestoreRef.current;
-    if (pending.wardId && wards.some((w) => w.id === pending.wardId)) {
+    if (
+      pending.wardId &&
+      geo.resolvedWards.some((w) => w.id === pending.wardId)
+    ) {
       skipLocationResetRef.current = true;
       setValue("wardId", pending.wardId);
       setValue("wardName", pending.wardName || "");
@@ -450,22 +496,22 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
         skipLocationResetRef.current = false;
       }, 0);
     }
-  }, [wards, wardsLoading, setValue]);
+  }, [geo.resolvedWards, setValue]);
 
-  // Re-apply saved polling unit once pollingUnits query finishes loading
+  // Re-apply saved polling unit once data is available.
   useEffect(() => {
     if (!pendingRestoreRef.current) return;
-    if (unitsLoading || !pollingUnits.length) return;
+    if (!geo.resolvedPollingUnits.length) return;
     const pending = pendingRestoreRef.current;
     if (
       pending.pollingUnitId &&
-      pollingUnits.some((p) => p.id === pending.pollingUnitId)
+      geo.resolvedPollingUnits.some((p) => p.id === pending.pollingUnitId)
     ) {
       setValue("pollingUnitId", pending.pollingUnitId);
       setValue("pollingUnitName", pending.pollingUnitName || "");
       pendingRestoreRef.current = null; // fully restored
     }
-  }, [pollingUnits, unitsLoading, setValue]);
+  }, [geo.resolvedPollingUnits, setValue]);
 
   // Canvasser URL params
   useEffect(() => {
@@ -1061,10 +1107,15 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             campaign={campaign}
             hasSavedProgress={hasSavedProgress}
             deviceSubmission={deviceSubmission}
+            offlineHealth={offlineGeo.health}
+            isOffline={isOffline}
+            preparedLgaCount={offlineGeo.preparedLgaIds.length}
+            preparedAt={offlineGeo.preparedAt}
             onStart={handleStart}
             onStartFresh={handleStartFresh}
             onRestore={handleRestoreProgress}
             onCopyReference={handleCopyLastReference}
+            onOpenPrepSheet={() => setOfflinePrepOpen(true)}
           />
         )}
 
@@ -1082,15 +1133,19 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
         {screen === 2 && (
           <LocationStep
             form={form}
-            lgas={lgas}
-            wards={wards}
-            pollingUnits={pollingUnits}
-            lgasLoading={lgasLoading}
-            wardsLoading={wardsLoading}
-            unitsLoading={unitsLoading}
-            lgasError={lgasError}
-            wardsError={wardsError}
-            unitsError={unitsError}
+            lgas={geo.resolvedLgas}
+            wards={geo.resolvedWards}
+            pollingUnits={geo.resolvedPollingUnits}
+            lgasLoading={geo.lgasLoading}
+            wardsLoading={geo.wardsLoading}
+            unitsLoading={geo.unitsLoading}
+            lgasError={geo.lgasError}
+            wardsError={geo.wardsError}
+            unitsError={geo.unitsError}
+            usingLocalData={geo.usingLocalData}
+            isOffline={isOffline}
+            offlineBlockReason={geo.offlineBlockReason}
+            onRetry={geo.retryGeo}
             onBack={goBack}
             onNext={validateAndNext}
           />
@@ -1172,6 +1227,18 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
           listFailedSubmissions={listFailedSubmissions}
           onDismissRow={handleDismissFailedRow}
           onBulkClear={clearFailedNotices}
+        />
+
+        <OfflinePrepSheet
+          open={offlinePrepOpen}
+          onOpenChange={setOfflinePrepOpen}
+          campaignSlug={campaign.slug}
+          preparedLgaIds={offlineGeo.preparedLgaIds}
+          isPreparing={offlineGeo.isPreparing}
+          hasExistingPack={offlineGeo.isPrepared}
+          isOffline={isOffline}
+          onPrepare={offlineGeo.prepare}
+          onClear={offlineGeo.clear}
         />
       </div>
     </FormShell>

@@ -74,6 +74,7 @@ export default async function CampaignPage({ params }: PageProps) {
       customQuestion1: true,
       customQuestion2: true,
       status: true,
+      updatedAt: true,
       campaignCanvassers: {
         select: { id: true, name: true, phone: true },
         orderBy: { name: "asc" },
@@ -88,6 +89,7 @@ export default async function CampaignPage({ params }: PageProps) {
   const initialCampaign: PublicCampaign = {
     ...campaign,
     brandingType: getCampaignBrandingType(campaign.brandingType),
+    updatedAt: campaign.updatedAt.toISOString(),
   };
 
   return <CampaignRegistrationForm initialCampaign={initialCampaign} />;

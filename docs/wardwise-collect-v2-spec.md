@@ -11,6 +11,7 @@
 - **v2.1 hardening pass complete** — offline queue, cache invalidation, bulk audit, UI polish
 - **v2.2 post-submission polish complete** — OpenGraph, returning visitor recognition, reference IDs, form UX audit fixes
 - **v2.7 offline queue UX complete** — queued/confirmed/failed confirmation states, failed review sheet, and reload rehydration
+- **v2.8 offline geo preparation complete** — selected-LGA offline packs, splash health card, location-step local-data fallback, cold-reopen via service worker, slug-aware cleanup
 
 ---
 
@@ -135,18 +136,20 @@ model CampaignCanvasser {
 
 ### 9. PWA / Offline Mode
 
-**Status:** Complete
-**Why:** Field canvassers in rural Nigeria lose connectivity mid-form.
+**Status:** Complete (v2.7 submission queue + v2.8 offline geo prep)
+**Why:** Field canvassers in rural Nigeria lose connectivity mid-form, and live geo dropdowns previously made offline starts impossible.
 
 **Approach:**
 
 - `src/app/manifest.ts` — Next.js App Router metadata manifest (type-safe, auto-detected)
-- Service worker scoped to `/c/` for static assets and GET API fallback caching; navigations/HTML stay network-first to avoid stale pages
-- IndexedDB-based submission queue, syncs on reconnect when the Collect page is open
+- Service worker scoped to `/c/`, with `/c/*` document navigations and `?_rsc` payloads cached network-first so the campaign page can cold-reopen and hydrate offline after a prior online visit
+- IndexedDB-based submission queue (v2.7), syncs on reconnect when the Collect page is open
+- Selected-LGA offline geo packs (v2.8) — manual preparation lets a field user save the LGAs they need, with wards and polling units, for offline location entry
+- Shared IndexedDB plumbing in `src/lib/collect/offline-storage.ts` so the queue store and geo-pack store share one connection and one version
 - Distinct confirmation states for `confirmed`, `queued`, and `failed` submissions
 - Failed review sheet for permanently rejected offline submissions, with per-record dismiss and bulk clear
-- Visual sync, pending, and needs-attention indicators on form
-- Current limitation: geo lookup data (LGAs, wards, polling units) is only available offline after those API responses have already been fetched and cached on that device
+- Visual sync, pending, needs-attention, and offline-ready indicators on form
+- Limitation: first-ever discovery of a campaign slug while fully offline is still not supported — the page must be visited online once to be cacheable
 
 ---
 
@@ -159,7 +162,6 @@ model CampaignCanvasser {
 - **Submission lag warning** — "No submissions in 48h" auto-alert on active campaigns
 - **Template custom questions** — Library of pre-made question sets to copy between campaigns (admin **Collect setup** step 2 is structured to absorb more fields / presets without another full wizard redesign)
 - **Geographic heatmap** — Map visualization of submission density by ward/LGA
-- **Offline geo catalogue preload** — Let field teams open a campaign while online and cache the campaign's LGA/ward/polling-unit catalogue for later offline starts. This should be scoped separately from submission queueing because it changes read-side caching and stale-data rules.
 
 ---
 
@@ -331,6 +333,35 @@ UX audit and post-submission improvements for the public registration form:
 **Files:** `src/lib/offline-queue.ts`, `src/hooks/use-offline.ts`, `src/components/collect/campaign-registration-form.tsx`, `src/components/collect/steps/confirmation-screen.tsx`, `src/components/collect/failed-review-sheet.tsx`, `src/components/ui/trust-indicators.tsx`, `src/lib/analytics/client.ts`
 
 **Deliberately not included:** edit-and-retry from a failed row, background sync with the tab closed, CSV export of failed local rows, IndexedDB indexes on `status`, and user-controlled failed-list filtering.
+
+---
+
+## Completed v2.8 — Offline Geo Preparation (2026-04-27)
+
+- [x] **Selected-LGA offline packs** — Field users can open a campaign online once, choose the LGAs they need, and download wards + polling units for those LGAs to IndexedDB. Cap is 50 LGAs per pack (covers any single Nigerian state) with a per-IP rate limit.
+- [x] **Splash-screen offline status card** — A second utility card under the main CTA shows the pack's health and the right action: `Prepare Offline`, `Manage Offline Areas`, `Refresh Offline Data` (mild for `content_outdated`, strong for `scope_invalid`), `Refresh` (for `aged`), or an informational `Offline Ready on this device` when offline.
+- [x] **Honest stale detection** — Health is one of `clean` / `scope_invalid` / `content_outdated` / `aged`. `scope_invalid` is computed only from a fresh allowed-LGA fetch; a failed fetch never infers invalid (no network blip falsely tells the user their pack is broken). `content_outdated` is `campaign.updatedAt > pack.campaignUpdatedAt`. `aged` is `preparedAt > 14d`.
+- [x] **Cold-reopen offline after prior online visit** — Service worker caches `/c/*` document navigations and `?_rsc` GETs network-first with cache fallback, so reopening offline loads + hydrates the campaign page.
+- [x] **Location step uses local data when offline or when live geo fails** — Online with healthy network uses live queries; offline uses pack only; online with a failed live geo query falls back to pack with a visible inline `Using saved offline data` note plus a Retry action. No silent swap.
+- [x] **Honest empty state when offline + no pack** — The location step shows a blocking info card instead of empty selects. The splash blocks fresh-start registration with the same honest treatment.
+- [x] **Restore-path integration** — Saved drafts re-apply their ward/PU against either the live query OR the offline pack, whichever resolves first. Stale ids that don't match either are silently dropped without clearing the rest of the draft.
+- [x] **Lifecycle cleanup** — Closed campaigns clear their stored pack on the next online open (registration form effect). Drafted/deleted campaigns clear their pack via a slug-aware `/c/[slug]/not-found.tsx` that wraps the existing themed `NotFoundStatusScreen`.
+- [x] **Last-known-data rule** — Offline geo packs are convenience data, not authority. If a pack becomes outdated and an offline submission later syncs against a now-closed or now-invalid campaign, the existing v2.7 failed-queue path handles the rejection. No new server-side rejection mechanism was needed.
+- [x] **Shared IndexedDB plumbing** — `src/lib/offline-db.ts` is the single owner of DB name, version, and upgrade path; both `pending-submissions` (v2.7) and `geo-packs` (v2.8) stores open through it.
+
+**Files:** `src/lib/collect/offline-storage.ts`, `src/lib/collect/offline-geo-pack.ts`, `src/lib/collect/offline-geo-health.ts`, `src/lib/collect/offline-prep-selection.ts`, `src/lib/offline-queue.ts`, `src/hooks/use-collect-offline-geo.ts`, `src/hooks/use-collect-geo-resolution.ts`, `src/lib/api/collect.ts`, `src/lib/schemas/collect-schemas.ts`, `src/lib/core/rate-limit.ts`, `src/app/api/collect/offline-pack/route.ts`, `src/app/api/collect/campaign/[slug]/route.ts`, `src/app/c/[slug]/page.tsx`, `src/app/c/[slug]/not-found.tsx`, `src/components/collect/campaign-registration-form.tsx`, `src/components/collect/steps/splash-screen.tsx`, `src/components/collect/steps/location-step.tsx`, `src/components/collect/offline-prep-sheet.tsx`, `src/types/collect.ts`, `public/sw.js`.
+
+**Post-merge finalization (same PR):**
+
+- [x] **Codex P2** — `scope_invalid` packs surface honestly while offline; geo resolution refuses to source pack data when health is `scope_invalid`; splash and location step both block fresh start with reason-specific copy.
+- [x] **Codex P3** — Location-step inline banner split: emerald "Using offline data" for legitimate offline use; amber "Network issue — using saved data" + Retry only for online-with-failed-live-query.
+- [x] **Remove offline data UX** — Prep sheet zero-selected + existing pack flips the CTA to `Remove offline data` (destructive tone) inside an `AlertDialog`. Online copy is matter-of-fact; offline copy warns the location step will be blocked until reconnect.
+- [x] **Stale-LGA submission bug** — Prep sheet derives `effectiveSelection`, `stalePreparedIds`, and `prepIntent` from `src/lib/collect/offline-prep-selection.ts` at render time. Hidden previously-prepared ids that disappear from the live LGA list are silently excluded from save and surfaced as an inline warning. No more 400-round-trip when scope shrinks after prep.
+- [x] **Pure-logic extraction + tests** — `computeOfflineGeoHealth` and the prep-selection helpers live in `src/lib/collect/`. Vitest coverage in `offline-geo-health.test.ts` (10 cases including the "failed fresh fetch never infers `scope_invalid`" contract and the precedence ordering) and `offline-prep-selection.test.ts` (12 cases).
+- [x] **Mechanical extraction** — Live/offline geo source precedence moved verbatim from `campaign-registration-form.tsx` into `useCollectGeoResolution`. Form file shrinks meaningfully; no behavior change.
+- [x] **Naming convention** — v2.8-introduced modules adopt the `use-collect-*` / `src/lib/collect/*` convention. The single import-line update in `src/lib/offline-queue.ts` follows the renamed shared storage file. v2.7 modules (`use-offline.ts`, `offline-queue.ts`) keep their current paths; a follow-up pure-rename PR will relocate them.
+
+**Deliberately not included:** background preload of whole-campaign geo, edit-and-retry of failed offline rows, background sync with the tab closed, first-ever offline discovery of a campaign slug, custom offline landing page beyond browser default for non-`/c/*` URLs.
 
 ---
 

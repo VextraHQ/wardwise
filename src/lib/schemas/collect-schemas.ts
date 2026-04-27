@@ -170,6 +170,19 @@ export type AddCampaignCanvasserData = z.infer<
   typeof addCampaignCanvasserSchema
 >;
 
+// ── Public: Offline geo-pack request ──
+// Cap of 50 LGAs covers any single Nigerian state (Kano = 44) and keeps the
+// response near 1–1.5 MB gzipped.
+export const offlinePackRequestSchema = z.object({
+  campaignSlug: z.string().min(1, "campaignSlug is required"),
+  lgaIds: z
+    .array(z.number().int().positive())
+    .min(1, "Select at least one LGA")
+    .max(50, "Cannot prepare more than 50 LGAs at once"),
+});
+
+export type OfflinePackRequest = z.infer<typeof offlinePackRequestSchema>;
+
 // ── Server submit schema (extends client schema with campaignSlug, drops client-only name fields) ──
 
 export const serverSubmitSchema = submitRegistrationSchema
