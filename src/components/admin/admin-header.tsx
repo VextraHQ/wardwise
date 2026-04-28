@@ -33,11 +33,11 @@ export function AdminHeader() {
     if (pathname === "/admin") return "Dashboard";
     if (pathname.startsWith("/admin/collect")) return "Collect";
     if (pathname.startsWith("/admin/geo")) return "Geo Data";
-    if (pathname.includes("/analytics")) return "Analytics";
-    if (pathname.includes("/activity")) return "Activity Logs";
-    if (pathname.includes("/settings")) return "Settings";
-    if (pathname.includes("/help")) return "Help & Documentation";
-    if (pathname.includes("/export")) return "Export Data";
+    if (pathname.startsWith("/admin/analytics")) return "Analytics";
+    if (pathname.startsWith("/admin/activity")) return "Activity Logs";
+    if (pathname.startsWith("/admin/settings")) return "Settings";
+    if (pathname.startsWith("/admin/help")) return "Help & Documentation";
+    if (pathname.startsWith("/admin/export")) return "Export Data";
     return "Candidate Management";
   };
 
