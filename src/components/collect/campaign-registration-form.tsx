@@ -191,18 +191,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
         source: "manual",
       });
       markManualSyncRequested();
-      const result = await trySync();
-      if (result) {
-        if (result.synced > 0) {
-          toast.success(`${result.synced} submission(s) synced`);
-        }
-        for (const f of result.failed) {
-          toast.error("Submission rejected", {
-            description: f.error,
-            duration: 8000,
-          });
-        }
-      }
+      await trySync();
     })();
   }, [markManualSyncRequested, pendingCount, trySync]);
 
