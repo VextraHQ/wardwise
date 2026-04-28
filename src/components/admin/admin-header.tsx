@@ -63,7 +63,7 @@ export function AdminHeader() {
         <SidebarTrigger className="-ml-1" />
         <Separator
           orientation="vertical"
-          className="mx-1 hidden data-[orientation=vertical]:h-4 sm:block"
+          className="mx-0.5 data-[orientation=vertical]:h-4"
         />
         <div className="min-w-0 flex-1 overflow-hidden">
           <div className="flex items-center gap-1.5 sm:gap-2">
