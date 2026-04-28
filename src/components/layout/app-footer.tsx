@@ -10,7 +10,7 @@ export function AppFooter() {
   return (
     <footer className="border-border/40 relative border-t">
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-10">
-        <div className="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
           <div className="flex min-w-0 flex-1 flex-col gap-3 sm:gap-5">
             <div className="flex flex-col items-center gap-1.5 text-center sm:flex-row sm:flex-wrap sm:items-center sm:justify-start sm:gap-2 sm:text-left">
               <p className="text-muted-foreground text-xs font-semibold tracking-wider">

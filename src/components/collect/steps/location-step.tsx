@@ -1,7 +1,7 @@
 "use client";
 
 import { HiLocationMarker, HiShieldCheck } from "react-icons/hi";
-import { MapPin } from "lucide-react";
+import { CloudOff, MapPin, RefreshCw, WifiOff } from "lucide-react";
 import { motion } from "motion/react";
 import type { UseFormReturn } from "react-hook-form";
 import type { RegistrationFormData } from "@/lib/schemas/collect-schemas";
@@ -34,6 +34,10 @@ export function LocationStep({
   lgasError = false,
   wardsError = false,
   unitsError = false,
+  usingLocalData = false,
+  isOffline = false,
+  offlineBlockReason = null,
+  onRetry,
   onBack,
   onNext,
 }: {
@@ -47,6 +51,10 @@ export function LocationStep({
   lgasError?: boolean;
   wardsError?: boolean;
   unitsError?: boolean;
+  usingLocalData?: boolean;
+  isOffline?: boolean;
+  offlineBlockReason?: "no-pack" | "scope-invalid" | null;
+  onRetry?: () => void;
   onBack: () => void;
   onNext: () => void;
 }) {
@@ -75,14 +83,108 @@ export function LocationStep({
       : formatGeoDisplayName(p.name),
   }));
 
+  if (offlineBlockReason) {
+    const isScopeInvalid = offlineBlockReason === "scope-invalid";
+    const blockTitle = isScopeInvalid
+      ? "Saved areas need a refresh"
+      : "Offline Setup Required";
+    const blockHeading = isScopeInvalid
+      ? "Your offline data is no longer valid for this campaign"
+      : "Polling unit data is not available offline";
+    const blockBody = isScopeInvalid
+      ? "One or more LGAs you saved have been confirmed out of scope for this campaign. Reconnect to the internet and refresh your offline data before continuing — submissions made offline against these areas will be rejected when they sync."
+      : "You're offline and no LGA, ward, or polling unit data has been saved on this device. Reconnect to the internet, or open this campaign again with network and prepare offline data first.";
+    const tone = isScopeInvalid
+      ? "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400"
+      : "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400";
+
+    return (
+      <div className="space-y-6">
+        <RegistrationStepHeader
+          title="Where Do You Vote?"
+          description="Help us find your exact polling unit location"
+        />
+
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <StepCard>
+            <CardSectionHeader
+              title={blockTitle}
+              subtitle="Location Finder"
+              statusLabel="Offline"
+              icon={
+                isScopeInvalid ? (
+                  <RefreshCw className="size-4.5" />
+                ) : (
+                  <CloudOff className="size-4.5" />
+                )
+              }
+            />
+            <div className="space-y-4 py-6 text-center">
+              <div
+                className={`mx-auto flex size-12 items-center justify-center rounded-full border ${tone}`}
+              >
+                {isScopeInvalid ? (
+                  <RefreshCw className="size-5" />
+                ) : (
+                  <WifiOff className="size-5" />
+                )}
+              </div>
+              <h3 className="text-foreground text-base font-semibold">
+                {blockHeading}
+              </h3>
+              <p className="text-muted-foreground mx-auto max-w-fit text-sm leading-relaxed">
+                {blockBody}
+              </p>
+              <Separator className="my-4" />
+              <NavButtons onBack={onBack} onNext={onNext} nextDisabled />
+            </div>
+          </StepCard>
+        </motion.div>
+
+        <CollectMobilePrivacyNote />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <RegistrationStepHeader
-        icon={MapPin}
-        badge="Finding Your Location"
         title="Where Do You Vote?"
         description="Help us find your exact polling unit location"
       />
+
+      {usingLocalData && !isOffline ? (
+        // Online but the live geo query failed — fall back to pack with a
+        // visible warning + retry. This is the unhappy path. The offline-by-
+        // design case is already covered by the shell banner.
+        <div className="mx-auto flex flex-col gap-2 overflow-hidden rounded-sm border border-dashed border-amber-500/30 bg-amber-500/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-2">
+            <RefreshCw className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+            <div className="space-y-0.5">
+              <p className="font-mono text-[10px] font-bold tracking-widest text-amber-700 uppercase dark:text-amber-400">
+                Network issue — using saved data
+              </p>
+              <p className="text-muted-foreground text-xs">
+                Showing locations from your offline pack while we couldn&apos;t
+                reach the server.
+              </p>
+            </div>
+          </div>
+          {onRetry ? (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 self-start rounded-sm border border-amber-500/30 bg-amber-500/10 px-3 font-mono text-[10px] font-bold tracking-widest text-amber-700 uppercase transition-colors hover:bg-amber-500/20 sm:self-center dark:text-amber-400"
+            >
+              <RefreshCw className="size-3" />
+              Retry
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       <motion.div
         initial={{ opacity: 0, y: 15 }}

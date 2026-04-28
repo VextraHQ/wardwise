@@ -25,7 +25,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ComboboxSelect } from "@/components/ui/combobox-select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useGeoLgas } from "@/hooks/use-geo";
 import {
   NIGERIAN_PARTIES,
@@ -689,37 +695,34 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                           <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
                             Position
                           </FormLabel>
-                          <FormControl>
-                            <RadioGroup
-                              value={field.value ?? ""}
-                              onValueChange={handleEditPositionChange}
-                              className="flex flex-col gap-1.5"
-                              aria-label="Electoral position"
+                          <Select
+                            value={field.value ?? ""}
+                            onValueChange={handleEditPositionChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger
+                                className="border-border/60 h-9 w-full rounded-sm"
+                                aria-label="Electoral position"
+                              >
+                                <SelectValue placeholder="Select position…" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent
+                              className="rounded-sm"
+                              position="popper"
+                              sideOffset={4}
                             >
-                              {POSITIONS.map((pos) => {
-                                const selected = field.value === pos;
-                                return (
-                                  <label
-                                    key={pos}
-                                    className={cn(
-                                      "focus-within:ring-primary/30 flex cursor-pointer items-start gap-3 rounded-sm border-2 px-3 py-2.5 transition-[border-color,background-color,color] focus-within:ring-2 focus-within:ring-offset-1 sm:items-center sm:px-4 sm:py-3",
-                                      selected
-                                        ? "border-primary bg-primary/5 text-primary"
-                                        : "border-border/60 bg-card text-foreground hover:border-primary/40",
-                                    )}
-                                  >
-                                    <RadioGroupItem
-                                      value={pos}
-                                      className="mt-0.5 shadow-none sm:mt-0"
-                                    />
-                                    <span className="min-w-0 flex-1 text-left text-sm leading-snug font-medium">
-                                      {pos}
-                                    </span>
-                                  </label>
-                                );
-                              })}
-                            </RadioGroup>
-                          </FormControl>
+                              {POSITIONS.map((pos) => (
+                                <SelectItem
+                                  key={pos}
+                                  value={pos}
+                                  className="rounded-sm"
+                                >
+                                  {pos}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}

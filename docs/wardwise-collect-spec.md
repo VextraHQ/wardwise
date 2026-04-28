@@ -112,6 +112,13 @@
 - **Collect canvasser attribution fixed for future writes**: public submissions now canonicalize `canvasserPhone` when a referrer is provided, matching the already-canonical supporter `phone` field.
 - **Existing live data cleaned safely**: the initial `canvasserPhone` backfill found two valid local-format values, normalized both to `+234XXXXXXXXXX`, and found no invalid/skipped rows or mixed-format groups. The one-time cleanup script was removed after verification.
 
+### What Changed (Batch 12 — Collect UI/UX Polish)
+
+- **Splash support state is calmer**: offline prep moved from a standalone support card into a compact device utility lane under the primary CTA, so campaign identity and the start action stay visually dominant.
+- **System messaging is calmer**: connectivity/sync state now lives in a slim shell-level banner, while the in-form status lane is reserved for higher-priority action-needed states such as failed uploads.
+- **Location messaging stays contextual**: the location step still owns the small local notes for `Using offline data`, online fallback with retry, and full offline blocking states because those messages explain the dropdown behavior directly.
+- **Confirmation remains the outcome surface**: confirmed, queued, and failed confirmation states were intentionally left structurally unchanged so the polish stays focused on task-flow calmness rather than changing the result model.
+
 ### What Changed (Batch 11 — Reporting Date Filters)
 
 - **Shared reporting date utilities**: date preset ranges, query formatting, picker bounds, and display labels now live in `src/lib/date-ranges.ts`.
@@ -224,6 +231,9 @@
 - The confirmation screen now also shows a copyable `Registration Reference` and explains that the campaign team will review and verify the registration.
 - Offline submissions are stored in IndexedDB until sync. Pending rows show an amber queued confirmation; successful sync removes the row and can flip to confirmed; permanent 4xx failures remain locally as failed rows for review/dismiss.
 - Active failed confirmations store a slug-scoped local pointer (`collect-active-failed-${slug}`) so reload can return to the same failed row while it still exists.
+- Offline geo packs (v2.8) are per-campaign IndexedDB records prepared explicitly while online. The packs power offline location entry but are convenience data, not authority — server submit/sync remains the final check on geo validity. Stale or invalid packs surface in the splash via four health states (`clean` / `scope_invalid` / `content_outdated` / `aged`) and can be refreshed any time the user is online. `scope_invalid` is computed only after a fresh allowed-LGA fetch succeeds, so a network blip never falsely marks a pack invalid.
+- The splash now surfaces offline geo prep as a compact device utility lane, while live connectivity/sync state sits in a slim shell-level banner above the form content. Blocking prep problems still escalate on the splash itself.
+- Closed campaigns clear their stored pack on the next online open. Drafted/deleted campaigns clear their pack via a slug-aware `/c/[slug]` not-found surface that reuses the themed `NotFoundStatusScreen`.
 
 ### Validation
 
@@ -233,22 +243,30 @@
 
 ### Edge Cases
 
-| Case                               | Behavior                                                                                    |
-| ---------------------------------- | ------------------------------------------------------------------------------------------- |
-| Invalid/missing slug               | `notFound()`                                                                                |
-| Draft campaign                     | `notFound()`                                                                                |
-| Paused campaign                    | Static "Registration Paused" message                                                        |
-| Closed campaign                    | Static "Registration Closed" message                                                        |
-| Duplicate phone                    | 409 → "Already Registered" error box                                                        |
-| Duplicate VIN                      | 409 → "Already Registered" error box                                                        |
-| Missing canvasser Yes/No           | Submit button stays disabled on canvasser step                                              |
-| Invalid submit payload             | 400 → first field-level validation message shown                                            |
-| Network error during online submit | Error displayed, localStorage preserves progress                                            |
-| Offline submit                     | Submission is queued in IndexedDB and the confirmation shows `Pending Upload`               |
-| Queued sync success                | Row is removed locally; active confirmation flips to confirmed when server receipt is known |
-| Queued sync permanent failure      | Row is marked failed, excluded from retry, and surfaced via failed confirmation/banner      |
-| Failed records on same device      | Banner opens a failed review sheet with errors, per-record dismiss, and bulk clear          |
-| Offline start without cached geo   | Location dropdowns cannot populate until the device has fetched the campaign geo catalogue  |
+| Case                                           | Behavior                                                                                                                                                                         |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Invalid/missing slug                           | `notFound()`                                                                                                                                                                     |
+| Draft campaign                                 | `notFound()`                                                                                                                                                                     |
+| Paused campaign                                | Static "Registration Paused" message                                                                                                                                             |
+| Closed campaign                                | Static "Registration Closed" message                                                                                                                                             |
+| Duplicate phone                                | 409 → "Already Registered" error box                                                                                                                                             |
+| Duplicate VIN                                  | 409 → "Already Registered" error box                                                                                                                                             |
+| Missing canvasser Yes/No                       | Submit button stays disabled on canvasser step                                                                                                                                   |
+| Invalid submit payload                         | 400 → first field-level validation message shown                                                                                                                                 |
+| Network error during online submit             | Error displayed, localStorage preserves progress                                                                                                                                 |
+| Offline submit                                 | Submission is queued in IndexedDB and the confirmation shows `Pending Upload`                                                                                                    |
+| Queued sync success                            | Row is removed locally; active confirmation flips to confirmed when server receipt is known                                                                                      |
+| Queued sync permanent failure                  | Row is marked failed, excluded from retry, and surfaced via failed confirmation/banner                                                                                           |
+| Failed records on same device                  | Banner opens a failed review sheet with errors, per-record dismiss, and bulk clear                                                                                               |
+| Offline start without prepared pack            | Splash blocks fresh start with honest copy; location step shows a blocking info card instead of empty selects                                                                    |
+| Pack with `scope_invalid` health               | Splash shows strong "Refresh Required" treatment; verdict only fires after a confirmed-fresh allowed-LGA fetch                                                                   |
+| Pack with `content_outdated` / `aged` health   | Mild refresh prompt; pack still usable as last-known data                                                                                                                        |
+| Selected-LGA-only offline prep                 | Offline location step shows only the prepared LGAs and their wards/units                                                                                                         |
+| Offline cold-reopen after prep                 | `/c/*` page navigation + `?_rsc` GETs are cache-fallback so the campaign page hydrates offline                                                                                   |
+| Online with failing live geo + pack            | Location step swaps to local data with a visible inline note + Retry; never silent                                                                                               |
+| Closed/draft/deleted campaign with stored pack | Pack is cleared on next online open of the closed shell, or via the slug-aware not-found surface                                                                                 |
+| Saved LGAs out of scope after prep             | Prep sheet derives `effectiveSelection` from visibleIds; hidden stale ids are excluded from save and surfaced as an inline amber warning. No 400 round-trip.                     |
+| Remove offline data from prep sheet            | Zero selected + existing pack flips the CTA to `Remove offline data`; AlertDialog confirms with stronger copy when offline (data loss is local-only; the campaign is unaffected) |
 
 ## Data Model
 
@@ -339,6 +357,7 @@ model PollingUnit {
 src/components/collect/
   campaign-registration-form.tsx  — orchestrator (form state + screen routing)
   failed-review-sheet.tsx         — failed offline submission review + dismiss sheet
+  offline-prep-sheet.tsx          — selected-LGA offline geo preparation sheet
   form-shell.tsx                  — header, context bar, layout wrapper
   form-ui.tsx                     — shared: FieldLabel, FieldError, InputIcon, NavButtons, StepCard, etc.
   registration-step-header.tsx    — animated step header component
@@ -350,6 +369,34 @@ src/components/collect/
     role-step.tsx
     canvasser-step.tsx
     confirmation-screen.tsx
+
+src/app/c/[slug]/
+  page.tsx                        — campaign-by-slug shell + closed/paused branches
+  not-found.tsx                   — slug-aware 404 that clears any matching offline pack
+
+src/app/api/collect/
+  campaign/[slug]/route.ts        — public campaign payload
+  lgas/route.ts                   — campaign-scoped LGA list
+  wards/route.ts                  — wards under an LGA
+  units/route.ts                  — polling units under a ward
+  offline-pack/route.ts           — bulk LGA/ward/PU download for offline prep (POST)
+  submit/route.ts                 — registration submission
+
+src/lib/
+  offline-queue.ts                — pending/failed submission queue (v2.7)
+  collect/
+    offline-storage.ts            — shared IndexedDB opener (one DB, two stores)
+    offline-geo-pack.ts           — per-campaign offline geo pack helpers (v2.8)
+    offline-geo-health.ts         — pure pack-health derivation (testable contract)
+    offline-prep-selection.ts     — pure prep-sheet selection helpers (effective/stale/intent)
+
+src/hooks/
+  use-collect.ts                  — public + admin Collect TanStack hooks
+  use-collect-form-persistence.ts — local draft autosave + restore plumbing
+  use-collect-service-worker.ts   — registers /sw.js scoped to /c/
+  use-offline.ts                  — submission queue + sync state (v2.7)
+  use-collect-offline-geo.ts      — geo-pack health + prepare/clear actions (v2.8)
+  use-collect-geo-resolution.ts   — live-vs-offline geo source precedence (v2.8)
 ```
 
 ### Admin

@@ -5,12 +5,14 @@ import { motion } from "motion/react";
 import { Logo } from "./logo";
 import { cn } from "@/lib/utils";
 import type { IconType } from "react-icons";
+import type { ReactNode } from "react";
 
 export interface HeaderProps {
   badge?: string;
   badgeIcon?: IconType;
   variant?: "primary" | "amber";
   hideMobileBadge?: boolean;
+  actions?: ReactNode;
   className?: string;
 }
 
@@ -32,9 +34,11 @@ export function Header({
   badgeIcon: BadgeIcon = HiShieldCheck,
   variant = "primary",
   hideMobileBadge = false,
+  actions,
   className,
 }: HeaderProps) {
   const styles = variantStyles[variant];
+  const centerLogo = hideMobileBadge && badge && !actions;
 
   return (
     <header className={cn("sticky top-0 z-50 w-full", className)}>
@@ -42,40 +46,41 @@ export function Header({
         <div
           className={cn(
             "mx-auto flex max-w-7xl items-center px-6 py-3.5",
-            hideMobileBadge && badge
+            centerLogo
               ? "justify-center sm:justify-between"
               : "justify-between",
           )}
         >
           <Logo />
 
-          {badge && (
-            <div
-              className={cn(
-                "flex items-center gap-4",
-                hideMobileBadge && "hidden sm:flex",
-              )}
-            >
-              <motion.div
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className={cn(
-                  "hidden items-center gap-1.5 rounded-sm border px-4 py-2 sm:flex",
-                  styles.badge,
-                )}
-              >
-                <BadgeIcon className={cn("size-4", styles.icon)} />
-                <span
+          {(actions || badge) && (
+            <div className={cn("flex items-center gap-4")}>
+              {actions ? (
+                <div className="flex items-center">{actions}</div>
+              ) : null}
+              {badge ? (
+                <motion.div
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
                   className={cn(
-                    "text-[10px] font-black tracking-tight uppercase",
-                    styles.text,
+                    "hidden items-center gap-1.5 rounded-sm border px-4 py-2 sm:flex",
+                    styles.badge,
+                    hideMobileBadge && "sm:flex",
                   )}
                 >
-                  {badge}
-                </span>
-              </motion.div>
+                  <BadgeIcon className={cn("size-4", styles.icon)} />
+                  <span
+                    className={cn(
+                      "text-[10px] font-black tracking-tight uppercase",
+                      styles.text,
+                    )}
+                  >
+                    {badge}
+                  </span>
+                </motion.div>
+              ) : null}
 
-              {!hideMobileBadge && (
+              {!hideMobileBadge && badge && (
                 <div className="sm:hidden">
                   <BadgeIcon className={cn("size-5", styles.icon)} />
                 </div>

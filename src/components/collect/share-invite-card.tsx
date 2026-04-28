@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { HiPhone, HiMail, HiUsers } from "react-icons/hi";
 import { FaWhatsapp } from "react-icons/fa";
 import { IconCopy } from "@tabler/icons-react";
@@ -8,33 +8,32 @@ import { motion } from "motion/react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { getSiteUrl } from "@/lib/core/metadata";
 
-/** Avoid hydration mismatch — window.location is only available on the client */
+// Function to collect the campaign registration URL from the environment or the window location
+function collectCampaignRegistrationUrl(slug: string): string {
+  const explicit = process.env.NEXT_PUBLIC_COLLECT_BASE_URL?.trim();
+  if (explicit) {
+    const base = explicit.endsWith("/") ? explicit.slice(0, -1) : explicit;
+    return `${base}/c/${slug}`;
+  }
+  if (typeof window !== "undefined") {
+    return `${window.location.origin}/c/${slug}`;
+  }
+  return `${getSiteUrl()}/c/${slug}`;
+}
+
 function useShareUrl(slug: string) {
-  const [shareUrl, setShareUrl] = useState("");
-  useEffect(() => {
-    const base =
-      process.env.NEXT_PUBLIC_COLLECT_BASE_URL || window.location.origin;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setShareUrl(`${base}/c/${slug}`);
-  }, [slug]);
-  return shareUrl;
+  return useMemo(() => collectCampaignRegistrationUrl(slug), [slug]);
 }
 
 interface ShareInviteCardProps {
-  /** Campaign slug used to build the share URL */
   campaignSlug: string;
-  /** Effective campaign name for share text */
   campaignName: string;
-  /** Party name for share text */
   party: string;
-  /** Constituency label when available (matches public page metadata) */
   constituency?: string;
-  /** Wrap in motion.div with fade-in animation? */
   animated?: boolean;
-  /** Delay for the animation (seconds) */
   animationDelay?: number;
-  /** Optional QR code size in px */
   qrSize?: number;
 }
 

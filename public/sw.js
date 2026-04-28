@@ -4,7 +4,11 @@
  * WardWise Collect — Service Worker
  *
  * Strategy overview:
- *   • Navigation / HTML  → network-only (never cache pages — Next.js handles its own revalidation)
+ *   • /c/* navigations   → network-first, cache fallback (enables offline cold-reopen
+ *                          after prior online visit + offline geo prep)
+ *   • /c/* ?_rsc GETs    → network-first, cache fallback (Next 16 RSC payloads —
+ *                          required for hydration on offline reopen)
+ *   • Other navigations  → network-only
  *   • API calls          → network-first, cache fallback for offline reads
  *   • /_next/static/*    → cache-first (filenames include content-hashes, so safe)
  *   • /brand/*           → stale-while-revalidate
@@ -14,7 +18,7 @@
  *   sed -i "s/__BUILD_ID__/$(git rev-parse --short HEAD)/" public/sw.js
  */
 
-const CACHE_VERSION = "e512eeb-1776968077818"; // replace at build time, or bump manually
+const CACHE_VERSION = "1e111c3-1777270327884"; // replace at build time, or bump manually
 const CACHE_NAME = `wardwise-collect-${CACHE_VERSION}`;
 
 const PRECACHE_ASSETS = ["/brand/logomark-lagoon.svg"];
@@ -54,6 +58,32 @@ self.addEventListener("fetch", (event) => {
     url.pathname.startsWith("/admin") ||
     url.pathname.startsWith("/api/admin")
   ) {
+    return;
+  }
+
+  // ── /c/* RSC payloads: network-first, cache fallback ──
+  // Next 16 emits ?_rsc=<hash> GETs against the page URL on client-side
+  // navigations to server components. These don't have request.mode ===
+  // "navigate" and don't live under /api/, so without an explicit rule they
+  // would fall through to network-only and break offline reopen hydration.
+  if (
+    event.request.method === "GET" &&
+    url.pathname.startsWith("/c/") &&
+    url.searchParams.has("_rsc")
+  ) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches
+              .open(CACHE_NAME)
+              .then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request)),
+    );
     return;
   }
 
@@ -118,18 +148,32 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // ── Everything else (page navigations, /c/* HTML): network-only ──
-  // Do NOT cache HTML/navigation responses. Next.js already handles
-  // client-side caching via its own router cache, and caching HTML in
-  // the SW causes the exact staleness problem we want to avoid.
-  // The SW only intercepts these if the network is down.
+  // ── /c/* document navigations: network-first, cache fallback ──
+  // Cache successful loads so the campaign page reopens offline after a prior
+  // online visit. Pair with the /c/* ?_rsc rule above so hydration also works.
+  if (event.request.mode === "navigate" && url.pathname.startsWith("/c/")) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches
+              .open(CACHE_NAME)
+              .then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request)),
+    );
+    return;
+  }
+
+  // ── Other navigations: network-only ──
+  // Don't cache outside the Collect surface — Next.js handles its own
+  // revalidation and caching HTML elsewhere causes staleness.
   if (event.request.mode === "navigate") {
     event.respondWith(
-      fetch(event.request).catch(() => {
-        // Offline fallback: you could return a custom offline page here
-        // For now, just let the browser show its default offline UI
-        return caches.match(event.request);
-      }),
+      fetch(event.request).catch(() => caches.match(event.request)),
     );
     return;
   }

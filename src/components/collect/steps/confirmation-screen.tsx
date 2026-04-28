@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { HiCheckCircle, HiShieldCheck } from "react-icons/hi";
 import { HiLockClosed } from "react-icons/hi2";
-import { AlertTriangle, CloudUpload, PartyPopper } from "lucide-react";
+import { AlertTriangle, UploadCloud } from "lucide-react";
 import { IconCopy, IconPlus } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import confetti from "canvas-confetti";
@@ -40,80 +40,6 @@ export type ConfirmationScreenProps =
       error?: string;
       onNewRegistration: () => void;
     };
-
-function QueueStatusCard({
-  pendingCount,
-  isOnline,
-  isSyncing,
-  onSyncNow,
-  onNewRegistration,
-}: {
-  pendingCount: number;
-  isOnline: boolean;
-  isSyncing: boolean;
-  onSyncNow: () => void;
-  onNewRegistration: () => void;
-}) {
-  if (pendingCount === 0) {
-    return (
-      <div className="bg-muted/10 border-border/50 rounded-sm border border-dashed p-5">
-        <h3 className="text-foreground mb-3 text-xs font-bold tracking-widest uppercase">
-          No Pending Uploads
-        </h3>
-        <p className="text-muted-foreground mb-4 text-xs leading-relaxed">
-          No pending uploads remain. If this registration uploaded successfully,
-          its receipt is unavailable here. If you saw a rejection message, start
-          a fresh registration with corrected details.
-        </p>
-        <Button
-          type="button"
-          onClick={onNewRegistration}
-          className="h-9 w-full rounded-sm text-[10px] font-bold tracking-widest uppercase sm:w-auto"
-        >
-          Start New Registration
-        </Button>
-        <p className="text-muted-foreground/80 mt-4 text-[10px] leading-relaxed">
-          Starting a new registration is safe.
-        </p>
-      </div>
-    );
-  }
-
-  const title = "Upload Queue";
-  const countLine = `${pendingCount} registration${pendingCount !== 1 ? "s" : ""} pending upload on this device`;
-  const connectivityLine = isOnline
-    ? "Online — ready to sync"
-    : "Offline — will upload when reconnected";
-
-  return (
-    <div className="bg-muted/10 border-border/50 rounded-sm border border-dashed p-5">
-      <h3 className="text-foreground mb-3 text-xs font-bold tracking-widest uppercase">
-        {title}
-      </h3>
-      <p className="text-muted-foreground mb-2 text-xs leading-relaxed">
-        {countLine}
-      </p>
-      <p className="text-muted-foreground mb-4 text-xs leading-relaxed">
-        {connectivityLine}
-      </p>
-      {isOnline && pendingCount > 0 ? (
-        <button
-          type="button"
-          onClick={onSyncNow}
-          disabled={isSyncing}
-          aria-busy={isSyncing}
-          className="mb-4 flex h-8 w-full items-center justify-center rounded-sm border border-emerald-500/20 bg-emerald-500/10 px-3 font-mono text-[10px] font-bold tracking-widest text-emerald-700 uppercase transition-colors hover:bg-emerald-500/20 disabled:opacity-50 sm:w-auto dark:text-emerald-400"
-        >
-          {isSyncing ? "Syncing..." : "Sync Now"}
-        </button>
-      ) : null}
-      <p className="text-muted-foreground/80 text-[10px] leading-relaxed">
-        Safe on this device. No registrations will be lost as long as this
-        browser data isn&apos;t cleared.
-      </p>
-    </div>
-  );
-}
 
 export function ConfirmationScreen(props: ConfirmationScreenProps) {
   const campaignName = getEffectiveCampaignName(props.campaign);
@@ -180,14 +106,11 @@ export function ConfirmationScreen(props: ConfirmationScreenProps) {
                 </div>
               </>
             ) : props.state === "queued" ? (
-              <>
-                <div className="absolute inset-0 animate-ping rounded-full border-2 border-amber-500/40 opacity-30" />
-                <div className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-amber-500/30 bg-amber-500/5 text-amber-700 sm:h-24 sm:w-24 dark:text-amber-400">
-                  <CloudUpload className="animate-in zoom-in h-10 w-10 duration-500 sm:h-12 sm:w-12" />
-                </div>
-              </>
+              <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-amber-500/30 bg-amber-500/5 text-amber-700 sm:h-24 sm:w-24 dark:text-amber-400">
+                <UploadCloud className="animate-in zoom-in h-10 w-10 duration-500 sm:h-12 sm:w-12" />
+              </div>
             ) : (
-              <div className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-red-500/40 bg-red-500/5 text-red-600 sm:h-24 sm:w-24 dark:text-red-400">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-red-500/40 bg-red-500/5 text-red-600 sm:h-24 sm:w-24 dark:text-red-400">
                 <AlertTriangle className="animate-in zoom-in h-10 w-10 duration-500 sm:h-12 sm:w-12" />
               </div>
             )}
@@ -196,28 +119,16 @@ export function ConfirmationScreen(props: ConfirmationScreenProps) {
 
         {props.state === "confirmed" ? (
           <RegistrationStepHeader
-            icon={PartyPopper}
-            badge="Registration Complete"
             title="You're All Set!"
             description="Thank you for registering your support. Your details have been received."
           />
         ) : props.state === "queued" ? (
           <RegistrationStepHeader
-            icon={
-              <CloudUpload className="h-4 w-4 text-amber-700 dark:text-amber-400" />
-            }
-            badge="Pending Upload"
-            badgeClassName="text-amber-700 dark:text-amber-400"
             title="Saved — Waiting to Upload"
             description="This registration is stored on this device. It will upload automatically when this page is open and internet is available."
           />
         ) : (
           <RegistrationStepHeader
-            icon={
-              <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-            }
-            badge="Needs Attention"
-            badgeClassName="text-red-600 dark:text-red-400"
             title="Upload Failed"
             description="This registration was not accepted by the server. Start a fresh registration with corrected details."
           />
@@ -256,7 +167,22 @@ export function ConfirmationScreen(props: ConfirmationScreenProps) {
         </>
       )}
 
-      <div className="flex justify-center">
+      <div className="flex flex-wrap justify-center gap-3">
+        {props.state === "queued" &&
+        props.isOnline &&
+        props.pendingCount > 0 ? (
+          <Button
+            type="button"
+            onClick={props.onSyncNow}
+            disabled={props.isSyncing}
+            aria-busy={props.isSyncing}
+            size="sm"
+            className="h-9 gap-1.5 rounded-sm border border-emerald-500/30 bg-emerald-500/10 px-4 text-[10px] font-bold tracking-widest text-emerald-700 uppercase hover:bg-emerald-500/20 disabled:opacity-50 dark:text-emerald-400"
+          >
+            <UploadCloud className="h-3.5 w-3.5" />
+            {props.isSyncing ? "Syncing..." : "Sync Now"}
+          </Button>
+        ) : null}
         <Button
           variant="outline"
           size="sm"
@@ -269,65 +195,35 @@ export function ConfirmationScreen(props: ConfirmationScreenProps) {
         </Button>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="border-border/60 bg-card relative overflow-hidden border"
-      >
-        <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
-        <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
+      {props.state === "failed" && (
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="border-border/60 bg-card relative overflow-hidden border"
+        >
+          <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
+          <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
 
-        <div className="space-y-6 p-7 sm:p-10">
-          <div className="border-border/40 border-b pb-6">
-            <div className="space-y-1">
-              <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
-                {campaignName}
-              </h2>
-              <div className="flex items-center gap-2">
-                <Badge
-                  variant="default"
-                  className="text-[9px] font-bold tracking-widest uppercase"
-                >
-                  {props.campaign.party}
-                </Badge>
-                <span className="text-muted-foreground text-xs">
-                  {props.campaign.constituency}
-                </span>
+          <div className="space-y-6 p-7 sm:p-10">
+            <div className="border-border/40 border-b pb-6">
+              <div className="space-y-1">
+                <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
+                  {campaignName}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant="default"
+                    className="text-[9px] font-bold tracking-widest uppercase"
+                  >
+                    {props.campaign.party}
+                  </Badge>
+                  <span className="text-muted-foreground text-xs">
+                    {props.campaign.constituency}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {props.state === "confirmed" ? (
-            <div className="bg-muted/10 border-border/50 rounded-sm border border-dashed p-5">
-              <h3 className="text-foreground mb-4 text-xs font-bold tracking-widest uppercase">
-                What Happens Next?
-              </h3>
-              <ul className="space-y-2.5 text-xs">
-                <li className="text-muted-foreground flex items-start gap-2 leading-relaxed">
-                  <span className="text-primary mt-0.5 shrink-0">•</span>
-                  <span>Your registration has been saved securely</span>
-                </li>
-                <li className="text-muted-foreground flex items-start gap-2 leading-relaxed">
-                  <span className="text-primary mt-0.5 shrink-0">•</span>
-                  <span>
-                    The campaign team will review and verify your details
-                  </span>
-                </li>
-                <li className="text-muted-foreground flex items-start gap-2 leading-relaxed">
-                  <span className="text-primary mt-0.5 shrink-0">•</span>
-                  <span>Share the link below to help grow the movement</span>
-                </li>
-              </ul>
-            </div>
-          ) : props.state === "queued" ? (
-            <QueueStatusCard
-              pendingCount={props.pendingCount}
-              isOnline={props.isOnline}
-              isSyncing={props.isSyncing}
-              onSyncNow={props.onSyncNow}
-              onNewRegistration={props.onNewRegistration}
-            />
-          ) : (
             <div className="rounded-sm border border-dashed border-red-500/30 bg-red-500/5 p-5">
               <h3 className="mb-3 text-xs font-bold tracking-widest text-red-700 uppercase dark:text-red-400">
                 Sync Failed
@@ -346,21 +242,15 @@ export function ConfirmationScreen(props: ConfirmationScreenProps) {
                   </p>
                 </div>
               ) : null}
-              <Button
-                type="button"
-                onClick={props.onNewRegistration}
-                className="h-9 w-full rounded-sm text-[10px] font-bold tracking-widest uppercase sm:w-auto"
-              >
-                Start New Registration
-              </Button>
-              <p className="text-muted-foreground/80 mt-4 text-[10px] leading-relaxed">
+              <p className="text-muted-foreground/80 text-[10px] leading-relaxed">
                 Retrying the same details will usually fail again. Correct the
-                information and submit a fresh registration.
+                information and submit a fresh registration using the button
+                above.
               </p>
             </div>
-          )}
-        </div>
-      </motion.div>
+          </div>
+        </motion.div>
+      )}
 
       {props.state === "confirmed" && (
         <ShareInviteCard
@@ -384,7 +274,10 @@ export function ConfirmationScreen(props: ConfirmationScreenProps) {
         <TrustIndicators
           variant="canvasser"
           items={[
-            { icon: <CloudUpload />, label: "PENDING_UPLOAD" },
+            {
+              icon: <UploadCloud className="size-4" />,
+              label: "PENDING_UPLOAD",
+            },
             { icon: <HiLockClosed />, label: "SAVED_ON_DEVICE" },
             { icon: <HiShieldCheck />, label: "ENCRYPTED_LOCALLY" },
           ]}

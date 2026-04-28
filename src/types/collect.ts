@@ -82,6 +82,7 @@ export type PublicCampaign = {
   customQuestion1: string | null;
   customQuestion2: string | null;
   status: string;
+  updatedAt: string;
   campaignCanvassers?: { id: string; name: string; phone: string }[];
 };
 

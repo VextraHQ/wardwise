@@ -1,13 +1,18 @@
 "use client";
-
 import { HiArrowRight, HiCheckCircle } from "react-icons/hi";
-import { ClipboardList } from "lucide-react";
+import {
+  ClipboardList,
+  CloudDownload,
+  CloudOff,
+  RefreshCw,
+} from "lucide-react";
 import { IconCopy, IconPlus, IconRestore } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import type { PublicCampaign } from "@/types/collect";
 import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
 import type { DeviceSubmissionData } from "@/hooks/use-collect-form-persistence";
+import type { OfflineGeoHealth } from "@/lib/collect/offline-geo-health";
 import {
   getEffectiveCampaignName,
   shouldShowCandidateTitle,
@@ -22,23 +27,45 @@ function formatSubmittedDate(value: string) {
   });
 }
 
+function daysSince(iso: string): number {
+  const ms = Date.now() - new Date(iso).getTime();
+  return Math.max(0, Math.floor(ms / (24 * 60 * 60 * 1000)));
+}
+
 export function SplashScreen({
   campaign,
   hasSavedProgress,
   deviceSubmission,
+  offlineHealth,
+  isOffline,
+  preparedLgaCount,
+  preparedAt,
   onStart,
   onStartFresh,
   onRestore,
   onCopyReference,
+  onOpenPrepSheet,
 }: {
   campaign: PublicCampaign;
   hasSavedProgress: boolean;
   deviceSubmission: DeviceSubmissionData | null;
+  offlineHealth: OfflineGeoHealth;
+  isOffline: boolean;
+  preparedLgaCount: number;
+  preparedAt: string | null;
   onStart: () => void;
   onStartFresh: () => void;
   onRestore: () => void;
   onCopyReference: () => void;
+  onOpenPrepSheet: () => void;
 }) {
+  // Block fresh start when offline AND the local data isn't trustworthy:
+  // either there's no pack at all, or the server already confirmed some of
+  // the saved LGAs are out of scope. In both cases new submissions would
+  // either be impossible (no_pack) or guaranteed to fail at sync.
+  const blockFreshStart =
+    isOffline &&
+    (offlineHealth === "no_pack" || offlineHealth === "scope_invalid");
   const showDeviceSubmissionNote = !hasSavedProgress && !!deviceSubmission;
   const formattedDate = deviceSubmission
     ? formatSubmittedDate(deviceSubmission.submittedAt)
@@ -102,12 +129,10 @@ export function SplashScreen({
               </p>
             </div>
           ) : (
-            <div className="bg-muted/30 border-border/50 mx-auto max-w-sm space-y-4 rounded-sm border border-dashed p-4">
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                Join the movement! Register as a supporter in just a few steps.
-                Your information helps strengthen grassroots support.
-              </p>
-            </div>
+            <p className="text-muted-foreground mx-auto max-w-sm text-sm leading-relaxed">
+              Register support in a few steps. We&apos;ll keep the flow simple
+              and protect anything collected on this device.
+            </p>
           )}
 
           <div className="flex flex-col items-center gap-3">
@@ -125,7 +150,8 @@ export function SplashScreen({
                   variant="outline"
                   size="sm"
                   onClick={onStartFresh}
-                  className="hover:bg-muted/50 h-10 w-full max-w-sm rounded-sm text-xs font-bold tracking-widest uppercase"
+                  disabled={blockFreshStart}
+                  className="hover:bg-muted/50 h-10 w-full max-w-sm rounded-sm text-xs font-bold tracking-widest uppercase disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <IconPlus className="mr-2 h-3.5 w-3.5" />
                   Start Fresh
@@ -135,13 +161,21 @@ export function SplashScreen({
               <Button
                 size="lg"
                 onClick={onStart}
-                className="bg-primary text-primary-foreground hover:bg-primary/95 h-12 w-full max-w-sm rounded-sm text-xs font-bold tracking-widest uppercase transition-all active:scale-95"
+                disabled={blockFreshStart}
+                className="bg-primary text-primary-foreground hover:bg-primary/95 h-12 w-full max-w-sm rounded-sm text-xs font-bold tracking-widest uppercase transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Begin registration
                 <HiArrowRight className="ml-2 h-4 w-4" />
               </Button>
             )}
           </div>
+          <OfflinePrepUtilityLane
+            health={offlineHealth}
+            isOffline={isOffline}
+            preparedLgaCount={preparedLgaCount}
+            preparedAt={preparedAt}
+            onOpen={onOpenPrepSheet}
+          />
 
           {showDeviceSubmissionNote && deviceSubmission && formattedDate && (
             <div className="mx-auto w-full max-w-sm text-left">
@@ -182,5 +216,234 @@ export function SplashScreen({
         </div>
       </StepCard>
     </motion.div>
+  );
+}
+
+type PrepUtilityProps = {
+  health: OfflineGeoHealth;
+  isOffline: boolean;
+  preparedLgaCount: number;
+  preparedAt: string | null;
+  onOpen: () => void;
+};
+
+type PrepUtilityCopy = {
+  tone: "neutral" | "ready" | "warning" | "alert";
+  Icon: typeof CloudDownload;
+  label: string;
+  title: string;
+  body: string;
+  action: { kind: "open"; text: string } | null;
+  compact: boolean;
+};
+
+function getPrepUtilityCopy({
+  health,
+  isOffline,
+  preparedLgaCount,
+  preparedAt,
+}: Omit<PrepUtilityProps, "onOpen">): PrepUtilityCopy {
+  const ageDays = preparedAt ? daysSince(preparedAt) : 0;
+
+  if (isOffline) {
+    if (health === "no_pack") {
+      return {
+        tone: "warning",
+        Icon: CloudOff,
+        label: "Offline",
+        title: "Offline setup required",
+        body: "You're offline and no campaign data has been saved on this device. Reconnect to prepare offline data, or restore a saved draft.",
+        action: null,
+        compact: false,
+      };
+    }
+    if (health === "scope_invalid") {
+      // Server already confirmed (last time we were online) that some saved
+      // LGAs are no longer in scope. Don't pretend the pack is usable just
+      // because we're offline now.
+      return {
+        tone: "alert",
+        Icon: RefreshCw,
+        label: "Offline",
+        title: "Saved areas need a refresh",
+        body: "One or more LGAs in your offline data are no longer part of this campaign. Reconnect to refresh — submissions made now would be rejected on sync.",
+        action: null,
+        compact: false,
+      };
+    }
+    return {
+      tone: "ready",
+      Icon: CloudDownload,
+      label: "This device",
+      title: "Saved areas available",
+      body: `Offline data is already saved here for ${preparedLgaCount} LGA${preparedLgaCount === 1 ? "" : "s"}.`,
+      action: null,
+      compact: true,
+    };
+  }
+
+  if (health === "no_pack") {
+    return {
+      tone: "neutral",
+      Icon: CloudDownload,
+      label: "This device",
+      title: "Expect poor network?",
+      body: "Save this campaign for offline use before you head into weak signal.",
+      action: { kind: "open", text: "Prepare offline" },
+      compact: true,
+    };
+  }
+
+  if (health === "scope_invalid") {
+    return {
+      tone: "alert",
+      Icon: RefreshCw,
+      label: "This device",
+      title: "Refresh required",
+      body: "One or more saved LGAs are no longer part of this campaign. Refresh your offline data before going offline.",
+      action: { kind: "open", text: "Refresh offline data" },
+      compact: true,
+    };
+  }
+
+  if (health === "content_outdated") {
+    return {
+      tone: "warning",
+      Icon: RefreshCw,
+      label: "This device",
+      title: "Refresh recommended",
+      body: `Campaign details changed since you saved ${preparedLgaCount} offline LGA${preparedLgaCount === 1 ? "" : "s"}.`,
+      action: { kind: "open", text: "Refresh offline data" },
+      compact: true,
+    };
+  }
+
+  if (health === "aged") {
+    return {
+      tone: "neutral",
+      Icon: RefreshCw,
+      label: "This device",
+      title: `Offline data is ${ageDays} days old`,
+      body: `${preparedLgaCount} LGA${preparedLgaCount === 1 ? "" : "s"} saved. Refresh if the campaign or boundaries may have changed.`,
+      action: { kind: "open", text: "Refresh" },
+      compact: true,
+    };
+  }
+
+  return {
+    tone: "ready",
+    Icon: CloudDownload,
+    label: "This device",
+    title: "Offline-ready",
+    body: `Saved for ${preparedLgaCount} LGA${preparedLgaCount === 1 ? "" : "s"}${preparedAt ? ` · prepared ${ageDays === 0 ? "today" : `${ageDays}d ago`}` : ""}.`,
+    action: { kind: "open", text: "Manage offline areas" },
+    compact: true,
+  };
+}
+
+const TONE_STYLES = {
+  neutral: {
+    border: "border-border/60",
+    bg: "bg-muted/20",
+    iconBg: "bg-muted",
+    iconText: "text-muted-foreground",
+  },
+  ready: {
+    border: "border-emerald-500/30",
+    bg: "bg-emerald-500/5",
+    iconBg: "bg-emerald-500/10",
+    iconText: "text-emerald-600 dark:text-emerald-400",
+  },
+  warning: {
+    border: "border-amber-500/30",
+    bg: "bg-amber-500/5",
+    iconBg: "bg-amber-500/10",
+    iconText: "text-amber-600 dark:text-amber-400",
+  },
+  alert: {
+    border: "border-red-500/30",
+    bg: "bg-red-500/5",
+    iconBg: "bg-red-500/10",
+    iconText: "text-red-600 dark:text-red-400",
+  },
+};
+
+function OfflinePrepUtilityLane({
+  health,
+  isOffline,
+  preparedLgaCount,
+  preparedAt,
+  onOpen,
+}: PrepUtilityProps) {
+  if (isOffline && health !== "no_pack" && health !== "scope_invalid") {
+    return null;
+  }
+
+  const copy = getPrepUtilityCopy({
+    health,
+    isOffline,
+    preparedLgaCount,
+    preparedAt,
+  });
+  const styles = TONE_STYLES[copy.tone];
+  const { Icon } = copy;
+
+  if (copy.compact) {
+    return (
+      <div
+        className={`mx-auto w-full max-w-sm overflow-hidden rounded-sm border px-3 py-2.5 text-left ${styles.border} ${styles.bg}`}
+      >
+        <div className="flex flex-col gap-2.5">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <Icon className={`size-3.5 shrink-0 ${styles.iconText}`} />
+              <p
+                className={`font-mono text-[10px] font-bold tracking-widest uppercase ${styles.iconText}`}
+              >
+                {copy.label}
+              </p>
+            </div>
+            <p className="mt-1 text-xs leading-relaxed">
+              <span className="text-foreground font-medium">{copy.title}</span>
+              <span className="text-muted-foreground"> {copy.body}</span>
+            </p>
+          </div>
+          {copy.action ? (
+            <button
+              type="button"
+              onClick={onOpen}
+              className="border-foreground/15 hover:bg-foreground/5 inline-flex h-8 shrink-0 items-center justify-center rounded-sm border px-3 font-mono text-[10px] font-bold tracking-widest uppercase transition-colors"
+            >
+              {copy.action.text}
+            </button>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`mx-auto w-full max-w-sm overflow-hidden rounded-sm border border-dashed px-4 py-3 text-left ${styles.border} ${styles.bg}`}
+    >
+      <div className="flex items-start gap-3">
+        <div
+          className={`flex size-8 shrink-0 items-center justify-center rounded-full ${styles.iconBg}`}
+        >
+          <Icon className={`size-4 ${styles.iconText}`} />
+        </div>
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <p
+            className={`font-mono text-[10px] font-bold tracking-widest uppercase ${styles.iconText}`}
+          >
+            {copy.label}
+          </p>
+          <p className="text-foreground text-sm font-semibold">{copy.title}</p>
+          <p className="text-muted-foreground text-xs leading-relaxed">
+            {copy.body}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

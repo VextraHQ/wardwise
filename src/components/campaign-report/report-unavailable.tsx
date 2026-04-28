@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { HiShieldExclamation } from "react-icons/hi2";
 import { AuthCard } from "@/components/auth/auth-card";
 import { RegistrationStepHeader } from "@/components/collect/registration-step-header";
 import { IconShieldOff } from "@tabler/icons-react";
@@ -11,8 +10,6 @@ export function ReportUnavailable() {
   return (
     <div className="mx-auto flex min-h-[60vh] w-full max-w-md flex-col justify-center">
       <RegistrationStepHeader
-        icon={HiShieldExclamation}
-        badge="Access Interrupted"
         title="Report Unavailable"
         description="This private Campaign Insights link is no longer accessible from your current session."
       />

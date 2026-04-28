@@ -104,7 +104,7 @@ export function NavButtons({
         onClick={onBack}
         disabled={isLoading}
         aria-label="Go back to previous step"
-        className="hover:bg-muted/10 h-12 min-h-12 shrink-0 rounded-sm px-4 text-xs font-bold tracking-widest uppercase sm:h-11 sm:min-h-0 sm:px-8"
+        className="hover:bg-muted/10 h-12 min-h-12 shrink-0 rounded-sm px-4 text-[10px] font-bold tracking-widest uppercase sm:h-11 sm:min-h-0 sm:px-8 sm:text-xs"
       >
         <HiArrowLeft className="mr-2 h-4 w-4 shrink-0" />
         Back

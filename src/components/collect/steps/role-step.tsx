@@ -6,7 +6,6 @@ import {
   HiClipboardList,
   HiShieldCheck,
 } from "react-icons/hi";
-import { Users } from "lucide-react";
 import { motion } from "motion/react";
 import type { UseFormReturn } from "react-hook-form";
 import type { RegistrationFormData } from "@/lib/schemas/collect-schemas";
@@ -67,8 +66,6 @@ export function RoleStep({
   return (
     <div className="space-y-6">
       <RegistrationStepHeader
-        icon={Users}
-        badge="Campaign Role"
         title="Choose Your Role"
         description="Select how you'd like to contribute to the campaign"
       />
