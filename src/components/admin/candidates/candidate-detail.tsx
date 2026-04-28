@@ -122,10 +122,10 @@ export function CandidateDetail({
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="min-w-0 space-y-3">
-            <div className="flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-              <h1 className="text-foreground text-[1.9rem] leading-none font-extrabold tracking-tighter sm:text-4xl">
+        <div className="flex flex-col gap-4">
+          <div className="w-full min-w-0 space-y-3">
+            <div className="space-y-2">
+              <h1 className="text-foreground text-2xl leading-tight font-extrabold tracking-tighter wrap-break-word sm:text-3xl md:text-4xl">
                 {candidate.title ? `${candidate.title} ` : ""}
                 {candidate.name}
               </h1>
@@ -145,7 +145,7 @@ export function CandidateDetail({
               </div>
             </div>
 
-            <div className="text-foreground/70 flex flex-col items-start gap-1.5 font-mono text-[9px] font-bold tracking-widest uppercase sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2 sm:text-[10px]">
+            <div className="text-foreground/70 flex min-w-0 flex-row flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[9px] font-bold tracking-widest uppercase sm:gap-x-4 sm:text-[10px]">
               <div className="flex max-w-full items-center gap-2">
                 <span className="bg-primary/40 size-1.5 rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
                 <span>{candidate.position}</span>

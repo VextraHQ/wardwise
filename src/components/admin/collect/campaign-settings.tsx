@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -19,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -67,6 +66,7 @@ function copyToClipboard(text: string, label: string) {
 }
 
 export function CampaignSettings({ campaignId }: { campaignId: string }) {
+  const dangerConfirmInputId = useId();
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -99,12 +99,31 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
     : "";
 
   const updatePatch = updateMutation.variables as
-    | { clientReportEnabled?: boolean }
+    | {
+        status?: string;
+        brandingType?: Campaign["brandingType"];
+        displayName?: string | null;
+        enabledLgaIds?: number[];
+        clientReportEnabled?: boolean;
+      }
     | undefined;
   const isEnablingClientReport =
     updateMutation.isPending && updatePatch?.clientReportEnabled === true;
   const isRevokingClientReport =
     updateMutation.isPending && updatePatch?.clientReportEnabled === false;
+  const pendingStatusTarget =
+    updateMutation.isPending && updatePatch?.status != null
+      ? updatePatch.status
+      : null;
+  const isBrandingSaving =
+    updateMutation.isPending &&
+    updatePatch != null &&
+    ("brandingType" in updatePatch || "displayName" in updatePatch) &&
+    updatePatch.status === undefined &&
+    updatePatch.enabledLgaIds === undefined &&
+    updatePatch.clientReportEnabled === undefined;
+  const isBoundaryResetPending =
+    updateMutation.isPending && updatePatch?.enabledLgaIds != null;
 
   useEffect(() => {
     if (!campaign) return;
@@ -295,90 +314,142 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
   return (
     <div className="space-y-6">
       {/* Status Control */}
-      <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader>
+      <Card className="border-border/60 bg-card rounded-sm shadow-none">
+        <CardHeader className="border-border/50 border-b pb-4">
           <CardTitle className="text-sm font-semibold tracking-tight">
-            Campaign Status
+            Campaign status
           </CardTitle>
-          <CardDescription className="text-muted-foreground mt-1 text-sm">
+          <CardDescription className="text-muted-foreground mt-1 text-sm leading-relaxed">
             Control whether the public form accepts submissions.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:gap-2">
-            <span className="text-muted-foreground text-sm">
-              Current status:
-            </span>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
             <Badge
               variant="outline"
-              className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${CAMPAIGN_STATUS_STYLES[campaign.status] ?? ""}`}
+              className={`rounded-sm px-2.5 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${CAMPAIGN_STATUS_STYLES[campaign.status] ?? ""}`}
             >
               {capitalize(campaign.status)}
             </Badge>
+            <p className="text-muted-foreground max-w-prose text-sm leading-relaxed">
+              {campaign.status === "active" && (
+                <>
+                  The public Collect form is live and accepting new submissions.
+                </>
+              )}
+              {campaign.status === "paused" && (
+                <>
+                  The form URL is paused. Visitors with the link see an
+                  unavailable state until you resume or change status.
+                </>
+              )}
+              {campaign.status === "closed" && (
+                <>
+                  This campaign is closed. The form does not accept further
+                  input.
+                </>
+              )}
+              {campaign.status === "draft" && (
+                <>
+                  Still in draft. Activate the campaign when you are ready to
+                  publish the Collect link.
+                </>
+              )}
+            </p>
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-            {campaign.status !== "active" && (
-              <Button
-                size="sm"
-                className="h-9 w-full justify-center rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
-                onClick={() => handleStatusChange("active")}
-              >
-                <IconPlayerPlay className="mr-1.5 h-3.5 w-3.5" />
-                Activate
-              </Button>
-            )}
-            {campaign.status === "active" && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-9 w-full justify-center rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
-                onClick={() => handleStatusChange("paused")}
-              >
-                <IconPlayerPause className="mr-1.5 h-3.5 w-3.5" />
-                Pause
-              </Button>
-            )}
-            {campaign.status !== "closed" && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-9 w-full justify-center rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
-                onClick={() => handleStatusChange("closed")}
-              >
-                <IconLock className="mr-1.5 h-3.5 w-3.5" />
-                Close
-              </Button>
-            )}
-            {campaign.status !== "draft" && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="col-span-2 h-9 w-full justify-center rounded-sm font-mono text-[11px] tracking-widest uppercase sm:col-auto sm:w-auto"
-                onClick={() => handleStatusChange("draft")}
-              >
-                <IconFileDescription className="mr-1.5 h-3.5 w-3.5" />
-                Set to Draft
-              </Button>
-            )}
+
+          <div className="border-border/40 space-y-3 border-t pt-6">
+            <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+              Change status
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              {campaign.status !== "active" && (
+                <Button
+                  size="sm"
+                  className="h-10 w-full shrink-0 justify-center rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto sm:min-w-34"
+                  disabled={updateMutation.isPending}
+                  onClick={() => handleStatusChange("active")}
+                >
+                  {pendingStatusTarget === "active" ? (
+                    <Spinner className="mr-1.5 size-3.5" />
+                  ) : (
+                    <IconPlayerPlay className="mr-1.5 h-3.5 w-3.5" />
+                  )}
+                  {pendingStatusTarget === "active"
+                    ? "Activating..."
+                    : "Activate"}
+                </Button>
+              )}
+              {campaign.status === "active" && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-10 w-full shrink-0 justify-center rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto sm:min-w-34"
+                  disabled={updateMutation.isPending}
+                  onClick={() => handleStatusChange("paused")}
+                >
+                  {pendingStatusTarget === "paused" ? (
+                    <Spinner className="mr-1.5 size-3.5" />
+                  ) : (
+                    <IconPlayerPause className="mr-1.5 h-3.5 w-3.5" />
+                  )}
+                  {pendingStatusTarget === "paused" ? "Pausing..." : "Pause"}
+                </Button>
+              )}
+              {campaign.status !== "closed" && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-10 w-full shrink-0 justify-center rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto sm:min-w-34"
+                  disabled={updateMutation.isPending}
+                  onClick={() => handleStatusChange("closed")}
+                >
+                  {pendingStatusTarget === "closed" ? (
+                    <Spinner className="mr-1.5 size-3.5" />
+                  ) : (
+                    <IconLock className="mr-1.5 h-3.5 w-3.5" />
+                  )}
+                  {pendingStatusTarget === "closed" ? "Closing..." : "Close"}
+                </Button>
+              )}
+              {campaign.status !== "draft" && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-10 w-full shrink-0 justify-center rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto sm:min-w-34"
+                  disabled={updateMutation.isPending}
+                  onClick={() => handleStatusChange("draft")}
+                >
+                  {pendingStatusTarget === "draft" ? (
+                    <Spinner className="mr-1.5 size-3.5" />
+                  ) : (
+                    <IconFileDescription className="mr-1.5 h-3.5 w-3.5" />
+                  )}
+                  {pendingStatusTarget === "draft"
+                    ? "Updating..."
+                    : "Set to Draft"}
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Campaign Branding */}
-      <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader>
+      <Card className="border-border/60 bg-card rounded-sm shadow-none">
+        <CardHeader className="border-border/50 border-b pb-4">
           <CardTitle className="text-sm font-semibold tracking-tight">
-            Campaign Branding
+            Campaign branding
           </CardTitle>
-          <CardDescription className="text-muted-foreground mt-1 text-sm">
+          <CardDescription className="text-muted-foreground mt-1 text-sm leading-relaxed">
             Control how this campaign appears on Collect pages while keeping the
             underlying candidate anchor unchanged.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-1.5">
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
             <Label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-              Runs As
+              Runs as
             </Label>
             <ToggleGroup
               type="single"
@@ -388,7 +459,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
                 setBrandingType(value as Campaign["brandingType"]);
               }}
               variant="outline"
-              className="grid w-full grid-cols-1 rounded-sm sm:grid-cols-3"
+              className="grid w-full grid-cols-1 rounded-sm shadow-none! sm:grid-cols-3"
             >
               {campaignBrandingTypes.map((type) => (
                 <ToggleGroupItem
@@ -402,9 +473,9 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
             </ToggleGroup>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-              Public Campaign Name
+              Public campaign name
             </Label>
             <Input
               value={displayName}
@@ -416,21 +487,23 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
                     ? "e.g. Fintiri Canvassers"
                     : "Optional if you want a public campaign name different from the candidate"
               }
-              className="h-9 rounded-sm"
+              className="border-border/60 h-9 rounded-sm"
             />
-            <p className="text-muted-foreground text-xs">
-              Public preview:{" "}
-              <span className="text-foreground font-medium">
+            <div className="border-border/50 bg-muted/20 text-muted-foreground rounded-sm border px-3 py-2 text-xs leading-relaxed">
+              <span className="text-foreground/70 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Preview
+              </span>
+              <span className="text-foreground mt-1 block font-medium">
                 {getEffectiveCampaignName({
                   candidateName: campaign.candidateName,
                   displayName,
                 })}
               </span>
-            </p>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-muted-foreground text-xs leading-relaxed">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-muted-foreground max-w-prose text-xs leading-relaxed">
               Anchor candidate stays linked for scope, analytics, and campaign
               rules.
             </p>
@@ -440,120 +513,146 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
               onClick={handleSaveBranding}
               disabled={!brandingDirty || updateMutation.isPending}
             >
-              {updateMutation.isPending ? "Saving..." : "Save Branding"}
+              {isBrandingSaving ? (
+                <Spinner className="mr-1.5 size-3.5" />
+              ) : null}
+              {isBrandingSaving ? "Saving..." : "Save Branding"}
             </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Campaign Details */}
-      <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader>
+      <Card className="border-border/60 bg-card rounded-sm shadow-none">
+        <CardHeader className="border-border/50 border-b pb-4">
           <CardTitle className="text-sm font-semibold tracking-tight">
-            Campaign Details
+            Campaign details
           </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-sm leading-relaxed">
+            Read-only snapshot of metadata stored with this campaign.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-            <span className="text-muted-foreground">Public name</span>
-            <span className="max-w-full text-left wrap-break-word sm:max-w-[65%] sm:text-right">
-              {campaignName}
-            </span>
-          </div>
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-            <span className="text-muted-foreground">Branding</span>
-            <span className="text-left sm:text-right">
-              {getCampaignBrandingLabel(campaign.brandingType)}
-            </span>
-          </div>
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-            <span className="text-muted-foreground">Slug</span>
-            <span className="max-w-full text-left font-mono wrap-break-word sm:max-w-[65%] sm:text-right">
-              {campaign.slug}
-            </span>
-          </div>
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-            <span className="text-muted-foreground">Anchor candidate</span>
-            <span className="max-w-full text-left wrap-break-word sm:max-w-[65%] sm:text-right">
-              {formatPersonName(campaign.candidateName)}
-            </span>
-          </div>
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-            <span className="text-muted-foreground">Party</span>
-            <span className="text-left sm:text-right">{campaign.party}</span>
-          </div>
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-            <span className="text-muted-foreground">Constituency</span>
-            <span className="max-w-full text-left wrap-break-word sm:max-w-[65%] sm:text-right">
-              {campaign.constituency}
-            </span>
-          </div>
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-            <span className="text-muted-foreground">Type</span>
-            <span className="text-left capitalize sm:text-right">
-              {campaign.constituencyType}
-            </span>
-          </div>
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-            <span className="text-muted-foreground">Created</span>
-            <span className="text-left sm:text-right">
-              {new Date(campaign.createdAt).toLocaleString("en-NG", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-              })}
-            </span>
-          </div>
+        <CardContent>
+          <dl className="divide-border/40 divide-y text-sm">
+            <div className="flex flex-col gap-1 py-2.5 first:pt-0 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <dt className="text-muted-foreground shrink-0 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Public name
+              </dt>
+              <dd className="max-w-full min-w-0 text-left wrap-break-word sm:max-w-[65%] sm:text-right">
+                {campaignName}
+              </dd>
+            </div>
+            <div className="flex flex-col gap-1 py-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <dt className="text-muted-foreground shrink-0 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Branding
+              </dt>
+              <dd className="text-left sm:max-w-[65%] sm:text-right">
+                {getCampaignBrandingLabel(campaign.brandingType)}
+              </dd>
+            </div>
+            <div className="flex flex-col gap-1 py-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <dt className="text-muted-foreground shrink-0 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Slug
+              </dt>
+              <dd className="max-w-full min-w-0 text-left font-mono wrap-break-word sm:max-w-[65%] sm:text-right">
+                {campaign.slug}
+              </dd>
+            </div>
+            <div className="flex flex-col gap-1 py-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <dt className="text-muted-foreground shrink-0 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Anchor candidate
+              </dt>
+              <dd className="max-w-full min-w-0 text-left wrap-break-word sm:max-w-[65%] sm:text-right">
+                {formatPersonName(campaign.candidateName)}
+              </dd>
+            </div>
+            <div className="flex flex-col gap-1 py-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <dt className="text-muted-foreground shrink-0 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Party
+              </dt>
+              <dd className="text-left sm:text-right">{campaign.party}</dd>
+            </div>
+            <div className="flex flex-col gap-1 py-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <dt className="text-muted-foreground shrink-0 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Constituency
+              </dt>
+              <dd className="max-w-full min-w-0 text-left wrap-break-word sm:max-w-[65%] sm:text-right">
+                {campaign.constituency}
+              </dd>
+            </div>
+            <div className="flex flex-col gap-1 py-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <dt className="text-muted-foreground shrink-0 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Type
+              </dt>
+              <dd className="text-left capitalize sm:text-right">
+                {campaign.constituencyType}
+              </dd>
+            </div>
+            <div className="flex flex-col gap-1 py-2.5 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <dt className="text-muted-foreground shrink-0 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Created
+              </dt>
+              <dd className="text-left tabular-nums sm:text-right">
+                {new Date(campaign.createdAt).toLocaleString("en-NG", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </dd>
+            </div>
+          </dl>
         </CardContent>
       </Card>
 
       {canShowBoundarySync && (
-        <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader>
+        <Card className="border-border/60 bg-card rounded-sm shadow-none">
+          <CardHeader className="border-border/50 border-b pb-4">
             <CardTitle className="text-sm font-semibold tracking-tight">
-              Boundary Sync
+              Boundary sync
             </CardTitle>
-            <CardDescription className="text-muted-foreground mt-1 text-sm">
+            <CardDescription className="text-muted-foreground mt-1 text-sm leading-relaxed">
               Campaigns keep their own saved coverage after creation. Reset this
               campaign only if you want the public form to match the
               candidate&apos;s current boundary again.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-3 text-sm">
-              <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-                <span className="text-muted-foreground">Campaign coverage</span>
-                <span className="text-left font-medium sm:text-right">
+            <div className="grid gap-6 text-sm sm:grid-cols-2">
+              <div className="space-y-1">
+                <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Campaign coverage
+                </p>
+                <p className="font-medium tabular-nums">
                   {campaign.enabledLgaIds.length} LGA
                   {campaign.enabledLgaIds.length === 1 ? "" : "s"}
-                </span>
+                </p>
               </div>
-              <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-                <span className="text-muted-foreground">
-                  Candidate coverage now
-                </span>
-                <span className="text-left font-medium sm:text-right">
+              <div className="space-y-1">
+                <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Candidate now
+                </p>
+                <p className="font-medium tabular-nums">
                   {currentCandidateBoundaryIds.length > 0
                     ? `${currentCandidateBoundaryIds.length} LGA${currentCandidateBoundaryIds.length === 1 ? "" : "s"}`
                     : "Unavailable"}
-                </span>
+                </p>
               </div>
             </div>
 
             {campaign.candidateBoundaryError ? (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground border-border/50 bg-muted/20 rounded-sm border px-3 py-2.5 text-sm leading-relaxed">
                 {campaign.candidateBoundaryError}
               </p>
             ) : campaign.isBoundaryOutOfSync ? (
-              <p className="text-sm text-amber-700">
+              <p className="rounded-sm border border-amber-500/25 bg-amber-500/5 px-3 py-2.5 text-sm leading-relaxed text-amber-800 dark:text-amber-200">
                 The candidate boundary changed after this campaign was created.
                 Reset the campaign boundary if you want the public form to use
                 the new scope.
               </p>
             ) : (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground border-border/50 bg-muted/10 rounded-sm border px-3 py-2.5 text-sm leading-relaxed">
                 This campaign already matches the candidate&apos;s current
                 boundary.
               </p>
@@ -569,8 +668,14 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
                 !canResetToCandidateBoundary || updateMutation.isPending
               }
             >
-              <IconRefresh className="mr-1.5 h-3.5 w-3.5" />
-              Reset to Candidate Boundary
+              {isBoundaryResetPending ? (
+                <Spinner className="mr-1.5 size-3.5" />
+              ) : (
+                <IconRefresh className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              {isBoundaryResetPending
+                ? "Resetting boundary..."
+                : "Reset to Candidate Boundary"}
             </Button>
 
             <p className="text-muted-foreground text-xs">
@@ -582,14 +687,14 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
       )}
 
       {/* Client Access */}
-      <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
+      <Card className="border-border/60 bg-card rounded-sm shadow-none">
+        <CardHeader className="border-border/50 border-b pb-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 space-y-1">
               <CardTitle className="text-sm font-semibold tracking-tight">
-                Client Access
+                Client access
               </CardTitle>
-              <CardDescription className="text-muted-foreground mt-1 text-sm">
+              <CardDescription className="text-muted-foreground text-sm leading-relaxed">
                 Give the client a private read-only results view for this
                 campaign.
               </CardDescription>
@@ -597,7 +702,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
             {isEnabled && (
               <Badge
                 variant="outline"
-                className="border-primary/30 bg-primary/10 text-primary rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                className="border-primary/30 bg-primary/10 text-primary shrink-0 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
               >
                 Enabled
               </Badge>
@@ -608,12 +713,12 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           {!isEnabled ? (
             <div className="space-y-3">
               {campaign.status === "draft" ? (
-                <p className="text-sm text-amber-700">
+                <p className="rounded-sm border border-amber-500/25 bg-amber-500/5 px-3 py-2.5 text-sm leading-relaxed text-amber-800 dark:text-amber-200">
                   Activate the campaign before enabling the client report. Draft
                   campaigns are not accessible to clients.
                 </p>
               ) : (
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground border-border/50 bg-muted/15 rounded-sm border px-3 py-2.5 text-sm leading-relaxed">
                   Enable to generate a private report link with a passcode that
                   you can share with the client.
                 </p>
@@ -637,52 +742,61 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
               </Button>
             </div>
           ) : (
-            <div className="space-y-5">
+            <div className="space-y-6">
               {/* Report URL */}
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                   Report URL
                 </Label>
-                <div className="flex gap-2">
-                  <Input
-                    readOnly
-                    value={reportUrl}
-                    className="h-9 rounded-sm font-mono text-xs"
-                    onFocus={(e) => e.target.select()}
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-9 shrink-0 rounded-sm"
-                    onClick={() => copyToClipboard(reportUrl, "Report link")}
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-2">
+                  <div
+                    className="border-border/60 bg-muted/30 text-foreground pointer-events-none w-full min-w-0 cursor-default rounded-sm border px-3 py-2 font-mono text-[11px] leading-relaxed wrap-break-word break-all shadow-none select-none sm:min-h-10 sm:flex-1 sm:text-xs"
+                    role="status"
+                    aria-label="Report link. Use Copy or Open—this value is not editable."
                   >
-                    <IconCopy className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-9 shrink-0 rounded-sm"
-                    onClick={() => window.open(reportUrl, "_blank")}
-                  >
-                    <IconExternalLink className="h-3.5 w-3.5" />
-                  </Button>
+                    {reportUrl}
+                  </div>
+                  <div className="flex min-h-10 shrink-0 gap-2 sm:items-center">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-10 flex-1 rounded-sm sm:h-10 sm:min-w-10 sm:flex-none sm:px-0"
+                      aria-label="Copy report link"
+                      onClick={() => copyToClipboard(reportUrl, "Report link")}
+                    >
+                      <IconCopy className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-10 flex-1 rounded-sm sm:h-10 sm:min-w-10 sm:flex-none sm:px-0"
+                      aria-label="Open report in new tab"
+                      onClick={() => window.open(reportUrl, "_blank")}
+                    >
+                      <IconExternalLink className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
               </div>
 
               {/* Passcode */}
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                   Passcode
                 </Label>
                 {visiblePasscode ? (
-                  <div className="flex items-center gap-2">
-                    <div className="bg-muted/50 flex h-9 items-center rounded-sm border px-3 font-mono text-sm font-bold tracking-[0.3em]">
+                  <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+                    <div className="border-border/60 bg-muted/40 flex min-h-10 min-w-0 flex-1 items-center rounded-sm border px-3 py-2 font-mono text-sm font-bold tracking-[0.3em] sm:py-0">
                       {visiblePasscode}
                     </div>
                     <Button
+                      type="button"
                       size="sm"
                       variant="outline"
-                      className="h-9 shrink-0 rounded-sm"
+                      className="h-10 w-full shrink-0 rounded-sm sm:w-auto sm:min-w-10 sm:px-0"
+                      aria-label="Copy passcode"
                       onClick={() =>
                         copyToClipboard(visiblePasscode, "Passcode")
                       }
@@ -691,7 +805,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
                     </Button>
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-muted-foreground border-border/50 bg-muted/15 rounded-sm border px-3 py-2.5 text-xs leading-relaxed">
                     Passcode is hidden. Reset it to generate a new one you can
                     copy.
                   </p>
@@ -703,17 +817,22 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
                   onClick={handleResetPasscode}
                   disabled={resettingPasscode}
                 >
-                  <IconKey className="mr-1.5 h-3.5 w-3.5" />
+                  {resettingPasscode ? (
+                    <Spinner className="mr-1.5 size-3.5" />
+                  ) : (
+                    <IconKey className="mr-1.5 h-3.5 w-3.5" />
+                  )}
                   {resettingPasscode ? "Resetting..." : "Reset Passcode"}
                 </Button>
               </div>
 
               {/* Security Info */}
-              <div className="space-y-2 text-sm">
-                <Separator />
-                <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-                  <span className="text-muted-foreground">Last viewed</span>
-                  <span className="text-left sm:text-right">
+              <div className="border-border/40 space-y-4 border-t pt-4 text-sm">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                  <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                    Last viewed
+                  </span>
+                  <span className="text-left tabular-nums sm:text-right">
                     {campaign.clientReportLastViewedAt
                       ? new Date(
                           campaign.clientReportLastViewedAt,
@@ -727,8 +846,10 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
                       : "Never"}
                   </span>
                 </div>
-                <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-                  <span className="text-muted-foreground">Access mode</span>
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                  <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                    Access mode
+                  </span>
                   <span className="text-left sm:text-right">
                     Private link + passcode
                   </span>
@@ -744,7 +865,11 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
                   onClick={handleRegenerateToken}
                   disabled={regeneratingToken}
                 >
-                  <IconRotateClockwise className="mr-1.5 h-3.5 w-3.5" />
+                  {regeneratingToken ? (
+                    <Spinner className="mr-1.5 size-3.5" />
+                  ) : (
+                    <IconRotateClockwise className="mr-1.5 h-3.5 w-3.5" />
+                  )}
                   {regeneratingToken ? "Regenerating..." : "Regenerate Link"}
                 </Button>
                 <Button
@@ -768,44 +893,76 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
       </Card>
 
       {/* Danger Zone */}
-      <Card className="border-destructive rounded-sm shadow-none">
-        <CardHeader>
+      <Card className="border-destructive/25 bg-destructive/5 dark:border-destructive/35 dark:bg-destructive/10 rounded-sm border shadow-none">
+        <CardHeader className="border-destructive/20 border-b pb-4">
           <CardTitle className="text-destructive text-sm font-semibold tracking-tight">
-            Danger Zone
+            Danger zone
           </CardTitle>
-          <CardDescription className="text-muted-foreground mt-1 text-sm">
-            Delete this campaign
+          <CardDescription className="text-muted-foreground mt-1 text-sm leading-relaxed">
+            Permanently delete this campaign
             {submissionCount > 0
-              ? ` and all ${submissionCount} submission${submissionCount === 1 ? "" : "s"}`
+              ? ` and all ${submissionCount.toLocaleString()} submission${submissionCount === 1 ? "" : "s"}`
               : ""}
-            . This action cannot be undone.
+            . This cannot be undone.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Separator className="mb-4" />
-          <div className="space-y-3">
-            <Label>
-              Type{" "}
-              <span className="font-mono font-semibold">{campaign.slug}</span>{" "}
-              to confirm
-            </Label>
-            <Input
-              value={deleteSlug}
-              onChange={(e) => setDeleteSlug(e.target.value)}
-              placeholder={campaign.slug}
-              className="rounded-sm"
-            />
+        <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <p className="text-muted-foreground text-xs leading-relaxed sm:text-sm">
+              Type the campaign slug shown below into the confirmation field.
+              Matching is case-sensitive. Deliberate typing reduces accidental
+              deletion.
+            </p>
+            <div>
+              <p className="text-foreground/70 mb-1.5 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Expected slug
+              </p>
+              <div className="border-destructive/20 bg-background/60 text-foreground dark:bg-background/40 rounded-sm border px-3 py-2.5 font-mono text-[11px] wrap-anywhere break-all shadow-none select-none sm:text-xs">
+                {campaign.slug}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor={dangerConfirmInputId}
+                className="text-foreground font-mono text-[10px] font-bold tracking-widest uppercase"
+              >
+                Confirmation
+              </Label>
+              <Input
+                id={dangerConfirmInputId}
+                value={deleteSlug}
+                onChange={(e) => setDeleteSlug(e.target.value)}
+                placeholder="Type the slug exactly as shown"
+                className="border-destructive/30 bg-background/80 selection:bg-destructive/15 selection:text-foreground hover:border-destructive/50 focus-visible:border-destructive focus-visible:ring-destructive/30 dark:border-destructive/45 dark:bg-background/60 dark:hover:border-destructive/60 dark:focus-visible:ring-destructive/35 rounded-sm font-mono text-xs shadow-none transition-[border-color,box-shadow] focus-visible:ring-[3px] sm:text-sm"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                aria-describedby={`${dangerConfirmInputId}-hint`}
+              />
+              <p
+                id={`${dangerConfirmInputId}-hint`}
+                className="text-muted-foreground text-[11px] leading-snug"
+              >
+                Delete stays disabled until this field matches exactly. The slug
+                cannot be selected, so you type it deliberately.
+              </p>
+            </div>
             <Button
               variant="destructive"
               size="sm"
-              className="h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
+              type="button"
+              className="h-10 w-full rounded-sm font-mono text-[11px] font-bold tracking-widest uppercase"
               disabled={
                 deleteSlug !== campaign.slug || deleteMutation.isPending
               }
               onClick={handleDelete}
             >
-              <IconTrash className="mr-1 h-4 w-4" />
-              {deleteMutation.isPending ? "Deleting..." : "Delete Campaign"}
+              {deleteMutation.isPending ? (
+                <Spinner className="mr-1.5 size-3.5" />
+              ) : (
+                <IconTrash className="mr-1.5 h-4 w-4" />
+              )}
+              {deleteMutation.isPending ? "Deleting..." : "Delete campaign"}
             </Button>
           </div>
         </CardContent>

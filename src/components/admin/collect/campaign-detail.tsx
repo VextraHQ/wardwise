@@ -3,7 +3,7 @@
 import { use } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { IconCopy } from "@tabler/icons-react";
+import { IconCopy, IconExternalLink } from "@tabler/icons-react";
 import { toast } from "sonner";
 
 import { useCampaign } from "@/hooks/use-collect";
@@ -66,12 +66,21 @@ export function CampaignDetail({
     router.replace(`?${params.toString()}`);
   }
 
-  function copyPublicLink() {
+  function getPublicFormUrl(slug: string) {
     const baseUrl =
       process.env.NEXT_PUBLIC_COLLECT_BASE_URL || window.location.origin;
-    const url = `${baseUrl}/c/${campaign?.slug}`;
-    navigator.clipboard.writeText(url);
+    return `${baseUrl}/c/${slug}`;
+  }
+
+  function copyPublicLink() {
+    if (!campaign) return;
+    navigator.clipboard.writeText(getPublicFormUrl(campaign.slug));
     toast.success("Public form link copied to clipboard");
+  }
+
+  function openPublicForm() {
+    if (!campaign) return;
+    window.open(getPublicFormUrl(campaign.slug), "_blank");
   }
 
   if (isLoading) {
@@ -127,10 +136,10 @@ export function CampaignDetail({
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
-            <div className="min-w-0 space-y-2">
-              <h1 className="text-foreground text-3xl leading-tight font-extrabold tracking-tighter wrap-break-word md:text-4xl">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="w-full min-w-0 flex-1 space-y-2 md:space-y-3">
+            <div className="space-y-2">
+              <h1 className="text-foreground text-2xl leading-tight font-extrabold tracking-tighter wrap-break-word sm:text-3xl md:text-4xl">
                 {campaignName}
               </h1>
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
@@ -149,7 +158,7 @@ export function CampaignDetail({
               </div>
             </div>
 
-            <div className="text-muted-foreground/70 flex flex-col items-start gap-1.5 font-mono text-[9px] font-bold tracking-widest uppercase sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2 sm:text-[10px]">
+            <div className="text-muted-foreground/70 flex min-w-0 flex-row flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[9px] font-bold tracking-widest uppercase sm:gap-x-4 sm:text-[10px]">
               <div className="flex max-w-full items-center gap-2">
                 <span className="bg-primary/40 size-1.5 rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
                 <span>{campaign.party}</span>
@@ -169,15 +178,26 @@ export function CampaignDetail({
             </div>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={copyPublicLink}
-            className="hover:bg-muted h-9 w-full shrink-0 rounded-sm font-mono text-[10px] tracking-widest uppercase shadow-sm transition-all sm:w-auto"
-          >
-            <IconCopy className="mr-2 h-3.5 w-3.5" />
-            Copy Link
-          </Button>
+          <div className="flex w-full min-w-0 shrink-0 flex-row gap-2 md:w-auto md:justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={openPublicForm}
+              className="hover:bg-muted h-9 min-w-0 flex-1 rounded-sm font-mono text-[10px] tracking-widest uppercase shadow-sm transition-all md:w-auto md:flex-none"
+            >
+              <IconExternalLink className="mr-2 h-3.5 w-3.5 shrink-0" />
+              Open Form
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={copyPublicLink}
+              className="hover:bg-muted h-9 min-w-0 flex-1 rounded-sm font-mono text-[10px] tracking-widest uppercase shadow-sm transition-all md:w-auto md:flex-none"
+            >
+              <IconCopy className="mr-2 h-3.5 w-3.5 shrink-0" />
+              Copy Link
+            </Button>
+          </div>
         </div>
         <div className="from-border/80 via-border/40 h-px w-full bg-linear-to-r to-transparent" />
       </header>

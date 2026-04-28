@@ -28,6 +28,7 @@ import {
   IconShieldCheck,
   IconSparkles,
   IconUsersGroup,
+  IconExternalLink,
 } from "@tabler/icons-react";
 import { SubmissionStatusBadge } from "./insights-helpers";
 
@@ -442,6 +443,11 @@ export function ReadyToCollectState({
     );
   };
 
+  const handleOpenForm = () => {
+    if (!formUrl) return;
+    window.open(formUrl, "_blank");
+  };
+
   return (
     <StepCard>
       <CardSectionHeader
@@ -464,15 +470,26 @@ export function ReadyToCollectState({
             start coming in, you&apos;ll see momentum, hotspots, field-team
             performance, and supporter records appear here automatically.
           </p>
-          <Button
-            size="sm"
-            variant="outline"
-            className="mt-6 h-9 rounded-sm font-mono text-[11px] tracking-widest uppercase"
-            onClick={handleCopy}
-          >
-            <IconCopy className="mr-1.5 h-3.5 w-3.5" />
-            Copy Form Link
-          </Button>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-9 rounded-sm font-mono text-[11px] tracking-widest uppercase"
+              onClick={handleOpenForm}
+            >
+              <IconExternalLink className="mr-1.5 h-3.5 w-3.5" />
+              Open Form
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-9 rounded-sm font-mono text-[11px] tracking-widest uppercase"
+              onClick={handleCopy}
+            >
+              <IconCopy className="mr-1.5 h-3.5 w-3.5" />
+              Copy Form Link
+            </Button>
+          </div>
         </div>
 
         <ShareInviteCard

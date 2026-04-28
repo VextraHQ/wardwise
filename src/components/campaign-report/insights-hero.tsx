@@ -8,7 +8,7 @@ import {
   getEffectiveCampaignName,
   shouldShowCandidateTitle,
 } from "@/lib/collect/branding";
-import { IconCopy } from "@tabler/icons-react";
+import { IconCopy, IconExternalLink } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { STATUS_STYLES } from "./insights-helpers";
 
@@ -46,11 +46,16 @@ export function InsightsHero({
     }
   };
 
+  const handleOpenPublicForm = () => {
+    if (!formUrl) return;
+    window.open(formUrl, "_blank");
+  };
+
   return (
     <Card className="border-border/60 overflow-hidden rounded-sm shadow-none">
       <CardContent className="space-y-4 sm:space-y-0">
         {/* Mobile: big number first, then identity */}
-        <div className="border-border/60 flex items-center justify-between border-b pb-4 sm:hidden">
+        <div className="border-border/60 flex flex-wrap items-start justify-between gap-3 border-b pb-4 sm:hidden">
           <div>
             <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
               Supporters Captured
@@ -59,15 +64,26 @@ export function InsightsHero({
               {total.toLocaleString()}
             </p>
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-8 shrink-0 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
-            onClick={handleCopyFormLink}
-          >
-            <IconCopy className="mr-1.5 h-3.5 w-3.5" />
-            Copy Link
-          </Button>
+          <div className="flex shrink-0 flex-wrap justify-end gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
+              onClick={handleOpenPublicForm}
+            >
+              <IconExternalLink className="mr-1.5 h-3.5 w-3.5" />
+              Open Form
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
+              onClick={handleCopyFormLink}
+            >
+              <IconCopy className="mr-1.5 h-3.5 w-3.5" />
+              Copy Link
+            </Button>
+          </div>
         </div>
 
         {/* Desktop: horizontal layout */}
@@ -103,16 +119,27 @@ export function InsightsHero({
               </p>
             </div>
 
-            {/* Copy link — desktop only (mobile has it in the top bar) */}
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-muted-foreground hover:text-foreground -ml-2 hidden h-8 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase sm:inline-flex"
-              onClick={handleCopyFormLink}
-            >
-              <IconCopy className="mr-1.5 h-3.5 w-3.5" />
-              Copy Form Link
-            </Button>
+            {/* Open + copy — desktop only (mobile has them in the top bar) */}
+            <div className="-ml-2 hidden gap-2 sm:flex">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground h-8 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
+                onClick={handleOpenPublicForm}
+              >
+                <IconExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                Open Form
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground h-8 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
+                onClick={handleCopyFormLink}
+              >
+                <IconCopy className="mr-1.5 h-3.5 w-3.5" />
+                Copy Form Link
+              </Button>
+            </div>
           </div>
 
           {/* Desktop big number */}

@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsPortraitMobile } from "@/hooks/use-mobile";
 import {
   Sheet,
   SheetContent,
@@ -127,7 +128,7 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
   const { data, isLoading } = useCampaignCanvassers(campaignId);
   const addMutation = useAddCanvasser(campaignId);
   const removeMutation = useRemoveCanvasser(campaignId);
-
+  const isPortraitMobile = useIsPortraitMobile();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [zone, setZone] = useState("");
@@ -532,7 +533,10 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
 
       {/* Manage Dropdown Sheet */}
       <Sheet open={manageOpen} onOpenChange={setManageOpen}>
-        <SheetContent className="flex flex-col gap-0 p-0 sm:max-w-md">
+        <SheetContent
+          side={isPortraitMobile ? "bottom" : "right"}
+          className="flex flex-col gap-0 p-0 sm:max-w-md"
+        >
           <SheetHeader className="space-y-1 border-b">
             <SheetTitle className="text-base font-bold tracking-tight">
               Public Form Canvassers
