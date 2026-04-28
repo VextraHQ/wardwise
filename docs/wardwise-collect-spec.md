@@ -112,6 +112,13 @@
 - **Collect canvasser attribution fixed for future writes**: public submissions now canonicalize `canvasserPhone` when a referrer is provided, matching the already-canonical supporter `phone` field.
 - **Existing live data cleaned safely**: the initial `canvasserPhone` backfill found two valid local-format values, normalized both to `+234XXXXXXXXXX`, and found no invalid/skipped rows or mixed-format groups. The one-time cleanup script was removed after verification.
 
+### What Changed (Batch 12 — Collect UI/UX Polish)
+
+- **Splash support state is calmer**: offline prep moved from a standalone support card into a compact device utility lane under the primary CTA, so campaign identity and the start action stay visually dominant.
+- **System messaging is calmer**: connectivity/sync state now lives in a slim shell-level banner, while the in-form status lane is reserved for higher-priority action-needed states such as failed uploads.
+- **Location messaging stays contextual**: the location step still owns the small local notes for `Using offline data`, online fallback with retry, and full offline blocking states because those messages explain the dropdown behavior directly.
+- **Confirmation remains the outcome surface**: confirmed, queued, and failed confirmation states were intentionally left structurally unchanged so the polish stays focused on task-flow calmness rather than changing the result model.
+
 ### What Changed (Batch 11 — Reporting Date Filters)
 
 - **Shared reporting date utilities**: date preset ranges, query formatting, picker bounds, and display labels now live in `src/lib/date-ranges.ts`.
@@ -225,6 +232,7 @@
 - Offline submissions are stored in IndexedDB until sync. Pending rows show an amber queued confirmation; successful sync removes the row and can flip to confirmed; permanent 4xx failures remain locally as failed rows for review/dismiss.
 - Active failed confirmations store a slug-scoped local pointer (`collect-active-failed-${slug}`) so reload can return to the same failed row while it still exists.
 - Offline geo packs (v2.8) are per-campaign IndexedDB records prepared explicitly while online. The packs power offline location entry but are convenience data, not authority — server submit/sync remains the final check on geo validity. Stale or invalid packs surface in the splash via four health states (`clean` / `scope_invalid` / `content_outdated` / `aged`) and can be refreshed any time the user is online. `scope_invalid` is computed only after a fresh allowed-LGA fetch succeeds, so a network blip never falsely marks a pack invalid.
+- The splash now surfaces offline geo prep as a compact device utility lane, while live connectivity/sync state sits in a slim shell-level banner above the form content. Blocking prep problems still escalate on the splash itself.
 - Closed campaigns clear their stored pack on the next online open. Drafted/deleted campaigns clear their pack via a slug-aware `/c/[slug]` not-found surface that reuses the themed `NotFoundStatusScreen`.
 
 ### Validation

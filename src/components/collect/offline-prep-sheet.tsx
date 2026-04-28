@@ -338,7 +338,7 @@ function PrepCta({
           <button
             type="button"
             disabled={isPreparing}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 inline-flex h-10 w-full items-center justify-center rounded-sm px-4 text-xs font-semibold tracking-widest uppercase transition-colors disabled:pointer-events-none disabled:opacity-50"
+            className="bg-destructive hover:bg-destructive/90 inline-flex h-10 w-full items-center justify-center rounded-sm px-4 text-xs font-semibold tracking-widest text-gray-100 uppercase transition-colors disabled:pointer-events-none disabled:opacity-50"
           >
             Remove offline data
           </button>

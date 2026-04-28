@@ -12,6 +12,7 @@
 - **v2.2 post-submission polish complete** — OpenGraph, returning visitor recognition, reference IDs, form UX audit fixes
 - **v2.7 offline queue UX complete** — queued/confirmed/failed confirmation states, failed review sheet, and reload rehydration
 - **v2.8 offline geo preparation complete** — selected-LGA offline packs, splash health card, location-step local-data fallback, cold-reopen via service worker, slug-aware cleanup
+- **v2.9 collect UX calm-down complete** — shell-level connectivity banner, quieter splash utility lane, and reduced banner clutter during the active form flow
 
 ---
 
@@ -162,6 +163,16 @@ model CampaignCanvasser {
 - **Submission lag warning** — "No submissions in 48h" auto-alert on active campaigns
 - **Template custom questions** — Library of pre-made question sets to copy between campaigns (admin **Collect setup** step 2 is structured to absorb more fields / presets without another full wizard redesign)
 - **Geographic heatmap** — Map visualization of submission density by ward/LGA
+
+---
+
+## Completed v2.9 — Collect UI/UX Polish (2026-04-27)
+
+- **Splash support state simplified**: the offline-prep surface was reshaped from a standalone support card into a compact device utility lane beneath the primary CTA, with blocking-only escalation for `offline + no_pack` and `offline + scope_invalid`.
+- **Shell connectivity banner**: offline / back-online / syncing state now lives in a slim shell-level banner, so ambient connectivity messaging no longer competes with the splash CTA or the step content.
+- **Action-needed status lane**: the in-form status lane now focuses on higher-priority action-needed states such as failed uploads instead of stacking passive offline/sync messaging with everything else.
+- **Contextual notes stayed local**: the location step still owns the `Using offline data`, `Network issue — using saved data`, and full offline-blocking treatments because those messages explain the dropdown source directly.
+- **Outcome model unchanged**: confirmed / queued / failed confirmation states were left intact so the polish stayed presentation-focused and did not reopen the offline queue logic.
 
 ---
 

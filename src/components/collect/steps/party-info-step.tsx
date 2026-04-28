@@ -37,8 +37,6 @@ export function PartyInfoStep({
   return (
     <div className="space-y-6">
       <RegistrationStepHeader
-        icon={ClipboardList}
-        badge="Party Verification"
         title="Party Information"
         description="Enter your party registration and voter identification details"
       />

@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { HiUser, HiPhone, HiUsers, HiCheckCircle } from "react-icons/hi";
-import { Users } from "lucide-react";
 import { motion } from "motion/react";
 import type { UseFormReturn } from "react-hook-form";
 import type { RegistrationFormData } from "@/lib/schemas/collect-schemas";
@@ -150,8 +149,6 @@ export function CanvasserStep({
   return (
     <div className="space-y-6">
       <RegistrationStepHeader
-        icon={Users}
-        badge="Referral Attribution"
         title="Canvasser Details"
         description="Were you referred by someone on the campaign team?"
       />

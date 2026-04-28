@@ -8,7 +8,6 @@ import {
   HiShieldCheck,
 } from "react-icons/hi";
 import { FaMale, FaFemale } from "react-icons/fa";
-import { UserCircle } from "lucide-react";
 import { motion } from "motion/react";
 import type { UseFormReturn } from "react-hook-form";
 import type { RegistrationFormData } from "@/lib/schemas/collect-schemas";
@@ -95,8 +94,6 @@ export function PersonalDetailsStep({
   return (
     <div className="space-y-6">
       <RegistrationStepHeader
-        icon={UserCircle}
-        badge="Personal Profile"
         title="Tell Us About Yourself"
         description="We need some basic information to register you as a supporter"
       />

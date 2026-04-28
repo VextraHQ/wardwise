@@ -5,6 +5,7 @@ import { useForm, useWatch, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { AlertTriangle } from "lucide-react";
 import {
   useCampaignLgas,
   useWards,
@@ -16,63 +17,79 @@ import { useCollectFormPersistence } from "@/hooks/use-collect-form-persistence"
 import { useOffline } from "@/hooks/use-offline";
 import { useCollectOfflineGeo } from "@/hooks/use-collect-offline-geo";
 import { useCollectGeoResolution } from "@/hooks/use-collect-geo-resolution";
+import { useCollectSubmissionLifecycle } from "@/hooks/use-collect-submission-lifecycle";
 import {
   createAnalyticsId,
   getCollectErrorCategory,
   track,
 } from "@/lib/analytics/client";
-import { getFailedSubmissionById, queueSubmission } from "@/lib/offline-queue";
+import { queueSubmission } from "@/lib/offline-queue";
 import {
   submitRegistrationSchema,
   type RegistrationFormData,
 } from "@/lib/schemas/collect-schemas";
+import {
+  COLLECT_CONFIRMATION_SCREEN,
+  COLLECT_LAST_INPUT_SCREEN,
+  COLLECT_STEP_KEYS,
+  COLLECT_STEP_TITLES,
+  COLLECT_TOTAL_SCREENS,
+  getCollectProgressCurrentStep,
+  getCollectProgressStepTitles,
+  getCollectProgressTotalSteps,
+  getCollectScreenFields,
+} from "@/lib/collect/step-flow";
 import type { PublicCampaign } from "@/types/collect";
-import { composeFullName, generateRefCode } from "@/lib/utils";
+import { generateRefCode } from "@/lib/utils";
 import { StepProgress } from "@/components/ui/step-progress";
 import { FormShell } from "@/components/collect/form-shell";
+import { CampaignAvailabilityScreen } from "@/components/collect/campaign-availability-screen";
 import { SplashScreen } from "@/components/collect/steps/splash-screen";
 import { PersonalDetailsStep } from "@/components/collect/steps/personal-details-step";
 import { LocationStep } from "@/components/collect/steps/location-step";
 import { PartyInfoStep } from "@/components/collect/steps/party-info-step";
 import { RoleStep } from "@/components/collect/steps/role-step";
 import { CanvasserStep } from "@/components/collect/steps/canvasser-step";
+import { CollectConnectivityBanner } from "@/components/collect/collect-connectivity-banner";
 import { FailedReviewSheet } from "@/components/collect/failed-review-sheet";
 import { OfflinePrepSheet } from "@/components/collect/offline-prep-sheet";
 import { ConfirmationScreen } from "@/components/collect/steps/confirmation-screen";
-import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
 type Props = { initialCampaign: PublicCampaign };
 
-const STEP_TITLES = [
-  "Welcome",
-  "Personal Details",
-  "Location",
-  "Party Information",
-  "Your Role",
-  "Canvasser",
-  "Confirmation",
-];
-
-const STEP_KEYS = [
-  "welcome",
-  "personal_details",
-  "location",
-  "party_information",
-  "role",
-  "canvasser",
-  "confirmation",
-] as const;
+function createCollectDefaultValues({
+  prefilledCanvasserName,
+  prefilledCanvasserPhone,
+}: {
+  prefilledCanvasserName: string;
+  prefilledCanvasserPhone: string;
+}): RegistrationFormData {
+  return {
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    phone: "",
+    email: "",
+    sex: undefined as unknown as RegistrationFormData["sex"],
+    age: undefined as unknown as number,
+    occupation: "",
+    maritalStatus:
+      undefined as unknown as RegistrationFormData["maritalStatus"],
+    lgaId: undefined as unknown as number,
+    lgaName: "",
+    wardId: undefined as unknown as number,
+    wardName: "",
+    pollingUnitId: undefined as unknown as number,
+    pollingUnitName: "",
+    apcRegNumber: "",
+    voterIdNumber: "",
+    role: undefined as unknown as RegistrationFormData["role"],
+    customAnswer1: "",
+    customAnswer2: "",
+    canvasserName: prefilledCanvasserName,
+    canvasserPhone: prefilledCanvasserPhone,
+  };
+}
 
 function focusFirstFieldError(
   form: UseFormReturn<RegistrationFormData>,
@@ -92,35 +109,22 @@ function focusFirstFieldError(
   }
 }
 
-// Party info is always shown now (APC/NIN + VIN are required)
-const TOTAL_SCREENS = 7; // 0=splash, 1=personal, 2=location, 3=party, 4=role, 5=canvasser, 6=confirmation
-
 export function CampaignRegistrationForm({ initialCampaign }: Props) {
   const campaign = initialCampaign;
   const searchParams = useSearchParams();
   const prefilledCanvasserName = searchParams.get("canvasser")?.trim() || "";
   const prefilledCanvasserPhone = searchParams.get("cphone")?.trim() || "";
   const [screen, setScreen] = useState(0);
-  const [submittedCount, setSubmittedCount] = useState<number | null>(null);
-  const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [hasCanvasser, setHasCanvasser] = useState<boolean | null>(
     prefilledCanvasserName ? true : null,
   );
   const [canvasserStepError, setCanvasserStepError] = useState<string>("");
-  const [syncSource, setSyncSource] = useState<"automatic" | "manual">(
-    "automatic",
-  );
   const [occupationMode, setOccupationMode] = useState<"select" | "custom">(
     "select",
   );
   const [validationFlashNonce, setValidationFlashNonce] = useState(0);
-  const [queuedAnalyticsId, setQueuedAnalyticsId] = useState<string | null>(
-    null,
-  );
-  const [queuedSyncError, setQueuedSyncError] = useState<string | null>(null);
   const [failedReviewOpen, setFailedReviewOpen] = useState(false);
   const [offlinePrepOpen, setOfflinePrepOpen] = useState(false);
-  const failedRehydrateAppliedRef = useRef(false);
 
   const offlineGeo = useCollectOfflineGeo(campaign);
 
@@ -138,22 +142,69 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     clearLastSyncResult,
   } = useOffline();
 
-  const clearActiveFailedPointer = useCallback(() => {
-    try {
-      localStorage.removeItem(`collect-active-failed-${campaign.slug}`);
-    } catch {
-      /* ignore */
-    }
-  }, [campaign.slug]);
+  const form = useForm<RegistrationFormData>({
+    resolver: zodResolver(submitRegistrationSchema),
+    defaultValues: createCollectDefaultValues({
+      prefilledCanvasserName,
+      prefilledCanvasserPhone,
+    }),
+  });
+
+  const {
+    submittedCount,
+    submissionId,
+    queuedSyncError,
+    clearQueuedFailureState,
+    markManualSyncRequested,
+    resetSubmissionState,
+    showConfirmedSubmission,
+    showQueuedSubmission,
+  } = useCollectSubmissionLifecycle({
+    campaignSlug: campaign.slug,
+    form,
+    screen,
+    confirmationScreen: COLLECT_CONFIRMATION_SCREEN,
+    lastSyncResult,
+    clearLastSyncResult,
+    onShowConfirmationScreen: () => setScreen(COLLECT_CONFIRMATION_SCREEN),
+  });
 
   const clearFailedNotices = useCallback(async () => {
     track("collect_failed_notice_dismissed", {
       cleared_count: failedCount,
     });
     await clearFailedSubmissions();
-    clearActiveFailedPointer();
-    setQueuedSyncError(null);
-  }, [failedCount, clearFailedSubmissions, clearActiveFailedPointer]);
+    clearQueuedFailureState();
+  }, [clearFailedSubmissions, clearQueuedFailureState, failedCount]);
+
+  const handleOpenFailedReview = () => {
+    track("collect_failed_review_opened", {
+      failed_count: failedCount,
+    });
+    setFailedReviewOpen(true);
+  };
+
+  const handleSyncNow = useCallback(() => {
+    void (async () => {
+      track("collect_sync_requested", {
+        pending_count: pendingCount,
+        source: "manual",
+      });
+      markManualSyncRequested();
+      const result = await trySync();
+      if (result) {
+        if (result.synced > 0) {
+          toast.success(`${result.synced} submission(s) synced`);
+        }
+        for (const f of result.failed) {
+          toast.error("Submission rejected", {
+            description: f.error,
+            duration: 8000,
+          });
+        }
+      }
+    })();
+  }, [markManualSyncRequested, pendingCount, trySync]);
 
   const handleDismissFailedRow = useCallback(
     async (id: number) => {
@@ -164,60 +215,14 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
         );
         const parsed = raw ? (JSON.parse(raw) as { id?: unknown }) : null;
         if (parsed?.id === id) {
-          localStorage.removeItem(`collect-active-failed-${campaign.slug}`);
-          setQueuedSyncError(null);
+          clearQueuedFailureState();
         }
       } catch {
         /* ignore */
       }
     },
-    [campaign.slug, dismissFailedSubmission],
+    [campaign.slug, dismissFailedSubmission, clearQueuedFailureState],
   );
-
-  useEffect(() => {
-    failedRehydrateAppliedRef.current = false;
-    if (typeof window === "undefined") return;
-    const key = `collect-active-failed-${campaign.slug}`;
-    let cancelled = false;
-    void (async () => {
-      try {
-        const raw = localStorage.getItem(key);
-        if (!raw) return;
-        const parsed = JSON.parse(raw) as { id?: unknown };
-        if (typeof parsed.id !== "number") return;
-        const row = await getFailedSubmissionById(parsed.id);
-        if (cancelled) return;
-        if (!row) {
-          try {
-            localStorage.removeItem(key);
-          } catch {
-            /* ignore */
-          }
-          return;
-        }
-        const err =
-          row.lastError ?? "This registration was not added to the campaign.";
-        queueMicrotask(() => {
-          if (failedRehydrateAppliedRef.current) return;
-          failedRehydrateAppliedRef.current = true;
-          setQueuedSyncError(err);
-          setQueuedAnalyticsId(null);
-          setSubmittedCount(null);
-          setSubmissionId(null);
-          setScreen(TOTAL_SCREENS - 1);
-          track("collect_failed_active_rehydrated", {
-            has_last_error: Boolean(row.lastError),
-            error_category: getCollectErrorCategory(row.lastError ?? err),
-          });
-        });
-      } catch {
-        /* ignore corrupt pointer */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [campaign.slug]);
 
   // Register / manage service worker lifecycle
   useCollectServiceWorker();
@@ -234,154 +239,6 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     closedCleanupRef.current = true;
     void offlineGeo.clear();
   }, [campaign.status, isOffline, offlineGeo]);
-
-  const form = useForm<RegistrationFormData>({
-    resolver: zodResolver(submitRegistrationSchema),
-    defaultValues: {
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      phone: "",
-      email: "",
-      sex: undefined,
-      age: undefined as unknown as number,
-      occupation: "",
-      maritalStatus: undefined,
-      lgaId: undefined as unknown as number,
-      lgaName: "",
-      wardId: undefined as unknown as number,
-      wardName: "",
-      pollingUnitId: undefined as unknown as number,
-      pollingUnitName: "",
-      apcRegNumber: "",
-      voterIdNumber: "",
-      role: undefined,
-      customAnswer1: "",
-      customAnswer2: "",
-      canvasserName: prefilledCanvasserName,
-      canvasserPhone: prefilledCanvasserPhone,
-    },
-  });
-
-  // Surface auto-sync results (from reconnect) as toasts; flip queued confirmation when this submission syncs
-  useEffect(() => {
-    if (!lastSyncResult) return;
-
-    // Match any queued->confirmed flip first so we can tell the failed branch
-    // below whether this specific record already transitioned to confirmed.
-    let flippedToConfirmed = false;
-    if (
-      screen === TOTAL_SCREENS - 1 &&
-      submittedCount === null &&
-      queuedAnalyticsId &&
-      lastSyncResult.syncedEntries.length > 0
-    ) {
-      const match = lastSyncResult.syncedEntries.find(
-        (e) => e.analyticsId === queuedAnalyticsId,
-      );
-      if (match) {
-        flippedToConfirmed = true;
-        const submissionId = match.submissionId;
-        const count = match.count;
-        const slug = campaign.slug;
-        const formValues = form.getValues();
-        queueMicrotask(() => {
-          setSubmittedCount(count);
-          setSubmissionId(submissionId);
-          setQueuedAnalyticsId(null);
-          try {
-            localStorage.removeItem(`collect-active-failed-${slug}`);
-          } catch {
-            /* ignore */
-          }
-
-          const refCode = generateRefCode(submissionId);
-          localStorage.setItem(
-            `collect-submitted-${slug}`,
-            JSON.stringify({
-              name: composeFullName(formValues),
-              count,
-              submittedAt: new Date().toISOString(),
-              refCode,
-            }),
-          );
-        });
-      }
-    }
-
-    // Flip the active queued confirmation to "failed" when the currently-shown
-    // submission was permanently rejected by the server during this sync.
-    const activeFailedMatch =
-      screen === TOTAL_SCREENS - 1 &&
-      submittedCount === null &&
-      queuedAnalyticsId &&
-      !flippedToConfirmed
-        ? lastSyncResult.failed.find((e) => e.analyticsId === queuedAnalyticsId)
-        : undefined;
-    if (activeFailedMatch) {
-      const errorMessage = activeFailedMatch.error;
-      const failedRowId = activeFailedMatch.id;
-      queueMicrotask(() => {
-        setQueuedSyncError(errorMessage);
-        setQueuedAnalyticsId(null);
-        try {
-          localStorage.setItem(
-            `collect-active-failed-${campaign.slug}`,
-            JSON.stringify({ id: failedRowId }),
-          );
-        } catch {
-          /* ignore */
-        }
-      });
-    }
-
-    track("collect_sync_completed", {
-      source: syncSource,
-      synced_count: lastSyncResult.synced,
-      failed_count: lastSyncResult.failed.length,
-    });
-
-    for (const entry of lastSyncResult.syncedEntries) {
-      track("collect_submission_succeeded", {
-        analytics_id: entry.analyticsId,
-        submission_source: "offline_queue",
-      });
-    }
-
-    for (const entry of lastSyncResult.failed) {
-      track("collect_submission_failed", {
-        analytics_id: entry.analyticsId,
-        error_category: getCollectErrorCategory(entry.error),
-        submission_source: "offline_queue",
-      });
-    }
-
-    if (lastSyncResult.synced > 0) {
-      toast.success(`${lastSyncResult.synced} submission(s) synced`);
-    }
-    for (const f of lastSyncResult.failed) {
-      // Suppress the toast for the entry already rendered inline as "failed"
-      // so we don't double-notify for the same record.
-      if (activeFailedMatch && f.id === activeFailedMatch.id) continue;
-      toast.error("Queued submission rejected", {
-        description: f.error,
-        duration: 8000,
-      });
-    }
-    window.setTimeout(() => {
-      setSyncSource("automatic");
-    }, 0);
-    clearLastSyncResult();
-  }, [
-    clearLastSyncResult,
-    lastSyncResult,
-    syncSource,
-    screen,
-    submittedCount,
-    queuedAnalyticsId,
-    campaign.slug,
-    form,
-  ]);
 
   const { setValue, trigger } = form;
   const lgaId = useWatch({ control: form.control, name: "lgaId" });
@@ -408,7 +265,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     form,
     campaignSlug: campaign.slug,
     screen,
-    totalScreens: TOTAL_SCREENS,
+    totalScreens: COLLECT_TOTAL_SCREENS,
     uiState: { hasCanvasser, occupationMode },
     skipLocationResetRef,
     pendingRestoreRef,
@@ -524,43 +381,18 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
 
   const submitMutation = useSubmitRegistration();
 
-  const screenFieldMap: Record<number, (keyof RegistrationFormData)[]> = {
-    1: [
-      "firstName",
-      "middleName",
-      "lastName",
-      "phone",
-      "email",
-      "sex",
-      "age",
-      "occupation",
-      "maritalStatus",
-    ],
-    2: [
-      "lgaId",
-      "lgaName",
-      "wardId",
-      "wardName",
-      "pollingUnitId",
-      "pollingUnitName",
-    ],
-    3: ["apcRegNumber", "voterIdNumber"],
-    4: ["role"],
-    5: ["canvasserName", "canvasserPhone"],
-  };
-
   const role = useWatch({ control: form.control, name: "role" });
   const skipCanvasserStep = role === "canvasser";
 
   useEffect(() => {
-    if (screen <= 0 || screen >= TOTAL_SCREENS - 1) return;
+    if (screen <= 0 || screen >= COLLECT_CONFIRMATION_SCREEN) return;
 
     const stepViewKey = `${screen}:${skipCanvasserStep ? "skip" : "full"}`;
     if (lastTrackedStepRef.current === stepViewKey) return;
 
     track("collect_step_viewed", {
       step_index: screen,
-      step_key: STEP_KEYS[screen],
+      step_key: COLLECT_STEP_KEYS[screen],
       skips_canvasser_step: skipCanvasserStep,
     });
     lastTrackedStepRef.current = stepViewKey;
@@ -568,10 +400,10 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
 
   useEffect(() => {
     const onPageHide = () => {
-      if (screen <= 0 || screen >= TOTAL_SCREENS - 1) return;
+      if (screen <= 0 || screen >= COLLECT_CONFIRMATION_SCREEN) return;
       track("collect_flow_abandoned", {
         step_index: screen,
-        step_key: STEP_KEYS[screen] ?? "unknown",
+        step_key: COLLECT_STEP_KEYS[screen] ?? "unknown",
       });
     };
     window.addEventListener("pagehide", onPageHide);
@@ -603,8 +435,8 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
           description:
             "Your registration will be submitted automatically when you reconnect.",
         });
-        setQueuedAnalyticsId(analyticsId);
-        setScreen(TOTAL_SCREENS - 1);
+        showQueuedSubmission(analyticsId);
+        setScreen(COLLECT_CONFIRMATION_SCREEN);
       } catch {
         toast.error("Failed to save offline");
       }
@@ -622,27 +454,13 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             duration_ms: Math.round(elapsed),
           });
         }
-        setSubmittedCount(result.count);
-        setSubmissionId(result.submission.id);
+        showConfirmedSubmission(result.submission.id, result.count);
         clearProgress();
         track("collect_submission_succeeded", {
           ...submissionProperties,
           submission_source: "online",
         });
-
-        // Persist submission for returning visitor recognition
-        const refCode = generateRefCode(result.submission.id);
-        localStorage.setItem(
-          `collect-submitted-${campaign.slug}`,
-          JSON.stringify({
-            name: composeFullName(form.getValues()),
-            count: result.count,
-            submittedAt: new Date().toISOString(),
-            refCode,
-          }),
-        );
-
-        setScreen(TOTAL_SCREENS - 1); // confirmation
+        setScreen(COLLECT_CONFIRMATION_SCREEN);
       },
       onError: (error) => {
         const msg = error.message || "";
@@ -667,40 +485,14 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   };
 
   const resetToFreshRegistration = (nextScreen = 1) => {
-    form.reset({
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      phone: "",
-      email: "",
-      sex: undefined as unknown as "male" | "female",
-      age: undefined as unknown as number,
-      occupation: "",
-      maritalStatus: undefined as unknown as
-        | "single"
-        | "married"
-        | "divorced"
-        | "widowed",
-      lgaId: undefined as unknown as number,
-      lgaName: "",
-      wardId: undefined as unknown as number,
-      wardName: "",
-      pollingUnitId: undefined as unknown as number,
-      pollingUnitName: "",
-      apcRegNumber: "",
-      voterIdNumber: "",
-      role: undefined as unknown as "volunteer" | "member" | "canvasser",
-      customAnswer1: "",
-      customAnswer2: "",
-      canvasserName: prefilledCanvasserName,
-      canvasserPhone: prefilledCanvasserPhone,
-    });
+    form.reset(
+      createCollectDefaultValues({
+        prefilledCanvasserName,
+        prefilledCanvasserPhone,
+      }),
+    );
     setScreen(nextScreen);
-    setSubmittedCount(null);
-    setSubmissionId(null);
-    setQueuedAnalyticsId(null);
-    setQueuedSyncError(null);
-    clearActiveFailedPointer();
+    resetSubmissionState();
     setHasCanvasser(prefilledCanvasserName ? true : null);
     setCanvasserStepError("");
     setOccupationMode("select");
@@ -722,7 +514,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   const recordValidationFailure = (failedFieldKeys: string[]) => {
     track("collect_validation_failed", {
       step_index: screen,
-      step_key: STEP_KEYS[screen] ?? "unknown",
+      step_key: COLLECT_STEP_KEYS[screen] ?? "unknown",
       failed_fields: failedFieldKeys.slice(0, 24).join(","),
       failed_count: failedFieldKeys.length,
     });
@@ -730,7 +522,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   };
 
   const validateAndNext = async () => {
-    const fields = screenFieldMap[screen];
+    const fields = getCollectScreenFields(screen);
     if (fields) {
       const valid = await trigger(fields);
       if (!valid) {
@@ -742,27 +534,24 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       }
     }
 
-    // Extra guardrail: ComboboxSelect fields set via setValue may not
-    // trigger zod's min(1) rule properly through trigger() alone.
-    // Explicitly check required select-based fields for each screen.
     if (screen === 1) {
       const vals = form.getValues();
       if (!vals.occupation || vals.occupation.trim() === "") {
         form.setError("occupation", { message: "Occupation is required" });
         recordValidationFailure(["occupation"]);
-        focusFirstFieldError(form, screenFieldMap[1]);
+        focusFirstFieldError(form, getCollectScreenFields(1) ?? []);
         return;
       }
       if (!vals.sex) {
         form.setError("sex", { message: "Please select your sex" });
         recordValidationFailure(["sex"]);
-        focusFirstFieldError(form, screenFieldMap[1]);
+        focusFirstFieldError(form, getCollectScreenFields(1) ?? []);
         return;
       }
       if (!vals.maritalStatus) {
         form.setError("maritalStatus", { message: "Select marital status" });
         recordValidationFailure(["maritalStatus"]);
-        focusFirstFieldError(form, screenFieldMap[1]);
+        focusFirstFieldError(form, getCollectScreenFields(1) ?? []);
         return;
       }
     }
@@ -772,31 +561,25 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       if (!vals.lgaId) {
         form.setError("lgaId", { message: "Select your LGA" });
         recordValidationFailure(["lgaId"]);
-        focusFirstFieldError(form, screenFieldMap[2]);
+        focusFirstFieldError(form, getCollectScreenFields(2) ?? []);
         return;
       }
       if (!vals.wardId) {
         form.setError("wardId", { message: "Select your ward" });
         recordValidationFailure(["wardId"]);
-        focusFirstFieldError(form, screenFieldMap[2]);
+        focusFirstFieldError(form, getCollectScreenFields(2) ?? []);
         return;
       }
       if (!vals.pollingUnitId) {
         form.setError("pollingUnitId", { message: "Select your polling unit" });
         recordValidationFailure(["pollingUnitId"]);
-        focusFirstFieldError(form, screenFieldMap[2]);
+        focusFirstFieldError(form, getCollectScreenFields(2) ?? []);
         return;
       }
     }
 
     // Canvasser validation: if "Yes" selected, require both name and phone
     if (screen === 5) {
-      if (hasCanvasser === null) {
-        setCanvasserStepError("Please select Yes or No before submitting.");
-        recordValidationFailure(["canvasser_yes_no"]);
-        return;
-      }
-
       setCanvasserStepError("");
 
       if (!hasCanvasser) {
@@ -843,7 +626,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     }
 
     // Submit on the last input screen (canvasser = screen before confirmation)
-    if (screen === TOTAL_SCREENS - 2) {
+    if (screen === COLLECT_LAST_INPUT_SCREEN) {
       doSubmit();
       return;
     }
@@ -854,7 +637,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   const goBack = () => {
     if (screen > 0) {
       // Skip canvasser step when going back from confirmation
-      if (screen === TOTAL_SCREENS - 1 && skipCanvasserStep) {
+      if (screen === COLLECT_CONFIRMATION_SCREEN && skipCanvasserStep) {
         setScreen(4); // go back to role step
         return;
       }
@@ -893,202 +676,57 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     restoreProgress();
   };
 
-  // Paused/Closed states
-  if (campaign.status === "paused") {
+  if (campaign.status === "paused" || campaign.status === "closed") {
     return (
-      <FormShell campaign={campaign}>
-        <div className="w-full">
-          <StepCard>
-            <CardSectionHeader
-              title="System Paused"
-              subtitle="Registration Protocol"
-              statusLabel="Offline"
-              icon={<div className="h-2 w-2 rounded-full bg-orange-500" />}
-            />
-            <div className="space-y-4 py-8 text-center">
-              <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-orange-500/10">
-                <div className="h-4 w-4 animate-pulse rounded-full bg-orange-500" />
-              </div>
-              <h2 className="text-foreground text-xl font-bold tracking-tight">
-                Registration Currently Paused
-              </h2>
-              <p className="text-muted-foreground mx-auto max-w-sm text-sm">
-                This registration campaign is currently on hold. Field
-                operations have been temporarily suspended. Please check back
-                later.
-              </p>
-            </div>
-          </StepCard>
-        </div>
-      </FormShell>
-    );
-  }
-
-  if (campaign.status === "closed") {
-    return (
-      <FormShell campaign={campaign}>
-        <div className="w-full">
-          <StepCard>
-            <CardSectionHeader
-              title="Campaign Concluded"
-              subtitle="Registration Protocol"
-              statusLabel="Terminated"
-              icon={<div className="bg-destructive h-2 w-2 rounded-full" />}
-            />
-            <div className="space-y-4 py-8 text-center">
-              <div className="bg-destructive/10 mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full">
-                <div className="bg-destructive h-4 w-4 rounded-full" />
-              </div>
-              <h2 className="text-foreground text-xl font-bold tracking-tight">
-                Registration Closed
-              </h2>
-              <p className="text-muted-foreground mx-auto max-w-sm text-sm">
-                This registration campaign has successfully ended its collection
-                phase. Thank you to all field operators and supporters.
-              </p>
-            </div>
-          </StepCard>
-        </div>
-      </FormShell>
+      <CampaignAvailabilityScreen
+        campaign={campaign}
+        status={campaign.status}
+      />
     );
   }
 
   return (
-    <FormShell campaign={campaign}>
-      <div>
-        {/* Persistent failed queue banner — survives reloads via IndexedDB */}
-        {failedCount > 0 && (
-          <div
-            role="alert"
-            className="mb-4 flex flex-col gap-3 overflow-hidden rounded-sm border border-dashed border-red-500/30 bg-red-500/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+    <FormShell
+      campaign={campaign}
+      statusBanner={
+        <CollectConnectivityBanner
+          isOffline={isOffline}
+          pendingCount={pendingCount}
+          isSyncing={isSyncing}
+          needsRefresh={offlineGeo.health === "scope_invalid"}
+          onSyncNow={handleSyncNow}
+        />
+      }
+      headerActions={
+        failedCount > 0 ? (
+          <button
+            type="button"
+            onClick={handleOpenFailedReview}
+            className="inline-flex h-9 items-center gap-2 rounded-sm border border-red-500/25 bg-red-500/6 px-2.5 text-left text-red-700 transition-colors hover:bg-red-500/10 sm:px-3 dark:text-red-300"
+            aria-label="Review saved registrations that need attention"
           >
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className="size-1.5 shrink-0 rounded-full bg-red-500" />
-                <p className="font-mono text-[10px] font-bold tracking-widest text-red-700 uppercase dark:text-red-400">
-                  Needs Attention
-                </p>
-              </div>
-              <p className="text-muted-foreground text-xs">
-                {failedCount === 1
-                  ? "1 registration needs attention. It was not uploaded. Start a fresh registration with corrected details."
-                  : `${failedCount} registrations were not uploaded. Start fresh registrations with corrected details.`}
-              </p>
-            </div>
-            <div className="flex shrink-0 flex-wrap items-center gap-2 self-start sm:self-center">
-              <button
-                type="button"
-                onClick={() => {
-                  track("collect_failed_review_opened", {
-                    failed_count: failedCount,
-                  });
-                  setFailedReviewOpen(true);
-                }}
-                className="flex h-8 shrink-0 items-center justify-center rounded-sm border border-red-500/30 bg-red-500/10 px-3 font-mono text-[10px] font-bold tracking-widest text-red-700 uppercase transition-colors hover:bg-red-500/20 dark:text-red-400"
-              >
-                Review
-              </button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex h-8 shrink-0 items-center justify-center rounded-sm border border-red-500/30 bg-red-500/10 px-3 font-mono text-[10px] font-bold tracking-widest text-red-700 uppercase transition-colors hover:bg-red-500/20 dark:text-red-400"
-                  >
-                    Clear failed notice
-                  </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Clear failed upload notices?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This clears failed local upload records from this device.
-                      It does not delete any submitted campaign record.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Keep notices</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => void clearFailedNotices()}
-                    >
-                      Clear notices
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </div>
-        )}
-        {/* Offline / Sync banners */}
-        {isOffline && (
-          <div className="mb-4 overflow-hidden rounded-sm border border-dashed border-amber-500/30 bg-amber-500/5 px-4 py-3">
-            <div className="flex items-center gap-2">
-              <div className="size-1.5 shrink-0 animate-pulse rounded-full bg-amber-500" />
-              <p className="font-mono text-[10px] font-bold tracking-widest text-amber-700 uppercase dark:text-amber-400">
-                Connection Lost
-              </p>
-            </div>
-            <p className="text-muted-foreground mt-1 text-xs">
-              You're currently offline. Any submissions will be secured locally
-              and queued for when you reconnect.
-            </p>
-          </div>
-        )}
-        {!isOffline && pendingCount > 0 && (
-          <div className="mb-4 flex flex-col justify-between gap-3 overflow-hidden rounded-sm border border-dashed border-emerald-500/30 bg-emerald-500/5 px-4 py-3 sm:flex-row sm:items-center">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className="size-1.5 shrink-0 rounded-full bg-emerald-500" />
-                <p className="font-mono text-[10px] font-bold tracking-widest text-emerald-700 uppercase dark:text-emerald-400">
-                  Ready to Sync
-                </p>
-              </div>
-              <p className="text-muted-foreground text-xs">
-                {pendingCount} offline submission{pendingCount !== 1 ? "s" : ""}{" "}
-                waiting to be uploaded.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={async () => {
-                track("collect_sync_requested", {
-                  pending_count: pendingCount,
-                  source: "manual",
-                });
-                setSyncSource("manual");
-                const result = await trySync();
-                if (result) {
-                  if (result.synced > 0) {
-                    toast.success(`${result.synced} submission(s) synced`);
-                  }
-                  for (const f of result.failed) {
-                    toast.error("Submission rejected", {
-                      description: f.error,
-                      duration: 8000,
-                    });
-                  }
-                }
-              }}
-              disabled={isSyncing}
-              className="flex h-8 items-center justify-center rounded-sm border border-emerald-500/20 bg-emerald-500/10 px-3 font-mono text-[10px] font-bold tracking-widest text-emerald-700 uppercase transition-colors hover:bg-emerald-500/20 disabled:opacity-50 dark:text-emerald-400"
-            >
-              {isSyncing ? "Syncing..." : "Sync Now"}
-            </button>
-          </div>
-        )}
-
+            <AlertTriangle className="size-4 shrink-0" />
+            <span className="hidden text-[11px] font-bold tracking-wide sm:inline">
+              Needs attention
+            </span>
+            <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-current/10 px-1.5 py-0.5 text-[10px] leading-none font-black">
+              {failedCount}
+            </span>
+          </button>
+        ) : undefined
+      }
+    >
+      <div>
         {/* Progress Bar — hide on splash and confirmation */}
-        {screen > 0 && screen < TOTAL_SCREENS - 1 && (
+        {screen > 0 && screen < COLLECT_CONFIRMATION_SCREEN && (
           <StepProgress
-            currentStep={skipCanvasserStep && screen > 4 ? screen - 1 : screen}
-            totalSteps={TOTAL_SCREENS - 2 - (skipCanvasserStep ? 1 : 0)}
-            stepTitle={STEP_TITLES[screen] || ""}
-            stepTitles={
-              skipCanvasserStep
-                ? STEP_TITLES.slice(1, 5)
-                : STEP_TITLES.slice(1, 6)
-            }
+            currentStep={getCollectProgressCurrentStep(
+              screen,
+              skipCanvasserStep,
+            )}
+            totalSteps={getCollectProgressTotalSteps(skipCanvasserStep)}
+            stepTitle={COLLECT_STEP_TITLES[screen] || ""}
+            stepTitles={getCollectProgressStepTitles(skipCanvasserStep)}
             onStepClick={(index) => {
               // StepProgress only invokes this for completed segments.
               // Step index is 0-based over the progress-bar slice; +1 maps
@@ -1185,7 +823,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
           />
         )}
 
-        {screen === 6 &&
+        {screen === COLLECT_CONFIRMATION_SCREEN &&
           (submittedCount !== null && submissionId !== null ? (
             <ConfirmationScreen
               state="confirmed"
@@ -1208,14 +846,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
               pendingCount={pendingCount}
               isOnline={!isOffline}
               isSyncing={isSyncing}
-              onSyncNow={async () => {
-                track("collect_sync_requested", {
-                  pending_count: pendingCount,
-                  source: "manual",
-                });
-                setSyncSource("manual");
-                await trySync();
-              }}
+              onSyncNow={handleSyncNow}
               onNewRegistration={handleNewRegistration}
             />
           ))}

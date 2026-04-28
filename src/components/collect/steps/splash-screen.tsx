@@ -1,5 +1,4 @@
 "use client";
-
 import { HiArrowRight, HiCheckCircle } from "react-icons/hi";
 import {
   ClipboardList,
@@ -130,12 +129,10 @@ export function SplashScreen({
               </p>
             </div>
           ) : (
-            <div className="bg-muted/30 border-border/50 mx-auto max-w-sm space-y-4 rounded-sm border border-dashed p-4">
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                Join the movement! Register as a supporter in just a few steps.
-                Your information helps strengthen grassroots support.
-              </p>
-            </div>
+            <p className="text-muted-foreground mx-auto max-w-sm text-sm leading-relaxed">
+              Register support in a few steps. We&apos;ll keep the flow simple
+              and protect anything collected on this device.
+            </p>
           )}
 
           <div className="flex flex-col items-center gap-3">
@@ -172,8 +169,7 @@ export function SplashScreen({
               </Button>
             )}
           </div>
-
-          <OfflinePrepCard
+          <OfflinePrepUtilityLane
             health={offlineHealth}
             isOffline={isOffline}
             preparedLgaCount={preparedLgaCount}
@@ -223,7 +219,7 @@ export function SplashScreen({
   );
 }
 
-type PrepCardProps = {
+type PrepUtilityProps = {
   health: OfflineGeoHealth;
   isOffline: boolean;
   preparedLgaCount: number;
@@ -231,21 +227,22 @@ type PrepCardProps = {
   onOpen: () => void;
 };
 
-type PrepCardCopy = {
+type PrepUtilityCopy = {
   tone: "neutral" | "ready" | "warning" | "alert";
   Icon: typeof CloudDownload;
   label: string;
   title: string;
   body: string;
   action: { kind: "open"; text: string } | null;
+  compact: boolean;
 };
 
-function getPrepCardCopy({
+function getPrepUtilityCopy({
   health,
   isOffline,
   preparedLgaCount,
   preparedAt,
-}: Omit<PrepCardProps, "onOpen">): PrepCardCopy {
+}: Omit<PrepUtilityProps, "onOpen">): PrepUtilityCopy {
   const ageDays = preparedAt ? daysSince(preparedAt) : 0;
 
   if (isOffline) {
@@ -257,6 +254,7 @@ function getPrepCardCopy({
         title: "Offline setup required",
         body: "You're offline and no campaign data has been saved on this device. Reconnect to prepare offline data, or restore a saved draft.",
         action: null,
+        compact: false,
       };
     }
     if (health === "scope_invalid") {
@@ -270,15 +268,17 @@ function getPrepCardCopy({
         title: "Saved areas need a refresh",
         body: "One or more LGAs in your offline data are no longer part of this campaign. Reconnect to refresh — submissions made now would be rejected on sync.",
         action: null,
+        compact: false,
       };
     }
     return {
       tone: "ready",
       Icon: CloudDownload,
-      label: "Offline",
-      title: "Offline ready on this device",
-      body: `Saved ${preparedLgaCount} LGA${preparedLgaCount === 1 ? "" : "s"}${preparedAt ? ` · prepared ${ageDays === 0 ? "today" : `${ageDays}d ago`}` : ""}.`,
+      label: "This device",
+      title: "Saved areas available",
+      body: `Offline data is already saved here for ${preparedLgaCount} LGA${preparedLgaCount === 1 ? "" : "s"}.`,
       action: null,
+      compact: true,
     };
   }
 
@@ -286,10 +286,11 @@ function getPrepCardCopy({
     return {
       tone: "neutral",
       Icon: CloudDownload,
-      label: "Offline",
-      title: "Offline not ready",
-      body: "Save selected LGAs to this device so you can complete registrations without network later.",
+      label: "This device",
+      title: "Expect poor network?",
+      body: "Save this campaign for offline use before you head into weak signal.",
       action: { kind: "open", text: "Prepare offline" },
+      compact: true,
     };
   }
 
@@ -297,10 +298,11 @@ function getPrepCardCopy({
     return {
       tone: "alert",
       Icon: RefreshCw,
-      label: "Offline",
+      label: "This device",
       title: "Refresh required",
       body: "One or more saved LGAs are no longer part of this campaign. Refresh your offline data before going offline.",
       action: { kind: "open", text: "Refresh offline data" },
+      compact: true,
     };
   }
 
@@ -308,10 +310,11 @@ function getPrepCardCopy({
     return {
       tone: "warning",
       Icon: RefreshCw,
-      label: "Offline",
-      title: "Campaign updated since prep",
-      body: `Your offline data still works, but the campaign has changed since you prepared it. ${preparedLgaCount} LGA${preparedLgaCount === 1 ? "" : "s"} saved.`,
+      label: "This device",
+      title: "Refresh recommended",
+      body: `Campaign details changed since you saved ${preparedLgaCount} offline LGA${preparedLgaCount === 1 ? "" : "s"}.`,
       action: { kind: "open", text: "Refresh offline data" },
+      compact: true,
     };
   }
 
@@ -319,20 +322,22 @@ function getPrepCardCopy({
     return {
       tone: "neutral",
       Icon: RefreshCw,
-      label: "Offline",
+      label: "This device",
       title: `Offline data is ${ageDays} days old`,
       body: `${preparedLgaCount} LGA${preparedLgaCount === 1 ? "" : "s"} saved. Refresh if the campaign or boundaries may have changed.`,
       action: { kind: "open", text: "Refresh" },
+      compact: true,
     };
   }
 
   return {
     tone: "ready",
     Icon: CloudDownload,
-    label: "Offline",
-    title: "Offline ready",
-    body: `Saved ${preparedLgaCount} LGA${preparedLgaCount === 1 ? "" : "s"}${preparedAt ? ` · prepared ${ageDays === 0 ? "today" : `${ageDays}d ago`}` : ""}.`,
+    label: "This device",
+    title: "Offline-ready",
+    body: `Saved for ${preparedLgaCount} LGA${preparedLgaCount === 1 ? "" : "s"}${preparedAt ? ` · prepared ${ageDays === 0 ? "today" : `${ageDays}d ago`}` : ""}.`,
     action: { kind: "open", text: "Manage offline areas" },
+    compact: true,
   };
 }
 
@@ -363,14 +368,18 @@ const TONE_STYLES = {
   },
 };
 
-function OfflinePrepCard({
+function OfflinePrepUtilityLane({
   health,
   isOffline,
   preparedLgaCount,
   preparedAt,
   onOpen,
-}: PrepCardProps) {
-  const copy = getPrepCardCopy({
+}: PrepUtilityProps) {
+  if (isOffline && health !== "no_pack" && health !== "scope_invalid") {
+    return null;
+  }
+
+  const copy = getPrepUtilityCopy({
     health,
     isOffline,
     preparedLgaCount,
@@ -378,6 +387,40 @@ function OfflinePrepCard({
   });
   const styles = TONE_STYLES[copy.tone];
   const { Icon } = copy;
+
+  if (copy.compact) {
+    return (
+      <div
+        className={`mx-auto w-full max-w-sm overflow-hidden rounded-sm border px-3 py-2.5 text-left ${styles.border} ${styles.bg}`}
+      >
+        <div className="flex flex-col gap-2.5">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <Icon className={`size-3.5 shrink-0 ${styles.iconText}`} />
+              <p
+                className={`font-mono text-[10px] font-bold tracking-widest uppercase ${styles.iconText}`}
+              >
+                {copy.label}
+              </p>
+            </div>
+            <p className="mt-1 text-xs leading-relaxed">
+              <span className="text-foreground font-medium">{copy.title}</span>
+              <span className="text-muted-foreground"> {copy.body}</span>
+            </p>
+          </div>
+          {copy.action ? (
+            <button
+              type="button"
+              onClick={onOpen}
+              className="border-foreground/15 hover:bg-foreground/5 inline-flex h-8 shrink-0 items-center justify-center rounded-sm border px-3 font-mono text-[10px] font-bold tracking-widest uppercase transition-colors"
+            >
+              {copy.action.text}
+            </button>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -399,15 +442,6 @@ function OfflinePrepCard({
           <p className="text-muted-foreground text-xs leading-relaxed">
             {copy.body}
           </p>
-          {copy.action ? (
-            <button
-              type="button"
-              onClick={onOpen}
-              className="border-foreground/20 hover:bg-foreground/5 mt-2 inline-flex h-8 items-center justify-center rounded-sm border px-3 font-mono text-[10px] font-bold tracking-widest uppercase transition-colors"
-            >
-              {copy.action.text}
-            </button>
-          ) : null}
         </div>
       </div>
     </div>

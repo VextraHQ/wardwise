@@ -50,7 +50,12 @@ export function TrustIndicators({
       <div className="text-muted-foreground/80 flex flex-wrap items-center justify-center gap-6 text-xs">
         {items.map((item, index) => (
           <div key={index} className="flex items-center gap-2.5">
-            <div className={cn("size-3.5 shrink-0 opacity-70", iconClass)}>
+            <div
+              className={cn(
+                "flex size-3.5 shrink-0 items-center justify-center opacity-70 [&_svg]:size-full",
+                iconClass,
+              )}
+            >
               {item.icon}
             </div>
             <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">

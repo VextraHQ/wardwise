@@ -101,8 +101,6 @@ export function LocationStep({
     return (
       <div className="space-y-6">
         <RegistrationStepHeader
-          icon={MapPin}
-          badge="Finding Your Location"
           title="Where Do You Vote?"
           description="Help us find your exact polling unit location"
         />
@@ -137,7 +135,7 @@ export function LocationStep({
               <h3 className="text-foreground text-base font-semibold">
                 {blockHeading}
               </h3>
-              <p className="text-muted-foreground mx-auto max-w-sm text-sm leading-relaxed">
+              <p className="text-muted-foreground mx-auto max-w-fit text-sm leading-relaxed">
                 {blockBody}
               </p>
               <Separator className="my-4" />
@@ -154,55 +152,38 @@ export function LocationStep({
   return (
     <div className="space-y-6">
       <RegistrationStepHeader
-        icon={MapPin}
-        badge="Finding Your Location"
         title="Where Do You Vote?"
         description="Help us find your exact polling unit location"
       />
 
-      {usingLocalData ? (
-        isOffline ? (
-          // Happy path: user is offline by design and has a prepared pack.
-          // Calm note, no Retry — refetching can't succeed while offline.
-          <div className="mx-auto flex items-start gap-2 overflow-hidden rounded-sm border border-dashed border-emerald-500/30 bg-emerald-500/5 px-4 py-3">
-            <CloudOff className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+      {usingLocalData && !isOffline ? (
+        // Online but the live geo query failed — fall back to pack with a
+        // visible warning + retry. This is the unhappy path. The offline-by-
+        // design case is already covered by the shell banner.
+        <div className="mx-auto flex flex-col gap-2 overflow-hidden rounded-sm border border-dashed border-amber-500/30 bg-amber-500/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-2">
+            <RefreshCw className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
             <div className="space-y-0.5">
-              <p className="font-mono text-[10px] font-bold tracking-widest text-emerald-700 uppercase dark:text-emerald-400">
-                Using offline data
+              <p className="font-mono text-[10px] font-bold tracking-widest text-amber-700 uppercase dark:text-amber-400">
+                Network issue — using saved data
               </p>
               <p className="text-muted-foreground text-xs">
-                Showing locations from the offline pack saved on this device.
+                Showing locations from your offline pack while we couldn&apos;t
+                reach the server.
               </p>
             </div>
           </div>
-        ) : (
-          // Online but the live geo query failed — fall back to pack with a
-          // visible warning + retry. This is the unhappy path.
-          <div className="mx-auto flex flex-col gap-2 overflow-hidden rounded-sm border border-dashed border-amber-500/30 bg-amber-500/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-2">
-              <RefreshCw className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-              <div className="space-y-0.5">
-                <p className="font-mono text-[10px] font-bold tracking-widest text-amber-700 uppercase dark:text-amber-400">
-                  Network issue — using saved data
-                </p>
-                <p className="text-muted-foreground text-xs">
-                  Showing locations from your offline pack while we
-                  couldn&apos;t reach the server.
-                </p>
-              </div>
-            </div>
-            {onRetry ? (
-              <button
-                type="button"
-                onClick={onRetry}
-                className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 self-start rounded-sm border border-amber-500/30 bg-amber-500/10 px-3 font-mono text-[10px] font-bold tracking-widest text-amber-700 uppercase transition-colors hover:bg-amber-500/20 sm:self-center dark:text-amber-400"
-              >
-                <RefreshCw className="size-3" />
-                Retry
-              </button>
-            ) : null}
-          </div>
-        )
+          {onRetry ? (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 self-start rounded-sm border border-amber-500/30 bg-amber-500/10 px-3 font-mono text-[10px] font-bold tracking-widest text-amber-700 uppercase transition-colors hover:bg-amber-500/20 sm:self-center dark:text-amber-400"
+            >
+              <RefreshCw className="size-3" />
+              Retry
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       <motion.div
