@@ -33,6 +33,129 @@ type AppStatusScreenProps = {
   footerStatus?: string;
 };
 
+type ErrorStatusContext = "app" | "collect";
+
+type ErrorStatusScreenState = {
+  protocol: string;
+  title: string;
+  description: string;
+  tone: "primary" | "destructive";
+  footerCode: string;
+  footerStatus: string;
+  reference?: string;
+  supportHref?: string;
+  supportLabel?: string;
+};
+
+const NETWORK_ERROR_PATTERNS = [
+  "failed to fetch",
+  "fetch failed",
+  "network",
+  "load failed",
+  "networkerror",
+  "timeout",
+  "timed out",
+  "econn",
+  "enotfound",
+  "dns",
+  "socket",
+  "cors",
+] as const;
+
+export function getErrorStatusScreenState(
+  error: Error & { digest?: string },
+  context: ErrorStatusContext = "app",
+): ErrorStatusScreenState {
+  const message = `${error.name} ${error.message}`.toLowerCase();
+  const isOffline =
+    typeof navigator !== "undefined" && navigator.onLine === false;
+  const hasNetworkSignal = NETWORK_ERROR_PATTERNS.some((pattern) =>
+    message.includes(pattern),
+  );
+
+  const supportHref = context === "collect" ? "/contact" : "/support";
+  const supportLabel =
+    context === "collect" ? "Contact WardWise Support" : "Visit support";
+
+  if (isOffline) {
+    return context === "collect"
+      ? {
+          protocol: "Err_Protocol_Offline",
+          title: "You appear to be offline",
+          description:
+            "Reconnect to the internet and try opening this registration form again.",
+          tone: "primary",
+          footerCode: "WW-COLLECT-OFFLINE",
+          footerStatus: "NETWORK_OFFLINE",
+          supportHref,
+          supportLabel,
+        }
+      : {
+          protocol: "Err_Protocol_Offline",
+          title: "You appear to be offline",
+          description:
+            "WardWise could not reach the server from this device. Reconnect and try again.",
+          tone: "primary",
+          footerCode: "WW-NET-OFFLINE",
+          footerStatus: "NETWORK_OFFLINE",
+          supportHref,
+          supportLabel,
+        };
+  }
+
+  if (hasNetworkSignal) {
+    return context === "collect"
+      ? {
+          protocol: "Err_Protocol_Network",
+          title: "We couldn’t reach this registration form",
+          description:
+            "This looks like a temporary connection issue. Please try again in a moment.",
+          tone: "primary",
+          footerCode: "WW-COLLECT-NET",
+          footerStatus: "TEMPORARY_NETWORK_ERROR",
+          supportHref,
+          supportLabel,
+        }
+      : {
+          protocol: "Err_Protocol_Network",
+          title: "We couldn’t reach WardWise",
+          description:
+            "This looks like a temporary network issue. Please try again in a moment.",
+          tone: "primary",
+          footerCode: "WW-NET-500",
+          footerStatus: "TEMPORARY_NETWORK_ERROR",
+          supportHref,
+          supportLabel,
+        };
+  }
+
+  return context === "collect"
+    ? {
+        protocol: "Err_Protocol_Collect_500",
+        title: "We couldn’t open this registration form",
+        description:
+          "Something unexpected interrupted this form. Please refresh and try again.",
+        tone: "destructive",
+        footerCode: "WW-COLLECT-500",
+        footerStatus: "RECOVERABLE_FORM_ERROR",
+        reference: error.digest,
+        supportHref,
+        supportLabel,
+      }
+    : {
+        protocol: "Err_Protocol_500",
+        title: "We couldn’t load this page",
+        description:
+          "Something unexpected interrupted this view. The issue has been logged, and your data is safe.",
+        tone: "destructive",
+        footerCode: "WW-SYS-500",
+        footerStatus: "RECOVERABLE_ERROR",
+        reference: error.digest,
+        supportHref,
+        supportLabel,
+      };
+}
+
 function ActionButton({ action }: { action: StatusAction }) {
   const variant = action.variant ?? "outline";
   const className =

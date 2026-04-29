@@ -7,7 +7,7 @@ import {
   statusIcons,
 } from "@/components/system/app-status-screen";
 
-export default function Error({
+export default function CampaignFormError({
   error,
   reset,
 }: {
@@ -15,11 +15,10 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // TODO: Send this to an error reporting service like Sentry or Bugsnag.
     console.error(error);
   }, [error]);
 
-  const screen = getErrorStatusScreenState(error);
+  const screen = getErrorStatusScreenState(error, "collect");
 
   return (
     <AppStatusScreen
