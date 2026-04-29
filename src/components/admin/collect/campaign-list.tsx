@@ -30,19 +30,14 @@ import {
   getCampaignBrandingLabel,
   getEffectiveCampaignName,
 } from "@/lib/collect/branding";
+import { formatStatusLabel } from "@/lib/admin/dashboard";
+import { isStaleCampaign } from "@/lib/collect/campaign-health";
 import { formatRelativeTime } from "@/lib/date-format";
 import {
   AdminResourceState,
   adminResourceStateIcons,
 } from "@/components/admin/shared/admin-resource-state";
 import { formatPersonName } from "@/lib/utils";
-
-function isStale(campaign: CampaignSummary): boolean {
-  if (campaign.status !== "active") return false;
-  if (!campaign.lastSubmissionAt) return campaign._count.submissions === 0;
-  const diff = Date.now() - new Date(campaign.lastSubmissionAt).getTime();
-  return diff > 48 * 60 * 60 * 1000; // 48 hours
-}
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border/60",
@@ -55,10 +50,6 @@ const REPORT_STATUS_STYLES: Record<string, string> = {
   enabled: "bg-primary/10 text-primary border-primary/30",
   disabled: "bg-muted text-muted-foreground border-border/60",
 };
-
-function formatStatusLabel(value: string) {
-  return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
 
 function CampaignReportBadge({ campaign }: { campaign: CampaignSummary }) {
   const enabled = Boolean(
@@ -438,7 +429,7 @@ export function CampaignList() {
                                 },
                               })}
                             </span>
-                            {isStale(campaign) && (
+                            {isStaleCampaign(campaign) && (
                               <IconAlertTriangle
                                 className="h-3.5 w-3.5 text-amber-500"
                                 title="No submissions in 48h"

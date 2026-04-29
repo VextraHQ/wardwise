@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   IconCreditCard,
   IconDotsVertical,
@@ -32,6 +34,7 @@ import { formatPersonName } from "@/lib/utils";
 
 export function NavUser() {
   const { data: session, status } = useSession();
+  const pathname = usePathname();
   const { isMobile } = useSidebar();
   const [mounted, setMounted] = React.useState(false);
 
@@ -44,7 +47,11 @@ export function NavUser() {
     signOut({ callbackUrl: "/" });
   };
 
-  const isAdmin = session?.user?.role === "admin";
+  // `useSession()` can lag behind the JWT after client navigations; middleware
+  // already ensures only admins reach /admin/*, so treat that route as admin UX.
+  const isAdmin =
+    pathname.startsWith("/admin") || session?.user?.role === "admin";
+  const accountHref = isAdmin ? "/admin/account" : "/dashboard/settings";
 
   const user = {
     name: formatPersonName(
@@ -133,17 +140,20 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle className="hover:text-primary-foreground" />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href={accountHref}>
+                  <IconUserCircle className="hover:text-primary-foreground" />
+                  Account
+                </Link>
               </DropdownMenuItem>
-              {isAdmin ? (
-                <DropdownMenuItem>
-                  <IconSettings className="hover:text-primary-foreground" />
-                  Settings
-                </DropdownMenuItem>
-              ) : (
+              {isAdmin ? null : (
                 <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/settings">
+                      <IconSettings className="hover:text-primary-foreground" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem>
                     <IconCreditCard className="hover:text-primary-foreground" />
                     Billing

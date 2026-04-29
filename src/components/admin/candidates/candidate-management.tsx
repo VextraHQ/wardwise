@@ -41,6 +41,7 @@ import {
   adminResourceStateIcons,
 } from "@/components/admin/shared/admin-resource-state";
 
+import { formatStatusLabel } from "@/lib/admin/dashboard";
 import { formatDisplayDate } from "@/lib/date-format";
 import { nigeriaStates } from "@/lib/data/state-lga-locations";
 import { formatPersonName } from "@/lib/utils";
@@ -68,10 +69,6 @@ const REPORT_STATUS_STYLES: Record<string, string> = {
   enabled: "bg-primary/10 text-primary border-primary/30",
   disabled: "bg-muted text-muted-foreground border-border/60",
 };
-
-function formatStatusLabel(value: string) {
-  return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
 
 function getCandidateDisplayName(candidate: CandidateWithUser) {
   return candidate.title

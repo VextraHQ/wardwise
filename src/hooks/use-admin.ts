@@ -17,6 +17,16 @@ export function useAdminCandidates() {
   });
 }
 
+// Platform-wide period summary for the admin command-center strip and health rail.
+export function useAdminDashboardSummary() {
+  return useQuery({
+    queryKey: ["admin", "dashboard-summary"],
+    queryFn: () => adminApi.dashboard.getSummary(),
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+}
+
 // === Mutation Hooks ===
 
 // Creates a new candidate account and refreshes the candidates list.

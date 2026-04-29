@@ -93,6 +93,22 @@ export interface UpdateCanvasserData {
   state?: string;
 }
 
+export interface AdminDashboardSummary {
+  updatedAt: string;
+  registrations: {
+    total: number;
+    today: number;
+    yesterday: number;
+    last7d: number;
+    previous7d: number;
+  };
+  candidates: {
+    total: number;
+    new7d: number;
+    previous7d: number;
+  };
+}
+
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   try {
     const response = await fetch(`/api/admin${endpoint}`, {
@@ -306,6 +322,15 @@ export const adminApi = {
       await apiCall(`/canvassers/${id}`, {
         method: "DELETE",
       });
+    },
+  },
+
+  dashboard: {
+    getSummary: async (): Promise<AdminDashboardSummary> => {
+      const data = await apiCall<{ summary: AdminDashboardSummary }>(
+        "/dashboard/summary",
+      );
+      return data.summary;
     },
   },
 };

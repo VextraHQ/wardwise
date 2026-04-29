@@ -8,12 +8,63 @@ import {
 const REPORT_TIME_ZONE = "Africa/Lagos";
 const REPORT_UTC_OFFSET = "+01:00";
 
+// Parse the start of a report day (00:00:00) in the Lagos timezone from a date string (YYYY-MM-DD)
 function parseReportDateStart(value: string): Date {
   return new Date(`${value}T00:00:00.000${REPORT_UTC_OFFSET}`);
 }
 
+// Parse the end of a report day (23:59:59.999) in the Lagos timezone from a date string (YYYY-MM-DD)
 function parseReportDateEnd(value: string): Date {
   return new Date(`${value}T23:59:59.999${REPORT_UTC_OFFSET}`);
+}
+
+// Convert a JS Date object to YYYY-MM-DD string in the Lagos timezone (for calendar groupings)
+function lagosCalendarDate(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: REPORT_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+// Take a date string (YYYY-MM-DD) and add or subtract days, returning new YYYY-MM-DD string
+function shiftDateString(yyyyMmDd: string, days: number): string {
+  const dt = new Date(`${yyyyMmDd}T00:00:00.000Z`);
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return dt.toISOString().slice(0, 10);
+}
+
+// Return a Date object at midnight (start of day) in Lagos time from a YYYY-MM-DD string
+function lagosDayStart(yyyyMmDd: string): Date {
+  return new Date(`${yyyyMmDd}T00:00:00.000${REPORT_UTC_OFFSET}`);
+}
+
+export type DashboardWindows = {
+  todayStart: Date;
+  tomorrowStart: Date;
+  yesterdayStart: Date;
+  last7dStart: Date;
+  previous7dStart: Date;
+  previous7dEnd: Date;
+};
+
+// Compute windows for reporting (like "today", "last 7d", etc.) relative to current time, in Lagos timezone
+export function getDashboardWindows(now: Date = new Date()): DashboardWindows {
+  const today = lagosCalendarDate(now);
+  const tomorrow = shiftDateString(today, 1);
+  const yesterday = shiftDateString(today, -1);
+  const last7Start = shiftDateString(today, -6); // includes today, so 6 days ago
+  const previous7Start = shiftDateString(today, -13); // 7 days prior to last 7d
+
+  return {
+    todayStart: lagosDayStart(today),
+    tomorrowStart: lagosDayStart(tomorrow),
+    yesterdayStart: lagosDayStart(yesterday),
+    last7dStart: lagosDayStart(last7Start),
+    previous7dStart: lagosDayStart(previous7Start),
+    previous7dEnd: lagosDayStart(last7Start),
+  };
 }
 
 export type CampaignStats = {
@@ -34,6 +85,7 @@ export type CampaignHealth = {
   topCanvassers: { name: string; phone: string; count: number }[];
 };
 
+// A simplified submission for dashboards (all relevant info, lighter than the full model)
 export type LightSubmission = {
   id: string;
   fullName: string;
@@ -55,7 +107,7 @@ export type LightSubmission = {
   createdAt: string;
 };
 
-/** Disambiguate ward names by appending LGA when the same ward name appears in multiple LGAs. */
+// Make ward names unique by appending the LGA if more than one ward shares the same name
 function disambiguateWards(
   rows: { wardName: string; lgaName: string; _count: number }[],
 ): { ward: string; count: number }[] {
@@ -72,6 +124,7 @@ function disambiguateWards(
   }));
 }
 
+// Get campaign submission stats: counts, breakdowns and daily trend, with optional filters
 export async function getCampaignStats(
   campaignId: string,
   options?: { from?: string; to?: string; lga?: string; role?: string },
@@ -81,6 +134,7 @@ export async function getCampaignStats(
   const lga = options?.lga;
   const role = options?.role;
 
+  // Prepare filters for date range
   const fromStartOfDay = from ? parseReportDateStart(from) : undefined;
   const toEndOfDay = to ? parseReportDateEnd(to) : undefined;
   const dateFilter = {
@@ -89,12 +143,15 @@ export async function getCampaignStats(
   };
   const hasDateFilter = from || to;
 
+  // Base Prisma "where" clause for most queries in this stats gathering
   const baseWhere: Prisma.CollectSubmissionWhereInput = {
     campaignId,
     ...(hasDateFilter && { createdAt: dateFilter }),
     ...(lga && { lgaName: lga }),
     ...(role && { role }),
   };
+
+  // Used for the raw SQL group-by for daily counts
   const dailyWhereConditions = [
     Prisma.sql`"campaignId" = ${campaignId}`,
     ...(fromStartOfDay ? [Prisma.sql`"createdAt" >= ${fromStartOfDay}`] : []),
@@ -104,8 +161,9 @@ export async function getCampaignStats(
   ];
   const dailyWhereSql = Prisma.join(dailyWhereConditions, " AND ");
 
+  // Gather all counts and breakdowns in parallel for performance
   const [totals, dailyRaw, byLga, byWard, byRole, bySex] = await Promise.all([
-    // Total, verified, flagged counts
+    // Total, verified and flagged submissions
     prisma.collectSubmission
       .aggregate({
         where: baseWhere,
@@ -123,7 +181,7 @@ export async function getCampaignStats(
         return { total: agg._count, verified, flagged };
       }),
 
-    // Daily submissions (group by date)
+    // Number of submissions per day (grouped by day in Lagos time)
     prisma.$queryRaw<{ date: string; count: bigint }[]>`
       SELECT DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE})::text as date, COUNT(*)::bigint as count
       FROM "CollectSubmission"
@@ -131,7 +189,7 @@ export async function getCampaignStats(
       GROUP BY 1 ORDER BY 1 ASC
     `,
 
-    // By LGA
+    // Number of submissions per LGA (grouped by LGA)
     prisma.collectSubmission.groupBy({
       by: ["lgaName"],
       where: baseWhere,
@@ -139,7 +197,7 @@ export async function getCampaignStats(
       orderBy: { _count: { lgaName: "desc" } },
     }),
 
-    // By Ward (top 10) — group by wardName + lgaName to avoid collisions
+    // Top 10 wards by number of submissions, differentiated by both wardName and lgaName
     prisma.collectSubmission.groupBy({
       by: ["wardName", "lgaName"],
       where: baseWhere,
@@ -148,14 +206,14 @@ export async function getCampaignStats(
       take: 10,
     }),
 
-    // By Role
+    // Breakdown by role
     prisma.collectSubmission.groupBy({
       by: ["role"],
       where: baseWhere,
       _count: true,
     }),
 
-    // By Sex
+    // Breakdown by sex
     prisma.collectSubmission.groupBy({
       by: ["sex"],
       where: baseWhere,
@@ -163,7 +221,7 @@ export async function getCampaignStats(
     }),
   ]);
 
-  // Build cumulative from daily
+  // Calculate the cumulative (running) total for daily trend
   let cumulative = 0;
   const daily = dailyRaw.map((d) => {
     const count = Number(d.count);
@@ -183,6 +241,7 @@ export async function getCampaignStats(
   };
 }
 
+// Get a page of recent submissions with simple info and total count, with optional filters applied
 export async function getRecentSubmissions(
   campaignId: string,
   options?: {
@@ -194,6 +253,7 @@ export async function getRecentSubmissions(
     lga?: string;
   },
 ): Promise<{ submissions: LightSubmission[]; total: number }> {
+  // Pagination defaults: page 1, 20 per page, max 100
   const page = Math.max(1, options?.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, options?.pageSize ?? 20));
   const where = buildSubmissionWhere(campaignId, options?.filters ?? {});
@@ -202,14 +262,17 @@ export async function getRecentSubmissions(
     : undefined;
   const toEndOfDay = options?.to ? parseReportDateEnd(options.to) : undefined;
 
+  // Set createdAt bound if date range specified
   if (fromStartOfDay || toEndOfDay) {
     where.createdAt = {
       ...(fromStartOfDay && { gte: fromStartOfDay }),
       ...(toEndOfDay && { lte: toEndOfDay }),
     };
   }
+  // Add LGA filter if provided
   if (options?.lga) where.lgaName = options.lga;
 
+  // Query matching submissions and get count in parallel
   const [rows, total] = await Promise.all([
     prisma.collectSubmission.findMany({
       where,
@@ -240,6 +303,7 @@ export async function getRecentSubmissions(
     prisma.collectSubmission.count({ where }),
   ]);
 
+  // Convert DB rows to LightSubmission (flatten and massage types)
   return {
     submissions: rows.map((s) => ({
       id: s.id,
@@ -265,9 +329,11 @@ export async function getRecentSubmissions(
   };
 }
 
+// Fetch campaign health/summary: last submission time, canvassers, form status, top canvassers by submissions
 export async function getCampaignHealth(
   campaignId: string,
 ): Promise<CampaignHealth> {
+  // Multi-query for performance: status, most recent submission, canvasser count, and top canvassers
   const [campaign, lastSubmission, canvasserCount, topCanvassers] =
     await Promise.all([
       prisma.campaign.findUnique({

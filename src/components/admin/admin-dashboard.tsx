@@ -1,92 +1,162 @@
 "use client";
 
 import { useMemo } from "react";
-import Link from "next/link";
-import {
-  IconAlertTriangle,
-  IconClipboardList,
-  IconUserPlus,
-  IconUsers,
-  IconActivity,
-  IconChartBar,
-  IconExclamationCircle,
-  IconChevronRight,
-  IconMap,
-  IconBolt,
-  IconCircleCheck,
-  IconUserExclamation,
-  IconUserOff,
-  IconMapOff,
-  IconFileText,
-  IconAlertCircle,
-  IconClockExclamation,
-  IconReportOff,
-} from "@tabler/icons-react";
+import { IconExclamationCircle } from "@tabler/icons-react";
 
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { StatCardSkeleton } from "@/components/admin/admin-skeletons";
-import { CampaignActionsMenu } from "@/components/admin/collect/campaign-actions-menu";
-
-import { useAdminCandidates } from "@/hooks/use-admin";
+  campaignDisplay,
+  candidateDisplay,
+  type PriorityBucket,
+} from "@/lib/admin/dashboard";
+import {
+  CommandStrip,
+  CoverageStrip,
+  HealthRail,
+  LiveCampaignsSection,
+  PriorityQueue,
+  QuickMoves,
+  RecentCandidatesSection,
+} from "@/components/admin/admin-dashboard-sections";
+import {
+  useAdminCandidates,
+  useAdminDashboardSummary,
+} from "@/hooks/use-admin";
 import { useCampaigns } from "@/hooks/use-collect";
-import type { CampaignSummary } from "@/types/collect";
-import type { CandidateWithUser } from "@/lib/api/admin";
+import { isStaleCampaign } from "@/lib/collect/campaign-health";
 import { positionRequiresLgas } from "@/lib/geo/constituency";
-import { nigeriaStates } from "@/lib/data/state-lga-locations";
-import { formatRelativeTime } from "@/lib/date-format";
-import { cn, formatPersonName } from "@/lib/utils";
+import type { CandidateWithUser } from "@/lib/api/admin";
+import type { CampaignSummary } from "@/types/collect";
 
-// ---------- Local helpers ----------
-
-const STALE_MS = 48 * 60 * 60 * 1000;
-
-function isStaleCampaign(campaign: CampaignSummary): boolean {
-  if (campaign.status !== "active") return false;
-  if ((campaign._count?.submissions ?? 0) === 0) return false;
-  if (!campaign.lastSubmissionAt) return true;
-  return Date.now() - new Date(campaign.lastSubmissionAt).getTime() > STALE_MS;
+// This function builds up all the buckets of issues that need admin attention.
+// Each bucket is a grouping of problems (like candidates missing info, stale campaigns, etc)
+function buildPriorityBuckets({
+  staleActiveCampaigns,
+  activeCampaignsNoSubmissions,
+  pendingCredentials,
+  candidatesWithoutCollect,
+  suspendedCandidates,
+  missingConstituencyLgas,
+  insightsOff,
+  draftCampaigns,
+}: {
+  staleActiveCampaigns: CampaignSummary[];
+  activeCampaignsNoSubmissions: CampaignSummary[];
+  pendingCredentials: CandidateWithUser[];
+  candidatesWithoutCollect: CandidateWithUser[];
+  suspendedCandidates: CandidateWithUser[];
+  missingConstituencyLgas: CandidateWithUser[];
+  insightsOff: CampaignSummary[];
+  draftCampaigns: CampaignSummary[];
+}): PriorityBucket[] {
+  return [
+    // High-priority: Stale campaigns, campaigns without submissions
+    {
+      key: "stale-active",
+      severity: "high",
+      title: "Stale active campaigns",
+      description: "Active campaigns with no submissions in the last 48 hours.",
+      count: staleActiveCampaigns.length,
+      cta: { href: "/admin/collect", label: "Open Collect" },
+      examples: staleActiveCampaigns.slice(0, 2).map(campaignDisplay),
+    },
+    {
+      key: "no-submissions",
+      severity: "high",
+      title: "Active without submissions",
+      description: "Active campaigns that haven’t received any submissions.",
+      count: activeCampaignsNoSubmissions.length,
+      cta: { href: "/admin/collect", label: "Review campaigns" },
+      examples: activeCampaignsNoSubmissions.slice(0, 2).map(campaignDisplay),
+    },
+    // Medium-priority: Onboarding, missing info, suspended users
+    {
+      key: "pending-credentials",
+      severity: "med",
+      title: "Pending credentials",
+      description: "Candidate logins not yet delivered or activated.",
+      count: pendingCredentials.length,
+      cta: { href: "/admin/candidates", label: "Review accounts" },
+      examples: pendingCredentials.slice(0, 2).map(candidateDisplay),
+    },
+    {
+      key: "without-collect",
+      severity: "med",
+      title: "Candidates without Collect",
+      description: "Candidates that don’t have a Collect campaign yet.",
+      count: candidatesWithoutCollect.length,
+      cta: { href: "/admin/candidates", label: "Open candidates" },
+      examples: candidatesWithoutCollect.slice(0, 2).map(candidateDisplay),
+    },
+    {
+      key: "suspended",
+      severity: "med",
+      title: "Suspended accounts",
+      description: "Candidate accounts currently suspended.",
+      count: suspendedCandidates.length,
+      cta: { href: "/admin/candidates", label: "View accounts" },
+      examples: suspendedCandidates.slice(0, 2).map(candidateDisplay),
+    },
+    {
+      key: "missing-lgas",
+      severity: "med",
+      title: "Missing constituency LGAs",
+      description:
+        "Constituency-level candidates without a configured LGA list.",
+      count: missingConstituencyLgas.length,
+      cta: { href: "/admin/candidates", label: "Fix setup" },
+      examples: missingConstituencyLgas.slice(0, 2).map(candidateDisplay),
+    },
+    // Low-priority: Non-blocking checks
+    {
+      key: "insights-off",
+      severity: "low",
+      title: "Campaign Insights off",
+      description: "Live campaigns with the client report disabled.",
+      count: insightsOff.length,
+      cta: { href: "/admin/collect", label: "Open Collect" },
+      examples: insightsOff.slice(0, 2).map(campaignDisplay),
+    },
+    {
+      key: "drafts",
+      severity: "low",
+      title: "Draft campaigns",
+      description: "Campaigns that haven’t been published yet.",
+      count: draftCampaigns.length,
+      cta: { href: "/admin/collect", label: "Resume setup" },
+      examples: draftCampaigns.slice(0, 2).map(campaignDisplay),
+    },
+  ];
 }
 
-function resolveStateName(stateCode: string | null | undefined): string | null {
-  if (!stateCode) return null;
-  return nigeriaStates.find((s) => s.code === stateCode)?.name ?? stateCode;
+// Sort campaigns so that active come first, then draft, then others
+// Also sorts by most recently modified
+function rankCampaigns(campaigns: CampaignSummary[]) {
+  return [...campaigns].sort((a, b) => {
+    const rank = (campaign: CampaignSummary) => {
+      if (campaign.status === "active") return 0;
+      if (campaign.status === "draft") return 1;
+      return 2;
+    };
+
+    const statusRank = rank(a) - rank(b);
+    if (statusRank !== 0) return statusRank;
+
+    // More recent campaigns at top
+    const aTime = new Date(
+      a.lastSubmissionAt ?? a.updatedAt ?? a.createdAt,
+    ).getTime();
+    const bTime = new Date(
+      b.lastSubmissionAt ?? b.updatedAt ?? b.createdAt,
+    ).getTime();
+
+    return bTime - aTime;
+  });
 }
-
-function formatStatusLabel(value: string): string {
-  if (!value) return "";
-  return value
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join(" ");
-}
-
-const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
-  draft: "bg-muted text-muted-foreground border-border/60",
-  active: "bg-primary/10 text-primary border-primary/30",
-  paused: "bg-orange-500/10 text-orange-600 border-orange-500/20",
-  closed: "bg-destructive/10 text-destructive border-destructive/30",
-};
-
-const ONBOARDING_STATUS_STYLES: Record<string, string> = {
-  pending: "bg-orange-500/10 text-orange-600 border-orange-500/20",
-  credentials_sent: "bg-muted text-muted-foreground border-border/60",
-  active: "bg-primary/10 text-primary border-primary/30",
-  suspended: "bg-destructive/10 text-destructive border-destructive/30",
-};
-
-// ---------- Component ----------
 
 export function AdminDashboard() {
+  // Fetch all candidate data, campaign data, and summary stats
   const {
     data: candidates = [],
     isLoading: candidatesLoading,
@@ -97,108 +167,111 @@ export function AdminDashboard() {
     isLoading: campaignsLoading,
     error: campaignsError,
   } = useCampaigns();
+  const {
+    data: summary,
+    isLoading: summaryLoading,
+    error: summaryError,
+  } = useAdminDashboardSummary();
 
-  const isLoading = candidatesLoading || campaignsLoading;
+  // Any loading state for main entities
+  const isLoadingEntities = candidatesLoading || campaignsLoading;
 
-  // ---- Candidate derivations ----
-  const candidatesWithoutCollect = useMemo(
-    () => candidates.filter((c) => !c.collectCampaign),
-    [candidates],
-  );
+  // Group candidates into buckets based on what needs admin attention
+  const candidateBuckets = useMemo(() => {
+    // Candidates waiting for account delivery/activation
+    const pendingCredentials = candidates.filter((candidate) =>
+      ["pending", "credentials_sent"].includes(candidate.onboardingStatus),
+    );
+    // Candidates without an associated Collect campaign
+    const candidatesWithoutCollect = candidates.filter(
+      (candidate) => !candidate.collectCampaign,
+    );
+    // Suspended accounts
+    const suspendedCandidates = candidates.filter(
+      (candidate) => candidate.onboardingStatus === "suspended",
+    );
+    // Those who should have LGAs assigned but don't
+    const missingConstituencyLgas = candidates.filter(
+      (candidate) =>
+        positionRequiresLgas(candidate.position) &&
+        (candidate.constituencyLgaIds?.length ?? 0) === 0,
+    );
 
-  const pendingCredentials = useMemo(
-    () =>
-      candidates.filter((c) =>
-        ["pending", "credentials_sent"].includes(c.onboardingStatus),
-      ),
-    [candidates],
-  );
+    return {
+      pendingCredentials,
+      candidatesWithoutCollect,
+      suspendedCandidates,
+      missingConstituencyLgas,
+    };
+  }, [candidates]);
 
-  const suspendedCandidates = useMemo(
-    () => candidates.filter((c) => c.onboardingStatus === "suspended"),
-    [candidates],
-  );
+  // Similarly, group campaigns by key signals
+  const campaignBuckets = useMemo(() => {
+    // All running campaigns
+    const activeCampaigns = campaigns.filter(
+      (campaign) => campaign.status === "active",
+    );
+    // Campaigns set up but not yet running
+    const draftCampaigns = campaigns.filter(
+      (campaign) => campaign.status === "draft",
+    );
+    // Active campaigns but with no submissions so far
+    const activeCampaignsNoSubmissions = activeCampaigns.filter(
+      (campaign) => (campaign._count?.submissions ?? 0) === 0,
+    );
+    // Active campaigns that haven't had submissions recently
+    const staleActiveCampaigns = activeCampaigns.filter(isStaleCampaign);
+    // Non-draft campaigns with client report disabled
+    const insightsOff = campaigns.filter(
+      (campaign) =>
+        campaign.status !== "draft" &&
+        (!campaign.clientReportEnabled || !campaign.clientReportToken),
+    );
 
-  const missingConstituencyLgas = useMemo(
-    () =>
-      candidates.filter(
-        (c) =>
-          positionRequiresLgas(c.position) &&
-          (c.constituencyLgaIds?.length ?? 0) === 0,
-      ),
-    [candidates],
-  );
-
-  // ---- Campaign derivations ----
-  const activeCampaigns = useMemo(
-    () => campaigns.filter((c) => c.status === "active"),
-    [campaigns],
-  );
-
-  const draftCampaigns = useMemo(
-    () => campaigns.filter((c) => c.status === "draft"),
-    [campaigns],
-  );
-
-  const activeCampaignsNoSubmissions = useMemo(
-    () => activeCampaigns.filter((c) => (c._count?.submissions ?? 0) === 0),
-    [activeCampaigns],
-  );
-
-  const staleActiveCampaigns = useMemo(
-    () => activeCampaigns.filter(isStaleCampaign),
-    [activeCampaigns],
-  );
-
-  // Exclude drafts so they don't double-count under "Draft campaigns".
-  const insightsOff = useMemo(
-    () =>
-      campaigns.filter(
-        (c) =>
-          c.status !== "draft" &&
-          (!c.clientReportEnabled || !c.clientReportToken),
-      ),
-    [campaigns],
-  );
-
-  // ---- Aggregates for metrics ----
-  const totalSubmissions = useMemo(
-    () => campaigns.reduce((sum, c) => sum + (c._count?.submissions ?? 0), 0),
-    [campaigns],
-  );
-
-  const attentionTotal =
-    candidatesWithoutCollect.length +
-    pendingCredentials.length +
-    suspendedCandidates.length +
-    missingConstituencyLgas.length +
-    draftCampaigns.length +
-    activeCampaignsNoSubmissions.length +
-    staleActiveCampaigns.length +
-    insightsOff.length;
-
-  // ---- Live Campaigns priority sort: active first (recent), then drafts, then stale ----
-  const liveCampaigns = useMemo(() => {
-    const ranked = [...campaigns].sort((a, b) => {
-      const rank = (c: CampaignSummary) => {
-        if (c.status === "active") return 0;
-        if (c.status === "draft") return 1;
-        return 2;
-      };
-      const r = rank(a) - rank(b);
-      if (r !== 0) return r;
-      const aTime = new Date(
-        a.lastSubmissionAt ?? a.updatedAt ?? a.createdAt,
-      ).getTime();
-      const bTime = new Date(
-        b.lastSubmissionAt ?? b.updatedAt ?? b.createdAt,
-      ).getTime();
-      return bTime - aTime;
-    });
-    return ranked.slice(0, 5);
+    return {
+      activeCampaigns,
+      draftCampaigns,
+      activeCampaignsNoSubmissions,
+      staleActiveCampaigns,
+      insightsOff,
+    };
   }, [campaigns]);
 
-  // ---- Recent Candidates (most recent 5) ----
+  // Total number of issues needing immediate attention
+  const attentionTotal =
+    candidateBuckets.candidatesWithoutCollect.length +
+    candidateBuckets.pendingCredentials.length +
+    candidateBuckets.suspendedCandidates.length +
+    candidateBuckets.missingConstituencyLgas.length +
+    campaignBuckets.draftCampaigns.length +
+    campaignBuckets.activeCampaignsNoSubmissions.length +
+    campaignBuckets.staleActiveCampaigns.length +
+    campaignBuckets.insightsOff.length;
+
+  // Compose all alert buckets for display in priority queue
+  const priorityBuckets = useMemo(
+    () =>
+      buildPriorityBuckets({
+        staleActiveCampaigns: campaignBuckets.staleActiveCampaigns,
+        activeCampaignsNoSubmissions:
+          campaignBuckets.activeCampaignsNoSubmissions,
+        pendingCredentials: candidateBuckets.pendingCredentials,
+        candidatesWithoutCollect: candidateBuckets.candidatesWithoutCollect,
+        suspendedCandidates: candidateBuckets.suspendedCandidates,
+        missingConstituencyLgas: candidateBuckets.missingConstituencyLgas,
+        insightsOff: campaignBuckets.insightsOff,
+        draftCampaigns: campaignBuckets.draftCampaigns,
+      }),
+    [candidateBuckets, campaignBuckets],
+  );
+
+  // Top 5 most relevant campaigns (sorted by status and recentness)
+  const liveCampaigns = useMemo(
+    () => rankCampaigns(campaigns).slice(0, 5),
+    [campaigns],
+  );
+
+  // Top 5 most recently created candidates
   const recentCandidates = useMemo(
     () =>
       [...candidates]
@@ -211,71 +284,48 @@ export function AdminDashboard() {
     [candidates],
   );
 
-  // ---- Coverage snapshot data ----
-  const uniqueParties = useMemo(
-    () =>
-      Array.from(
-        new Set(candidates.map((c) => c.party).filter(Boolean)),
-      ).sort(),
-    [candidates],
-  );
-
-  const nationalCandidates = useMemo(
-    () => candidates.filter((c) => c.isNational).length,
-    [candidates],
-  );
-
-  const topPositions = useMemo(() => {
-    const counts = candidates.reduce<Record<string, number>>((acc, c) => {
-      acc[c.position] = (acc[c.position] ?? 0) + 1;
-      return acc;
-    }, {});
-    return Object.entries(counts)
+  // Quick snapshot of overall candidate coverage (totals, national, parties, top positions)
+  const coverageSnapshot = useMemo(() => {
+    // Number of national-level candidates
+    const nationalCandidates = candidates.filter(
+      (candidate) => candidate.isNational,
+    ).length;
+    // Number of distinct political parties
+    const distinctParties = Array.from(
+      new Set(candidates.map((candidate) => candidate.party).filter(Boolean)),
+    ).length;
+    // Top 4 most common candidate positions
+    const topPositions = Object.entries(
+      candidates.reduce<Record<string, number>>((counts, candidate) => {
+        counts[candidate.position] = (counts[candidate.position] ?? 0) + 1;
+        return counts;
+      }, {}),
+    )
       .sort((a, b) => b[1] - a[1])
       .slice(0, 4);
+
+    return {
+      totalCandidates: candidates.length,
+      nationalCandidates,
+      distinctParties,
+      topPositions,
+    };
   }, [candidates]);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      {/* 1. Operations Overview ---------------------------------------- */}
-      <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-1">
-            <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
-              Operations Overview
-            </CardDescription>
-            <CardTitle className="text-base font-semibold tracking-tight">
-              WardWise Command Center
-            </CardTitle>
-            <p className="text-muted-foreground text-sm">
-              Platform readiness, live campaign activity, and admin shortcuts.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2 sm:shrink-0">
-            <Button
-              asChild
-              variant="outline"
-              className="gap-1.5 rounded-sm font-mono text-[11px] tracking-widest uppercase"
-            >
-              <Link href="/admin/candidates/new">
-                <IconUserPlus className="h-4 w-4" />
-                Create Candidate
-              </Link>
-            </Button>
-            <Button
-              asChild
-              className="gap-1.5 rounded-sm font-mono text-[11px] tracking-widest uppercase"
-            >
-              <Link href="/admin/collect/campaigns/new">
-                <IconClipboardList className="h-4 w-4" />
-                New Campaign
-              </Link>
-            </Button>
-          </div>
-        </CardHeader>
-      </Card>
+    <div className="flex flex-1 flex-col gap-5 p-3 sm:gap-6 sm:p-4 md:p-6">
+      {/* Summary bar at the top */}
+      <CommandStrip
+        liveCampaigns={campaignBuckets.activeCampaigns.length}
+        prioritySignals={attentionTotal}
+        staleCount={campaignBuckets.staleActiveCampaigns.length}
+        registrationsToday={summary?.registrations.today ?? null}
+        summaryLoading={summaryLoading}
+        summaryError={Boolean(summaryError)}
+        updatedAt={summary?.updatedAt ?? null}
+      />
 
-      {/* Errors -------------------------------------------------------- */}
+      {/* Show an alert if anything failed to load */}
       {(candidatesError || campaignsError) && (
         <Alert
           variant="destructive"
@@ -299,783 +349,52 @@ export function AdminDashboard() {
         </Alert>
       )}
 
-      {/* 2. Quick Actions --------------------------------------------- */}
-      <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader className="pb-3">
-          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
-            Quick Actions
-          </CardDescription>
-          <CardTitle className="text-sm font-semibold tracking-tight">
-            Jump straight into common admin tasks
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-            <QuickActionButton
-              href="/admin/candidates/new"
-              icon={<IconUserPlus className="h-4 w-4" />}
-              label="Create Candidate"
-            />
-            <QuickActionButton
-              href="/admin/collect/campaigns/new"
-              icon={<IconBolt className="h-4 w-4" />}
-              label="New Collect Campaign"
-            />
-            <QuickActionButton
-              href="/admin/collect"
-              icon={<IconClipboardList className="h-4 w-4" />}
-              label="Manage Campaigns"
-            />
-            <QuickActionButton
-              href="/admin/candidates"
-              icon={<IconUsers className="h-4 w-4" />}
-              label="Candidate Accounts"
-            />
-            <QuickActionButton
-              href="/admin/geo"
-              icon={<IconMap className="h-4 w-4" />}
-              label="Geo Data"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Quick links section */}
+      <QuickMoves />
 
-      {/* 3. Needs Attention | 5. Live Campaigns ----------------------- */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.1fr_1fr]">
-        <Card
-          id="needs-attention"
-          className="border-border/60 scroll-mt-20 rounded-sm shadow-none"
-        >
-          <CardHeader className="pb-3">
-            <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
-              Needs Attention
-            </CardDescription>
-            <div className="flex items-center justify-between gap-3">
-              <CardTitle className="text-sm font-semibold tracking-tight">
-                Operational follow-ups
-              </CardTitle>
-              {attentionTotal > 0 && (
-                <Badge
-                  variant="outline"
-                  className="rounded-sm border-orange-500/30 bg-orange-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-orange-600 uppercase"
-                >
-                  {attentionTotal} {attentionTotal === 1 ? "signal" : "signals"}
-                </Badge>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <AttentionColumnSkeleton />
-                <AttentionColumnSkeleton />
-              </div>
-            ) : attentionTotal === 0 ? (
-              <div className="border-border/60 flex flex-col items-center gap-3 rounded-sm border border-dashed py-10 text-center">
-                <div className="bg-primary/10 border-primary/20 flex h-10 w-10 items-center justify-center rounded-sm border">
-                  <IconCircleCheck className="text-primary h-5 w-5" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold tracking-tight">
-                    All clear
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    No urgent admin actions right now.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <AttentionColumn title="Candidate Actions">
-                  <AttentionRow
-                    icon={<IconUserExclamation className="h-3.5 w-3.5" />}
-                    label="Candidates without Collect"
-                    count={candidatesWithoutCollect.length}
-                    href="/admin/candidates"
-                    tone="warning"
-                  />
-                  <AttentionRow
-                    icon={<IconAlertCircle className="h-3.5 w-3.5" />}
-                    label="Pending credentials"
-                    count={pendingCredentials.length}
-                    href="/admin/candidates"
-                    tone="warning"
-                  />
-                  <AttentionRow
-                    icon={<IconUserOff className="h-3.5 w-3.5" />}
-                    label="Suspended accounts"
-                    count={suspendedCandidates.length}
-                    href="/admin/candidates"
-                    tone="danger"
-                  />
-                  <AttentionRow
-                    icon={<IconMapOff className="h-3.5 w-3.5" />}
-                    label="Missing constituency LGAs"
-                    count={missingConstituencyLgas.length}
-                    href="/admin/candidates"
-                    tone="warning"
-                  />
-                </AttentionColumn>
-                <AttentionColumn title="Campaign Actions">
-                  <AttentionRow
-                    icon={<IconFileText className="h-3.5 w-3.5" />}
-                    label="Draft campaigns"
-                    count={draftCampaigns.length}
-                    href="/admin/collect"
-                    tone="muted"
-                  />
-                  <AttentionRow
-                    icon={<IconAlertCircle className="h-3.5 w-3.5" />}
-                    label="Active with no submissions"
-                    count={activeCampaignsNoSubmissions.length}
-                    href="/admin/collect"
-                    tone="warning"
-                  />
-                  <AttentionRow
-                    icon={<IconClockExclamation className="h-3.5 w-3.5" />}
-                    label="Stale active campaigns"
-                    count={staleActiveCampaigns.length}
-                    href="/admin/collect"
-                    tone="danger"
-                  />
-                  <AttentionRow
-                    icon={<IconReportOff className="h-3.5 w-3.5" />}
-                    label="Campaign Insights off"
-                    count={insightsOff.length}
-                    href="/admin/collect"
-                    tone="muted"
-                  />
-                </AttentionColumn>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="pb-3">
-            <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
-              Live Campaigns
-            </CardDescription>
-            <div className="flex items-center justify-between gap-3">
-              <CardTitle className="text-sm font-semibold tracking-tight">
-                Recent campaign activity
-              </CardTitle>
-              {campaigns.length > 0 && (
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 rounded-sm px-2 font-mono text-[10px] tracking-widest uppercase"
-                >
-                  <Link href="/admin/collect">
-                    All
-                    <IconChevronRight className="h-3.5 w-3.5" />
-                  </Link>
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <RowSkeleton key={i} />
-                ))}
-              </div>
-            ) : liveCampaigns.length === 0 ? (
-              <EmptyRow
-                icon={
-                  <IconClipboardList className="text-muted-foreground h-8 w-8" />
-                }
-                title="No campaigns yet"
-                description="Create a Collect campaign to start gathering supporters."
-                ctaHref="/admin/collect/campaigns/new"
-                ctaLabel="New Collect Campaign"
-              />
-            ) : (
-              <div className="space-y-2">
-                {liveCampaigns.map((c) => (
-                  <CampaignRow key={c.id} campaign={c} />
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* 4. Core Metrics --------------------------------------------- */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {isLoading ? (
-          <>
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-          </>
-        ) : (
-          <>
-            <MetricCard
-              href="/admin/candidates"
-              label="Candidates"
-              value={candidates.length}
-              subtitle={
-                candidates.length === 1
-                  ? "1 account"
-                  : `${candidates.length} accounts`
-              }
-              icon={<IconUsers className="text-primary h-5 w-5" />}
-            />
-            <MetricCard
-              href="/admin/collect"
-              label="Live Campaigns"
-              value={activeCampaigns.length}
-              subtitle={`of ${campaigns.length} total`}
-              icon={<IconActivity className="text-primary h-5 w-5" />}
-              showLiveDot={activeCampaigns.length > 0}
-            />
-            <MetricCard
-              href="/admin/collect"
-              label="Registrations"
-              value={totalSubmissions.toLocaleString()}
-              subtitle="via Collect"
-              icon={<IconChartBar className="text-primary h-5 w-5" />}
-            />
-            <MetricCard
-              href="#needs-attention"
-              label="Needs Attention"
-              value={attentionTotal}
-              subtitle={
-                attentionTotal === 1
-                  ? "1 signal to review"
-                  : `${attentionTotal} signals to review`
-              }
-              icon={
-                <IconAlertTriangle
-                  className={cn(
-                    "h-5 w-5",
-                    attentionTotal === 0 ? "text-primary" : "text-orange-600",
-                  )}
-                />
-              }
-              tone={attentionTotal === 0 ? "primary" : "warning"}
-            />
-          </>
-        )}
-      </div>
-
-      {/* 6. Recent Candidates | 7. Coverage Snapshot ------------------ */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-        <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="pb-3">
-            <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
-              Recent Candidate Setup
-            </CardDescription>
-            <div className="flex items-center justify-between gap-3">
-              <CardTitle className="text-sm font-semibold tracking-tight">
-                Newest accounts to finish setting up
-              </CardTitle>
-              {candidates.length > 0 && (
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 rounded-sm px-2 font-mono text-[10px] tracking-widest uppercase"
-                >
-                  <Link href="/admin/candidates">
-                    All
-                    <IconChevronRight className="h-3.5 w-3.5" />
-                  </Link>
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <RowSkeleton key={i} />
-                ))}
-              </div>
-            ) : recentCandidates.length === 0 ? (
-              <EmptyRow
-                icon={<IconUsers className="text-muted-foreground h-8 w-8" />}
-                title="No candidates yet"
-                description="Add your first candidate account to get started."
-                ctaHref="/admin/candidates/new"
-                ctaLabel="Create First Candidate"
-              />
-            ) : (
-              <div className="space-y-2">
-                {recentCandidates.map((c) => (
-                  <CandidateRow key={c.id} candidate={c} />
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="pb-3">
-            <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
-              Coverage Snapshot
-            </CardDescription>
-            <CardTitle className="text-sm font-semibold tracking-tight">
-              Candidate distribution
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-4 w-full rounded-sm" />
-                <Skeleton className="h-4 w-full rounded-sm" />
-                <Skeleton className="h-4 w-full rounded-sm" />
-                <div className="space-y-2 pt-2">
-                  <Skeleton className="h-3 w-24 rounded-sm" />
-                  <Skeleton className="h-2 w-full rounded-sm" />
-                  <Skeleton className="h-2 w-full rounded-sm" />
-                  <Skeleton className="h-2 w-full rounded-sm" />
-                </div>
-              </div>
-            ) : candidates.length === 0 ? (
-              <div className="border-border/60 rounded-sm border border-dashed py-8 text-center">
-                <p className="text-muted-foreground text-sm">
-                  Distribution data appears once candidate accounts exist.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <div className="space-y-2.5">
-                  <CoverageStat
-                    label="Constituency-linked"
-                    value={candidates.length - nationalCandidates}
-                  />
-                  <CoverageStat label="National" value={nationalCandidates} />
-                  <CoverageStat
-                    label="Distinct parties"
-                    value={uniqueParties.length}
-                  />
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-                      Top Positions
-                    </h3>
-                    {topPositions.length > 0 && (
-                      <Badge
-                        variant="outline"
-                        className="rounded-sm px-1.5 py-0 font-mono text-[10px] font-bold tracking-widest uppercase"
-                      >
-                        {topPositions.length} tracked
-                      </Badge>
-                    )}
-                  </div>
-                  {topPositions.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">
-                      Position data will appear here once candidates exist.
-                    </p>
-                  ) : (
-                    <div className="space-y-2.5">
-                      {topPositions.map(([position, count]) => (
-                        <div key={position} className="space-y-1">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground truncate pr-2">
-                              {position}
-                            </span>
-                            <span className="font-mono font-medium tabular-nums">
-                              {count}
-                            </span>
-                          </div>
-                          <div className="bg-muted h-1.5 rounded-sm">
-                            <div
-                              className="bg-primary h-1.5 rounded-sm"
-                              style={{
-                                width: `${(count / Math.max(candidates.length, 1)) * 100}%`,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-}
-
-function CoverageStat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-mono font-medium tabular-nums">{value}</span>
-    </div>
-  );
-}
-
-// ---------- Quick Actions ----------
-
-function QuickActionButton({
-  href,
-  icon,
-  label,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <Button
-      asChild
-      variant="outline"
-      className="h-auto justify-start gap-2 rounded-sm py-2.5 font-mono text-[11px] tracking-widest uppercase"
-    >
-      <Link href={href}>
-        {icon}
-        <span className="truncate">{label}</span>
-      </Link>
-    </Button>
-  );
-}
-
-// ---------- Core Metric Card ----------
-
-function MetricCard({
-  href,
-  label,
-  value,
-  subtitle,
-  icon,
-  showLiveDot,
-  tone = "primary",
-}: {
-  href: string;
-  label: string;
-  value: string | number;
-  subtitle: string;
-  icon: React.ReactNode;
-  showLiveDot?: boolean;
-  tone?: "primary" | "warning";
-}) {
-  const iconWrap =
-    tone === "warning"
-      ? "bg-orange-500/10 border-orange-500/20"
-      : "bg-primary/10 border-primary/20";
-  return (
-    <Link
-      href={href}
-      className="focus-visible:ring-primary/40 group rounded-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-    >
-      <Card className="border-border/60 group-hover:border-border group-hover:bg-muted/20 rounded-sm shadow-none transition-colors">
-        <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-3">
-          <CardTitle className="text-muted-foreground min-w-0 pr-2 font-mono text-[10px] leading-relaxed font-bold tracking-widest uppercase">
-            {label}
-          </CardTitle>
-          <div
-            className={cn(
-              "flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border",
-              iconWrap,
-            )}
-          >
-            {icon}
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="font-mono text-[2rem] leading-none font-semibold tracking-tight tabular-nums">
-            {value}
-          </div>
-          <div className="text-muted-foreground mt-2 flex items-center gap-2 text-sm">
-            {showLiveDot && (
-              <span className="relative flex h-1.5 w-1.5 shrink-0">
-                <span className="bg-primary absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
-                <span className="bg-primary relative inline-flex h-1.5 w-1.5 rounded-full" />
-              </span>
-            )}
-            <span>{subtitle}</span>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
-  );
-}
-
-// ---------- Needs Attention ----------
-
-function AttentionColumn({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-2">
-      <h3 className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-        {title}
-      </h3>
-      <div className="space-y-1.5">{children}</div>
-    </div>
-  );
-}
-
-const ATTENTION_TONE_STYLES: Record<"warning" | "danger" | "muted", string> = {
-  warning: "bg-orange-500/10 text-orange-600 border-orange-500/20",
-  danger: "bg-destructive/10 text-destructive border-destructive/30",
-  muted: "bg-muted text-muted-foreground border-border/60",
-};
-
-function AttentionRow({
-  icon,
-  label,
-  count,
-  href,
-  tone,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  count: number;
-  href: string;
-  tone: "warning" | "danger" | "muted";
-}) {
-  if (count === 0) return null;
-  return (
-    <Link
-      href={href}
-      className="border-border/60 hover:border-border hover:bg-muted/30 group flex items-center justify-between gap-3 rounded-sm border p-2.5 transition-colors"
-    >
-      <div className="flex min-w-0 items-center gap-2.5">
-        <span
-          className={cn(
-            "flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border",
-            ATTENTION_TONE_STYLES[tone],
-          )}
-        >
-          {icon}
-        </span>
-        <span className="truncate text-sm">{label}</span>
-      </div>
-      <div className="flex shrink-0 items-center gap-1.5">
-        <Badge
-          variant="outline"
-          className="rounded-sm px-1.5 py-0 font-mono text-[10px] font-bold tracking-widest tabular-nums"
-        >
-          {count}
-        </Badge>
-        <IconChevronRight className="text-muted-foreground group-hover:text-foreground h-4 w-4 transition-colors" />
-      </div>
-    </Link>
-  );
-}
-
-function AttentionColumnSkeleton() {
-  return (
-    <div className="space-y-2">
-      <Skeleton className="h-3 w-24 rounded-sm" />
-      <div className="space-y-1.5">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-10 w-full rounded-sm" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ---------- Live Campaigns ----------
-
-function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
-  const stale = isStaleCampaign(campaign);
-  const statusStyle =
-    CAMPAIGN_STATUS_STYLES[campaign.status] ??
-    "bg-muted text-muted-foreground border-border/60";
-  const submissions = campaign._count?.submissions ?? 0;
-  const detailHref = `/admin/collect/campaigns/${campaign.id}`;
-  return (
-    <div className="border-border/60 hover:border-border hover:bg-muted/20 group flex items-start gap-3 rounded-sm border p-3 transition-colors">
-      <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={detailHref}
-            className="hover:text-primary truncate text-sm font-semibold tracking-tight transition-colors"
-          >
-            {campaign.displayName?.trim() ||
-              formatPersonName(campaign.candidateName)}
-          </Link>
-          <Badge
-            variant="outline"
-            className={cn(
-              "rounded-sm px-1.5 py-0 font-mono text-[10px] font-bold tracking-widest uppercase",
-              statusStyle,
-            )}
-          >
-            {formatStatusLabel(campaign.status)}
-          </Badge>
-          {stale && (
-            <Badge
-              variant="outline"
-              className="border-destructive/30 bg-destructive/10 text-destructive rounded-sm px-1.5 py-0 font-mono text-[10px] font-bold tracking-widest uppercase"
-            >
-              Stale
-            </Badge>
-          )}
-        </div>
-        <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-          {campaign.displayName?.trim() && (
-            <span className="truncate">
-              {formatPersonName(campaign.candidateName)}
-            </span>
-          )}
-          <span className="font-mono tabular-nums">
-            {submissions.toLocaleString()}{" "}
-            {submissions === 1 ? "submission" : "submissions"}
-          </span>
-          <span>
-            {campaign.lastSubmissionAt
-              ? formatRelativeTime(campaign.lastSubmissionAt, {
-                  emptyLabel: "—",
-                  invalidLabel: "—",
-                  olderDateStyle: "months",
-                })
-              : "No submissions yet"}
-          </span>
-        </div>
-      </div>
-      <div className="shrink-0">
-        <CampaignActionsMenu
-          campaign={{
-            id: campaign.id,
-            slug: campaign.slug,
-            clientReportEnabled: campaign.clientReportEnabled,
-            clientReportToken: campaign.clientReportToken,
-          }}
-          ariaLabel={`Actions for ${campaign.displayName?.trim() || formatPersonName(campaign.candidateName)}`}
+      {/* Main dashboard section: queue of priorities and health metrics */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr]">
+        <PriorityQueue
+          isLoading={isLoadingEntities}
+          buckets={priorityBuckets}
+          total={attentionTotal}
+        />
+        <HealthRail
+          isLoadingEntities={isLoadingEntities}
+          summary={summary}
+          summaryLoading={summaryLoading}
+          summaryError={Boolean(summaryError)}
+          pendingCredentialsCount={candidateBuckets.pendingCredentials.length}
+          candidatesWithoutCollectCount={
+            candidateBuckets.candidatesWithoutCollect.length
+          }
+          activeCampaignsCount={campaignBuckets.activeCampaigns.length}
+          draftCampaignsCount={campaignBuckets.draftCampaigns.length}
+          staleCampaignsCount={campaignBuckets.staleActiveCampaigns.length}
+          insightsOffCount={campaignBuckets.insightsOff.length}
         />
       </div>
-    </div>
-  );
-}
 
-// ---------- Recent Candidate Setup ----------
-
-function CandidateRow({ candidate }: { candidate: CandidateWithUser }) {
-  const status = candidate.onboardingStatus;
-  const statusStyle =
-    ONBOARDING_STATUS_STYLES[status] ??
-    "bg-muted text-muted-foreground border-border/60";
-  const detailHref = `/admin/candidates/${candidate.id}`;
-  const accountHref = `/admin/candidates/${candidate.id}?tab=account`;
-  const collectAction = candidate.collectCampaign
-    ? {
-        href: `/admin/collect/campaigns/${candidate.collectCampaign.id}`,
-        label: "View Collect",
-      }
-    : {
-        href: `/admin/collect/campaigns/new?candidateId=${candidate.id}`,
-        label: "Create Campaign",
-      };
-  const locationLabel =
-    candidate.constituency ||
-    resolveStateName(candidate.stateCode) ||
-    (candidate.isNational ? "National" : null);
-  return (
-    <div className="border-border/60 hover:border-border hover:bg-muted/20 group flex flex-col gap-3 rounded-sm border p-3 transition-colors sm:flex-row sm:items-start">
-      <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={detailHref}
-            className="hover:text-primary truncate text-sm font-semibold tracking-tight transition-colors"
-          >
-            {candidate.title
-              ? `${candidate.title} ${candidate.name}`
-              : candidate.name}
-          </Link>
-          {candidate.party && (
-            <Badge
-              variant="outline"
-              className="border-border/60 rounded-sm px-1.5 py-0 font-mono text-[10px] font-bold tracking-widest uppercase"
-            >
-              {candidate.party}
-            </Badge>
-          )}
-          <Badge
-            variant="outline"
-            className={cn(
-              "rounded-sm px-1.5 py-0 font-mono text-[10px] font-bold tracking-widest uppercase",
-              statusStyle,
-            )}
-          >
-            {formatStatusLabel(status)}
-          </Badge>
-        </div>
-        <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-          <span>{candidate.position}</span>
-          {locationLabel && <span>{locationLabel}</span>}
-        </div>
+      {/* Show latest campaigns on the left and latest candidates on the right */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.1fr_1fr]">
+        <LiveCampaignsSection
+          campaigns={liveCampaigns}
+          isLoading={isLoadingEntities}
+        />
+        <RecentCandidatesSection
+          candidates={recentCandidates}
+          isLoading={isLoadingEntities}
+        />
       </div>
-      <div className="flex flex-wrap gap-1.5 sm:shrink-0">
-        <RowAction href={detailHref} label="View" />
-        <RowAction href={collectAction.href} label={collectAction.label} />
-        <RowAction href={accountHref} label="Account" />
-      </div>
-    </div>
-  );
-}
 
-function RowAction({ href, label }: { href: string; label: string }) {
-  return (
-    <Button
-      asChild
-      variant="outline"
-      size="sm"
-      className="h-7 rounded-sm px-2 font-mono text-[10px] tracking-widest uppercase"
-    >
-      <Link href={href}>{label}</Link>
-    </Button>
-  );
-}
-
-// ---------- Shared row primitives ----------
-
-function RowSkeleton() {
-  return (
-    <div className="border-border/60 flex items-center gap-3 rounded-sm border border-dashed p-3">
-      <div className="flex-1 space-y-2">
-        <Skeleton className="h-4 w-1/2 rounded-sm" />
-        <Skeleton className="h-3 w-3/4 rounded-sm" />
-      </div>
-      <Skeleton className="h-7 w-20 shrink-0 rounded-sm" />
-    </div>
-  );
-}
-
-function EmptyRow({
-  icon,
-  title,
-  description,
-  ctaHref,
-  ctaLabel,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  ctaHref: string;
-  ctaLabel: string;
-}) {
-  return (
-    <div className="border-border/60 flex flex-col items-center gap-3 rounded-sm border border-dashed py-10 text-center">
-      <div className="flex h-12 w-12 items-center justify-center">{icon}</div>
-      <div className="space-y-1">
-        <p className="text-sm font-semibold tracking-tight">{title}</p>
-        <p className="text-muted-foreground text-sm">{description}</p>
-      </div>
-      <Button
-        asChild
-        size="sm"
-        className="rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
-      >
-        <Link href={ctaHref}>{ctaLabel}</Link>
-      </Button>
+      {/* Quick coverage stats at the bottom */}
+      <CoverageStrip
+        isLoading={isLoadingEntities}
+        totalCandidates={coverageSnapshot.totalCandidates}
+        nationalCandidates={coverageSnapshot.nationalCandidates}
+        distinctParties={coverageSnapshot.distinctParties}
+        topPositions={coverageSnapshot.topPositions}
+      />
     </div>
   );
 }

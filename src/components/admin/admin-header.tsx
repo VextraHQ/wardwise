@@ -31,6 +31,7 @@ export function AdminHeader() {
       return "Candidates";
     }
     if (pathname === "/admin") return "Dashboard";
+    if (pathname.startsWith("/admin/account")) return "Account";
     if (pathname.startsWith("/admin/collect")) return "Collect";
     if (pathname.startsWith("/admin/geo")) return "Geo Data";
     if (pathname.startsWith("/admin/analytics")) return "Analytics";
