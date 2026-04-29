@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { HiArrowRight } from "react-icons/hi";
 import { HiArrowUpRight } from "react-icons/hi2";
-import { motion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -49,11 +48,7 @@ export function HeroSection() {
         <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-12">
           {/* Left: Campaign Strategy */}
           <div className="flex flex-col justify-center space-y-6">
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="inline-flex"
-            >
+            <div className="inline-flex">
               <div className="border-primary/40 flex items-center gap-3 border-l-2 pl-4">
                 <span className="text-primary text-[10px] font-black tracking-[0.4em] uppercase">
                   Ward-level intelligence
@@ -63,37 +58,22 @@ export function HeroSection() {
                   From the ground up
                 </span>
               </div>
-            </motion.div>
+            </div>
 
             <div className="space-y-4">
-              <motion.h1
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-foreground text-5xl leading-[1.1] font-extrabold tracking-tight sm:text-6xl lg:text-7xl"
-              >
+              <h1 className="text-foreground text-5xl leading-[1.1] font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
                 From Ward <br />
                 <span className="text-primary font-serif italic">
                   to Victory.
                 </span>
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-muted-foreground max-w-xl text-base leading-relaxed font-medium sm:text-lg"
-              >
+              </h1>
+              <p className="text-muted-foreground max-w-xl text-base leading-relaxed font-medium sm:text-lg">
                 {heroSupportingCopy}
-              </motion.p>
+              </p>
             </div>
 
             {/* Campaign Proof Points */}
-            <motion.ul
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="space-y-2.5"
-            >
+            <ul className="space-y-2.5">
               {benefitPoints.map((point, i) => (
                 <li key={i} className="flex items-center gap-3">
                   <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-orange-500/10">
@@ -104,14 +84,9 @@ export function HeroSection() {
                   </span>
                 </li>
               ))}
-            </motion.ul>
+            </ul>
 
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="space-y-5 pt-2"
-            >
+            <div className="space-y-5 pt-2">
               <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
                 <Button
                   size="lg"
@@ -156,7 +131,7 @@ export function HeroSection() {
                   </Link>
                 )}
               </div>
-            </motion.div>
+            </div>
 
             {/* Sub-Header Trust Indicators */}
             <div className="border-border/60 flex flex-wrap items-center gap-8 border-t pt-8">
@@ -186,13 +161,7 @@ export function HeroSection() {
           </div>
 
           {/* Right: The High-Fidelity Campaign Command Dashboard */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="relative lg:block"
-          >
+          <div className="relative lg:block">
             <div className="relative mx-auto w-full max-w-xl">
               {/* The Command Dashboard Hub - "Silver Glass" Aesthetic */}
               <div className="border-border/60 bg-card relative overflow-hidden border shadow-[0_48px_96px_-12px_rgba(0,0,0,0.12)] backdrop-blur-xl">
@@ -246,14 +215,9 @@ export function HeroSection() {
                     </div>
                     {/* Premium Progress Bar */}
                     <div className="bg-muted h-2.5 w-full overflow-hidden rounded-full p-0.5">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        whileInView={{ width: "84.2%" }}
-                        transition={{ duration: 1.5, ease: "easeOut" }}
-                        className="from-primary to-primary/80 relative h-full rounded-full bg-linear-to-r"
-                      >
+                      <div className="from-primary to-primary/80 relative h-full rounded-full bg-linear-to-r">
                         <div className="absolute inset-0 animate-pulse bg-white/10" />
-                      </motion.div>
+                      </div>
                     </div>
                   </div>
 
@@ -428,7 +392,7 @@ export function HeroSection() {
               <div className="border-border/40 absolute -top-8 -left-8 -z-10 h-32 w-32 rounded-full border opacity-60" />
               <div className="border-border/40 absolute -right-12 -bottom-12 -z-10 h-48 w-48 rounded-full border opacity-60" />
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { HiArrowRight } from "react-icons/hi";
-import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 
 export function CallToActionSection() {
@@ -32,12 +31,7 @@ export function CallToActionSection() {
       />
 
       <div className="relative mx-auto max-w-6xl px-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.99 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="border-border/60 bg-background relative border px-8 py-16 sm:px-12 sm:py-24 lg:px-20"
-        >
+        <div className="border-border/60 bg-background relative border px-8 py-16 sm:px-12 sm:py-24 lg:px-20">
           {/* Corner Precision Markers */}
           <div className="border-primary absolute -top-px -left-px size-3 border-t-2 border-l-2" />
           <div className="border-primary absolute -top-px -right-px size-3 border-t-2 border-r-2" />
@@ -138,7 +132,7 @@ export function CallToActionSection() {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
@@ -195,6 +196,24 @@ function PrepSheetBody({
   const showStaleWarning = !isLoading && stalePreparedIds.length > 0;
   // Count of currently effective selections
   const effectiveCount = effectiveSelection.size;
+  const allVisibleSelected =
+    visibleIds !== null &&
+    visibleIds.size > 0 &&
+    effectiveSelection.size === visibleIds.size;
+
+  const selectAllVisible = () => {
+    if (isPreparing || !lgasLoadedSuccessfully || lgas.length === 0) return;
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const l of lgas) next.add(l.id);
+      return next;
+    });
+  };
+
+  const clearSelection = () => {
+    if (isPreparing) return;
+    setSelected(new Set());
+  };
 
   return (
     <>
@@ -218,6 +237,37 @@ function PrepSheetBody({
             disabled={isPreparing}
           />
         </div>
+        {lgasLoadedSuccessfully && lgas.length > 0 ? (
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <p className="text-muted-foreground min-w-0 text-xs">
+              <span className="font-mono tabular-nums">{effectiveCount}</span>{" "}
+              of <span className="font-mono tabular-nums">{lgas.length}</span>{" "}
+              selected
+            </p>
+            <div className="flex shrink-0 gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 rounded-sm font-mono text-[11px] tracking-widest uppercase"
+                disabled={isPreparing || allVisibleSelected}
+                onClick={selectAllVisible}
+              >
+                Select all
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 rounded-sm font-mono text-[11px] tracking-widest uppercase"
+                disabled={isPreparing || selected.size === 0}
+                onClick={clearSelection}
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
