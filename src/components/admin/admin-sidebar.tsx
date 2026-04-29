@@ -3,11 +3,9 @@ import {
   IconDashboard,
   IconUsers,
   IconClipboardList,
+  IconHistory,
   IconSettings,
   IconHome,
-  IconChartBar,
-  IconHistory,
-  IconHelp,
   IconMapPin,
 } from "@tabler/icons-react";
 import { NavMain } from "@/components/layout/sidebar/nav-main";
@@ -45,28 +43,22 @@ const adminNavItems = [
     url: "/admin/geo",
     icon: IconMapPin,
   },
-  {
-    title: "Analytics",
-    url: "#",
-    icon: IconChartBar,
-  },
-  {
-    title: "Activity Logs",
-    url: "#",
-    icon: IconHistory,
-  },
 ];
 
 const adminSecondaryItems = [
   {
+    title: "Audit Log",
+    url: "#",
+    icon: IconHistory,
+    disabled: true,
+    badge: "Soon",
+  },
+  {
     title: "Settings",
     url: "#",
     icon: IconSettings,
-  },
-  {
-    title: "Help & Docs",
-    url: "#",
-    icon: IconHelp,
+    disabled: true,
+    badge: "Soon",
   },
   {
     title: "Home",
