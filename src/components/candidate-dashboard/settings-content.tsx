@@ -19,7 +19,7 @@ export function SettingsContent() {
       </div>
 
       <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader className="pb-3">
+        <CardHeader>
           <CardTitle className="text-sm font-semibold tracking-tight">
             Account Settings
           </CardTitle>

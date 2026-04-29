@@ -102,7 +102,7 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
     <div className="space-y-6 pt-4">
       {/* Account Info */}
       <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader>
+        <CardHeader className="border-border/60 border-b">
           <CardTitle className="text-foreground font-mono text-[11px] font-bold tracking-widest uppercase">
             Account Information
           </CardTitle>
@@ -154,7 +154,7 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
 
       {/* Onboarding Status */}
       <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader>
+        <CardHeader className="border-border/60 border-b">
           <CardTitle className="text-foreground font-mono text-[11px] font-bold tracking-widest uppercase">
             Onboarding Status
           </CardTitle>
@@ -215,7 +215,7 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
 
       {/* Reset Password */}
       <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader>
+        <CardHeader className="border-border/60 border-b">
           <CardTitle className="text-foreground font-mono text-[11px] font-bold tracking-widest uppercase">
             Password Management
           </CardTitle>

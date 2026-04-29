@@ -135,7 +135,7 @@ export function ReportsContent() {
 
       {/* Verification Summary */}
       <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader className="pb-3">
+        <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-sm font-semibold tracking-tight">
@@ -251,7 +251,7 @@ export function ReportsContent() {
 
       {/* Deduplication Report */}
       <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader className="pb-3">
+        <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-sm font-semibold tracking-tight">
@@ -352,7 +352,7 @@ export function ReportsContent() {
 
       {/* Coverage Report */}
       <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader className="pb-3">
+        <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-sm font-semibold tracking-tight">

@@ -242,7 +242,7 @@ export function PricingContent() {
                 </Badge>
               </div>
             )}
-            <CardHeader className={plan.badge ? "pt-6 pb-3" : "pb-3"}>
+            <CardHeader className={plan.badge ? "pt-6" : undefined}>
               <CardTitle className="text-sm font-semibold tracking-tight">
                 {plan.name}
               </CardTitle>

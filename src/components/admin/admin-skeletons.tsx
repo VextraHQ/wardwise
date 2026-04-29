@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function StatCardSkeleton() {
   return (
     <Card className="border-border/60 animate-pulse rounded-sm border-dashed shadow-none">
-      <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
+      <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
         <Skeleton className="h-4 w-32 rounded-sm" />
         <Skeleton className="h-8 w-8 shrink-0 rounded-sm sm:h-9 sm:w-9" />
       </CardHeader>

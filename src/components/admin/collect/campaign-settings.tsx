@@ -315,7 +315,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
     <div className="space-y-6">
       {/* Status Control */}
       <Card className="border-border/60 bg-card rounded-sm shadow-none">
-        <CardHeader className="border-border/50 border-b pb-4">
+        <CardHeader className="border-border/50 border-b">
           <CardTitle className="text-sm font-semibold tracking-tight">
             Campaign status
           </CardTitle>
@@ -437,7 +437,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
 
       {/* Campaign Branding */}
       <Card className="border-border/60 bg-card rounded-sm shadow-none">
-        <CardHeader className="border-border/50 border-b pb-4">
+        <CardHeader className="border-border/50 border-b">
           <CardTitle className="text-sm font-semibold tracking-tight">
             Campaign branding
           </CardTitle>
@@ -524,7 +524,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
 
       {/* Campaign Details */}
       <Card className="border-border/60 bg-card rounded-sm shadow-none">
-        <CardHeader className="border-border/50 border-b pb-4">
+        <CardHeader className="border-border/50 border-b">
           <CardTitle className="text-sm font-semibold tracking-tight">
             Campaign details
           </CardTitle>
@@ -608,7 +608,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
 
       {canShowBoundarySync && (
         <Card className="border-border/60 bg-card rounded-sm shadow-none">
-          <CardHeader className="border-border/50 border-b pb-4">
+          <CardHeader className="border-border/50 border-b">
             <CardTitle className="text-sm font-semibold tracking-tight">
               Boundary sync
             </CardTitle>
@@ -688,7 +688,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
 
       {/* Client Access */}
       <Card className="border-border/60 bg-card rounded-sm shadow-none">
-        <CardHeader className="border-border/50 border-b pb-4">
+        <CardHeader className="border-border/50 border-b">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
               <CardTitle className="text-sm font-semibold tracking-tight">
@@ -894,7 +894,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
 
       {/* Danger Zone */}
       <Card className="border-destructive/25 bg-destructive/5 dark:border-destructive/35 dark:bg-destructive/10 rounded-sm border shadow-none">
-        <CardHeader className="border-destructive/20 border-b pb-4">
+        <CardHeader className="border-destructive/20 border-b">
           <CardTitle className="text-destructive text-sm font-semibold tracking-tight">
             Danger zone
           </CardTitle>

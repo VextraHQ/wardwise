@@ -204,7 +204,7 @@ export function GeoLevelWards({
   return (
     <>
       <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader>
+        <CardHeader className="border-border/60 border-b">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <CardTitle className="text-sm font-semibold tracking-tight">
               Wards
@@ -234,7 +234,7 @@ export function GeoLevelWards({
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent>
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="flex-1">
               <AdminSearchBar

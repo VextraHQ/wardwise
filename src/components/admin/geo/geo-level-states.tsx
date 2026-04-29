@@ -119,7 +119,7 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
 
   return (
     <Card className="border-border/60 rounded-sm shadow-none">
-      <CardHeader>
+      <CardHeader className="border-border/60 border-b">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-semibold tracking-tight">
             States
@@ -127,7 +127,7 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
           <ViewModeToggle value={viewMode} onValueChange={setViewMode} />
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent>
         {viewMode === "grid" ? (
           <div className="space-y-8">
             {ZONES.map((zone) => {

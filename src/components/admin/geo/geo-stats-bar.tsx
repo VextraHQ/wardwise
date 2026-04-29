@@ -58,7 +58,7 @@ export function GeoStatsBar() {
           key={item.label}
           className="border-border/60 rounded-sm shadow-none"
         >
-          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
             <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
               {item.label}
             </CardTitle>
@@ -66,7 +66,7 @@ export function GeoStatsBar() {
               <item.icon className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent>
             <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
               {item.value}
             </div>

@@ -144,7 +144,7 @@ function StatsGrid({
               />
             </div>
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent>
             <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
               {card.value}
             </div>

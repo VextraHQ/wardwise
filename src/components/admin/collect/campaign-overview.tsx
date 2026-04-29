@@ -111,7 +111,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
                 <Skeleton className="h-4 w-28" />
                 <Skeleton className="h-9 w-9 rounded-sm" />
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent>
                 <Skeleton className="h-8 w-16" />
               </CardContent>
             </Card>
@@ -140,7 +140,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
       {/* Stat Cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
             <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
               Total Submissions
             </CardTitle>
@@ -148,7 +148,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
               <IconClipboardList className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent>
             <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
               {total}
             </div>
@@ -158,7 +158,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
           </CardContent>
         </Card>
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
             <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
               Verified
             </CardTitle>
@@ -166,7 +166,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
               <IconShieldCheck className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent>
             <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
               {verified}
             </div>
@@ -177,7 +177,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
           </CardContent>
         </Card>
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
             <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
               Flagged
             </CardTitle>
@@ -185,7 +185,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
               <IconFlag className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent>
             <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
               {flagged}
             </div>
@@ -195,7 +195,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
           </CardContent>
         </Card>
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
             <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
               LGAs Active
             </CardTitle>
@@ -203,7 +203,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
               <IconUsers className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent>
             <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
               {campaign.enabledLgaIds.length}
             </div>
@@ -218,7 +218,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Daily Registrations */}
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="">
+          <CardHeader>
             <CardTitle className="text-sm font-semibold tracking-tight">
               Daily Registrations
             </CardTitle>
@@ -253,7 +253,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
 
         {/* By LGA */}
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="">
+          <CardHeader>
             <CardTitle className="text-sm font-semibold tracking-tight">
               Submissions by LGA
             </CardTitle>
@@ -288,7 +288,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
       {/* Registration Trend + Top Wards */}
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="">
+          <CardHeader>
             <CardTitle className="text-sm font-semibold tracking-tight">
               Registration Trend (Cumulative)
             </CardTitle>
@@ -319,7 +319,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
         </Card>
 
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="">
+          <CardHeader>
             <CardTitle className="text-sm font-semibold tracking-tight">
               Top Wards (by Registrations)
             </CardTitle>
@@ -360,7 +360,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Role Breakdown */}
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="">
+          <CardHeader>
             <CardTitle className="text-sm font-semibold tracking-tight">
               By Role
             </CardTitle>
@@ -420,7 +420,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
 
         {/* QR Code */}
         <Card className="border-border/60 rounded-sm shadow-none">
-          <CardHeader className="">
+          <CardHeader>
             <CardTitle className="text-sm font-semibold tracking-tight">
               Registration QR Code
             </CardTitle>
