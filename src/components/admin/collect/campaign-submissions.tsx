@@ -1,50 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import type { ComponentType } from "react";
+import { useEffect, useState } from "react";
+
 import {
-  useCampaignSubmissions,
-  useUpdateSubmission,
-  useDeleteSubmission,
-  useBulkSubmissionAction,
-  useSubmissionAudit,
-} from "@/hooks/use-collect";
-import { adminCollectApi } from "@/lib/api/collect";
-import { roleLabels } from "@/lib/collect/analytics";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn, formatPersonName } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  IconFlag,
+  IconFlagOff,
+  IconShieldCheck,
+  IconShieldX,
+} from "@tabler/icons-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+
+import { AdminPagination } from "@/components/admin/admin-pagination";
+import { AdminMobileRecordSkeleton } from "@/components/admin/shared/admin-mobile-record-card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,158 +24,55 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AdminPagination } from "@/components/admin/admin-pagination";
 import {
-  AdminMobileRecordCard,
-  AdminMobileRecordField,
-  AdminMobileRecordFields,
-  AdminMobileRecordHeader,
-  AdminMobileRecordMeta,
-  AdminMobileRecordSkeleton,
-  AdminMobileRecordTitle,
-} from "@/components/admin/shared/admin-mobile-record-card";
-import { MobileBulkActionTray } from "@/components/ui/mobile-selection-actions";
-import { toast } from "sonner";
+  useBulkSubmissionAction,
+  useCampaignSubmissions,
+  useDeleteSubmission,
+  useSubmissionAudit,
+  useUpdateSubmission,
+} from "@/hooks/use-collect";
 import { track } from "@/lib/analytics/client";
+import { adminCollectApi } from "@/lib/api/collect";
+import { roleLabels } from "@/lib/collect/analytics";
 import {
-  IconChevronDown,
-  IconCopy,
-  IconDotsVertical,
-  IconFileExport,
-  IconFlag,
-  IconFlagOff,
-  IconFileTypeCsv,
-  IconFileTypeXls,
-  IconSearch,
-  IconShieldCheck,
-  IconShieldX,
-  IconTrash,
-} from "@tabler/icons-react";
-import type { CollectSubmission } from "@/types/collect";
-import { formatGeoDisplayName } from "@/lib/geo/display";
-import { generateRefCode } from "@/lib/utils";
-import { useIsPortraitMobile } from "@/hooks/use-mobile";
-import { formatDisplayDateTime } from "@/lib/date-format";
-import type { ExportFormat } from "@/lib/exports/shared";
-import {
-  getOrderedExportFormats,
   readPreferredExportFormat,
   writePreferredExportFormat,
 } from "@/lib/exports/client-preferences";
+import { useIsPortraitMobile } from "@/hooks/use-mobile";
+import {
+  buildExportToastMessage,
+  deriveSubmissionSelectionState,
+  getReviewStatusFilters,
+  getReviewStatusLabel,
+} from "@/lib/collect/campaign-submissions";
+import { formatPersonName } from "@/lib/utils";
+import type {
+  ReviewStatus,
+  SubmissionActiveFilters,
+  SubmissionBulkActionKey,
+  SubmissionBulkActionViewModel,
+  SubmissionConfirmDialog,
+  SubmissionWithPU,
+} from "@/types/campaign-submissions";
 
-// Extended type to include nested polling unit from API
-type SubmissionWithPU = CollectSubmission & {
-  pollingUnit?: { id: number; code: string; name: string } | null;
-};
+import { CampaignSubmissionDetailSheet } from "./campaign-submission-detail-sheet";
+import {
+  CampaignSubmissionsBulkToolbar,
+  CampaignSubmissionsSelectionTray,
+} from "./campaign-submissions-bulk-toolbar";
+import { CampaignSubmissionsTable } from "./campaign-submissions-table";
+import { CampaignSubmissionsToolbar } from "./campaign-submissions-toolbar";
 
-const exportFormatMeta = {
-  csv: { label: "CSV", icon: IconFileTypeCsv },
-  xlsx: { label: "Excel", icon: IconFileTypeXls },
-} satisfies Record<
-  ExportFormat,
-  { label: string; icon: React.ComponentType<{ className?: string }> }
+const bulkActionIcons = {
+  verify: IconShieldCheck,
+  unverify: IconShieldX,
+  flag: IconFlag,
+  unflag: IconFlagOff,
+} as const satisfies Record<
+  SubmissionBulkActionKey,
+  ComponentType<{ className?: string }>
 >;
-
-type ReviewStatus = "pending" | "verified" | "flagged" | "all";
-
-const REVIEW_STATUSES = [
-  { value: "all", label: "All" },
-  { value: "pending", label: "Pending" },
-  { value: "verified", label: "Verified" },
-  { value: "flagged", label: "Flagged" },
-] as const satisfies ReadonlyArray<{
-  value: ReviewStatus;
-  label: string;
-}>;
-
-function getReviewStatusFilters(status: ReviewStatus) {
-  switch (status) {
-    case "pending":
-      return { isVerified: false, isFlagged: false };
-    case "verified":
-      return { isVerified: true, isFlagged: false };
-    case "flagged":
-      return { isFlagged: true };
-    default:
-      return {};
-  }
-}
-
-function getReviewStatusLabel(status: ReviewStatus) {
-  return REVIEW_STATUSES.find((item) => item.value === status)?.label ?? "All";
-}
-
-function formatPU(sub: SubmissionWithPU) {
-  const code = sub.pollingUnit?.code;
-  const displayName = formatGeoDisplayName(sub.pollingUnitName);
-  if (code) return `${code.padStart(3, "0")} - ${displayName}`;
-  return displayName;
-}
-
-function getSubmissionRefCode(submission: SubmissionWithPU) {
-  return submission.refCode || generateRefCode(submission.id);
-}
-
-function SubmissionStatusBadges({
-  submission,
-}: {
-  submission: SubmissionWithPU;
-}) {
-  return (
-    <div className="flex min-w-0 flex-wrap justify-end gap-1">
-      {submission.isVerified && (
-        <Badge
-          variant="outline"
-          className="bg-primary/10 text-primary border-primary/30 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-        >
-          Verified
-        </Badge>
-      )}
-      {submission.isFlagged && (
-        <Badge
-          variant="outline"
-          className="bg-destructive/10 text-destructive border-destructive/30 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-        >
-          Flagged
-        </Badge>
-      )}
-      {!submission.isVerified && !submission.isFlagged && (
-        <Badge
-          variant="outline"
-          className="rounded-sm border-orange-500/20 bg-orange-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-orange-600 uppercase"
-        >
-          Pending Review
-        </Badge>
-      )}
-    </div>
-  );
-}
-
-function buildExportToastMessage(args: {
-  format: ExportFormat;
-  redacted?: boolean;
-  hasSearch: boolean;
-  hasRoleFilter: boolean;
-  hasCanvasserFilter: boolean;
-  hasStatusFilter: boolean;
-}) {
-  const label = `${args.redacted ? "Redacted " : ""}${exportFormatMeta[args.format].label}`;
-  const activeFilters = [
-    args.hasSearch ? "search" : null,
-    args.hasStatusFilter ? "review status" : null,
-    args.hasRoleFilter ? "role" : null,
-    args.hasCanvasserFilter ? "canvasser" : null,
-  ].filter(Boolean);
-
-  if (activeFilters.length === 0) return `${label} exported`;
-  if (activeFilters.length === 1) {
-    return `${label} exported with ${activeFilters[0]} filter`;
-  }
-
-  return `${label} exported with active filters`;
-}
 
 export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
   const searchParams = useSearchParams();
@@ -228,20 +94,15 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
   >(() => searchParams.get("canvasserPhone"));
   const [selected, setSelected] = useState<SubmissionWithPU | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
-  const [confirmDialog, setConfirmDialog] = useState<{
-    title: string;
-    description: string;
-    onConfirm: () => void;
-    confirmLabel?: string;
-    destructive?: boolean;
-  } | null>(null);
-  const [preferredFormat, setPreferredFormat] = useState<ExportFormat>(() =>
+  const [confirmDialog, setConfirmDialog] = useState<SubmissionConfirmDialog>(
+    null,
+  );
+  const [preferredFormat, setPreferredFormat] = useState(() =>
     readPreferredExportFormat(),
   );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [allMatchingSelected, setAllMatchingSelected] = useState(false);
 
-  // Clear one-shot URL params after consuming them
   useEffect(() => {
     const hasCanvasserParam = searchParams.has("canvasserName");
     const hasRoleParam = searchParams.has("role");
@@ -259,14 +120,14 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     setAllMatchingSelected(false);
   };
 
-  const baseFilters = {
+  const baseFilters: SubmissionActiveFilters = {
     search: search || undefined,
     role: roleFilter !== "all" ? roleFilter : undefined,
     canvasserName: canvasserFilter || undefined,
     canvasserPhone: canvasserPhoneFilter || undefined,
   };
   const statusFilters = getReviewStatusFilters(reviewStatus);
-  const activeFilters = {
+  const activeFilters: SubmissionActiveFilters = {
     ...baseFilters,
     ...statusFilters,
   };
@@ -306,26 +167,33 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
   const deleteMutation = useDeleteSubmission();
   const bulkMutation = useBulkSubmissionAction();
   const { data: auditData } = useSubmissionAudit(selected?.id || null);
+
   const submissions = (data?.submissions || []) as SubmissionWithPU[];
   const total = data?.total || 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const reviewCounts = {
+  const reviewCounts: Record<ReviewStatus, number> = {
     pending: pendingCountData?.total ?? 0,
     verified: verifiedCountData?.total ?? 0,
     flagged: flaggedCountData?.total ?? 0,
     all: allCountData?.total ?? 0,
-  } satisfies Record<ReviewStatus, number>;
+  };
 
-  const allOnPageSelected =
-    submissions.length > 0 && submissions.every((s) => selectedIds.has(s.id));
+  const selectionState = deriveSubmissionSelectionState({
+    submissions,
+    selectedIds,
+    total,
+    reviewStatus,
+    allMatchingSelected,
+  });
 
   const toggleSelectAll = () => {
-    if (allOnPageSelected) {
+    if (selectionState.allOnPageSelected) {
       clearSelection();
-    } else {
-      setSelectedIds(new Set(submissions.map((s) => s.id)));
-      setAllMatchingSelected(false);
+      return;
     }
+
+    setSelectedIds(new Set(submissions.map((submission) => submission.id)));
+    setAllMatchingSelected(false);
   };
 
   const toggleSelect = (id: string) => {
@@ -368,7 +236,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
           );
           clearSelection();
         },
-        onError: (e) => toast.error(e.message),
+        onError: (error) => toast.error(error.message),
       },
     );
   };
@@ -384,6 +252,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
       });
       return;
     }
+
     executeBulkAction(action);
   };
 
@@ -412,88 +281,15 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     });
   };
 
-  // Compute which bulk actions to show based on selected rows' states
-  const selectedSubs = submissions.filter((s) => selectedIds.has(s.id));
-  const selectedCount = allMatchingSelected ? total : selectedIds.size;
-  const hasUnverified = allMatchingSelected
-    ? reviewStatus !== "verified"
-    : selectedSubs.some((s) => !s.isVerified);
-  const hasVerified = allMatchingSelected
-    ? reviewStatus === "verified"
-    : selectedSubs.some((s) => s.isVerified);
-  const hasUnflagged = allMatchingSelected
-    ? reviewStatus !== "flagged"
-    : selectedSubs.some((s) => !s.isFlagged);
-  const hasFlagged = allMatchingSelected
-    ? reviewStatus === "flagged"
-    : selectedSubs.some((s) => s.isFlagged);
-  const canSelectAllMatching =
-    !allMatchingSelected &&
-    allOnPageSelected &&
-    total > selectedIds.size &&
-    reviewStatus !== "all";
-  const bulkActions = [
-    hasUnverified
-      ? {
-          key: "verify",
-          label: allMatchingSelected ? "Verify Matching" : "Verify Selected",
-          mobileLabel: "Verify",
-          icon: IconShieldCheck,
-          onClick: () =>
-            allMatchingSelected
-              ? handleFilteredBulkAction("verify")
-              : handleBulkAction("verify"),
-        }
-      : null,
-    hasVerified
-      ? {
-          key: "unverify",
-          label: allMatchingSelected
-            ? "Unverify Matching"
-            : "Unverify Selected",
-          mobileLabel: "Unverify",
-          icon: IconShieldX,
-          onClick: () =>
-            allMatchingSelected
-              ? handleFilteredBulkAction("unverify")
-              : handleBulkAction("unverify"),
-        }
-      : null,
-    hasUnflagged
-      ? {
-          key: "flag",
-          label: allMatchingSelected ? "Flag Matching" : "Flag Selected",
-          mobileLabel: "Flag",
-          icon: IconFlag,
-          onClick: () =>
-            allMatchingSelected
-              ? handleFilteredBulkAction("flag")
-              : handleBulkAction("flag"),
-        }
-      : null,
-    hasFlagged
-      ? {
-          key: "unflag",
-          label: allMatchingSelected ? "Unflag Matching" : "Unflag Selected",
-          mobileLabel: "Unflag",
-          icon: IconFlagOff,
-          onClick: () =>
-            allMatchingSelected
-              ? handleFilteredBulkAction("unflag")
-              : handleBulkAction("unflag"),
-        }
-      : null,
-  ].filter(
-    (
-      action,
-    ): action is {
-      key: string;
-      label: string;
-      mobileLabel: string;
-      icon: typeof IconShieldCheck;
-      onClick: () => void;
-    } => Boolean(action),
-  );
+  const bulkActions: SubmissionBulkActionViewModel[] =
+    selectionState.availableActions.map((action) => ({
+      ...action,
+      icon: bulkActionIcons[action.key],
+      onClick: () =>
+        allMatchingSelected
+          ? handleFilteredBulkAction(action.key)
+          : handleBulkAction(action.key),
+    }));
 
   const handleExport = async ({
     format,
@@ -525,8 +321,6 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     }
   };
 
-  const orderedFormats = getOrderedExportFormats(preferredFormat);
-
   const handleCopyReference = async (refCode: string) => {
     try {
       await navigator.clipboard.writeText(refCode);
@@ -536,18 +330,18 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     }
   };
 
-  const handleToggleFlag = (sub: SubmissionWithPU) => {
-    const newFlagged = !sub.isFlagged;
+  const handleToggleFlag = (submission: SubmissionWithPU) => {
+    const newFlagged = !submission.isFlagged;
     updateMutation.mutate(
-      { sid: sub.id, data: { isFlagged: newFlagged } },
+      { sid: submission.id, data: { isFlagged: newFlagged } },
       {
         onSuccess: () => {
           track("admin_submission_updated", {
             action: newFlagged ? "flagged" : "unflagged",
-            submission_id: sub.id,
+            submission_id: submission.id,
           });
           toast.success(newFlagged ? "Flagged" : "Unflagged");
-          if (selected?.id === sub.id) {
+          if (selected?.id === submission.id) {
             setSelected({ ...selected, isFlagged: newFlagged });
           }
         },
@@ -555,39 +349,39 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     );
   };
 
-  const handleDelete = (sub: SubmissionWithPU) => {
+  const handleDelete = (submission: SubmissionWithPU) => {
     setConfirmDialog({
       title: "Delete submission?",
-      description: `This will permanently delete the submission from ${formatPersonName(sub.fullName)}. This action cannot be undone.`,
+      description: `This will permanently delete the submission from ${formatPersonName(submission.fullName)}. This action cannot be undone.`,
       confirmLabel: "Delete",
       destructive: true,
       onConfirm: () => {
-        deleteMutation.mutate(sub.id, {
+        deleteMutation.mutate(submission.id, {
           onSuccess: () => {
             track("admin_submission_deleted", {
-              submission_id: sub.id,
+              submission_id: submission.id,
             });
             toast.success("Submission deleted");
             setSelected(null);
           },
-          onError: (e) => toast.error(e.message),
+          onError: (error) => toast.error(error.message),
         });
       },
     });
   };
 
-  const handleVerify = (sub: SubmissionWithPU) => {
-    const newVerified = !sub.isVerified;
+  const handleVerify = (submission: SubmissionWithPU) => {
+    const newVerified = !submission.isVerified;
     updateMutation.mutate(
-      { sid: sub.id, data: { isVerified: newVerified } },
+      { sid: submission.id, data: { isVerified: newVerified } },
       {
         onSuccess: () => {
           track("admin_submission_updated", {
             action: newVerified ? "verified" : "unverified",
-            submission_id: sub.id,
+            submission_id: submission.id,
           });
           toast.success(newVerified ? "Verified" : "Unverified");
-          if (selected?.id === sub.id) {
+          if (selected?.id === submission.id) {
             setSelected({ ...selected, isVerified: newVerified });
           }
         },
@@ -600,214 +394,64 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     setAdminNotes(submission.adminNotes || "");
   };
 
+  const selectionSummary = allMatchingSelected
+    ? `${selectionState.selectedCount.toLocaleString()} matching records selected`
+    : `${selectionState.selectedCount} selected`;
+
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="grid grid-cols-1 gap-2 lg:grid-cols-[auto_minmax(18rem,1fr)_auto] lg:items-center lg:gap-3">
-        <div
-          role="group"
-          aria-label="Filter by review status"
-          className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {REVIEW_STATUSES.map((status) => {
-            const isActive = reviewStatus === status.value;
-            return (
-              <button
-                key={status.value}
-                type="button"
-                aria-pressed={isActive}
-                onClick={() => {
-                  setReviewStatus(status.value);
-                  setPage(1);
-                  clearSelection();
-                }}
-                className={cn(
-                  "inline-flex shrink-0 items-center gap-1.5 rounded-sm px-2.5 py-1.5 font-mono text-[10px] font-bold tracking-widest whitespace-nowrap uppercase transition-colors",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
-              >
-                <span>{status.label}</span>
-                <span
-                  className={cn(
-                    "tabular-nums",
-                    isActive ? "text-primary/70" : "text-muted-foreground/60",
-                  )}
-                >
-                  {reviewCounts[status.value].toLocaleString()}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-        <div className="relative min-w-0 lg:min-w-72 xl:min-w-88">
-          <IconSearch className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-          <Input
-            placeholder="Search by name, phone, email, or reference..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-              clearSelection();
-            }}
-            className="rounded-sm pl-9 text-sm"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-[minmax(10rem,12rem)_minmax(9rem,1fr)] lg:flex lg:w-auto lg:items-center">
-          <Select
-            value={roleFilter}
-            onValueChange={(v) => {
-              setRoleFilter(v);
-              setPage(1);
-              clearSelection();
-            }}
-          >
-            <SelectTrigger className="w-full rounded-sm lg:w-40">
-              <SelectValue placeholder="All Roles" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="volunteer">Volunteer</SelectItem>
-              <SelectItem value="member">Member</SelectItem>
-              <SelectItem value="canvasser">Canvasser</SelectItem>
-            </SelectContent>
-          </Select>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={total === 0}
-                title={total === 0 ? "No submissions to export" : undefined}
-                className="h-9 w-full justify-center rounded-sm px-4 font-mono text-[10px] font-bold tracking-widest uppercase shadow-sm lg:w-auto"
-              >
-                <IconFileExport className="mr-2 h-4 w-4" />
-                Export
-                <IconChevronDown className="ml-1 h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="text-muted-foreground font-mono text-[10px] tracking-widest uppercase">
-                Last Used: {exportFormatMeta[preferredFormat].label}
-              </DropdownMenuLabel>
-              {orderedFormats.map((format) => {
-                const Icon = exportFormatMeta[format].icon;
-                return (
-                  <DropdownMenuItem
-                    key={format}
-                    onClick={() => handleExport({ format })}
-                  >
-                    <Icon className="mr-2 h-4 w-4" />
-                    Export {exportFormatMeta[format].label}
-                  </DropdownMenuItem>
-                );
-              })}
-              <DropdownMenuSeparator />
-              {orderedFormats.map((format) => {
-                const Icon = exportFormatMeta[format].icon;
-                return (
-                  <DropdownMenuItem
-                    key={`redacted-${format}`}
-                    onClick={() => handleExport({ format, redacted: true })}
-                  >
-                    <Icon className="mr-2 h-4 w-4" />
-                    Export Redacted {exportFormatMeta[format].label}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+      <CampaignSubmissionsToolbar
+        reviewStatus={reviewStatus}
+        reviewCounts={reviewCounts}
+        onReviewStatusChange={(status) => {
+          setReviewStatus(status);
+          setPage(1);
+          clearSelection();
+        }}
+        search={search}
+        onSearchChange={(value) => {
+          setSearch(value);
+          setPage(1);
+          clearSelection();
+        }}
+        roleFilter={roleFilter}
+        onRoleFilterChange={(value) => {
+          setRoleFilter(value);
+          setPage(1);
+          clearSelection();
+        }}
+        canvasserFilter={canvasserFilter}
+        onClearCanvasserFilter={() => {
+          setCanvasserFilter(null);
+          setCanvasserPhoneFilter(null);
+          setPage(1);
+          clearSelection();
+        }}
+        total={total}
+        preferredFormat={preferredFormat}
+        onExport={handleExport}
+      />
 
-      {/* Canvasser Filter Chip */}
-      {canvasserFilter && (
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge
-            variant="secondary"
-            className="rounded-sm px-2 py-1 text-xs wrap-break-word"
-          >
-            Referred by: {canvasserFilter}
-            <button
-              type="button"
-              className="hover:text-foreground ml-1.5"
-              onClick={() => {
-                setCanvasserFilter(null);
-                setCanvasserPhoneFilter(null);
-                setPage(1);
-                clearSelection();
-              }}
-            >
-              &times;
-            </button>
-          </Badge>
-        </div>
+      {selectionState.selectedCount > 0 && (
+        <CampaignSubmissionsBulkToolbar
+          summary={selectionSummary}
+          canSelectAllMatching={selectionState.canSelectAllMatching}
+          total={total}
+          onSelectAllMatching={() => setAllMatchingSelected(true)}
+          actions={bulkActions}
+          showDeleteAction={!allMatchingSelected}
+          onDeleteSelected={() => handleBulkAction("delete")}
+          isPending={bulkMutation.isPending}
+          onClear={clearSelection}
+        />
       )}
 
-      {/* Bulk Actions Toolbar */}
-      {selectedCount > 0 && (
-        <div className="bg-primary/5 border-primary/20 hidden flex-wrap items-center gap-2 rounded-sm border px-3 py-2 md:flex">
-          <span className="text-primary w-full text-xs font-bold sm:w-auto">
-            {allMatchingSelected
-              ? `${selectedCount.toLocaleString()} matching records selected`
-              : `${selectedCount} selected`}
-          </span>
-          {canSelectAllMatching && (
-            <button
-              type="button"
-              className="text-primary hover:text-primary/80 text-xs font-semibold underline"
-              onClick={() => setAllMatchingSelected(true)}
-            >
-              Select all {total.toLocaleString()} matching records
-            </button>
-          )}
-          {bulkActions.map((action) => {
-            const Icon = action.icon;
-            return (
-              <Button
-                key={action.key}
-                size="sm"
-                variant="outline"
-                className="h-8 flex-1 rounded-sm px-2 text-[10px] font-bold tracking-wider uppercase sm:h-7 sm:flex-none"
-                onClick={action.onClick}
-                disabled={bulkMutation.isPending}
-              >
-                <Icon className="mr-1 h-3 w-3" />
-                {action.label}
-              </Button>
-            );
-          })}
-          {!allMatchingSelected && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 flex-1 rounded-sm border-red-500/20 px-2 text-[10px] font-bold tracking-wider text-red-600 uppercase hover:bg-red-600 hover:text-white sm:h-7 sm:flex-none"
-              onClick={() => handleBulkAction("delete")}
-              disabled={bulkMutation.isPending}
-            >
-              <IconTrash className="mr-1 h-3 w-3" />
-              Delete Selected
-            </Button>
-          )}
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-8 w-full px-2 text-[10px] font-bold tracking-wider uppercase sm:ml-auto sm:h-7 sm:w-auto"
-            onClick={clearSelection}
-          >
-            Clear
-          </Button>
-        </div>
-      )}
-
-      {/* Table */}
       {isLoading ? (
         <>
           <AdminMobileRecordSkeleton rows={5} />
           <div className="hidden space-y-2 md:block">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Skeleton key={index} className="h-12 w-full" />
             ))}
           </div>
         </>
@@ -819,177 +463,17 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
         </div>
       ) : (
         <>
-          <div className="space-y-3 md:hidden">
-            {submissions.map((s) => (
-              <AdminMobileRecordCard
-                key={s.id}
-                className={cn(
-                  "cursor-pointer transition-colors",
-                  s.isFlagged
-                    ? "border-destructive/30 bg-destructive/5 hover:bg-destructive/10"
-                    : s.isVerified
-                      ? "border-primary/20 bg-primary/5 hover:bg-primary/10"
-                      : "hover:bg-muted/30",
-                  selectedIds.has(s.id) &&
-                    "border-primary/40 ring-primary/20 ring-1",
-                )}
-                onClick={() => openSubmission(s)}
-              >
-                <div className="flex min-w-0 items-start gap-3">
-                  <div onClick={(event) => event.stopPropagation()}>
-                    <Checkbox
-                      checked={selectedIds.has(s.id)}
-                      onCheckedChange={() => toggleSelect(s.id)}
-                      aria-label={`Select ${formatPersonName(s.fullName)}`}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <AdminMobileRecordHeader>
-                      <div className="min-w-0 flex-1">
-                        <AdminMobileRecordTitle>
-                          {formatPersonName(s.fullName)}
-                        </AdminMobileRecordTitle>
-                        <AdminMobileRecordMeta mono>
-                          {s.phone}
-                        </AdminMobileRecordMeta>
-                      </div>
-                      <SubmissionStatusBadges submission={s} />
-                    </AdminMobileRecordHeader>
-                    <AdminMobileRecordFields>
-                      <AdminMobileRecordField
-                        label="Location"
-                        value={`${formatGeoDisplayName(s.lgaName)} / ${formatGeoDisplayName(s.wardName)}`}
-                      />
-                      <AdminMobileRecordField
-                        label="PU"
-                        value={formatPU(s)}
-                        mono
-                      />
-                      <AdminMobileRecordField label="Role">
-                        <Badge
-                          variant="outline"
-                          className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-                        >
-                          {roleLabels[s.role] || s.role}
-                        </Badge>
-                      </AdminMobileRecordField>
-                      <AdminMobileRecordField
-                        label="Submitted"
-                        value={formatDisplayDateTime(s.createdAt)}
-                        mono
-                      />
-                    </AdminMobileRecordFields>
-                  </div>
-                </div>
-              </AdminMobileRecordCard>
-            ))}
-          </div>
+          <CampaignSubmissionsTable
+            submissions={submissions}
+            page={page}
+            pageSize={pageSize}
+            selectedIds={selectedIds}
+            allOnPageSelected={selectionState.allOnPageSelected}
+            onToggleSelectAll={toggleSelectAll}
+            onToggleSelect={toggleSelect}
+            onOpenSubmission={openSubmission}
+          />
 
-          <div className="hidden overflow-x-auto rounded-sm border md:block">
-            <Table>
-              <TableHeader className="bg-muted/30 sticky top-0 z-10">
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="h-10 w-10 text-center">
-                    <Checkbox
-                      checked={allOnPageSelected}
-                      onCheckedChange={toggleSelectAll}
-                      aria-label="Select all"
-                    />
-                  </TableHead>
-                  <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
-                    S/N
-                  </TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                    Name
-                  </TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                    Phone
-                  </TableHead>
-                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
-                    LGA
-                  </TableHead>
-                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
-                    Ward
-                  </TableHead>
-                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase xl:table-cell">
-                    Polling Unit
-                  </TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                    Role
-                  </TableHead>
-                  <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
-                    Status
-                  </TableHead>
-                  <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase lg:table-cell">
-                    Date
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {submissions.map((s, idx) => (
-                  <TableRow
-                    key={s.id}
-                    className={`cursor-pointer transition-colors ${
-                      s.isFlagged
-                        ? "bg-destructive/5 hover:bg-destructive/10"
-                        : s.isVerified
-                          ? "bg-brand-emerald/5 hover:bg-brand-emerald/10"
-                          : "hover:bg-muted/30"
-                    }`}
-                    onClick={() => openSubmission(s)}
-                  >
-                    <TableCell
-                      className="text-center"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Checkbox
-                        checked={selectedIds.has(s.id)}
-                        onCheckedChange={() => toggleSelect(s.id)}
-                        aria-label={`Select ${formatPersonName(s.fullName)}`}
-                      />
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-center text-xs font-medium">
-                      {(page - 1) * pageSize + idx + 1}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {formatPersonName(s.fullName)}
-                    </TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {s.phone}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {formatGeoDisplayName(s.lgaName)}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {formatGeoDisplayName(s.wardName)}
-                    </TableCell>
-                    <TableCell className="hidden xl:table-cell">
-                      <code className="text-muted-foreground bg-muted rounded px-1.5 py-0.5 text-xs">
-                        {formatPU(s)}
-                      </code>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-                      >
-                        {roleLabels[s.role] || s.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <SubmissionStatusBadges submission={s} />
-                    </TableCell>
-                    <TableCell className="text-muted-foreground hidden text-xs lg:table-cell">
-                      {formatDisplayDateTime(s.createdAt)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Pagination */}
           <AdminPagination
             currentPage={page}
             totalPages={totalPages}
@@ -1009,351 +493,61 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
         </>
       )}
 
-      {selectedCount > 0 && (
-        <MobileBulkActionTray
-          summary={
-            allMatchingSelected
-              ? `${selectedCount.toLocaleString()} matching records selected`
-              : `${selectedCount} selected`
-          }
-          supportingText={
-            canSelectAllMatching ? (
-              <button
-                type="button"
-                className="hover:text-primary/80 underline"
-                onClick={() => setAllMatchingSelected(true)}
-              >
-                Select all {total.toLocaleString()} matching records
-              </button>
-            ) : undefined
-          }
-          summaryAction={
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 rounded-sm px-2 font-mono text-[10px] font-bold tracking-widest uppercase"
-              onClick={clearSelection}
-            >
-              Clear
-            </Button>
-          }
-        >
-          <div className="grid grid-cols-2 gap-2">
-            {bulkActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <Button
-                  key={action.key}
-                  size="sm"
-                  variant="outline"
-                  className="h-9 rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase"
-                  onClick={action.onClick}
-                  disabled={bulkMutation.isPending}
-                >
-                  <Icon className="mr-1.5 h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{action.mobileLabel}</span>
-                </Button>
-              );
-            })}
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            {!allMatchingSelected ? (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-9 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
-                onClick={toggleSelectAll}
-                disabled={bulkMutation.isPending}
-              >
-                {allOnPageSelected ? "Clear Page" : "Select Page"}
-              </Button>
-            ) : (
-              <div />
-            )}
-            {!allMatchingSelected ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-9 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
-                    disabled={bulkMutation.isPending}
-                  >
-                    <IconDotsVertical className="h-3.5 w-3.5" />
-                    More
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem
-                    className="text-destructive focus:text-destructive"
-                    onClick={() => handleBulkAction("delete")}
-                  >
-                    <IconTrash className="mr-2 h-4 w-4" />
-                    Delete Selected
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-9 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
-                    disabled={bulkMutation.isPending}
-                  >
-                    <IconDotsVertical className="h-3.5 w-3.5" />
-                    More
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={toggleSelectAll}>
-                    Clear Page Selection
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-        </MobileBulkActionTray>
+      {selectionState.selectedCount > 0 && (
+        <CampaignSubmissionsSelectionTray
+          summary={selectionSummary}
+          canSelectAllMatching={selectionState.canSelectAllMatching}
+          total={total}
+          onSelectAllMatching={() => setAllMatchingSelected(true)}
+          actions={bulkActions}
+          allMatchingSelected={allMatchingSelected}
+          allOnPageSelected={selectionState.allOnPageSelected}
+          onToggleSelectAll={toggleSelectAll}
+          onDeleteSelected={() => handleBulkAction("delete")}
+          isPending={bulkMutation.isPending}
+          onClear={clearSelection}
+        />
       )}
 
-      {/* Detail Sheet */}
-      <Sheet
-        open={!!selected}
-        onOpenChange={(open) => !open && setSelected(null)}
-      >
-        <SheetContent
-          side={isPortraitMobile ? "bottom" : "right"}
-          className="flex min-w-0 flex-col gap-0 overflow-x-hidden p-0 sm:max-w-md"
-        >
-          <div className="bg-muted/10 border-b">
-            <SheetHeader className="min-w-0 space-y-1">
-              <SheetTitle className="min-w-0 text-lg font-extrabold tracking-tight wrap-break-word sm:text-xl">
-                {formatPersonName(selected?.fullName)}
-              </SheetTitle>
-              <div className="flex min-w-0 flex-wrap items-center gap-2">
-                <code className="text-muted-foreground/80 bg-muted/60 max-w-full rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold break-all">
-                  {selected?.phone}
-                </code>
-                {selected?.role && (
-                  <Badge
-                    variant="outline"
-                    className="bg-primary/5 border-primary/20 text-primary shrink-0 rounded-sm px-1.5 py-0 font-mono text-[10px] font-bold tracking-widest uppercase"
-                  >
-                    {roleLabels[selected.role] || selected.role}
-                  </Badge>
-                )}
-              </div>
-              {selected && (
-                <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
-                  <span className="text-muted-foreground shrink-0 font-medium">
-                    Ref
-                  </span>
-                  <code className="text-muted-foreground min-w-0 flex-1 font-mono tracking-[0.18em] break-all uppercase sm:flex-initial">
-                    {getSubmissionRefCode(selected)}
-                  </code>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-foreground h-6 shrink-0 rounded-sm px-1.5"
-                    onClick={() =>
-                      handleCopyReference(getSubmissionRefCode(selected))
-                    }
-                    aria-label="Copy registration reference"
-                  >
-                    <IconCopy className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              )}
-            </SheetHeader>
-          </div>
+      <CampaignSubmissionDetailSheet
+        selected={selected}
+        isPortraitMobile={isPortraitMobile}
+        adminNotes={adminNotes}
+        onAdminNotesChange={setAdminNotes}
+        onOpenChange={(open) => {
+          if (!open) setSelected(null);
+        }}
+        onCopyReference={handleCopyReference}
+        onSaveNotes={() => {
+          if (!selected) return;
+          updateMutation.mutate(
+            {
+              sid: selected.id,
+              data: { adminNotes },
+            },
+            {
+              onSuccess: () => {
+                track("admin_submission_updated", {
+                  action: "notes_saved",
+                  submission_id: selected.id,
+                });
+                toast.success("Notes saved");
+                setSelected({
+                  ...selected,
+                  adminNotes,
+                });
+              },
+            },
+          );
+        }}
+        onToggleFlag={() => selected && handleToggleFlag(selected)}
+        onVerify={() => selected && handleVerify(selected)}
+        onDelete={() => selected && handleDelete(selected)}
+        updatePending={updateMutation.isPending}
+        deletePending={deleteMutation.isPending}
+        auditEntries={auditData?.entries ?? []}
+      />
 
-          <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
-            {selected && (
-              <div className="min-w-0 space-y-6 p-5">
-                <Section label="Personal Identity">
-                  <Field label="Email" value={selected.email || "—"} />
-                  <Field label="Sex" value={selected.sex} />
-                  <Field label="Age" value={String(selected.age)} />
-                  <Field label="Occupation" value={selected.occupation} />
-                  <Field
-                    label="Marital Status"
-                    value={selected.maritalStatus}
-                  />
-                </Section>
-
-                <Section label="Location Data">
-                  <Field
-                    label="LGA"
-                    value={formatGeoDisplayName(selected.lgaName)}
-                  />
-                  <Field
-                    label="Ward"
-                    value={formatGeoDisplayName(selected.wardName)}
-                  />
-                  <Field label="Polling Unit" value={formatPU(selected)} mono />
-                </Section>
-
-                <Section label="Verification Info">
-                  <Field
-                    label="APC/NIN Num."
-                    value={selected.apcRegNumber || "—"}
-                    mono
-                  />
-                  <Field
-                    label="Voter's ID"
-                    value={selected.voterIdNumber || "—"}
-                    mono
-                  />
-                </Section>
-
-                <Section label="Source & Context">
-                  <Field
-                    label="Assigned Role"
-                    value={roleLabels[selected.role] || selected.role}
-                  />
-                  {selected.role !== "canvasser" && (
-                    <>
-                      <Field
-                        label="Agent/Canv."
-                        value={selected.canvasserName || "—"}
-                      />
-                      <Field
-                        label="Agent Contact"
-                        value={selected.canvasserPhone || "—"}
-                        mono
-                      />
-                    </>
-                  )}
-                </Section>
-
-                {(selected.customAnswer1 || selected.customAnswer2) && (
-                  <Section label="Submission Specifics">
-                    {selected.customAnswer1 && (
-                      <Field label="Q1" value={selected.customAnswer1} />
-                    )}
-                    {selected.customAnswer2 && (
-                      <Field label="Q2" value={selected.customAnswer2} />
-                    )}
-                  </Section>
-                )}
-
-                <Section label="Admin Notes">
-                  <Textarea
-                    value={adminNotes}
-                    onChange={(e) => setAdminNotes(e.target.value)}
-                    placeholder="Add administrative notes..."
-                    className="border-border/60 min-h-[80px] w-full min-w-0 rounded-sm text-sm"
-                  />
-                  {adminNotes !== (selected.adminNotes || "") && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase"
-                      disabled={updateMutation.isPending}
-                      onClick={() => {
-                        updateMutation.mutate(
-                          {
-                            sid: selected.id,
-                            data: { adminNotes },
-                          },
-                          {
-                            onSuccess: () => {
-                              track("admin_submission_updated", {
-                                action: "notes_saved",
-                                submission_id: selected.id,
-                              });
-                              toast.success("Notes saved");
-                              setSelected({
-                                ...selected,
-                                adminNotes,
-                              });
-                            },
-                          },
-                        );
-                      }}
-                    >
-                      Save Notes
-                    </Button>
-                  )}
-                </Section>
-
-                {auditData && auditData.entries.length > 0 && (
-                  <Section label="History">
-                    <div className="max-h-40 space-y-2 overflow-y-auto">
-                      {auditData.entries.map((entry) => (
-                        <div
-                          key={entry.id}
-                          className="border-border/60 flex min-w-0 items-start gap-2 border-l-2 pl-3 text-xs"
-                        >
-                          <div className="min-w-0 flex-1 wrap-break-word">
-                            <span className="font-medium">
-                              {entry.userName}
-                            </span>{" "}
-                            <span className="text-muted-foreground">
-                              {entry.action}
-                            </span>
-                          </div>
-                          <span className="text-muted-foreground shrink-0 text-[10px]">
-                            {formatDisplayDateTime(entry.createdAt, {
-                              day: "numeric",
-                              month: "short",
-                              hour: "numeric",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </Section>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="bg-background min-w-0 shrink-0 border-t p-4 pb-[max(env(safe-area-inset-bottom),1rem)] shadow-[0_-8px_30px_rgb(0,0,0,0.04)] sm:p-5">
-            <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <div className="flex min-w-0 flex-1 flex-wrap gap-2 sm:flex-initial">
-                <Button
-                  variant={selected?.isFlagged ? "outline" : "destructive"}
-                  size="sm"
-                  className="h-8 flex-1 rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase transition-all sm:flex-initial"
-                  onClick={() => selected && handleToggleFlag(selected)}
-                >
-                  {selected?.isFlagged ? (
-                    <IconFlagOff className="mr-2 h-3.5 w-3.5" />
-                  ) : (
-                    <IconFlag className="mr-2 h-3.5 w-3.5" />
-                  )}
-                  {selected?.isFlagged ? "Unflag" : "Flag"}
-                </Button>
-                <Button
-                  variant={selected?.isVerified ? "outline" : "default"}
-                  size="sm"
-                  className="h-8 flex-1 rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase transition-all sm:flex-initial"
-                  onClick={() => selected && handleVerify(selected)}
-                >
-                  <IconShieldCheck className="mr-2 h-3.5 w-3.5" />
-                  {selected?.isVerified ? "Unverify" : "Verify"}
-                </Button>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 w-full rounded-sm border-red-500/20 px-3 font-mono text-[10px] font-bold tracking-widest text-red-600 uppercase transition-all hover:bg-red-600 hover:text-white sm:ml-auto sm:w-auto"
-                onClick={() => selected && handleDelete(selected)}
-                disabled={deleteMutation.isPending}
-              >
-                <IconTrash className="mr-1.5 h-3.5 w-3.5" />
-                Delete
-              </Button>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* Confirm Dialog */}
       <AlertDialog
         open={!!confirmDialog}
         onOpenChange={(open) => !open && setConfirmDialog(null)}
@@ -1385,49 +579,6 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
-}
-
-function Section({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="min-w-0 space-y-4">
-      <div className="flex min-w-0 items-center gap-2">
-        <h4 className="text-foreground max-w-[85%] font-mono text-[10px] font-bold tracking-widest uppercase sm:max-w-none sm:whitespace-nowrap">
-          {label}
-        </h4>
-        <div className="bg-border/70 h-px min-w-0 flex-1" />
-      </div>
-      <div className="grid min-w-0 gap-2.5">{children}</div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-}) {
-  return (
-    <div className="flex min-w-0 items-start justify-between gap-3">
-      <span className="text-muted-foreground max-w-[46%] shrink-0 text-[10px] font-bold tracking-widest uppercase sm:max-w-[40%]">
-        {label}
-      </span>
-      <span
-        className={`text-foreground min-w-0 flex-1 text-right text-sm font-bold wrap-anywhere ${mono ? "font-mono text-xs break-all tabular-nums" : "wrap-break-word"}`}
-      >
-        {value}
-      </span>
     </div>
   );
 }
