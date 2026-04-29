@@ -31,26 +31,18 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
+import { MobileBulkActionTray } from "@/components/ui/mobile-selection-actions";
+import { formatDisplayDateTime } from "@/lib/date-format";
 import { formatRole } from "@/lib/collect/reporting";
 import { InsightsExportMenu } from "./insights-export-menu";
 import { formatGeoDisplayName } from "@/lib/geo/display";
-import { formatPersonName } from "@/lib/utils";
+import { cn, formatPersonName } from "@/lib/utils";
 import { useCampaignReportSubmissions } from "@/hooks/use-campaign-report";
 import { useIsPortraitMobile } from "@/hooks/use-mobile";
 import { SubmissionStatusBadge } from "./insights-helpers";
 import type { CampaignReportSubmission } from "@/types/campaign-report";
 
 const EMPTY_SUPPORTERS: CampaignReportSubmission[] = [];
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("en-NG", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
 
 function formatPU(submission: CampaignReportSubmission) {
   if (submission.pollingUnitCode) {
@@ -233,7 +225,7 @@ export function InsightsSupporters({ token }: { token: string }) {
         </div>
 
         {selectedIds.size > 0 && (
-          <div className="bg-primary/5 border-primary/20 flex flex-wrap items-center gap-2 rounded-sm border px-3 py-2">
+          <div className="bg-primary/5 border-primary/20 hidden flex-wrap items-center gap-2 rounded-sm border px-3 py-2 md:flex">
             <span className="text-primary w-full text-xs font-bold sm:w-auto">
               {selectedIds.size} selected for follow-up
             </span>
@@ -375,7 +367,7 @@ export function InsightsSupporters({ token }: { token: string }) {
                         />
                       </TableCell>
                       <TableCell className="text-muted-foreground hidden text-xs lg:table-cell">
-                        {formatDate(submission.createdAt)}
+                        {formatDisplayDateTime(submission.createdAt)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -387,13 +379,16 @@ export function InsightsSupporters({ token }: { token: string }) {
               {submissions.map((submission) => (
                 <div
                   key={submission.id}
-                  className={`rounded-sm border p-3 ${
+                  className={cn(
+                    "cursor-pointer rounded-sm border p-3 transition-colors",
                     submission.isFlagged
                       ? "border-destructive/30 bg-destructive/5"
                       : submission.isVerified
                         ? "border-primary/20 bg-primary/5"
-                        : "border-border/60"
-                  }`}
+                        : "border-border/60 hover:bg-muted/30",
+                    selectedIds.has(submission.id) &&
+                      "border-primary/40 ring-primary/20 ring-1",
+                  )}
                   onClick={() => setSelectedSubmission(submission)}
                 >
                   <div className="flex items-start gap-3">
@@ -428,7 +423,7 @@ export function InsightsSupporters({ token }: { token: string }) {
                         <p>{formatPU(submission)}</p>
                         <p>{formatRole(submission.role)}</p>
                         <p className="font-mono">
-                          {formatDate(submission.createdAt)}
+                          {formatDisplayDateTime(submission.createdAt)}
                         </p>
                       </div>
                     </div>
@@ -457,6 +452,49 @@ export function InsightsSupporters({ token }: { token: string }) {
           </>
         )}
       </div>
+
+      {selectedIds.size > 0 && (
+        <MobileBulkActionTray
+          summary={`${selectedIds.size} selected for follow-up`}
+          summaryAction={
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 rounded-sm px-2 font-mono text-[10px] font-bold tracking-widest uppercase"
+              onClick={() => setSelectedIds(new Set())}
+            >
+              Clear
+            </Button>
+          }
+        >
+          <div
+            className={cn(
+              "grid gap-2",
+              allOnPageSelected ? "grid-cols-1" : "grid-cols-2",
+            )}
+          >
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-9 rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase"
+              onClick={copySelectedContacts}
+            >
+              <IconCopy className="mr-1.5 h-3.5 w-3.5 shrink-0" />
+              Copy Contacts
+            </Button>
+            {!allOnPageSelected && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-9 rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase"
+                onClick={toggleSelectAll}
+              >
+                Select Page
+              </Button>
+            )}
+          </div>
+        </MobileBulkActionTray>
+      )}
 
       <Sheet
         open={!!selectedSubmission}
@@ -544,7 +582,7 @@ export function InsightsSupporters({ token }: { token: string }) {
                   />
                   <Field
                     label="Submitted"
-                    value={formatDate(selectedSubmission.createdAt)}
+                    value={formatDisplayDateTime(selectedSubmission.createdAt)}
                     mono
                   />
                 </Section>

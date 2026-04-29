@@ -22,6 +22,7 @@ import {
   adminResourceStateIcons,
 } from "@/components/admin/shared/admin-resource-state";
 import { getEffectiveCampaignName } from "@/lib/collect/branding";
+import { formatRelativeTime } from "@/lib/date-format";
 import { formatPersonName } from "@/lib/utils";
 import type { CampaignSummary } from "@/types/collect";
 
@@ -41,27 +42,6 @@ function formatStatusLabel(value: string) {
   return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function relativeTime(dateStr: string | null): string {
-  if (!dateStr) return "No activity yet";
-
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
-
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-
-  return new Date(dateStr).toLocaleDateString("en-NG", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 function CampaignReportBadge({ campaign }: { campaign: CampaignSummary }) {
   const enabled = Boolean(
     campaign.clientReportEnabled && campaign.clientReportToken,
@@ -79,7 +59,14 @@ function CampaignReportBadge({ campaign }: { campaign: CampaignSummary }) {
       </Badge>
       {campaign.clientReportLastViewedAt && (
         <p className="text-muted-foreground text-[10px]">
-          Viewed {relativeTime(campaign.clientReportLastViewedAt)}
+          Viewed{" "}
+          {formatRelativeTime(campaign.clientReportLastViewedAt, {
+            absoluteDateOptions: {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            },
+          })}
         </p>
       )}
     </div>
@@ -279,7 +266,13 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
                   <CampaignReportBadge campaign={campaign} />
                 </TableCell>
                 <TableCell className="text-muted-foreground hidden text-xs sm:table-cell">
-                  {relativeTime(campaign.lastSubmissionAt)}
+                  {formatRelativeTime(campaign.lastSubmissionAt, {
+                    absoluteDateOptions: {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    },
+                  })}
                 </TableCell>
                 <TableCell
                   className="w-12 text-right"

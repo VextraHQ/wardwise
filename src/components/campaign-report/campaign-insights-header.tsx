@@ -148,7 +148,7 @@ function ReportDesktopDateFilter({ scope }: { scope: CampaignInsightsScope }) {
   const hasCustomSelection = !!scope.dateFrom || !!scope.dateTo;
   const customRangeLabel = hasCustomSelection
     ? formatDateRangeLabel(scope.dateRange, { dateFormat: "dd MMM" })
-    : "Custom";
+    : "Custom Range";
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">

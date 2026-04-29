@@ -43,28 +43,12 @@ import type { CampaignSummary } from "@/types/collect";
 import type { CandidateWithUser } from "@/lib/api/admin";
 import { positionRequiresLgas } from "@/lib/geo/constituency";
 import { nigeriaStates } from "@/lib/data/state-lga-locations";
+import { formatRelativeTime } from "@/lib/date-format";
 import { cn, formatPersonName } from "@/lib/utils";
 
 // ---------- Local helpers ----------
 
 const STALE_MS = 48 * 60 * 60 * 1000;
-
-function relativeTime(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  const diff = Date.now() - new Date(iso).getTime();
-  if (Number.isNaN(diff)) return "—";
-  const minutes = Math.round(diff / 60_000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.round(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  const months = Math.round(days / 30);
-  if (months < 12) return `${months}mo ago`;
-  const years = Math.round(months / 12);
-  return `${years}y ago`;
-}
 
 function isStaleCampaign(campaign: CampaignSummary): boolean {
   if (campaign.status !== "active") return false;
@@ -948,7 +932,11 @@ function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
           </span>
           <span>
             {campaign.lastSubmissionAt
-              ? relativeTime(campaign.lastSubmissionAt)
+              ? formatRelativeTime(campaign.lastSubmissionAt, {
+                  emptyLabel: "—",
+                  invalidLabel: "—",
+                  olderDateStyle: "months",
+                })
               : "No submissions yet"}
           </span>
         </div>

@@ -30,24 +30,12 @@ import {
   getCampaignBrandingLabel,
   getEffectiveCampaignName,
 } from "@/lib/collect/branding";
+import { formatRelativeTime } from "@/lib/date-format";
 import {
   AdminResourceState,
   adminResourceStateIcons,
 } from "@/components/admin/shared/admin-resource-state";
 import { formatPersonName } from "@/lib/utils";
-
-function relativeTime(dateStr: string | null): string {
-  if (!dateStr) return "No activity yet";
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return `${Math.floor(days / 30)}mo ago`;
-}
 
 function isStale(campaign: CampaignSummary): boolean {
   if (campaign.status !== "active") return false;
@@ -89,7 +77,14 @@ function CampaignReportBadge({ campaign }: { campaign: CampaignSummary }) {
       </Badge>
       {campaign.clientReportLastViewedAt && (
         <p className="text-muted-foreground text-[10px]">
-          Viewed {relativeTime(campaign.clientReportLastViewedAt)}
+          Viewed{" "}
+          {formatRelativeTime(campaign.clientReportLastViewedAt, {
+            absoluteDateOptions: {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            },
+          })}
         </p>
       )}
     </div>
@@ -322,9 +317,7 @@ export function CampaignList() {
 
       {/* Table */}
       {isLoading ? (
-        <div className="overflow-x-auto">
-          <TableSkeleton />
-        </div>
+        <TableSkeleton />
       ) : error ? (
         <AdminResourceState
           tone="error"
@@ -397,7 +390,7 @@ export function CampaignList() {
                               {campaign.brandingType !== "candidate" && (
                                 <Badge
                                   variant="outline"
-                                  className="rounded-sm px-2 py-0.5 font-mono text-[9px] font-bold tracking-widest uppercase"
+                                  className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
                                 >
                                   {brandingLabel}
                                 </Badge>
@@ -437,7 +430,13 @@ export function CampaignList() {
                         <TableCell className="hidden lg:table-cell">
                           <div className="flex items-center gap-1.5">
                             <span className="text-muted-foreground text-xs">
-                              {relativeTime(campaign.lastSubmissionAt)}
+                              {formatRelativeTime(campaign.lastSubmissionAt, {
+                                absoluteDateOptions: {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                },
+                              })}
                             </span>
                             {isStale(campaign) && (
                               <IconAlertTriangle

@@ -4,6 +4,7 @@ import {
   getPresetRange as getSharedPresetRange,
   type DateRangePreset,
 } from "@/lib/date-ranges";
+import { formatDisplayDate, formatRelativeTime } from "@/lib/date-format";
 
 export type CampaignReportRangePreset = Extract<
   DateRangePreset,
@@ -43,7 +44,7 @@ export function formatDateKey(
   value: string,
   options: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" },
 ): string {
-  return parseDateKey(value).toLocaleDateString("en-NG", options);
+  return formatDisplayDate(parseDateKey(value), options);
 }
 
 /** Gets the preset range for a campaign report */
@@ -123,26 +124,13 @@ export function getVerificationRate(total: number, verified: number): number {
 
 /** Formats the time ago for a ISO date */
 export function timeAgo(isoDate: string | null): string {
-  if (!isoDate) return "No submissions yet";
-
-  const now = Date.now();
-  const then = new Date(isoDate).getTime();
-  const diffMs = now - then;
-
-  const minutes = Math.floor(diffMs / 60_000);
-  if (minutes < 1) return "Just now";
-  if (minutes < 60) return `${minutes}m ago`;
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-
-  const days = Math.floor(hours / 24);
-  if (days === 1) return "Yesterday";
-  if (days < 30) return `${days}d ago`;
-
-  return new Date(isoDate).toLocaleDateString("en-NG", {
-    day: "numeric",
-    month: "short",
+  return formatRelativeTime(isoDate, {
+    emptyLabel: "No submissions yet",
+    includeYesterday: true,
+    absoluteDateOptions: {
+      day: "numeric",
+      month: "short",
+    },
   });
 }
 

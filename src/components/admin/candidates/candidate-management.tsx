@@ -41,6 +41,7 @@ import {
   adminResourceStateIcons,
 } from "@/components/admin/shared/admin-resource-state";
 
+import { formatDisplayDate } from "@/lib/date-format";
 import { nigeriaStates } from "@/lib/data/state-lga-locations";
 import { formatPersonName } from "@/lib/utils";
 
@@ -70,6 +71,12 @@ const REPORT_STATUS_STYLES: Record<string, string> = {
 
 function formatStatusLabel(value: string) {
   return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function getCandidateDisplayName(candidate: CandidateWithUser) {
+  return candidate.title
+    ? `${candidate.title} ${formatPersonName(candidate.name)}`
+    : formatPersonName(candidate.name);
 }
 
 function getPrimaryAction(candidate: CandidateWithUser) {
@@ -150,10 +157,10 @@ function ReportBadge({ candidate }: { candidate: CandidateWithUser }) {
       {campaign.clientReportLastViewedAt && (
         <p className="text-muted-foreground text-[10px]">
           Viewed{" "}
-          {new Date(campaign.clientReportLastViewedAt).toLocaleDateString(
-            "en-NG",
-            { day: "numeric", month: "short" },
-          )}
+          {formatDisplayDate(campaign.clientReportLastViewedAt, {
+            day: "numeric",
+            month: "short",
+          })}
         </p>
       )}
     </div>
@@ -600,9 +607,7 @@ export function CandidateManagement() {
                         <TableCell>
                           <div>
                             <span className="text-sm font-medium">
-                              {candidate.title
-                                ? `${candidate.title} ${formatPersonName(candidate.name)}`
-                                : formatPersonName(candidate.name)}
+                              {getCandidateDisplayName(candidate)}
                             </span>
                             <span className="text-muted-foreground block text-xs">
                               {candidate.user?.email}
@@ -644,14 +649,7 @@ export function CandidateManagement() {
                           />
                         </TableCell>
                         <TableCell className="text-muted-foreground hidden text-xs xl:table-cell">
-                          {new Date(candidate.createdAt).toLocaleDateString(
-                            "en-NG",
-                            {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            },
-                          )}
+                          {formatDisplayDate(candidate.createdAt)}
                         </TableCell>
                         <TableCell
                           className="w-12 text-right"

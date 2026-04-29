@@ -46,6 +46,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { formatRelativeTime } from "@/lib/date-format";
 import { cn, formatPersonName } from "@/lib/utils";
 import { toast } from "sonner";
 import { addCampaignCanvasserSchema } from "@/lib/schemas/collect-schemas";
@@ -77,18 +78,6 @@ const exportFormatMeta = {
   ExportFormat,
   { label: string; icon: React.ComponentType<{ className?: string }> }
 >;
-
-function relativeTime(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return `${Math.floor(days / 30)}mo ago`;
-}
 
 function StatPill({
   icon: Icon,
@@ -500,7 +489,11 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
                         )}
                       </TableCell>
                       <TableCell className="text-muted-foreground hidden text-xs lg:table-cell">
-                        {c.lastActive ? relativeTime(c.lastActive) : "—"}
+                        {c.lastActive
+                          ? formatRelativeTime(c.lastActive, {
+                              olderDateStyle: "months",
+                            })
+                          : "—"}
                       </TableCell>
                     </TableRow>
                   );
