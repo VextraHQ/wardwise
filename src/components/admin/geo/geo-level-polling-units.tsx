@@ -122,6 +122,16 @@ export function GeoLevelPollingUnits({
     search: debouncedSearch || undefined,
   });
 
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / pageSize)) : 1;
+  const safePage = Math.min(page, totalPages);
+
+  useEffect(() => {
+    if (data && page > totalPages) {
+      const timeoutId = window.setTimeout(() => setPage(totalPages), 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [data, page, totalPages]);
+
   const puData = data?.data;
   const sortedPUs = useMemo(() => {
     if (!puData) return [];
@@ -131,8 +141,6 @@ export function GeoLevelPollingUnits({
   const createMutation = useCreatePollingUnit();
   const updateMutation = useUpdatePollingUnit();
   const deleteMutation = useDeletePollingUnit();
-
-  const totalPages = data ? Math.ceil(data.total / pageSize) : 1;
 
   const handleCreate = () => {
     if (!formCode.trim()) return;
@@ -312,7 +320,7 @@ export function GeoLevelPollingUnits({
                   {sortedPUs.map((pu, idx) => (
                     <TableRow key={pu.id}>
                       <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
-                        {(page - 1) * pageSize + idx + 1}
+                        {(safePage - 1) * pageSize + idx + 1}
                       </TableCell>
                       <TableCell className="font-mono text-sm font-medium">
                         {pu.code}
@@ -360,7 +368,7 @@ export function GeoLevelPollingUnits({
 
           <div className="pt-4">
             <AdminPagination
-              currentPage={page}
+              currentPage={safePage}
               totalPages={totalPages}
               pageSize={pageSize}
               totalItems={data?.total ?? 0}

@@ -119,6 +119,16 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
     search: debouncedSearch || undefined,
   });
 
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / pageSize)) : 1;
+  const safePage = Math.min(page, totalPages);
+
+  useEffect(() => {
+    if (data && page > totalPages) {
+      const timeoutId = window.setTimeout(() => setPage(totalPages), 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [data, page, totalPages]);
+
   const lgaData = data?.data;
   const sortedLgas = useMemo(() => {
     if (!lgaData) return [];
@@ -128,8 +138,6 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
   const createMutation = useCreateLga();
   const updateMutation = useUpdateLga();
   const deleteMutation = useDeleteLga();
-
-  const totalPages = data ? Math.ceil(data.total / pageSize) : 1;
 
   const handleCreate = () => {
     if (!formName.trim()) return;
@@ -302,7 +310,7 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
                       onClick={() => onDrillDown(lga.id, lga.name)}
                     >
                       <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
-                        {(page - 1) * pageSize + idx + 1}
+                        {(safePage - 1) * pageSize + idx + 1}
                       </TableCell>
                       <TableCell className="font-medium">
                         {formatGeoDisplayName(lga.name)}
@@ -345,10 +353,7 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
                             <DropdownMenuItem
                               variant="destructive"
                               onClick={() =>
-                                setDeletingLga({
-                                  id: lga.id,
-                                  name: lga.name,
-                                })
+                                setDeletingLga({ id: lga.id, name: lga.name })
                               }
                             >
                               <HiOutlineTrash className="mr-2 h-4 w-4" />
@@ -366,7 +371,7 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
 
           <div className="pt-4">
             <AdminPagination
-              currentPage={page}
+              currentPage={safePage}
               totalPages={totalPages}
               pageSize={pageSize}
               totalItems={data?.total ?? 0}

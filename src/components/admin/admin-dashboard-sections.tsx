@@ -5,7 +5,6 @@ import {
   IconCircleCheck,
   IconClipboardList,
   IconMap,
-  IconUserPlus,
   IconUsers,
 } from "@tabler/icons-react";
 
@@ -21,7 +20,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 import type { CandidateWithUser } from "@/lib/api/admin";
-import { formatRelativeTime } from "@/lib/date-format";
 import type { CampaignSummary } from "@/types/collect";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +27,6 @@ import {
   type DashboardSummary,
   formatDelta,
   type PriorityBucket,
-  pluralize,
 } from "@/lib/admin/dashboard";
 import {
   CampaignRow,
@@ -39,6 +36,7 @@ import {
   PriorityQueueRowSkeleton,
   RowSkeleton,
 } from "@/components/admin/admin-dashboard-rows";
+export { CommandStrip } from "@/components/admin/admin-command-strip";
 
 const DELTA_TONE_CLASS: Record<"up" | "down" | "flat", string> = {
   up: "text-primary",
@@ -59,135 +57,26 @@ type HealthRailProps = {
   insightsOffCount: number;
 };
 
-export function CommandStrip({
-  liveCampaigns,
-  prioritySignals,
-  staleCount,
-  registrationsToday,
-  summaryLoading,
-  summaryError,
-  updatedAt,
-}: {
-  liveCampaigns: number;
-  prioritySignals: number;
-  staleCount: number;
-  registrationsToday: number | null;
-  summaryLoading: boolean;
-  summaryError: boolean;
-  updatedAt: string | null;
-}) {
-  return (
-    <div className="border-border/60 flex flex-col gap-4 border-b pb-4 sm:flex-row sm:items-start sm:justify-between sm:pb-5">
-      <div className="min-w-0 space-y-1.5">
-        <h1 className="text-base font-semibold tracking-tight">
-          WardWise Command Center
-        </h1>
-        <div className="text-muted-foreground hidden flex-wrap items-center gap-x-2 gap-y-1 text-sm sm:flex">
-          <span className="whitespace-nowrap">
-            {pluralize(liveCampaigns, "live campaign")}
-          </span>
-          <span aria-hidden>·</span>
-          <span className="whitespace-nowrap">
-            {pluralize(prioritySignals, "priority signal")}
-          </span>
-          <span aria-hidden>·</span>
-          {summaryLoading ? (
-            <span className="whitespace-nowrap">
-              <Skeleton className="h-4 w-32 rounded-sm" />
-            </span>
-          ) : summaryError ? (
-            <span className="text-muted-foreground/70 whitespace-nowrap italic">
-              Couldn’t refresh totals
-            </span>
-          ) : registrationsToday !== null ? (
-            <span className="whitespace-nowrap">
-              {pluralize(registrationsToday, "registration")} today
-            </span>
-          ) : null}
-          <span aria-hidden>·</span>
-          <span className="whitespace-nowrap">
-            {pluralize(staleCount, "stale campaign")}
-          </span>
-        </div>
-        <div className="grid grid-cols-2 gap-2 sm:hidden">
-          <StripStatChip
-            label="Live campaigns"
-            value={liveCampaigns.toLocaleString()}
-          />
-          <StripStatChip
-            label="Priority signals"
-            value={prioritySignals.toLocaleString()}
-          />
-          <StripStatChip
-            label="Registrations today"
-            value={
-              summaryLoading
-                ? null
-                : summaryError
-                  ? "—"
-                  : (registrationsToday ?? 0).toLocaleString()
-            }
-            tone={summaryError ? "muted" : "default"}
-          />
-          <StripStatChip
-            label="Stale campaigns"
-            value={staleCount.toLocaleString()}
-            tone={staleCount > 0 ? "warning" : "default"}
-          />
-        </div>
-        {updatedAt && !summaryLoading && !summaryError && (
-          <p className="text-muted-foreground/60 font-mono text-[10px] tracking-widest uppercase">
-            Updated{" "}
-            {formatRelativeTime(updatedAt, {
-              emptyLabel: "—",
-              invalidLabel: "—",
-              olderDateStyle: "months",
-            })}
-          </p>
-        )}
-      </div>
-      <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:flex-wrap sm:gap-2">
-        <Button
-          asChild
-          variant="outline"
-          className="h-11 justify-center gap-1.5 rounded-sm px-3 font-mono text-[10px] tracking-[0.18em] uppercase sm:h-auto sm:justify-start sm:px-4 sm:text-[11px] sm:tracking-widest"
-        >
-          <Link href="/admin/candidates/new">
-            <IconUserPlus className="h-4 w-4" />
-            Create Candidate
-          </Link>
-        </Button>
-        <Button
-          asChild
-          className="h-11 justify-center gap-1.5 rounded-sm px-3 font-mono text-[10px] tracking-[0.18em] uppercase sm:h-auto sm:justify-start sm:px-4 sm:text-[11px] sm:tracking-widest"
-        >
-          <Link href="/admin/collect/campaigns/new">
-            <IconClipboardList className="h-4 w-4" />
-            New Campaign
-          </Link>
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 export function QuickMoves() {
   return (
     <div className="border-border/60 bg-muted/10 grid grid-cols-3 gap-2 rounded-sm border p-2 sm:flex sm:flex-wrap sm:border-0 sm:bg-transparent sm:p-0">
       <QuickActionButton
         href="/admin/collect"
-        icon={<IconClipboardList className="h-4 w-4" />}
+        icon={<IconClipboardList className="h-4 w-4 shrink-0" />}
         label="Manage Campaigns"
+        shortLabel="Campaigns"
       />
       <QuickActionButton
         href="/admin/candidates"
-        icon={<IconUsers className="h-4 w-4" />}
+        icon={<IconUsers className="h-4 w-4 shrink-0" />}
         label="Candidate Accounts"
+        shortLabel="Candidates"
       />
       <QuickActionButton
         href="/admin/geo"
-        icon={<IconMap className="h-4 w-4" />}
+        icon={<IconMap className="h-4 w-4 shrink-0" />}
         label="Geo Data"
+        shortLabel="Geo"
       />
     </div>
   );
@@ -529,38 +418,6 @@ export function CoverageStrip({
   );
 }
 
-function StripStatChip({
-  label,
-  value,
-  tone = "default",
-}: {
-  label: string;
-  value: string | null;
-  tone?: "default" | "warning" | "muted";
-}) {
-  const toneClass =
-    tone === "warning"
-      ? "border-orange-500/25 bg-orange-500/5"
-      : tone === "muted"
-        ? "border-border/60 bg-muted/30"
-        : "border-border/60 bg-background";
-
-  return (
-    <div className={cn("rounded-sm border px-3 py-2.5", toneClass)}>
-      <div className="font-mono text-[10px] tracking-[0.16em] uppercase">
-        {label}
-      </div>
-      {value === null ? (
-        <Skeleton className="mt-2 h-5 w-16 rounded-sm" />
-      ) : (
-        <div className="mt-1 text-base font-semibold tracking-tight">
-          {value}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function CoverageStat({ label, value }: { label: string; value: number }) {
   return (
     <span className="flex items-baseline gap-1.5 text-sm">
@@ -574,20 +431,28 @@ function QuickActionButton({
   href,
   icon,
   label,
+  shortLabel,
 }: {
   href: string;
   icon: ReactNode;
   label: string;
+  /** Shown below `sm` when the grid is tight; full `label` from `sm` up. */
+  shortLabel?: string;
 }) {
+  const compact = shortLabel ?? label;
+
   return (
     <Button
       asChild
       variant="outline"
-      className="h-16 min-w-0 flex-col justify-center gap-1 rounded-sm px-2 py-2 font-mono text-[10px] tracking-[0.16em] uppercase sm:h-auto sm:flex-row sm:justify-start sm:gap-2 sm:px-4 sm:py-2.5 sm:text-[11px] sm:tracking-widest"
+      className="h-16 min-w-0 flex-col justify-center gap-1 overflow-hidden rounded-sm px-2 py-2 font-mono text-[10px] tracking-[0.16em] uppercase sm:h-auto sm:flex-row sm:justify-start sm:gap-2 sm:overflow-visible sm:px-4 sm:py-2.5 sm:text-[11px] sm:tracking-widest"
     >
-      <Link href={href}>
+      <Link href={href} className="max-w-full min-w-0" aria-label={label}>
         {icon}
-        <span className="truncate text-center leading-tight">{label}</span>
+        <span className="max-w-full min-w-0 truncate text-center leading-tight sm:text-left">
+          <span className="sm:hidden">{compact}</span>
+          <span className="hidden sm:inline">{label}</span>
+        </span>
       </Link>
     </Button>
   );

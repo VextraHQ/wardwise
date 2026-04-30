@@ -5,10 +5,11 @@
 | Metric                | Value                                                                             |
 | --------------------- | --------------------------------------------------------------------------------- |
 | **Stack**             | Next.js 16, React 19, TypeScript, Prisma, PostgreSQL, Tailwind v4, TanStack Query |
-| **Source Files**      | 264 `.ts`/`.tsx` files                                                            |
-| **Lines of Code**     | ~42,400                                                                           |
+| **Source Files**      | 404 `.ts`/`.tsx` files                                                            |
+| **Lines of Code**     | ~71,100                                                                           |
 | **TypeScript Errors** | **0** ✅                                                                          |
 | **Lint Errors**       | **0** ✅                                                                          |
+| **Tests**             | **21 files / 235 tests** ✅                                                       |
 
 ---
 
@@ -134,17 +135,21 @@ src/
 
 ---
 
-### 7. Testing — **2 / 10**
+### 7. Testing — **6 / 10**
 
-> [!WARNING]
-> **No test files exist anywhere in the project.** Zero unit tests, zero integration tests, zero end-to-end tests.
+**Strengths:**
 
-This is the single biggest gap in the codebase. At minimum, the following should be tested:
+- **Vitest is set up and active** (`vitest.config.ts` and `pnpm test`), with a passing suite.
+- **Meaningful unit coverage exists** across auth (`guards`, `session`, `redirects`, `errors`, `links`), email (`auth`, `send`, templates), collect helpers, server query parsing, and core utilities.
+- **Schema validation coverage exists** for `admin-schemas`, `collect-schemas`, and `field-schemas`.
+- **API route test coverage has started** (`app/api/auth/forgot-password/route.test.ts`), showing route-level testing patterns are in place.
+- Current snapshot: **21 test files, 235 passing tests**.
 
-- **Zod schemas** — validation edge cases (Nigerian phone normalization, NIN/VIN validation)
-- **API routes** — auth gating, CRUD operations, error responses
-- **Utility functions** — `normalizeNigerianPhoneInput`, `validateApcOrNin`, constituency helpers
-- **Critical user flows** — registration form submission, campaign creation
+**Areas for improvement:**
+
+- Expand **API route integration tests** across critical admin/collect routes (auth gating + error contracts + edge cases).
+- Add **end-to-end coverage** for high-risk flows (login, campaign creation, submission + export).
+- Add **regression tests for geo/admin drill-down behavior**, where interaction complexity is highest.
 
 ---
 
@@ -176,27 +181,27 @@ This is the single biggest gap in the codebase. At minimum, the following should
 | Data Layer               | 8.0          |
 | Frontend Patterns        | 8.5          |
 | Code Quality             | 8.5          |
-| Testing                  | 2.0          |
+| Testing                  | 6.0          |
 | Performance              | 7.5          |
-| **Weighted Overall**     | **7.5 / 10** |
+| **Weighted Overall**     | **8.0 / 10** |
 
 ---
 
 ## Verdict
 
 > [!NOTE]
-> This is a **well-architected, production-oriented codebase** that demonstrates strong engineering discipline in its layered architecture, type safety, schema-validated APIs, and real-world considerations like offline support and rate limiting. The zero TS errors / zero lint errors on ~42K lines is impressive.
+> This is a **well-architected, production-oriented codebase** that demonstrates strong engineering discipline in its layered architecture, type safety, schema-validated APIs, and real-world considerations like offline support and rate limiting. The zero TS errors / zero lint errors on ~71K lines is impressive.
 >
 > The architecture you've built — with dedicated hook layers, domain-scoped API clients, shared Zod schemas, and audit logging — is genuinely above-average for a project at this stage. The code reads cleanly and would be easy for another developer to pick up.
 >
 > The "always-on shell" pattern, the offline IndexedDB queue, and the Nigerian phone normalization show thoughtful, domain-aware engineering rather than generic CRUD scaffolding.
 
 > [!IMPORTANT]
-> **The biggest drag on the score is the complete absence of tests.** Adding even basic test coverage on your schemas, API routes, and utility functions would bump this into the high 8s. The other improvement areas (middleware placement, icon library consolidation, string-based enums) are minor relative to the overall quality.
+> **The biggest remaining drag is test depth, not test existence.** The project now has a real Vitest baseline (21 files, 235 tests), but broader API integration and end-to-end coverage are still needed to move confidently into the high 8s. The other improvement areas (icon library consolidation, security hardening, and query client defaults) are comparatively minor.
 
 ### Priority Action Items
 
-1. **Add tests** — start with Zod schema tests and API route integration tests (Vitest + MSW or similar)
+1. **Expand tests** — prioritize API route integration and E2E coverage for critical admin/collect flows
 2. **Tighten image remote patterns** — replace `hostname: "**"` with specific allowed domains
 3. **Consolidate icon libraries** — pick one (lucide-react pairs best with shadcn/ui) and migrate
 4. **Configure QueryClient defaults** — add global error handler, retry config, default staleTime

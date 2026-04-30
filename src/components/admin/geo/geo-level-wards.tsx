@@ -125,6 +125,16 @@ export function GeoLevelWards({
     search: debouncedSearch || undefined,
   });
 
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / pageSize)) : 1;
+  const safePage = Math.min(page, totalPages);
+
+  useEffect(() => {
+    if (data && page > totalPages) {
+      const timeoutId = window.setTimeout(() => setPage(totalPages), 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [data, page, totalPages]);
+
   const wardData = data?.data;
   const sortedWards = useMemo(() => {
     if (!wardData) return [];
@@ -134,8 +144,6 @@ export function GeoLevelWards({
   const createMutation = useCreateWard();
   const updateMutation = useUpdateWard();
   const deleteMutation = useDeleteWard();
-
-  const totalPages = data ? Math.ceil(data.total / pageSize) : 1;
 
   const handleCreate = () => {
     if (!formName.trim()) return;
@@ -316,7 +324,7 @@ export function GeoLevelWards({
                       }
                     >
                       <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
-                        {(page - 1) * pageSize + idx + 1}
+                        {(safePage - 1) * pageSize + idx + 1}
                       </TableCell>
                       <TableCell className="text-muted-foreground font-mono text-xs tabular-nums">
                         {ward.code || "—"}
@@ -380,7 +388,7 @@ export function GeoLevelWards({
 
           <div className="pt-4">
             <AdminPagination
-              currentPage={page}
+              currentPage={safePage}
               totalPages={totalPages}
               pageSize={pageSize}
               totalItems={data?.total ?? 0}
