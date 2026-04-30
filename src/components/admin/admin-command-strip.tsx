@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   IconClipboardList,
@@ -29,39 +30,47 @@ export function CommandStrip({
   updatedAt: string | null;
 }) {
   return (
-    <div className="border-border/60 flex flex-col gap-4 border-b pb-4 sm:flex-row sm:items-start sm:justify-between sm:pb-5">
+    <div className="border-border/60 flex flex-col gap-4 border-b pb-2 md:flex-row md:items-start md:justify-between md:pb-3">
       <div className="min-w-0 space-y-1.5">
-        <h1 className="text-base font-semibold tracking-tight">
+        <p className="text-primary/80 font-mono text-[10px] font-bold tracking-widest uppercase">
+          Operations Overview
+        </p>
+        <h2 className="text-foreground text-lg font-semibold tracking-tight">
           WardWise Command Center
-        </h1>
-        <div className="text-muted-foreground hidden flex-wrap items-center gap-x-2 gap-y-1 text-sm sm:flex">
-          <span className="whitespace-nowrap">
-            {pluralize(liveCampaigns, "live campaign")}
-          </span>
-          <span aria-hidden>·</span>
-          <span className="whitespace-nowrap">
-            {pluralize(prioritySignals, "priority signal")}
-          </span>
-          <span aria-hidden>·</span>
+        </h2>
+        <div className="hidden flex-wrap items-center gap-2 md:flex">
+          <DesktopMetaPill
+            label="Live"
+            value={pluralize(liveCampaigns, "campaign")}
+          />
+          <DesktopMetaPill
+            label="Priority"
+            value={pluralize(prioritySignals, "signal")}
+          />
           {summaryLoading ? (
-            <span className="whitespace-nowrap">
-              <Skeleton className="h-4 w-32 rounded-sm" />
-            </span>
+            <DesktopMetaPill
+              label="Today"
+              value={<Skeleton className="h-4 w-20 rounded-sm" />}
+            />
           ) : summaryError ? (
-            <span className="text-muted-foreground/70 whitespace-nowrap italic">
-              Couldn’t refresh totals
-            </span>
-          ) : registrationsToday !== null ? (
-            <span className="whitespace-nowrap">
-              {pluralize(registrationsToday, "registration")} today
-            </span>
-          ) : null}
-          <span aria-hidden>·</span>
-          <span className="whitespace-nowrap">
-            {pluralize(staleCount, "stale campaign")}
-          </span>
+            <DesktopMetaPill
+              label="Today"
+              value="Couldn’t refresh"
+              tone="muted"
+            />
+          ) : (
+            <DesktopMetaPill
+              label="Today"
+              value={pluralize(registrationsToday ?? 0, "registration")}
+            />
+          )}
+          <DesktopMetaPill
+            label="Stale"
+            value={pluralize(staleCount, "campaign")}
+            tone={staleCount > 0 ? "warning" : "default"}
+          />
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:hidden">
+        <div className="grid grid-cols-2 gap-2 md:hidden">
           <StripStatChip
             label="Live campaigns"
             value={liveCampaigns.toLocaleString()}
@@ -87,32 +96,43 @@ export function CommandStrip({
             tone={staleCount > 0 ? "warning" : "default"}
           />
         </div>
+        <div className="pt-1 md:hidden">
+          <CommandSummaryAsOf
+            updatedAt={updatedAt}
+            summaryLoading={summaryLoading}
+            summaryError={summaryError}
+          />
+        </div>
       </div>
-      <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
-        <Button
-          asChild
-          variant="outline"
-          className="h-11 min-h-11 min-w-0 flex-1 basis-30 justify-center gap-1.5 rounded-sm px-3 font-mono text-[10px] tracking-[0.18em] uppercase sm:h-auto sm:min-h-0 sm:flex-none sm:basis-auto sm:justify-start sm:px-4 sm:text-[11px] sm:tracking-widest"
-        >
-          <Link href="/admin/candidates/new">
-            <IconUserPlus className="h-4 w-4" />
-            Create Candidate
-          </Link>
-        </Button>
-        <Button
-          asChild
-          className="h-11 min-h-11 min-w-0 flex-1 basis-30 justify-center gap-1.5 rounded-sm px-3 font-mono text-[10px] tracking-[0.18em] uppercase sm:h-auto sm:min-h-0 sm:flex-none sm:basis-auto sm:justify-start sm:px-4 sm:text-[11px] sm:tracking-widest"
-        >
-          <Link href="/admin/collect/campaigns/new">
-            <IconClipboardList className="h-4 w-4" />
-            New Campaign
-          </Link>
-        </Button>
-        <CommandSummaryAsOf
-          updatedAt={updatedAt}
-          summaryLoading={summaryLoading}
-          summaryError={summaryError}
-        />
+      <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:flex-col md:items-end md:gap-1.5">
+        <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:justify-end">
+          <Button
+            asChild
+            variant="outline"
+            className="h-11 min-h-11 min-w-0 flex-1 basis-30 justify-center gap-1.5 rounded-sm px-3 font-mono text-[10px] tracking-[0.18em] uppercase md:h-auto md:min-h-0 md:flex-none md:basis-auto md:justify-start md:px-4 md:text-[11px] md:tracking-widest"
+          >
+            <Link href="/admin/candidates/new">
+              <IconUserPlus className="h-4 w-4" />
+              Create Candidate
+            </Link>
+          </Button>
+          <Button
+            asChild
+            className="h-11 min-h-11 min-w-0 flex-1 basis-30 justify-center gap-1.5 rounded-sm px-3 font-mono text-[10px] tracking-[0.18em] uppercase md:h-auto md:min-h-0 md:flex-none md:basis-auto md:justify-start md:px-4 md:text-[11px] md:tracking-widest"
+          >
+            <Link href="/admin/collect/campaigns/new">
+              <IconClipboardList className="h-4 w-4" />
+              New Campaign
+            </Link>
+          </Button>
+        </div>
+        <div className="hidden md:flex">
+          <CommandSummaryAsOf
+            updatedAt={updatedAt}
+            summaryLoading={summaryLoading}
+            summaryError={summaryError}
+          />
+        </div>
       </div>
     </div>
   );
@@ -141,7 +161,7 @@ function CommandSummaryAsOf({
 
   return (
     <p
-      className="text-muted-foreground inline-flex w-full min-w-0 items-center justify-end gap-1.5 font-mono text-[9px] font-bold tracking-wider uppercase sm:w-auto sm:max-w-[min(14rem,36vw)] sm:justify-start sm:text-[10px] sm:tracking-wider"
+      className="text-muted-foreground inline-flex min-w-0 items-center gap-1.5 font-mono text-[9px] font-bold tracking-wider uppercase md:max-w-[min(14rem,36vw)] md:text-[10px] md:tracking-wider"
       title={updatedAt ?? undefined}
     >
       <IconClock className="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden />
@@ -155,6 +175,37 @@ function CommandSummaryAsOf({
         )}
       </span>
     </p>
+  );
+}
+
+function DesktopMetaPill({
+  label,
+  value,
+  tone = "default",
+}: {
+  label: string;
+  value: ReactNode;
+  tone?: "default" | "warning" | "muted";
+}) {
+  const toneClass =
+    tone === "warning"
+      ? "border-orange-500/25 bg-orange-500/5 text-orange-700 dark:text-orange-300"
+      : tone === "muted"
+        ? "border-border/60 bg-muted/40 text-muted-foreground"
+        : "border-border/60 bg-muted/20 text-muted-foreground";
+
+  return (
+    <div
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-sm border px-2 py-1",
+        toneClass,
+      )}
+    >
+      <span className="font-mono text-[9px] font-bold tracking-wider uppercase">
+        {label}
+      </span>
+      <span className="text-foreground text-xs font-medium">{value}</span>
+    </div>
   );
 }
 
