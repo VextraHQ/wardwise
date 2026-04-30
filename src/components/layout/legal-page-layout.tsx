@@ -17,27 +17,11 @@ import { cn } from "@/lib/utils";
 import type { IconType } from "react-icons";
 import type { LucideIcon } from "lucide-react";
 
-/**
- * LegalPageLayout - Shared layout component for legal and support pages.
- *
- * Features:
- * - Uses existing Header component for DRY code
- * - Desktop: Sidebar navigation
- * - Mobile: Uses footer for navigation (industry standard)
- * - Print-friendly styles (hides nav/footer when printing)
- * - Consistent styling with app theme
- */
-
 export interface LegalPageLayoutProps {
-  /** Page title displayed in the header */
   title: string;
-  /** Page subtitle/description */
   subtitle?: string;
-  /** System code displayed in the header (e.g., "LEGAL_PRIV_001") */
   systemCode: string;
-  /** Icon displayed in the header */
   icon: IconType | LucideIcon;
-  /** Children to render in the main content area */
   children: React.ReactNode;
 }
 
@@ -52,21 +36,18 @@ export function LegalPageLayout({
 
   return (
     <div className="bg-background min-h-screen">
-      {/* Header - hidden when printing */}
       <div className="print:hidden">
-        <Header badge="Legal & Support" />
+        <Header badge="Legal" />
       </div>
 
-      {/* Main Content */}
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-10 print:max-w-none print:px-8 print:py-4">
         <div className="flex gap-10">
-          {/* Desktop Sidebar Navigation (hidden when printing) */}
           <aside className="hidden shrink-0 lg:block lg:w-56 print:hidden">
             <nav className="sticky top-24">
               <div className="border-border/60 bg-card overflow-hidden rounded-sm border shadow-none">
                 <div className="border-border/60 bg-muted/30 border-b px-4 py-3">
                   <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-                    Legal & Support
+                    Legal
                   </span>
                 </div>
                 <ul className="space-y-0.5 p-2">
@@ -90,7 +71,6 @@ export function LegalPageLayout({
             </nav>
           </aside>
 
-          {/* Content Area */}
           <div className="min-w-0 flex-1">
             <motion.div
               initial={{ opacity: 0, y: 15 }}
@@ -98,13 +78,10 @@ export function LegalPageLayout({
               transition={{ duration: 0.35 }}
               className="print:transform-none! print:opacity-100!"
             >
-              {/* Page Header */}
               <div className="border-border/60 bg-card relative overflow-hidden border shadow-none print:border-none print:bg-transparent">
-                {/* Corner Markers (hidden when printing) */}
                 <div className="border-primary absolute top-0 left-0 size-5 border-t border-l print:hidden" />
                 <div className="border-primary absolute top-0 right-0 size-5 border-t border-r print:hidden" />
 
-                {/* System Code */}
                 <div className="absolute top-3 right-4 flex items-center gap-1.5 opacity-50 print:hidden">
                   <div className="bg-primary size-1.5 rounded-full" />
                   <span className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
@@ -137,11 +114,9 @@ export function LegalPageLayout({
                 </div>
               </div>
 
-              {/* Content */}
               <div className="border-border/60 bg-card mt-4 overflow-hidden rounded-sm border shadow-none print:mt-6 print:border-none print:bg-transparent">
                 <div className="p-5 sm:p-6 print:p-0">{children}</div>
 
-                {/* Content Footer (hidden when printing) */}
                 <div className="border-border/60 bg-muted/30 flex flex-wrap items-center justify-between gap-3 border-t px-5 py-3 print:hidden">
                   <span className="text-muted-foreground font-mono text-[10px]">
                     {systemCode} :: {COMPANY_INFO.name}
@@ -164,9 +139,6 @@ export function LegalPageLayout({
   );
 }
 
-/**
- * LegalSectionContent - Renders content sections for legal pages
- */
 export interface LegalSectionContentProps {
   sections: LegalSection[];
 }

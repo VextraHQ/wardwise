@@ -62,11 +62,14 @@ export function PartyInfoStep({
                 </InputIcon>
                 <Input
                   {...register("apcRegNumber")}
-                  placeholder="Enter your APC reg number or NIN"
+                  placeholder="Enter numbers only (APC number or NIN)"
                   className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-mono font-medium tracking-wider transition-all placeholder:text-xs"
                 />
               </div>
               <FieldError error={errors.apcRegNumber?.message} />
+              <FieldHint>
+                Use numbers only. Do not include text prefixes like "APC".
+              </FieldHint>
             </div>
 
             <div className="space-y-1.5">

@@ -66,6 +66,18 @@ export const recoveryRateLimit = redis
   : null;
 
 /**
+ * Rate limiter for public contact submissions.
+ * 5 attempts per 15 minutes per IP.
+ */
+export const contactRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, "15 m"),
+      prefix: "rl:contact",
+    })
+  : null;
+
+/**
  * Rate limiter for password setup / reset completion attempts.
  * 5 attempts per 10 minutes per IP.
  */

@@ -2,6 +2,7 @@ export type RouteGroup =
   | "marketing"
   | "auth"
   | "legal"
+  | "support"
   | "public_collect"
   | "candidate"
   | "admin"
@@ -14,8 +15,8 @@ export type RouteName =
   | "legal_cookies"
   | "legal_privacy"
   | "legal_terms"
-  | "legal_contact"
-  | "legal_support"
+  | "support_contact"
+  | "support_center"
   | "public_collect"
   | "candidate_dashboard"
   | "candidate_supporters"
@@ -80,11 +81,11 @@ export function getAnalyticsRoute(pathname: string | null): RouteDescriptor {
   }
 
   if (normalized === "/contact") {
-    return { group: "legal", name: "legal_contact" };
+    return { group: "support", name: "support_contact" };
   }
 
   if (normalized === "/support") {
-    return { group: "legal", name: "legal_support" };
+    return { group: "support", name: "support_center" };
   }
 
   if (normalized.startsWith("/c/")) {

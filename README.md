@@ -2,18 +2,18 @@
 
 WardWise is a campaign intelligence and field operations platform built for political teams. It helps candidates, admins, and canvassers coordinate voter registration, manage campaign data, monitor ward-level coverage, and collect supporter information with polling-unit precision.
 
-This repo contains a full-stack Next.js application with role-based dashboards, public campaign registration flows, Prisma-backed data models, and optional rate limiting for production hardening.
+This repository contains the full-stack WardWise app: role-based dashboards, public campaign collection flows, Prisma-backed data models, transactional email hooks, analytics consent handling, and optional production hardening such as rate limiting and bot protection.
 
-## What the App Does
+## Product Surface
 
-- Candidate dashboard for campaign analytics, supporter insights, ward coverage, and operational visibility
-- Admin dashboard for candidate management, geo management, campaign oversight, and submission review
-- Public campaign registration flow at `/c/[slug]` for collecting supporter data
-- Canvasser-friendly data collection workflows with structured location capture
+- Candidate workspace for campaign analytics, supporter insights, ward coverage, and field visibility
+- Admin workspace for candidate management, geographic data, campaign oversight, and submission review
+- Public campaign collection pages for supporter registration and canvasser-friendly data capture
 - Geographic hierarchy support for State -> LGA -> Ward -> Polling Unit
-- Audit-friendly data handling with submission activity tracking and optional rate limiting
+- Audit-friendly workflows for account, campaign, submission, and auth activity
+- Optional email, analytics, bot protection, and rate-limit integrations
 
-## Main Flows
+## Main Routes
 
 - Landing page: marketing site and product overview
 - Login: shared authentication entry point for admin and candidate users
@@ -33,7 +33,7 @@ This repo contains a full-stack Next.js application with role-based dashboards, 
 - Zod
 - Radix UI + shadcn-style component patterns
 
-## Local Setup
+## Quick Start
 
 ### 1. Install dependencies
 
@@ -43,13 +43,13 @@ pnpm install
 
 ### 2. Create your environment file
 
-Copy `.env.example` to `.env` and set the required values:
+Copy `.env.example` to `.env` and fill in local development values:
 
 ```bash
 cp .env.example .env
 ```
 
-Required environment variables:
+Minimum required values:
 
 ```env
 DATABASE_URL=""
@@ -58,30 +58,25 @@ NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET=""
 ```
 
-Optional:
+Optional integrations are also documented in `.env.example`, including email delivery, Turnstile, Upstash Redis, and PostHog.
 
-```env
-UPSTASH_REDIS_REST_URL=""
-UPSTASH_REDIS_REST_TOKEN=""
-NEXT_PUBLIC_POSTHOG_KEY=""
-# NEXT_PUBLIC_POSTHOG_TOKEN can be used instead if you copied PostHog's docs
-NEXT_PUBLIC_POSTHOG_HOST="https://eu.i.posthog.com"
-NEXT_PUBLIC_ENABLE_ANALYTICS_DEV="false"
-```
+For local secrets, use generated or development-only values. Do not reuse production credentials in local development.
 
-### 3. Push the database schema
+### 3. Prepare the database
+
+Push the schema to your development database:
 
 ```bash
 pnpm db:push
 ```
 
-### 4. Seed demo data
+Seed local demo data:
 
 ```bash
 pnpm db:seed
 ```
 
-### 5. Start the app
+### 4. Start the app
 
 ```bash
 pnpm dev
@@ -89,26 +84,11 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Demo Credentials
+## Local Demo Access
 
-The seed script creates demo users you can use immediately.
+The seed script creates local-only demo users for development and QA. Check `prisma/seed.ts` when you need the current seeded accounts.
 
-Admin:
-
-- Email: `admin@wardwise.ng`
-- Password: `admin123`
-
-Candidate accounts:
-
-- Seeded candidate emails use the `@wardwise.ng` domain
-- Password for seeded candidate accounts: `demo123`
-
-Examples from the seed data include:
-
-- `ahmadu.fintiri@wardwise.ng`
-- `aishatu.binani@wardwise.ng`
-- `bola.tinubu@wardwise.ng`
-- `atiku.abubakar@wardwise.ng`
+Treat seeded credentials as disposable development data. They must never be reused for staging, production, or shared client demos.
 
 ## Useful Scripts
 
@@ -116,11 +96,14 @@ Examples from the seed data include:
 pnpm dev
 pnpm build
 pnpm start
+pnpm test
 pnpm lint
 pnpm typecheck
 pnpm format
+pnpm format:check
 pnpm db:push
 pnpm db:migrate
+pnpm db:migrate:deploy
 pnpm db:seed
 pnpm db:studio
 ```
@@ -140,20 +123,20 @@ prisma/
   seed.ts          Demo data seeding
 
 docs/
-  Product, branding, geo, collect, and hardening specs
+  Product, auth, geo, collect, design, and hardening notes
 ```
 
 ## Documentation
 
-The `/docs` folder contains product and implementation notes for the app, including:
+The `/docs` folder contains product and implementation notes for the team. Treat these files as internal working documentation unless they have been reviewed for external sharing.
 
-- [collect-candidate-geo-rethink.md](docs/collect-candidate-geo-rethink.md)
-- [geo-management-spec.md](docs/geo-management-spec.md)
-- [wardwise-branding-spec.md](docs/wardwise-branding-spec.md)
-- [wardwise-candidates-spec.md](docs/wardwise-candidates-spec.md)
-- [wardwise-collect-spec.md](docs/wardwise-collect-spec.md)
-- [wardwise-collect-v2-spec.md](docs/wardwise-collect-v2-spec.md)
-- [wardwise-hardening-spec.md](docs/wardwise-hardening-spec.md)
+## Security and Data Safety
+
+- Keep `.env`, `.env.local`, database dumps, and production credentials out of git.
+- Use `.env.example` for placeholders only.
+- Do not commit real voter, supporter, campaign, contact, or analytics exports.
+- Keep seed credentials local-only and rotate any credential that may have been copied into a shared channel.
+- Prefer development databases for local work; production data should only be accessed through approved operational workflows.
 
 ## Notes
 
@@ -164,9 +147,14 @@ The `/docs` folder contains product and implementation notes for the app, includ
 
 ## Deployment
 
-For production, provide a PostgreSQL database, set the NextAuth secrets and app URL, then run:
+For production, configure environment variables in the deployment platform rather than committing them to the repo. At minimum, production needs a PostgreSQL database, a stable app URL, and a strong NextAuth secret.
+
+Run production migrations before starting the app:
 
 ```bash
+pnpm db:migrate:deploy
 pnpm build
 pnpm start
 ```
+
+Before launch, confirm that demo credentials are disabled or changed, email delivery is configured, bot protection/rate limits are enabled where appropriate, and no real data exports are present in the repository.

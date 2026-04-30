@@ -92,6 +92,38 @@ export function createAuthMetadata({
 }
 
 /**
+ * Creates metadata for public marketing/support pages.
+ */
+export function createPublicMetadata({
+  title,
+  description,
+  openGraph,
+  twitter,
+  ...rest
+}: Omit<Metadata, "title"> & { title: string }): Metadata {
+  const resolvedTitle = `${title} | WardWise`;
+  const resolvedDescription = description ?? undefined;
+
+  return {
+    ...rest,
+    title: {
+      absolute: resolvedTitle,
+    },
+    description: resolvedDescription,
+    openGraph: createDefaultOpenGraph({
+      title: resolvedTitle,
+      description: resolvedDescription,
+      ...openGraph,
+    }),
+    twitter: createDefaultTwitter({
+      title: resolvedTitle,
+      description: resolvedDescription,
+      ...twitter,
+    }),
+  };
+}
+
+/**
  * Creates metadata for admin dashboard pages (/admin/*).
  */
 export function createAdminMetadata({

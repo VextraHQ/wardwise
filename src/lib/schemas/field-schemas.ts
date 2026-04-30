@@ -107,8 +107,8 @@ export const voterIdVinSchema = z
 
 // APC-or-NIN hybrid validator used on the Collect form.
 // - Exactly 11 digits → validated as NIN (reject all-same-digit and sequential dummies)
-// - Otherwise → min 5 chars, alphanumeric with optional "/" or "-" (APC format)
-const APC_REGEX = /^[A-Za-z0-9/-]+$/;
+// - Otherwise → APC number must be numeric-only (minimum 5 digits)
+const APC_NUMBER_REGEX = /^\d{5,20}$/;
 export const apcOrNinSchema = z
   .string()
   .trim()
@@ -119,8 +119,8 @@ export const apcOrNinSchema = z
       if (val === "12345678901" || val === "01234567890") return false;
       return true;
     }
-    return val.length >= 5 && APC_REGEX.test(val);
-  }, "Enter a valid NIN (11 digits) or APC number (min 5 chars, alphanumeric)");
+    return APC_NUMBER_REGEX.test(val);
+  }, "Enter a valid NIN (11 digits) or APC number (numbers only, min 5 digits)");
 
 // Trimmed text helpers — shared primitives for Collect and admin inputs.
 // Trim happens BEFORE min/max so whitespace-only input cannot satisfy min.

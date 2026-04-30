@@ -377,8 +377,14 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 | `privacy-content.tsx`   | ✅ Uses `LegalSectionContent`                                                   |
 | `terms-content.tsx`     | ✅ Uses `LegalSectionContent`                                                   |
 | `cookies-content.tsx`   | ✅ Uses `LegalSectionContent`                                                   |
-| `support-content.tsx`   | ✅ Accordion `rounded-sm`, contact cards, cockpit button                        |
-| `contact-content.tsx`   | ✅ Theme token alerts, `rounded-sm` inputs, cockpit submit                      |
+
+### Public Support Pages (`src/components/public/`, `src/components/layout/`)
+
+| Component                   | Status                                                                               |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| `public-support-layout.tsx` | ✅ Cockpit-aligned public shell with shared support nav and minimal chrome           |
+| `support-content.tsx`       | ✅ Accordion `rounded-sm`, contact cards, cockpit button                             |
+| `contact-content.tsx`       | ✅ Theme token alerts, `rounded-sm` inputs, Turnstile state, cockpit submit handling |
 
 ### Landing Page (`src/components/landing/`)
 

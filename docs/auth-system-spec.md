@@ -164,13 +164,14 @@ WardWise now stores invite and reset links in `AuthToken`.
 
 ## Environment Variables
 
-| Variable          | Required | Purpose                                                                                        |
-| ----------------- | -------- | ---------------------------------------------------------------------------------------------- |
-| `NEXTAUTH_URL`    | Yes      | Base URL used for auth redirects and links                                                     |
-| `NEXTAUTH_SECRET` | Yes      | JWT signing secret                                                                             |
-| `RESEND_API_KEY`  | No       | Enables production email delivery (auth + any future transactional email)                      |
-| `EMAIL_FROM`      | No       | Primary sender identity for all WardWise email. Takes precedence over `AUTH_FROM_EMAIL`.       |
-| `AUTH_FROM_EMAIL` | No       | Legacy fallback sender. Used only when `EMAIL_FROM` is not set. Kept for existing deployments. |
+| Variable           | Required | Purpose                                                                                        |
+| ------------------ | -------- | ---------------------------------------------------------------------------------------------- |
+| `NEXTAUTH_URL`     | Yes      | Base URL used for auth redirects and links                                                     |
+| `NEXTAUTH_SECRET`  | Yes      | JWT signing secret                                                                             |
+| `RESEND_API_KEY`   | No       | Enables production email delivery (auth + any future transactional email)                      |
+| `EMAIL_FROM`       | No       | Primary sender identity for all WardWise email. Takes precedence over `AUTH_FROM_EMAIL`.       |
+| `CONTACT_TO_EMAIL` | No       | Destination inbox for public contact-form notifications.                                       |
+| `AUTH_FROM_EMAIL`  | No       | Legacy fallback sender. Used only when `EMAIL_FROM` is not set. Kept for existing deployments. |
 
 If email delivery is not configured, WardWise still supports manual invite/reset link sharing from the admin UI.
 
@@ -178,11 +179,11 @@ If email delivery is not configured, WardWise still supports manual invite/reset
 
 Email sending is split into a generic transport and an auth-specific helper:
 
-- `src/lib/email/send.ts` is the generic Resend wrapper (`sendEmail({ to, subject, html, text?, replyTo?, from? })`). Future features like the public contact form reuse this directly.
-- `src/lib/email/auth.ts` exposes `canSendAuthLinkEmail()` and `sendAuthLinkEmail(...)` for invite/reset delivery, and delegates to `sendEmail` for the actual POST.
+- `src/lib/email/send.ts` is the generic Resend SDK wrapper (`sendEmail({ to, subject, html, text?, replyTo?, from? })`). Public contact delivery reuses this directly.
+- `src/lib/email/auth.ts` exposes `canSendAuthLinkEmail()` and `sendAuthLinkEmail(...)` for invite/reset delivery, and delegates to `sendEmail` for the actual provider call.
 - `src/lib/email/templates/auth-link.ts` owns the invite/reset HTML + text body. User-supplied fields (name, url) are HTML-escaped.
 
-WardWise intentionally keeps this layer on raw `fetch` plus plain HTML/text templates for now. Revisit the Resend SDK or React Email only when multiple templates, richer email features, or shared branded components justify the extra dependency and abstraction cost.
+WardWise now uses the Resend Node SDK for transport while intentionally keeping plain HTML/text templates. Revisit React Email when multiple branded templates or shared email components justify the extra abstraction.
 
 ---
 
@@ -199,6 +200,8 @@ WardWise intentionally keeps this layer on raw `fetch` plus plain HTML/text temp
 | `src/lib/email/send.ts`                                     | Generic Resend wrapper shared by auth + future transactional   |
 | `src/lib/email/auth.ts`                                     | Auth email capability check + `sendAuthLinkEmail` entrypoint   |
 | `src/lib/email/templates/auth-link.ts`                      | Escaped HTML/text body for invite + password-reset email       |
+| `src/lib/email/contact.ts`                                  | Public contact email orchestration                             |
+| `src/lib/email/templates/contact-notification.ts`           | Internal contact notification template                         |
 | `src/lib/auth/client.ts`                                    | Browser auth client for login, forgot-password, and setup      |
 | `src/lib/core/metadata.ts`                                  | Shared metadata helpers, including non-indexable auth metadata |
 | `src/proxy.ts`                                              | Entry guard for protected routes                               |

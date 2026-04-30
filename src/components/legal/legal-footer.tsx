@@ -6,6 +6,7 @@ import { HiArrowUpRight } from "react-icons/hi2";
 import { Logo } from "@/components/layout/logo";
 import { FooterCookieSettingsButton } from "@/components/layout/cookie-consent";
 import { COMPANY_INFO, legalNavigation } from "@/lib/data/legal-data";
+import { supportNavigation } from "@/lib/data/support-data";
 import { cn } from "@/lib/utils";
 
 interface LegalFooterProps {
@@ -52,7 +53,7 @@ export function LegalFooter({ pathname }: LegalFooterProps) {
                 Support
               </h4>
               <ul className="space-y-2">
-                {legalNavigation.slice(3).map((item) => (
+                {supportNavigation.map((item) => (
                   <li key={item.href}>
                     <Link
                       href={item.href}

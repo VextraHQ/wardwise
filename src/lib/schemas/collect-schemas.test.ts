@@ -93,6 +93,22 @@ describe("serverSubmitSchema field normalization", () => {
     expect(result.success).toBe(false);
   });
 
+  it("rejects APC/NIN values with alphabetic prefixes", () => {
+    const result = serverSubmitSchema.safeParse({
+      ...baseServerSubmission,
+      apcRegNumber: "apc234728347292",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts numeric APC registration values", () => {
+    const result = serverSubmitSchema.safeParse({
+      ...baseServerSubmission,
+      apcRegNumber: "234728347292",
+    });
+    expect(result.success).toBe(true);
+  });
+
   it("trims custom answers and keeps blank as empty string", () => {
     const result = serverSubmitSchema.parse({
       ...baseServerSubmission,
