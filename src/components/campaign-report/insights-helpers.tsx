@@ -32,7 +32,7 @@ export function SubmissionStatusBadge({
     return (
       <Badge
         variant="outline"
-        className="bg-primary/10 text-primary border-primary/30 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+        className="bg-brand-emerald/10 text-brand-lagoon border-brand-emerald/30 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
       >
         Verified
       </Badge>
@@ -44,7 +44,7 @@ export function SubmissionStatusBadge({
       variant="outline"
       className="rounded-sm border-orange-500/20 bg-orange-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-orange-600 uppercase"
     >
-      Pending
+      Pending Review
     </Badge>
   );
 }

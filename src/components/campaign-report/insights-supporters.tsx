@@ -29,6 +29,15 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AdminMobileRecordCard,
+  AdminMobileRecordField,
+  AdminMobileRecordFields,
+  AdminMobileRecordHeader,
+  AdminMobileRecordMeta,
+  AdminMobileRecordSkeleton,
+  AdminMobileRecordTitle,
+} from "@/components/admin/shared/admin-mobile-record-card";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
 import { MobileBulkActionTray } from "@/components/ui/mobile-selection-actions";
@@ -250,11 +259,14 @@ export function InsightsSupporters({ token }: { token: string }) {
         )}
 
         {loading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <Skeleton key={index} className="h-12 w-full rounded-sm" />
-            ))}
-          </div>
+          <>
+            <AdminMobileRecordSkeleton rows={5} />
+            <div className="hidden space-y-2 md:block">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Skeleton key={index} className="h-12 w-full" />
+              ))}
+            </div>
+          </>
         ) : error ? (
           <div className="border-destructive/30 bg-destructive/10 rounded-sm border p-4 text-center">
             <p className="text-destructive text-sm font-medium">
@@ -269,7 +281,7 @@ export function InsightsSupporters({ token }: { token: string }) {
           </div>
         ) : (
           <>
-            <div className="hidden overflow-x-auto rounded-sm border md:block">
+            <div className="border-border/60 hidden overflow-x-auto rounded-sm border md:block">
               <Table>
                 <TableHeader className="bg-muted/30 sticky top-0 z-10">
                   <TableRow className="hover:bg-transparent">
@@ -313,13 +325,13 @@ export function InsightsSupporters({ token }: { token: string }) {
                   {submissions.map((submission, idx) => (
                     <TableRow
                       key={submission.id}
-                      className={`cursor-pointer transition-colors ${
+                      className={
                         submission.isFlagged
-                          ? "bg-destructive/5 hover:bg-destructive/10"
+                          ? "bg-destructive/5 hover:bg-destructive/10 cursor-pointer transition-colors"
                           : submission.isVerified
-                            ? "bg-primary/5 hover:bg-primary/10"
-                            : "hover:bg-muted/30"
-                      }`}
+                            ? "bg-brand-emerald/5 hover:bg-brand-emerald/10 cursor-pointer transition-colors"
+                            : "hover:bg-muted/50 cursor-pointer transition-colors"
+                      }
                       onClick={() => setSelectedSubmission(submission)}
                     >
                       <TableCell
@@ -332,11 +344,13 @@ export function InsightsSupporters({ token }: { token: string }) {
                           aria-label={`Select ${formatPersonName(submission.fullName)}`}
                         />
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-center text-xs font-medium">
+                      <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
                         {(page - 1) * pageSize + idx + 1}
                       </TableCell>
-                      <TableCell className="font-medium">
-                        {formatPersonName(submission.fullName)}
+                      <TableCell>
+                        <span className="text-sm font-medium">
+                          {formatPersonName(submission.fullName)}
+                        </span>
                       </TableCell>
                       <TableCell className="font-mono text-xs">
                         {submission.phone}
@@ -361,10 +375,12 @@ export function InsightsSupporters({ token }: { token: string }) {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <SubmissionStatusBadge
-                          isVerified={submission.isVerified}
-                          isFlagged={submission.isFlagged}
-                        />
+                        <div className="flex min-w-0 flex-wrap justify-end gap-1">
+                          <SubmissionStatusBadge
+                            isVerified={submission.isVerified}
+                            isFlagged={submission.isFlagged}
+                          />
+                        </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground hidden text-xs lg:table-cell">
                         {formatDisplayDateTime(submission.createdAt)}
@@ -377,21 +393,21 @@ export function InsightsSupporters({ token }: { token: string }) {
 
             <div className="space-y-3 md:hidden">
               {submissions.map((submission) => (
-                <div
+                <AdminMobileRecordCard
                   key={submission.id}
                   className={cn(
-                    "cursor-pointer rounded-sm border p-3 transition-colors",
+                    "cursor-pointer transition-colors",
                     submission.isFlagged
-                      ? "border-destructive/30 bg-destructive/5"
+                      ? "border-destructive/30 bg-destructive/5 hover:bg-destructive/10"
                       : submission.isVerified
-                        ? "border-primary/20 bg-primary/5"
-                        : "border-border/60 hover:bg-muted/30",
+                        ? "border-brand-emerald/20 bg-brand-emerald/5 hover:bg-brand-emerald/10"
+                        : "hover:bg-muted/50",
                     selectedIds.has(submission.id) &&
                       "border-primary/40 ring-primary/20 ring-1",
                   )}
                   onClick={() => setSelectedSubmission(submission)}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex min-w-0 items-start gap-3">
                     <div onClick={(event) => event.stopPropagation()}>
                       <Checkbox
                         checked={selectedIds.has(submission.id)}
@@ -400,35 +416,48 @@ export function InsightsSupporters({ token }: { token: string }) {
                         className="mt-1"
                       />
                     </div>
-                    <div className="min-w-0 flex-1 space-y-1.5">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">
+                    <div className="min-w-0 flex-1">
+                      <AdminMobileRecordHeader>
+                        <div className="min-w-0 flex-1">
+                          <AdminMobileRecordTitle>
                             {formatPersonName(submission.fullName)}
-                          </p>
-                          <p className="text-muted-foreground font-mono text-[10px]">
+                          </AdminMobileRecordTitle>
+                          <AdminMobileRecordMeta mono>
                             {submission.phone}
-                          </p>
+                          </AdminMobileRecordMeta>
                         </div>
                         <SubmissionStatusBadge
                           isVerified={submission.isVerified}
                           isFlagged={submission.isFlagged}
                         />
-                      </div>
-                      <div className="text-muted-foreground grid gap-1 text-xs">
-                        <p>
-                          {formatGeoDisplayName(submission.lgaName)} •{" "}
-                          {formatGeoDisplayName(submission.wardName)}
-                        </p>
-                        <p>{formatPU(submission)}</p>
-                        <p>{formatRole(submission.role)}</p>
-                        <p className="font-mono">
-                          {formatDisplayDateTime(submission.createdAt)}
-                        </p>
-                      </div>
+                      </AdminMobileRecordHeader>
+                      <AdminMobileRecordFields>
+                        <AdminMobileRecordField
+                          label="Location"
+                          value={`${formatGeoDisplayName(submission.lgaName)} / ${formatGeoDisplayName(submission.wardName)}`}
+                        />
+                        <AdminMobileRecordField
+                          label="PU"
+                          value={formatPU(submission)}
+                          mono
+                        />
+                        <AdminMobileRecordField label="Role">
+                          <Badge
+                            variant="outline"
+                            className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                          >
+                            {formatRole(submission.role)}
+                          </Badge>
+                        </AdminMobileRecordField>
+                        <AdminMobileRecordField
+                          label="Submitted"
+                          value={formatDisplayDateTime(submission.createdAt)}
+                          mono
+                        />
+                      </AdminMobileRecordFields>
                     </div>
                   </div>
-                </div>
+                </AdminMobileRecordCard>
               ))}
             </div>
 
