@@ -15,6 +15,7 @@ declare global {
           "error-callback"?: () => void;
           theme?: "light" | "dark" | "auto";
           size?: "normal" | "flexible" | "compact";
+          appearance?: "always" | "execute" | "interaction-only";
         },
       ) => string;
       reset: (widgetId: string) => void;
@@ -61,7 +62,8 @@ export function TurnstileWidget({
       "expired-callback": () => onTokenChangeRef.current(""),
       "error-callback": () => onTokenChangeRef.current(""),
       theme: "light",
-      size: "flexible",
+      size: "normal",
+      appearance: "always",
     });
 
     return () => {
@@ -96,7 +98,7 @@ export function TurnstileWidget({
           onTokenChange("");
         }}
       />
-      <div ref={widgetContainerRef} className="w-full min-w-[300px]" />
+      <div ref={widgetContainerRef} className="inline-block max-w-full" />
       {hasScriptError ? (
         <p className="text-destructive text-xs">
           Verification failed to load. Refresh and try again.

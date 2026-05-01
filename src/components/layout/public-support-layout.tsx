@@ -56,16 +56,19 @@ export function PublicSupportLayout({
                 {eyebrow}
               </p>
 
-              <nav className="flex flex-wrap gap-2" aria-label="Support pages">
+              <nav
+                className="border-border/60 bg-background inline-flex flex-wrap items-center gap-1 rounded-sm border p-1"
+                aria-label="Support & Contact pages"
+              >
                 {supportNavigation.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "rounded-sm border px-3 py-2 font-mono text-[10px] font-bold tracking-[0.18em] uppercase transition-colors",
+                      "rounded-sm px-3 py-1.5 font-mono text-[10px] font-bold tracking-[0.18em] uppercase transition-colors",
                       pathname === item.href
-                        ? "border-primary/40 bg-primary/10 text-primary"
-                        : "border-border/60 bg-background text-muted-foreground hover:border-primary/30 hover:text-foreground",
+                        ? "bg-primary/15 text-primary"
+                        : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
                     )}
                   >
                     {item.label}
