@@ -81,7 +81,7 @@ describe("sendAuthLinkEmail", () => {
     expect(call.to).toBe("ada@test.com");
     expect(call.subject).toBe("Set up your WardWise account");
     expect(call.html).toContain("Set up your WardWise access");
-    expect(call.text).toContain("Set up your WardWise access");
+    expect(call.text).toMatch(/set up your wardwise access/i);
   });
 
   it("bubbles not_configured from sendEmail", async () => {

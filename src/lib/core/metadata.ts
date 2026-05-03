@@ -24,6 +24,37 @@ export function getSiteUrl(): string {
   );
 }
 
+/**
+ * Origin for absolute URLs to `public/` assets in outbound email. Mail clients and
+ * proxies cannot load `localhost`; plain `http:` is upgraded to `https` when the
+ * hostname is public.
+ */
+export function getEmailAssetsBaseUrl(): string {
+  try {
+    const parsed = new URL(
+      process.env.NEXT_PUBLIC_EMAIL_ASSETS_BASE_URL || getSiteUrl(),
+    );
+    const host = parsed.hostname;
+    const isLocal =
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === "[::1]" ||
+      host.endsWith(".local");
+
+    if (isLocal) {
+      return FALLBACK_SITE_URL;
+    }
+
+    if (parsed.protocol === "http:") {
+      return normalizeSiteUrl(`https://${parsed.host}`);
+    }
+
+    return normalizeSiteUrl(parsed.origin);
+  } catch {
+    return FALLBACK_SITE_URL;
+  }
+}
+
 export function getMetadataBase(): URL {
   return new URL(getSiteUrl());
 }

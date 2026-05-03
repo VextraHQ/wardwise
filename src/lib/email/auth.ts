@@ -26,7 +26,7 @@ export function canSendAuthLinkEmail(): boolean {
 export async function sendAuthLinkEmail(
   input: SendAuthLinkEmailInput,
 ): Promise<AuthLinkEmailResult> {
-  const { subject, html, text } = buildAuthLinkEmail({
+  const { subject, html, text } = await buildAuthLinkEmail({
     type: input.type,
     name: input.name,
     url: input.url,

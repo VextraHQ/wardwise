@@ -94,9 +94,8 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
   >(() => searchParams.get("canvasserPhone"));
   const [selected, setSelected] = useState<SubmissionWithPU | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
-  const [confirmDialog, setConfirmDialog] = useState<SubmissionConfirmDialog>(
-    null,
-  );
+  const [confirmDialog, setConfirmDialog] =
+    useState<SubmissionConfirmDialog>(null);
   const [preferredFormat, setPreferredFormat] = useState(() =>
     readPreferredExportFormat(),
   );

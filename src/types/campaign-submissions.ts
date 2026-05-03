@@ -14,21 +14,15 @@ export type SubmissionActiveFilters = Omit<
   "page" | "pageSize"
 >;
 
-export type SubmissionConfirmDialog =
-  | {
-      title: string;
-      description: string;
-      onConfirm: () => void;
-      confirmLabel?: string;
-      destructive?: boolean;
-    }
-  | null;
+export type SubmissionConfirmDialog = {
+  title: string;
+  description: string;
+  onConfirm: () => void;
+  confirmLabel?: string;
+  destructive?: boolean;
+} | null;
 
-export type SubmissionBulkActionKey =
-  | "verify"
-  | "unverify"
-  | "flag"
-  | "unflag";
+export type SubmissionBulkActionKey = "verify" | "unverify" | "flag" | "unflag";
 
 export type SubmissionBulkActionConfig = {
   key: SubmissionBulkActionKey;

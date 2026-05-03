@@ -47,7 +47,9 @@ function MobileBulkActionTray({
       <div
         aria-hidden
         className="md:hidden"
-        style={reservedHeight > 0 ? { height: `${reservedHeight}px` } : undefined}
+        style={
+          reservedHeight > 0 ? { height: `${reservedHeight}px` } : undefined
+        }
       />
       <div
         ref={trayRef}

@@ -197,10 +197,7 @@ export function ContactContent({
       subtitle="Use the contact form for demos, partnerships, support, or press. We'll route it internally and reply from a real inbox."
     >
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.12fr)_320px]">
-        <section className="border-border/60 bg-card relative overflow-hidden border shadow-none">
-          <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
-          <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
-
+        <section className="border-border/60 bg-card relative overflow-hidden rounded-sm border shadow-none">
           <div className="border-border/60 bg-muted/20 flex flex-wrap items-center justify-between gap-3 border-b px-5 py-3 sm:px-6">
             <div>
               <p className="text-foreground text-sm font-semibold">

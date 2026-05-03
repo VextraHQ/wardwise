@@ -47,7 +47,7 @@ export function NavSecondary({
                       tooltip={item.title}
                       type="button"
                       aria-disabled="true"
-                      className="text-sidebar-foreground/45 hover:bg-transparent hover:text-sidebar-foreground/45 active:bg-transparent active:text-sidebar-foreground/45 cursor-default pr-14"
+                      className="text-sidebar-foreground/45 hover:text-sidebar-foreground/45 active:text-sidebar-foreground/45 cursor-default pr-14 hover:bg-transparent active:bg-transparent"
                     >
                       <item.icon />
                       <span>{item.title}</span>

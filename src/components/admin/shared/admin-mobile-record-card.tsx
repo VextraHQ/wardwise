@@ -29,7 +29,10 @@ function AdminMobileRecordHeader({
 }: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn("flex min-w-0 items-start justify-between gap-3", className)}
+      className={cn(
+        "flex min-w-0 items-start justify-between gap-3",
+        className,
+      )}
     >
       {children}
     </div>
@@ -93,7 +96,12 @@ function AdminMobileRecordField({
   className?: string;
 }) {
   return (
-    <div className={cn("flex min-w-0 items-start justify-between gap-3", className)}>
+    <div
+      className={cn(
+        "flex min-w-0 items-start justify-between gap-3",
+        className,
+      )}
+    >
       <span className="text-muted-foreground/70 max-w-[44%] shrink-0 font-mono text-[10px] font-bold tracking-widest uppercase">
         {label}
       </span>
