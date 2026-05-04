@@ -56,13 +56,13 @@ import type {
   SubmissionWithPU,
 } from "@/types/campaign-submissions";
 
-import { CampaignSubmissionDetailSheet } from "./campaign-submission-detail-sheet";
+import { CampaignSubmissionDetailSheet } from "@/components/admin/collect/campaign-submission-detail-sheet";
 import {
   CampaignSubmissionsBulkToolbar,
   CampaignSubmissionsSelectionTray,
-} from "./campaign-submissions-bulk-toolbar";
-import { CampaignSubmissionsTable } from "./campaign-submissions-table";
-import { CampaignSubmissionsToolbar } from "./campaign-submissions-toolbar";
+} from "@/components/admin/collect/campaign-submissions-bulk-toolbar";
+import { CampaignSubmissionsTable } from "@/components/admin/collect/campaign-submissions-table";
+import { CampaignSubmissionsToolbar } from "@/components/admin/collect/campaign-submissions-toolbar";
 
 const bulkActionIcons = {
   verify: IconShieldCheck,

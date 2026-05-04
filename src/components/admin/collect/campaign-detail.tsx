@@ -20,10 +20,10 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-import { CampaignOverview } from "./campaign-overview";
-import { CampaignSubmissions } from "./campaign-submissions";
-import { CampaignCanvassers } from "./campaign-canvassers";
-import { CampaignSettings } from "./campaign-settings";
+import { CampaignOverview } from "@/components/admin/collect/campaign-overview";
+import { CampaignSubmissions } from "@/components/admin/collect/campaign-submissions";
+import { CampaignCanvassers } from "@/components/admin/collect/campaign-canvassers";
+import { CampaignSettings } from "@/components/admin/collect/campaign-settings";
 import {
   getCampaignBrandingLabel,
   getEffectiveCampaignName,
