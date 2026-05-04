@@ -1,14 +1,11 @@
 import {
   Body,
   Button,
-  Column,
   Container,
   Head,
-  Hr,
   Html,
   Link,
   Preview,
-  Row,
   Section,
   Text,
 } from "@react-email/components";
@@ -18,6 +15,7 @@ import {
   type ContactReason,
 } from "@/lib/contact/reasons";
 import { EmailBrandHeader } from "@/lib/email/components/email-brand-header";
+import { EmailStandardFooter } from "@/lib/email/components/email-standard-footer";
 
 export type ContactNotificationEmailInput = {
   name: string;
@@ -43,28 +41,13 @@ function formatSubmittedAt(submittedAt: Date): string {
   }).format(submittedAt);
 }
 
-function MetadataRow({ label, value }: { label: string; value: string }) {
-  return (
-    <Row>
-      <Column style={styles.metaKeyColumn}>
-        <Text style={styles.metaKey}>{label}</Text>
-      </Column>
-      <Column style={styles.metaValueColumn}>
-        <Text style={styles.metaValue}>{value}</Text>
-      </Column>
-    </Row>
-  );
-}
-
 function ContactNotificationTemplate({
   reasonTitle,
-  reasonLabel,
   input,
   submittedLabel,
   messagePreview,
 }: {
   reasonTitle: string;
-  reasonLabel: string;
   input: ContactNotificationEmailInput;
   submittedLabel: string;
   messagePreview: string;
@@ -77,60 +60,41 @@ function ContactNotificationTemplate({
         <Container style={styles.outerFrame}>
           <EmailBrandHeader eyebrow="Contact Form" />
 
-          {/* ── Sender ── */}
           <Section style={styles.senderPanel}>
-            <Text style={styles.senderEyebrow}>New contact from</Text>
+            <Text style={styles.senderEyebrow}>New contact</Text>
             <Text style={styles.senderName}>{input.name}</Text>
+
+            <Text style={styles.senderFieldLabel}>Email</Text>
             <Link href={`mailto:${input.email}`} style={styles.senderEmail}>
               {input.email}
             </Link>
 
-            <Row style={{ marginTop: "20px" }}>
-              <Column style={{ verticalAlign: "middle" }}>
-                <Text style={styles.reasonLabel}>{reasonTitle}</Text>
-              </Column>
-              <Column style={{ textAlign: "right", verticalAlign: "middle" }}>
-                <Text style={styles.timestamp}>{submittedLabel}</Text>
-              </Column>
-            </Row>
-          </Section>
-
-          {/* ── Metadata + Message ── */}
-          <Section style={styles.detailSection}>
-            <Section style={styles.metaPanel}>
-              <Text style={styles.panelEyebrow}>Metadata</Text>
-              <MetadataRow label="Name" value={input.name} />
-              <MetadataRow label="Email" value={input.email} />
-              <MetadataRow label="Reason" value={reasonLabel} />
-              {input.reasonDetails.trim().length > 0 ? (
-                <MetadataRow
-                  label="Details"
-                  value={input.reasonDetails.trim()}
-                />
-              ) : null}
-              <MetadataRow label="Submitted" value={submittedLabel} />
-              <MetadataRow label="Source" value={input.sourcePath} />
+            <Section style={styles.senderMetaStrip}>
+              <Text style={styles.senderMetaLabel}>Topic</Text>
+              <Text style={styles.senderTopicValue}>{reasonTitle}</Text>
+              <Text style={styles.senderMetaLabelReceived}>Received</Text>
+              <Text style={styles.timestampValue}>{submittedLabel}</Text>
             </Section>
-
-            <Text style={styles.messageSectionEyebrow}>Message</Text>
-            <Hr style={styles.rule} />
-            <Text style={styles.messageText}>{input.message}</Text>
           </Section>
 
-          {/* ── CTA ── */}
+          <Section style={styles.detailSection}>
+            <Text style={styles.sourceInline}>
+              Submitted from {input.sourcePath}
+            </Text>
+
+            <Text style={styles.sectionLabel}>Message</Text>
+            <Section style={styles.messagePanel}>
+              <Text style={styles.messageText}>{input.message}</Text>
+            </Section>
+          </Section>
+
           <Section style={styles.ctaSection}>
             <Button href={`mailto:${input.email}`} style={styles.button}>
-              Reply to Sender
+              Reply by email
             </Button>
           </Section>
 
-          {/* ── Footer ── */}
-          <Section style={styles.footer}>
-            <Text style={styles.footerSource}>Source: {input.sourcePath}</Text>
-            <Text style={styles.footerText}>
-              Internal notification · Do not forward externally
-            </Text>
-          </Section>
+          <EmailStandardFooter disclaimer="Internal notification · Do not forward externally" />
         </Container>
       </Body>
     </Html>
@@ -156,7 +120,6 @@ export async function buildContactNotificationEmail(
   const template = (
     <ContactNotificationTemplate
       reasonTitle={resolvedReasonTitle}
-      reasonLabel={reasonLabel}
       input={input}
       submittedLabel={submittedLabel}
       messagePreview={messagePreview}
@@ -185,108 +148,105 @@ const styles = {
     margin: "0 auto",
     backgroundColor: "#ffffff",
   },
-  // Sender panel
   senderPanel: {
-    padding: "32px 28px 26px",
+    padding: "30px 28px 26px",
     backgroundColor: "#ffffff",
     borderBottom: "1px solid rgba(22, 101, 91, 0.12)",
   },
   senderEyebrow: {
-    margin: "0 0 10px",
-    color: "#41535a",
-    fontSize: "11px",
+    margin: "0 0 14px",
+    color: "#7a8f96",
+    fontSize: "10px",
     fontWeight: "700",
-    letterSpacing: "0.14em",
+    letterSpacing: "0.12em",
     textTransform: "uppercase" as const,
+    lineHeight: "1.4",
   },
   senderName: {
-    margin: "0 0 5px",
+    margin: "0 0 18px",
     color: "#101414",
-    fontSize: "26px",
+    fontSize: "24px",
     fontWeight: "800",
     letterSpacing: "-0.02em",
     lineHeight: "1.2",
   },
-  senderEmail: {
-    color: "#16655b",
-    fontSize: "14px",
-    fontWeight: "500",
-    textDecoration: "none",
-  },
-  reasonLabel: {
-    margin: "0",
-    color: "#16655b",
-    fontSize: "13px",
-    fontWeight: "700",
-  },
-  timestamp: {
-    margin: "0",
-    color: "#41535a",
-    fontSize: "12px",
-    textAlign: "right" as const,
-  },
-  // Detail section (meta + message)
-  detailSection: {
-    padding: "24px 28px 32px",
-    backgroundColor: "#ffffff",
-  },
-  metaPanel: {
-    marginBottom: "28px",
-    padding: "18px 20px",
-    backgroundColor: "#f7f7f4",
-    borderTop: "1px solid rgba(22, 101, 91, 0.12)",
-    borderRight: "1px solid rgba(22, 101, 91, 0.12)",
-    borderBottom: "1px solid rgba(22, 101, 91, 0.12)",
-    borderLeft: "3px solid #16655b",
-    borderRadius: "2px",
-  },
-  panelEyebrow: {
-    margin: "0 0 14px",
-    color: "#41535a",
-    fontSize: "10px",
-    fontWeight: "700",
-    letterSpacing: "0.16em",
-    textTransform: "uppercase" as const,
-  },
-  metaKeyColumn: {
-    width: "100px",
-    paddingRight: "12px",
-    paddingTop: "9px",
-    paddingBottom: "9px",
-    verticalAlign: "top" as const,
-  },
-  metaValueColumn: {
-    paddingLeft: "12px",
-    paddingTop: "9px",
-    paddingBottom: "9px",
-    borderBottom: "1px solid rgba(15, 23, 42, 0.06)",
-    verticalAlign: "top" as const,
-  },
-  metaKey: {
-    margin: "0",
-    color: "#41535a",
+  senderFieldLabel: {
+    margin: "0 0 5px",
+    color: "#556f77",
     fontSize: "10px",
     fontWeight: "700",
     letterSpacing: "0.1em",
     textTransform: "uppercase" as const,
+    lineHeight: "1.4",
   },
-  metaValue: {
+  senderEmail: {
     margin: "0",
-    color: "#101414",
-    fontSize: "13px",
-    lineHeight: "1.55",
+    color: "#16655b",
+    fontSize: "15px",
+    fontWeight: "600",
+    lineHeight: "1.45",
+    textDecoration: "none",
   },
-  messageSectionEyebrow: {
-    margin: "0",
-    color: "#41535a",
+  senderMetaStrip: {
+    margin: "22px 0 0",
+  },
+  senderMetaLabel: {
+    margin: "0 0 5px",
+    color: "#556f77",
     fontSize: "10px",
     fontWeight: "700",
-    letterSpacing: "0.16em",
+    letterSpacing: "0.1em",
+    textTransform: "uppercase" as const,
+    lineHeight: "1.4",
+  },
+  senderMetaLabelReceived: {
+    margin: "14px 0 5px",
+    color: "#556f77",
+    fontSize: "10px",
+    fontWeight: "700",
+    letterSpacing: "0.1em",
+    textTransform: "uppercase" as const,
+    lineHeight: "1.4",
+  },
+  senderTopicValue: {
+    margin: "0",
+    color: "#101414",
+    fontSize: "14px",
+    fontWeight: "600",
+    lineHeight: "1.55",
+    wordBreak: "break-word" as const,
+  },
+  timestampValue: {
+    margin: "0",
+    color: "#41535a",
+    fontSize: "13px",
+    fontWeight: "500",
+    lineHeight: "1.5",
+  },
+  detailSection: {
+    padding: "26px 28px 30px",
+    backgroundColor: "#ffffff",
+  },
+  sourceInline: {
+    margin: "0 0 16px",
+    color: "#556f77",
+    fontSize: "12px",
+    fontWeight: "500",
+    lineHeight: "1.5",
+  },
+  sectionLabel: {
+    margin: "0 0 10px",
+    color: "#41535a",
+    fontSize: "11px",
+    fontWeight: "700",
+    letterSpacing: "0.06em",
     textTransform: "uppercase" as const,
   },
-  rule: {
-    borderColor: "rgba(22, 101, 91, 0.12)",
-    margin: "12px 0 20px",
+  messagePanel: {
+    padding: "18px 20px",
+    backgroundColor: "#f5f5ed",
+    border: "1px solid rgba(22, 101, 91, 0.1)",
+    borderRadius: "2px",
   },
   messageText: {
     margin: "0",
@@ -295,17 +255,16 @@ const styles = {
     lineHeight: "1.72",
     whiteSpace: "pre-line" as const,
   },
-  // CTA
   ctaSection: {
-    padding: "20px 28px",
-    backgroundColor: "#f7f7f4",
-    borderTop: "1px solid rgba(22, 101, 91, 0.1)",
-    borderBottom: "1px solid rgba(22, 101, 91, 0.1)",
+    padding: "24px 28px 26px",
+    backgroundColor: "#ffffff",
+    borderTop: "1px solid rgba(22, 101, 91, 0.12)",
+    textAlign: "center" as const,
   },
   button: {
     backgroundColor: "#16655b",
-    color: "#f7f7f4",
-    padding: "12px 22px",
+    color: "#f5f5ed",
+    padding: "13px 22px",
     borderRadius: "2px",
     textDecoration: "none",
     fontSize: "11px",
@@ -313,22 +272,5 @@ const styles = {
     letterSpacing: "0.14em",
     textTransform: "uppercase" as const,
     display: "inline-block",
-  },
-  // Footer
-  footer: {
-    backgroundColor: "#f7f7f4",
-    borderTop: "1px solid rgba(15, 23, 42, 0.08)",
-    padding: "14px 28px 18px",
-  },
-  footerSource: {
-    margin: "0 0 4px",
-    color: "#41535a",
-    fontSize: "11px",
-  },
-  footerText: {
-    margin: "0",
-    color: "#9aacb3",
-    fontSize: "11px",
-    textAlign: "center" as const,
   },
 };

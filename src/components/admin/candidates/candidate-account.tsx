@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -13,6 +13,8 @@ import type { CandidateWithUser } from "@/lib/api/admin";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import {
   Select,
@@ -21,6 +23,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import {
+  IconAlertTriangle,
   IconKey,
   IconEye,
   IconEyeOff,
@@ -28,7 +31,7 @@ import {
   IconDeviceFloppy,
   IconTrash,
 } from "@tabler/icons-react";
-import { DeleteCandidateDialog } from "@/components/admin/admin-dialogs/delete-candidate-dialog";
+import { Spinner } from "@/components/ui/spinner";
 
 const ONBOARDING_STATUSES = [
   { value: "pending", label: "Pending" },
@@ -60,8 +63,16 @@ interface CandidateAccountProps {
   candidate: CandidateWithUser;
 }
 
+function formatCount(value: number, singular: string, plural = `${singular}s`) {
+  return `${value.toLocaleString()} ${value === 1 ? singular : plural}`;
+}
+
 export function CandidateAccount({ candidate }: CandidateAccountProps) {
   const router = useRouter();
+  const deleteConfirmInputId = useId();
+  const deleteReviewPanelId = useId();
+  const deleteReviewHeadingId = useId();
+  const deleteConfirmInputRef = useRef<HTMLInputElement>(null);
   const [resetLinkData, setResetLinkData] = useState<{
     url: string;
     expiresAt: string;
@@ -71,13 +82,55 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
   const [selectedStatus, setSelectedStatus] = useState(
     candidate.onboardingStatus,
   );
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteReviewOpen, setDeleteReviewOpen] = useState(false);
+  const [deleteConfirmationEmail, setDeleteConfirmationEmail] = useState("");
 
   const deleteMutation = useDeleteCandidate();
 
   const resetPasswordMutation = useResetCandidatePassword();
 
   const updateStatusMutation = useUpdateCandidateStatus();
+
+  const deletionImpact = useMemo(() => {
+    const fallbackCampaignCount =
+      candidate.campaignCount ??
+      (candidate as CandidateWithUser & { _count?: { campaigns?: number } })
+        ._count?.campaigns ??
+      0;
+    const fallbackCanvasserCount =
+      (candidate as CandidateWithUser & { _count?: { canvassers?: number } })
+        ._count?.canvassers ?? 0;
+
+    return (
+      candidate.deletionImpact ?? {
+        accountEmail: candidate.user?.email ?? candidate.email ?? "",
+        campaignCount: fallbackCampaignCount,
+        submissionCount: candidate.supporterCount ?? 0,
+        candidateCanvasserCount: fallbackCanvasserCount,
+        campaignCanvasserCount: 0,
+        canvasserRecordCount: fallbackCanvasserCount,
+        campaignSlugs: candidate.collectCampaign
+          ? [candidate.collectCampaign.slug]
+          : [],
+      }
+    );
+  }, [candidate]);
+
+  const expectedDeleteEmail = deletionImpact.accountEmail.trim().toLowerCase();
+  const normalizedDeleteConfirmation =
+    deleteConfirmationEmail.trim().toLowerCase();
+  const canDeleteCandidate =
+    expectedDeleteEmail.length > 0 &&
+    normalizedDeleteConfirmation === expectedDeleteEmail;
+  const visibleCampaignSlugs = deletionImpact.campaignSlugs.slice(0, 5);
+  const hiddenCampaignSlugCount =
+    deletionImpact.campaignSlugs.length - visibleCampaignSlugs.length;
+
+  useEffect(() => {
+    if (deleteReviewOpen) {
+      deleteConfirmInputRef.current?.focus();
+    }
+  }, [deleteReviewOpen]);
 
   function copyResetLink() {
     if (!resetLinkData) return;
@@ -96,6 +149,30 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
         },
       );
     }
+  }
+
+  function handleCancelDeleteReview() {
+    setDeleteReviewOpen(false);
+    setDeleteConfirmationEmail("");
+  }
+
+  function handleDeleteCandidate() {
+    if (!canDeleteCandidate || deleteMutation.isPending) return;
+
+    deleteMutation.mutate(
+      {
+        id: candidate.id,
+        confirmationEmail: deleteConfirmationEmail,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Candidate account permanently deleted");
+          router.push("/admin/candidates");
+        },
+        onError: (error: Error) =>
+          toast.error(error.message || "Failed to delete candidate"),
+      },
+    );
   }
 
   return (
@@ -312,8 +389,7 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
       </Card>
       {/* Danger Zone */}
       <div className="border-destructive/30 rounded-sm border">
-        <div className="border-destructive/20 bg-destructive/5 flex items-center gap-3 border-b px-5 py-4">
-          <IconTrash className="text-destructive h-4 w-4 shrink-0" />
+        <div className="border-destructive/20 bg-destructive/5 border-b px-5 py-4">
           <div>
             <p className="text-destructive text-sm font-semibold">
               Danger Zone
@@ -323,44 +399,185 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
             </p>
           </div>
         </div>
-        <div className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-0.5">
-            <p className="text-sm font-medium">Delete this candidate account</p>
-            <p className="text-muted-foreground text-xs">
-              Permanently removes {candidate.name}&apos;s account, all their
-              campaigns, supporter data, and canvasser records. This cannot be
-              reversed.
-            </p>
+        <div className="space-y-4 px-5 py-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">
+                Delete this candidate account
+              </p>
+              <p className="text-muted-foreground max-w-2xl text-xs leading-relaxed">
+                Permanently removes {candidate.name}&apos;s login account,
+                Collect campaigns, supporter submissions, and canvasser records.
+                This cannot be reversed.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                "shrink-0 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase transition-colors",
+                deleteReviewOpen
+                  ? "border-border/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  : "border-destructive/40 text-destructive hover:bg-destructive hover:text-white",
+              )}
+              onClick={() => {
+                if (deleteReviewOpen) {
+                  handleCancelDeleteReview();
+                  return;
+                }
+                setDeleteReviewOpen(true);
+              }}
+              disabled={deleteMutation.isPending}
+              aria-expanded={deleteReviewOpen}
+              aria-controls={deleteReviewPanelId}
+            >
+              {deleteReviewOpen ? (
+                <IconEyeOff className="mr-1.5 h-3.5 w-3.5" />
+              ) : (
+                <IconAlertTriangle className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              {deleteReviewOpen ? "Hide Review" : "Review Deletion"}
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-destructive/40 text-destructive hover:bg-destructive shrink-0 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase transition-colors hover:text-white"
-            onClick={() => setDeleteDialogOpen(true)}
-          >
-            <IconTrash className="mr-1.5 h-3.5 w-3.5" />
-            Delete Account
-          </Button>
+
+          {deleteReviewOpen && (
+            <div
+              id={deleteReviewPanelId}
+              aria-labelledby={deleteReviewHeadingId}
+              className="border-destructive/20 bg-destructive/5 space-y-4 rounded-sm border px-4 py-4"
+            >
+              <div className="space-y-1">
+                <p
+                  id={deleteReviewHeadingId}
+                  className="text-destructive text-sm font-semibold"
+                >
+                  Review what will be deleted
+                </p>
+                <p className="text-muted-foreground text-xs leading-relaxed">
+                  Type the candidate email below before the final delete button
+                  becomes available.
+                </p>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  formatCount(deletionImpact.campaignCount, "campaign"),
+                  formatCount(
+                    deletionImpact.submissionCount,
+                    "supporter submission",
+                  ),
+                  formatCount(
+                    deletionImpact.canvasserRecordCount,
+                    "canvasser record",
+                  ),
+                  "1 login account",
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="border-destructive/15 bg-background/70 rounded-sm border px-3 py-2 text-xs font-medium"
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-foreground/70 font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Campaign links that stop working
+                </p>
+                {visibleCampaignSlugs.length > 0 ? (
+                  <div className="border-destructive/15 bg-background/70 rounded-sm border px-3 py-2">
+                    <div className="flex flex-wrap gap-1.5">
+                      {visibleCampaignSlugs.map((slug) => (
+                        <span
+                          key={slug}
+                          className="border-border/60 bg-muted/40 rounded-sm border px-2 py-1 font-mono text-[10px] font-bold tracking-widest"
+                        >
+                          /c/{slug}
+                        </span>
+                      ))}
+                      {hiddenCampaignSlugCount > 0 && (
+                        <span className="text-muted-foreground px-2 py-1 text-[11px]">
+                          +{hiddenCampaignSlugCount.toLocaleString()} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-xs">
+                    No Collect campaign links are attached to this candidate.
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <p className="text-foreground/70 mb-1.5 font-mono text-[10px] font-bold tracking-widest uppercase">
+                    Expected email
+                  </p>
+                  <div className="border-destructive/20 bg-background/70 text-foreground rounded-sm border px-3 py-2.5 font-mono text-[11px] wrap-anywhere break-all select-none sm:text-xs">
+                    {expectedDeleteEmail || "No account email available"}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor={deleteConfirmInputId}
+                    className="text-foreground font-mono text-[10px] font-bold tracking-widest uppercase"
+                  >
+                    Confirmation
+                  </Label>
+                  <Input
+                    ref={deleteConfirmInputRef}
+                    id={deleteConfirmInputId}
+                    value={deleteConfirmationEmail}
+                    onChange={(event) =>
+                      setDeleteConfirmationEmail(event.target.value)
+                    }
+                    placeholder="Type the candidate email"
+                    className="border-destructive/30 bg-background/80 selection:bg-destructive/15 selection:text-foreground hover:border-destructive/50 focus-visible:border-destructive focus-visible:ring-destructive/30 dark:border-destructive/45 dark:bg-background/60 dark:hover:border-destructive/60 dark:focus-visible:ring-destructive/35 rounded-sm font-mono text-xs shadow-none transition-[border-color,box-shadow] focus-visible:ring-[3px] sm:text-sm"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    disabled={deleteMutation.isPending}
+                  />
+                  <p className="text-muted-foreground text-[11px] leading-snug">
+                    Delete stays disabled until the typed email matches this
+                    candidate account.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
+                  onClick={handleCancelDeleteReview}
+                  disabled={deleteMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase"
+                  disabled={!canDeleteCandidate || deleteMutation.isPending}
+                  onClick={handleDeleteCandidate}
+                >
+                  {deleteMutation.isPending ? (
+                    <Spinner className="mr-1.5 size-3.5" />
+                  ) : (
+                    <IconTrash className="mr-1.5 h-3.5 w-3.5" />
+                  )}
+                  {deleteMutation.isPending
+                    ? "Deleting..."
+                    : "Delete Candidate Account"}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      <DeleteCandidateDialog
-        candidateId={candidate.id}
-        candidateName={candidate.name}
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        onConfirm={() =>
-          deleteMutation.mutate(candidate.id, {
-            onSuccess: () => {
-              toast.success("Candidate account permanently deleted");
-              router.push("/admin/candidates");
-            },
-            onError: (error: Error) =>
-              toast.error(error.message || "Failed to delete candidate"),
-          })
-        }
-        isLoading={deleteMutation.isPending}
-      />
     </div>
   );
 }

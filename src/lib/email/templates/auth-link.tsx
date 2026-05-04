@@ -10,6 +10,7 @@ import {
 } from "@react-email/components";
 import { render } from "@react-email/render";
 import { EmailBrandHeader } from "@/lib/email/components/email-brand-header";
+import { EmailStandardFooter } from "@/lib/email/components/email-standard-footer";
 
 export type AuthLinkEmailType = "invite" | "password_reset";
 
@@ -94,12 +95,7 @@ function AuthLinkTemplate({
             <Text style={styles.ignoreText}>{ignoreText}</Text>
           </Section>
 
-          {/* ── Footer ── */}
-          <Section style={styles.footer}>
-            <Text style={styles.footerText}>
-              Secure email from WardWise · wardwise.ng
-            </Text>
-          </Section>
+          <EmailStandardFooter />
         </Container>
       </Body>
     </Html>
@@ -173,7 +169,7 @@ const styles = {
   },
   button: {
     backgroundColor: "#16655b",
-    color: "#f7f7f4",
+    color: "#f5f5ed",
     padding: "13px 22px",
     borderRadius: "2px",
     textDecoration: "none",
@@ -183,24 +179,19 @@ const styles = {
     textTransform: "uppercase" as const,
     display: "inline-block",
   },
-  // Expiry note (cockpit left-border accent panel)
   notePanel: {
     padding: "16px 18px",
-    backgroundColor: "#f7f7f4",
-    borderTop: "1px solid rgba(22, 101, 91, 0.12)",
-    borderRight: "1px solid rgba(22, 101, 91, 0.12)",
-    borderBottom: "1px solid rgba(22, 101, 91, 0.12)",
-    borderLeft: "3px solid #16655b",
+    backgroundColor: "#f5f5ed",
+    border: "1px solid rgba(22, 101, 91, 0.14)",
     borderRadius: "2px",
     marginBottom: "20px",
   },
   noteLabel: {
-    margin: "0 0 6px",
+    margin: "0 0 8px",
     color: "#41535a",
-    fontSize: "10px",
-    fontWeight: "700",
-    letterSpacing: "0.16em",
-    textTransform: "uppercase" as const,
+    fontSize: "12px",
+    fontWeight: "600",
+    letterSpacing: "0",
   },
   noteText: {
     margin: "0",
@@ -210,20 +201,8 @@ const styles = {
   },
   ignoreText: {
     margin: "0",
-    color: "#9aacb3",
-    fontSize: "12px",
-    lineHeight: "1.65",
-  },
-  // Footer
-  footer: {
-    backgroundColor: "#f7f7f4",
-    borderTop: "1px solid rgba(15, 23, 42, 0.08)",
-    padding: "14px 28px 18px",
-  },
-  footerText: {
-    margin: "0",
-    color: "#9aacb3",
-    fontSize: "11px",
-    textAlign: "center" as const,
+    color: "#556f77",
+    fontSize: "13px",
+    lineHeight: "1.6",
   },
 };

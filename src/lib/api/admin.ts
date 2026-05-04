@@ -12,6 +12,7 @@ export interface CandidateWithUser extends Candidate {
   };
   campaignCount?: number;
   collectCampaign?: CandidateCollectCampaignSummary | null;
+  deletionImpact?: CandidateDeletionImpact;
 }
 
 export interface CandidateCollectCampaignSummary {
@@ -24,6 +25,16 @@ export interface CandidateCollectCampaignSummary {
   clientReportLastViewedAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CandidateDeletionImpact {
+  accountEmail: string;
+  campaignCount: number;
+  submissionCount: number;
+  candidateCanvasserCount: number;
+  campaignCanvasserCount: number;
+  canvasserRecordCount: number;
+  campaignSlugs: string[];
 }
 
 export interface CreateCandidateResponse {
@@ -61,6 +72,11 @@ export interface UpdateCandidateData {
   phone?: string;
   title?: string;
   onboardingStatus?: string;
+}
+
+export interface DeleteCandidateData {
+  id: string;
+  confirmationEmail: string;
 }
 
 export interface CanvasserWithCandidate extends Canvasser {
@@ -220,9 +236,10 @@ export const adminApi = {
       return result.candidate;
     },
 
-    delete: async (id: string): Promise<void> => {
+    delete: async (id: string, confirmationEmail: string): Promise<void> => {
       await apiCall(`/candidates/${id}`, {
         method: "DELETE",
+        body: JSON.stringify({ confirmationEmail }),
       });
     },
   },

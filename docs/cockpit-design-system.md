@@ -340,8 +340,7 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 | `candidates/candidate-detail.tsx`        | ✅ Breadcrumb, tabs, badges, gradient divider             |
 | `candidates/candidate-overview.tsx`      | ✅ Stat cards, grouped sections, inline edit              |
 | `candidates/candidate-campaigns.tsx`     | ✅ Table, S/N, pagination                                 |
-| `candidates/candidate-account.tsx`       | ✅ Status select, password reset, danger zone             |
-| `admin-dialogs/delete-candidate-dialog`  | ✅ `rounded-sm` dialog, cockpit buttons                   |
+| `candidates/candidate-account.tsx`       | ✅ Status select, password reset, inline reviewed danger zone |
 | `collect/campaign-list.tsx`              | ✅ Stat cards, table, dashed empty state                  |
 | `collect/campaign-detail.tsx`            | ✅ Breadcrumb, tabs, badges                               |
 | `collect/campaign-overview.tsx`          | ✅ Chart cards, dashed empty states                       |

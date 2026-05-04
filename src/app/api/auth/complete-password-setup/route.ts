@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getClientIp, passwordSetupRateLimit } from "@/lib/core/rate-limit";
 import { consumeAuthLink } from "@/lib/auth/links";
+import { sendAccountWelcomeEmail } from "@/lib/email/account-welcome";
 import { passwordSetupSchema } from "@/lib/schemas/auth-schemas";
 
 const requestSchema = z.object({
@@ -39,6 +40,15 @@ export async function POST(request: Request) {
       { error: "This secure link is invalid or has expired." },
       { status: 400 },
     );
+  }
+
+  if (result.type === "invite") {
+    const displayName =
+      result.user.name?.trim() || result.user.candidate?.name?.trim() || "";
+    void sendAccountWelcomeEmail({
+      to: result.user.email,
+      name: displayName,
+    }).catch(() => undefined);
   }
 
   return NextResponse.json({

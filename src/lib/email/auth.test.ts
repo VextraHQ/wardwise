@@ -79,9 +79,9 @@ describe("sendAuthLinkEmail", () => {
     expect(mockSendEmail).toHaveBeenCalledTimes(1);
     const call = mockSendEmail.mock.calls[0][0];
     expect(call.to).toBe("ada@test.com");
-    expect(call.subject).toBe("Set up your WardWise account");
-    expect(call.html).toContain("Set up your WardWise access");
-    expect(call.text).toMatch(/set up your wardwise access/i);
+    expect(call.subject).toBe("Your WardWise access is ready, Ada");
+    expect(call.html).toContain("You&#x27;re in, ");
+    expect(call.text).toMatch(/you're in, ada/i);
   });
 
   it("bubbles not_configured from sendEmail", async () => {

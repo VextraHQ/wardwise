@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# local email HTML previews (`pnpm email:preview`)
+/tmp/
+
 # production
 /build
 

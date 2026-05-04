@@ -3,7 +3,10 @@ import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import type { Candidate } from "@/types/candidate";
-import { updateCandidateSchema } from "@/lib/schemas/admin-schemas";
+import {
+  deleteCandidateSchema,
+  updateCandidateSchema,
+} from "@/lib/schemas/admin-schemas";
 import { logAudit } from "@/lib/core/audit";
 import { bumpCandidateSessionVersions } from "@/lib/auth/storage";
 import { sanitizeCandidateConstituencyLgaIds } from "@/lib/geo/constituency-server";
@@ -17,25 +20,46 @@ const CANDIDATE_INCLUDE = {
     select: { campaigns: true, canvassers: true },
   },
   campaigns: {
-    select: { _count: { select: { submissions: true } } },
+    select: {
+      slug: true,
+      _count: { select: { submissions: true, campaignCanvassers: true } },
+    },
   },
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformCandidate(c: any) {
-  const supporterCount = c.campaigns
-    ? c.campaigns.reduce(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (sum: number, cam: any) => sum + (cam._count?.submissions ?? 0),
-        0,
-      )
-    : 0;
+  const campaigns = c.campaigns ?? [];
+  const supporterCount = campaigns.reduce(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (sum: number, cam: any) => sum + (cam._count?.submissions ?? 0),
+    0,
+  );
+  const campaignCanvasserCount = campaigns.reduce(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (sum: number, cam: any) => sum + (cam._count?.campaignCanvassers ?? 0),
+    0,
+  );
+  const candidateCanvasserCount = c._count?.canvassers ?? 0;
+  const campaignCount = c._count?.campaigns ?? campaigns.length;
+
   return {
     ...c,
     campaigns: undefined,
     position: c.position as Candidate["position"],
     email: c.user?.email || "",
     supporterCount,
+    campaignCount,
+    deletionImpact: {
+      accountEmail: c.user?.email || "",
+      campaignCount,
+      submissionCount: supporterCount,
+      candidateCanvasserCount,
+      campaignCanvasserCount,
+      canvasserRecordCount: candidateCanvasserCount + campaignCanvasserCount,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      campaignSlugs: campaigns.map((cam: any) => cam.slug).filter(Boolean),
+    },
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
     user: c.user
@@ -287,7 +311,21 @@ export async function DELETE(
     if (error) return error;
 
     const { id } = await params;
-    const candidate = await prisma.candidate.findUnique({ where: { id } });
+    const candidate = await prisma.candidate.findUnique({
+      where: { id },
+      include: {
+        user: { select: { email: true } },
+        _count: { select: { campaigns: true, canvassers: true } },
+        campaigns: {
+          select: {
+            slug: true,
+            _count: {
+              select: { submissions: true, campaignCanvassers: true },
+            },
+          },
+        },
+      },
+    });
     if (!candidate) {
       return NextResponse.json(
         { error: "Candidate not found" },
@@ -295,10 +333,60 @@ export async function DELETE(
       );
     }
 
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      body = {};
+    }
+
+    const parsed = deleteCandidateSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          error: "Confirmation email is required",
+          details: parsed.error.flatten().fieldErrors,
+        },
+        { status: 400 },
+      );
+    }
+
+    const expectedEmail = candidate.user?.email?.trim().toLowerCase();
+    if (!expectedEmail) {
+      return NextResponse.json(
+        { error: "Candidate account email is unavailable" },
+        { status: 409 },
+      );
+    }
+
+    if (parsed.data.confirmationEmail !== expectedEmail) {
+      return NextResponse.json(
+        { error: "Confirmation email does not match this candidate account" },
+        { status: 400 },
+      );
+    }
+
+    const submissionCount = candidate.campaigns.reduce(
+      (sum, campaign) => sum + campaign._count.submissions,
+      0,
+    );
+    const campaignCanvasserCount = candidate.campaigns.reduce(
+      (sum, campaign) => sum + campaign._count.campaignCanvassers,
+      0,
+    );
+
     await prisma.candidate.delete({ where: { id } });
 
     void logAudit("candidate.delete", "candidate", id, user!.id, {
       candidateName: candidate.name,
+      email: expectedEmail,
+      campaignCount: candidate._count.campaigns,
+      submissionCount,
+      candidateCanvasserCount: candidate._count.canvassers,
+      campaignCanvasserCount,
+      canvasserRecordCount:
+        candidate._count.canvassers + campaignCanvasserCount,
+      campaignSlugs: candidate.campaigns.map((campaign) => campaign.slug),
     });
 
     return NextResponse.json({ success: true });

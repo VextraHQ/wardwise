@@ -21,10 +21,11 @@ describe("buildAuthLinkEmail invite copy", () => {
       url: BASE_URL,
       expiresAt: EXPIRES,
     });
-    expect(subject).toBe("Set up your WardWise account");
-    expect(html).toContain("Set up your WardWise access");
-    expect(html).toContain("set your password");
-    expect(text).toMatch(/set up your wardwise access/i);
+    expect(subject).toBe("Your WardWise access is ready, Ada");
+    expect(html).toContain("You&#x27;re in, ");
+    expect(html).toMatch(/Ada/);
+    expect(html).toContain("Set your password");
+    expect(text).toMatch(/you're in, ada/i);
     expect(html).toContain(LOGO_URL);
   });
 });
@@ -37,9 +38,9 @@ describe("buildAuthLinkEmail password reset copy", () => {
       url: BASE_URL,
       expiresAt: EXPIRES,
     });
-    expect(subject).toBe("Reset your WardWise password");
-    expect(html).toContain("Reset your password");
-    expect(text).toMatch(/reset your password/i);
+    expect(subject).toBe("Reset your WardWise password, Ada");
+    expect(html).toContain("Choose a new password");
+    expect(text).toMatch(/choose a new password/i);
   });
 });
 
@@ -74,8 +75,8 @@ describe("buildAuthLinkEmail escaping", () => {
       url: BASE_URL,
       expiresAt: EXPIRES,
     });
-    expect(html).toContain("Hello there,");
-    expect(text).toContain("Hello there,");
+    expect(html).toContain("You&#x27;re in, ");
+    expect(text).toMatch(/you're in, there/i);
   });
 });
 

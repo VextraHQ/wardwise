@@ -24,7 +24,7 @@ describe("buildContactNotificationEmail", () => {
     });
 
     expect(email.subject).toContain("Request a Demo");
-    expect(email.html).toContain("Contact form");
+    expect(email.html).toContain("Contact Form");
     expect(email.text).toMatch(/request a demo/i);
     expect(email.html).toContain(LOGO_URL);
   });
@@ -76,7 +76,7 @@ describe("buildContactNotificationEmail", () => {
     });
 
     expect(email.subject).toContain(
-      "Other / Something Else - Procurement review",
+      "Other / Something Else — Procurement review",
     );
   });
 
@@ -91,15 +91,32 @@ describe("buildContactNotificationEmail", () => {
       sourcePath: "/contact",
     });
 
-    expect(email.html).toContain(">Name<");
-    expect(email.html).toContain(">Ada<");
-    expect(email.html).toContain(">Email<");
-    expect(email.html).toContain(">ada@example.com<");
-    expect(email.html).toContain(">Submitted<");
-    expect(email.html).toContain(">Message<");
-    expect(email.text).toMatch(/Source\s+\/contact/);
-    expect(email.html).toContain("Reply To Sender");
+    expect(email.html).toContain("Ada");
+    expect(email.html).toContain("ada@example.com");
+    expect(email.html).toContain("Submitted from");
+    expect(email.html).toContain("/contact");
+    expect(email.html).toContain("Message");
+    expect(email.text).toMatch(/Submitted from\s+\/contact/);
+    expect(email.html).toContain("Reply by email");
     expect(email.html).toContain("mailto:ada@example.com");
+    expect(email.html).toContain("All rights reserved");
+    expect(email.html).toContain("Internal notification");
+  });
+
+  it("surfaces reason details in topic only (no duplicate context block)", async () => {
+    const email = await buildContactNotificationEmail({
+      name: "Ada",
+      email: "ada@example.com",
+      reason: "support",
+      reasonDetails: "Cannot log in",
+      message: "Help",
+      submittedAt: new Date("2026-04-30T09:00:00.000Z"),
+      sourcePath: "/contact",
+    });
+
+    expect(email.html).toContain("Cannot log in");
+    expect(email.html).toContain("Submitted from");
+    expect(email.html).toContain("/contact");
   });
 
   it("points the header logo at the canonical HTTPS host when NEXTAUTH_URL is localhost", async () => {

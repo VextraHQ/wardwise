@@ -53,9 +53,9 @@ const styles = {
   eyebrow: {
     margin: "0",
     color: "#556f77",
-    fontSize: "11px",
+    fontSize: "12px",
     fontWeight: "600",
-    letterSpacing: "0.02em",
-    lineHeight: "1.35",
+    letterSpacing: "0",
+    lineHeight: "1.4",
   },
 };

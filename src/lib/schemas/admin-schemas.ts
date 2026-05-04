@@ -167,6 +167,10 @@ export const updateCandidateSchema = z
     }
   });
 
+export const deleteCandidateSchema = z.object({
+  confirmationEmail: emailSchema,
+});
+
 // Create Canvasser Schema
 export const createCanvasserSchema = z.object({
   code: z
