@@ -177,43 +177,49 @@ If email delivery is not configured, WardWise still supports manual invite/reset
 
 ### Email Transport
 
-Email sending is split into a generic transport and an auth-specific helper:
+Email sending is split into a generic transport, small orchestration modules, and **React Email** (`@react-email/components` + `@react-email/render`) for HTML + plain-text bodies:
 
 - `src/lib/email/send.ts` is the generic Resend SDK wrapper (`sendEmail({ to, subject, html, text?, replyTo?, from? })`). Public contact delivery reuses this directly.
 - `src/lib/email/auth.ts` exposes `canSendAuthLinkEmail()` and `sendAuthLinkEmail(...)` for invite/reset delivery, and delegates to `sendEmail` for the actual provider call.
-- `src/lib/email/templates/auth-link.ts` owns the invite/reset HTML + text body. User-supplied fields (name, url) are HTML-escaped.
+- `src/lib/email/account-welcome.ts` sends the post–invite password welcome mail (same Resend / From gates as auth links); triggered from `complete-password-setup` after a successful **invite** flow only.
+- `src/lib/email/contact.ts` orchestrates internal contact-form notifications.
+- Templates under `src/lib/email/templates/*.tsx` render escaped, branded transactional mail (invite, password reset, contact notification, account welcome). Shared chrome lives in `src/lib/email/components/` (e.g. header, footer).
 
-WardWise now uses the Resend Node SDK for transport while intentionally keeping plain HTML/text templates. Revisit React Email when multiple branded templates or shared email components justify the extra abstraction.
+**Local previews:** run `pnpm email:dev` (React Email preview app; defaults to port **3001** so it can run beside `pnpm dev` on **3000**). Preview entry files live in `src/lib/email/previews/` and import the same template components production uses—no duplicate markup.
 
 ---
 
 ## Key Files
 
-| File                                                        | Purpose                                                        |
-| ----------------------------------------------------------- | -------------------------------------------------------------- |
-| `src/lib/auth/config.ts`                                    | NextAuth config, login rules, JWT/session fields               |
-| `src/lib/auth/guards.ts`                                    | Shared server auth wrapper and role guards                     |
-| `src/lib/auth/session.ts`                                   | Session lifetime policy helpers                                |
-| `src/lib/auth/redirects.ts`                                 | Safe post-login callback URL and default home resolution       |
-| `src/lib/auth/storage.ts`                                   | Auth-specific user/session persistence helpers                 |
-| `src/lib/auth/links.ts`                                     | Invite/reset token issuing, hashing, consuming                 |
-| `src/lib/email/send.ts`                                     | Generic Resend wrapper shared by auth + future transactional   |
-| `src/lib/email/auth.ts`                                     | Auth email capability check + `sendAuthLinkEmail` entrypoint   |
-| `src/lib/email/templates/auth-link.ts`                      | Escaped HTML/text body for invite + password-reset email       |
-| `src/lib/email/contact.ts`                                  | Public contact email orchestration                             |
-| `src/lib/email/templates/contact-notification.ts`           | Internal contact notification template                         |
-| `src/lib/auth/client.ts`                                    | Browser auth client for login, forgot-password, and setup      |
-| `src/lib/core/metadata.ts`                                  | Shared metadata helpers, including non-indexable auth metadata |
-| `src/proxy.ts`                                              | Entry guard for protected routes                               |
-| `src/app/(auth)/layout.tsx`                                 | Shared auth-page wrapper and redirect behavior                 |
-| `src/app/(auth)/login/page.tsx`                             | Shared login route                                             |
-| `src/app/(auth)/forgot-password/page.tsx`                   | Password recovery route                                        |
-| `src/app/(auth)/reset-password/[token]/page.tsx`            | Setup/reset password route                                     |
-| `src/components/auth/*`                                     | Shared auth screens and architectural auth card shell          |
-| `src/app/api/auth/forgot-password/route.ts`                 | Forgot-password API                                            |
-| `src/app/api/auth/complete-password-setup/route.ts`         | Password completion API                                        |
-| `src/app/api/admin/candidates/route.ts`                     | Candidate creation + invite issuing                            |
-| `src/app/api/admin/candidates/[id]/reset-password/route.ts` | Admin reset-link issuing                                       |
+| File                                                        | Purpose                                                                     |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `src/lib/auth/config.ts`                                    | NextAuth config, login rules, JWT/session fields                            |
+| `src/lib/auth/guards.ts`                                    | Shared server auth wrapper and role guards                                  |
+| `src/lib/auth/session.ts`                                   | Session lifetime policy helpers                                             |
+| `src/lib/auth/redirects.ts`                                 | Safe post-login callback URL and default home resolution                    |
+| `src/lib/auth/storage.ts`                                   | Auth-specific user/session persistence helpers                              |
+| `src/lib/auth/links.ts`                                     | Invite/reset token issuing, hashing, consuming                              |
+| `src/lib/email/send.ts`                                     | Generic Resend wrapper shared by auth + contact + welcome mail              |
+| `src/lib/email/auth.ts`                                     | Auth email capability check + `sendAuthLinkEmail` entrypoint                |
+| `src/lib/email/account-welcome.ts`                          | Welcome email after invite password setup (`sendAccountWelcomeEmail`)       |
+| `src/lib/email/contact.ts`                                  | Public contact form → internal notification email                           |
+| `src/lib/email/templates/auth-link.tsx`                     | React Email: invite + password-reset templates                              |
+| `src/lib/email/templates/contact-notification.tsx`          | React Email: internal contact notification                                  |
+| `src/lib/email/templates/account-welcome.tsx`               | React Email: post-setup welcome                                             |
+| `src/lib/email/components/*`                                | Shared header/footer (and similar) across templates                         |
+| `src/lib/email/previews/*`                                  | Dev-only fixtures for `pnpm email:dev`                                      |
+| `src/lib/auth/client.ts`                                    | Browser auth client for login, forgot-password, and setup                   |
+| `src/lib/core/metadata.ts`                                  | Shared metadata helpers, including non-indexable auth metadata              |
+| `src/proxy.ts`                                              | Entry guard for protected routes                                            |
+| `src/app/(auth)/layout.tsx`                                 | Shared auth-page wrapper and redirect behavior                              |
+| `src/app/(auth)/login/page.tsx`                             | Shared login route                                                          |
+| `src/app/(auth)/forgot-password/page.tsx`                   | Password recovery route                                                     |
+| `src/app/(auth)/reset-password/[token]/page.tsx`            | Setup/reset password route                                                  |
+| `src/components/auth/*`                                     | Shared auth screens and architectural auth card shell                       |
+| `src/app/api/auth/forgot-password/route.ts`                 | Forgot-password API                                                         |
+| `src/app/api/auth/complete-password-setup/route.ts`         | Password completion API; fires welcome email on successful **invite** setup |
+| `src/app/api/admin/candidates/route.ts`                     | Candidate creation + invite issuing                                         |
+| `src/app/api/admin/candidates/[id]/reset-password/route.ts` | Admin reset-link issuing                                                    |
 
 ---
 
@@ -225,4 +231,4 @@ WardWise now uses the Resend Node SDK for transport while intentionally keeping 
 - Evaluate whether admin accounts should also move to secure reset-link-first recovery if multiple staff accounts become common
 - Split `onboardingStatus` from auth access state only when the product truly needs both
 - Unify invite orchestration only if invite delivery policy changes or new invite entrypoints appear; the current split is acceptable now that transport/template logic lives in the shared email layer
-- When the public contact form ships, route it through `src/lib/email/send.ts` and record consistent delivery/audit events across auth and contact email flows
+- Extend delivery/audit logging for contact + auth flows if product needs stronger observability than today

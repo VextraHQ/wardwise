@@ -140,7 +140,7 @@ src/
 **Strengths:**
 
 - **Vitest is set up and active** (`vitest.config.ts` and `pnpm test`), with a passing suite.
-- **Meaningful unit coverage exists** across auth (`guards`, `session`, `redirects`, `errors`, `links`), email (`auth`, `send`, templates), collect helpers, server query parsing, and core utilities.
+- **Meaningful unit coverage exists** across auth (`guards`, `session`, `redirects`, `errors`, `links`), email (`auth`, `send`, `templates`, `contact`), collect helpers, server query parsing, and core utilities.
 - **Schema validation coverage exists** for `admin-schemas`, `collect-schemas`, and `field-schemas`.
 - **API route test coverage has started** (`app/api/auth/forgot-password/route.test.ts`), showing route-level testing patterns are in place.
 - Current snapshot: **21 test files, 235 passing tests**.
