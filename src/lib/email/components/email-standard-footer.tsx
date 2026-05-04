@@ -1,4 +1,4 @@
-import { Section, Text } from "@react-email/components";
+import { Link, Section, Text } from "@react-email/components";
 
 type EmailStandardFooterProps = {
   // Optional line (e.g. internal-use disclaimer) below copyright
@@ -12,7 +12,10 @@ export function EmailStandardFooter({ disclaimer }: EmailStandardFooterProps) {
   return (
     <Section style={styles.footer}>
       <Text style={styles.primaryLine}>
-        Secure email from WardWise · wardwise.ng
+        Secure email from WardWise ·{" "}
+        <Link href="https://wardwise.ng" style={styles.footerLink}>
+          wardwise.ng
+        </Link>
       </Text>
       <Text style={styles.copyright}>
         © {year} WardWise. All rights reserved.
@@ -48,5 +51,9 @@ const styles = {
     fontSize: "11px",
     lineHeight: "1.5",
     textAlign: "center" as const,
+  },
+  footerLink: {
+    color: "#16655b",
+    textDecoration: "none",
   },
 };

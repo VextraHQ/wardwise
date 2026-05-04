@@ -4,6 +4,7 @@ import {
   Container,
   Head,
   Html,
+  Link,
   Preview,
   Section,
   Text,
@@ -22,6 +23,8 @@ export type AuthLinkEmailInput = {
 };
 
 export type AuthLinkEmail = { subject: string; html: string; text: string };
+
+const PREVIEW_PADDING = " ‌​‍‎‏﻿".repeat(20);
 
 /** Shared by `buildAuthLinkEmail` and `src/lib/email/previews/*`. */
 export function formatAuthLinkExpiresAt(expiresAt: Date): string {
@@ -72,7 +75,10 @@ export function AuthLinkTemplate({
   return (
     <Html lang="en">
       <Head />
-      <Preview>{preview}</Preview>
+      <Preview>
+        {preview}
+        {PREVIEW_PADDING}
+      </Preview>
       <Body style={styles.body}>
         <Container style={styles.outerFrame}>
           <EmailBrandHeader eyebrow={headerEyebrow} />
@@ -87,6 +93,14 @@ export function AuthLinkTemplate({
                 {ctaLabel}
               </Button>
             </Section>
+
+            <Text style={styles.fallbackIntro}>
+              If the button above doesn&apos;t work, copy this link into your
+              browser:
+            </Text>
+            <Link href={url} style={styles.fallbackUrl}>
+              {url}
+            </Link>
 
             <Section style={styles.notePanel}>
               <Text style={styles.noteLabel}>Link Expiry</Text>
@@ -166,7 +180,22 @@ const styles = {
     lineHeight: "1.72",
   },
   buttonRow: {
-    margin: "0 0 28px",
+    margin: "0 0 14px",
+  },
+  fallbackIntro: {
+    margin: "0 0 6px",
+    color: "#7a8f96",
+    fontSize: "12px",
+    lineHeight: "1.5",
+  },
+  fallbackUrl: {
+    display: "block",
+    margin: "0 0 24px",
+    color: "#16655b",
+    fontSize: "11px",
+    lineHeight: "1.6",
+    wordBreak: "break-all" as const,
+    textDecoration: "none",
   },
   button: {
     backgroundColor: "#16655b",
