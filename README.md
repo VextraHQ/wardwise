@@ -84,6 +84,16 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+### Transactional email previews (optional)
+
+To iterate on React Email templates in the browser (hot reload, separate from the Next app):
+
+```bash
+pnpm email:dev
+```
+
+Opens the preview UI at [http://localhost:3001](http://localhost:3001). Templates live under `src/lib/email/templates/`; dev fixtures under `src/lib/email/previews/`.
+
 ## Local Demo Access
 
 The seed script creates local-only demo users for development and QA. Check `prisma/seed.ts` when you need the current seeded accounts.

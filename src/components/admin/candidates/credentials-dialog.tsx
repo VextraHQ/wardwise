@@ -12,10 +12,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  IconArrowRight,
   IconCopy,
-  IconExternalLink,
+  IconEye,
+  IconEyeOff,
   IconMail,
-  IconShieldLock,
 } from "@tabler/icons-react";
 
 interface CredentialsDialogProps {
@@ -39,14 +45,32 @@ export function CredentialsDialog({
 }: CredentialsDialogProps) {
   const [showFullLink, setShowFullLink] = useState(false);
 
-  function copyCredentials() {
+  function handleOpenChange(next: boolean) {
+    if (!next) setShowFullLink(false);
+    onOpenChange(next);
+  }
+
+  async function copySetupUrl() {
+    try {
+      await navigator.clipboard.writeText(setupUrl);
+      toast.success("Setup URL copied");
+    } catch {
+      toast.error("Couldn't copy — try again or copy manually");
+    }
+  }
+
+  async function copyCredentials() {
     const text = `WardWise Account Setup\n\nCandidate: ${candidateName}\nEmail: ${email}\nSecure setup link: ${setupUrl}\n\nThis link expires on ${new Date(expiresAt).toLocaleString("en-NG")}.`;
-    navigator.clipboard.writeText(text);
-    toast.success("Setup link copied to clipboard");
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Setup details copied");
+    } catch {
+      toast.error("Couldn't copy — try again or copy manually");
+    }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md rounded-sm">
         <DialogHeader>
           <DialogTitle>Account Created</DialogTitle>
@@ -72,21 +96,56 @@ export function CredentialsDialog({
                 <span className="text-muted-foreground">Delivery</span>
                 <span className="font-medium capitalize">{deliveryMethod}</span>
               </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-muted-foreground">Setup Link</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-mono text-xs">
+              <div className="border-border/60 space-y-1.5 border-t pt-2">
+                <span className="text-muted-foreground text-xs">
+                  Setup link
+                </span>
+                <div className="bg-background/80 border-border/60 flex items-start justify-between gap-2 rounded-sm border p-2.5">
+                  <span className="min-w-0 flex-1 font-mono text-xs break-all">
                     {showFullLink
                       ? setupUrl
                       : `${setupUrl.slice(0, 34)}...${setupUrl.slice(-12)}`}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowFullLink((current) => !current)}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <IconShieldLock className="h-3.5 w-3.5" />
-                  </button>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          aria-label={
+                            showFullLink ? "Hide full link" : "Show full link"
+                          }
+                          onClick={() => setShowFullLink((current) => !current)}
+                        >
+                          {showFullLink ? (
+                            <IconEyeOff className="h-3.5 w-3.5" />
+                          ) : (
+                            <IconEye className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        {showFullLink ? "Hide full link" : "Show full link"}
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          aria-label="Copy setup URL"
+                          onClick={() => void copySetupUrl()}
+                        >
+                          <IconCopy className="h-3.5 w-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">Copy setup URL</TooltipContent>
+                    </Tooltip>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center justify-between">
@@ -109,14 +168,14 @@ export function CredentialsDialog({
           <Button
             variant="outline"
             className="rounded-sm"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOpenChange(false)}
           >
-            <IconExternalLink className="mr-2 h-4 w-4" />
+            <IconArrowRight className="mr-2 h-4 w-4" />
             Go to Candidate
           </Button>
           <Button
             className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
-            onClick={copyCredentials}
+            onClick={() => void copyCredentials()}
           >
             {deliveryMethod === "email" ? (
               <IconMail className="mr-2 h-4 w-4" />
@@ -124,8 +183,8 @@ export function CredentialsDialog({
               <IconCopy className="mr-2 h-4 w-4" />
             )}
             {deliveryMethod === "email"
-              ? "Copy Backup Link"
-              : "Copy Setup Link"}
+              ? "Copy Backup Details"
+              : "Copy Setup Details"}
           </Button>
         </DialogFooter>
       </DialogContent>

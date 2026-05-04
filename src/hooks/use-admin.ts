@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   adminApi,
   type CreateCandidateData,
+  type DeleteCandidateData,
   type UpdateCandidateData,
 } from "@/lib/api/admin";
 
@@ -75,9 +76,14 @@ export function useUpdateCandidateStatus() {
 export function useDeleteCandidate() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => adminApi.candidates.delete(id),
-    onSuccess: () => {
+    mutationFn: ({ id, confirmationEmail }: DeleteCandidateData) =>
+      adminApi.candidates.delete(id, confirmationEmail),
+    onSuccess: (_data, variables) => {
+      qc.removeQueries({
+        queryKey: ["admin", "candidates", variables.id],
+      });
       qc.invalidateQueries({ queryKey: ["admin", "candidates"] });
+      qc.invalidateQueries({ queryKey: ["admin-campaigns"] });
     },
   });
 }

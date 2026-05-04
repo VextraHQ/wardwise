@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   createCandidateSchema,
   createCanvasserSchema,
+  deleteCandidateSchema,
   updateCanvasserSchema,
   updateSubmissionSchema,
 } from "./admin-schemas";
@@ -85,6 +86,27 @@ describe("createCandidateSchema", () => {
       });
       expect(result.success).toBe(false);
     }
+  });
+});
+
+describe("deleteCandidateSchema", () => {
+  it("requires a valid confirmation email", () => {
+    const result = deleteCandidateSchema.safeParse({
+      confirmationEmail: "amina@example.com",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("normalizes confirmation email before comparison", () => {
+    const result = deleteCandidateSchema.parse({
+      confirmationEmail: "  AMINA@EXAMPLE.COM  ",
+    });
+    expect(result.confirmationEmail).toBe("amina@example.com");
+  });
+
+  it("rejects missing confirmation email", () => {
+    const result = deleteCandidateSchema.safeParse({});
+    expect(result.success).toBe(false);
   });
 });
 

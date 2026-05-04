@@ -37,6 +37,7 @@ import {
   contactFormSchema,
   type ContactFormValues,
 } from "@/lib/schemas/contact-schemas";
+import { toast } from "sonner";
 
 type FormStatus =
   | { kind: "idle" }
@@ -153,9 +154,13 @@ export function ContactContent({
       } | null;
 
       if (!response.ok) {
+        const message = getContactErrorMessage(response.status, payload?.error);
         setFormStatus({
           kind: "error",
-          message: getContactErrorMessage(response.status, payload?.error),
+          message,
+        });
+        toast.error("Could not send message", {
+          description: message,
         });
         setTurnstileResetNonce((current) => current + 1);
         return;
@@ -168,11 +173,18 @@ export function ContactContent({
         message:
           "Your message is in. We'll review it and reply within 24–48 business hours.",
       });
+      toast.success("Message sent", {
+        description: "We'll reply within 24–48 business hours.",
+      });
     } catch {
+      const message =
+        "We couldn't send your message right now. Please use the email option below if this keeps happening.";
       setFormStatus({
         kind: "error",
-        message:
-          "We couldn't send your message right now. Please use the email option below if this keeps happening.",
+        message,
+      });
+      toast.error("Could not send message", {
+        description: message,
       });
       setTurnstileResetNonce((current) => current + 1);
     }
@@ -185,10 +197,7 @@ export function ContactContent({
       subtitle="Use the contact form for demos, partnerships, support, or press. We'll route it internally and reply from a real inbox."
     >
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.12fr)_320px]">
-        <section className="border-border/60 bg-card relative overflow-hidden border shadow-none">
-          <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
-          <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
-
+        <section className="border-border/60 bg-card relative overflow-hidden rounded-sm border shadow-none">
           <div className="border-border/60 bg-muted/20 flex flex-wrap items-center justify-between gap-3 border-b px-5 py-3 sm:px-6">
             <div>
               <p className="text-foreground text-sm font-semibold">
@@ -209,34 +218,6 @@ export function ContactContent({
                 We&apos;ll only use your email to reply to this request.
               </p>
             </div>
-
-            {formStatus.kind === "success" ? (
-              <div className="border-primary/30 bg-primary/10 flex items-start gap-3 rounded-sm border p-4">
-                <HiCheckCircle className="text-primary mt-0.5 size-5 shrink-0" />
-                <div className="space-y-1">
-                  <p className="text-foreground text-sm font-semibold">
-                    Message sent successfully
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    {formStatus.message}
-                  </p>
-                </div>
-              </div>
-            ) : null}
-
-            {formStatus.kind === "error" ? (
-              <div className="border-destructive/30 bg-destructive/10 flex items-start gap-3 rounded-sm border p-4">
-                <HiExclamation className="text-destructive mt-0.5 size-5 shrink-0" />
-                <div className="space-y-1">
-                  <p className="text-foreground text-sm font-semibold">
-                    We couldn&apos;t send that yet
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    {formStatus.message}
-                  </p>
-                </div>
-              </div>
-            ) : null}
 
             <Form {...form}>
               <form
@@ -344,7 +325,7 @@ export function ContactContent({
                 <FormField
                   control={form.control}
                   name="message"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <div className="flex items-center justify-between gap-3">
                         <FormLabel>Message</FormLabel>
@@ -360,21 +341,21 @@ export function ContactContent({
                           {...field}
                         />
                       </FormControl>
-                      {selectedReason !== "other" ? (
+                      <FormMessage />
+                      {!fieldState.error && selectedReason !== "other" ? (
                         <p className="text-muted-foreground text-xs">
                           If the reason above doesn&apos;t fit perfectly,
                           explain the angle here and we&apos;ll route it
                           properly.
                         </p>
                       ) : null}
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
 
                 <div className="space-y-3">
                   {turnstileSiteKey ? (
-                    <div className="border-border/60 bg-muted/20 w-full max-w-[380px] rounded-sm border px-3 py-3">
+                    <div className="w-fit max-w-full">
                       <TurnstileWidget
                         siteKey={turnstileSiteKey}
                         resetNonce={turnstileResetNonce}
@@ -388,12 +369,40 @@ export function ContactContent({
                     </div>
                   ) : null}
 
-                  <div className="border-border/60 bg-muted/20 rounded-sm border px-4 py-3 text-xs leading-6">
-                    <p className="text-muted-foreground">
-                      Private reply-only contact flow. We typically respond
-                      within 24–48 business hours.
-                    </p>
-                  </div>
+                  {formStatus.kind === "success" ? (
+                    <div
+                      role="status"
+                      aria-live="polite"
+                      className="border-primary/30 bg-primary/10 flex items-start gap-3 rounded-sm border p-4"
+                    >
+                      <HiCheckCircle className="text-primary mt-0.5 size-5 shrink-0" />
+                      <div className="space-y-1">
+                        <p className="text-foreground text-sm font-semibold">
+                          Message sent successfully
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                          {formStatus.message}
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {formStatus.kind === "error" ? (
+                    <div
+                      role="alert"
+                      className="border-destructive/30 bg-destructive/10 flex items-start gap-3 rounded-sm border p-4"
+                    >
+                      <HiExclamation className="text-destructive mt-0.5 size-5 shrink-0" />
+                      <div className="space-y-1">
+                        <p className="text-foreground text-sm font-semibold">
+                          We couldn&apos;t send that yet
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                          {formStatus.message}
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
 
                 <Button

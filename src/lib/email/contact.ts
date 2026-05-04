@@ -32,7 +32,7 @@ export async function sendContactNotificationEmail(
   }
 
   // Prepare email contents from the input data
-  const { subject, html, text } = buildContactNotificationEmail(input);
+  const { subject, html, text } = await buildContactNotificationEmail(input);
 
   // Send the email with reply-to set as the sender's email
   return sendEmail({
