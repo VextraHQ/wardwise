@@ -23,7 +23,8 @@ export type AuthLinkEmailInput = {
 
 export type AuthLinkEmail = { subject: string; html: string; text: string };
 
-function formatExpiresAt(expiresAt: Date): string {
+/** Shared by `buildAuthLinkEmail` and `src/lib/email/previews/*`. */
+export function formatAuthLinkExpiresAt(expiresAt: Date): string {
   return new Intl.DateTimeFormat("en-NG", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -31,7 +32,7 @@ function formatExpiresAt(expiresAt: Date): string {
   }).format(expiresAt);
 }
 
-function AuthLinkTemplate({
+export function AuthLinkTemplate({
   type,
   name,
   url,
@@ -107,7 +108,7 @@ export async function buildAuthLinkEmail(
 ): Promise<AuthLinkEmail> {
   const displayName =
     input.name.trim().length > 0 ? input.name.trim() : "there";
-  const expiresLabel = formatExpiresAt(input.expiresAt);
+  const expiresLabel = formatAuthLinkExpiresAt(input.expiresAt);
 
   const subject =
     input.type === "invite"

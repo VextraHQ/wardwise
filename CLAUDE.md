@@ -22,6 +22,7 @@ pnpm db:migrate   # Run migrations (prod-ready schema changes)
 pnpm db:push      # Quick schema push (prototyping only)
 pnpm db:generate  # Regenerate Prisma client after schema changes
 pnpm db:seed      # Seed candidates, users, canvassers, voters
+pnpm email:dev    # React Email live preview (port 3001; run beside `pnpm dev` on 3000)
 ```
 
 ## Architecture

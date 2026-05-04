@@ -33,7 +33,7 @@
     "db:reset": "prisma migrate reset --force && pnpm db:seed",
     "db:studio": "prisma studio",
     "db:generate": "prisma generate",
-    "email:preview": "tsx scripts/email-preview.ts"
+    "email:dev": "email dev --dir ./src/lib/email/previews --port 3001"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.0",
@@ -105,6 +105,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@eslint/js": "^9.37.0",
+    "@react-email/ui": "^6.0.7",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.19",
@@ -122,6 +123,7 @@
     "eslint-plugin-react-hooks": "^7.0.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
+    "react-email": "^6.0.7",
     "shadcn": "^3.4.0",
     "tailwindcss": "^4",
     "tsx": "^4.20.6",

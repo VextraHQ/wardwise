@@ -33,7 +33,8 @@ export type ContactNotificationEmail = {
   text: string;
 };
 
-function formatSubmittedAt(submittedAt: Date): string {
+/** Shared by `buildContactNotificationEmail` and `src/lib/email/previews/*`. */
+export function formatContactSubmittedAt(submittedAt: Date): string {
   return new Intl.DateTimeFormat("en-NG", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -41,7 +42,7 @@ function formatSubmittedAt(submittedAt: Date): string {
   }).format(submittedAt);
 }
 
-function ContactNotificationTemplate({
+export function ContactNotificationTemplate({
   reasonTitle,
   input,
   submittedLabel,
@@ -110,7 +111,7 @@ export async function buildContactNotificationEmail(
     reasonDetailLabel.length > 0
       ? `${reasonLabel} — ${reasonDetailLabel}`
       : reasonLabel;
-  const submittedLabel = formatSubmittedAt(input.submittedAt);
+  const submittedLabel = formatContactSubmittedAt(input.submittedAt);
   const subject = `New contact: ${input.name} · ${resolvedReasonTitle}`;
 
   const rawMessage = input.message.trim().replace(/\s+/g, " ");

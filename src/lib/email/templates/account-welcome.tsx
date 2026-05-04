@@ -23,7 +23,7 @@ export type AccountWelcomeEmail = {
   text: string;
 };
 
-function AccountWelcomeTemplate({
+export function AccountWelcomeTemplate({
   greetingName,
   loginUrl,
 }: {
