@@ -91,22 +91,32 @@ function StatPill({
   onClick?: () => void;
 }) {
   const Comp = onClick ? "button" : "div";
+  const isZero = value === 0;
   return (
     <Comp
+      {...(onClick ? { type: "button" as const } : {})}
       onClick={onClick}
       className={cn(
-        "border-border/60 bg-card inline-flex w-full items-center justify-between gap-2 rounded-sm border px-3 py-2 text-left shadow-xs sm:w-auto sm:justify-start",
+        "border-border/60 bg-card flex h-full min-w-0 flex-col items-center justify-center gap-1 rounded-sm border px-2 py-2 text-center",
+        "sm:inline-flex sm:h-auto sm:w-auto sm:flex-row sm:justify-between sm:gap-2 sm:px-3 sm:py-2 sm:text-left",
         onClick &&
-          "hover:bg-accent hover:border-primary/20 cursor-pointer transition-all",
+          "hover:bg-accent hover:border-primary/20 cursor-pointer transition-colors",
       )}
     >
-      <Icon className="text-primary/70 h-3.5 w-3.5" />
-      <span className="text-muted-foreground text-xs font-medium">{label}</span>
+      <Icon className="text-primary/70 h-3.5 w-3.5 shrink-0" />
+      <span className="text-muted-foreground line-clamp-2 max-w-full min-w-0 text-[10px] leading-tight font-medium sm:line-clamp-none sm:flex-1 sm:text-xs">
+        {label}
+      </span>
       <Badge
-        variant="secondary"
-        className="rounded-sm px-1.5 py-0 font-mono text-[10px] font-bold tabular-nums"
+        variant="outline"
+        className={cn(
+          "shrink-0 rounded-sm px-1.5 py-0 font-mono text-[10px] font-bold tabular-nums",
+          isZero
+            ? "border-amber-500/40 bg-amber-500/8 text-amber-800 dark:text-amber-400"
+            : "border-border/50 bg-muted/40 text-foreground",
+        )}
       >
-        {value}
+        {value.toLocaleString()}
       </Badge>
     </Comp>
   );
@@ -151,6 +161,34 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
         c.canvasserPhone.toLowerCase().includes(q),
     );
   }, [canvassers, leaderboardSearch]);
+
+  const leaderboardEntries = useMemo(() => {
+    return filteredCanvassers.map((c, i) => {
+      const verifiedPct =
+        c._count > 0 ? Math.round((c.verified / c._count) * 100) : 0;
+      const flaggedPct =
+        c._count > 0 ? Math.round((c.flagged / c._count) * 100) : 0;
+      const rankEmoji = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : null;
+
+      const tableRowClass =
+        i === 0
+          ? "bg-amber-500/10 hover:bg-amber-500/15"
+          : i === 1
+            ? "bg-zinc-400/10 hover:bg-zinc-400/15"
+            : i === 2
+              ? "bg-orange-600/10 hover:bg-orange-600/15"
+              : "hover:bg-muted/30";
+
+      return {
+        canvasser: c,
+        index: i,
+        verifiedPct,
+        flaggedPct,
+        rankEmoji,
+        tableRowClass,
+      };
+    });
+  }, [filteredCanvassers]);
 
   const handleAdd = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -274,12 +312,18 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
 
   return (
     <div className="space-y-4">
-      {/* Header: subtitle + stat pills */}
-      <div className="space-y-3">
-        <p className="text-muted-foreground text-xs">
+      {/* Header: subtitle + stat pills — one row grid on narrow screens */}
+      <div className="space-y-2 sm:space-y-3">
+        <p className="text-muted-foreground text-[11px] leading-snug sm:text-xs">
           Referral performance and attribution for this campaign
         </p>
-        <div className="flex flex-wrap items-center gap-2">
+        <div
+          className={cn(
+            "grid gap-2",
+            selfIdentifiedCount > 0 ? "grid-cols-3" : "grid-cols-2",
+            "sm:flex sm:flex-wrap sm:items-stretch sm:gap-2",
+          )}
+        >
           <StatPill
             icon={IconTrophy}
             label="Referral Canvassers"
@@ -360,7 +404,7 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
       {canvassers.length > 0 ? (
         <div className="space-y-2">
           <div className="flex items-center gap-2.5 px-1">
-            <IconTrophy className="text-primary h-4 w-4" />
+            <IconTrophy className="text-primary h-4 w-4 shrink-0" />
             <h3 className="text-sm font-semibold tracking-tight">
               Referral Leaderboard
             </h3>
@@ -373,6 +417,7 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
                 : canvassers.length}
             </Badge>
           </div>
+
           <div className="overflow-x-auto rounded-sm border">
             <Table>
               <TableHeader className="bg-muted/30 sticky top-0 z-10">
@@ -400,36 +445,21 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {filteredCanvassers.map((c, i) => {
-                  const rankClass =
-                    i === 0
-                      ? "bg-amber-500/10 hover:bg-amber-500/15"
-                      : i === 1
-                        ? "bg-zinc-400/10 hover:bg-zinc-400/15"
-                        : i === 2
-                          ? "bg-orange-600/10 hover:bg-orange-600/15"
-                          : "hover:bg-muted/30";
-                  const rankLabel =
-                    i === 0
-                      ? "🥇"
-                      : i === 1
-                        ? "🥈"
-                        : i === 2
-                          ? "🥉"
-                          : String(i + 1);
-                  const verifiedPct =
-                    c._count > 0
-                      ? Math.round((c.verified / c._count) * 100)
-                      : 0;
-                  const flaggedPct =
-                    c._count > 0 ? Math.round((c.flagged / c._count) * 100) : 0;
-                  return (
+              <TableBody className="max-md:[&_td]:py-3">
+                {leaderboardEntries.map(
+                  ({
+                    canvasser: c,
+                    index: i,
+                    verifiedPct,
+                    flaggedPct,
+                    rankEmoji,
+                    tableRowClass,
+                  }) => (
                     <TableRow
                       key={`${c.canvasserName}-${c.canvasserPhone}`}
                       className={cn(
                         "cursor-pointer transition-colors",
-                        rankClass,
+                        tableRowClass,
                       )}
                       tabIndex={0}
                       role="button"
@@ -449,8 +479,16 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
                         }
                       }}
                     >
-                      <TableCell className="text-muted-foreground text-center text-xs font-medium">
-                        {rankLabel}
+                      <TableCell className="text-muted-foreground w-12 text-center font-mono text-xs font-semibold tabular-nums">
+                        <span>{i + 1}</span>
+                        {rankEmoji ? (
+                          <span
+                            aria-hidden
+                            className="pl-0.5 align-middle sm:pl-1"
+                          >
+                            {rankEmoji}
+                          </span>
+                        ) : null}
                       </TableCell>
                       <TableCell>{formatPersonName(c.canvasserName)}</TableCell>
                       <TableCell className="hidden sm:table-cell">
@@ -496,19 +534,18 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
                           : "—"}
                       </TableCell>
                     </TableRow>
-                  );
-                })}
-                {filteredCanvassers.length === 0 &&
-                  leaderboardSearch.trim() && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={7}
-                        className="text-muted-foreground py-8 text-center text-sm"
-                      >
-                        No canvassers match &quot;{leaderboardSearch}&quot;
-                      </TableCell>
-                    </TableRow>
-                  )}
+                  ),
+                )}
+                {filteredCanvassers.length === 0 && leaderboardSearch.trim() ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={7}
+                      className="text-muted-foreground py-8 text-center text-sm"
+                    >
+                      No canvassers match &quot;{leaderboardSearch}&quot;
+                    </TableCell>
+                  </TableRow>
+                ) : null}
               </TableBody>
             </Table>
           </div>

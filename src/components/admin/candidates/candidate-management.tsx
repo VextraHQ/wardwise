@@ -44,7 +44,16 @@ import {
 import { formatStatusLabel } from "@/lib/admin/dashboard";
 import { formatDisplayDate } from "@/lib/date-format";
 import { nigeriaStates } from "@/lib/data/state-lga-locations";
-import { formatPersonName } from "@/lib/utils";
+import { cn, formatPersonName } from "@/lib/utils";
+import {
+  AdminMobileRecordCard,
+  AdminMobileRecordField,
+  AdminMobileRecordFields,
+  AdminMobileRecordHeader,
+  AdminMobileRecordMeta,
+  AdminMobileRecordSkeleton,
+  AdminMobileRecordTitle,
+} from "@/components/admin/shared/admin-mobile-record-card";
 
 function resolveStateName(stateCode: string | null): string {
   if (!stateCode) return "Nigeria";
@@ -231,7 +240,7 @@ function CandidateActions({
 
 function CandidateTableSkeleton() {
   return (
-    <div className="border-border/60 overflow-x-auto rounded-sm border border-dashed">
+    <div className="border-border/60 hidden overflow-x-auto rounded-sm border border-dashed md:block">
       <Table>
         <TableHeader className="bg-muted/30">
           <TableRow className="hover:bg-transparent">
@@ -412,28 +421,42 @@ export function CandidateManagement() {
       : `${filteredCandidates.length.toLocaleString()} shown`;
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-          <div className="flex-1">
-            <AdminSearchBar
-              value={searchQuery}
-              onChange={(value) => {
-                setSearchQuery(value);
-                setCandidatePage(1);
-              }}
-              onClear={() => setCandidatePage(1)}
-              placeholder="Search candidates by name, email, party, position, or constituency"
-            />
-          </div>
+    <div className="flex flex-1 flex-col p-4 md:p-6">
+      {/* Page header — same rhythm as Collect campaigns */}
+      <div className="border-border/60 flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-primary mb-1 font-mono text-[10px] font-bold tracking-widest uppercase">
+            Directory
+          </p>
+          <h2 className="text-foreground text-lg font-semibold tracking-tight">
+            Candidate Accounts
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Profiles, constituency scope, account status, and Collect shortcuts.
+          </p>
+        </div>
 
-          <Button
-            onClick={() => router.push("/admin/candidates/new")}
-            className="w-full gap-2 rounded-sm font-mono text-[11px] tracking-widest uppercase lg:w-auto"
-          >
-            <HiOutlineUserAdd className="h-4 w-4" />
-            <span>Create Candidate</span>
-          </Button>
+        <Button
+          onClick={() => router.push("/admin/candidates/new")}
+          className="h-9 w-full gap-2 rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto"
+        >
+          <HiOutlineUserAdd className="h-4 w-4" />
+          Create Candidate
+        </Button>
+      </div>
+
+      {/* Toolbar — search + filters */}
+      <div className="border-border/60 flex flex-col gap-2 border-b py-4 xl:flex-row xl:items-center xl:gap-3">
+        <div className="min-w-0 xl:flex-1">
+          <AdminSearchBar
+            value={searchQuery}
+            onChange={(value) => {
+              setSearchQuery(value);
+              setCandidatePage(1);
+            }}
+            onClear={() => setCandidatePage(1)}
+            placeholder="Search candidates by name, email, party, position, or constituency"
+          />
         </div>
 
         <CandidateFilters
@@ -459,39 +482,40 @@ export function CandidateManagement() {
         />
       </div>
 
-      <div className="flex flex-col gap-4">
-        <div className="border-border/60 flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-primary mb-1 font-mono text-[10px] font-bold tracking-widest uppercase">
-              Directory
-            </p>
-            <h2 className="text-foreground text-lg font-semibold tracking-tight">
-              Candidate Accounts
-            </h2>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Profiles, constituency scope, account status, and Collect
-              shortcuts.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2 sm:justify-end">
-            <Badge
-              variant="outline"
-              className="bg-background rounded-sm px-2.5 py-1 font-mono text-[10px] font-bold tracking-widest uppercase"
-            >
-              {candidateCountLabel}
-            </Badge>
-            <Badge
-              variant="outline"
-              className="border-primary/30 bg-primary/10 text-primary rounded-sm px-2.5 py-1 font-mono text-[10px] font-bold tracking-widest uppercase"
-            >
-              {activeCandidateCount.toLocaleString()} active
-            </Badge>
-          </div>
+      {/* Summary — total / active (Collect’s status strip slot) */}
+      {!error ? (
+        <div className="border-border/60 border-b py-2">
+          {isLoading ? (
+            <div className="flex flex-wrap gap-2">
+              <Skeleton className="h-7 w-28 rounded-sm" />
+              <Skeleton className="h-7 w-24 rounded-sm" />
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2 sm:justify-end">
+              <Badge
+                variant="outline"
+                className="bg-background rounded-sm px-2.5 py-1 font-mono text-[10px] font-bold tracking-widest uppercase"
+              >
+                {candidateCountLabel}
+              </Badge>
+              <Badge
+                variant="outline"
+                className="border-primary/30 bg-primary/10 text-primary rounded-sm px-2.5 py-1 font-mono text-[10px] font-bold tracking-widest uppercase"
+              >
+                {activeCandidateCount.toLocaleString()} active
+              </Badge>
+            </div>
+          )}
         </div>
+      ) : null}
 
+      {/* Records */}
+      <div className="mt-5 flex flex-1 flex-col gap-4">
         {isLoading ? (
-          <CandidateTableSkeleton />
+          <>
+            <AdminMobileRecordSkeleton rows={5} />
+            <CandidateTableSkeleton />
+          </>
         ) : error ? (
           <AdminResourceState
             tone="error"
@@ -546,7 +570,91 @@ export function CandidateManagement() {
           />
         ) : (
           <>
-            <div className="overflow-x-auto rounded-sm border">
+            <div className="space-y-3 md:hidden">
+              {paginatedCandidates.map((candidate) => {
+                const isSuspended = candidate.onboardingStatus === "suspended";
+                return (
+                  <AdminMobileRecordCard
+                    key={candidate.id}
+                    className={cn(
+                      "cursor-pointer transition-colors",
+                      isSuspended
+                        ? "border-destructive/30 bg-destructive/5 hover:bg-destructive/10"
+                        : "hover:bg-muted/30",
+                    )}
+                    onClick={() =>
+                      router.push(`/admin/candidates/${candidate.id}`)
+                    }
+                  >
+                    <AdminMobileRecordHeader>
+                      <div className="min-w-0 flex-1">
+                        <AdminMobileRecordTitle>
+                          {getCandidateDisplayName(candidate)}
+                        </AdminMobileRecordTitle>
+                        <AdminMobileRecordMeta mono>
+                          {candidate.user?.email ?? "—"}
+                        </AdminMobileRecordMeta>
+                      </div>
+                      <div
+                        className="flex shrink-0 flex-col items-end gap-2"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <Badge
+                          variant="outline"
+                          className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+                        >
+                          {candidate.party}
+                        </Badge>
+                        <CandidateActions
+                          candidate={candidate}
+                          onNavigate={(href) => router.push(href)}
+                        />
+                      </div>
+                    </AdminMobileRecordHeader>
+                    <AdminMobileRecordFields>
+                      <AdminMobileRecordField
+                        label="Position"
+                        value={candidate.position}
+                      />
+                      <AdminMobileRecordField label="Location">
+                        <span className="block text-right">
+                          {resolveStateName(candidate.stateCode)}
+                          {candidate.constituency ? (
+                            <span className="text-muted-foreground block text-xs font-normal">
+                              {candidate.constituency}
+                            </span>
+                          ) : null}
+                        </span>
+                      </AdminMobileRecordField>
+                      <AdminMobileRecordField label="Collect">
+                        <div className="text-foreground ml-auto inline-flex flex-col items-end gap-1 text-sm font-medium">
+                          <CollectBadge candidate={candidate} />
+                        </div>
+                      </AdminMobileRecordField>
+                      <AdminMobileRecordField label="Report">
+                        <div className="text-foreground ml-auto inline-flex flex-col items-end gap-1 text-sm font-medium">
+                          <ReportBadge candidate={candidate} />
+                        </div>
+                      </AdminMobileRecordField>
+                      <AdminMobileRecordField label="Account">
+                        <div className="flex justify-end">
+                          <OnboardingBadge
+                            status={candidate.onboardingStatus}
+                          />
+                        </div>
+                      </AdminMobileRecordField>
+                      <AdminMobileRecordField
+                        label="Added"
+                        value={formatDisplayDate(candidate.createdAt)}
+                        mono
+                      />
+                    </AdminMobileRecordFields>
+                  </AdminMobileRecordCard>
+                );
+              })}
+            </div>
+
+            <div className="hidden overflow-x-auto rounded-sm border md:block">
               <Table>
                 <TableHeader className="bg-muted/30 sticky top-0 z-10">
                   <TableRow className="hover:bg-transparent">
