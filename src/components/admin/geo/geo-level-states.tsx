@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, Fragment } from "react";
 import { HiCheck } from "react-icons/hi";
 import { nigeriaStates, type StateData } from "@/lib/data/state-lga-locations";
 import { useGeoStats } from "@/hooks/use-geo";
@@ -22,6 +22,7 @@ import {
   adminResourceStateIcons,
 } from "@/components/admin/shared/admin-resource-state";
 import { cn } from "@/lib/utils";
+import { IconChevronRight } from "@tabler/icons-react";
 
 type SeedStatus = "all" | "complete" | "partial" | "not-seeded";
 
@@ -112,13 +113,13 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
   }, [search, seedStatus, stats]);
 
   const renderCompleteness = (stateCode: string) => {
-    if (isLoading) return <Skeleton className="h-5 w-16" />;
+    if (isLoading) return <Skeleton className="h-6 w-20 rounded-sm" />;
     const ss = getStateStats(stateCode);
     if (!ss || ss.lgasSeeded === 0) {
       return (
         <Badge
           variant="outline"
-          className="bg-muted text-muted-foreground border-border/60 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+          className="border-border/60 bg-muted/50 text-muted-foreground shrink-0 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest whitespace-nowrap uppercase"
         >
           Not seeded
         </Badge>
@@ -128,17 +129,20 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
       return (
         <Badge
           variant="outline"
-          className="border-brand-emerald/20 bg-brand-emerald/10 text-brand-lagoon rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+          className="border-primary/30 bg-primary/10 text-primary shrink-0 rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest whitespace-nowrap uppercase"
         >
-          <HiCheck className="mr-0.5 h-3 w-3" />
+          <HiCheck className="mr-0.5 inline h-3 w-3 align-[-0.125em]" />
           Complete
         </Badge>
       );
     }
     return (
-      <span className="font-mono text-xs font-medium text-amber-600 tabular-nums dark:text-amber-400">
+      <Badge
+        variant="outline"
+        className="shrink-0 rounded-sm border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest whitespace-nowrap text-amber-800 uppercase dark:text-amber-200"
+      >
         {ss.lgasSeeded}/{ss.lgasExpected} LGAs
-      </span>
+      </Badge>
     );
   };
 
@@ -157,15 +161,124 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
     );
   };
 
-  const renderMetadata = (stateCode: string) => {
-    if (isLoading) return null;
+  const renderGeoTotals = (stateCode: string) => {
+    if (isLoading) {
+      return (
+        <div className="my-3 grid grid-cols-2 gap-2">
+          <Skeleton className="border-primary/15 h-13 rounded-sm border border-dashed" />
+          <Skeleton className="border-primary/15 h-13 rounded-sm border border-dashed" />
+        </div>
+      );
+    }
     const ss = getStateStats(stateCode);
-    if (!ss || (ss.totalWards === 0 && ss.totalPUs === 0)) return null;
+    const wards =
+      ss && typeof ss.totalWards === "number"
+        ? ss.totalWards.toLocaleString()
+        : "—";
+    const pus =
+      ss && typeof ss.totalPUs === "number"
+        ? ss.totalPUs.toLocaleString()
+        : "—";
+
+    const wardsIsZero = !!ss && ss.totalWards === 0;
+    const pusIsZero = !!ss && ss.totalPUs === 0;
+
     return (
-      <p className="text-muted-foreground/70 mt-0.5 text-[11px]">
-        {ss.totalWards.toLocaleString()} wards &middot;{" "}
-        {ss.totalPUs.toLocaleString()} PUs
-      </p>
+      <dl className="my-3 grid grid-cols-2 gap-2">
+        <div
+          className={cn(
+            "rounded-sm border border-dashed px-2.5 py-2",
+            wardsIsZero
+              ? "border-amber-500/45 bg-amber-500/8"
+              : "border-primary/20 bg-primary/6",
+          )}
+        >
+          <dt className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
+            Wards
+          </dt>
+          <dd
+            className={cn(
+              "mt-1 font-mono text-sm leading-none font-semibold tabular-nums",
+              wardsIsZero
+                ? "text-amber-700 dark:text-amber-400"
+                : "text-foreground",
+            )}
+          >
+            {wards}
+          </dd>
+        </div>
+        <div
+          className={cn(
+            "rounded-sm border border-dashed px-2.5 py-2",
+            pusIsZero
+              ? "border-amber-500/45 bg-amber-500/8"
+              : "border-primary/20 bg-primary/6",
+          )}
+        >
+          <dt className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
+            Polling units
+          </dt>
+          <dd
+            className={cn(
+              "mt-1 font-mono text-sm leading-none font-semibold tabular-nums",
+              pusIsZero
+                ? "text-amber-700 dark:text-amber-400"
+                : "text-foreground",
+            )}
+          >
+            {pus}
+          </dd>
+        </div>
+      </dl>
+    );
+  };
+
+  const renderStateGridCard = (state: StateData) => {
+    return (
+      <button
+        type="button"
+        onClick={() => onDrillDown(state.code)}
+        aria-label={`View LGAs in ${state.name}`}
+        className={cn(
+          "border-border/60 bg-card/50 hover:bg-card hover:border-primary/25 group flex min-h-0 min-w-0 cursor-pointer flex-col rounded-sm border p-4 text-left transition-colors",
+          "focus-visible:ring-ring focus-visible:ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+        )}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm leading-snug font-semibold tracking-tight">
+              {state.name}
+            </p>
+            <p className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+              <span className="text-foreground font-mono text-[11px] font-semibold tracking-wide uppercase tabular-nums">
+                {state.code}
+              </span>
+              <span className="text-muted-foreground/50" aria-hidden>
+                &middot;
+              </span>
+              <span className="text-muted-foreground min-w-0">
+                <span className="sr-only">Capital: </span>
+                {state.capital}
+              </span>
+            </p>
+          </div>
+          <div className="shrink-0 pt-px">{renderCompleteness(state.code)}</div>
+        </div>
+
+        {renderGeoTotals(state.code)}
+
+        {renderProgressBar(state.code)}
+
+        <div className="text-muted-foreground group-hover:text-primary border-border/40 mt-auto flex items-center gap-1 border-t pt-2.5 font-mono text-[10px] font-bold tracking-widest uppercase transition-colors">
+          <span className="min-w-0">View LGAs</span>
+          <IconChevronRight
+            aria-hidden
+            size={15}
+            stroke={1.75}
+            className="shrink-0 opacity-80"
+          />
+        </div>
+      </button>
     );
   };
 
@@ -177,8 +290,8 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
   ];
 
   return (
-    <Card className="border-border/60 rounded-sm shadow-none">
-      <CardHeader className="border-border/60 border-b">
+    <Card className="border-border/60 min-w-0 rounded-sm shadow-none">
+      <CardHeader className="border-border/60 min-w-0 border-b">
         {/* Title row + toggle */}
         <div className="flex items-center justify-between gap-3">
           <CardTitle className="text-sm font-semibold tracking-tight">
@@ -188,7 +301,7 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
         </div>
 
         {/* Search */}
-        <div className="mt-3">
+        <div className="mt-3 min-w-0">
           <AdminSearchBar
             value={search}
             onChange={setSearch}
@@ -197,42 +310,47 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
         </div>
 
         {/* Status filter tabs */}
-        <div
-          role="group"
-          aria-label="Filter states by seeding status"
-          className="bg-muted/20 border-border/60 mt-2 grid grid-cols-2 gap-1 rounded-sm border p-1 sm:flex sm:flex-wrap sm:items-center"
-        >
-          {STATUS_TABS.map(({ value, label }) => {
-            const isActive = seedStatus === value;
-            const count =
-              value === "all"
-                ? nigeriaStates.length
-                : statusCounts[value as keyof typeof statusCounts];
-            return (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={isActive}
-                onClick={() => setSeedStatus(value)}
-                className={cn(
-                  "inline-flex min-w-0 items-center justify-between gap-2 rounded-sm border px-2.5 py-1.5 text-left font-mono text-[10px] font-bold tracking-widest uppercase transition-colors sm:w-auto sm:justify-center",
-                  isActive
-                    ? "border-primary/25 bg-primary/12 text-primary shadow-sm"
-                    : "text-muted-foreground hover:bg-background/70 hover:text-foreground border-transparent",
-                )}
-              >
-                <span className="truncate">{label}</span>
-                <span
+        <div className="border-border/60 bg-muted/20 mt-2 w-full min-w-0 overflow-hidden rounded-sm border p-1 sm:w-fit">
+          <div
+            role="group"
+            aria-label="Filter states by seeding status"
+            className={cn(
+              "flex min-w-0 items-center gap-1 overflow-x-auto sm:flex-wrap sm:overflow-visible",
+              "mask-[linear-gradient(90deg,#000_0,#000_calc(100%-2.5rem),transparent)] [-webkit-mask-image:linear-gradient(90deg,#000_0,#000_calc(100%-2.5rem),transparent)] sm:mask-none sm:[-webkit-mask-image:none]",
+            )}
+          >
+            {STATUS_TABS.map(({ value, label }) => {
+              const isActive = seedStatus === value;
+              const count =
+                value === "all"
+                  ? nigeriaStates.length
+                  : statusCounts[value as keyof typeof statusCounts];
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => setSeedStatus(value)}
                   className={cn(
-                    "bg-background/80 text-muted-foreground/80 rounded-sm px-1.5 py-px text-[9px] tabular-nums sm:text-[10px]",
-                    isActive && "bg-background text-primary shadow-sm",
+                    "inline-flex min-w-max shrink-0 items-center justify-between gap-2 rounded-sm border px-2.5 py-1.5 text-left font-mono text-[10px] font-bold tracking-widest uppercase transition-colors sm:w-auto sm:min-w-0 sm:shrink sm:justify-center",
+                    isActive
+                      ? "border-primary/25 bg-primary/12 text-primary shadow-sm"
+                      : "text-muted-foreground hover:bg-background/70 hover:text-foreground border-transparent",
                   )}
                 >
-                  {isLoading ? "—" : count}
-                </span>
-              </button>
-            );
-          })}
+                  <span className="truncate">{label}</span>
+                  <span
+                    className={cn(
+                      "bg-background/80 text-muted-foreground/80 rounded-sm px-1.5 py-px text-[9px] tabular-nums sm:text-[10px]",
+                      isActive && "bg-background text-primary shadow-sm",
+                    )}
+                  >
+                    {isLoading ? "—" : count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </CardHeader>
 
@@ -253,25 +371,9 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
           hasFilters ? (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filteredStates.map((state) => (
-                <div
-                  key={state.code}
-                  className="border-border/60 bg-card/50 hover:bg-card hover:border-primary/20 cursor-pointer rounded-sm border p-4 transition-colors"
-                  onClick={() => onDrillDown(state.code)}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="truncate font-medium">{state.name}</p>
-                      <p className="text-muted-foreground text-xs">
-                        {state.capital}
-                      </p>
-                      {renderMetadata(state.code)}
-                    </div>
-                    <div className="shrink-0">
-                      {renderCompleteness(state.code)}
-                    </div>
-                  </div>
-                  {renderProgressBar(state.code)}
-                </div>
+                <Fragment key={state.code}>
+                  {renderStateGridCard(state)}
+                </Fragment>
               ))}
             </div>
           ) : (
@@ -285,27 +387,9 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
                     </h3>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                       {states.map((state) => (
-                        <div
-                          key={state.code}
-                          className="border-border/60 bg-card/50 hover:bg-card hover:border-primary/20 cursor-pointer rounded-sm border p-4 transition-colors"
-                          onClick={() => onDrillDown(state.code)}
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0">
-                              <p className="truncate font-medium">
-                                {state.name}
-                              </p>
-                              <p className="text-muted-foreground text-xs">
-                                {state.capital}
-                              </p>
-                              {renderMetadata(state.code)}
-                            </div>
-                            <div className="shrink-0">
-                              {renderCompleteness(state.code)}
-                            </div>
-                          </div>
-                          {renderProgressBar(state.code)}
-                        </div>
+                        <Fragment key={state.code}>
+                          {renderStateGridCard(state)}
+                        </Fragment>
                       ))}
                     </div>
                   </div>
