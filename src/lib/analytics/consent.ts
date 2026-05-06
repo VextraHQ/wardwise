@@ -68,7 +68,7 @@ export function getConsentValue(): ConsentValue {
   return null;
 }
 
-export function hasAnalyticsConsent() {
+export function hasAnalyticsConsent(): boolean {
   return getConsentValue() === "accepted";
 }
 

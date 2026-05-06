@@ -176,12 +176,13 @@ export function LoginScreen({ callbackUrl }: LoginScreenProps) {
               <button
                 type="button"
                 onClick={() => setShowPassword((current) => !current)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
                 className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
               >
                 {showPassword ? (
-                  <HiEyeOff className="size-4" />
+                  <HiEyeOff className="size-4" aria-hidden />
                 ) : (
-                  <HiEye className="size-4" />
+                  <HiEye className="size-4" aria-hidden />
                 )}
               </button>
             </div>

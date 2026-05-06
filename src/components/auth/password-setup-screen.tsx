@@ -105,7 +105,7 @@ export function PasswordSetupScreen({
     >
       <AuthCard
         title={isInvite ? "Account Setup" : "Reset Password"}
-        subtitle={isInvite ? "Invite flow" : "Recovery flow"}
+        subtitle={isInvite ? "Email invite" : "Secure link"}
         status={isSuccess ? "Completed" : "Protected"}
         icon={isSuccess ? HiCheckCircle : HiKey}
       >
@@ -176,12 +176,13 @@ export function PasswordSetupScreen({
                 <button
                   type="button"
                   onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
                 >
                   {showPassword ? (
-                    <HiEyeOff className="size-4" />
+                    <HiEyeOff className="size-4" aria-hidden />
                   ) : (
-                    <HiEye className="size-4" />
+                    <HiEye className="size-4" aria-hidden />
                   )}
                 </button>
               </div>
@@ -215,12 +216,17 @@ export function PasswordSetupScreen({
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((current) => !current)}
+                  aria-label={
+                    showConfirmPassword
+                      ? "Hide confirm password"
+                      : "Show confirm password"
+                  }
                   className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
                 >
                   {showConfirmPassword ? (
-                    <HiEyeOff className="size-4" />
+                    <HiEyeOff className="size-4" aria-hidden />
                   ) : (
-                    <HiEye className="size-4" />
+                    <HiEye className="size-4" aria-hidden />
                   )}
                 </button>
               </div>
@@ -292,7 +298,7 @@ export function PasswordSetupUnavailable({
         icon={HiExclamationCircle}
       >
         <div className="space-y-6">
-          <div className="border-destructive/20 bg-destructive/5 rounded-sm border p-4 text-sm leading-relaxed text-slate-700">
+          <div className="border-destructive/20 bg-destructive/5 text-muted-foreground rounded-sm border p-4 text-sm leading-relaxed">
             This link may have expired, already been used, or been replaced by a
             newer secure link.
           </div>

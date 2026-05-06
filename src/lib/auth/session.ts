@@ -1,7 +1,7 @@
 const HOUR_MS = 60 * 60 * 1000; // 1 hour
 const DAY_MS = 24 * HOUR_MS; // 1 day
 
-export const STANDARD_SESSION_MAX_AGE_MS = 12 * HOUR_MS; // 12 hours
+export const STANDARD_SESSION_MAX_AGE_MS = 24 * HOUR_MS; // 24 hours
 export const REMEMBERED_SESSION_MAX_AGE_MS = 30 * DAY_MS; // 30 days
 export const SESSION_REVALIDATION_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 
