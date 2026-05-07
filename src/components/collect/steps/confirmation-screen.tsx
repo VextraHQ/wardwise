@@ -120,7 +120,7 @@ export function ConfirmationScreen(props: ConfirmationScreenProps) {
         {props.state === "confirmed" ? (
           <RegistrationStepHeader
             title="You're All Set!"
-            description="Thank you for registering your support. Your details have been received."
+            description="Your details have been received. The campaign team will review and verify your registration."
           />
         ) : props.state === "queued" ? (
           <RegistrationStepHeader
@@ -136,17 +136,13 @@ export function ConfirmationScreen(props: ConfirmationScreenProps) {
       </section>
 
       {props.state === "confirmed" && (
-        <>
-          <p className="text-muted-foreground mx-auto max-w-md text-center text-sm leading-relaxed">
-            The campaign team will review and verify your registration.
-          </p>
-
-          <div className="mt-2 space-y-2 text-center">
-            <div className="border-border/60 bg-muted/30 inline-flex items-center gap-3 rounded-sm border border-dashed px-5 py-2.5">
-              <span className="text-muted-foreground/60 text-[10px] font-bold tracking-[0.2em] uppercase">
-                Registration Reference
-              </span>
-              <div className="bg-border/50 h-3 w-px" />
+        <div className="space-y-2 text-center">
+          <div className="border-border/60 bg-muted/40 mx-auto flex w-full max-w-sm flex-col items-stretch gap-2 rounded-sm border border-dashed px-4 py-3 sm:inline-flex sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:gap-3 sm:px-5 sm:py-2.5">
+            <span className="text-muted-foreground/70 text-center font-mono text-[10px] font-bold tracking-widest uppercase sm:text-left">
+              Registration Reference
+            </span>
+            <div className="bg-border/50 hidden h-3 w-px sm:block" />
+            <div className="flex items-center justify-center gap-2 sm:gap-3">
               <span className="text-foreground font-mono text-sm font-bold tracking-widest">
                 {props.refCode}
               </span>
@@ -154,17 +150,18 @@ export function ConfirmationScreen(props: ConfirmationScreenProps) {
                 variant="ghost"
                 size="sm"
                 onClick={handleCopyReference}
+                aria-label="Copy registration reference"
                 className="text-muted-foreground hover:text-foreground h-7 rounded-sm px-2 text-[10px] font-bold tracking-widest uppercase"
               >
                 <IconCopy className="mr-1 h-3.5 w-3.5" />
                 Copy
               </Button>
             </div>
-            <p className="text-muted-foreground text-center text-xs leading-relaxed">
-              Keep this reference if you need help with this registration.
-            </p>
           </div>
-        </>
+          <p className="text-muted-foreground text-center text-xs leading-relaxed">
+            Keep this reference if you need help with this registration.
+          </p>
+        </div>
       )}
 
       <div className="flex flex-wrap justify-center gap-3">

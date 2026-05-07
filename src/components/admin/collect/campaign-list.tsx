@@ -7,6 +7,7 @@ import {
   IconClipboardList,
   IconAlertTriangle,
 } from "@tabler/icons-react";
+import { HiX } from "react-icons/hi";
 import { useCampaigns } from "@/hooks/use-collect";
 import type { CampaignSummary } from "@/types/collect";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,7 @@ import {
   type CampaignSort,
   type CampaignStatusFilter,
   type CampaignReportFilter,
+  type CampaignActivityFilter,
 } from "@/components/admin/admin-filters/campaign-filters";
 import { CampaignActionsMenu } from "@/components/admin/collect/campaign-actions-menu";
 import {
@@ -97,9 +99,12 @@ function CampaignReportBadge({ campaign }: { campaign: CampaignSummary }) {
 function SummaryStripSkeleton() {
   return (
     <div className="border-border/60 flex flex-col gap-2 border-b py-2 md:flex-row md:items-center md:justify-between md:gap-3 md:py-1">
-      <div className="flex w-full min-w-0 gap-1.5 overflow-hidden md:flex-1">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-9 w-19 shrink-0 rounded-sm" />
+      <div className="flex w-full min-w-0 items-center gap-1.5 overflow-hidden md:flex-1">
+        {["w-12", "w-16", "w-16", "w-16", "w-16"].map((widthClass, i) => (
+          <Skeleton
+            key={i}
+            className={cn("h-7 shrink-0 rounded-sm", widthClass)}
+          />
         ))}
       </div>
       <div className="border-border/40 flex w-full justify-between gap-3 border-t pt-2 md:w-auto md:shrink-0 md:border-t-0 md:pt-0 md:pl-2">
@@ -185,27 +190,33 @@ export function CampaignList() {
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<CampaignStatusFilter>("all");
+  const [activityFilter, setActivityFilter] =
+    useState<CampaignActivityFilter>("all");
   const [reportFilter, setReportFilter] = useState<CampaignReportFilter>("all");
   const [sort, setSort] = useState<CampaignSort>("recent-activity");
 
   const hasFilters =
     search !== "" ||
     statusFilter !== "all" ||
+    activityFilter !== "all" ||
     reportFilter !== "all" ||
     sort !== "recent-activity";
 
   function resetFilters() {
     setSearch("");
     setStatusFilter("all");
+    setActivityFilter("all");
     setReportFilter("all");
     setSort("recent-activity");
     setPage(1);
   }
 
   function handleFilterChange(filter: {
+    activity?: CampaignActivityFilter;
     report?: CampaignReportFilter;
     sort?: CampaignSort;
   }) {
+    if (filter.activity !== undefined) setActivityFilter(filter.activity);
     if (filter.report !== undefined) setReportFilter(filter.report);
     if (filter.sort !== undefined) setSort(filter.sort);
     setPage(1);
@@ -237,6 +248,18 @@ export function CampaignList() {
       result = result.filter((c) => c.status === statusFilter);
     }
 
+    if (activityFilter !== "all") {
+      result = result.filter((c) => {
+        if (activityFilter === "no-submissions") {
+          return c._count.submissions === 0;
+        }
+        if (c.status !== "active") return false;
+        if (c._count.submissions === 0) return false;
+        const stale = isStaleCampaign(c);
+        return activityFilter === "stale" ? stale : !stale;
+      });
+    }
+
     if (reportFilter !== "all") {
       result = result.filter((c) => {
         const on = Boolean(c.clientReportEnabled && c.clientReportToken);
@@ -245,7 +268,7 @@ export function CampaignList() {
     }
 
     return applySort(result, sort);
-  }, [campaigns, search, statusFilter, reportFilter, sort]);
+  }, [campaigns, search, statusFilter, activityFilter, reportFilter, sort]);
 
   // Tab counts always reflect the full unfiltered dataset so they don't
   // disappear when another filter is active.
@@ -309,25 +332,7 @@ export function CampaignList() {
         </Button>
       </div>
 
-      {/* Toolbar — single row on xl+, stacked below */}
-      <div className="border-border/60 flex flex-col gap-2 border-b py-4 xl:flex-row xl:items-center xl:gap-3">
-        <div className="min-w-0 xl:flex-1">
-          <AdminSearchBar
-            value={search}
-            onChange={handleSearch}
-            placeholder="Search by name, party, constituency, or slug…"
-          />
-        </div>
-        <CampaignFilters
-          reportFilter={reportFilter}
-          sort={sort}
-          onFilterChange={handleFilterChange}
-          onReset={resetFilters}
-          hasFilters={hasFilters}
-        />
-      </div>
-
-      {/* Status tabs + stale indicator + submissions count */}
+      {/* Status tabs — primary axis, sits directly under the page header */}
       {isLoading ? (
         <SummaryStripSkeleton />
       ) : campaigns ? (
@@ -377,12 +382,7 @@ export function CampaignList() {
             })}
           </div>
 
-          <div
-            className={cn(
-              "border-border/40 text-muted-foreground flex w-full flex-wrap items-center gap-x-3 gap-y-1 border-t pt-2 md:w-auto md:shrink-0 md:flex-nowrap md:justify-end md:border-t-0 md:pt-0 md:pl-2",
-              filteredStale > 0 ? "justify-between" : "justify-end",
-            )}
-          >
+          <div className="border-border/40 text-muted-foreground flex w-full flex-wrap items-center justify-end gap-x-3 gap-y-1 border-t pt-2 md:w-auto md:shrink-0 md:flex-nowrap md:border-t-0 md:pt-0 md:pl-2">
             {filteredStale > 0 && (
               <span className="flex items-center gap-1 text-amber-600 dark:text-amber-500">
                 <IconAlertTriangle className="h-3 w-3 shrink-0" />
@@ -397,9 +397,41 @@ export function CampaignList() {
               </span>{" "}
               submissions
             </span>
+            {hasFilters ? (
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={resetFilters}
+                aria-label="Reset search and filters"
+                className="border-border/60 hover:bg-muted h-7 shrink-0 gap-1.5 rounded-sm px-2.5 font-mono text-[10px] font-bold tracking-widest uppercase shadow-none"
+              >
+                <HiX className="h-3 w-3" />
+                Reset
+              </Button>
+            ) : null}
           </div>
         </div>
       ) : null}
+
+      {/* Toolbar — search + filters */}
+      <div className="border-border/60 flex flex-col gap-2 border-b py-4 xl:flex-row xl:items-center xl:gap-3">
+        <div className="min-w-0 xl:flex-1">
+          <AdminSearchBar
+            value={search}
+            onChange={handleSearch}
+            placeholder="Search by name, party, constituency, or slug…"
+          />
+        </div>
+        <CampaignFilters
+          activityFilter={activityFilter}
+          reportFilter={reportFilter}
+          sort={sort}
+          onFilterChange={handleFilterChange}
+          onReset={resetFilters}
+          hasFilters={hasFilters}
+        />
+      </div>
 
       {/* Records */}
       <div className="mt-5 flex flex-1 flex-col gap-4">

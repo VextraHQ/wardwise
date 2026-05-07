@@ -761,21 +761,23 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
                       type="button"
                       size="sm"
                       variant="outline"
-                      className="h-10 flex-1 rounded-sm sm:h-10 sm:min-w-10 sm:flex-none sm:px-0"
+                      className="h-10 flex-1 gap-1.5 rounded-sm font-mono text-[11px] tracking-widest uppercase sm:h-10 sm:min-w-10 sm:flex-none sm:gap-0 sm:px-0 sm:text-xs"
                       aria-label="Copy report link"
                       onClick={() => copyToClipboard(reportUrl, "Report link")}
                     >
                       <IconCopy className="h-3.5 w-3.5" />
+                      <span className="sm:hidden">Copy</span>
                     </Button>
                     <Button
                       type="button"
                       size="sm"
                       variant="outline"
-                      className="h-10 flex-1 rounded-sm sm:h-10 sm:min-w-10 sm:flex-none sm:px-0"
+                      className="h-10 flex-1 gap-1.5 rounded-sm font-mono text-[11px] tracking-widest uppercase sm:h-10 sm:min-w-10 sm:flex-none sm:gap-0 sm:px-0 sm:text-xs"
                       aria-label="Open report in new tab"
                       onClick={() => window.open(reportUrl, "_blank")}
                     >
                       <IconExternalLink className="h-3.5 w-3.5" />
+                      <span className="sm:hidden">Open</span>
                     </Button>
                   </div>
                 </div>
@@ -795,13 +797,14 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
                       type="button"
                       size="sm"
                       variant="outline"
-                      className="h-10 w-full shrink-0 rounded-sm sm:w-auto sm:min-w-10 sm:px-0"
+                      className="h-10 w-full shrink-0 gap-1.5 rounded-sm font-mono text-[11px] tracking-widest uppercase sm:w-auto sm:min-w-10 sm:gap-0 sm:px-0 sm:text-xs"
                       aria-label="Copy passcode"
                       onClick={() =>
                         copyToClipboard(visiblePasscode, "Passcode")
                       }
                     >
                       <IconCopy className="h-3.5 w-3.5" />
+                      <span className="sm:hidden">Copy</span>
                     </Button>
                   </div>
                 ) : (

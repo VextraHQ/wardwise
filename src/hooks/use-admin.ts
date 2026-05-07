@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   adminApi,
+  type CandidateWithUser,
   type CreateCandidateData,
   type DeleteCandidateData,
   type UpdateCandidateData,
@@ -40,6 +41,20 @@ export function useAdminDashboardSummary() {
 
 // === Mutation Hooks ===
 
+// Sync candidate caches to ensure data consistency across components.
+export function syncCandidateCaches(
+  qc: ReturnType<typeof useQueryClient>,
+  candidate: CandidateWithUser,
+) {
+  qc.setQueryData(["admin", "candidates", candidate.id], candidate);
+  qc.setQueryData(
+    ["admin", "candidates"],
+    (current: CandidateWithUser[] | undefined) =>
+      current?.map((item) => (item.id === candidate.id ? candidate : item)) ??
+      current,
+  );
+}
+
 // Creates a new candidate account and refreshes the candidates list.
 export function useCreateCandidate() {
   const qc = useQueryClient();
@@ -56,7 +71,8 @@ export function useUpdateCandidate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: UpdateCandidateData) => adminApi.candidates.update(data),
-    onSuccess: (_data, variables) => {
+    onSuccess: (data, variables) => {
+      syncCandidateCaches(qc, data);
       qc.invalidateQueries({
         queryKey: ["admin", "candidates", variables.id],
       });
@@ -73,7 +89,8 @@ export function useUpdateCandidateStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       adminApi.candidates.update({ id, onboardingStatus: status }),
-    onSuccess: (_data, variables) => {
+    onSuccess: (data, variables) => {
+      syncCandidateCaches(qc, data);
       qc.invalidateQueries({
         queryKey: ["admin", "candidates", variables.id],
       });

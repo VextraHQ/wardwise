@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminCandidates } from "@/hooks/use-admin";
-import { HiOutlineUserAdd, HiOutlineUserGroup } from "react-icons/hi";
+import { HiOutlineUserAdd, HiOutlineUserGroup, HiX } from "react-icons/hi";
 import {
   IconClipboardList,
   IconDotsVertical,
@@ -33,7 +33,12 @@ import {
 } from "@/components/ui/table";
 
 import { AdminSearchBar } from "@/components/admin/admin-search-bar";
-import { CandidateFilters } from "@/components/admin/admin-filters/candidate-filters";
+import {
+  CandidateFilters,
+  type CandidateCollectFilter,
+  type CandidateInsightsFilter,
+  type CandidateSort,
+} from "@/components/admin/admin-filters/candidate-filters";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { CampaignActionMenuItems } from "@/components/admin/collect/campaign-actions-menu";
 import {
@@ -323,22 +328,52 @@ function CandidateTableSkeleton() {
   );
 }
 
+type CandidateStatusFilter =
+  | "all"
+  | "pending"
+  | "credentials_sent"
+  | "active"
+  | "suspended";
+
+const CANDIDATE_STATUS_TABS: { value: CandidateStatusFilter; label: string }[] =
+  [
+    { value: "all", label: "All" },
+    { value: "pending", label: "Pending" },
+    { value: "credentials_sent", label: "Credentials Sent" },
+    { value: "active", label: "Active" },
+    { value: "suspended", label: "Suspended" },
+  ];
+
 export function CandidateManagement() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState<CandidateStatusFilter>("all");
+  const [collectFilter, setCollectFilter] =
+    useState<CandidateCollectFilter>("all");
+  const [insightsFilter, setInsightsFilter] =
+    useState<CandidateInsightsFilter>("all");
   const [partyFilter, setPartyFilter] = useState("all");
   const [positionFilter, setPositionFilter] = useState("all");
-  const [candidateSort, setCandidateSort] = useState<"name" | "date">("date");
+  const [candidateSort, setCandidateSort] = useState<CandidateSort>("date");
   const [candidatePage, setCandidatePage] = useState(1);
   const [candidatePageSize, setCandidatePageSize] = useState(10);
 
   const { data: candidates = [], isLoading, error } = useAdminCandidates();
   const hasSearchQuery = searchQuery.trim().length > 0;
 
-  const activeCandidateCount = useMemo(
-    () =>
-      candidates.filter((candidate) => candidate.onboardingStatus === "active")
+  const statusCounts: Record<CandidateStatusFilter, number> = useMemo(
+    () => ({
+      all: candidates.length,
+      pending: candidates.filter((c) => c.onboardingStatus === "pending")
         .length,
+      credentials_sent: candidates.filter(
+        (c) => c.onboardingStatus === "credentials_sent",
+      ).length,
+      active: candidates.filter((c) => c.onboardingStatus === "active").length,
+      suspended: candidates.filter((c) => c.onboardingStatus === "suspended")
+        .length,
+    }),
     [candidates],
   );
 
@@ -364,6 +399,42 @@ export function CandidateManagement() {
     const query = searchQuery.trim().toLowerCase();
 
     const filtered = candidates.filter((candidate) => {
+      if (statusFilter !== "all" && candidate.onboardingStatus !== statusFilter)
+        return false;
+
+      if (collectFilter !== "all") {
+        const hasCampaign =
+          candidate.hasAnyCampaign ??
+          ((candidate.campaignCount ?? 0) > 0 ||
+            Boolean(candidate.collectCampaign));
+        const hasActiveCampaign =
+          candidate.hasActiveCampaign ??
+          candidate.collectCampaign?.status === "active";
+        if (collectFilter === "has-active" && !hasActiveCampaign) return false;
+        if (
+          collectFilter === "has-inactive" &&
+          (!hasCampaign || hasActiveCampaign)
+        )
+          return false;
+        if (collectFilter === "no-campaign" && hasCampaign) return false;
+      }
+
+      if (insightsFilter !== "all") {
+        const hasCampaign =
+          candidate.hasAnyCampaign ??
+          ((candidate.campaignCount ?? 0) > 0 ||
+            Boolean(candidate.collectCampaign));
+        const insightsOn =
+          candidate.hasInsightsEnabledCampaign ??
+          Boolean(
+            candidate.collectCampaign?.clientReportEnabled &&
+            candidate.collectCampaign.clientReportToken,
+          );
+        if (!hasCampaign) return false;
+        if (insightsFilter === "insights-on" && !insightsOn) return false;
+        if (insightsFilter === "insights-off" && insightsOn) return false;
+      }
+
       if (partyFilter !== "all" && candidate.party !== partyFilter)
         return false;
       if (positionFilter !== "all" && candidate.position !== positionFilter)
@@ -383,15 +454,33 @@ export function CandidateManagement() {
     });
 
     filtered.sort((left, right) => {
-      if (candidateSort === "name") return left.name.localeCompare(right.name);
-      return (
-        new Date(right.user.createdAt).getTime() -
-        new Date(left.user.createdAt).getTime()
-      );
+      switch (candidateSort) {
+        case "name":
+          return left.name.localeCompare(right.name);
+        case "campaigns":
+          return (right.campaignCount ?? 0) - (left.campaignCount ?? 0);
+        case "supporters":
+          return (right.supporterCount ?? 0) - (left.supporterCount ?? 0);
+        case "date":
+        default:
+          return (
+            new Date(right.user.createdAt).getTime() -
+            new Date(left.user.createdAt).getTime()
+          );
+      }
     });
 
     return filtered;
-  }, [candidates, searchQuery, partyFilter, positionFilter, candidateSort]);
+  }, [
+    candidates,
+    searchQuery,
+    statusFilter,
+    collectFilter,
+    insightsFilter,
+    partyFilter,
+    positionFilter,
+    candidateSort,
+  ]);
 
   const candidateTotalPages = Math.max(
     1,
@@ -407,11 +496,19 @@ export function CandidateManagement() {
 
   const activeFilters =
     hasSearchQuery ||
+    statusFilter !== "all" ||
+    collectFilter !== "all" ||
+    insightsFilter !== "all" ||
     partyFilter !== "all" ||
     positionFilter !== "all" ||
     candidateSort !== "date";
   const hasActiveCandidateFilters =
-    hasSearchQuery || partyFilter !== "all" || positionFilter !== "all";
+    hasSearchQuery ||
+    statusFilter !== "all" ||
+    collectFilter !== "all" ||
+    insightsFilter !== "all" ||
+    partyFilter !== "all" ||
+    positionFilter !== "all";
 
   // S/N offset for current page
   const snOffset = (safeCandidatePage - 1) * candidatePageSize;
@@ -419,6 +516,17 @@ export function CandidateManagement() {
     filteredCandidates.length === candidates.length
       ? `${candidates.length.toLocaleString()} total`
       : `${filteredCandidates.length.toLocaleString()} shown`;
+
+  function resetDirectoryFilters() {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setCollectFilter("all");
+    setInsightsFilter("all");
+    setPartyFilter("all");
+    setPositionFilter("all");
+    setCandidateSort("date");
+    setCandidatePage(1);
+  }
 
   return (
     <div className="flex flex-1 flex-col p-4 md:p-6">
@@ -445,69 +553,116 @@ export function CandidateManagement() {
         </Button>
       </div>
 
-      {/* Toolbar — search + filters */}
-      <div className="border-border/60 flex flex-col gap-2 border-b py-4 xl:flex-row xl:items-center xl:gap-3">
-        <div className="min-w-0 xl:flex-1">
-          <AdminSearchBar
-            value={searchQuery}
-            onChange={(value) => {
-              setSearchQuery(value);
-              setCandidatePage(1);
-            }}
-            onClear={() => setCandidatePage(1)}
-            placeholder="Search candidates by name, email, party, position, or constituency"
-          />
-        </div>
+      {/* Status pill bar */}
+      {!error ? (
+        isLoading ? (
+          <div className="border-border/60 flex flex-col gap-2 border-b py-2 md:flex-row md:items-center md:justify-between md:gap-3 md:py-1">
+            <div className="flex w-full min-w-0 items-center gap-1.5 overflow-hidden md:flex-1">
+              {["w-12", "w-20", "w-32", "w-16", "w-24"].map((widthClass, i) => (
+                <Skeleton
+                  key={i}
+                  className={cn("h-7 shrink-0 rounded-sm", widthClass)}
+                />
+              ))}
+            </div>
+            <Skeleton className="h-4 w-20 shrink-0 rounded-sm md:ml-auto" />
+          </div>
+        ) : (
+          <div className="border-border/60 flex flex-col gap-2 border-b py-2 md:flex-row md:items-center md:justify-between md:gap-3 md:py-1">
+            <div
+              role="group"
+              aria-label="Filter candidates by account status"
+              className="flex w-full min-w-0 items-center gap-0.5 overflow-x-auto pb-0.5 [scrollbar-width:none] md:flex-1 md:pb-0 [&::-webkit-scrollbar]:hidden"
+            >
+              {CANDIDATE_STATUS_TABS.map(({ value, label }) => {
+                const isActive = statusFilter === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => {
+                      setStatusFilter(value);
+                      setCandidatePage(1);
+                    }}
+                    className={cn(
+                      "inline-flex shrink-0 items-center gap-1.5 rounded-sm px-2.5 py-1.5 font-mono text-[10px] font-bold tracking-widest whitespace-nowrap uppercase transition-colors",
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
+                  >
+                    {label}
+                    <span
+                      className={cn(
+                        "tabular-nums",
+                        isActive
+                          ? "text-primary/70"
+                          : "text-muted-foreground/60",
+                      )}
+                    >
+                      {statusCounts[value].toLocaleString()}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="border-border/40 text-muted-foreground flex w-full items-center justify-end gap-3 border-t pt-2 md:w-auto md:shrink-0 md:justify-end md:border-t-0 md:pt-0 md:pl-2">
+              <span className="font-mono text-[10px] font-bold tracking-widest whitespace-nowrap uppercase tabular-nums">
+                {candidateCountLabel}
+              </span>
+              {activeFilters ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={resetDirectoryFilters}
+                  aria-label="Reset search and filters"
+                  className="border-border/60 hover:bg-muted h-7 shrink-0 gap-1.5 rounded-sm px-2.5 font-mono text-[10px] font-bold tracking-widest uppercase shadow-none"
+                >
+                  <HiX className="h-3 w-3" />
+                  Reset
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        )
+      ) : null}
+
+      {/* Toolbar — search row */}
+      <div className="border-border/60 flex flex-col gap-3 border-b py-4">
+        <AdminSearchBar
+          value={searchQuery}
+          onChange={(value) => {
+            setSearchQuery(value);
+            setCandidatePage(1);
+          }}
+          onClear={() => setCandidatePage(1)}
+          placeholder="Search candidates by name, email, party, position, or constituency"
+          mobilePlaceholder="Search name, email, party…"
+        />
 
         <CandidateFilters
+          collectFilter={collectFilter}
+          insightsFilter={insightsFilter}
           partyFilter={partyFilter}
           positionFilter={positionFilter}
           sort={candidateSort}
           uniqueParties={uniqueParties}
           uniquePositions={uniquePositions}
-          onFilterChange={({ party, position, sort }) => {
+          onFilterChange={({ collect, insights, party, position, sort }) => {
+            if (collect !== undefined) setCollectFilter(collect);
+            if (insights !== undefined) setInsightsFilter(insights);
             if (party !== undefined) setPartyFilter(party);
             if (position !== undefined) setPositionFilter(position);
             if (sort !== undefined) setCandidateSort(sort);
             setCandidatePage(1);
           }}
-          onReset={() => {
-            setSearchQuery("");
-            setPartyFilter("all");
-            setPositionFilter("all");
-            setCandidateSort("date");
-            setCandidatePage(1);
-          }}
+          onReset={resetDirectoryFilters}
           hasFilters={activeFilters}
         />
       </div>
-
-      {/* Summary — total / active (Collect’s status strip slot) */}
-      {!error ? (
-        <div className="border-border/60 border-b py-2">
-          {isLoading ? (
-            <div className="flex flex-wrap gap-2">
-              <Skeleton className="h-7 w-28 rounded-sm" />
-              <Skeleton className="h-7 w-24 rounded-sm" />
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2 sm:justify-end">
-              <Badge
-                variant="outline"
-                className="bg-background rounded-sm px-2.5 py-1 font-mono text-[10px] font-bold tracking-widest uppercase"
-              >
-                {candidateCountLabel}
-              </Badge>
-              <Badge
-                variant="outline"
-                className="border-primary/30 bg-primary/10 text-primary rounded-sm px-2.5 py-1 font-mono text-[10px] font-bold tracking-widest uppercase"
-              >
-                {activeCandidateCount.toLocaleString()} active
-              </Badge>
-            </div>
-          )}
-        </div>
-      ) : null}
 
       {/* Records */}
       <div className="mt-5 flex flex-1 flex-col gap-4">
@@ -542,20 +697,17 @@ export function CandidateManagement() {
               hasSearchQuery
                 ? "Try adjusting your search terms or clearing filters."
                 : hasActiveCandidateFilters
-                  ? "Try clearing the selected party or position filters."
+                  ? "No candidates match the current combination of status and filter selections. Try clearing one or more filters."
                   : "Create your first candidate to start managing campaigns, account access, and Collect setup."
             }
             action={
-              hasActiveCandidateFilters
+              hasSearchQuery || hasActiveCandidateFilters
                 ? {
-                    label: "Clear Filters",
-                    onClick: () => {
-                      setSearchQuery("");
-                      setPartyFilter("all");
-                      setPositionFilter("all");
-                      setCandidateSort("date");
-                      setCandidatePage(1);
-                    },
+                    label:
+                      hasSearchQuery && !hasActiveCandidateFilters
+                        ? "Clear Search"
+                        : "Clear Filters",
+                    onClick: resetDirectoryFilters,
                     variant: "outline",
                   }
                 : !hasSearchQuery

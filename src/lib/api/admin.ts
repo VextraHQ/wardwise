@@ -12,6 +12,9 @@ export interface CandidateWithUser extends Candidate {
   };
   campaignCount?: number;
   collectCampaign?: CandidateCollectCampaignSummary | null;
+  hasActiveCampaign?: boolean;
+  hasAnyCampaign?: boolean;
+  hasInsightsEnabledCampaign?: boolean;
   deletionImpact?: CandidateDeletionImpact;
 }
 

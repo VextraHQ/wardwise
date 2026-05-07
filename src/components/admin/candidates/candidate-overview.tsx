@@ -41,7 +41,7 @@ import {
 } from "@/lib/data/nigerian-parties";
 import { ListOrCustomField } from "@/components/admin/shared/list-or-custom-field";
 import {
-  IconEdit,
+  IconPencil,
   IconX,
   IconDeviceFloppy,
   IconUsers,
@@ -49,6 +49,7 @@ import {
   IconClipboardList,
 } from "@tabler/icons-react";
 import { useMemo, useEffect } from "react";
+import type { ZodError } from "zod";
 import { LgaCheckboxGrid } from "@/components/admin/shared/lga-checkbox-grid";
 import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituency-boundary-alerts";
 import { OfficialConstituencySelector } from "@/components/admin/shared/official-constituency-selector";
@@ -64,6 +65,7 @@ import {
   getUnsupportedPresetsForState,
 } from "@/lib/data/nigerian-constituencies";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 function resolveStateName(stateCode: string | null): string {
   if (!stateCode) return "—";
@@ -87,12 +89,41 @@ const TITLE_OPTIONS_WITH_OTHER = [
   CANDIDATE_TITLE_OTHER_OPTION,
 ];
 
+type EditingSection = "identity" | "electoral" | "contact" | "bio";
+
+const LGA_CHIP_DISPLAY_LIMIT = 4;
+
+function buildCandidateFormDefaults(
+  candidate: CandidateWithUser,
+): UpdateCandidateFormValues {
+  return {
+    id: candidate.id,
+    name: candidate.name,
+    email: candidate.user?.email ?? "",
+    party: candidate.party,
+    position: candidate.position,
+    constituency: candidate.constituency ?? "",
+    stateCode: candidate.stateCode ?? "",
+    lga: candidate.lga ?? "",
+    constituencyLgaIds: candidate.constituencyLgaIds ?? [],
+    description: candidate.description ?? "",
+    phone: candidate.phone ?? "",
+    title: candidate.title ?? "",
+  };
+}
+
+function firstZodIssueMessage(error: ZodError): string {
+  return error.issues[0]?.message ?? "Validation failed";
+}
+
 interface CandidateOverviewProps {
   candidate: CandidateWithUser;
 }
 
 export function CandidateOverview({ candidate }: CandidateOverviewProps) {
-  const [editing, setEditing] = useState(false);
+  const [editingSection, setEditingSection] = useState<EditingSection | null>(
+    null,
+  );
   const campaignCount =
     (candidate as CandidateWithUser & { _count?: { campaigns?: number } })
       ._count?.campaigns ?? 0;
@@ -103,20 +134,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
 
   const form = useForm<UpdateCandidateFormValues>({
     resolver: zodResolver(updateCandidateSchema),
-    defaultValues: {
-      id: candidate.id,
-      name: candidate.name,
-      email: candidate.user?.email ?? "",
-      party: candidate.party,
-      position: candidate.position,
-      constituency: candidate.constituency ?? "",
-      stateCode: candidate.stateCode ?? "",
-      lga: candidate.lga ?? "",
-      constituencyLgaIds: candidate.constituencyLgaIds ?? [],
-      description: candidate.description ?? "",
-      phone: candidate.phone ?? "",
-      title: candidate.title ?? "",
-    },
+    defaultValues: buildCandidateFormDefaults(candidate),
   });
 
   const selectedPosition = useWatch({
@@ -146,20 +164,20 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     selectedPosition && positionRequiresLgas(selectedPosition),
   );
 
-  const {
-    data: lgaResponse,
-    isLoading: lgasLoading,
-    isFetching: lgasFetching,
-  } = useGeoLgas(
-    editing
+  const geoLgaQueryState =
+    editingSection === "electoral"
       ? showLgaGrid && selectedStateCode
         ? selectedStateCode
         : null
       : positionRequiresLgas(candidate.position) && candidate.stateCode
         ? candidate.stateCode
-        : null,
-    { pageSize: 200 },
-  );
+        : null;
+
+  const {
+    data: lgaResponse,
+    isLoading: lgasLoading,
+    isFetching: lgasFetching,
+  } = useGeoLgas(geoLgaQueryState, { pageSize: 200 });
 
   const lgas = useMemo(
     () => lgaResponse?.data.map((l) => ({ id: l.id, name: l.name })) ?? [],
@@ -178,6 +196,35 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
         .map((lga) => lga.name),
     [constituencyLgaIds, lgas],
   );
+
+  /** LGAs for read-only chips while another section is being edited (geo keyed to saved candidate). */
+  const summaryLgaNames = useMemo(() => {
+    if (
+      !positionRequiresLgas(candidate.position) ||
+      !candidate.stateCode ||
+      editingSection === "electoral"
+    ) {
+      return [];
+    }
+    return lgas
+      .filter((lga) => candidate.constituencyLgaIds.includes(lga.id))
+      .map((lga) => lga.name);
+  }, [
+    candidate.constituencyLgaIds,
+    candidate.position,
+    candidate.stateCode,
+    editingSection,
+    lgas,
+  ]);
+  const visibleSummaryLgaChips = summaryLgaNames.slice(
+    0,
+    LGA_CHIP_DISPLAY_LIMIT,
+  );
+  const remainingSummaryLgaCount = Math.max(
+    0,
+    summaryLgaNames.length - visibleSummaryLgaChips.length,
+  );
+
   const suggestedConstituency = useMemo(
     () => autoConstituencyName(selectedLgaNames),
     [selectedLgaNames],
@@ -219,7 +266,10 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
 
   const availablePresets = useMemo(
     () =>
-      editing && showLgaGrid && selectedPosition && selectedStateCode
+      editingSection === "electoral" &&
+      showLgaGrid &&
+      selectedPosition &&
+      selectedStateCode
         ? getPresetsForState(
             selectedPosition as
               | "Senator"
@@ -228,19 +278,19 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
             selectedStateCode,
           )
         : [],
-    [editing, showLgaGrid, selectedPosition, selectedStateCode],
+    [editingSection, showLgaGrid, selectedPosition, selectedStateCode],
   );
   const hasPresets = availablePresets.length > 0;
   const unsupportedPresets = useMemo(
     () =>
-      editing &&
+      editingSection === "electoral" &&
       showLgaGrid &&
       selectedStateCode &&
       (selectedPosition === "House of Representatives" ||
         selectedPosition === "State Assembly")
         ? getUnsupportedPresetsForState(selectedPosition, selectedStateCode)
         : [],
-    [editing, showLgaGrid, selectedPosition, selectedStateCode],
+    [editingSection, showLgaGrid, selectedPosition, selectedStateCode],
   );
   const matchingPreset = useMemo(
     () => findMatchingPreset(constituencyLgaIds, lgas, availablePresets),
@@ -277,7 +327,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
   const manuallyMatchesPreset =
     !effectivePresetShortName && Boolean(matchingPreset);
   const showBoundaryGrid = Boolean(
-    editing &&
+    editingSection === "electoral" &&
     showLgaGrid &&
     selectedStateCode &&
     !lgasFetching &&
@@ -381,9 +431,9 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
       candidate.position === "Governor");
   const lastAutoConstituencyRef = useRef("");
 
-  // Auto-suggest constituency from selected LGAs when editing
+  // Auto-suggest constituency from selected LGAs when editing electoral section
   useEffect(() => {
-    if (!editing || !showLgaGrid || lgas.length === 0) {
+    if (editingSection !== "electoral" || !showLgaGrid || lgas.length === 0) {
       lastAutoConstituencyRef.current = "";
       return;
     }
@@ -418,7 +468,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     }
   }, [
     constituencyValue,
-    editing,
+    editingSection,
     effectivePresetShortName,
     form,
     lgas.length,
@@ -427,11 +477,11 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
   ]);
 
   useEffect(() => {
-    if (!editing) {
+    if (editingSection !== "electoral") {
       setSelectedPresetShortName(null);
       setCustomBoundaryMode(false);
     }
-  }, [editing]);
+  }, [editingSection]);
 
   function handlePresetChange(value: string) {
     if (value === "__custom__" || !value) {
@@ -469,30 +519,142 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
 
   const updateMutation = useUpdateCandidate();
 
-  function onSubmit(data: UpdateCandidateFormValues) {
+  const candidateRemoteRevision = `${candidate.id}:${candidate.updatedAt}`;
+
+  useEffect(() => {
+    if (editingSection === null) {
+      form.reset(buildCandidateFormDefaults(candidate));
+    }
+  }, [candidateRemoteRevision, editingSection, form, candidate]);
+
+  function beginSectionEdit(section: EditingSection) {
+    if (editingSection && editingSection !== section) {
+      form.reset(buildCandidateFormDefaults(candidate));
+    }
+    setEditingSection(section);
+  }
+
+  function cancelSectionEdit() {
+    form.reset(buildCandidateFormDefaults(candidate));
+    setEditingSection(null);
+  }
+
+  function saveIdentity() {
+    const v = form.getValues();
+    const parsed = updateCandidateSchema.safeParse({
+      id: candidate.id,
+      name: v.name,
+      party: v.party,
+      title: v.title || undefined,
+    });
+    if (!parsed.success) {
+      toast.error(firstZodIssueMessage(parsed.error));
+      return;
+    }
+    const d = parsed.data;
     updateMutation.mutate(
       {
-        id: candidate.id,
-        name: data.name,
-        email: data.email,
-        party: data.party,
-        position: data.position as (typeof POSITIONS)[number],
-        constituency: data.constituency,
-        constituencyLgaIds: data.constituencyLgaIds,
-        stateCode: data.stateCode || undefined,
-        lga: data.lga || undefined,
-        description: data.description || undefined,
-        phone: data.phone || undefined,
-        title: data.title || undefined,
+        id: d.id,
+        name: d.name,
+        party: d.party,
+        title: d.title,
       },
       {
         onSuccess: () => {
-          setEditing(false);
+          setEditingSection(null);
           toast.success("Candidate updated");
         },
-        onError: (error: Error) => {
-          toast.error(error.message || "Failed to update candidate");
+        onError: (error: Error) =>
+          toast.error(error.message || "Failed to update candidate"),
+      },
+    );
+  }
+
+  function saveElectoral() {
+    const v = form.getValues();
+    const parsed = updateCandidateSchema.safeParse({
+      id: candidate.id,
+      position: v.position,
+      stateCode: v.stateCode || undefined,
+      constituency: v.constituency,
+      constituencyLgaIds: v.constituencyLgaIds,
+      lga: v.lga || undefined,
+    });
+    if (!parsed.success) {
+      toast.error(firstZodIssueMessage(parsed.error));
+      return;
+    }
+    const d = parsed.data;
+    updateMutation.mutate(
+      {
+        id: d.id,
+        position: d.position as (typeof POSITIONS)[number],
+        constituency: d.constituency,
+        constituencyLgaIds: d.constituencyLgaIds,
+        stateCode: d.stateCode || undefined,
+        lga: d.lga || undefined,
+      },
+      {
+        onSuccess: () => {
+          setEditingSection(null);
+          toast.success("Candidate updated");
         },
+        onError: (error: Error) =>
+          toast.error(error.message || "Failed to update candidate"),
+      },
+    );
+  }
+
+  function saveContact() {
+    const v = form.getValues();
+    const parsed = updateCandidateSchema.safeParse({
+      id: candidate.id,
+      email: v.email,
+      phone: v.phone,
+    });
+    if (!parsed.success) {
+      toast.error(firstZodIssueMessage(parsed.error));
+      return;
+    }
+    updateMutation.mutate(
+      {
+        id: parsed.data.id,
+        email: parsed.data.email,
+        phone: parsed.data.phone,
+      },
+      {
+        onSuccess: () => {
+          setEditingSection(null);
+          toast.success("Candidate updated");
+        },
+        onError: (error: Error) =>
+          toast.error(error.message || "Failed to update candidate"),
+      },
+    );
+  }
+
+  function saveBio() {
+    const v = form.getValues();
+    const parsed = updateCandidateSchema.safeParse({
+      id: candidate.id,
+      description: v.description ?? "",
+    });
+    if (!parsed.success) {
+      toast.error(firstZodIssueMessage(parsed.error));
+      return;
+    }
+    updateMutation.mutate(
+      {
+        id: parsed.data.id,
+        description: parsed.data.description,
+      },
+      {
+        onSuccess: () => {
+          setEditingSection(null);
+          toast.success("Candidate updated");
+        },
+        onError: (error: Error) =>
+          toast.error(error.message || "Failed to update candidate"),
       },
     );
   }
@@ -592,36 +754,88 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
         </CardContent>
       </Card>
 
-      {/* Info / Edit card */}
+      {/* Candidate profile — wizard-style sections */}
       <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader className="border-border/60 flex flex-col gap-3 border-b pb-3 sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader className="border-border/60 border-b">
           <CardTitle className="text-foreground font-mono text-[11px] font-bold tracking-widest uppercase">
-            Candidate Information
+            Candidate profile
           </CardTitle>
-          {!editing && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
-              onClick={() => setEditing(true)}
-            >
-              <IconEdit className="mr-1.5 h-3.5 w-3.5" />
-              Edit
-            </Button>
-          )}
         </CardHeader>
-        <CardContent>
-          {editing ? (
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
-                {/* Identity */}
-                <div className="space-y-4">
-                  <p className="text-foreground/70 font-mono text-[9px] font-bold tracking-widest uppercase">
-                    Identity
+        <CardContent className="space-y-6">
+          <Form {...form}>
+            {/* Summary — same label/value rhythm as Account Information */}
+            <div className="space-y-4">
+              <p className="text-foreground/70 font-mono text-[10px] font-bold tracking-widest uppercase">
+                Candidate summary
+              </p>
+              <p className="text-foreground text-base font-semibold tracking-tight wrap-break-word">
+                {candidate.title ? `${candidate.title} ` : ""}
+                {candidate.name}
+              </p>
+              <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                <div>
+                  <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                    Login email
                   </p>
+                  <p className="text-foreground mt-0.5 font-medium wrap-break-word">
+                    {candidate.user?.email ?? "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                    Party
+                  </p>
+                  <p className="text-foreground mt-0.5 font-medium">
+                    {candidate.party || "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                    Position
+                  </p>
+                  <p className="text-foreground mt-0.5 font-medium">
+                    {candidate.position}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                    State
+                  </p>
+                  <p className="text-foreground mt-0.5 font-medium">
+                    {resolveStateName(candidate.stateCode)}
+                  </p>
+                </div>
+                <div className="sm:col-span-2">
+                  <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                    Constituency
+                  </p>
+                  <p className="text-foreground mt-0.5 font-medium wrap-break-word">
+                    {candidate.constituency || "—"}
+                  </p>
+                </div>
+              </div>
+              <p className="text-muted-foreground font-mono text-[10px] tracking-wide">
+                Last updated{" "}
+                {new Date(candidate.updatedAt).toLocaleString("en-NG", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+
+            {/* Identity */}
+            <div className="border-border/40 space-y-3 border-t pt-5">
+              <OverviewSectionHeader
+                eyebrow="Identity"
+                showEdit={editingSection !== "identity"}
+                onEdit={() => beginSectionEdit("identity")}
+                editDisabled={updateMutation.isPending}
+              />
+              {editingSection === "identity" ? (
+                <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField
                       control={form.control}
@@ -641,7 +855,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                             searchPlaceholder="Search titles..."
                             emptyMessage="No title found."
                             customPlaceholder="Enter title"
-                            customHintId="edit-custom-title-hint"
+                            customHintId="overview-custom-title-hint"
                             initialMode={initialTitleMode}
                           />
                           <FormMessage />
@@ -667,83 +881,128 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                       )}
                     />
                   </div>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <FormField
-                      control={form.control}
-                      name="party"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
-                            Party
-                          </FormLabel>
-                          <ListOrCustomField
-                            options={PARTY_OPTIONS_WITH_OTHER}
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            triggerAriaLabel="Party"
-                            inputAriaLabel="Party"
-                            placeholder="Select party..."
-                            searchPlaceholder="Search parties..."
-                            emptyMessage="No party found."
-                            customPlaceholder="Enter party name"
-                            customHintId="edit-custom-party-hint"
-                            initialMode={initialPartyMode}
-                          />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="position"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
-                            Position
-                          </FormLabel>
-                          <Select
-                            value={field.value ?? ""}
-                            onValueChange={handleEditPositionChange}
-                          >
-                            <FormControl>
-                              <SelectTrigger
-                                className="border-border/60 h-9 w-full rounded-sm"
-                                aria-label="Electoral position"
-                              >
-                                <SelectValue placeholder="Select position…" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent
-                              className="rounded-sm"
-                              position="popper"
-                              sideOffset={4}
-                            >
-                              {POSITIONS.map((pos) => (
-                                <SelectItem
-                                  key={pos}
-                                  value={pos}
-                                  className="rounded-sm"
-                                >
-                                  {pos}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <FormField
+                    control={form.control}
+                    name="party"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
+                          Party
+                        </FormLabel>
+                        <ListOrCustomField
+                          options={PARTY_OPTIONS_WITH_OTHER}
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          triggerAriaLabel="Party"
+                          inputAriaLabel="Party"
+                          placeholder="Select party..."
+                          searchPlaceholder="Search parties..."
+                          emptyMessage="No party found."
+                          customPlaceholder="Enter party name"
+                          customHintId="overview-custom-party-hint"
+                          initialMode={initialPartyMode}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center">
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={updateMutation.isPending}
+                      className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
+                      onClick={saveIdentity}
+                    >
+                      <IconDeviceFloppy className="mr-1.5 h-3.5 w-3.5" />
+                      {updateMutation.isPending ? "Saving..." : "Save"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
+                      disabled={updateMutation.isPending}
+                      onClick={cancelSectionEdit}
+                    >
+                      <IconX className="mr-1.5 h-3.5 w-3.5" />
+                      Cancel
+                    </Button>
                   </div>
                 </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 sm:grid-cols-2">
+                  <OverviewField label="Title" value={candidate.title || "—"} />
+                  <OverviewField label="Name" value={candidate.name} />
+                  <OverviewField label="Party" value={candidate.party} />
+                </div>
+              )}
+            </div>
 
-                <div className="border-border/40 border-b" />
-
-                {/* Electoral Boundary */}
+            {/* Electoral profile */}
+            <div className="border-border/40 space-y-3 border-t pt-5">
+              <OverviewSectionHeader
+                eyebrow="Electoral profile"
+                showEdit={editingSection !== "electoral"}
+                onEdit={() => beginSectionEdit("electoral")}
+                editDisabled={updateMutation.isPending}
+              />
+              {editingSection === "electoral" ? (
                 <div className="space-y-4">
+                  {campaignCount > 0 && (
+                    <div className="border-border/50 bg-muted/20 rounded-sm border px-3 py-2.5">
+                      <p className="text-foreground text-xs font-medium">
+                        {campaignCount} Collect campaign
+                        {campaignCount === 1 ? "" : "s"} linked — boundary and
+                        office changes can affect coverage and links.
+                      </p>
+                    </div>
+                  )}
+                  <FormField
+                    control={form.control}
+                    name="position"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
+                          Position
+                        </FormLabel>
+                        <Select
+                          value={field.value ?? ""}
+                          onValueChange={handleEditPositionChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger
+                              className="border-border/60 h-9 w-full rounded-sm"
+                              aria-label="Electoral position"
+                            >
+                              <SelectValue placeholder="Select position…" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent
+                            className="rounded-sm"
+                            position="popper"
+                            sideOffset={4}
+                          >
+                            {POSITIONS.map((pos) => (
+                              <SelectItem
+                                key={pos}
+                                value={pos}
+                                className="rounded-sm"
+                              >
+                                {pos}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <p className="text-foreground/70 font-mono text-[9px] font-bold tracking-widest uppercase">
                     {selectedPosition === "President"
                       ? "Location"
-                      : "Electoral Boundary"}
+                      : "Electoral boundary"}
                   </p>
                   {showStateField && (
                     <FormField
@@ -881,11 +1140,11 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                               {...field}
                             />
                           </FormControl>
-                          {subtitle && (
+                          {subtitle ? (
                             <p className="text-muted-foreground text-[11px]">
                               {subtitle}
                             </p>
-                          )}
+                          ) : null}
                           <FormMessage />
                         </FormItem>
                       );
@@ -893,15 +1152,124 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                   />
 
                   <ConstituencyBoundaryAlerts warnings={editBoundaryWarnings} />
+
+                  <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center">
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={updateMutation.isPending}
+                      className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
+                      onClick={saveElectoral}
+                    >
+                      <IconDeviceFloppy className="mr-1.5 h-3.5 w-3.5" />
+                      {updateMutation.isPending ? "Saving..." : "Save"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
+                      disabled={updateMutation.isPending}
+                      onClick={cancelSectionEdit}
+                    >
+                      <IconX className="mr-1.5 h-3.5 w-3.5" />
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+                    <OverviewField
+                      label="Position"
+                      value={candidate.position}
+                    />
+                    <OverviewField
+                      label="State"
+                      value={resolveStateName(candidate.stateCode)}
+                    />
+                    <OverviewField
+                      label="Constituency"
+                      value={candidate.constituency || "—"}
+                    />
+                  </div>
+                  {summaryLgaNames.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
+                        Boundary LGAs ({summaryLgaNames.length})
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {visibleSummaryLgaChips.map((name) => (
+                          <Badge
+                            key={name}
+                            variant="outline"
+                            className="border-border/60 bg-card rounded-sm px-2 py-0.5 text-[10px] font-medium"
+                          >
+                            {name}
+                          </Badge>
+                        ))}
+                        {remainingSummaryLgaCount > 0 ? (
+                          <Badge
+                            variant="outline"
+                            className="border-border/60 bg-muted/40 text-muted-foreground rounded-sm px-2 py-0.5 text-[10px] font-medium"
+                          >
+                            +{remainingSummaryLgaCount} more
+                          </Badge>
+                        ) : null}
+                      </div>
+                    </div>
+                  )}
+                  <ConstituencyBoundaryAlerts
+                    warnings={summaryBoundaryWarnings}
+                  />
+                  {showCampaignBoundaryReviewNote ? (
+                    <div className="border-border/50 bg-muted/20 rounded-sm border px-3 py-2.5">
+                      <p className="text-foreground text-xs font-medium">
+                        {campaignCount} existing Collect campaign
+                        {campaignCount === 1 ? "" : "s"} use
+                        {campaignCount === 1 ? "s" : ""} this saved boundary.
+                      </p>
+                      <p className="text-muted-foreground mt-1 text-xs">
+                        If you edit this boundary later, review campaign
+                        coverage in the Campaigns tab.
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+              )}
+            </div>
 
-                <div className="border-border/40 border-b" />
-
-                {/* Contact & Bio */}
+            {/* Contact */}
+            <div className="border-border/40 space-y-3 border-t pt-5">
+              <OverviewSectionHeader
+                eyebrow="Contact"
+                showEdit={editingSection !== "contact"}
+                onEdit={() => beginSectionEdit("contact")}
+                editDisabled={updateMutation.isPending}
+              />
+              {editingSection === "contact" ? (
                 <div className="space-y-4">
-                  <p className="text-foreground/70 font-mono text-[9px] font-bold tracking-widest uppercase">
-                    Contact & Bio
-                  </p>
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-mono text-[10px] font-bold tracking-widest uppercase">
+                          Login email
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="candidate@wardwise.ng"
+                            className="border-border/60 rounded-sm"
+                            {...field}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="phone"
@@ -922,6 +1290,51 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                       </FormItem>
                     )}
                   />
+                  <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center">
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={updateMutation.isPending}
+                      className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
+                      onClick={saveContact}
+                    >
+                      <IconDeviceFloppy className="mr-1.5 h-3.5 w-3.5" />
+                      {updateMutation.isPending ? "Saving..." : "Save"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
+                      disabled={updateMutation.isPending}
+                      onClick={cancelSectionEdit}
+                    >
+                      <IconX className="mr-1.5 h-3.5 w-3.5" />
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2">
+                  <OverviewField
+                    label="Login email"
+                    value={candidate.user?.email || "—"}
+                  />
+                  <OverviewField label="Phone" value={candidate.phone || "—"} />
+                </div>
+              )}
+            </div>
+
+            {/* Bio */}
+            <div className="border-border/40 space-y-3 border-t pt-5">
+              <OverviewSectionHeader
+                eyebrow="Bio"
+                showEdit={editingSection !== "bio"}
+                onEdit={() => beginSectionEdit("bio")}
+                editDisabled={updateMutation.isPending}
+              />
+              {editingSection === "bio" ? (
+                <div className="space-y-4">
                   <FormField
                     control={form.control}
                     name="description"
@@ -941,133 +1354,85 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                       </FormItem>
                     )}
                   />
-                </div>
-
-                <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center">
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={updateMutation.isPending}
-                    className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
-                  >
-                    <IconDeviceFloppy className="mr-1.5 h-3.5 w-3.5" />
-                    {updateMutation.isPending ? "Saving..." : "Save"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
-                    onClick={() => {
-                      form.reset();
-                      setEditing(false);
-                    }}
-                  >
-                    <IconX className="mr-1.5 h-3.5 w-3.5" />
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          ) : (
-            <div className="space-y-5">
-              {/* Identity */}
-              <div>
-                <p className="text-foreground/70 mb-3 font-mono text-[9px] font-bold tracking-widest uppercase">
-                  Identity
-                </p>
-                <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-                  <InfoRow label="Title" value={candidate.title || "—"} />
-                  <InfoRow label="Name" value={candidate.name} />
-                  <InfoRow label="Party" value={candidate.party} />
-                  <InfoRow label="Position" value={candidate.position} />
-                </div>
-              </div>
-
-              <div className="border-border/40 border-b" />
-
-              {/* Electoral Boundary */}
-              <div>
-                <p className="text-foreground/70 mb-3 font-mono text-[9px] font-bold tracking-widest uppercase">
-                  Electoral Boundary
-                </p>
-                <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-                  <InfoRow
-                    label="State"
-                    value={resolveStateName(candidate.stateCode)}
-                  />
-                  <InfoRow
-                    label="Constituency"
-                    value={candidate.constituency || "—"}
-                  />
-                  {candidate.constituencyLgaIds.length > 0 && (
-                    <InfoRow
-                      label="Constituency LGAs"
-                      value={`${candidate.constituencyLgaIds.length} LGA${candidate.constituencyLgaIds.length !== 1 ? "s" : ""} selected`}
-                    />
-                  )}
-                </div>
-                <div className="mt-4">
-                  <ConstituencyBoundaryAlerts
-                    warnings={summaryBoundaryWarnings}
-                  />
-                </div>
-                {showCampaignBoundaryReviewNote && (
-                  <div className="border-border/50 bg-muted/20 mt-4 rounded-sm border px-3 py-2.5">
-                    <p className="text-foreground text-xs font-medium">
-                      {campaignCount} existing Collect campaign
-                      {campaignCount === 1 ? "" : "s"} use
-                      {campaignCount === 1 ? "s" : ""} this saved boundary.
-                    </p>
-                    <p className="text-muted-foreground mt-1 text-xs">
-                      If you edit this boundary later, review campaign coverage
-                      in the Campaigns tab.
-                    </p>
+                  <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center">
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={updateMutation.isPending}
+                      className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
+                      onClick={saveBio}
+                    >
+                      <IconDeviceFloppy className="mr-1.5 h-3.5 w-3.5" />
+                      {updateMutation.isPending ? "Saving..." : "Save"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-full rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
+                      disabled={updateMutation.isPending}
+                      onClick={cancelSectionEdit}
+                    >
+                      <IconX className="mr-1.5 h-3.5 w-3.5" />
+                      Cancel
+                    </Button>
                   </div>
-                )}
-              </div>
-
-              <div className="border-border/40 border-b" />
-
-              {/* Contact */}
-              <div>
-                <p className="text-foreground/70 mb-3 font-mono text-[9px] font-bold tracking-widest uppercase">
-                  Contact
-                </p>
-                <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-                  <InfoRow label="Phone" value={candidate.phone || "—"} />
                 </div>
-              </div>
-
-              {candidate.description && (
-                <>
-                  <div className="border-border/40 border-b" />
-                  <div>
-                    <p className="text-foreground/70 mb-3 font-mono text-[9px] font-bold tracking-widest uppercase">
-                      Bio
-                    </p>
-                    <InfoRow
-                      label="Description"
-                      value={candidate.description}
-                    />
-                  </div>
-                </>
+              ) : (
+                <OverviewField
+                  label="Description"
+                  value={candidate.description || "—"}
+                />
               )}
             </div>
-          )}
+          </Form>
         </CardContent>
       </Card>
     </div>
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function OverviewSectionHeader({
+  eyebrow,
+  showEdit,
+  onEdit,
+  editDisabled,
+}: {
+  eyebrow: string;
+  showEdit: boolean;
+  onEdit: () => void;
+  editDisabled?: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <p className="text-foreground/70 font-mono text-[10px] font-bold tracking-widest uppercase">
+        {eyebrow}
+      </p>
+      {showEdit ? (
+        <button
+          type="button"
+          onClick={onEdit}
+          disabled={editDisabled}
+          aria-label={`Edit ${eyebrow}`}
+          className="text-muted-foreground hover:text-foreground hover:bg-muted/60 focus-visible:ring-primary/40 inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40"
+        >
+          Edit
+          <IconPencil className="size-2.5" />
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function OverviewField({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-0.5">
-      <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+      <p className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
         {label}
       </p>
-      <p className="text-foreground text-sm font-medium">{value}</p>
+      <p className="text-foreground text-xs font-medium wrap-break-word">
+        {value || "—"}
+      </p>
     </div>
   );
 }

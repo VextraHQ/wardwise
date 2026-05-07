@@ -31,6 +31,7 @@ import {
   StepCard,
   CardSectionHeader,
 } from "@/components/collect/form-ui";
+import { sanitizePhoneInputEvent } from "@/components/collect/phone-input-utils";
 import { cn } from "@/lib/utils";
 
 const OCCUPATION_OPTIONS: ComboboxSelectOption[] = [
@@ -180,7 +181,9 @@ export function PersonalDetailsStep({
                       placeholder="08031234567"
                       type="tel"
                       inputMode="tel"
+                      pattern="[0-9+() .-]*"
                       autoComplete="tel"
+                      onInput={sanitizePhoneInputEvent}
                       className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-mono font-medium tracking-wider transition-all placeholder:text-xs"
                     />
                   </div>
