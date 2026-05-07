@@ -58,6 +58,11 @@ function transformCandidate(c: {
     email: (c.user?.email as string) || "",
     supporterCount,
     campaignCount: campaigns.length,
+    hasAnyCampaign: campaigns.length > 0,
+    hasActiveCampaign: campaigns.some((campaign) => campaign.status === "active"),
+    hasInsightsEnabledCampaign: campaigns.some((campaign) =>
+      Boolean(campaign.clientReportEnabled && campaign.clientReportToken),
+    ),
     collectCampaign: collectCampaign
       ? {
           id: collectCampaign.id,

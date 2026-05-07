@@ -166,6 +166,27 @@ model CampaignCanvasser {
 
 ---
 
+## Completed v2.10 — Admin Filters Refresh (2026-05-06)
+
+Reframed the admin filter sets so each list answers its actual operational question instead of generic demographic filters.
+
+**Candidates page** (`/admin` Candidates tab — `CandidateManagement` + `CandidateFilters`):
+
+- Account-status pill bar promoted to the primary axis (sits directly under the page header): All / Pending / Credentials Sent / Active / Suspended (live counts, mirrors Collect's status tabs)
+- New engagement filters: **Collect** (Has active / Has campaign inactive / No campaign yet) and **Insights** (On / Off) — derived from the existing `collectCampaign` payload, no schema change
+- Sort expanded with "Most campaigns" and "Most supporters"
+- Toolbar split into two stacked rows (search row, then filter row) so the larger filter set never overflows; Clear filters wraps with `ml-auto` so it stays right-aligned without clipping
+
+**Collect page** (`/admin/collect` — `CampaignList` + `CampaignFilters`):
+
+- Status tabs moved above the toolbar to match the Candidates hierarchy
+- New **Activity** filter using existing `isStaleCampaign()`: Live (≤ 48h) / Stale (> 48h) / No submissions yet
+- Insights, Sort, and the existing status tabs are unchanged
+
+Both pages reuse `AdminToolbarFilterSheet` as the mobile bottom-sheet container; no new shared abstraction was introduced. All filtering remains client-side. State/region was deliberately dropped from the secondary filter set to keep the toolbar lean — geo intent is already captured by the candidate's `Position` (President = national, Governor / Senator / etc. are state-scoped).
+
+---
+
 ## Completed v2.9 — Collect UI/UX Polish (2026-04-27)
 
 - **Splash support state simplified**: the offline-prep surface was reshaped from a standalone support card into a compact device utility lane beneath the primary CTA, with blocking-only escalation for `offline + no_pack` and `offline + scope_invalid`.

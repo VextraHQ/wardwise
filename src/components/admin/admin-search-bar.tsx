@@ -2,11 +2,13 @@
 
 import { Input } from "@/components/ui/input";
 import { HiOutlineSearch, HiX } from "react-icons/hi";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AdminSearchBarProps {
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
+  mobilePlaceholder?: string;
   onClear?: () => void;
 }
 
@@ -14,8 +16,15 @@ export function AdminSearchBar({
   value,
   onChange,
   placeholder,
+  mobilePlaceholder,
   onClear,
 }: AdminSearchBarProps) {
+  const isMobile = useIsMobile();
+  const resolvedPlaceholder =
+    isMobile && mobilePlaceholder?.trim()
+      ? mobilePlaceholder.trim()
+      : placeholder;
+
   const handleClear = () => {
     onChange("");
     onClear?.();
@@ -28,7 +37,7 @@ export function AdminSearchBar({
         aria-hidden
       />
       <Input
-        placeholder={placeholder}
+        placeholder={resolvedPlaceholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="border-border/60 w-full rounded-sm pl-9"
