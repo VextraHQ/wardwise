@@ -96,10 +96,16 @@ function CampaignReportBadge({ campaign }: { campaign: CampaignSummary }) {
 
 function SummaryStripSkeleton() {
   return (
-    <div className="border-border/60 flex flex-wrap items-center gap-x-5 gap-y-2 border-b py-3">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Skeleton key={i} className="h-4 w-20 rounded-sm" />
-      ))}
+    <div className="border-border/60 flex flex-col gap-2 border-b py-2 md:flex-row md:items-center md:justify-between md:gap-3 md:py-1">
+      <div className="flex w-full min-w-0 gap-1.5 overflow-hidden md:flex-1">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-9 w-19 shrink-0 rounded-sm" />
+        ))}
+      </div>
+      <div className="border-border/40 flex w-full justify-between gap-3 border-t pt-2 md:w-auto md:shrink-0 md:border-t-0 md:pt-0 md:pl-2">
+        <Skeleton className="h-4 w-20 shrink-0 rounded-sm" />
+        <Skeleton className="h-4 w-28 shrink-0 rounded-sm" />
+      </div>
     </div>
   );
 }
@@ -325,11 +331,11 @@ export function CampaignList() {
       {isLoading ? (
         <SummaryStripSkeleton />
       ) : campaigns ? (
-        <div className="border-border/60 flex items-center justify-between gap-3 border-b py-1">
+        <div className="border-border/60 flex flex-col gap-2 border-b py-2 md:flex-row md:items-center md:justify-between md:gap-3 md:py-1">
           <div
             role="group"
             aria-label="Filter campaigns by status"
-            className="flex items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex w-full min-w-0 items-center gap-0.5 overflow-x-auto pb-0.5 [scrollbar-width:none] md:flex-1 md:pb-0 [&::-webkit-scrollbar]:hidden"
           >
             {(
               [
@@ -371,7 +377,12 @@ export function CampaignList() {
             })}
           </div>
 
-          <div className="flex shrink-0 items-center gap-3 pl-2">
+          <div
+            className={cn(
+              "border-border/40 text-muted-foreground flex w-full flex-wrap items-center gap-x-3 gap-y-1 border-t pt-2 md:w-auto md:shrink-0 md:flex-nowrap md:justify-end md:border-t-0 md:pt-0 md:pl-2",
+              filteredStale > 0 ? "justify-between" : "justify-end",
+            )}
+          >
             {filteredStale > 0 && (
               <span className="flex items-center gap-1 text-amber-600 dark:text-amber-500">
                 <IconAlertTriangle className="h-3 w-3 shrink-0" />

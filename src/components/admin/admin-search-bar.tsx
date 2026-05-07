@@ -22,8 +22,11 @@ export function AdminSearchBar({
   };
 
   return (
-    <div className="relative w-full">
-      <HiOutlineSearch className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+    <div className="relative w-full min-w-0">
+      <HiOutlineSearch
+        className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+        aria-hidden
+      />
       <Input
         placeholder={placeholder}
         value={value}
