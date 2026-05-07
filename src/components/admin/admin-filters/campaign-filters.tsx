@@ -48,7 +48,7 @@ export function CampaignFilters({
     (reportFilter !== "all" ? 1 : 0) + (sort !== "recent-activity" ? 1 : 0);
 
   return (
-    <div className="w-full">
+    <div className="w-full min-w-0 xl:w-auto xl:shrink-0">
       <div className="md:hidden">
         <AdminToolbarFilterSheet
           triggerLabel="Campaign filters"

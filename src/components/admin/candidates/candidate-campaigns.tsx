@@ -3,6 +3,12 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import {
+  IconAlertTriangle,
+  IconClipboardList,
+  IconPlus,
+} from "@tabler/icons-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,14 +20,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { CampaignActionsMenu } from "@/components/admin/collect/campaign-actions-menu";
-import { IconClipboardList, IconPlus } from "@tabler/icons-react";
+import {
+  AdminMobileRecordCard,
+  AdminMobileRecordField,
+  AdminMobileRecordFields,
+  AdminMobileRecordHeader,
+  AdminMobileRecordMeta,
+  AdminMobileRecordSkeleton,
+  AdminMobileRecordTitle,
+} from "@/components/admin/shared/admin-mobile-record-card";
 import {
   AdminResourceState,
   adminResourceStateIcons,
 } from "@/components/admin/shared/admin-resource-state";
+
 import { formatStatusLabel } from "@/lib/admin/dashboard";
+import { isStaleCampaign } from "@/lib/collect/campaign-health";
 import { getEffectiveCampaignName } from "@/lib/collect/branding";
 import { formatRelativeTime } from "@/lib/date-format";
 import { formatPersonName } from "@/lib/utils";
@@ -74,6 +91,18 @@ interface CandidateCampaignsProps {
   candidateId: string;
 }
 
+function CampaignToolbarSkeleton() {
+  return (
+    <div className="border-border/60 flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap gap-2">
+        <Skeleton className="h-7 w-28 rounded-sm" />
+        <Skeleton className="h-7 w-36 rounded-sm" />
+      </div>
+      <Skeleton className="h-8 w-full rounded-sm sm:h-9 sm:w-44" />
+    </div>
+  );
+}
+
 export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
   const router = useRouter();
   const [page, setPage] = useState(1);
@@ -113,15 +142,15 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <Skeleton className="h-5 w-48 rounded-sm" />
-          <Skeleton className="h-9 w-36 rounded-sm" />
-        </div>
-        <div className="rounded-sm border border-dashed">
+      <div className="flex flex-col gap-4 pt-4">
+        <CampaignToolbarSkeleton />
+        <AdminMobileRecordSkeleton rows={3} />
+        <div className="border-border/60 hidden overflow-hidden rounded-sm border border-dashed md:block">
           <Skeleton className="h-10 w-full rounded-none" />
-          {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="mx-4 my-4 h-8 rounded-sm" />
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="border-border/50 border-t px-4 py-3">
+              <Skeleton className="h-6 w-full max-w-xl rounded-sm" />
+            </div>
           ))}
         </div>
       </div>
@@ -166,18 +195,18 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
   );
 
   return (
-    <div className="space-y-4 pt-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-col gap-4 pt-4">
+      <div className="border-border/60 flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-2">
           <Badge
             variant="outline"
-            className="bg-background rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+            className="bg-background rounded-sm px-2.5 py-1 font-mono text-[10px] font-bold tracking-widest uppercase"
           >
             {campaigns.length.toLocaleString()} total
           </Badge>
           <Badge
             variant="outline"
-            className="border-primary/30 bg-primary/10 text-primary rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
+            className="border-primary/30 bg-primary/10 text-primary rounded-sm px-2.5 py-1 font-mono text-[10px] font-bold tracking-widest uppercase"
           >
             {totalSubmissions.toLocaleString()} submissions
           </Badge>
@@ -186,15 +215,98 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
         <Button
           variant="outline"
           size="sm"
-          className="h-8 w-full rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase sm:w-auto"
+          className="border-border/60 h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase shadow-none sm:w-auto"
           onClick={() => router.push(createCampaignHref)}
         >
-          <IconPlus className="mr-1.5 h-3.5 w-3.5" />
+          <IconPlus className="mr-2 h-4 w-4" />
           Create Campaign
         </Button>
       </div>
 
-      <div className="overflow-x-auto rounded-sm border">
+      <div className="space-y-3 md:hidden">
+        {paginatedCampaigns.map((campaign) => {
+          const campaignName = getEffectiveCampaignName(campaign);
+          const stale = isStaleCampaign(campaign);
+          const reportEnabled = Boolean(
+            campaign.clientReportEnabled && campaign.clientReportToken,
+          );
+
+          return (
+            <AdminMobileRecordCard
+              key={campaign.id}
+              className="hover:bg-muted/25 cursor-pointer transition-colors"
+              onClick={() =>
+                router.push(`/admin/collect/campaigns/${campaign.id}`)
+              }
+            >
+              <AdminMobileRecordHeader>
+                <div className="min-w-0 flex-1">
+                  <AdminMobileRecordTitle>
+                    {campaignName}
+                  </AdminMobileRecordTitle>
+                  <AdminMobileRecordMeta mono>
+                    {campaign.party} · /c/{campaign.slug}
+                  </AdminMobileRecordMeta>
+                  {campaign.displayName && (
+                    <AdminMobileRecordMeta>
+                      Anchor: {formatPersonName(campaign.candidateName)}
+                    </AdminMobileRecordMeta>
+                  )}
+                </div>
+                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <CampaignActionsMenu
+                    campaign={campaign}
+                    ariaLabel={`Open actions for ${campaignName}`}
+                  />
+                </div>
+              </AdminMobileRecordHeader>
+              <AdminMobileRecordFields>
+                <AdminMobileRecordField label="Status">
+                  <Badge
+                    variant="outline"
+                    className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${STATUS_STYLES[campaign.status] ?? ""}`}
+                  >
+                    {formatStatusLabel(campaign.status)}
+                  </Badge>
+                </AdminMobileRecordField>
+                <AdminMobileRecordField
+                  label="Submissions"
+                  value={campaign._count.submissions.toLocaleString()}
+                  mono
+                />
+                <AdminMobileRecordField label="Insights">
+                  <Badge
+                    variant="outline"
+                    className={`rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${
+                      reportEnabled
+                        ? REPORT_STATUS_STYLES.enabled
+                        : REPORT_STATUS_STYLES.disabled
+                    }`}
+                  >
+                    {reportEnabled ? "On" : "Off"}
+                  </Badge>
+                </AdminMobileRecordField>
+                <AdminMobileRecordField label="Last activity">
+                  <span className="flex items-center justify-end gap-1 text-xs">
+                    {formatRelativeTime(campaign.lastSubmissionAt, {
+                      absoluteDateOptions: {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      },
+                    })}
+                    {stale ? (
+                      <IconAlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                    ) : null}
+                  </span>
+                </AdminMobileRecordField>
+              </AdminMobileRecordFields>
+            </AdminMobileRecordCard>
+          );
+        })}
+      </div>
+
+      <div className="border-border/60 hidden overflow-x-auto rounded-sm border shadow-none md:block">
         <Table>
           <TableHeader className="bg-muted/30 sticky top-0 z-10">
             <TableRow className="hover:bg-transparent">
@@ -272,7 +384,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
                   })}
                 </TableCell>
                 <TableCell
-                  className="w-12 text-right"
+                  className="hidden w-12 text-right sm:table-cell"
                   onClick={(event) => event.stopPropagation()}
                 >
                   <CampaignActionsMenu

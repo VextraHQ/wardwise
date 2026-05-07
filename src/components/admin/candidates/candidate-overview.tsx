@@ -540,55 +540,61 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     {
       label: "Campaigns",
       value: campaignCount,
-      subtitle: "Collect campaigns",
+      hint: "Collect campaigns created for this candidate",
       icon: IconClipboardList,
     },
     {
       label: "Supporters",
       value: supporterCount,
-      subtitle: "From submissions",
+      hint: "Unique supporters recorded from Collect submissions",
       icon: IconUsers,
     },
     {
       label: "Canvassers",
       value: canvasserCount,
-      subtitle: "Field agents",
+      hint: "Field agents assigned to this candidate",
       icon: IconBuildingCommunity,
     },
   ];
 
   return (
-    <div className="space-y-6 pt-4">
-      {/* Stats row */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-        {stats.map((stat) => (
-          <Card
-            key={stat.label}
-            className="border-border/60 rounded-sm shadow-none"
-          >
-            <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
-              <CardTitle className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-                {stat.label}
-              </CardTitle>
-              <div className="bg-primary/10 flex h-8 w-8 shrink-0 items-center justify-center rounded-sm sm:h-9 sm:w-9">
-                <stat.icon className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
+    <div className="space-y-4 pt-4">
+      <Card
+        className="border-border/60 gap-0 overflow-hidden rounded-sm p-0 shadow-none"
+        role="region"
+        aria-label="Collect activity"
+      >
+        <CardContent className="p-0">
+          <div className="divide-border/60 divide-y sm:grid sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                className="flex flex-row items-center justify-between gap-3 px-4 py-3 sm:flex-col sm:items-stretch sm:gap-3 sm:px-6 sm:py-4"
+                title={stat.hint}
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:w-full sm:flex-initial sm:items-start sm:justify-between sm:gap-3">
+                  <div className="bg-primary/10 flex h-7 w-7 shrink-0 items-center justify-center rounded-sm sm:order-2 sm:h-8 sm:w-8">
+                    <stat.icon
+                      className="text-primary size-3.5 sm:size-4"
+                      aria-hidden
+                    />
+                  </div>
+                  <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase sm:order-1">
+                    {stat.label}
+                  </p>
+                </div>
+                <p className="text-foreground font-mono text-lg leading-none font-semibold tracking-tight tabular-nums sm:w-full sm:text-2xl sm:leading-none">
+                  {stat.value.toLocaleString()}
+                </p>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="font-mono text-xl font-semibold tabular-nums sm:text-2xl">
-                {stat.value}
-              </div>
-              <p className="text-muted-foreground mt-1 text-xs">
-                {stat.subtitle}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Info / Edit card */}
       <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader className="border-border/60 flex flex-col gap-3 border-b sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader className="border-border/60 flex flex-col gap-3 border-b pb-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-foreground font-mono text-[11px] font-bold tracking-widest uppercase">
             Candidate Information
           </CardTitle>

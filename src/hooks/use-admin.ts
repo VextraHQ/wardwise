@@ -18,6 +18,16 @@ export function useAdminCandidates() {
   });
 }
 
+/** Single candidate for detail routes and admin chrome (shared query key with `CandidateDetail`). */
+export function useAdminCandidate(id: string | undefined) {
+  return useQuery({
+    queryKey: ["admin", "candidates", id],
+    queryFn: () => adminApi.candidates.getById(id!),
+    enabled: Boolean(id),
+    staleTime: 1000 * 60,
+  });
+}
+
 // Platform-wide period summary for the admin command-center strip and health rail.
 export function useAdminDashboardSummary() {
   return useQuery({
