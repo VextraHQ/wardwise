@@ -116,9 +116,11 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
     );
   }, [candidate]);
 
-  const expectedDeleteEmail = deletionImpact.accountEmail.trim().toLowerCase();
-  const normalizedDeleteConfirmation =
-    deleteConfirmationEmail.trim().toLowerCase();
+  const displayExpectedEmail = deletionImpact.accountEmail.trim();
+  const expectedDeleteEmail = displayExpectedEmail.toLowerCase();
+  const normalizedDeleteConfirmation = deleteConfirmationEmail
+    .trim()
+    .toLowerCase();
   const canDeleteCandidate =
     expectedDeleteEmail.length > 0 &&
     normalizedDeleteConfirmation === expectedDeleteEmail;
@@ -459,7 +461,7 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
                 </p>
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-2 sm:grid-cols-3">
                 {[
                   formatCount(deletionImpact.campaignCount, "campaign"),
                   formatCount(
@@ -470,7 +472,6 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
                     deletionImpact.canvasserRecordCount,
                     "canvasser record",
                   ),
-                  "1 login account",
                 ].map((item) => (
                   <div
                     key={item}
@@ -516,8 +517,13 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
                     Expected email
                   </p>
                   <div className="border-destructive/20 bg-background/70 text-foreground rounded-sm border px-3 py-2.5 font-mono text-[11px] wrap-anywhere break-all select-none sm:text-xs">
-                    {expectedDeleteEmail || "No account email available"}
+                    {displayExpectedEmail || "No account email available"}
                   </div>
+                  {displayExpectedEmail ? (
+                    <p className="text-muted-foreground text-[11px] leading-snug">
+                      Must match this address; capitalization is ignored.
+                    </p>
+                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <Label
@@ -541,8 +547,8 @@ export function CandidateAccount({ candidate }: CandidateAccountProps) {
                     disabled={deleteMutation.isPending}
                   />
                   <p className="text-muted-foreground text-[11px] leading-snug">
-                    Delete stays disabled until the typed email matches this
-                    candidate account.
+                    Delete stays disabled until the typed email matches (same
+                    address; capitalization ignored).
                   </p>
                 </div>
               </div>
