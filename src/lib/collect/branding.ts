@@ -41,6 +41,33 @@ export function getEffectiveCampaignName({
   );
 }
 
+/**
+ * Returns the campaign name with the candidate honorific prepended where
+ * appropriate (e.g. "Hon. Aliyu Wakili Boya"). For movement/team brands or
+ * candidate brands with a custom display name override, the title is dropped
+ * because prefixing "Hon." onto a team/movement label reads incorrectly
+ * ("Hon. Fintiri Canvassers"). Use this for share previews, OG metadata, and
+ * any outward-facing copy that should carry the full candidate identity.
+ */
+export function getCampaignDisplayHeadline({
+  candidateName,
+  candidateTitle,
+  displayName,
+  brandingType,
+}: {
+  candidateName: string;
+  candidateTitle?: string | null;
+  displayName?: string | null;
+  brandingType?: string | null;
+}): string {
+  const baseName = getEffectiveCampaignName({ candidateName, displayName });
+  if (!shouldShowCandidateTitle({ brandingType, displayName })) {
+    return baseName;
+  }
+  const trimmedTitle = candidateTitle?.trim();
+  return trimmedTitle ? `${trimmedTitle} ${baseName}` : baseName;
+}
+
 /** Checks if the candidate title should be shown */
 export function shouldShowCandidateTitle({
   brandingType,

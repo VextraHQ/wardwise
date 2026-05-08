@@ -49,11 +49,9 @@ export function ShareInviteCard({
   const shareUrl = useShareUrl(campaignSlug);
   const campaignLabel = `${campaignName} (${party})`;
   const locationClause = constituency ? ` in ${constituency}` : "";
-  const wardWisePitch =
-    "Nigeria's campaign intelligence platform for supporter mobilisation and field insights";
-  const shareBody = `Register your support for ${campaignLabel}${locationClause} on WardWise, ${wardWisePitch}.`;
+  const shareBody = `Register your support for ${campaignLabel}${locationClause}. Add your name on WardWise to help mobilise the campaign.`;
   const shareText = `${shareBody}\n\n${shareUrl}`;
-  const emailSubject = `${campaignName} Supporter Registration`;
+  const emailSubject = `${campaignName} — Supporter Registration`;
   const emailBody = `Hello,
 
 ${shareBody}

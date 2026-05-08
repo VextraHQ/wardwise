@@ -15,7 +15,7 @@ import { ReportUnavailable } from "@/components/campaign-report/report-unavailab
 import { CampaignInsights } from "@/components/campaign-report/campaign-insights";
 import {
   getCampaignBrandingType,
-  getEffectiveCampaignName,
+  getCampaignDisplayHeadline,
 } from "@/lib/collect/branding";
 
 type PageProps = {
@@ -32,9 +32,9 @@ export async function generateMetadata({
     return { title: "Report Unavailable" };
   }
 
-  const campaignName = getEffectiveCampaignName(campaign);
-  const title = `${campaignName} - Campaign Insights`;
-  const description = `Access secure campaign insights for ${campaignName} in ${campaign.constituency} on WardWise, including supporter activity, field performance, and local reporting.`;
+  const headline = getCampaignDisplayHeadline(campaign);
+  const title = `${headline} — Campaign Insights`;
+  const description = `Live campaign insights for ${headline} (${campaign.party}) in ${campaign.constituency} — supporter activity, field performance, and local reporting.`;
   const url = `${getSiteUrl()}/r/${token}`;
 
   return {

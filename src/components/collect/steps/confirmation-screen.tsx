@@ -14,7 +14,7 @@ import { RegistrationStepHeader } from "@/components/collect/registration-step-h
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { ShareInviteCard } from "@/components/collect/share-invite-card";
 import type { PublicCampaign } from "@/types/collect";
-import { getEffectiveCampaignName } from "@/lib/collect/branding";
+import { getCampaignDisplayHeadline } from "@/lib/collect/branding";
 import { track } from "@/lib/analytics/client";
 
 export type ConfirmationScreenProps =
@@ -42,7 +42,7 @@ export type ConfirmationScreenProps =
     };
 
 export function ConfirmationScreen(props: ConfirmationScreenProps) {
-  const campaignName = getEffectiveCampaignName(props.campaign);
+  const campaignName = getCampaignDisplayHeadline(props.campaign);
   const hasFiredConfettiRef = useRef(false);
   const initialStateRef = useRef(props.state);
   const lastTrackedStateRef = useRef<"confirmed" | "queued" | "failed" | null>(

@@ -23,7 +23,7 @@ import {
   getRecentWindowCount,
   getVerificationRate,
 } from "@/lib/collect/reporting";
-import { getEffectiveCampaignName } from "@/lib/collect/branding";
+import { getCampaignDisplayHeadline } from "@/lib/collect/branding";
 import { IconFlag, IconRefresh } from "@tabler/icons-react";
 
 export function CampaignInsights({ token }: { token: string }) {
@@ -152,7 +152,7 @@ export function CampaignInsights({ token }: { token: string }) {
     );
   }
 
-  const campaignName = getEffectiveCampaignName(summary.campaign);
+  const campaignName = getCampaignDisplayHeadline(summary.campaign);
   const verifiedRate = getVerificationRate(
     summary.stats.total,
     summary.stats.verified,

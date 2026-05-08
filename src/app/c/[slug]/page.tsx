@@ -10,7 +10,7 @@ import {
 } from "@/lib/core/metadata";
 import {
   getCampaignBrandingType,
-  getEffectiveCampaignName,
+  getCampaignDisplayHeadline,
 } from "@/lib/collect/branding";
 
 type PageProps = {
@@ -25,6 +25,8 @@ export async function generateMetadata({
     where: { slug },
     select: {
       candidateName: true,
+      candidateTitle: true,
+      brandingType: true,
       displayName: true,
       party: true,
       constituency: true,
@@ -35,9 +37,9 @@ export async function generateMetadata({
     return { title: "Campaign Not Found" };
   }
 
-  const campaignName = getEffectiveCampaignName(campaign);
-  const title = `${campaignName} - Supporter Registration`;
-  const description = `Register your support for ${campaignName} in ${campaign.constituency} on WardWise, Nigeria's campaign intelligence platform for supporter mobilisation and field insights.`;
+  const headline = getCampaignDisplayHeadline(campaign);
+  const title = `${headline} — Supporter Registration`;
+  const description = `Register your support for ${headline} (${campaign.party}) in ${campaign.constituency}. Add your name on WardWise to help mobilise the campaign.`;
   const url = `${getSiteUrl()}/c/${slug}`;
 
   return {
