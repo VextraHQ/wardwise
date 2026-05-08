@@ -92,6 +92,15 @@ export function useCampaign(id: string) {
   });
 }
 
+// Invalidate campaign and candidate queries to ensure data consistency across components.
+export function invalidateCampaignAndCandidateQueries(
+  qc: ReturnType<typeof useQueryClient>,
+) {
+  qc.invalidateQueries({ queryKey: ["admin-campaigns"] });
+  qc.invalidateQueries({ queryKey: ["admin-campaign"] });
+  qc.invalidateQueries({ queryKey: ["admin", "candidates"] });
+}
+
 // Creates a new campaign and refreshes the global admin list.
 export function useCreateCampaign() {
   const qc = useQueryClient();
@@ -99,7 +108,7 @@ export function useCreateCampaign() {
     mutationFn: (data: Record<string, unknown>) =>
       adminCollectApi.createCampaign(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-campaigns"] });
+      invalidateCampaignAndCandidateQueries(qc);
     },
   });
 }
@@ -111,7 +120,7 @@ export function useUpdateCampaign(id: string) {
     mutationFn: (data: Record<string, unknown>) =>
       adminCollectApi.updateCampaign(id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-campaigns"] });
+      invalidateCampaignAndCandidateQueries(qc);
       qc.invalidateQueries({ queryKey: ["admin-campaign", id] });
     },
   });
@@ -123,7 +132,7 @@ export function useDeleteCampaign() {
   return useMutation({
     mutationFn: (id: string) => adminCollectApi.deleteCampaign(id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-campaigns"] });
+      invalidateCampaignAndCandidateQueries(qc);
     },
   });
 }

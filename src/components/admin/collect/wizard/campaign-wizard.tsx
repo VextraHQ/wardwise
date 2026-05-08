@@ -28,7 +28,9 @@ import { StepCandidateSetup } from "./step-candidate-setup";
 import { StepCampaignCollectConfig } from "./step-campaign-collect-config";
 import { StepCampaignReview } from "./step-campaign-review";
 
-type Candidate = {
+import type { CandidateCollectCampaignSummary } from "@/lib/api/admin";
+
+type WizardCandidate = {
   id: string;
   name: string;
   party: string;
@@ -37,6 +39,8 @@ type Candidate = {
   stateCode: string;
   lga: string;
   constituencyLgaIds: number[];
+  draftCampaign?: CandidateCollectCampaignSummary | null;
+  hasActiveCampaign?: boolean;
 };
 
 const STEP_TITLES = ["Select Candidate", "Collect setup", "Review & create"];
@@ -107,9 +111,9 @@ export function CampaignWizard() {
   });
 
   const { data: candidates, isLoading: candidatesLoading } = useQuery<
-    Candidate[]
+    WizardCandidate[]
   >({
-    queryKey: ["admin-candidates"],
+    queryKey: ["admin", "candidates"],
     queryFn: async () => {
       const res = await fetch("/api/admin/candidates");
       if (!res.ok) throw new Error("Failed to fetch candidates");
@@ -196,7 +200,7 @@ export function CampaignWizard() {
         candidate_id: data.candidateId,
       });
       clearDraftStorage();
-      toast.success("Campaign created successfully");
+      toast.success("Draft campaign created");
       router.push(`/admin/collect/campaigns/${result.campaign.id}`);
     } catch (err) {
       track("admin_campaign_creation_failed", {
@@ -217,6 +221,11 @@ export function CampaignWizard() {
     [candidates, candidateId],
   );
 
+  const existingDraftCampaign = selectedCandidate?.draftCampaign ?? null;
+  const showActiveCampaignDraftNotice = Boolean(
+    selectedCandidate?.hasActiveCampaign && !existingDraftCampaign,
+  );
+
   const stepSubtitles = useMemo((): (string | undefined)[] => {
     const v = watchedForm as CreateCampaignData;
     const anchor =
@@ -230,7 +239,7 @@ export function CampaignWizard() {
       qBits.length
         ? `${qBits.length} custom question${qBits.length === 1 ? "" : "s"}`
         : undefined,
-      anchor ? "Ready to create" : undefined,
+      anchor ? "Ready to save draft" : undefined,
     ];
   }, [watchedForm, selectedCandidate?.name]);
 
@@ -304,6 +313,8 @@ export function CampaignWizard() {
           candidateOptions={candidateOptions}
           candidatesLoading={candidatesLoading}
           selectedCandidate={selectedCandidate}
+          existingDraftCampaign={existingDraftCampaign}
+          showActiveCampaignDraftNotice={showActiveCampaignDraftNotice}
           onCandidateSelect={handleCandidateSelect}
           onBack={goBack}
           onNext={validateAndNext}

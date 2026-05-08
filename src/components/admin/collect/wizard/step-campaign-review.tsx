@@ -138,7 +138,7 @@ export function StepCampaignReview({
       <div className="space-y-4">
         <SectionLabel
           title="Campaign summary"
-          subtitle="Confirm details before creating the Collect campaign"
+          subtitle="Confirm details before saving a new draft Collect campaign"
         />
 
         <div className="bg-muted/50 space-y-4 rounded-sm border p-4">
@@ -212,7 +212,7 @@ export function StepCampaignReview({
         <NavButtons
           onBack={onBack}
           onNext={onSubmit}
-          nextLabel="Create Campaign"
+          nextLabel="Create Draft Campaign"
           isLoading={isSubmitting}
           nextDisabled={isSubmitting}
         />

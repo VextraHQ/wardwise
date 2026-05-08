@@ -97,15 +97,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Guard: one active campaign per candidate
-    const existingActive = await prisma.campaign.findFirst({
-      where: { candidateId: data.candidateId, status: "active" },
+    // Guard: one open draft per candidate (resume existing draft instead of creating another)
+    const existingDraft = await prisma.campaign.findFirst({
+      where: { candidateId: data.candidateId, status: "draft" },
+      orderBy: { updatedAt: "desc" },
       select: { id: true, slug: true },
     });
-    if (existingActive) {
+    if (existingDraft) {
       return NextResponse.json(
         {
-          error: `This candidate already has an active campaign (${existingActive.slug}). Close or pause it first.`,
+          error: `This candidate already has a draft campaign (${existingDraft.slug}). Open it to continue setup instead of creating another draft.`,
         },
         { status: 409 },
       );

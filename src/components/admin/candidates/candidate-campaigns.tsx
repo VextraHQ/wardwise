@@ -125,6 +125,17 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
     staleTime: 1000 * 60,
   });
 
+  const draftShortcut = useMemo(() => {
+    if (!campaigns?.length) return null;
+    const drafts = campaigns.filter((c) => c.status === "draft");
+    if (drafts.length === 0) return null;
+    return drafts.reduce((latest, c) =>
+      new Date(c.updatedAt).getTime() > new Date(latest.updatedAt).getTime()
+        ? c
+        : latest,
+    );
+  }, [campaigns]);
+
   const createCampaignHref = `/admin/collect/campaigns/new?candidateId=${candidateId}`;
 
   const totalPages = Math.max(
@@ -216,10 +227,23 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
           variant="outline"
           size="sm"
           className="border-border/60 h-9 w-full rounded-sm font-mono text-[11px] tracking-widest uppercase shadow-none sm:w-auto"
-          onClick={() => router.push(createCampaignHref)}
+          onClick={() =>
+            draftShortcut
+              ? router.push(`/admin/collect/campaigns/${draftShortcut.id}`)
+              : router.push(createCampaignHref)
+          }
         >
-          <IconPlus className="mr-2 h-4 w-4" />
-          Create Campaign
+          {draftShortcut ? (
+            <>
+              <IconClipboardList className="mr-2 h-4 w-4" />
+              Continue Draft
+            </>
+          ) : (
+            <>
+              <IconPlus className="mr-2 h-4 w-4" />
+              Create Campaign
+            </>
+          )}
         </Button>
       </div>
 
