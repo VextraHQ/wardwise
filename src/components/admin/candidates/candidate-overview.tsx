@@ -906,7 +906,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                       </FormItem>
                     )}
                   />
-                  <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center">
+                  <div className="flex flex-col gap-2 pt-1 sm:flex-row-reverse sm:items-center sm:justify-start">
                     <Button
                       type="button"
                       size="sm"
@@ -1153,7 +1153,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
 
                   <ConstituencyBoundaryAlerts warnings={editBoundaryWarnings} />
 
-                  <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center">
+                  <div className="flex flex-col gap-2 pt-1 sm:flex-row-reverse sm:items-center sm:justify-start">
                     <Button
                       type="button"
                       size="sm"
@@ -1290,7 +1290,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                       </FormItem>
                     )}
                   />
-                  <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center">
+                  <div className="flex flex-col gap-2 pt-1 sm:flex-row-reverse sm:items-center sm:justify-start">
                     <Button
                       type="button"
                       size="sm"
@@ -1354,7 +1354,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
                       </FormItem>
                     )}
                   />
-                  <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center">
+                  <div className="flex flex-col gap-2 pt-1 sm:flex-row-reverse sm:items-center sm:justify-start">
                     <Button
                       type="button"
                       size="sm"

@@ -91,8 +91,13 @@ function getCandidateDisplayName(candidate: CandidateWithUser) {
 }
 
 function getPrimaryAction(candidate: CandidateWithUser) {
-  const campaign = candidate.collectCampaign;
-  if (!campaign) {
+  if (candidate.draftCampaign) {
+    return {
+      label: "Continue Draft",
+      href: `/admin/collect/campaigns/${candidate.draftCampaign.id}`,
+    };
+  }
+  if (!candidate.collectCampaign) {
     return {
       label: "Create Campaign",
       href: `/admin/collect/campaigns/new?candidateId=${candidate.id}`,
@@ -100,8 +105,8 @@ function getPrimaryAction(candidate: CandidateWithUser) {
   }
 
   return {
-    label: campaign.status === "draft" ? "Continue Setup" : "View Collect",
-    href: `/admin/collect/campaigns/${campaign.id}`,
+    label: "View Collect",
+    href: `/admin/collect/campaigns/${candidate.collectCampaign.id}`,
   };
 }
 

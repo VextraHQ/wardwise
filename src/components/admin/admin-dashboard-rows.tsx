@@ -205,15 +205,20 @@ export function CandidateRow({ candidate }: { candidate: CandidateWithUser }) {
     "bg-muted text-muted-foreground border-border/60";
   const detailHref = `/admin/candidates/${candidate.id}`;
   const accountHref = `/admin/candidates/${candidate.id}?tab=account`;
-  const collectAction = candidate.collectCampaign
+  const collectAction = candidate.draftCampaign
     ? {
-        href: `/admin/collect/campaigns/${candidate.collectCampaign.id}`,
-        label: "View Collect",
+        href: `/admin/collect/campaigns/${candidate.draftCampaign.id}`,
+        label: "Continue Draft",
       }
-    : {
-        href: `/admin/collect/campaigns/new?candidateId=${candidate.id}`,
-        label: "Create Campaign",
-      };
+    : candidate.collectCampaign
+      ? {
+          href: `/admin/collect/campaigns/${candidate.collectCampaign.id}`,
+          label: "View Collect",
+        }
+      : {
+          href: `/admin/collect/campaigns/new?candidateId=${candidate.id}`,
+          label: "Create Campaign",
+        };
   const locationLabel =
     candidate.constituency ||
     resolveStateName(candidate.stateCode) ||

@@ -56,10 +56,13 @@ the candidate detail page.
 | `supporterCount`    | Sum of `_count.submissions` across all campaigns  |
 | `_count.campaigns`  | Prisma nested count                               |
 | `_count.canvassers` | Prisma nested count                               |
-| `collectCampaign`   | Primary campaign shortcut for list-row operations |
+| `collectCampaign`   | Primary Collect status summary for badges, filters, and reporting (prefers active → paused → draft → closed; tie-break by `updatedAt`) |
+| `draftCampaign`     | Most recently updated **draft** only — drives **Continue Draft** shortcuts when present |
 | `campaignCount`     | Number of Collect campaigns attached to candidate |
 
----
+**Shortcuts**: Admin list/dashboard/actions prefer **`draftCampaign`** first (**Continue Draft**), else **`collectCampaign`** (**View Collect**), else **Create Campaign**. Collect status badges continue to reflect **`collectCampaign`** only.
+
+**Campaign rules (Collect)**: Multiple campaigns per candidate are allowed over time; at most **one active** (enforced when activating) and at most **one open draft** (enforced when creating).
 
 ## Position Hierarchy & Field Requirements
 
@@ -102,8 +105,7 @@ pending → credentials_sent → active → suspended
 
 ### `GET /api/admin/candidates`
 
-Returns all candidates with user accounts, computed supporter counts, and a
-sanitized primary Collect campaign summary for list-row shortcuts.
+Returns all candidates with user accounts, computed supporter counts, sanitized **`collectCampaign`** (primary status summary) and **`draftCampaign`** (latest draft if any) for shortcuts.
 
 ### `POST /api/admin/candidates`
 
@@ -113,7 +115,7 @@ Creates candidate + user account with a secure account-setup link.
 
 ### `GET /api/admin/candidates/[id]`
 
-Returns single candidate with nested counts (campaigns, canvassers, submissions).
+Returns single candidate with nested counts (campaigns, canvassers, submissions), **`collectCampaign`**, **`draftCampaign`**, and deletion-impact metadata.
 
 ### `PUT /api/admin/candidates/[id]`
 
@@ -146,10 +148,10 @@ Issues a fresh secure reset link. Returns `{ resetUrl, expiresAt, deliveryMethod
 - "Create Candidate" button → navigates to `/admin/candidates/new`
 - Row click → navigates to `/admin/candidates/[id]`
 - The Actions column uses one consistent `Manage` dropdown per row to keep the table visually stable at scale.
-- The first dropdown item is contextual:
-  - `Create Campaign` when no Collect campaign exists
-  - `Continue Setup` for draft campaigns
-  - `View Collect` for active/paused/closed campaigns
+- The first dropdown item is contextual (same precedence as dashboard shortcuts):
+  - `Continue Draft` when `draftCampaign` is present (unfinished server draft)
+  - `View Collect` when there is no open draft and `collectCampaign` exists
+  - `Create Campaign` when the candidate has no campaigns yet
 - Actions dropdown:
   - View Candidate
   - View Collect

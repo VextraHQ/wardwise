@@ -8,6 +8,10 @@ import { logAudit } from "@/lib/core/audit";
 import { sanitizeCandidateConstituencyLgaIds } from "@/lib/geo/constituency-server";
 import { issueAuthLink } from "@/lib/auth/links";
 import { sendAuthLinkEmail } from "@/lib/email/auth";
+import {
+  pickCollectCampaignSummary,
+  pickDraftCampaignSummary,
+} from "@/lib/admin/candidate-collect-summaries";
 
 // Transform Prisma candidate to API response shape
 function transformCandidate(c: {
@@ -36,20 +40,8 @@ function transformCandidate(c: {
         0,
       )
     : 0;
-  const campaignPriority: Record<string, number> = {
-    active: 0,
-    paused: 1,
-    draft: 2,
-    closed: 3,
-  };
-  const collectCampaign = [...campaigns]
-    .sort((left, right) => {
-      const leftPriority = campaignPriority[left.status] ?? 9;
-      const rightPriority = campaignPriority[right.status] ?? 9;
-      if (leftPriority !== rightPriority) return leftPriority - rightPriority;
-      return right.updatedAt.getTime() - left.updatedAt.getTime();
-    })
-    .at(0);
+  const collectCampaign = pickCollectCampaignSummary(campaigns);
+  const draftCampaign = pickDraftCampaignSummary(campaigns);
 
   return {
     ...c,
@@ -59,24 +51,14 @@ function transformCandidate(c: {
     supporterCount,
     campaignCount: campaigns.length,
     hasAnyCampaign: campaigns.length > 0,
-    hasActiveCampaign: campaigns.some((campaign) => campaign.status === "active"),
+    hasActiveCampaign: campaigns.some(
+      (campaign) => campaign.status === "active",
+    ),
     hasInsightsEnabledCampaign: campaigns.some((campaign) =>
       Boolean(campaign.clientReportEnabled && campaign.clientReportToken),
     ),
-    collectCampaign: collectCampaign
-      ? {
-          id: collectCampaign.id,
-          slug: collectCampaign.slug,
-          status: collectCampaign.status,
-          submissionsCount: collectCampaign._count.submissions,
-          clientReportEnabled: collectCampaign.clientReportEnabled,
-          clientReportToken: collectCampaign.clientReportToken,
-          clientReportLastViewedAt:
-            collectCampaign.clientReportLastViewedAt?.toISOString() ?? null,
-          createdAt: collectCampaign.createdAt.toISOString(),
-          updatedAt: collectCampaign.updatedAt.toISOString(),
-        }
-      : null,
+    collectCampaign,
+    draftCampaign,
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
     user: c.user

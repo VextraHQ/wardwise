@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { type UseFormReturn } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { ComboboxSelect } from "@/components/ui/combobox-select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -15,7 +17,12 @@ import {
   FieldError,
   NavButtons,
 } from "@/components/collect/form-ui";
-import { IconUser, IconLink } from "@tabler/icons-react";
+import {
+  IconUser,
+  IconLink,
+  IconAlertTriangle,
+  IconInfoCircle,
+} from "@tabler/icons-react";
 import type { CreateCampaignData } from "@/lib/schemas/collect-schemas";
 import { nigeriaStates, getLGAsByState } from "@/lib/data/state-lga-locations";
 import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituency-boundary-alerts";
@@ -47,6 +54,10 @@ interface StepCandidateSetupProps {
   candidateOptions: CandidateOption[];
   candidatesLoading: boolean;
   selectedCandidate?: CandidateInfo;
+  /** Blocks continuing past step 1 — admins must open the existing server draft */
+  existingDraftCampaign?: { id: string; slug: string } | null;
+  /** Shown when the candidate has an active Collect campaign and no open draft */
+  showActiveCampaignDraftNotice?: boolean;
   onCandidateSelect: (candidateId: string) => void;
   onBack: () => void;
   onNext: () => void;
@@ -57,6 +68,8 @@ export function StepCandidateSetup({
   candidateOptions,
   candidatesLoading,
   selectedCandidate,
+  existingDraftCampaign,
+  showActiveCampaignDraftNotice,
   onCandidateSelect,
   onBack,
   onNext,
@@ -190,6 +203,40 @@ export function StepCandidateSetup({
               <ConstituencyBoundaryAlerts
                 warnings={candidateBoundaryWarnings}
               />
+              {existingDraftCampaign ? (
+                <Alert className="rounded-sm border-amber-500/35 bg-amber-500/10 text-amber-950 dark:text-amber-100 [&>svg]:text-amber-600">
+                  <IconAlertTriangle className="text-amber-600" aria-hidden />
+                  <AlertTitle>Draft campaign already exists</AlertTitle>
+                  <AlertDescription className="text-amber-950/85 dark:text-amber-50/90">
+                    <p>
+                      This candidate already has an open draft (
+                      <span className="font-mono">
+                        {existingDraftCampaign.slug}
+                      </span>
+                      ). Only one draft is allowed — continue that setup instead
+                      of starting another wizard.
+                    </p>
+                    <Link
+                      href={`/admin/collect/campaigns/${existingDraftCampaign.id}`}
+                      className="text-primary mt-2 inline-block font-mono text-[10px] font-bold tracking-widest uppercase underline-offset-2 hover:underline"
+                    >
+                      Continue Draft
+                    </Link>
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+              {showActiveCampaignDraftNotice && selectedCandidate ? (
+                <Alert className="border-border/60 bg-muted/40 [&>svg]:text-muted-foreground rounded-sm">
+                  <IconInfoCircle aria-hidden />
+                  <AlertTitle>New campaign will be a draft</AlertTitle>
+                  <AlertDescription>
+                    This candidate already has an active Collect campaign. You
+                    can create another campaign as a draft now, but you cannot
+                    activate it until the current active campaign is paused or
+                    closed.
+                  </AlertDescription>
+                </Alert>
+              ) : null}
             </div>
           )}
         </div>
@@ -317,7 +364,11 @@ export function StepCandidateSetup({
       </div>
 
       <div className="mt-4">
-        <NavButtons onBack={onBack} onNext={onNext} />
+        <NavButtons
+          onBack={onBack}
+          onNext={onNext}
+          nextDisabled={Boolean(existingDraftCampaign)}
+        />
       </div>
     </StepCard>
   );

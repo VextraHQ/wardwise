@@ -305,6 +305,12 @@ model PollingUnit {
 - `slug`: unique, used in public URL
 - Candidate identity corrections sync `candidateName`, `candidateTitle`, `party`, and `constituency`; `slug` remains stable.
 
+**Cardinality (application rules)**
+
+- A candidate may have **multiple** Collect campaigns over time (e.g. closed, paused, drafts).
+- At **activation** time (`PATCH` → `active`), at most **one active** campaign per candidate; activating a draft while another campaign is active returns `409`.
+- At **create** time (`POST`), at most **one open draft** per candidate; if a draft already exists, creation returns `409` so admins resume that draft instead of creating another.
+
 ### CollectSubmission
 
 - `@@unique([campaignId, phone])` + `@@unique([campaignId, voterIdNumber])`
@@ -330,7 +336,7 @@ model PollingUnit {
 
 | Route                                           | Method               | Notes                                                                               |
 | ----------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------- |
-| `/api/admin/collect/campaigns`                  | GET + POST           | List with `_count`; GET accepts `?candidateId=` filter; create with slug uniqueness |
+| `/api/admin/collect/campaigns`                  | GET + POST           | List with `_count`; GET accepts `?candidateId=` filter; POST creates a **draft** (slug uniqueness); blocked with `409` if candidate already has a draft |
 | `/api/admin/collect/campaigns/[id]`             | GET + PATCH + DELETE |                                                                                     |
 | `/api/admin/collect/campaigns/[id]/submissions` | GET                  | Paginated, filterable; includes PU code and derived registration reference support  |
 | `/api/admin/collect/campaigns/[id]/export`      | GET                  | CSV with PU code column; sanitizes `=+-@`                                           |
@@ -412,7 +418,7 @@ src/components/admin/collect/
   campaign-wizard.tsx
   step-candidate-setup.tsx            — step 1: candidate + slug + branding
   step-campaign-collect-config.tsx    — step 2: questions + LGA restrict
-  step-campaign-review.tsx            — step 3: read-only summary + Edit + create
+  step-campaign-review.tsx            — step 3: read-only summary + Edit + **Create Draft Campaign**
 ```
 
 **New Campaign wizard (`campaign-wizard.tsx`) — draft autosave**
@@ -424,6 +430,7 @@ src/components/admin/collect/
 - Successful create calls `clear()` only (storage wipe; form already navigates away).
 - `?candidateId=` URL preselect still runs when candidates load, but **skips if `candidateId` is already set** (e.g. from a restored draft) so draft and deep-link compose safely.
 - Analytics: `admin_campaign_wizard_draft_restored`, `admin_campaign_wizard_draft_discarded`.
+- Step 1 notices: if the candidate already has a server **draft**, show **Continue Draft** (Next stays disabled until they leave the wizard); if they have an **active** campaign and no draft, show a non-blocking note that the new record saves as draft until the active campaign is paused or closed.
 
 ### Admin Support Workflow
 

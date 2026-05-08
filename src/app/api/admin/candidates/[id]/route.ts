@@ -11,6 +11,10 @@ import { logAudit } from "@/lib/core/audit";
 import { bumpCandidateSessionVersions } from "@/lib/auth/storage";
 import { sanitizeCandidateConstituencyLgaIds } from "@/lib/geo/constituency-server";
 import { getPositionStateValidationMessage } from "@/lib/geo/constituency";
+import {
+  pickCollectCampaignSummary,
+  pickDraftCampaignSummary,
+} from "@/lib/admin/candidate-collect-summaries";
 
 const CANDIDATE_INCLUDE = {
   user: {
@@ -21,7 +25,14 @@ const CANDIDATE_INCLUDE = {
   },
   campaigns: {
     select: {
+      id: true,
       slug: true,
+      status: true,
+      clientReportEnabled: true,
+      clientReportToken: true,
+      clientReportLastViewedAt: true,
+      createdAt: true,
+      updatedAt: true,
       _count: { select: { submissions: true, campaignCanvassers: true } },
     },
   },
@@ -42,6 +53,8 @@ function transformCandidate(c: any) {
   );
   const candidateCanvasserCount = c._count?.canvassers ?? 0;
   const campaignCount = c._count?.campaigns ?? campaigns.length;
+  const collectCampaign = pickCollectCampaignSummary(campaigns);
+  const draftCampaign = pickDraftCampaignSummary(campaigns);
 
   return {
     ...c,
@@ -60,6 +73,18 @@ function transformCandidate(c: any) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       campaignSlugs: campaigns.map((cam: any) => cam.slug).filter(Boolean),
     },
+    collectCampaign,
+    draftCampaign,
+    hasActiveCampaign: campaigns.some(
+      (cam: { status: string }) => cam.status === "active",
+    ),
+    hasAnyCampaign: campaigns.length > 0,
+    hasInsightsEnabledCampaign: campaigns.some(
+      (cam: {
+        clientReportEnabled: boolean;
+        clientReportToken: string | null;
+      }) => Boolean(cam.clientReportEnabled && cam.clientReportToken),
+    ),
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
     user: c.user
