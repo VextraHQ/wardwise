@@ -125,9 +125,7 @@ export function CampaignDetail({
                 <Link href="/admin/collect">Campaigns</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator className="text-muted-foreground/70">
-              /
-            </BreadcrumbSeparator>
+            <BreadcrumbSeparator className="text-muted-foreground/70" />
             <BreadcrumbItem>
               <BreadcrumbPage className="text-foreground/40 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
                 {campaignName}

@@ -46,7 +46,7 @@ export function GeoBreadcrumb({
                 All States
               </BreadcrumbLink>
             ) : (
-              <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
+              <BreadcrumbPage className="text-foreground/40 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
                 All States
               </BreadcrumbPage>
             )}
@@ -54,9 +54,7 @@ export function GeoBreadcrumb({
 
           {stateCode && state && (
             <>
-              <BreadcrumbSeparator className="text-muted-foreground/30">
-                /
-              </BreadcrumbSeparator>
+              <BreadcrumbSeparator className="text-muted-foreground/60" />
               <BreadcrumbItem>
                 {lgaId ? (
                   <BreadcrumbLink
@@ -66,7 +64,7 @@ export function GeoBreadcrumb({
                     {state.name}
                   </BreadcrumbLink>
                 ) : (
-                  <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
+                  <BreadcrumbPage className="text-foreground/40 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
                     {state.name}
                   </BreadcrumbPage>
                 )}
@@ -76,9 +74,7 @@ export function GeoBreadcrumb({
 
           {lgaId && lgaName && (
             <>
-              <BreadcrumbSeparator className="text-muted-foreground/30">
-                /
-              </BreadcrumbSeparator>
+              <BreadcrumbSeparator className="text-muted-foreground/60" />
               <BreadcrumbItem>
                 {wardId ? (
                   <BreadcrumbLink
@@ -94,7 +90,7 @@ export function GeoBreadcrumb({
                     {formatGeoDisplayName(lgaName)}
                   </BreadcrumbLink>
                 ) : (
-                  <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
+                  <BreadcrumbPage className="text-foreground/40 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
                     {formatGeoDisplayName(lgaName)}
                   </BreadcrumbPage>
                 )}
@@ -104,11 +100,9 @@ export function GeoBreadcrumb({
 
           {wardId && wardName && (
             <>
-              <BreadcrumbSeparator className="text-muted-foreground/30">
-                /
-              </BreadcrumbSeparator>
+              <BreadcrumbSeparator className="text-muted-foreground/60" />
               <BreadcrumbItem>
-                <BreadcrumbPage className="text-foreground/30 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
+                <BreadcrumbPage className="text-foreground/40 font-mono text-[9px] font-bold tracking-[0.15em] uppercase">
                   {formatGeoDisplayName(wardName)}
                 </BreadcrumbPage>
               </BreadcrumbItem>

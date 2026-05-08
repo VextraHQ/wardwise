@@ -51,10 +51,10 @@ export function AdminHeader() {
           className="mx-0.5 data-[orientation=vertical]:h-4"
         />
         <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden sm:gap-2">
-          <span className="text-foreground/50 shrink-0 font-mono text-[9px] font-black tracking-[0.2em] uppercase sm:text-[10px]">
+          <span className="text-foreground/60 shrink-0 font-mono text-[9px] font-black tracking-[0.2em] uppercase sm:text-[10px]">
             Admin
           </span>
-          <span className="text-foreground/30 shrink-0 font-mono text-[10px] sm:text-xs">
+          <span className="text-foreground/60 shrink-0 font-mono text-[10px] sm:text-xs">
             {"//"}
           </span>
           <h1 className="truncate text-sm font-bold tracking-tight">
