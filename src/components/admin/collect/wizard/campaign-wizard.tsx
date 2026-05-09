@@ -33,6 +33,7 @@ import type { CandidateCollectCampaignSummary } from "@/lib/api/admin";
 type WizardCandidate = {
   id: string;
   name: string;
+  title: string | null;
   party: string;
   position: string;
   constituency: string;
@@ -127,7 +128,7 @@ export function CampaignWizard() {
     () =>
       candidates?.map((c) => ({
         value: c.id,
-        label: c.name,
+        label: c.title?.trim() ? `${c.title.trim()} ${c.name}` : c.name,
         description: `${c.party} — ${c.constituency || c.position || "N/A"}`,
       })) ?? [],
     [candidates],

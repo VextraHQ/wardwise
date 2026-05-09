@@ -1,7 +1,13 @@
 "use client";
 
+import { motion } from "motion/react";
+import { IconLock, IconPlayerPauseFilled } from "@tabler/icons-react";
 import { FormShell } from "@/components/collect/form-shell";
 import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
+import {
+  getEffectiveCampaignName,
+  shouldShowCandidateTitle,
+} from "@/lib/collect/branding";
 import type { PublicCampaign } from "@/types/collect";
 
 type CampaignAvailabilityScreenProps = {
@@ -11,28 +17,24 @@ type CampaignAvailabilityScreenProps = {
 
 const AVAILABILITY_COPY = {
   paused: {
-    title: "System Paused",
-    subtitle: "Registration Protocol",
-    statusLabel: "Offline",
+    statusLabel: "Paused",
     indicator: "bg-orange-500",
-    iconTone: "bg-orange-500/10",
-    iconInnerTone: "bg-orange-500",
-    iconAnimated: true,
-    heading: "Registration Currently Paused",
+    indicatorAnimated: true,
+    heading: "Registration temporarily paused",
     description:
-      "This registration campaign is currently on hold. Field operations have been temporarily suspended. Please check back later.",
+      "This campaign has paused new registrations. Check back soon or follow updates from the campaign.",
+    cardTone: "border-amber-500/35 bg-amber-500/10",
+    iconTone: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
   },
   closed: {
-    title: "Campaign Concluded",
-    subtitle: "Registration Protocol",
-    statusLabel: "Terminated",
+    statusLabel: "Closed",
     indicator: "bg-destructive",
-    iconTone: "bg-destructive/10",
-    iconInnerTone: "bg-destructive",
-    iconAnimated: false,
-    heading: "Registration Closed",
+    indicatorAnimated: false,
+    heading: "Registration closed",
     description:
-      "This registration campaign has successfully ended its collection phase. Thank you to all field operators and supporters.",
+      "This campaign has concluded its supporter registration phase. Thank you to everyone who stood with the campaign.",
+    cardTone: "border-border/60 bg-muted/30",
+    iconTone: "bg-muted text-muted-foreground",
   },
 } as const;
 
@@ -41,36 +43,80 @@ export function CampaignAvailabilityScreen({
   status,
 }: CampaignAvailabilityScreenProps) {
   const copy = AVAILABILITY_COPY[status];
+  const campaignName = getEffectiveCampaignName(campaign);
+  const showCandidateTitle = shouldShowCandidateTitle(campaign);
+  const StatusIcon = status === "paused" ? IconPlayerPauseFilled : IconLock;
 
   return (
     <FormShell campaign={campaign}>
-      <div className="w-full">
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full"
+      >
         <StepCard>
           <CardSectionHeader
-            title={copy.title}
-            subtitle={copy.subtitle}
+            title="Supporter Registration"
+            subtitle="Registration Protocol"
             statusLabel={copy.statusLabel}
-            icon={<div className={`h-2 w-2 rounded-full ${copy.indicator}`} />}
-          />
-          <div className="space-y-4 py-8 text-center">
-            <div
-              className={`mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full ${copy.iconTone}`}
-            >
+            icon={
               <div
-                className={`h-4 w-4 rounded-full ${copy.iconInnerTone} ${
-                  copy.iconAnimated ? "animate-pulse" : ""
+                className={`h-2 w-2 rounded-full ${copy.indicator} ${
+                  copy.indicatorAnimated ? "animate-pulse" : ""
                 }`}
               />
+            }
+          />
+
+          <div className="space-y-6 py-4 text-center">
+            <div className="space-y-5">
+              <div className="mx-auto flex items-center justify-center gap-3">
+                <div className="bg-primary h-px w-8" />
+                <span className="text-primary text-[10px] font-black tracking-widest uppercase">
+                  {campaign.party}
+                </span>
+                <div className="bg-primary h-px w-8" />
+              </div>
+
+              <div className="flex flex-col items-center justify-center space-y-3">
+                <h1 className="text-foreground text-3xl font-black tracking-tight text-balance sm:text-4xl">
+                  {showCandidateTitle && campaign.candidateTitle && (
+                    <span className="text-muted-foreground mr-2 font-medium">
+                      {campaign.candidateTitle}
+                    </span>
+                  )}
+                  {campaignName}
+                </h1>
+                <p className="text-muted-foreground mx-auto max-w-sm text-xs leading-relaxed font-semibold tracking-widest text-balance uppercase">
+                  {campaign.constituency}
+                </p>
+              </div>
             </div>
-            <h2 className="text-foreground text-xl font-bold tracking-tight">
-              {copy.heading}
-            </h2>
-            <p className="text-muted-foreground mx-auto max-w-sm text-sm">
-              {copy.description}
-            </p>
+
+            <div
+              className={`mx-auto max-w-sm rounded-sm border border-dashed p-5 text-left ${copy.cardTone}`}
+              role="status"
+              aria-live="polite"
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${copy.iconTone}`}
+                >
+                  <StatusIcon className="size-4" aria-hidden />
+                </div>
+                <div className="min-w-0 space-y-1">
+                  <p className="text-foreground text-sm font-semibold">
+                    {copy.heading}
+                  </p>
+                  <p className="text-muted-foreground text-xs leading-relaxed">
+                    {copy.description}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </StepCard>
-      </div>
+      </motion.div>
     </FormShell>
   );
 }

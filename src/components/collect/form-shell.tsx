@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { Header } from "@/components/layout/header";
 import type { PublicCampaign } from "@/types/collect";
-import { getEffectiveCampaignName } from "@/lib/collect/branding";
+import { getCampaignDisplayHeadline } from "@/lib/collect/branding";
 import { AppFooter } from "@/components/layout/app-footer";
 
 export function FormShell({
@@ -17,7 +17,7 @@ export function FormShell({
   statusBanner?: ReactNode;
   headerActions?: ReactNode;
 }) {
-  const campaignName = getEffectiveCampaignName(campaign);
+  const campaignName = getCampaignDisplayHeadline(campaign);
 
   return (
     <div className="bg-background relative min-h-screen overflow-hidden">

@@ -26,7 +26,7 @@ import { CampaignCanvassers } from "@/components/admin/collect/campaign-canvasse
 import { CampaignSettings } from "@/components/admin/collect/campaign-settings";
 import {
   getCampaignBrandingLabel,
-  getEffectiveCampaignName,
+  getCampaignDisplayHeadline,
 } from "@/lib/collect/branding";
 import {
   AdminResourceState,
@@ -58,7 +58,7 @@ export function CampaignDetail({
 
   const currentTab = searchParams.get("tab") ?? "overview";
   const { data: campaign, isLoading } = useCampaign(id);
-  const campaignName = campaign ? getEffectiveCampaignName(campaign) : "";
+  const campaignName = campaign ? getCampaignDisplayHeadline(campaign) : "";
 
   function handleTabChange(value: string) {
     const params = new URLSearchParams(searchParams.toString());

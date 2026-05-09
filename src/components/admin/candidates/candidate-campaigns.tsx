@@ -39,7 +39,7 @@ import {
 
 import { formatStatusLabel } from "@/lib/admin/dashboard";
 import { isStaleCampaign } from "@/lib/collect/campaign-health";
-import { getEffectiveCampaignName } from "@/lib/collect/branding";
+import { getCampaignDisplayHeadline } from "@/lib/collect/branding";
 import { formatRelativeTime } from "@/lib/date-format";
 import { formatPersonName } from "@/lib/utils";
 import type { CampaignSummary } from "@/types/collect";
@@ -249,7 +249,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
 
       <div className="space-y-3 md:hidden">
         {paginatedCampaigns.map((campaign) => {
-          const campaignName = getEffectiveCampaignName(campaign);
+          const campaignName = getCampaignDisplayHeadline(campaign);
           const stale = isStaleCampaign(campaign);
           const reportEnabled = Boolean(
             campaign.clientReportEnabled && campaign.clientReportToken,
@@ -372,7 +372,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
                 <TableCell>
                   <div>
                     <span className="text-sm font-medium">
-                      {getEffectiveCampaignName(campaign)}
+                      {getCampaignDisplayHeadline(campaign)}
                     </span>
                     <span className="text-muted-foreground block font-mono text-xs">
                       /c/{campaign.slug}
@@ -413,7 +413,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
                 >
                   <CampaignActionsMenu
                     campaign={campaign}
-                    ariaLabel={`Open actions for ${getEffectiveCampaignName(campaign)}`}
+                    ariaLabel={`Open actions for ${getCampaignDisplayHeadline(campaign)}`}
                   />
                 </TableCell>
               </TableRow>
