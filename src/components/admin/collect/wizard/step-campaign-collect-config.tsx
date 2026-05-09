@@ -20,6 +20,7 @@ import type { CreateCampaignData } from "@/lib/schemas/collect-schemas";
 type CandidateInfo = {
   id: string;
   name: string;
+  title: string | null;
   party: string;
   position: string;
   constituency: string;

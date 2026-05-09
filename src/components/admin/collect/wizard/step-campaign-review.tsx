@@ -13,13 +13,14 @@ import { IconChecklist, IconPencil } from "@tabler/icons-react";
 import type { CreateCampaignData } from "@/lib/schemas/collect-schemas";
 import {
   getCampaignBrandingLabel,
-  getEffectiveCampaignName,
+  getCampaignDisplayHeadline,
 } from "@/lib/collect/branding";
 import { positionRequiresLgas } from "@/lib/geo/constituency";
 
 type CandidateInfo = {
   id: string;
   name: string;
+  title: string | null;
   party: string;
   position: string;
   constituency: string;
@@ -103,11 +104,20 @@ export function StepCampaignReview({
   const customQuestion2 = watch("customQuestion2");
 
   const campaignName = selectedCandidate
-    ? getEffectiveCampaignName({
+    ? getCampaignDisplayHeadline({
         candidateName: selectedCandidate.name,
+        candidateTitle: selectedCandidate.title,
         displayName,
+        brandingType,
       })
     : displayName?.trim() || "—";
+  const anchorHeadline = selectedCandidate
+    ? getCampaignDisplayHeadline({
+        candidateName: selectedCandidate.name,
+        candidateTitle: selectedCandidate.title,
+        brandingType: "candidate",
+      })
+    : "";
 
   const needsLgas =
     selectedCandidate && positionRequiresLgas(selectedCandidate.position);
@@ -165,7 +175,7 @@ export function StepCampaignReview({
               <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
                 <ReviewField
                   label="Anchor candidate"
-                  value={selectedCandidate?.name ?? ""}
+                  value={anchorHeadline || selectedCandidate?.name || ""}
                 />
                 <ReviewField
                   label="Position"

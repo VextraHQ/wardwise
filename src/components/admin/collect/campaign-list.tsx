@@ -34,7 +34,7 @@ import {
 import { CampaignActionsMenu } from "@/components/admin/collect/campaign-actions-menu";
 import {
   getCampaignBrandingLabel,
-  getEffectiveCampaignName,
+  getCampaignDisplayHeadline,
 } from "@/lib/collect/branding";
 import { formatStatusLabel } from "@/lib/admin/dashboard";
 import { isStaleCampaign } from "@/lib/collect/campaign-health";
@@ -169,8 +169,8 @@ function applySort(
       case "most-submissions":
         return b._count.submissions - a._count.submissions;
       case "name-a-z":
-        return getEffectiveCampaignName(a).localeCompare(
-          getEffectiveCampaignName(b),
+        return getCampaignDisplayHeadline(a).localeCompare(
+          getCampaignDisplayHeadline(b),
         );
       case "recent-activity":
       default: {
@@ -236,7 +236,7 @@ export function CampaignList() {
       const q = search.trim().toLowerCase();
       result = result.filter(
         (c) =>
-          getEffectiveCampaignName(c).toLowerCase().includes(q) ||
+          getCampaignDisplayHeadline(c).toLowerCase().includes(q) ||
           c.candidateName.toLowerCase().includes(q) ||
           c.party.toLowerCase().includes(q) ||
           c.constituency.toLowerCase().includes(q) ||
@@ -481,7 +481,7 @@ export function CampaignList() {
             {/* Mobile cards — hidden on md+ */}
             <div className="space-y-3 md:hidden">
               {paginated.map((campaign) => {
-                const campaignName = getEffectiveCampaignName(campaign);
+                const campaignName = getCampaignDisplayHeadline(campaign);
                 const stale = isStaleCampaign(campaign);
                 const reportEnabled = Boolean(
                   campaign.clientReportEnabled && campaign.clientReportToken,
@@ -599,7 +599,7 @@ export function CampaignList() {
                 </TableHeader>
                 <TableBody>
                   {paginated.map((campaign, idx) => {
-                    const campaignName = getEffectiveCampaignName(campaign);
+                    const campaignName = getCampaignDisplayHeadline(campaign);
                     const brandingLabel = getCampaignBrandingLabel(
                       campaign.brandingType,
                     );

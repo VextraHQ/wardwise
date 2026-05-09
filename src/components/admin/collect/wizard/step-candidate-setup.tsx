@@ -29,8 +29,8 @@ import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituen
 import { getConstituencyBoundaryWarnings } from "@/lib/geo/constituency";
 import {
   campaignBrandingTypes,
-  getEffectiveCampaignName,
   getCampaignBrandingLabel,
+  getCampaignDisplayHeadline,
 } from "@/lib/collect/branding";
 
 type CandidateOption = {
@@ -42,6 +42,7 @@ type CandidateOption = {
 type CandidateInfo = {
   id: string;
   name: string;
+  title: string | null;
   party: string;
   position: string;
   constituency: string;
@@ -118,17 +119,26 @@ export function StepCandidateSetup({
     : null;
   const brandingLabel = getCampaignBrandingLabel(brandingType);
   const previewName = selectedCandidate
-    ? getEffectiveCampaignName({
+    ? getCampaignDisplayHeadline({
         candidateName: selectedCandidate.name,
+        candidateTitle: selectedCandidate.title,
         displayName,
+        brandingType,
       })
     : displayName?.trim() || "Public campaign name";
+  const anchorHeadline = selectedCandidate
+    ? getCampaignDisplayHeadline({
+        candidateName: selectedCandidate.name,
+        candidateTitle: selectedCandidate.title,
+        brandingType: "candidate",
+      })
+    : null;
   const displayNamePlaceholder =
     brandingType === "movement"
       ? "e.g. City Boy Movement"
       : brandingType === "team"
         ? "e.g. Fintiri Canvassers"
-        : "Optional if you want a public campaign name different from the candidate";
+        : "Optional — leave blank to use the candidate's name and title";
 
   return (
     <StepCard>
@@ -166,7 +176,7 @@ export function StepCandidateSetup({
               <div className="bg-muted/50 space-y-2 rounded-sm border px-4 py-3">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-medium">
-                    {selectedCandidate.name}
+                    {anchorHeadline ?? selectedCandidate.name}
                   </p>
                   <Badge
                     variant="outline"
@@ -310,7 +320,7 @@ export function StepCandidateSetup({
             </ToggleGroup>
             <p className="text-muted-foreground text-xs leading-relaxed">
               {brandingType === "candidate"
-                ? "Use the anchor candidate name by default, or override it with a cleaner public campaign name."
+                ? "Uses the candidate's name and title automatically. Only override below if you want a different public-facing name."
                 : brandingType === "movement"
                   ? "Best for broader supporter brands like City Boy Movement."
                   : "Best for operational groups like Fintiri Canvassers."}
@@ -354,7 +364,7 @@ export function StepCandidateSetup({
                 <p className="text-muted-foreground">
                   Anchor candidate:{" "}
                   <span className="text-foreground/80">
-                    {selectedCandidate.name}
+                    {anchorHeadline ?? selectedCandidate.name}
                   </span>
                 </p>
               )}

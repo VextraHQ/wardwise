@@ -43,7 +43,7 @@ import type { Campaign } from "@/types/collect";
 import {
   campaignBrandingTypes,
   getCampaignBrandingLabel,
-  getEffectiveCampaignName,
+  getCampaignDisplayHeadline,
 } from "@/lib/collect/branding";
 import { formatPersonName } from "@/lib/utils";
 
@@ -281,7 +281,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
     }
   };
 
-  const campaignName = getEffectiveCampaignName(campaign);
+  const campaignName = getCampaignDisplayHeadline(campaign);
   const brandingDirty =
     brandingType !== campaign.brandingType ||
     displayName !== (campaign.displayName ?? "");
@@ -485,19 +485,31 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
                   ? "e.g. City Boy Movement"
                   : brandingType === "team"
                     ? "e.g. Fintiri Canvassers"
-                    : "Optional if you want a public campaign name different from the candidate"
+                    : "Optional — leave blank to use the candidate's name and title"
               }
               className="border-border/60 h-9 rounded-sm"
             />
-            <div className="border-border/50 bg-muted/20 text-muted-foreground rounded-sm border px-3 py-2 text-xs leading-relaxed">
+            <div className="border-border/50 bg-muted/20 rounded-sm border px-3 py-2 text-xs leading-relaxed">
               <span className="text-foreground/70 font-mono text-[10px] font-bold tracking-widest uppercase">
                 Preview
               </span>
               <span className="text-foreground mt-1 block font-medium">
-                {getEffectiveCampaignName({
+                {getCampaignDisplayHeadline({
                   candidateName: campaign.candidateName,
+                  candidateTitle: campaign.candidateTitle,
                   displayName,
+                  brandingType,
                 })}
+              </span>
+              <span className="text-muted-foreground mt-0.5 block">
+                Anchor:{" "}
+                <span className="text-foreground/80">
+                  {getCampaignDisplayHeadline({
+                    candidateName: campaign.candidateName,
+                    candidateTitle: campaign.candidateTitle,
+                    brandingType: "candidate",
+                  })}
+                </span>
               </span>
             </div>
           </div>
