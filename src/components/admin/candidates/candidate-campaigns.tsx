@@ -69,7 +69,7 @@ function CampaignReportBadge({ campaign }: { campaign: CampaignSummary }) {
           enabled ? REPORT_STATUS_STYLES.enabled : REPORT_STATUS_STYLES.disabled
         }`}
       >
-        {enabled ? "Insights On" : "Off"}
+        {enabled ? "Insights On" : "Insights Off"}
       </Badge>
       {campaign.clientReportLastViewedAt && (
         <p className="text-muted-foreground text-[10px]">
@@ -258,7 +258,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
           return (
             <AdminMobileRecordCard
               key={campaign.id}
-              className="hover:bg-muted/25 cursor-pointer transition-colors"
+              className="hover:bg-muted/25 cursor-pointer"
               onClick={() =>
                 router.push(`/admin/collect/campaigns/${campaign.id}`)
               }
@@ -310,7 +310,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
                     {reportEnabled ? "On" : "Off"}
                   </Badge>
                 </AdminMobileRecordField>
-                <AdminMobileRecordField label="Last activity">
+                <AdminMobileRecordField label="Last Activity">
                   <span className="flex items-center justify-end gap-1 text-xs">
                     {formatRelativeTime(campaign.lastSubmissionAt, {
                       absoluteDateOptions: {
@@ -347,7 +347,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
                 Submissions
               </TableHead>
               <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase xl:table-cell">
-                Report
+                Insights
               </TableHead>
               <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase sm:table-cell">
                 Last Activity

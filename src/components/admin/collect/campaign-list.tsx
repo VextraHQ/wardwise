@@ -78,7 +78,7 @@ function CampaignReportBadge({ campaign }: { campaign: CampaignSummary }) {
           enabled ? REPORT_STATUS_STYLES.enabled : REPORT_STATUS_STYLES.disabled
         }`}
       >
-        {enabled ? "Insights On" : "Off"}
+        {enabled ? "Insights On" : "Insights Off"}
       </Badge>
       {campaign.clientReportLastViewedAt && (
         <p className="text-muted-foreground text-[10px]">
@@ -117,37 +117,69 @@ function SummaryStripSkeleton() {
 
 function TableSkeleton() {
   return (
-    <div className="border-border/60 hidden animate-pulse rounded-sm border border-dashed md:block">
+    <div className="border-border/60 hidden overflow-x-auto rounded-sm border border-dashed md:block">
       <Table>
         <TableHeader className="bg-muted/30">
           <TableRow className="hover:bg-transparent">
-            {[
-              "S/N",
-              "Campaign",
-              "Constituency",
-              "Status",
-              "Submissions",
-              "Report",
-              "Last Activity",
-              "Actions",
-            ].map((h) => (
-              <TableHead
-                key={h}
-                className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase"
-              >
-                {h}
-              </TableHead>
-            ))}
+            <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
+              S/N
+            </TableHead>
+            <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+              Campaign
+            </TableHead>
+            <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase lg:table-cell">
+              Constituency
+            </TableHead>
+            <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+              Status
+            </TableHead>
+            <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
+              Submissions
+            </TableHead>
+            <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase xl:table-cell">
+              Insights
+            </TableHead>
+            <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase lg:table-cell">
+              Last Activity
+            </TableHead>
+            <TableHead className="text-muted-foreground h-10 w-12 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
+              Actions
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <TableRow key={i}>
-              {Array.from({ length: 8 }).map((_, j) => (
-                <TableCell key={j}>
-                  <Skeleton className="h-4 w-24" />
-                </TableCell>
-              ))}
+          {Array.from({ length: 5 }).map((_, rowIndex) => (
+            <TableRow key={rowIndex}>
+              <TableCell className="text-center">
+                <Skeleton className="mx-auto h-4 w-4 rounded-sm" />
+              </TableCell>
+              <TableCell>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-40 rounded-sm" />
+                  <Skeleton className="h-3 w-32 rounded-sm" />
+                </div>
+              </TableCell>
+              <TableCell className="hidden lg:table-cell">
+                <Skeleton className="h-4 w-24 rounded-sm" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-5 w-16 rounded-sm" />
+              </TableCell>
+              <TableCell className="text-right">
+                <Skeleton className="ml-auto h-4 w-12 rounded-sm" />
+              </TableCell>
+              <TableCell className="hidden xl:table-cell">
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-20 rounded-sm" />
+                  <Skeleton className="h-3 w-16 rounded-sm" />
+                </div>
+              </TableCell>
+              <TableCell className="hidden lg:table-cell">
+                <Skeleton className="h-4 w-20 rounded-sm" />
+              </TableCell>
+              <TableCell className="text-right">
+                <Skeleton className="ml-auto h-8 w-8 rounded-sm" />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -490,7 +522,7 @@ export function CampaignList() {
                 return (
                   <AdminMobileRecordCard
                     key={campaign.id}
-                    className="cursor-pointer"
+                    className="hover:bg-muted/25 cursor-pointer"
                     onClick={() =>
                       router.push(`/admin/collect/campaigns/${campaign.id}`)
                     }
@@ -587,7 +619,7 @@ export function CampaignList() {
                       Submissions
                     </TableHead>
                     <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase xl:table-cell">
-                      Report
+                      Insights
                     </TableHead>
                     <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase lg:table-cell">
                       Last Activity
