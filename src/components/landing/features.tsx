@@ -147,7 +147,7 @@ const features = [
       <div className="bg-muted/20 relative flex h-full w-full flex-col justify-center gap-6 p-10 lg:p-14">
         {[
           {
-            role: "MANAGER",
+            role: "SUPPORTER",
             color: "bg-primary",
             percentage: 100,
             access: "RW_CORE",

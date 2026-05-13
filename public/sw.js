@@ -18,7 +18,7 @@
  *   sed -i "s/__BUILD_ID__/$(git rev-parse --short HEAD)/" public/sw.js
  */
 
-const CACHE_VERSION = "0f608ab-1777501031485"; // replace at build time, or bump manually
+const CACHE_VERSION = "b6dc45d-1778635988852"; // replace at build time, or bump manually
 const CACHE_NAME = `wardwise-collect-${CACHE_VERSION}`;
 
 const PRECACHE_ASSETS = ["/brand/logomark-lagoon.svg"];
