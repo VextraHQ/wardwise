@@ -30,11 +30,19 @@ import {
 } from "@/components/ui/popover";
 import { loginSchema, type LoginFormData } from "@/lib/schemas/auth-schemas";
 
-type LoginScreenProps = {
-  callbackUrl?: string;
+type LoginNotice = "email-changed" | "password-changed";
+
+const LOGIN_NOTICE_COPY: Record<LoginNotice, string> = {
+  "email-changed": "Email updated. Sign in with your new email.",
+  "password-changed": "Password updated. Sign in with your new password.",
 };
 
-export function LoginScreen({ callbackUrl }: LoginScreenProps) {
+type LoginScreenProps = {
+  callbackUrl?: string;
+  notice?: LoginNotice;
+};
+
+export function LoginScreen({ callbackUrl, notice }: LoginScreenProps) {
   const isSubmittingRef = useRef(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -106,6 +114,13 @@ export function LoginScreen({ callbackUrl }: LoginScreenProps) {
         icon={HiShieldCheck}
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {notice && !error && (
+            <Alert className="border-primary/30 bg-primary/5 rounded-sm shadow-none">
+              <AlertDescription className="font-mono text-xs font-bold tracking-wide uppercase">
+                {LOGIN_NOTICE_COPY[notice]}
+              </AlertDescription>
+            </Alert>
+          )}
           {error && (
             <Alert
               variant="destructive"

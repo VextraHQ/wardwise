@@ -25,15 +25,16 @@ model User {
 }
 
 model AuthToken {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
-  type        String   // "invite" | "password_reset"
-  tokenHash   String   @unique
+  type        String // "invite" | "password_reset" | "admin_email_change"
+  tokenHash   String    @unique
+  targetEmail String? // normalized lowercase email; set only for admin_email_change tokens
   expiresAt   DateTime
   usedAt      DateTime?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
   createdById String?
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, type])
   @@index([expiresAt])
@@ -47,76 +48,76 @@ enum OnboardingStatus {
 }
 
 model Candidate {
-  id               String           @id @default(cuid())
-  name             String
-  party            String
-  position         String
-  isNational       Boolean          @default(false)
-  stateCode        String?          // 2-letter code (e.g. "AD", "LA")
-  lga              String?
-  constituency     String?
-  constituencyLgaIds Int[]          @default([])
-  description      String?
-  phone            String?
-  title            String?          // Honorific: Hon., Sen., Dr., Chief, Alh.
-  onboardingStatus OnboardingStatus @default(pending)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  user             User?
-  canvassers       Canvasser[]
-  campaigns        Campaign[]
+  id                 String           @id @default(cuid())
+  name               String
+  party              String
+  position           String
+  isNational         Boolean          @default(false)
+  stateCode          String? // 2-letter code (e.g. "AD", "LA")
+  lga                String?
+  constituency       String?
+  constituencyLgaIds Int[]            @default([])
+  description        String?
+  phone              String?
+  title              String? // Honorific: Hon., Sen., Dr., Chief, Alh.
+  onboardingStatus   OnboardingStatus @default(pending)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  user               User?
+  canvassers         Canvasser[]
+  campaigns          Campaign[]
 }
 
 model Voter {
-  id                 String     @id @default(cuid())
-  nin                String?    @unique   // Optional — canvasser can register without NIN if person doesn't know it
-  firstName          String
-  middleName         String?
-  lastName           String
-  dateOfBirth        DateTime?  // Made optional for field registration
-  yearOfBirth        Int?       // Simpler alternative to dateOfBirth for field capture
-  email              String?    // Not collected in field — optional, no unique constraint
-  phoneNumber        String     // Primary contact channel & secondary dedup key
-  gender             String?
-  occupation         String?    // Keep optional (Phase 2 field)
-  religion           String?    // Keep optional (Phase 2 field)
-  age                Int?       // Derived from yearOfBirth, made optional
-  state              String
-  lga                String
-  ward               String
-  pollingUnit        String
-  role               String     @default("voter")
-  vin                String?    // Legacy VIN field — optional
-  canvasserCode      String?
+  id            String    @id @default(cuid())
+  nin           String?   @unique // Optional — canvasser can register without NIN if person doesn't know it
+  firstName     String
+  middleName    String?
+  lastName      String
+  dateOfBirth   DateTime? // Made optional for field registration
+  yearOfBirth   Int? // Simpler alternative to dateOfBirth for field capture
+  email         String? // Not collected in field — optional, no unique constraint
+  phoneNumber   String // Primary contact channel & secondary dedup key
+  gender        String?
+  occupation    String? // Keep optional (Phase 2 field)
+  religion      String? // Keep optional (Phase 2 field)
+  age           Int? // Derived from yearOfBirth, made optional
+  state         String
+  lga           String
+  ward          String
+  pollingUnit   String
+  role          String    @default("voter")
+  vin           String? // Legacy VIN field — optional
+  canvasserCode String?
 
   // New fields for canvasser workflow
-  supportLevel       String?    // "strong" | "leaning" | "undecided"
-  contactOutcome     String?    // "spoke_to" | "not_home" | "refused"
-  gpsLatitude        Float?     // Silent GPS auto-capture
-  gpsLongitude       Float?     // Silent GPS auto-capture
-  consentGiven       Boolean    @default(false) // NDPA compliance
-  notes              String?    // Canvasser notes about the voter
+  supportLevel   String? // "strong" | "leaning" | "undecided"
+  contactOutcome String? // "spoke_to" | "not_home" | "refused"
+  gpsLatitude    Float? // Silent GPS auto-capture
+  gpsLongitude   Float? // Silent GPS auto-capture
+  consentGiven   Boolean @default(false) // NDPA compliance
+  notes          String? // Canvasser notes about the voter
 
-  registrationDate   DateTime   @default(now())
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
-  canvasser          Canvasser? @relation(fields: [canvasserCode], references: [code])
+  registrationDate DateTime   @default(now())
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  canvasser        Canvasser? @relation(fields: [canvasserCode], references: [code])
 }
 
 model Canvasser {
-  id           String   @id @default(cuid())
-  code         String   @unique
-  name         String
-  phone        String
-  candidateId  String
-  ward         String?
-  lga          String?
-  state        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  phone       String
+  candidateId String
+  ward        String?
+  lga         String?
+  state       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  candidate    Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-  voters       Voter[]
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  voters    Voter[]
 
   @@index([candidateId])
   @@index([code])
@@ -125,9 +126,9 @@ model Canvasser {
 // === Collect: Geo Models (database-backed) ===
 
 model Lga {
-  id          Int      @id @default(autoincrement())
+  id          Int                 @id @default(autoincrement())
   name        String
-  stateCode   String   @default("AD")
+  stateCode   String              @default("AD")
   wards       Ward[]
   submissions CollectSubmission[]
 
@@ -136,11 +137,11 @@ model Lga {
 }
 
 model Ward {
-  id           Int           @id @default(autoincrement())
+  id           Int                 @id @default(autoincrement())
   code         String?
   name         String
   lgaId        Int
-  lga          Lga           @relation(fields: [lgaId], references: [id])
+  lga          Lga                 @relation(fields: [lgaId], references: [id])
   pollingUnits PollingUnit[]
   submissions  CollectSubmission[]
 
@@ -149,11 +150,11 @@ model Ward {
 }
 
 model PollingUnit {
-  id          Int     @id @default(autoincrement())
+  id          Int                 @id @default(autoincrement())
   code        String?
   name        String
   wardId      Int
-  ward        Ward    @relation(fields: [wardId], references: [id])
+  ward        Ward                @relation(fields: [wardId], references: [id])
   submissions CollectSubmission[]
 
   @@unique([code, wardId])
@@ -164,29 +165,29 @@ model PollingUnit {
 // === Collect: Campaign & Submission Models ===
 
 model Campaign {
-  id               String   @id @default(uuid())
-  candidateId      String
-  candidate        Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-  slug             String   @unique
-  candidateName    String
-  candidateTitle   String?
-  brandingType     String   @default("candidate")
-  displayName      String?
-  party            String
-  constituency     String
-  constituencyType String   // "federal" | "state" | "lga"
-  enabledLgaIds    Int[]
-  customQuestion1  String?
-  customQuestion2  String?
-  status           String   @default("draft")     // "draft" | "active" | "paused" | "closed"
-  clientReportEnabled      Boolean   @default(false)
-  clientReportToken        String?   @unique
+  id                       String              @id @default(uuid())
+  candidateId              String
+  candidate                Candidate           @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  slug                     String              @unique
+  candidateName            String
+  candidateTitle           String?
+  brandingType             String              @default("candidate")
+  displayName              String?
+  party                    String
+  constituency             String
+  constituencyType         String // "federal" | "state" | "lga"
+  enabledLgaIds            Int[]
+  customQuestion1          String?
+  customQuestion2          String?
+  status                   String              @default("draft") // "draft" | "active" | "paused" | "closed"
+  clientReportEnabled      Boolean             @default(false)
+  clientReportToken        String?             @unique
   clientReportPasscodeHash String?
   clientReportLastViewedAt DateTime?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  submissions      CollectSubmission[]
-  campaignCanvassers CampaignCanvasser[]
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  submissions              CollectSubmission[]
+  campaignCanvassers       CampaignCanvasser[]
 }
 
 model CampaignCanvasser {
@@ -202,40 +203,40 @@ model CampaignCanvasser {
 }
 
 model CollectSubmission {
-  id               String   @id @default(uuid())
-  campaignId       String
-  campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  firstName        String?
-  middleName       String?
-  lastName         String?
-  fullName         String
-  phone            String
-  email            String?
-  sex              String
-  age              Int
-  occupation       String
-  maritalStatus    String
-  lgaId            Int?
-  lga              Lga?        @relation(fields: [lgaId], references: [id])
-  lgaName          String
-  wardId           Int?
-  ward             Ward?       @relation(fields: [wardId], references: [id])
-  wardName         String
-  pollingUnitId    Int?
-  pollingUnit      PollingUnit? @relation(fields: [pollingUnitId], references: [id])
-  pollingUnitName  String
-  apcRegNumber     String?
-  voterIdNumber    String?
-  isVerified       Boolean  @default(false)
-  role             String   // "volunteer" | "member" | "canvasser"
-  customAnswer1    String?
-  customAnswer2    String?
-  canvasserName    String?
-  canvasserPhone   String?
-  isFlagged        Boolean  @default(false)
-  adminNotes       String?
-  createdAt        DateTime @default(now())
-  auditEntries     SubmissionAuditEntry[]
+  id              String                 @id @default(uuid())
+  campaignId      String
+  campaign        Campaign               @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  firstName       String?
+  middleName      String?
+  lastName        String?
+  fullName        String
+  phone           String
+  email           String?
+  sex             String
+  age             Int
+  occupation      String
+  maritalStatus   String
+  lgaId           Int?
+  lga             Lga?                   @relation(fields: [lgaId], references: [id])
+  lgaName         String
+  wardId          Int?
+  ward            Ward?                  @relation(fields: [wardId], references: [id])
+  wardName        String
+  pollingUnitId   Int?
+  pollingUnit     PollingUnit?           @relation(fields: [pollingUnitId], references: [id])
+  pollingUnitName String
+  apcRegNumber    String?
+  voterIdNumber   String?
+  isVerified      Boolean                @default(false)
+  role            String // "volunteer" | "member" | "canvasser"
+  customAnswer1   String?
+  customAnswer2   String?
+  canvasserName   String?
+  canvasserPhone  String?
+  isFlagged       Boolean                @default(false)
+  adminNotes      String?
+  createdAt       DateTime               @default(now())
+  auditEntries    SubmissionAuditEntry[]
 
   @@unique([campaignId, phone])
   @@unique([campaignId, voterIdNumber])
@@ -247,12 +248,12 @@ model CollectSubmission {
 }
 
 model SubmissionAuditEntry {
-  id           String   @id @default(cuid())
+  id           String            @id @default(cuid())
   submissionId String
-  action       String   // "verified", "unverified", "flagged", "unflagged", "note_added", "deleted"
+  action       String // "verified", "unverified", "flagged", "unflagged", "note_added", "deleted"
   userId       String
-  details      String?  // JSON string with change details
-  createdAt    DateTime @default(now())
+  details      String? // JSON string with change details
+  createdAt    DateTime          @default(now())
   submission   CollectSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 
   @@index([submissionId])
@@ -262,10 +263,10 @@ model SubmissionAuditEntry {
 
 model AuditLog {
   id         String   @id @default(cuid())
-  action     String   // e.g. "candidate.create", "campaign.delete"
-  entityType String   // "candidate", "campaign", "submission"
+  action     String // e.g. "candidate.create", "campaign.delete"
+  entityType String // "candidate", "campaign", "submission"
   entityId   String
-  userId     String?  // admin who performed the action
+  userId     String? // admin who performed the action
   details    Json?
   createdAt  DateTime @default(now())
 

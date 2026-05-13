@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import {
   IconAlertTriangle,
   IconClipboardList,
@@ -37,6 +36,7 @@ import {
   adminResourceStateIcons,
 } from "@/components/admin/shared/admin-resource-state";
 
+import { useCandidateCampaigns } from "@/hooks/use-collect";
 import { formatStatusLabel } from "@/lib/admin/dashboard";
 import { isStaleCampaign } from "@/lib/collect/campaign-health";
 import { getCampaignDisplayHeadline } from "@/lib/collect/branding";
@@ -112,18 +112,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
     data: campaigns,
     isLoading,
     error,
-  } = useQuery<CampaignSummary[]>({
-    queryKey: ["admin", "candidates", candidateId, "campaigns"],
-    queryFn: async () => {
-      const res = await fetch(
-        `/api/admin/collect/campaigns?candidateId=${candidateId}`,
-      );
-      if (!res.ok) throw new Error("Failed to fetch campaigns");
-      const json = await res.json();
-      return json.campaigns;
-    },
-    staleTime: 1000 * 60,
-  });
+  } = useCandidateCampaigns(candidateId);
 
   const draftShortcut = useMemo(() => {
     if (!campaigns?.length) return null;

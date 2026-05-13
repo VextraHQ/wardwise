@@ -13,6 +13,9 @@ const AUTH_LINK_TTL_MS: Record<AuthLinkType, number> = {
   password_reset: 60 * 60 * 1000, // 1 hour
 };
 
+export const ADMIN_EMAIL_CHANGE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+export const ADMIN_EMAIL_CHANGE_TOKEN_TYPE = "admin_email_change";
+
 type AuthUserRecord = {
   id: string;
   name: string | null;
@@ -30,6 +33,10 @@ function hashAuthToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
+export function hashAdminEmailChangeToken(token: string) {
+  return hashAuthToken(token);
+}
+
 export function generateAuthToken() {
   return crypto.randomBytes(24).toString("base64url");
 }
@@ -42,6 +49,10 @@ function getBaseUrl() {
 
 export function buildAuthLinkUrl(token: string) {
   return `${getBaseUrl()}/reset-password/${token}`;
+}
+
+export function buildAdminEmailChangeUrl(token: string) {
+  return `${getBaseUrl()}/confirm-email-change/${token}`;
 }
 
 async function getUserForAuthLink(
@@ -310,4 +321,187 @@ export async function createPasswordResetForUser({
       deliveryMethod: "manual" as const,
     };
   }
+}
+
+export async function revokeAdminEmailChangeTokensForUser(
+  userId: string,
+  db: AuthDbClient = prisma,
+) {
+  await db.authToken.updateMany({
+    where: {
+      userId,
+      type: ADMIN_EMAIL_CHANGE_TOKEN_TYPE,
+      usedAt: null,
+    },
+    data: {
+      usedAt: new Date(),
+    },
+  });
+}
+
+export async function createAdminEmailChangeToken({
+  userId,
+  targetEmail,
+}: {
+  userId: string;
+  targetEmail: string;
+}) {
+  const token = generateAuthToken();
+  const tokenHash = hashAuthToken(token);
+  const expiresAt = new Date(Date.now() + ADMIN_EMAIL_CHANGE_TTL_MS);
+  const createdAt = new Date();
+
+  await prisma.$transaction(async (tx) => {
+    await revokeAdminEmailChangeTokensForUser(userId, tx);
+    await tx.authToken.create({
+      data: {
+        userId,
+        type: ADMIN_EMAIL_CHANGE_TOKEN_TYPE,
+        tokenHash,
+        targetEmail,
+        expiresAt,
+        createdById: userId,
+      },
+    });
+  });
+
+  return {
+    token,
+    url: buildAdminEmailChangeUrl(token),
+    expiresAt,
+    requestedAt: createdAt,
+  };
+}
+
+export type AdminEmailChangeTokenPreview = {
+  targetEmail: string;
+  expiresAt: Date;
+  createdAt: Date;
+  isValid: boolean;
+  isExpired: boolean;
+  isUsed: boolean;
+};
+
+export async function readAdminEmailChangeTokenPreview(
+  token: string,
+): Promise<AdminEmailChangeTokenPreview | null> {
+  const record = await prisma.authToken.findUnique({
+    where: { tokenHash: hashAuthToken(token) },
+    select: {
+      type: true,
+      targetEmail: true,
+      expiresAt: true,
+      usedAt: true,
+      createdAt: true,
+    },
+  });
+
+  if (!record || record.type !== ADMIN_EMAIL_CHANGE_TOKEN_TYPE) {
+    return null;
+  }
+
+  if (!record.targetEmail) {
+    return null;
+  }
+
+  const isExpired = record.expiresAt.getTime() < Date.now();
+  const isUsed = Boolean(record.usedAt);
+
+  return {
+    targetEmail: record.targetEmail,
+    expiresAt: record.expiresAt,
+    createdAt: record.createdAt,
+    isExpired,
+    isUsed,
+    isValid: !isExpired && !isUsed,
+  };
+}
+
+export type ConsumeAdminEmailChangeResult =
+  | {
+      success: true;
+      userId: string;
+      newEmail: string;
+    }
+  | {
+      success: false;
+      reason: "invalid" | "expired" | "used" | "conflict";
+    };
+
+export async function consumeAdminEmailChangeToken({
+  token,
+}: {
+  token: string;
+}): Promise<ConsumeAdminEmailChangeResult> {
+  const tokenHash = hashAuthToken(token);
+
+  return prisma.$transaction(async (tx) => {
+    const record = await tx.authToken.findUnique({
+      where: { tokenHash },
+      select: {
+        id: true,
+        userId: true,
+        type: true,
+        targetEmail: true,
+        expiresAt: true,
+        usedAt: true,
+      },
+    });
+
+    if (
+      !record ||
+      record.type !== ADMIN_EMAIL_CHANGE_TOKEN_TYPE ||
+      !record.targetEmail
+    ) {
+      return { success: false as const, reason: "invalid" as const };
+    }
+
+    if (record.usedAt) {
+      return { success: false as const, reason: "used" as const };
+    }
+
+    if (record.expiresAt.getTime() < Date.now()) {
+      return { success: false as const, reason: "expired" as const };
+    }
+
+    const conflict = await tx.user.findFirst({
+      where: {
+        email: { equals: record.targetEmail, mode: "insensitive" },
+        id: { not: record.userId },
+      },
+      select: { id: true },
+    });
+
+    if (conflict) {
+      return { success: false as const, reason: "conflict" as const };
+    }
+
+    await tx.authToken.update({
+      where: { id: record.id },
+      data: { usedAt: new Date() },
+    });
+
+    await tx.authToken.updateMany({
+      where: {
+        userId: record.userId,
+        type: ADMIN_EMAIL_CHANGE_TOKEN_TYPE,
+        usedAt: null,
+      },
+      data: { usedAt: new Date() },
+    });
+
+    await tx.user.update({
+      where: { id: record.userId },
+      data: {
+        email: record.targetEmail,
+        sessionVersion: { increment: 1 },
+      },
+    });
+
+    return {
+      success: true as const,
+      userId: record.userId,
+      newEmail: record.targetEmail,
+    };
+  });
 }

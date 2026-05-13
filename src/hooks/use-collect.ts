@@ -68,15 +68,20 @@ export function useSubmitRegistration() {
 }
 
 // Fetches all campaigns for the global admin dashboard.
-export function useCampaigns() {
+export function useCampaigns(params?: { candidateId?: string }) {
   return useQuery({
-    queryKey: ["admin-campaigns"],
+    queryKey: ["admin-campaigns", params?.candidateId ?? "all"],
     queryFn: async () => {
-      const data = await adminCollectApi.getCampaigns();
+      const data = await adminCollectApi.getCampaigns(params);
       return data.campaigns;
     },
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
+}
+
+// Fetches Collect campaigns anchored to one candidate account.
+export function useCandidateCampaigns(candidateId: string) {
+  return useCampaigns({ candidateId });
 }
 
 // Fetches details and settings for a single admin campaign.

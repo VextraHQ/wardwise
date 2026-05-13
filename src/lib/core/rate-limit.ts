@@ -102,6 +102,54 @@ export const reportUnlockRateLimit = redis
   : null;
 
 /**
+ * Admin self-service password changes.
+ * 5 attempts per 15 minutes — keyed per userId + IP at the call site.
+ */
+export const adminPasswordChangeRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, "15 m"),
+      prefix: "rl:admin-pwd",
+    })
+  : null;
+
+/**
+ * Admin email-change requests (issue a confirmation link).
+ * 3 attempts per 15 minutes — keyed per userId + IP at the call site.
+ */
+export const adminEmailChangeRequestRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(3, "15 m"),
+      prefix: "rl:admin-email-req",
+    })
+  : null;
+
+/**
+ * Public consume endpoint for admin email-change confirmation — per IP.
+ * 10 attempts per 15 minutes.
+ */
+export const adminEmailChangeConsumeIpRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(10, "15 m"),
+      prefix: "rl:admin-email-consume-ip",
+    })
+  : null;
+
+/**
+ * Public consume endpoint for admin email-change confirmation — per hashed token + IP.
+ * 5 attempts per 15 minutes to mitigate per-token brute-force.
+ */
+export const adminEmailChangeConsumeTokenRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, "15 m"),
+      prefix: "rl:admin-email-consume-token",
+    })
+  : null;
+
+/**
  * Extract client IP from request headers.
  */
 export function getClientIp(request: Request): string {
