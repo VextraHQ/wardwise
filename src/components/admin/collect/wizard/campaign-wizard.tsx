@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import Link from "next/link";
 
 import { track } from "@/lib/analytics/client";
+import { useAdminCandidates } from "@/hooks/use-admin";
 import { useCreateCampaign } from "@/hooks/use-collect";
 import { useWizardDraft } from "@/hooks/use-wizard-draft";
 import {
@@ -28,9 +28,7 @@ import { StepCandidateSetup } from "./step-candidate-setup";
 import { StepCampaignCollectConfig } from "./step-campaign-collect-config";
 import { StepCampaignReview } from "./step-campaign-review";
 
-import type { CandidateCollectCampaignSummary } from "@/lib/api/admin";
-
-type WizardCandidate = {
+type WizardSelectedCandidate = {
   id: string;
   name: string;
   title: string | null;
@@ -38,9 +36,11 @@ type WizardCandidate = {
   position: string;
   constituency: string;
   stateCode: string;
-  lga: string;
   constituencyLgaIds: number[];
-  draftCampaign?: CandidateCollectCampaignSummary | null;
+  draftCampaign?: {
+    id: string;
+    slug: string;
+  } | null;
   hasActiveCampaign?: boolean;
 };
 
@@ -111,18 +111,8 @@ export function CampaignWizard() {
     },
   });
 
-  const { data: candidates, isLoading: candidatesLoading } = useQuery<
-    WizardCandidate[]
-  >({
-    queryKey: ["admin", "candidates"],
-    queryFn: async () => {
-      const res = await fetch("/api/admin/candidates");
-      if (!res.ok) throw new Error("Failed to fetch candidates");
-      const json = await res.json();
-      return json.candidates;
-    },
-    staleTime: 1000 * 60 * 5,
-  });
+  const { data: candidates, isLoading: candidatesLoading } =
+    useAdminCandidates();
 
   const candidateOptions = useMemo(
     () =>
@@ -217,10 +207,23 @@ export function CampaignWizard() {
 
   const candidateId = useWatch({ control: form.control, name: "candidateId" });
   const watchedForm = useWatch({ control: form.control });
-  const selectedCandidate = useMemo(
-    () => candidates?.find((c) => c.id === candidateId),
-    [candidates, candidateId],
-  );
+  const selectedCandidate = useMemo<WizardSelectedCandidate | undefined>(() => {
+    const candidate = candidates?.find((c) => c.id === candidateId);
+    if (!candidate) return undefined;
+
+    return {
+      id: candidate.id,
+      name: candidate.name,
+      title: candidate.title,
+      party: candidate.party,
+      position: candidate.position,
+      constituency: candidate.constituency ?? "",
+      stateCode: candidate.stateCode ?? "",
+      constituencyLgaIds: candidate.constituencyLgaIds,
+      draftCampaign: candidate.draftCampaign ?? null,
+      hasActiveCampaign: candidate.hasActiveCampaign,
+    };
+  }, [candidates, candidateId]);
 
   const existingDraftCampaign = selectedCandidate?.draftCampaign ?? null;
   const showActiveCampaignDraftNotice = Boolean(

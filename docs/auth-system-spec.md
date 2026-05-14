@@ -223,12 +223,95 @@ Email sending is split into a generic transport, small orchestration modules, an
 
 ---
 
+## Admin self-service account (`/admin/account`)
+
+Self-service surface for the **currently signed-in admin only**. V1 covers name, email, and password changes — no admin creation, no `/admin/users`, no `super_admin` role.
+
+Visual and interaction standard: see `docs/cockpit-design-system.md` → **Admin Account UX Standard**.
+
+### Editable scope
+
+- **Name** — in-session update via `PATCH /api/admin/account/profile`. No session bump.
+- **Email** — two-step verified flow (see below). Requires current password to initiate.
+- **Password** — `POST /api/admin/account/password` with current password. Bumps `sessionVersion` and forces re-auth on all devices.
+
+Read-only on the page: `role`, `createdAt`, `lastLoginAt`, and `passwordChangedAt`. The role badge displays as "Admin" — it is fixed by Vextra and not user-editable in V1.
+
+### Two-step verified email change
+
+1. Admin submits `newEmail + currentPassword` to `POST /api/admin/account/email-change`.
+2. Endpoint validates current password, rejects duplicates against the **full `User` table** (case-insensitive, not just admins), revokes any older unused `admin_email_change` tokens for the user, and creates a new `AuthToken` row with `type = "admin_email_change"`, a normalized `targetEmail`, and a 24-hour TTL.
+3. Confirmation email lands in the **new inbox** with target email, requesting IP/UA, and request time. A best-effort **security notice** also lands in the current/old inbox so the admin can spot unexpected requests. If the primary confirmation mail is unconfigured the request fails with HTTP 503 — no token is created. If the old-inbox notice fails, the request still succeeds because the verified new-inbox flow is the source of truth.
+4. The link `/confirm-email-change/[token]` is a **scanner-safe GET page**. It previews the target email and expiry but never consumes the token, so Outlook Safe Links / Google / Proofpoint pre-fetching does not burn it.
+5. The user clicks `Confirm email change`, which POSTs to `/api/auth/confirm-email-change`. That endpoint consumes the token in a transaction, rejects conflicts re-checked at consume time, swaps `User.email`, revokes any other pending tokens, and increments `sessionVersion`.
+6. Client signs out and redirects to `/login?notice=email-changed`, where the LoginScreen renders "Sign in with your new email."
+
+The old email remains valid for sign-in until the new one is confirmed or the pending change is cancelled.
+
+### Cancellation
+
+`DELETE /api/admin/account/email-change` cancels the current pending change and revokes its unused tokens. Surfaced as a button on the pending-state banner.
+
+### Cross-device invalidation
+
+Both email and password changes bump `sessionVersion` on the `User` row. The existing `getAuthContext()` guard re-checks DB state on every protected request and rejects mismatched sessions with `session_stale`, so other devices die on their next protected request. No additional plumbing required.
+
+### Password-change side-effect: revoke pending email changes
+
+A password change also marks all unused `admin_email_change` tokens for that user as used, in the same transaction as the password update. This closes the gap where an attacker silently requested an email change before the victim rotated their password.
+
+### Rate limits (Upstash, graceful no-op when unset)
+
+| Endpoint                                       | Limit       | Key                  |
+| ---------------------------------------------- | ----------- | -------------------- |
+| `POST /api/admin/account/password`             | 5 / 15 min  | `userId + IP`        |
+| `POST /api/admin/account/email-change`         | 3 / 15 min  | `userId + IP`        |
+| `POST /api/auth/confirm-email-change` (per IP) | 10 / 15 min | IP                   |
+| `POST /api/auth/confirm-email-change` (token)  | 5 / 15 min  | `sha256(token) + IP` |
+
+### Audit events
+
+Personal account/security events for the signed-in admin are surfaced in the "Recent activity" section (last 10). Namespaces:
+
+- `admin.account.login` — successful admin sign-in
+- `admin.account.login_failed` — wrong password against a known admin account (only logged when the email maps to an existing admin, to avoid enumeration noise)
+- `admin.account.profile_updated` — name change
+- `admin.account.email_change_requested` — new pending email change issued
+- `admin.account.email_change_cancelled` — pending change cancelled by the admin
+- `admin.account.email_changed` — confirmation consumed, login email swapped
+- `admin.account.password_changed` — password rotation
+
+All events log `requestIp` and `userAgent` where available.
+
+### Production admin bootstrap
+
+The seeded `admin@wardwise.ng` account is a **local/dev convenience only**. The seed script now skips it in production unless `SEED_BOOTSTRAP_ADMIN === "true"` is explicitly set. Production admins must manage their own accounts via `/admin/account` using real reachable inboxes — email-based recovery and email-change confirmation both depend on it.
+
+Note: environments that _already_ seeded `admin@wardwise.ng` before this guard landed are not auto-cleaned. Operators should rotate or remove that account manually in production.
+
+### Files
+
+| File                                                   | Purpose                                          |
+| ------------------------------------------------------ | ------------------------------------------------ |
+| `src/app/admin/account/page.tsx`                       | Admin account route shell                        |
+| `src/components/admin/admin-account.tsx`               | Profile / Email / Security / Metadata / Activity |
+| `src/app/api/admin/account/route.ts`                   | `GET` account snapshot                           |
+| `src/app/api/admin/account/profile/route.ts`           | `PATCH` name                                     |
+| `src/app/api/admin/account/email-change/route.ts`      | `POST` + `DELETE` email-change request           |
+| `src/app/api/admin/account/password/route.ts`          | `POST` password change                           |
+| `src/app/api/auth/confirm-email-change/route.ts`       | Public consume (POST only)                       |
+| `src/app/(auth)/confirm-email-change/[token]/page.tsx` | Scanner-safe GET preview page                    |
+| `src/components/auth/confirm-email-change-screen.tsx`  | Client confirm button                            |
+| `src/lib/email/templates/admin-email-change.tsx`       | React Email template                             |
+| `src/lib/auth/links.ts`                                | `admin_email_change` token helpers               |
+
 ## Next Improvements
 
 - Add focused auth tests around invite acceptance, forgot-password, suspension, and remember-me session rules
 - Add explicit tests for generic forgot-password responses so account enumeration stays closed
 - Add candidate-facing copy in docs and support playbooks for link expiry / resend behavior
 - Evaluate whether admin accounts should also move to secure reset-link-first recovery if multiple staff accounts become common
+- Add a "Sign out all other sessions" button on `/admin/account` that bumps `sessionVersion` on demand (deferred from V1)
 - Split `onboardingStatus` from auth access state only when the product truly needs both
 - Unify invite orchestration only if invite delivery policy changes or new invite entrypoints appear; the current split is acceptable now that transport/template logic lives in the shared email layer
 - Extend delivery/audit logging for contact + auth flows if product needs stronger observability than today

@@ -10,7 +10,11 @@ vi.mock("./send", async () => {
   };
 });
 
-import { canSendAuthLinkEmail, sendAuthLinkEmail } from "./auth";
+import {
+  canSendAuthLinkEmail,
+  sendAdminEmailChangeNoticeEmail,
+  sendAuthLinkEmail,
+} from "./auth";
 import { sendEmail } from "./send";
 
 const mockSendEmail = vi.mocked(sendEmail);
@@ -96,5 +100,30 @@ describe("sendAuthLinkEmail", () => {
     });
 
     expect(result).toEqual({ sent: false, reason: "not_configured" });
+  });
+});
+
+describe("sendAdminEmailChangeNoticeEmail", () => {
+  it("delegates to sendEmail with the old-email notification template", async () => {
+    mockSendEmail.mockResolvedValue({ sent: true });
+
+    const result = await sendAdminEmailChangeNoticeEmail({
+      to: "admin@wardwise.ng",
+      name: "Ada",
+      currentEmail: "admin@wardwise.ng",
+      targetEmail: "new@wardwise.ng",
+      requestedAt: new Date("2026-05-14T12:30:00Z"),
+      requestIp: "::1",
+      userAgent: "Firefox on macOS",
+    });
+
+    expect(result).toEqual({ sent: true });
+    expect(mockSendEmail).toHaveBeenCalledTimes(1);
+    const call = mockSendEmail.mock.calls[0][0];
+    expect(call.to).toBe("admin@wardwise.ng");
+    expect(call.subject).toBe("Security notice: admin email change requested");
+    expect(call.html).toContain("admin@wardwise.ng");
+    expect(call.html).toContain("new@wardwise.ng");
+    expect(call.text).toMatch(/no action is needed on this inbox/i);
   });
 });

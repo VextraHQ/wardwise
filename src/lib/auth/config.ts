@@ -12,6 +12,45 @@ import {
 } from "@/lib/auth/storage";
 import { normalizeEmailInput } from "@/lib/schemas/field-schemas";
 import { getCandidateStatusLoginError } from "@/lib/auth/errors";
+import { logAudit } from "@/lib/core/audit";
+
+type AuthorizeRequestLike = {
+  headers?: Record<string, string | string[] | undefined> | Headers;
+};
+
+function getHeader(
+  req: AuthorizeRequestLike | undefined,
+  name: string,
+): string | null {
+  if (!req?.headers) return null;
+  if (typeof (req.headers as Headers).get === "function") {
+    return (req.headers as Headers).get(name);
+  }
+  const raw = (req.headers as Record<string, string | string[] | undefined>)[
+    name
+  ];
+  if (Array.isArray(raw)) return raw[0] ?? null;
+  return raw ?? null;
+}
+
+function getRequestIp(req: AuthorizeRequestLike | undefined): string {
+  const forwarded = getHeader(req, "x-forwarded-for");
+  if (forwarded) {
+    return forwarded.split(",")[0]?.trim() || "unknown";
+  }
+  return getHeader(req, "x-real-ip") ?? "unknown";
+}
+
+function logAdminLoginEvent(
+  action: "admin.account.login" | "admin.account.login_failed",
+  userId: string,
+  req: AuthorizeRequestLike | undefined,
+) {
+  void logAudit(action, "user", userId, userId, {
+    requestIp: getRequestIp(req),
+    userAgent: getHeader(req, "user-agent") ?? null,
+  });
+}
 
 function logCredentialsRejection({
   email,
@@ -43,7 +82,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
         rememberMe: { label: "Remember Me", type: "text" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         const startedAt = Date.now();
 
         if (!credentials?.email || !credentials?.password) {
@@ -98,6 +137,9 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isPasswordValid) {
+          if (user.role === "admin") {
+            logAdminLoginEvent("admin.account.login_failed", user.id, req);
+          }
           logCredentialsRejection({
             email,
             reason: "password_mismatch",
@@ -107,6 +149,10 @@ export const authOptions: NextAuthOptions = {
         }
 
         await recordSuccessfulLogin(user.id);
+
+        if (user.role === "admin") {
+          logAdminLoginEvent("admin.account.login", user.id, req);
+        }
 
         return {
           id: user.id,
@@ -126,7 +172,7 @@ export const authOptions: NextAuthOptions = {
     maxAge: Math.floor(REMEMBERED_SESSION_MAX_AGE_MS / 1000),
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.role = user.role;
         token.candidateId = user.candidateId;
@@ -135,6 +181,19 @@ export const authOptions: NextAuthOptions = {
         token.rememberMe = user.rememberMe ?? false;
         token.loginAt = Date.now();
         token.lastValidatedAt = Date.now();
+      } else if (
+        trigger === "update" &&
+        session &&
+        typeof session === "object"
+      ) {
+        // Client called `useSession().update({...})` — merge in editable fields.
+        const update = session as { name?: unknown; email?: unknown };
+        if (typeof update.name === "string") {
+          token.name = update.name;
+        }
+        if (typeof update.email === "string") {
+          token.email = update.email;
+        }
       } else if (token.sub && isSessionDueForRefresh(token.lastValidatedAt)) {
         const { user: dbUser } = await readAuthUserById(token.sub);
 
@@ -145,6 +204,8 @@ export const authOptions: NextAuthOptions = {
         }
 
         token.role = dbUser.role;
+        token.name = dbUser.name;
+        token.email = dbUser.email;
         token.candidateId = dbUser.candidateId ?? undefined;
         token.onboardingStatus =
           dbUser.candidate?.onboardingStatus ?? undefined;

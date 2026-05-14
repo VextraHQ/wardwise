@@ -292,6 +292,66 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 
 ---
 
+## Admin Account UX Standard
+
+`/admin/account` should feel like part of the WardWise cockpit, not a separate settings product. The distinction comes from a calmer **security-focused interaction model**, not a different visual language.
+
+### Core layout
+
+- Keep the **page header editorial** like other strong admin pages: mono eyebrow, compact title, short description.
+- Keep the **page body operational**: primary account actions on the left, supporting context on the right.
+- Use the support rail for bounded context only: account record and recent activity.
+- Avoid turning support content into equal-weight action cards.
+
+### Interaction model
+
+- Use **read-first, edit-on-demand** patterns.
+- Simple identity fields like **display name** should edit **in place**.
+- Sensitive multi-step actions like **email change** and **password change** should open in a **dialog/sheet**, not expand the page downward.
+- Do not keep multiple account forms open by default.
+- Do not let action buttons trigger large layout jumps that move the user away from the field they acted on.
+
+### Card anatomy
+
+- Card headers should stay **compact and structural**, not read like mini page heroes.
+- Avoid stacked intro blocks that make the card body feel like a second header.
+- The card body should present **current state + next action**, not another explanatory banner.
+- Avoid right-aligned header badges or counts when they risk awkward wrapping. Put secondary labels inside the body when needed.
+
+### Form behavior
+
+- Keep labels **left-aligned above fields**.
+- For inline edit states, prefer a **vertical form rhythm**:
+  1. label
+  2. field
+  3. helper/error text
+  4. action row
+- Avoid long horizontal rows where a stretched input fights Save / Cancel buttons on the same line.
+- Use icons on action buttons where they improve scanning, especially on security actions.
+
+### Content discipline
+
+- Show only metadata that helps the operator make a decision.
+- Do not surface raw technical identifiers like `User ID` on the main account page unless there is a live operational need.
+- Keep recent activity **bounded and scannable**. The account page should show a compact recent feed, not become a full audit console.
+
+### WardWise account patterns
+
+- **Display name**: inline edit in place.
+- **Sign-in email**: verified security flow in dialog/sheet.
+- **Password**: security flow in dialog/sheet.
+- **Activity**: compact timeline in the support rail.
+
+### Anti-patterns
+
+- Header inside header inside header
+- Always-open forms for every account action
+- Expanding panels that push the form far below the trigger
+- Equal visual weight for primary actions and passive metadata
+- Micro-abstractions that make straightforward account UI harder to read
+
+---
+
 ## Component Inventory
 
 ### Candidate Dashboard (`src/components/candidate-dashboard/`)
@@ -341,6 +401,7 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 | `candidates/candidate-overview.tsx`      | ✅ Stat cards, grouped sections, inline edit              |
 | `candidates/candidate-campaigns.tsx`     | ✅ Table, S/N, pagination                                 |
 | `candidates/candidate-account.tsx`       | ✅ Status select, password reset, inline reviewed danger zone |
+| `admin-account.tsx`                      | ✅ Follows Admin Account UX Standard: inline profile, dialog security flows |
 | `collect/campaign-list.tsx`              | ✅ Stat cards, table, dashed empty state                  |
 | `collect/campaign-detail.tsx`            | ✅ Breadcrumb, tabs, badges                               |
 | `collect/campaign-overview.tsx`          | ✅ Chart cards, dashed empty states                       |

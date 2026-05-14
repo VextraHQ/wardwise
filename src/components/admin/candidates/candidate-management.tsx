@@ -168,7 +168,7 @@ function ReportBadge({ candidate }: { candidate: CandidateWithUser }) {
           enabled ? REPORT_STATUS_STYLES.enabled : REPORT_STATUS_STYLES.disabled
         }`}
       >
-        {enabled ? "Enabled" : "Off"}
+        {enabled ? "Insights On" : "Insights Off"}
       </Badge>
       {campaign.clientReportLastViewedAt && (
         <p className="text-muted-foreground text-[10px]">
@@ -273,7 +273,7 @@ function CandidateTableSkeleton() {
               Collect
             </TableHead>
             <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase xl:table-cell">
-              Report
+              Insights
             </TableHead>
             <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase xl:table-cell">
               Account
@@ -734,7 +734,7 @@ export function CandidateManagement() {
                   <AdminMobileRecordCard
                     key={candidate.id}
                     className={cn(
-                      "cursor-pointer transition-colors",
+                      "cursor-pointer",
                       isSuspended
                         ? "border-destructive/30 bg-destructive/5 hover:bg-destructive/10"
                         : "hover:bg-muted/30",
@@ -788,7 +788,7 @@ export function CandidateManagement() {
                           <CollectBadge candidate={candidate} />
                         </div>
                       </AdminMobileRecordField>
-                      <AdminMobileRecordField label="Report">
+                      <AdminMobileRecordField label="Insights">
                         <div className="text-foreground ml-auto inline-flex flex-col items-end gap-1 text-sm font-medium">
                           <ReportBadge candidate={candidate} />
                         </div>
@@ -834,7 +834,7 @@ export function CandidateManagement() {
                       Collect
                     </TableHead>
                     <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase xl:table-cell">
-                      Report
+                      Insights
                     </TableHead>
                     <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase xl:table-cell">
                       Account

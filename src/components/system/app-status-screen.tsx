@@ -33,7 +33,7 @@ type AppStatusScreenProps = {
   footerStatus?: string;
 };
 
-type ErrorStatusContext = "app" | "collect";
+type ErrorStatusContext = "app" | "collect" | "report";
 
 type ErrorStatusScreenState = {
   protocol: string;
@@ -73,9 +73,10 @@ export function getErrorStatusScreenState(
     message.includes(pattern),
   );
 
-  const supportHref = context === "collect" ? "/contact" : "/support";
+  const supportHref =
+    context === "app" ? "/support" : "/contact";
   const supportLabel =
-    context === "collect" ? "Contact WardWise Support" : "Visit support";
+    context === "app" ? "Visit support" : "Contact WardWise Support";
 
   if (isOffline) {
     return context === "collect"
@@ -90,6 +91,18 @@ export function getErrorStatusScreenState(
           supportHref,
           supportLabel,
         }
+      : context === "report"
+        ? {
+            protocol: "Err_Protocol_Report_Offline",
+            title: "You appear to be offline",
+            description:
+              "Reconnect to the internet and try opening this campaign report again.",
+            tone: "primary",
+            footerCode: "WW-REPORT-OFFLINE",
+            footerStatus: "NETWORK_OFFLINE",
+            supportHref,
+            supportLabel,
+          }
       : {
           protocol: "Err_Protocol_Offline",
           title: "You appear to be offline",
@@ -116,6 +129,18 @@ export function getErrorStatusScreenState(
           supportHref,
           supportLabel,
         }
+      : context === "report"
+        ? {
+            protocol: "Err_Protocol_Report_Network",
+            title: "We couldn’t reach this campaign report",
+            description:
+              "This looks like a temporary connection issue. Please try again in a moment.",
+            tone: "primary",
+            footerCode: "WW-REPORT-NET",
+            footerStatus: "TEMPORARY_NETWORK_ERROR",
+            supportHref,
+            supportLabel,
+          }
       : {
           protocol: "Err_Protocol_Network",
           title: "We couldn’t reach WardWise",
@@ -142,6 +167,19 @@ export function getErrorStatusScreenState(
         supportHref,
         supportLabel,
       }
+    : context === "report"
+      ? {
+          protocol: "Err_Protocol_Report_500",
+          title: "We couldn’t load this campaign report",
+          description:
+            "Please refresh and try again. If this continues, contact your campaign admin.",
+          tone: "destructive",
+          footerCode: "WW-REPORT-500",
+          footerStatus: "RECOVERABLE_REPORT_ERROR",
+          reference: error.digest,
+          supportHref,
+          supportLabel,
+        }
     : {
         protocol: "Err_Protocol_500",
         title: "We couldn’t load this page",

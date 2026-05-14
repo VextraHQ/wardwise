@@ -66,38 +66,48 @@ export function ContactNotificationTemplate({
         <Container style={styles.outerFrame}>
           <EmailBrandHeader eyebrow="Contact Form" />
 
-          <Section style={styles.senderPanel}>
-            <Text style={styles.senderEyebrow}>New contact</Text>
-            <Text style={styles.senderName}>{input.name}</Text>
-
-            <Text style={styles.senderFieldLabel}>Email</Text>
-            <Link href={`mailto:${input.email}`} style={styles.senderEmail}>
-              {input.email}
-            </Link>
-
-            <Section style={styles.senderMetaStrip}>
-              <Text style={styles.senderMetaLabel}>Topic</Text>
-              <Text style={styles.senderTopicValue}>{reasonTitle}</Text>
-              <Text style={styles.senderMetaLabelReceived}>Received</Text>
-              <Text style={styles.timestampValue}>{submittedLabel}</Text>
-            </Section>
-          </Section>
-
-          <Section style={styles.detailSection}>
-            <Text style={styles.sourceInline}>
-              Submitted from {input.sourcePath}
+          <Section style={styles.panel}>
+            <Text style={styles.title}>A new contact request is ready.</Text>
+            <Text style={styles.bodyText}>
+              Review the sender details, scan the request context, and reply
+              directly if follow-up is needed.
             </Text>
+
+            <Section style={styles.notePanel}>
+              <Text style={styles.noteLabel}>Contact Summary</Text>
+              <Text style={styles.metadataText}>
+                <strong>Name:</strong> {input.name}
+              </Text>
+              <Text style={styles.metadataText}>
+                <strong>Email:</strong>{" "}
+                <Link
+                  href={`mailto:${input.email}`}
+                  style={styles.metadataLink}
+                >
+                  {input.email}
+                </Link>
+              </Text>
+              <Text style={styles.metadataText}>
+                <strong>Topic:</strong> {reasonTitle}
+              </Text>
+              <Text style={styles.metadataText}>
+                <strong>Received:</strong> {submittedLabel}
+              </Text>
+              <Text style={styles.metadataTextLast}>
+                <strong>Source:</strong> {input.sourcePath}
+              </Text>
+            </Section>
 
             <Text style={styles.sectionLabel}>Message</Text>
             <Section style={styles.messagePanel}>
               <Text style={styles.messageText}>{input.message}</Text>
             </Section>
-          </Section>
 
-          <Section style={styles.ctaSection}>
-            <Button href={`mailto:${input.email}`} style={styles.button}>
-              Reply by email
-            </Button>
+            <Section style={styles.buttonRow}>
+              <Button href={`mailto:${input.email}`} style={styles.button}>
+                Reply by email
+              </Button>
+            </Section>
           </Section>
 
           <EmailStandardFooter disclaimer="Internal notification · Do not forward externally" />
@@ -154,91 +164,55 @@ const styles = {
     margin: "0 auto",
     backgroundColor: "#ffffff",
   },
-  senderPanel: {
-    padding: "30px 28px 26px",
+  panel: {
+    padding: "32px 28px 36px",
     backgroundColor: "#ffffff",
-    borderBottom: "1px solid rgba(22, 101, 91, 0.12)",
   },
-  senderEyebrow: {
-    margin: "0 0 14px",
-    color: "#7a8f96",
-    fontSize: "10px",
-    fontWeight: "700",
-    letterSpacing: "0.12em",
-    textTransform: "uppercase" as const,
-    lineHeight: "1.4",
-  },
-  senderName: {
-    margin: "0 0 18px",
+  title: {
+    margin: "0 0 16px",
     color: "#101414",
-    fontSize: "24px",
+    fontSize: "26px",
     fontWeight: "800",
     letterSpacing: "-0.02em",
     lineHeight: "1.2",
   },
-  senderFieldLabel: {
-    margin: "0 0 5px",
-    color: "#556f77",
-    fontSize: "10px",
-    fontWeight: "700",
-    letterSpacing: "0.1em",
-    textTransform: "uppercase" as const,
-    lineHeight: "1.4",
-  },
-  senderEmail: {
-    margin: "0",
-    color: "#16655b",
+  bodyText: {
+    margin: "0 0 24px",
+    color: "#41535a",
     fontSize: "15px",
+    lineHeight: "1.72",
+  },
+  notePanel: {
+    padding: "16px 18px",
+    backgroundColor: "#f5f5ed",
+    border: "1px solid rgba(22, 101, 91, 0.14)",
+    borderRadius: "2px",
+    marginBottom: "24px",
+  },
+  noteLabel: {
+    margin: "0 0 10px",
+    color: "#41535a",
+    fontSize: "12px",
     fontWeight: "600",
-    lineHeight: "1.45",
-    textDecoration: "none",
+    letterSpacing: "0",
   },
-  senderMetaStrip: {
-    margin: "22px 0 0",
+  metadataText: {
+    margin: "0 0 8px",
+    color: "#101414",
+    fontSize: "14px",
+    lineHeight: "1.65",
+    wordBreak: "break-word" as const,
   },
-  senderMetaLabel: {
-    margin: "0 0 5px",
-    color: "#556f77",
-    fontSize: "10px",
-    fontWeight: "700",
-    letterSpacing: "0.1em",
-    textTransform: "uppercase" as const,
-    lineHeight: "1.4",
-  },
-  senderMetaLabelReceived: {
-    margin: "14px 0 5px",
-    color: "#556f77",
-    fontSize: "10px",
-    fontWeight: "700",
-    letterSpacing: "0.1em",
-    textTransform: "uppercase" as const,
-    lineHeight: "1.4",
-  },
-  senderTopicValue: {
+  metadataTextLast: {
     margin: "0",
     color: "#101414",
     fontSize: "14px",
-    fontWeight: "600",
-    lineHeight: "1.55",
+    lineHeight: "1.65",
     wordBreak: "break-word" as const,
   },
-  timestampValue: {
-    margin: "0",
-    color: "#41535a",
-    fontSize: "13px",
-    fontWeight: "500",
-    lineHeight: "1.5",
-  },
-  detailSection: {
-    padding: "26px 28px 30px",
-    backgroundColor: "#ffffff",
-  },
-  sourceInline: {
-    margin: "0 0 16px",
-    color: "#556f77",
-    fontSize: "12px",
-    fontWeight: "500",
-    lineHeight: "1.5",
+  metadataLink: {
+    color: "#16655b",
+    textDecoration: "none",
   },
   sectionLabel: {
     margin: "0 0 10px",
@@ -261,11 +235,8 @@ const styles = {
     lineHeight: "1.72",
     whiteSpace: "pre-line" as const,
   },
-  ctaSection: {
-    padding: "24px 28px 26px",
-    backgroundColor: "#ffffff",
-    borderTop: "1px solid rgba(22, 101, 91, 0.12)",
-    textAlign: "center" as const,
+  buttonRow: {
+    margin: "24px 0 0",
   },
   button: {
     backgroundColor: "#16655b",

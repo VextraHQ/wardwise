@@ -113,7 +113,7 @@ function buildPriorityBuckets({
       key: "insights-off",
       severity: "low",
       title: "Campaign Insights off",
-      description: "Live campaigns with the client report disabled.",
+      description: "Live campaigns with insights disabled.",
       count: insightsOff.length,
       cta: { href: "/admin/collect", label: "Open Collect" },
       examples: insightsOff.slice(0, 2).map(campaignDisplay),

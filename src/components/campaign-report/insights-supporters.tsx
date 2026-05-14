@@ -396,7 +396,7 @@ export function InsightsSupporters({ token }: { token: string }) {
                 <AdminMobileRecordCard
                   key={submission.id}
                   className={cn(
-                    "cursor-pointer transition-colors",
+                    "cursor-pointer",
                     submission.isFlagged
                       ? "border-destructive/30 bg-destructive/5 hover:bg-destructive/10"
                       : submission.isVerified

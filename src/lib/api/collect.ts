@@ -164,8 +164,12 @@ export const publicCollectApi = {
 // Admin API methods (for managing everything)
 export const adminCollectApi = {
   // ----- Campaign Management -----
-  getCampaigns: () =>
-    adminApiCall<{ campaigns: CampaignSummary[] }>("/campaigns"),
+  getCampaigns: (params?: { candidateId?: string }) =>
+    adminApiCall<{ campaigns: CampaignSummary[] }>(
+      `/campaigns${qs({
+        candidateId: params?.candidateId,
+      })}`,
+    ),
 
   getCampaign: (id: string) =>
     adminApiCall<{ campaign: Campaign }>(`/campaigns/${id}`),

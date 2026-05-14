@@ -102,10 +102,10 @@ export function CampaignFilters({
                 }
               >
                 <SelectTrigger className="border-border/60 h-10 w-full rounded-sm shadow-none">
-                  <SelectValue placeholder="All reports" />
+                  <SelectValue placeholder="All insights" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All reports</SelectItem>
+                  <SelectItem value="all">All insights</SelectItem>
                   <SelectItem value="insights-on">Insights on</SelectItem>
                   <SelectItem value="insights-off">Insights off</SelectItem>
                 </SelectContent>
@@ -165,10 +165,10 @@ export function CampaignFilters({
           }
         >
           <SelectTrigger className="border-border/60 h-9 w-[160px] rounded-sm shadow-none">
-            <SelectValue placeholder="All reports" />
+            <SelectValue placeholder="All insights" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All reports</SelectItem>
+            <SelectItem value="all">All insights</SelectItem>
             <SelectItem value="insights-on">Insights on</SelectItem>
             <SelectItem value="insights-off">Insights off</SelectItem>
           </SelectContent>

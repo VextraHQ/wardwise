@@ -6,6 +6,7 @@ import {
   optionalNullableTrimmedText,
   requiredTrimmedText,
 } from "@/lib/schemas/field-schemas";
+import { passwordPolicySchema } from "@/lib/schemas/auth-schemas";
 import { getPositionStateValidationMessage } from "@/lib/geo/constituency";
 
 // Candidate position enum
@@ -246,7 +247,43 @@ export const updateSubmissionSchema = z.object({
   adminNotes: optionalNullableTrimmedText({ max: 2000 }),
 });
 
+// Update Admin Profile Schema
+export const updateAdminProfileSchema = z.object({
+  name: requiredTrimmedText({ min: 2, max: 120, label: "Name" }),
+});
+
+// Request Admin Email Change Schema
+export const requestAdminEmailChangeSchema = z.object({
+  newEmail: emailSchema,
+  currentPassword: z.string().min(1, "Current password is required"),
+});
+
+// Change Admin Password Schema
+export const changeAdminPasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: passwordPolicySchema,
+    confirmPassword: z.string().min(1, "Please confirm your new password"),
+  })
+  .refine((values) => values.newPassword === values.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  })
+  .refine((values) => values.newPassword !== values.currentPassword, {
+    path: ["newPassword"],
+    message: "New password must be different from your current password",
+  });
+
 // Type exports
+export type UpdateAdminProfileFormValues = z.infer<
+  typeof updateAdminProfileSchema
+>;
+export type RequestAdminEmailChangeFormValues = z.infer<
+  typeof requestAdminEmailChangeSchema
+>;
+export type ChangeAdminPasswordFormValues = z.infer<
+  typeof changeAdminPasswordSchema
+>;
 export type UpdateSubmissionValues = z.infer<typeof updateSubmissionSchema>;
 export type CreateCandidateFormValues = z.infer<typeof createCandidateSchema>;
 export type UpdateCandidateFormValues = z.infer<typeof updateCandidateSchema>;

@@ -501,27 +501,50 @@ async function main() {
   }
 
   // ========================================
-  // 5. ADMIN ACCOUNT
+  // 5. ADMIN ACCOUNT (local/dev bootstrap only)
   // ========================================
-  console.log("🌱 Creating admin account...");
-  const adminPassword = await bcrypt.hash("admin123", 12);
-  await prisma.user.upsert({
-    where: { email: "admin@wardwise.ng" },
-    update: { name: "WardWise Admin", password: adminPassword, role: "admin" },
-    create: {
-      email: "admin@wardwise.ng",
-      name: "WardWise Admin",
-      password: adminPassword,
-      role: "admin",
-    },
-  });
-  console.log("  ✅ Admin: admin@wardwise.ng");
+  // The seeded `admin@wardwise.ng` is a developer convenience, not a production
+  // identity. In production, admins must manage their own accounts via
+  // /admin/account using real reachable inboxes. Skip seeding in production
+  // unless explicitly opted in.
+  const allowBootstrapAdmin =
+    process.env.NODE_ENV !== "production" ||
+    process.env.SEED_BOOTSTRAP_ADMIN === "true";
+
+  if (allowBootstrapAdmin) {
+    console.log("🌱 Creating admin account...");
+    const adminPassword = await bcrypt.hash("admin123", 12);
+    const now = new Date();
+    await prisma.user.upsert({
+      where: { email: "admin@wardwise.ng" },
+      update: {
+        name: "WardWise Admin",
+        password: adminPassword,
+        role: "admin",
+        passwordChangedAt: now,
+      },
+      create: {
+        email: "admin@wardwise.ng",
+        name: "WardWise Admin",
+        password: adminPassword,
+        role: "admin",
+        passwordChangedAt: now,
+      },
+    });
+    console.log("  ✅ Admin: admin@wardwise.ng");
+  } else {
+    console.log(
+      "⏭️  Skipping bootstrap admin in production (set SEED_BOOTSTRAP_ADMIN=true to override).",
+    );
+  }
 
   console.log("\n🎉 Database seeded successfully!");
   console.log(`   - ${allCandidates.length} Candidates`);
   console.log(`   - ${canvassers.length} Canvassers`);
   console.log(`   - ${demoVoters.length} Voters`);
-  console.log(`   - 1 Admin account\n`);
+  console.log(
+    `   - ${allowBootstrapAdmin ? "1 Admin account" : "0 Admin accounts (bootstrap skipped)"}\n`,
+  );
 }
 
 main()

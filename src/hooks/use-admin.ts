@@ -2,8 +2,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   adminApi,
   type CandidateWithUser,
+  type ChangeAdminPasswordData,
   type CreateCandidateData,
   type DeleteCandidateData,
+  type RequestAdminEmailChangeData,
+  type UpdateAdminProfileData,
   type UpdateCandidateData,
 } from "@/lib/api/admin";
 
@@ -119,5 +122,62 @@ export function useDeleteCandidate() {
 export function useResetCandidatePassword() {
   return useMutation({
     mutationFn: (id: string) => adminApi.candidates.resetPassword(id),
+  });
+}
+
+// === Admin self-service account ===
+
+const ADMIN_ACCOUNT_KEY = ["admin", "account"] as const;
+
+// Loads the current admin's account, pending email change (if any), and recent activity.
+export function useAdminAccount() {
+  return useQuery({
+    queryKey: ADMIN_ACCOUNT_KEY,
+    queryFn: () => adminApi.account.get(),
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+}
+
+// Updates the signed-in admin's display name. Stays in-session.
+export function useUpdateAdminProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: UpdateAdminProfileData) =>
+      adminApi.account.updateProfile(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ADMIN_ACCOUNT_KEY });
+    },
+  });
+}
+
+// Issues an email-change confirmation link to the new address.
+export function useRequestAdminEmailChange() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: RequestAdminEmailChangeData) =>
+      adminApi.account.requestEmailChange(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ADMIN_ACCOUNT_KEY });
+    },
+  });
+}
+
+// Cancels the currently pending admin email change and revokes its tokens.
+export function useCancelAdminEmailChange() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => adminApi.account.cancelEmailChange(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ADMIN_ACCOUNT_KEY });
+    },
+  });
+}
+
+// Changes the current admin's password. Forces a re-auth.
+export function useChangeAdminPassword() {
+  return useMutation({
+    mutationFn: (data: ChangeAdminPasswordData) =>
+      adminApi.account.changePassword(data),
   });
 }

@@ -1,760 +1,1348 @@
-# WardWise App Architecture & Folder Structure Spec
+# WardWise App Architecture and Refactor Migration Plan
 
 ## Status
 
-- **Future-state reference** — this document defines the target app structure and architectural rules for WardWise as the product grows.
-- **Not a rewrite mandate** — do not mass-move files just to satisfy this doc. Use it for new work, follow-up refactors, onboarding, and long-term consistency.
-- **Migration style** — incremental, feature-by-feature, with behavior changes separated from large relocations whenever possible.
+- **Source of truth for app structure** as WardWise moves from the current layered layout into a feature-first layout.
+- **Phase-gated migration plan** for a large refactor. Do not move the whole app in one PR.
+- **No compatibility shims** once a file is moved. Old files should be removed and all imports should be updated in the same PR.
+- **Behavior-preserving by default.** A phase should not change product behavior unless that phase explicitly says so.
+- **Single dedicated refactor branch.** Create a new branch for this architecture migration, then keep all phases on that same branch. Do not create a separate branch per phase or per review checkpoint.
+- **Last updated:** 2026-05-13.
+
+This document is meant to be readable by every contributor, including a developer joining the project for the first time.
+
+---
 
 ## Why This Exists
 
-WardWise is now beyond the size where a flat `components/`, `hooks/`, and `lib/` layout stays effortless. The app serves multiple product surfaces:
-
-- public Collect registration
-- admin campaign management
-- candidate/client reporting
-- geo management and canonical data workflows
-- authentication and account recovery
-
-That means architecture needs to optimize for:
-
-- **human readability**
-- **discoverability for new engineers**
-- **clear ownership boundaries**
-- **safe refactors**
-- **future monorepo readiness**
-
-This doc is the answer to: "If WardWise keeps growing, where should things live, how should they be named, and how do we stop the repo from becoming hard to reason about?"
-
----
-
-## Core Principles
-
-### 1. Feature-first by default
-
-If code exists mainly for one domain, it should live with that domain.
-
-Examples:
-
-- Collect-only logic belongs under `features/collect/*`
-- Geo-only logic belongs under `features/geo/*`
-- Candidate-only logic belongs under `features/candidates/*`
-
-Do **not** promote something to shared space just because two files happen to reuse it today. Shared code should be the exception, not the default.
-
-### 2. Shared-by-exception
-
-Only place code in global shared folders when it is genuinely cross-feature and likely to stay that way.
-
-Examples of truly shared code:
-
-- design-system primitives
-- app-wide infrastructure like Prisma and rate limiting
-- generic hooks like click-outside or mobile detection
-- field schemas reused across multiple surfaces
-
-Examples that are **not** automatically shared:
-
-- offline queue logic for Collect
-- candidate-specific overview helpers
-- geo-admin formatting helpers
-
-### 3. Thin route files, thin page files
-
-Next.js route handlers and page files should mostly:
-
-- parse params
-- call feature/server logic
-- return UI or HTTP responses
-
-They should not become the long-term home for business rules.
-
-### 4. Human-readable beats clever DRY
-
-WardWise should favor:
-
-- obvious control flow
-- explicit state transitions
-- focused modules with one job
-
-over:
-
-- abstraction for its own sake
-- giant helper layers
-- "one mega component with many variants"
-
-If a refactor makes the code drier but harder for a new engineer to follow, it is probably not worth it.
-
-### 5. Boundaries should feel monorepo-ready
-
-Even in a single repo, features should be organized as if they could one day become packages or isolated workspaces.
-
-That means:
-
-- minimal cross-feature reach-through
-- stable import directions
-- no shared layer importing feature internals
-- feature code grouped so ownership is obvious
-
-### 6. Migration must be incremental
-
-Architecture cleanups should not block product delivery.
-
-Rule of thumb:
-
-- **new code** should follow the target structure immediately
-- **old code** moves when touched for a real reason, or in isolated relocation PRs
-
----
-
-## Target `src/` Shape
-
-This is the intended future app structure:
+WardWise has outgrown the early structure where most code lives under broad technical folders:
 
 ```text
 src/
   app/
-    (public)/
-      page.tsx
-      c/[slug]/
-      ...
-    (admin)/
-      admin/
-      ...
-    (candidate)/
-      dashboard/
-      ...
-    api/
-      auth/
-      collect/
-      admin/
-      ...
-
-  features/
-    collect/
-      components/
-      hooks/
-      lib/
-      server/
-      schemas/
-      types/
-    candidates/
-      components/
-      hooks/
-      lib/
-      server/
-      schemas/
-      types/
-    geo/
-      components/
-      hooks/
-      lib/
-      server/
-      schemas/
-      types/
-    auth/
-      components/
-      hooks/
-      lib/
-      server/
-      schemas/
-      types/
-    reporting/
-      components/
-      hooks/
-      lib/
-      server/
-      schemas/
-      types/
-    admin-shell/
-      components/
-      hooks/
-      lib/
-
   components/
-    ui/
-    shared/
-
   hooks/
-    shared/
-
   lib/
-    core/
-    schemas/
-
   types/
 ```
 
-This structure creates three clear levels:
+That structure was fine while the app was smaller. It is now harder to answer simple questions like:
 
-1. **feature-owned code**
-2. **shared app code**
-3. **framework entrypoints**
+- Where does Collect live?
+- Which files belong to campaign management?
+- Which hooks are shared and which hooks are feature-specific?
+- Is this `lib` file infrastructure, business logic, or API client code?
+- What needs to change when a developer works on candidates, geo, or reporting?
+
+WardWise now has several real product domains:
+
+- public Collect registration
+- admin Collect campaign management
+- candidate management
+- candidate dashboard
+- geo management
+- campaign reporting and insights
+- authentication and account recovery
+- public marketing/support/legal pages
+- admin shell and internal command surfaces
+
+The structure needs to make those domains obvious.
 
 ---
 
-## What Each Top-Level Area Means
+## Refactor Principles
 
-## `src/app/`
+### 1. Product domain first, technical type second
 
-This stays Next.js-owned.
+Prefer:
+
+```text
+features/collect/components/
+features/collect/hooks/
+features/collect/lib/
+```
+
+over:
+
+```text
+components/collect/
+hooks/use-collect.ts
+lib/collect/
+```
+
+This keeps the full feature in one place.
+
+### 2. `app/` stays thin
+
+`src/app` is owned by Next.js routing.
 
 Use it for:
 
-- App Router pages
+- route segments
 - layouts
+- pages
+- metadata
 - route handlers
-- route groups
-- server entrypoints
+- loading/error/not-found files
 
-Keep these files thin. They should compose feature code, not absorb it.
+Avoid putting long-term business logic inside `app/`. Route files should compose feature code, not become the feature.
 
-Good examples:
+### 3. Shared by exception
 
-- `app/c/[slug]/page.tsx` loads campaign data and renders a feature component
-- `app/api/collect/submit/route.ts` validates the request and delegates to a Collect server action
+Do not promote code to shared just because two files use it once.
 
-Bad examples:
+Shared code must be:
 
-- a route handler containing 250 lines of cross-cutting business logic
-- a page file holding a feature's entire data pipeline
+- understandable without product-specific context
+- used by multiple stable areas
+- unlikely to become feature-specific again
 
-## `src/features/<feature>/`
+### 4. No old compatibility files
 
-This is the long-term home for domain code.
+When a file moves:
 
-Each feature owns:
+- remove the old file
+- update every import
+- verify no stale path remains
 
-- UI specific to that feature
-- feature hooks
-- feature logic helpers
-- feature server actions/services
-- feature schemas/types
+Do not leave files like this behind:
 
-This should be the primary way new engineers navigate the app.
+```ts
+export { CampaignRegistrationForm } from "@/features/collect/components/public/campaign-registration-form";
+```
 
-If a teammate asks "where does Collect live?" the answer should eventually be "inside `src/features/collect`."
+Those shims hide the migration state and make the repo harder to trust.
 
-## `src/components/ui/`
+### 5. No behavior changes in relocation PRs
 
-Design-system primitives and low-level reusable UI only.
+Relocation PRs should change paths and imports only.
 
-Examples:
+If a file also needs cleanup, split that into a later PR unless the cleanup is tiny and required by the move.
 
-- button
-- input
-- sheet
-- alert-dialog
-- badge
-- separator
+### 6. Review after every phase
 
-No product business logic should live here.
+Each phase needs:
 
-## `src/components/shared/`
+- code review
+- import review
+- doc review
+- typecheck/lint/test/build verification
+- a short written summary of what moved and what did not move
 
-Reusable app-level components that are not design-system primitives and are not owned by a single feature.
+### 7. Create folders when needed
 
-Examples:
+The target tree below is a blueprint, not a requirement to create empty folders.
 
-- date range filter used by multiple product surfaces
-- shared status screens
-- global navigation fragments
+A small feature can start with:
 
-If a component becomes shared only by coincidence during a short refactor, leave it in the feature until that shared use is clearly stable.
+```text
+features/waitlist/
+  components/
+  server/
+  schemas/
+```
 
-## `src/hooks/shared/`
-
-Generic hooks only.
-
-Examples:
-
-- `use-mobile`
-- `use-click-outside`
-
-Feature hooks should not live here.
-
-## `src/lib/core/`
-
-App-wide infrastructure and foundational utilities.
-
-Examples:
-
-- Prisma
-- rate limiting
-- environment helpers
-- auth/session primitives
-- audit infrastructure
-
-This folder must stay feature-agnostic.
-
-## `src/lib/schemas/`
-
-Schemas that are truly cross-feature or are so foundational that keeping them at app-level is clearer than pushing them into a single feature.
-
-Examples today:
-
-- shared field schemas
-- some auth/admin/collect schemas while the repo is still mid-migration
-
-Long term, feature-local schemas can move into `features/<feature>/schemas/` where that improves ownership.
-
-## `src/types/`
-
-Only for truly broad app-wide types.
-
-If a type exists only for one feature, it should prefer feature ownership.
+Add `hooks`, `api`, `lib`, or `types` only when the feature actually needs them.
 
 ---
 
-## Recommended Feature Breakdown for WardWise
-
-## `features/collect`
-
-Owns:
-
-- public registration flow
-- Collect admin campaign management
-- offline geo prep
-- offline submission queue
-- confirmation state machine
-- failed review flow
-- Collect reporting queries that are still domain-specific
-
-Suggested internal structure:
+## Target Top-Level Structure
 
 ```text
-features/collect/
+src/
+  app/
+  features/
   components/
-    campaign-registration-form.tsx
-    collect-status-banners.tsx
-    offline-prep-sheet.tsx
-    failed-review-sheet.tsx
-    steps/
   hooks/
-    use-collect-offline-geo.ts
-    use-collect-geo-resolution.ts
-    use-collect-submission-sync.ts
-    use-collect-failed-review.ts
   lib/
-    branding.ts
-    validation.ts
-    offline-storage.ts
-    offline-geo-pack.ts
-    offline-submission-queue.ts
-    offline-geo-health.ts
-    offline-prep-selection.ts
-  server/
-    submit-registration.ts
-    build-offline-pack.ts
-    resolve-campaign-lgas.ts
-  schemas/
   types/
 ```
 
-## `features/candidates`
+### `src/app`
 
-Owns:
+Next.js route entrypoints only.
 
-- candidate CRUD
-- candidate onboarding state
-- candidate overview logic
-- candidate-boundary editing helpers
+```text
+src/app/
+  page.tsx
+  layout.tsx
+  providers.tsx
+  globals.css
+  not-found.tsx
+  error.tsx
+  manifest.ts
 
-This should include candidate-only hooks and lib files instead of leaving them scattered across root `hooks/` and admin components.
+  (auth)/
+  (public)/
+  (legal)/
+  admin/
+  (candidate)/
+  c/[slug]/
+  r/[token]/
+  api/
+```
 
-## `features/geo`
+### `src/features`
 
-Owns:
+Product/domain-owned code.
 
-- geo admin drill-down screens
-- canonical data management
-- geo sync helpers
-- geo auditing and UI logic
+```text
+src/features/
+  collect/
+  candidates/
+  candidate-dashboard/
+  geo/
+  reporting/
+  auth/
+  admin-shell/
+  public-site/
+```
 
-This is a real bounded context in WardWise and should not be treated as a bag of random utilities.
+Future examples:
 
-## `features/auth`
+```text
+src/features/
+  billing/
+  notifications/
+  team-members/
+  audit-log/
+  exports/
+  party-dashboard/
+  field-director-dashboard/
+```
 
-Owns:
+### `src/components`
 
-- login/recovery/reset UI
-- auth-link generation helpers
-- auth flows not used broadly enough to be core infra
+Only global UI primitives and genuinely shared app components.
 
-Core auth infrastructure may still stay in `lib/core`, but feature behavior and screens belong together.
+```text
+src/components/
+  ui/
+  shared/
+```
 
-## `features/reporting`
+### `src/hooks`
 
-Owns:
+Only truly generic shared hooks.
 
-- campaign insights UI
-- reporting filters and summary formatting
-- read-only client-facing report logic
+```text
+src/hooks/
+  shared/
+    use-mobile.ts
+    use-click-outside.ts
+```
 
-If reporting remains tightly tied to Collect, it can temporarily stay under Collect until it genuinely becomes its own domain. This doc leaves room for either path.
+### `src/lib`
 
-## `features/admin-shell`
+App-wide infrastructure and services that are not feature-owned.
 
-Owns:
+```text
+src/lib/
+  core/
+  email/
+  analytics/
+  exports/
+  constants/
+  utils.ts
+  date-format.ts
+  date-ranges.ts
+```
 
-- admin layout shell
-- admin nav
-- admin global toolbar patterns
-- admin-only visual scaffolding reused across features
+### `src/types`
 
-This avoids putting every admin-specific shared component into unrelated feature folders.
+Only broad app-wide types.
+
+Feature types should move into `features/<feature>/types`.
 
 ---
 
-## Naming Conventions
+## Full Target Feature Blueprint
 
-Naming needs to help humans, not just be technically valid.
+This is the long-term structure WardWise should move toward.
 
-## Hooks
+Do not create empty folders just to match this tree.
 
-### Feature hooks
+```text
+src/features/
+  collect/
+    components/
+      public/
+        campaign-registration-form.tsx
+        campaign-availability-screen.tsx
+        form-shell.tsx
+        form-ui.tsx
+        share-invite-card.tsx
+        collect-connectivity-banner.tsx
+        failed-review-sheet.tsx
+        offline-prep-sheet.tsx
+        registration-step-header.tsx
+        steps/
+          splash-screen.tsx
+          role-step.tsx
+          personal-details-step.tsx
+          location-step.tsx
+          party-info-step.tsx
+          canvasser-step.tsx
+          confirmation-screen.tsx
+      admin/
+        campaign-list.tsx
+        campaign-detail.tsx
+        campaign-overview.tsx
+        campaign-settings.tsx
+        campaign-canvassers.tsx
+        campaign-submissions.tsx
+        campaign-submissions-table.tsx
+        campaign-submission-detail-sheet.tsx
+        campaign-submissions-toolbar.tsx
+        campaign-submissions-bulk-toolbar.tsx
+        campaign-actions-menu.tsx
+        campaign-overview-date-filter.tsx
+        wizard/
+          campaign-wizard.tsx
+          step-candidate-setup.tsx
+          step-campaign-collect-config.tsx
+          step-campaign-review.tsx
+    hooks/
+      use-collect.ts
+      use-collect-form-persistence.ts
+      use-collect-geo-resolution.ts
+      use-collect-offline-geo.ts
+      use-collect-service-worker.ts
+      use-collect-submission-lifecycle.ts
+      use-offline.ts
+    api/
+      collect-api.ts
+      admin-collect-api.ts
+    server/
+      get-public-campaign.ts
+      submit-registration.ts
+      build-offline-pack.ts
+      get-campaign-submissions.ts
+      update-campaign-submission.ts
+      campaign-report-access.ts
+    schemas/
+      collect-schemas.ts
+      collect-schemas.test.ts
+    lib/
+      analytics.ts
+      branding.ts
+      campaign-health.ts
+      campaign-submissions.ts
+      offline-geo-health.ts
+      offline-geo-health.test.ts
+      offline-geo-pack.ts
+      offline-prep-selection.ts
+      offline-prep-selection.test.ts
+      offline-storage.ts
+      phone-input-utils.ts
+      phone-input-utils.test.ts
+      reporting.ts
+      step-flow.ts
+      submission-query.ts
+      submission-query.test.ts
+      validation.ts
+    types/
+      collect.types.ts
+      campaign-submissions.types.ts
 
-Use feature-prefixed hook names:
+  candidates/
+    components/
+      candidate-management.tsx
+      candidate-detail.tsx
+      candidate-overview.tsx
+      candidate-account.tsx
+      candidate-campaigns.tsx
+      create-candidate-form.tsx
+      credentials-dialog.tsx
+      wizard/
+        step-identity.tsx
+        step-position.tsx
+        step-boundary.tsx
+        step-review.tsx
+    hooks/
+      use-candidates.ts
+      use-wizard-draft.ts
+    api/
+      candidates-api.ts
+    server/
+      create-candidate.ts
+      update-candidate.ts
+      reset-candidate-password.ts
+      candidate-directory.ts
+    schemas/
+      candidate-schemas.ts
+      candidate-schemas.test.ts
+    lib/
+      candidate-collect-summaries.ts
+      directory.ts
+    types/
+      candidate.types.ts
+      canvasser.types.ts
 
-- `use-collect-offline-geo`
-- `use-collect-geo-resolution`
-- `use-candidate-dashboard`
-- `use-campaign-insights-scope`
+  candidate-dashboard/
+    components/
+      candidate-shell.tsx
+      candidate-sidebar.tsx
+      site-header.tsx
+      dashboard-content.tsx
+      analytics-content.tsx
+      supporters-content.tsx
+      wards-content.tsx
+      messages-content.tsx
+      reports-content.tsx
+      export-content.tsx
+      settings-content.tsx
+      notifications-content.tsx
+      pricing-content.tsx
+      section-cards.tsx
+      data-table.tsx
+      chart-area-interactive.tsx
+      chart-patterns.tsx
+    hooks/
+      use-candidate-dashboard.ts
+    api/
+      candidate-dashboard-api.ts
+    server/
+      get-candidate-dashboard.ts
+    lib/
+      analytics.ts
+    types/
+      candidate-dashboard.types.ts
 
-If a hook is feature-specific, its name should say so.
+  geo/
+    components/
+      geo-management.tsx
+      geo-breadcrumb.tsx
+      geo-stats-bar.tsx
+      geo-level-states.tsx
+      geo-level-lgas.tsx
+      geo-level-wards.tsx
+      geo-level-polling-units.tsx
+      dialogs/
+        bulk-import-dialog.tsx
+    hooks/
+      use-geo.ts
+    api/
+      geo-api.ts
+      location-api.ts
+    server/
+      constituency-server.ts
+      import-geo-data.ts
+    schemas/
+      geo-schemas.ts
+    lib/
+      constituency.ts
+      display.ts
+    data/
+      nigerian-constituencies.ts
+      nigerian-federal-constituencies.ts
+      nigerian-senatorial-districts.ts
+      state-lga-locations.ts
+      wards.ts
+      polling-units.ts
 
-### Shared hooks
+  reporting/
+    components/
+      campaign-insights.tsx
+      campaign-insights-header.tsx
+      insights-hero.tsx
+      insights-overview.tsx
+      insights-breakdown.tsx
+      insights-geography.tsx
+      insights-momentum.tsx
+      insights-supporters.tsx
+      insights-export-menu.tsx
+      report-gate.tsx
+      report-unavailable.tsx
+      report-site-header.tsx
+      report-site-layout.tsx
+    hooks/
+      use-campaign-report.ts
+      use-campaign-insights-scope.ts
+    api/
+      campaign-report-api.ts
+    server/
+      report-access.ts
+      collect-reporting.ts
+    lib/
+      insights-helpers.ts
+    types/
+      campaign-report.types.ts
 
-Use short names only when truly generic:
+  auth/
+    components/
+      auth-page-shell.tsx
+      auth-card.tsx
+      login-screen.tsx
+      forgot-password-screen.tsx
+      password-setup-screen.tsx
+    api/
+      auth-api.ts
+    server/
+      complete-password-setup.ts
+      forgot-password.ts
+    schemas/
+      auth-schemas.ts
+    lib/
+      client.ts
+      config.ts
+      errors.ts
+      errors.test.ts
+      guards.ts
+      guards.test.ts
+      links.ts
+      links.test.ts
+      redirects.ts
+      redirects.test.ts
+      session.ts
+      session.test.ts
+      storage.ts
 
-- `use-mobile`
-- `use-click-outside`
+  admin-shell/
+    components/
+      admin-shell.tsx
+      admin-sidebar.tsx
+      admin-header.tsx
+      admin-search-bar.tsx
+      admin-command-strip.tsx
+      admin-account.tsx
+      admin-dashboard.tsx
+      admin-dashboard-sections.tsx
+      admin-dashboard-rows.tsx
+      admin-skeletons.tsx
+      admin-pagination.tsx
+      filters/
+        campaign-filters.tsx
+        candidate-filters.tsx
+      shared/
+        admin-resource-state.tsx
+        admin-mobile-record-card.tsx
+        admin-toolbar-filter-sheet.tsx
+        constituency-boundary-alerts.tsx
+        lga-checkbox-grid.tsx
+        list-or-custom-field.tsx
+        official-constituency-selector.tsx
+    hooks/
+      use-admin.ts
+    api/
+      admin-api.ts
+    server/
+      admin-dashboard.ts
 
-Avoid ambiguous names like:
+  public-site/
+    components/
+      landing/
+        hero.tsx
+        header.tsx
+        features.tsx
+        collect-section.tsx
+        platform-pillars.tsx
+        how-it-works.tsx
+        impact.tsx
+        security.tsx
+        cta-section.tsx
+        footer.tsx
+        scroll-to-top.tsx
+      legal/
+        legal-page-layout.tsx
+        privacy-content.tsx
+        terms-content.tsx
+        cookies-content.tsx
+        legal-footer.tsx
+      support/
+        public-support-layout.tsx
+        support-content.tsx
+        contact-content.tsx
+        turnstile-widget.tsx
+    schemas/
+      contact-schemas.ts
+      contact-schemas.test.ts
+    server/
+      submit-contact-form.ts
+    lib/
+      landing-data.ts
+      contact-reasons.ts
+      turnstile.ts
+      turnstile.test.ts
+```
 
-- `use-offline`
-- `use-data`
-- `use-form-state`
+---
 
-unless the hook is truly app-wide.
+## Current-to-Target Mapping
 
-## Logic files
+Use this table when reviewing migration PRs.
 
-Name logic files after the job they do, not generic buckets.
-
-Prefer:
-
-- `offline-geo-health.ts`
-- `submission-query.ts`
-- `resolve-campaign-lgas.ts`
-
-Avoid:
-
-- `helpers.ts`
-- `utils.ts`
-- `misc.ts`
-
-unless the file is extremely small and tightly scoped inside a feature.
-
-## Components
-
-Component names should reflect product meaning.
-
-Prefer:
-
-- `failed-review-sheet.tsx`
-- `offline-prep-sheet.tsx`
-- `collect-status-banners.tsx`
-
-Avoid names that only describe implementation:
-
-- `alert-stack.tsx`
-- `multi-banner.tsx`
-- `generic-modal.tsx`
-
-## Tests
-
-Colocate tests with the files they protect whenever possible:
-
-- `offline-geo-health.ts`
-- `offline-geo-health.test.ts`
-
-This is already a repo pattern and should stay the default.
+| Current location                                    | Target location                                                                                            |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `src/components/collect/*`                          | `src/features/collect/components/public/*`                                                                 |
+| `src/components/collect/steps/*`                    | `src/features/collect/components/public/steps/*`                                                           |
+| `src/components/admin/collect/*`                    | `src/features/collect/components/admin/*`                                                                  |
+| `src/components/admin/collect/wizard/*`             | `src/features/collect/components/admin/wizard/*`                                                           |
+| `src/hooks/use-collect*.ts`                         | `src/features/collect/hooks/*`                                                                             |
+| `src/hooks/use-offline.ts`                          | `src/features/collect/hooks/use-offline.ts` unless it becomes truly app-wide                               |
+| `src/lib/collect/*`                                 | `src/features/collect/lib/*`                                                                               |
+| `src/lib/api/collect.ts`                            | `src/features/collect/api/collect-api.ts`                                                                  |
+| `src/lib/schemas/collect-schemas.ts`                | `src/features/collect/schemas/collect-schemas.ts`                                                          |
+| `src/types/collect.ts`                              | `src/features/collect/types/collect.types.ts`                                                              |
+| `src/types/campaign-submissions.ts`                 | `src/features/collect/types/campaign-submissions.types.ts`                                                 |
+| `src/components/admin/candidates/*`                 | `src/features/candidates/components/*`                                                                     |
+| `src/components/admin/candidates/wizard/*`          | `src/features/candidates/components/wizard/*`                                                              |
+| `src/hooks/use-wizard-draft.ts`                     | `src/features/candidates/hooks/use-wizard-draft.ts` if only candidate wizard uses it                       |
+| `src/lib/api/candidate.ts`                          | `src/features/candidates/api/candidates-api.ts`                                                            |
+| `src/lib/schemas/admin-schemas.ts` candidate pieces | `src/features/candidates/schemas/candidate-schemas.ts`                                                     |
+| `src/types/candidate.ts`                            | `src/features/candidates/types/candidate.types.ts`                                                         |
+| `src/types/canvasser.ts`                            | `src/features/candidates/types/canvasser.types.ts` or Collect if canvassers become Collect-owned           |
+| `src/components/candidate-dashboard/*`              | `src/features/candidate-dashboard/components/*`                                                            |
+| `src/hooks/use-candidate-dashboard.ts`              | `src/features/candidate-dashboard/hooks/use-candidate-dashboard.ts`                                        |
+| `src/lib/api/candidate-dashboard.ts`                | `src/features/candidate-dashboard/api/candidate-dashboard-api.ts`                                          |
+| `src/lib/candidate/*`                               | `src/features/candidate-dashboard/lib/*` or `src/features/candidates/lib/*` depending on ownership         |
+| `src/components/admin/geo/*`                        | `src/features/geo/components/*`                                                                            |
+| `src/hooks/use-geo.ts`                              | `src/features/geo/hooks/use-geo.ts`                                                                        |
+| `src/lib/api/geo.ts`                                | `src/features/geo/api/geo-api.ts`                                                                          |
+| `src/lib/api/location.ts`                           | `src/features/geo/api/location-api.ts`                                                                     |
+| `src/lib/geo/*`                                     | `src/features/geo/lib/*` or `src/features/geo/server/*`                                                    |
+| `src/lib/schemas/geo-schemas.ts`                    | `src/features/geo/schemas/geo-schemas.ts`                                                                  |
+| `src/lib/data/nigerian-*.ts`                        | `src/features/geo/data/*` if used mainly for geo/domain selection                                          |
+| `src/components/campaign-report/*`                  | `src/features/reporting/components/*`                                                                      |
+| `src/hooks/use-campaign-report.ts`                  | `src/features/reporting/hooks/use-campaign-report.ts`                                                      |
+| `src/hooks/use-campaign-insights-scope.ts`          | `src/features/reporting/hooks/use-campaign-insights-scope.ts`                                              |
+| `src/lib/api/campaign-report.ts`                    | `src/features/reporting/api/campaign-report-api.ts`                                                        |
+| `src/lib/server/report-access.ts`                   | `src/features/reporting/server/report-access.ts`                                                           |
+| `src/lib/server/collect-reporting.ts`               | `src/features/reporting/server/collect-reporting.ts` or `src/features/collect/server/collect-reporting.ts` |
+| `src/types/campaign-report.ts`                      | `src/features/reporting/types/campaign-report.types.ts`                                                    |
+| `src/components/auth/*`                             | `src/features/auth/components/*`                                                                           |
+| `src/lib/auth/*`                                    | `src/features/auth/lib/*` unless the file is app-wide auth infrastructure                                  |
+| `src/lib/schemas/auth-schemas.ts`                   | `src/features/auth/schemas/auth-schemas.ts`                                                                |
+| `src/components/admin/admin-*`                      | `src/features/admin-shell/components/*`                                                                    |
+| `src/components/admin/admin-filters/*`              | `src/features/admin-shell/components/filters/*`                                                            |
+| `src/components/admin/shared/*`                     | `src/features/admin-shell/components/shared/*` unless truly cross-feature                                  |
+| `src/hooks/use-admin.ts`                            | `src/features/admin-shell/hooks/use-admin.ts`                                                              |
+| `src/lib/admin/dashboard.ts`                        | `src/features/admin-shell/server/admin-dashboard.ts`                                                       |
+| `src/components/landing/*`                          | `src/features/public-site/components/landing/*`                                                            |
+| `src/components/legal/*`                            | `src/features/public-site/components/legal/*`                                                              |
+| `src/components/public/*`                           | `src/features/public-site/components/support/*`                                                            |
+| `src/lib/contact/*`                                 | `src/features/public-site/lib/*` or `src/features/public-site/server/*`                                    |
+| `src/lib/schemas/contact-schemas.ts`                | `src/features/public-site/schemas/contact-schemas.ts`                                                      |
+| `src/lib/landing-data.ts`                           | `src/features/public-site/lib/landing-data.ts`                                                             |
+| `src/components/layout/logo.tsx`                    | `src/components/shared/logo.tsx`                                                                           |
+| `src/components/layout/app-footer.tsx`              | `src/components/shared/app-footer.tsx`                                                                     |
+| `src/components/layout/cookie-consent.tsx`          | `src/components/shared/cookie-consent.tsx`                                                                 |
+| `src/components/system/*`                           | `src/components/shared/*`                                                                                  |
+| `src/components/ui/*`                               | stays `src/components/ui/*`                                                                                |
+| `src/hooks/use-mobile.ts`                           | `src/hooks/shared/use-mobile.ts`                                                                           |
+| `src/hooks/use-click-outside.ts`                    | `src/hooks/shared/use-click-outside.ts`                                                                    |
+| `src/lib/core/*`                                    | stays `src/lib/core/*`                                                                                     |
+| `src/lib/email/*`                                   | stays `src/lib/email/*`                                                                                    |
+| `src/lib/analytics/*`                               | stays `src/lib/analytics/*`                                                                                |
+| `src/lib/exports/*`                                 | stays `src/lib/exports/*` until exports become a feature                                                   |
 
 ---
 
 ## Import Direction Rules
 
-These rules are the backbone of long-term maintainability.
+### Allowed
 
-## Allowed direction
+`app/*` may import from:
 
-- `app/*` can import from `features/*`, `components/shared`, `components/ui`, `hooks/shared`, `lib/core`, `lib/schemas`, and `types`
-- `features/*` can import from:
-  - their own feature
-  - `components/ui`
-  - `components/shared`
-  - `hooks/shared`
-  - `lib/core`
-  - `lib/schemas` when truly shared
-  - `types` when truly shared
+- `features/*`
+- `components/ui`
+- `components/shared`
+- `hooks/shared`
+- `lib/core`
+- other app-wide `lib` services
+- `types`
 
-## Disallowed direction
+`features/*` may import from:
 
-- `components/ui` must not import feature code
-- `components/shared` must not import feature internals
-- `hooks/shared` must not import feature code
-- `lib/core` must not import feature code
-- one feature should not deep-import random files from another feature
+- the same feature
+- `components/ui`
+- `components/shared`
+- `hooks/shared`
+- `lib/core`
+- app-wide `lib` services such as email or analytics when appropriate
+- broad app-wide `types`
 
-If cross-feature coordination is needed, expose a clear public surface rather than reaching into internals.
+### Avoid
+
+- one feature deep-importing another feature's private internals
+- shared components importing feature code
+- `components/ui` importing product code
+- `lib/core` importing feature code
+- broad barrels that hide ownership
+
+If a feature needs to expose a stable cross-feature function, expose a deliberately named file rather than importing a random internal helper.
 
 Good:
 
 ```ts
-import { buildCollectReference } from "@/features/collect/lib/reference";
+import { getCampaignDisplayHeadline } from "@/features/collect/lib/branding";
 ```
 
-Bad:
+Risky:
 
 ```ts
-import { something } from "@/features/collect/components/steps/internal-file";
+import { getCampaignDisplayHeadline } from "@/features/collect/components/public/internal-card";
 ```
-
-## Barrel files
-
-Do not create broad barrels just to shorten imports.
-
-Allow a feature-level barrel only when:
-
-- the public boundary is stable
-- it reduces import sprawl
-- it does not hide ownership
-
-Avoid barrel trees that make it hard to find where code really lives.
 
 ---
 
-## Human-Readable Code Rules
+## Naming Rules
 
-This section matters as much as folder layout.
+### Files
 
-## 1. One file, one main job
+Use product-meaningful names.
 
-A file can coordinate more than one detail, but it should still feel like it has one clear responsibility.
+Prefer:
+
+- `campaign-registration-form.tsx`
+- `offline-geo-health.ts`
+- `campaign-submissions-table.tsx`
+- `candidate-boundary-summary.tsx`
+
+Avoid:
+
+- `helpers.ts`
+- `misc.ts`
+- `shared.ts`
+- `stuff.ts`
+- `types.ts` inside large features unless the feature is still very small
+
+### Hooks
+
+Feature hooks should keep feature context in the name.
 
 Examples:
 
-- a page orchestrates a screen
-- a hook resolves one slice of derived state
-- a helper computes one concept
+- `use-collect-offline-geo`
+- `use-candidate-dashboard`
+- `use-campaign-insights-scope`
 
-When a file reads like two or three different jobs at once, split it.
+Shared hooks can use short names only when truly generic:
 
-## 2. Prefer explicit state machines
+- `use-mobile`
+- `use-click-outside`
 
-For user flows like Collect, keep important states obvious:
+### Tests
 
-- `confirmed`
-- `queued`
-- `failed`
-- `scope_invalid`
+Colocate tests with the file they protect.
 
-Do not hide critical product states inside overly generic helpers.
-
-## 3. Extract pure logic before extracting orchestration
-
-The safest refactors usually go in this order:
-
-1. extract pure helper
-2. test pure helper
-3. extract hook around it if needed
-4. move UI shell later if still necessary
-
-That keeps behavior easier to verify.
-
-## 4. Duplicate a little when it keeps meaning obvious
-
-Small, local duplication is better than one reusable abstraction that collapses genuinely different product states into "just a variant."
-
-This is especially true for:
-
-- alerts
-- confirmation states
-- admin vs public flows
-
-## 5. Comment invariants, not trivia
-
-Good comments explain:
-
-- why a state must not happen
-- why a fallback exists
-- why a helper cannot infer something from missing data
-
-Bad comments narrate what the next line already says plainly.
+```text
+offline-geo-health.ts
+offline-geo-health.test.ts
+```
 
 ---
 
-## Recommended Refactor Strategy
+## Migration Phases
 
-WardWise should migrate toward this architecture in small, reviewable steps.
+All phases should happen on one dedicated architecture-refactor branch.
 
-## Phase 1 — New code follows the target shape
+Each phase should still be reviewed as a checkpoint, but the checkpoint should happen through commits, PR updates, review comments, or internal review notes on the same branch. Do not open a new branch for every phase.
 
-Starting now:
+Recommended branch name:
 
-- new feature-local logic should prefer feature folders
-- new hooks should use feature-prefixed names
-- new pure helpers should be colocated with feature code and tests
+```text
+codex/feature-first-architecture
+```
 
-## Phase 2 — Collect becomes the first vertical slice
+If the team prefers a different naming convention, use one equivalent dedicated branch and keep the whole migration there.
 
-Collect is the best first migration target because:
+### Phase 0 - Architecture Control Document
 
-- it is already large
-- it has real bounded behavior
-- it mixes public UI, admin UI, offline logic, and confirmation states
-- it is now a product selling point
+Status: **in progress**
 
-Good follow-up PRs:
+Goal:
 
-- readability refactor of `campaign-registration-form.tsx`
-- move more Collect-only files into a single Collect home
-- create a clearer status/banner system
+- establish this document as the central source of truth
+- agree on target structure
+- agree on migration rules
+- avoid moving code before the review process is clear
 
-## Phase 3 — Geo, Candidates, and Reporting follow
+Scope:
 
-Migrate the next-biggest domains one at a time.
+- update `docs/wardwise-app-architecture-spec.md`
+- do not move source files yet
 
-Each migration PR should choose one of these scopes:
+Done when:
 
-- pure relocation
-- behavior cleanup
-- readability refactor
+- this document is reviewed
+- the team agrees on feature boundaries
+- the first migration phase is selected
 
-Avoid combining all three when possible.
+### Phase 1 - Prepare Guardrails
 
-## Phase 4 — Thin route handlers and pages
+Goal:
 
-As features stabilize:
+- make future moves easier to review and less likely to break imports
 
-- move route logic into `features/<feature>/server/*`
+Scope:
+
+- add `src/features/` only when the first feature migration starts
+- decide whether to add ESLint import boundary rules
+- confirm path alias strategy stays `@/*`
+- confirm shadcn still writes primitives to `src/components/ui`
+- document review commands in `README.md` or `CLAUDE.md` if the team wants them visible there too
+
+Do not:
+
+- create empty feature folders for every future feature
+- move product code yet unless this phase is combined with Phase 2 by explicit agreement
+
+Done when:
+
+- contributors know the import rules
+- no code behavior has changed
+
+### Phase 2 - Collect Pure Relocation
+
+Goal:
+
+- move Collect into a single feature home without changing behavior
+
+Scope:
+
+- `src/components/collect/*`
+- `src/components/admin/collect/*`
+- `src/hooks/use-collect*.ts`
+- `src/hooks/use-offline.ts` if it is Collect-only
+- `src/lib/collect/*`
+- `src/lib/api/collect.ts`
+- `src/lib/schemas/collect-schemas.ts`
+- `src/types/collect.ts`
+- `src/types/campaign-submissions.ts`
+
+Expected target:
+
+```text
+src/features/collect/
+  components/
+  hooks/
+  api/
+  schemas/
+  lib/
+  types/
+```
+
+Rules:
+
+- no old files left behind
+- no re-export compatibility files
+- update all imports in the same PR
+- do not rewrite component internals unless required by the move
+
+Review checks:
+
+```bash
+rg "@/components/collect|@/components/admin/collect|@/lib/collect|@/hooks/use-collect|@/hooks/use-offline|@/types/collect|@/types/campaign-submissions" src
+pnpm exec tsc --noEmit --pretty false
+pnpm test
+pnpm build
+```
+
+### Phase 3 - Collect Route and Server Thinning
+
+Goal:
+
+- move Collect-specific route logic into Collect server modules
+
+Scope examples:
+
+- public campaign loading for `/c/[slug]`
+- collect submit route orchestration
+- offline pack route orchestration
+- collect campaign admin route helpers
+
+Expected target:
+
+```text
+src/features/collect/server/
+```
+
+Rules:
+
 - keep route handlers thin
-- keep page files focused on composition
+- add or adjust tests around pure server helpers where practical
+- behavior should remain unchanged
 
-## Phase 5 — Optional monorepo transition later
+Done when:
 
-If WardWise grows into multiple apps or packages, the feature boundaries in this doc should make that move easier.
+- `app/c/[slug]/page.tsx` primarily composes feature code
+- `app/api/collect/*` delegates to feature server logic
 
-Examples of future package candidates:
+### Phase 4 - Candidates Relocation
 
-- shared design system
-- geo domain
-- reporting
-- candidate-facing dashboard
+Goal:
+
+- move candidate management into `features/candidates`
+
+Scope:
+
+- `src/components/admin/candidates/*`
+- candidate wizard steps
+- candidate API client
+- candidate schemas currently inside admin schemas
+- candidate-specific hooks
+- candidate-specific types and directory helpers
+
+Expected target:
+
+```text
+src/features/candidates/
+  components/
+  hooks/
+  api/
+  server/
+  schemas/
+  lib/
+  types/
+```
+
+Special decision:
+
+- decide whether `canvasser` belongs to `candidates` or `collect`
+- if canvasser management is mostly campaign collection work, prefer `features/collect`
+
+### Phase 5 - Geo Relocation
+
+Goal:
+
+- move geo management into `features/geo`
+
+Scope:
+
+- `src/components/admin/geo/*`
+- `src/hooks/use-geo.ts`
+- `src/lib/geo/*`
+- `src/lib/api/geo.ts`
+- `src/lib/api/location.ts`
+- `src/lib/schemas/geo-schemas.ts`
+- geo data files if they are not broadly shared
+
+Expected target:
+
+```text
+src/features/geo/
+  components/
+  hooks/
+  api/
+  server/
+  schemas/
+  lib/
+  data/
+```
+
+Special caution:
+
+- large static data imports can affect bundles
+- verify that moved geo data is not accidentally imported by client components that do not need it
+
+### Phase 6 - Reporting Relocation
+
+Goal:
+
+- move campaign insights and report access into `features/reporting`
+
+Scope:
+
+- `src/components/campaign-report/*`
+- `src/hooks/use-campaign-report.ts`
+- `src/hooks/use-campaign-insights-scope.ts`
+- `src/lib/api/campaign-report.ts`
+- `src/lib/server/report-access.ts`
+- `src/lib/server/collect-reporting.ts`
+- `src/types/campaign-report.ts`
+
+Expected target:
+
+```text
+src/features/reporting/
+  components/
+  hooks/
+  api/
+  server/
+  lib/
+  types/
+```
+
+Special decision:
+
+- if a reporting helper is truly Collect-specific, keep it in `features/collect`
+- if it powers the client-facing report route, prefer `features/reporting`
+
+### Phase 7 - Candidate Dashboard Relocation
+
+Goal:
+
+- move candidate-facing dashboard code into `features/candidate-dashboard`
+
+Scope:
+
+- `src/components/candidate-dashboard/*`
+- `src/hooks/use-candidate-dashboard.ts`
+- `src/lib/api/candidate-dashboard.ts`
+- candidate dashboard analytics helpers
+
+Expected target:
+
+```text
+src/features/candidate-dashboard/
+  components/
+  hooks/
+  api/
+  server/
+  lib/
+  types/
+```
+
+Done when:
+
+- pages under `app/(candidate)/dashboard/*` import from `features/candidate-dashboard`
+
+### Phase 8 - Auth, Admin Shell, and Public Site
+
+Goal:
+
+- move remaining domain UI out of global component folders
+
+Scope:
+
+- `src/components/auth/*` -> `features/auth/components`
+- `src/lib/auth/*` -> `features/auth/lib` unless app-wide infrastructure
+- `src/components/admin/admin-*` -> `features/admin-shell/components`
+- `src/components/admin/shared/*` -> `features/admin-shell/components/shared`
+- `src/components/landing/*` -> `features/public-site/components/landing`
+- `src/components/legal/*` -> `features/public-site/components/legal`
+- `src/components/public/*` -> `features/public-site/components/support`
+
+Done when:
+
+- `src/components` contains only `ui` and `shared`
+- feature-specific hooks are no longer in root `src/hooks`
+- feature-specific logic is no longer in broad root `src/lib`
+
+### Phase 9 - Documentation Alignment Sweep
+
+Goal:
+
+- update every doc to match the new architecture
+
+Scope:
+
+- `README.md`
+- `CLAUDE.md`
+- `docs/wardwise-collect-spec.md`
+- `docs/wardwise-collect-v2-spec.md`
+- `docs/collect-campaign-branding-spec.md`
+- `docs/collect-candidate-geo-rethink.md`
+- `docs/campaign-insights-spec.md`
+- `docs/geo-management-spec.md`
+- `docs/geo-canonical-seeding-plan.md`
+- `docs/hor-canonical-rollout.md`
+- `docs/adamawa-ward-pu-sync.md`
+- `docs/wardwise-candidates-spec.md`
+- `docs/auth-system-spec.md`
+- `docs/admin-dashboard-command-center-spec.md`
+- `docs/cockpit-design-system.md`
+- `docs/wardwise-hardening-spec.md`
+- `docs/codebase-review.md`
+- `docs/prisma-neon-workflow.md`
+
+Rules:
+
+- current implementation paths must match the new structure
+- historical notes can mention old paths only if clearly marked as historical
+- examples and onboarding instructions must point to the current folders
+- do not leave docs saying "components/collect" after Collect moves
+
+Useful doc search commands:
+
+```bash
+rg "src/components|@/components|src/hooks|@/hooks|src/lib/collect|@/lib/collect|src/lib/schemas|@/lib/schemas|src/types|@/types" README.md CLAUDE.md docs
+rg "components/collect|components/admin|components/campaign-report|components/candidate-dashboard|lib/collect|lib/geo|lib/auth|hooks/use-" README.md CLAUDE.md docs
+```
 
 ---
 
-## Pull Request Guidelines for Architecture Work
+## Per-Phase Definition of Done
 
-These rules will save review time.
+Every migration PR must satisfy this checklist.
 
-## 1. Separate behavior change from relocation when possible
+### Code
 
-Best:
+- moved files are removed from old locations
+- no compatibility re-export files are left behind
+- all imports compile through the new location
+- route files stay thin or become thinner
+- no unrelated formatting churn
+- no unrelated refactors
+- no behavior change unless explicitly listed in the PR
 
-- PR 1: fix offline bug
-- PR 2: pure file move/rename
+### Tests and checks
 
-Acceptable:
+Run the strongest practical checks for the phase:
 
-- small rename inside a behavior PR when the file is newly introduced or the import change is trivial
+```bash
+pnpm exec tsc --noEmit --pretty false
+pnpm test
+pnpm build
+```
 
-## 2. Keep migrations feature-bounded
+For smaller phases, also run targeted lint on changed files:
 
-Avoid repo-wide "cleanups" that touch five unrelated domains at once.
+```bash
+pnpm exec eslint <changed files>
+```
 
-Good:
+### Search checks
 
-- `refactor: thin collect registration orchestrator`
+Each phase must search for stale old paths.
 
-Bad:
+Examples:
 
-- `cleanup: move hooks, libs, and components everywhere`
+```bash
+rg "@/components/collect|@/lib/collect|@/hooks/use-collect" src
+rg "src/components/collect|src/lib/collect|src/hooks/use-collect" README.md CLAUDE.md docs
+```
 
-## 3. Update docs when conventions change
+The expected result after a migration is either:
 
-If a structural decision becomes intentional, record it.
+- no matches, or
+- matches that are intentionally historical and clearly marked
 
-At minimum update:
+### Documentation
 
-- this architecture doc
-- the feature spec if affected
-- `CLAUDE.md` if future contributors should follow it immediately
+For every phase:
 
-## 4. Prefer codemod-friendly naming
+- update this document's status if needed
+- update the feature spec affected by that phase
+- update onboarding docs if a new contributor would otherwise follow stale paths
+- document any boundary decision that came up during the move
 
-Avoid names that are too generic to search safely.
+### Review summary
 
-Feature-prefixed names are better because they:
+Each PR description should include:
 
-- communicate ownership
-- reduce collisions
-- make grep-based refactors easier
-
----
-
-## Working Defaults for the Team
-
-If a teammate is unsure where something should go, use these defaults:
-
-### Put it in the feature if:
-
-- only one domain uses it
-- the name needs domain context to make sense
-- changing it would primarily affect one product area
-
-### Put it in shared if:
-
-- at least two stable features use it
-- the code is understandable without product context
-- future ownership is clearly cross-feature
-
-### Extract a new file when:
-
-- a file reads like multiple jobs
-- a pure helper can be named clearly
-- tests would become easier and faster
-
-### Leave code where it is for now when:
-
-- moving it would create a wide diff with little immediate value
-- the feature is still in active churn
-- the refactor would mix structural cleanup with risky behavior changes
+- files moved
+- files intentionally not moved
+- behavior changes, ideally none
+- verification commands run
+- docs updated
+- known follow-up phases
 
 ---
 
-## What Success Looks Like
+## Documentation Ownership Map
 
-When this architecture is working well, a new engineer should be able to:
+Use this map to avoid missing old docs.
 
-1. identify a feature boundary quickly
-2. find the relevant hook/component/helper without guesswork
-3. understand which code is shared and which code is feature-owned
-4. make a change without accidentally crossing app-wide boundaries
-5. review a PR and understand whether it is a behavior change, a relocation, or both
-
-That is the standard this doc is aiming for.
+| Domain              | Docs to update when moved                                                                                                                              |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Architecture        | `docs/wardwise-app-architecture-spec.md`, `README.md`, `CLAUDE.md`                                                                                     |
+| Collect             | `docs/wardwise-collect-spec.md`, `docs/wardwise-collect-v2-spec.md`, `docs/collect-campaign-branding-spec.md`, `docs/collect-candidate-geo-rethink.md` |
+| Candidates          | `docs/wardwise-candidates-spec.md`, `docs/auth-system-spec.md` when onboarding/auth paths are referenced                                               |
+| Candidate dashboard | `docs/codebase-review.md`, dashboard-related sections in `README.md` and `CLAUDE.md`                                                                   |
+| Geo                 | `docs/geo-management-spec.md`, `docs/geo-canonical-seeding-plan.md`, `docs/hor-canonical-rollout.md`, `docs/adamawa-ward-pu-sync.md`                   |
+| Reporting           | `docs/campaign-insights-spec.md`, reporting sections in Collect docs                                                                                   |
+| Admin shell         | `docs/admin-dashboard-command-center-spec.md`, `docs/cockpit-design-system.md`                                                                         |
+| Auth                | `docs/auth-system-spec.md`, `docs/wardwise-hardening-spec.md`, `CLAUDE.md`                                                                             |
+| Public site         | `README.md`, public/contact/support docs if created later                                                                                              |
+| Infrastructure      | `docs/wardwise-hardening-spec.md`, `docs/prisma-neon-workflow.md`, `CLAUDE.md`                                                                         |
 
 ---
 
-## Near-Term Recommendation
+## How New Work Scales
 
-After the current offline PR lands, the next architectural cleanup should **not** be a repo-wide move. It should be a focused, human-readable Collect refactor:
+### New public page
 
-- calm the Collect UX presentation
-- thin `campaign-registration-form.tsx`
-- keep state transitions explicit
-- continue moving Collect toward a clear vertical slice
+Route goes in `app`; product code goes in `features/public-site` unless it becomes a real product domain.
 
-Collect is now the best place to prove this architecture before the rest of the app follows.
+```text
+src/app/(public)/pricing/page.tsx
+src/features/public-site/components/pricing/pricing-page.tsx
+```
+
+If the page becomes a workflow with data, emails, admin review, or state, make it its own feature:
+
+```text
+src/features/waitlist/
+src/features/referrals/
+src/features/onboarding/
+```
+
+### New dashboard
+
+Route group goes in `app`; dashboard code gets its own feature.
+
+```text
+src/app/(party)/dashboard/page.tsx
+src/features/party-dashboard/
+```
+
+If dashboards share a domain, create a domain feature instead of duplicating logic:
+
+```text
+src/features/notifications/
+src/features/billing/
+src/features/team-members/
+src/features/reporting/
+```
+
+### New shared UI primitive
+
+Put it in:
+
+```text
+src/components/ui/
+```
+
+Only if it is design-system level and product-agnostic.
+
+### New reusable product component
+
+Put it in:
+
+```text
+src/components/shared/
+```
+
+Only if multiple stable features use it and it does not depend on one feature's internal types.
+
+### New infrastructure helper
+
+Put it in:
+
+```text
+src/lib/core/
+```
+
+Only if it is app-wide infrastructure, such as Prisma, metadata, audit, auth primitives, or rate limiting.
+
+---
+
+## Reviewer Checklist
+
+Use this checklist for every migration PR.
+
+### Structure
+
+- Does each moved file now live in the correct feature?
+- Are old files deleted?
+- Are there no compatibility shims?
+- Is `src/components` closer to only `ui` and `shared`?
+- Is `src/hooks` closer to only `shared`?
+- Is `src/lib` closer to only infrastructure and app-wide services?
+
+### Imports
+
+- Are imports updated to the new paths?
+- Are there stale docs or code references to old paths?
+- Is any feature importing another feature's private internals?
+- Are shared folders free from feature imports?
+
+### Behavior
+
+- Is the PR behavior-preserving?
+- If behavior changed, is it explicitly documented?
+- Are route handlers still working?
+- Are client/server boundaries still valid?
+
+### Verification
+
+- Did typecheck pass?
+- Did tests pass?
+- Did build pass?
+- Was targeted lint run on changed files?
+- Were stale-path `rg` searches run?
+
+### Documentation
+
+- Did the affected feature spec get updated?
+- Did onboarding docs get updated if needed?
+- Does this architecture doc still reflect reality?
+
+---
+
+## Peer Review Workflow
+
+For this refactor, a second reviewer is strongly recommended after each phase.
+
+The reviewer can be another developer, Claude, Codex, or both. The important part is that the reviewer has a narrow job: verify the migration, not redesign the phase during review.
+
+All peer review should happen against the same dedicated refactor branch. A review checkpoint can be tied to a commit range or PR update, but it should not create a new branch unless the team explicitly abandons and restarts the migration branch.
+
+### Recommended workflow
+
+1. Create or continue from the dedicated architecture-refactor branch.
+2. Implement one phase as a focused commit or commit group.
+3. Run the phase verification commands.
+4. Ask the peer reviewer to check the phase against this document.
+5. Fix review findings.
+6. Re-run typecheck, tests, build, and stale-path searches.
+7. Mark the phase clean before starting the next phase on the same branch.
+
+### Reviewer should check
+
+- moved files match the current-to-target mapping
+- old files were removed
+- no compatibility shims were left behind
+- imports use the new paths
+- docs no longer point to stale current paths
+- app behavior is unchanged
+- client/server boundaries are still valid
+- feature code does not leak into `components/ui`, `components/shared`, `hooks/shared`, or `lib/core`
+
+### Reviewer should avoid
+
+- broad style rewrites
+- opportunistic component redesigns
+- renaming files outside the phase
+- fixing unrelated bugs in the same PR
+- moving a second feature while reviewing the first one
+
+If the reviewer finds a bigger improvement, record it as a follow-up task unless it is required to make the current phase pass.
+
+---
+
+## Current Status Tracker
+
+| Phase                                        | Status      | Notes                                                     |
+| -------------------------------------------- | ----------- | --------------------------------------------------------- |
+| Phase 0 - Architecture Control Document      | In progress | This document is the starting point.                      |
+| Phase 1 - Prepare Guardrails                 | Not started | Decide import guardrails before moving code.              |
+| Phase 2 - Collect Pure Relocation            | Not started | Best first source-code migration.                         |
+| Phase 3 - Collect Route and Server Thinning  | Not started | Follow after Collect files are relocated.                 |
+| Phase 4 - Candidates Relocation              | Not started | Depends on candidate/canvasser ownership decision.        |
+| Phase 5 - Geo Relocation                     | Not started | Watch static data and client bundle imports.              |
+| Phase 6 - Reporting Relocation               | Not started | Decide Collect vs Reporting ownership for shared helpers. |
+| Phase 7 - Candidate Dashboard Relocation     | Not started | Should be straightforward after earlier migrations.       |
+| Phase 8 - Auth, Admin Shell, and Public Site | Not started | Leaves global folders clean.                              |
+| Phase 9 - Documentation Alignment Sweep      | Not started | Final full-doc search and cleanup.                        |
+
+---
+
+## Immediate Next Todos
+
+1. Review and approve this architecture document.
+2. Create the dedicated architecture-refactor branch.
+3. Keep every migration phase on that same branch.
+4. Decide whether Phase 1 should add ESLint import restrictions now or after the first migration.
+5. Start Phase 2 with Collect as the first vertical slice.
+6. Keep each phase behavior-preserving unless explicitly documented.
+7. Run verification before every review checkpoint.
+8. Update Collect docs immediately after the Collect move.
+
+---
+
+## Final Target
+
+The migration is successful when:
+
+- new developers can find a product area by opening `src/features`
+- `src/components` contains only global UI and shared app components
+- `src/hooks` contains only generic shared hooks
+- `src/lib` contains infrastructure and app-wide services, not scattered product logic
+- route files under `src/app` are thin
+- docs point to the same structure as the codebase
+- each phase has been reviewed and verified before the next one starts
+
+That is the standard for this refactor.

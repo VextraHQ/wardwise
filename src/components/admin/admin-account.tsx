@@ -1,121 +1,138 @@
 "use client";
 
+import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { IconAlertTriangle } from "@tabler/icons-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { useAdminAccount } from "@/hooks/use-admin";
+import { ACCOUNT_DATETIME_OPTIONS } from "@/lib/admin/account";
+import { formatDisplayDateTime, formatRelativeTime } from "@/lib/date-format";
+
+import { EmailCard } from "@/components/admin/account/email-card";
+import { PasswordCard } from "@/components/admin/account/password-card";
+import { ProfileCard } from "@/components/admin/account/profile-card";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { formatPersonName } from "@/lib/utils";
+  AccountRecordCard,
+  ActivityCard,
+  LoadingState,
+} from "@/components/admin/account/support-cards";
 
-function FieldCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="border-border/60 rounded-sm border px-3 py-3">
-      <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-        {label}
-      </p>
-      <p className="mt-1.5 text-sm font-medium wrap-anywhere">{value}</p>
-    </div>
-  );
-}
-
-function PlaceholderRow({ label, status }: { label: string; status: string }) {
-  return (
-    <div className="border-border/60 flex items-center justify-between gap-3 border-t py-3 first:border-t-0 first:pt-0 last:pb-0">
-      <p className="text-sm font-medium">{label}</p>
-      <Badge
-        variant="outline"
-        className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
-      >
-        {status}
-      </Badge>
-    </div>
-  );
-}
+type EditingSection = "profile" | "email" | "password" | null;
 
 export function AdminAccount() {
-  const { data: session } = useSession();
+  const { data, isLoading, error } = useAdminAccount();
+  const { update: updateSession } = useSession();
 
-  const name = formatPersonName(session?.user?.name || "Super Admin");
-  const email = session?.user?.email || "admin@wardwise.ng";
-  const role = session?.user?.role === "admin" ? "Super Admin" : "Admin";
+  const [editingSection, setEditingSection] = useState<EditingSection>(null);
+
+  const account = data?.account;
+  const pendingEmailChange = data?.pendingEmailChange ?? null;
+  const activity = data?.activity ?? [];
+
+  function beginEdit(section: Exclude<EditingSection, null>) {
+    setEditingSection(section);
+  }
+
+  function cancelEdit() {
+    setEditingSection(null);
+  }
 
   return (
-    <div className="flex flex-1 flex-col gap-5 p-3 sm:gap-6 sm:p-4 md:p-6">
-      <div className="border-border/60 border-b pb-5">
-        <p className="text-muted-foreground/70 font-mono text-[10px] font-bold tracking-widest uppercase">
-          Account
+    <div className="flex flex-1 flex-col gap-5 p-4 md:gap-6 md:p-6">
+      <header className="border-border/60 space-y-3 border-b pb-5">
+        <p className="text-primary font-mono text-[10px] font-bold tracking-[0.18em] uppercase">
+          Account & Security
         </p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">
-          Admin Account
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Simple placeholder for personal account settings. We can expand this
-          when profile, security, and preference controls are ready.
-        </p>
-      </div>
-
-      <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader className="border-border/60 border-b">
-          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
-            Current Account
-          </CardDescription>
-          <CardTitle className="text-sm font-semibold tracking-tight">
-            Signed-In Identity
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="flex min-w-0 items-start gap-4">
-            <Avatar className="bg-primary text-primary-foreground h-12 w-12 rounded-sm">
-              <AvatarFallback className="bg-primary text-primary-foreground rounded-sm text-sm font-semibold">
-                {name.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 space-y-1">
-              <p className="truncate text-base font-semibold tracking-tight">
-                {name}
-              </p>
-              <p className="text-muted-foreground truncate text-sm">{email}</p>
+        <div className="space-y-2">
+          <h1 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl">
+            Admin Account
+          </h1>
+          <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
+            Manage the name, sign-in email, and password behind this admin
+            account.
+          </p>
+        </div>
+        {account ? (
+          <div className="text-foreground/70 flex min-w-0 flex-row flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[10px] font-bold tracking-widest uppercase">
+            <div className="flex max-w-full items-center gap-2">
+              <span className="bg-primary/40 size-1.5 rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
+              <span className="wrap-break-word">{account.email}</span>
+            </div>
+            <div className="flex max-w-full items-center gap-2">
+              <span className="bg-border size-1.5 rounded-full" />
+              <span>{account.role === "admin" ? "Admin" : account.role}</span>
+            </div>
+            <div className="flex max-w-full items-center gap-2">
+              <span className="bg-border size-1.5 rounded-full" />
+              <span
+                title={formatDisplayDateTime(
+                  account.lastLoginAt,
+                  ACCOUNT_DATETIME_OPTIONS,
+                  "—",
+                )}
+              >
+                Last sign-in{" "}
+                {formatRelativeTime(account.lastLoginAt, {
+                  emptyLabel: "Never",
+                  olderDateStyle: "months",
+                })}
+              </span>
             </div>
           </div>
+        ) : null}
+      </header>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <FieldCard label="Full Name" value={name} />
-            <FieldCard label="Email Address" value={email} />
-            <FieldCard label="Role" value={role} />
-            <FieldCard label="Entry Route" value="/admin/account" />
+      {error ? (
+        <div className="border-destructive/30 bg-destructive/5 flex items-start gap-3 rounded-sm border p-4">
+          <IconAlertTriangle className="text-destructive mt-0.5 size-4 shrink-0" />
+          <div className="space-y-0.5">
+            <p className="text-destructive text-sm font-semibold">
+              Could not load account
+            </p>
+            <p className="text-muted-foreground text-xs">
+              {error instanceof Error ? error.message : "Please try again."}
+            </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      ) : null}
 
-      {/* Intentionally lightweight until real account settings ship. */}
-      <Card className="border-border/60 rounded-sm shadow-none">
-        <CardHeader className="border-border/60 border-b">
-          <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
-            Placeholder
-          </CardDescription>
-          <CardTitle className="text-sm font-semibold tracking-tight">
-            Future Account Controls
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            This page is intentionally lightweight for now. When the account
-            surface is fully implemented, profile editing, password controls,
-            and personal preferences can live here.
-          </p>
-          <div className="mt-4">
-            <PlaceholderRow label="Profile Editing" status="Later" />
-            <PlaceholderRow label="Security Controls" status="Later" />
-            <PlaceholderRow label="Personal Preferences" status="Later" />
+      {isLoading || !account ? (
+        <LoadingState />
+      ) : (
+        <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.2fr)_360px]">
+          <div className="space-y-5">
+            <ProfileCard
+              name={account.name}
+              isEditing={editingSection === "profile"}
+              onEdit={() => beginEdit("profile")}
+              onCancel={cancelEdit}
+              onSaved={(newName) => {
+                void updateSession({ name: newName });
+                cancelEdit();
+              }}
+            />
+            <EmailCard
+              currentEmail={account.email}
+              pending={pendingEmailChange}
+              isEditing={editingSection === "email"}
+              onEdit={() => beginEdit("email")}
+              onCancel={cancelEdit}
+              onSaved={cancelEdit}
+            />
+            <PasswordCard
+              passwordChangedAt={account.passwordChangedAt}
+              isEditing={editingSection === "password"}
+              onEdit={() => beginEdit("password")}
+              onCancel={cancelEdit}
+            />
           </div>
-        </CardContent>
-      </Card>
+
+          <aside className="space-y-5 xl:sticky xl:top-16">
+            <AccountRecordCard account={account} />
+            <ActivityCard activity={activity} />
+          </aside>
+        </div>
+      )}
     </div>
   );
 }

@@ -113,6 +113,51 @@ export interface UpdateCanvasserData {
   state?: string;
 }
 
+export interface AdminAccount {
+  id: string;
+  name: string | null;
+  email: string;
+  role: string;
+  createdAt: string;
+  lastLoginAt: string | null;
+  passwordChangedAt: string | null;
+}
+
+export interface PendingAdminEmailChange {
+  targetEmail: string;
+  requestedAt: string;
+  expiresAt: string;
+  ttlMs: number;
+}
+
+export interface AdminAccountActivityItem {
+  id: string;
+  action: string;
+  createdAt: string;
+  details: Record<string, unknown> | null;
+}
+
+export interface AdminAccountSnapshot {
+  account: AdminAccount;
+  pendingEmailChange: PendingAdminEmailChange | null;
+  activity: AdminAccountActivityItem[];
+}
+
+export interface UpdateAdminProfileData {
+  name: string;
+}
+
+export interface RequestAdminEmailChangeData {
+  newEmail: string;
+  currentPassword: string;
+}
+
+export interface ChangeAdminPasswordData {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export interface AdminDashboardSummary {
   updatedAt: string;
   registrations: {
@@ -352,6 +397,56 @@ export const adminApi = {
         "/dashboard/summary",
       );
       return data.summary;
+    },
+  },
+
+  account: {
+    get: async (): Promise<AdminAccountSnapshot> => {
+      return apiCall<AdminAccountSnapshot>("/account");
+    },
+
+    updateProfile: async (
+      data: UpdateAdminProfileData,
+    ): Promise<AdminAccount> => {
+      const result = await apiCall<{ success: true; account: AdminAccount }>(
+        "/account/profile",
+        {
+          method: "PATCH",
+          body: JSON.stringify(data),
+        },
+      );
+      return result.account;
+    },
+
+    requestEmailChange: async (
+      data: RequestAdminEmailChangeData,
+    ): Promise<PendingAdminEmailChange> => {
+      const result = await apiCall<{
+        success: true;
+        pendingEmailChange: PendingAdminEmailChange;
+      }>("/account/email-change", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      return result.pendingEmailChange;
+    },
+
+    cancelEmailChange: async (): Promise<void> => {
+      await apiCall<{ success: true }>("/account/email-change", {
+        method: "DELETE",
+      });
+    },
+
+    changePassword: async (
+      data: ChangeAdminPasswordData,
+    ): Promise<{ success: true; reauthRequired: true }> => {
+      return apiCall<{ success: true; reauthRequired: true }>(
+        "/account/password",
+        {
+          method: "POST",
+          body: JSON.stringify(data),
+        },
+      );
     },
   },
 };

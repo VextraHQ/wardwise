@@ -3,6 +3,8 @@
 > Practical database workflow for this repo while we are still in the early `db push` phase.
 > Last updated: 2026-04-09
 
+If you are ready to move beyond `db push`, use the repo-specific migration rollout in [prisma-migrate-adoption-plan.md](/Users/nabeelhassan/Desktop/wardwise-demo/docs/prisma-migrate-adoption-plan.md).
+
 ---
 
 ## Quick Answer

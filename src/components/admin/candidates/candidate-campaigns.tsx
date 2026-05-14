@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import {
   IconAlertTriangle,
   IconClipboardList,
@@ -37,6 +36,7 @@ import {
   adminResourceStateIcons,
 } from "@/components/admin/shared/admin-resource-state";
 
+import { useCandidateCampaigns } from "@/hooks/use-collect";
 import { formatStatusLabel } from "@/lib/admin/dashboard";
 import { isStaleCampaign } from "@/lib/collect/campaign-health";
 import { getCampaignDisplayHeadline } from "@/lib/collect/branding";
@@ -69,7 +69,7 @@ function CampaignReportBadge({ campaign }: { campaign: CampaignSummary }) {
           enabled ? REPORT_STATUS_STYLES.enabled : REPORT_STATUS_STYLES.disabled
         }`}
       >
-        {enabled ? "Insights On" : "Off"}
+        {enabled ? "Insights On" : "Insights Off"}
       </Badge>
       {campaign.clientReportLastViewedAt && (
         <p className="text-muted-foreground text-[10px]">
@@ -112,18 +112,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
     data: campaigns,
     isLoading,
     error,
-  } = useQuery<CampaignSummary[]>({
-    queryKey: ["admin", "candidates", candidateId, "campaigns"],
-    queryFn: async () => {
-      const res = await fetch(
-        `/api/admin/collect/campaigns?candidateId=${candidateId}`,
-      );
-      if (!res.ok) throw new Error("Failed to fetch campaigns");
-      const json = await res.json();
-      return json.campaigns;
-    },
-    staleTime: 1000 * 60,
-  });
+  } = useCandidateCampaigns(candidateId);
 
   const draftShortcut = useMemo(() => {
     if (!campaigns?.length) return null;
@@ -258,7 +247,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
           return (
             <AdminMobileRecordCard
               key={campaign.id}
-              className="hover:bg-muted/25 cursor-pointer transition-colors"
+              className="hover:bg-muted/25 cursor-pointer"
               onClick={() =>
                 router.push(`/admin/collect/campaigns/${campaign.id}`)
               }
@@ -310,7 +299,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
                     {reportEnabled ? "On" : "Off"}
                   </Badge>
                 </AdminMobileRecordField>
-                <AdminMobileRecordField label="Last activity">
+                <AdminMobileRecordField label="Last Activity">
                   <span className="flex items-center justify-end gap-1 text-xs">
                     {formatRelativeTime(campaign.lastSubmissionAt, {
                       absoluteDateOptions: {
@@ -347,7 +336,7 @@ export function CandidateCampaigns({ candidateId }: CandidateCampaignsProps) {
                 Submissions
               </TableHead>
               <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase xl:table-cell">
-                Report
+                Insights
               </TableHead>
               <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase sm:table-cell">
                 Last Activity

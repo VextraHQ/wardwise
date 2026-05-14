@@ -93,10 +93,11 @@ describe("buildContactNotificationEmail", () => {
 
     expect(email.html).toContain("Ada");
     expect(email.html).toContain("ada@example.com");
-    expect(email.html).toContain("Submitted from");
+    expect(email.html).toContain("Contact Summary");
+    expect(email.html).toContain("Source:");
     expect(email.html).toContain("/contact");
     expect(email.html).toContain("Message");
-    expect(email.text).toMatch(/Submitted from\s+\/contact/);
+    expect(email.text).toMatch(/Source:\s+\/contact/);
     expect(email.html).toContain("Reply by email");
     expect(email.html).toContain("mailto:ada@example.com");
     expect(email.html).toContain("All rights reserved");
@@ -115,7 +116,7 @@ describe("buildContactNotificationEmail", () => {
     });
 
     expect(email.html).toContain("Cannot log in");
-    expect(email.html).toContain("Submitted from");
+    expect(email.html).toContain("Source:");
     expect(email.html).toContain("/contact");
   });
 

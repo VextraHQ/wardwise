@@ -13,7 +13,7 @@ function AdminMobileRecordCard({
   return (
     <div
       className={cn(
-        "border-border/60 bg-card min-w-0 rounded-sm border p-3 shadow-none",
+        "border-border/60 bg-card active:bg-muted/40 min-w-0 rounded-sm border p-3 shadow-none transition-colors",
         className,
       )}
       {...props}

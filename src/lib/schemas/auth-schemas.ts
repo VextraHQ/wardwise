@@ -17,14 +17,16 @@ export const forgotPasswordSchema = z.object({
 
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
+export const passwordPolicySchema = z
+  .string()
+  .min(8, "Use at least 8 characters")
+  .regex(/[A-Z]/, "Add at least one uppercase letter")
+  .regex(/[a-z]/, "Add at least one lowercase letter")
+  .regex(/[0-9]/, "Add at least one number");
+
 export const passwordSetupSchema = z
   .object({
-    password: z
-      .string()
-      .min(8, "Use at least 8 characters")
-      .regex(/[A-Z]/, "Add at least one uppercase letter")
-      .regex(/[a-z]/, "Add at least one lowercase letter")
-      .regex(/[0-9]/, "Add at least one number"),
+    password: passwordPolicySchema,
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
   .refine((values) => values.password === values.confirmPassword, {

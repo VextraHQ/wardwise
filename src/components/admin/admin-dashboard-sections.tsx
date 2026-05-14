@@ -99,7 +99,7 @@ export function PriorityQueue({
       className="border-border/60 scroll-mt-20 rounded-sm shadow-none"
     >
       <CardHeader className="border-border/60 border-b">
-        <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+        <CardDescription className="text-muted-foreground/70 font-mono text-[10px] font-bold tracking-widest uppercase">
           Priority Queue
         </CardDescription>
         <div className="flex items-center justify-between gap-3">
@@ -168,7 +168,7 @@ export function HealthRail({
   return (
     <Card className="border-border/60 rounded-sm shadow-none">
       <CardHeader className="border-border/60 border-b">
-        <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+        <CardDescription className="text-muted-foreground/70 font-mono text-[10px] font-bold tracking-widest uppercase">
           Platform Health
         </CardDescription>
         <CardTitle className="text-sm font-semibold tracking-tight">
@@ -219,7 +219,7 @@ export function LiveCampaignsSection({
   return (
     <Card className="border-border/60 rounded-sm shadow-none">
       <CardHeader className="border-border/60 border-b">
-        <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+        <CardDescription className="text-muted-foreground/70 font-mono text-[10px] font-bold tracking-widest uppercase">
           Live Campaigns
         </CardDescription>
         <div className="flex items-center justify-between gap-3">
@@ -280,7 +280,7 @@ export function RecentCandidatesSection({
   return (
     <Card className="border-border/60 rounded-sm shadow-none">
       <CardHeader className="border-border/60 border-b">
-        <CardDescription className="text-muted-foreground/70 font-mono text-[10px] tracking-widest uppercase">
+        <CardDescription className="text-muted-foreground/70 font-mono text-[10px] font-bold tracking-widest uppercase">
           Recent Candidate Setup
         </CardDescription>
         <div className="flex items-center justify-between gap-3">
