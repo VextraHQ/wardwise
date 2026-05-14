@@ -13,7 +13,10 @@ import {
   createAdminEmailChangeToken,
   revokeAdminEmailChangeTokensForUser,
 } from "@/lib/auth/links";
-import { sendAdminEmailChangeEmail } from "@/lib/email/auth";
+import {
+  sendAdminEmailChangeEmail,
+  sendAdminEmailChangeNoticeEmail,
+} from "@/lib/email/auth";
 import { requestAdminEmailChangeSchema } from "@/lib/schemas/admin-schemas";
 
 export async function POST(request: NextRequest) {
@@ -137,6 +140,18 @@ export async function POST(request: NextRequest) {
       { status: 503 },
     );
   }
+
+  void sendAdminEmailChangeNoticeEmail({
+    to: account.email,
+    name: account.name ?? "Admin",
+    currentEmail: account.email,
+    targetEmail: newEmail,
+    requestedAt: issued.requestedAt,
+    requestIp: ip,
+    userAgent,
+  }).catch((noticeError) => {
+    console.warn("Admin old-email change notice failed:", noticeError);
+  });
 
   void logAudit(
     "admin.account.email_change_requested",

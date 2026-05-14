@@ -227,19 +227,21 @@ Email sending is split into a generic transport, small orchestration modules, an
 
 Self-service surface for the **currently signed-in admin only**. V1 covers name, email, and password changes — no admin creation, no `/admin/users`, no `super_admin` role.
 
+Visual and interaction standard: see `docs/cockpit-design-system.md` → **Admin Account UX Standard**.
+
 ### Editable scope
 
 - **Name** — in-session update via `PATCH /api/admin/account/profile`. No session bump.
 - **Email** — two-step verified flow (see below). Requires current password to initiate.
 - **Password** — `POST /api/admin/account/password` with current password. Bumps `sessionVersion` and forces re-auth on all devices.
 
-Read-only on the page: `role`, `createdAt`, `lastLoginAt`, `passwordChangedAt`, `userId`. The role badge displays as "Admin" — it is fixed by Vextra and not user-editable in V1.
+Read-only on the page: `role`, `createdAt`, `lastLoginAt`, and `passwordChangedAt`. The role badge displays as "Admin" — it is fixed by Vextra and not user-editable in V1.
 
 ### Two-step verified email change
 
 1. Admin submits `newEmail + currentPassword` to `POST /api/admin/account/email-change`.
 2. Endpoint validates current password, rejects duplicates against the **full `User` table** (case-insensitive, not just admins), revokes any older unused `admin_email_change` tokens for the user, and creates a new `AuthToken` row with `type = "admin_email_change"`, a normalized `targetEmail`, and a 24-hour TTL.
-3. Confirmation email lands in the **new inbox** with target email, requesting IP/UA, and request time. If mail delivery is unconfigured the request fails with HTTP 503 — no token is created.
+3. Confirmation email lands in the **new inbox** with target email, requesting IP/UA, and request time. A best-effort **security notice** also lands in the current/old inbox so the admin can spot unexpected requests. If the primary confirmation mail is unconfigured the request fails with HTTP 503 — no token is created. If the old-inbox notice fails, the request still succeeds because the verified new-inbox flow is the source of truth.
 4. The link `/confirm-email-change/[token]` is a **scanner-safe GET page**. It previews the target email and expiry but never consumes the token, so Outlook Safe Links / Google / Proofpoint pre-fetching does not burn it.
 5. The user clicks `Confirm email change`, which POSTs to `/api/auth/confirm-email-change`. That endpoint consumes the token in a transaction, rejects conflicts re-checked at consume time, swaps `User.email`, revokes any other pending tokens, and increments `sessionVersion`.
 6. Client signs out and redirects to `/login?notice=email-changed`, where the LoginScreen renders "Sign in with your new email."
@@ -269,7 +271,7 @@ A password change also marks all unused `admin_email_change` tokens for that use
 
 ### Audit events
 
-Personal account/security events for the signed-in admin are surfaced in the "Recent activity" section (last 20). Namespaces:
+Personal account/security events for the signed-in admin are surfaced in the "Recent activity" section (last 10). Namespaces:
 
 - `admin.account.login` — successful admin sign-in
 - `admin.account.login_failed` — wrong password against a known admin account (only logged when the email maps to an existing admin, to avoid enumeration noise)

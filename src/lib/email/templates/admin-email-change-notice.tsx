@@ -1,10 +1,8 @@
 import {
   Body,
-  Button,
   Container,
   Head,
   Html,
-  Link,
   Preview,
   Section,
   Text,
@@ -15,43 +13,39 @@ import { EmailStandardFooter } from "@/lib/email/components/email-standard-foote
 import { formatRequestIpLabel } from "@/lib/core/ip";
 import { formatAuthLinkExpiresAt } from "@/lib/email/templates/auth-link";
 
-export type AdminEmailChangeEmailInput = {
+export type AdminEmailChangeNoticeEmailInput = {
   name: string;
-  url: string;
+  currentEmail: string;
   targetEmail: string;
-  expiresAt: Date;
   requestedAt: Date;
   requestIp?: string | null;
   userAgent?: string | null;
 };
 
-export type AdminEmailChangeEmail = {
+export type AdminEmailChangeNoticeEmail = {
   subject: string;
   html: string;
   text: string;
 };
 
-// Invisible padding for email preview to prevent merge issues eg: Gmail, Outlook, etc.
 const PREVIEW_PADDING = "\u200C\u200D\u200E\u200F".repeat(20);
 
-export function AdminEmailChangeTemplate({
+export function AdminEmailChangeNoticeTemplate({
   name,
-  url,
+  currentEmail,
   targetEmail,
-  expiresLabel,
   requestedLabel,
   requestIp,
   userAgent,
 }: {
   name: string;
-  url: string;
+  currentEmail: string;
   targetEmail: string;
-  expiresLabel: string;
   requestedLabel: string;
   requestIp?: string | null;
   userAgent?: string | null;
 }) {
-  const preview = `Confirm your new WardWise admin email (${targetEmail}). Link expires ${expiresLabel}.`;
+  const preview = `A WardWise admin email change was requested from ${currentEmail} to ${targetEmail}.`;
 
   return (
     <Html lang="en">
@@ -62,44 +56,27 @@ export function AdminEmailChangeTemplate({
       </Preview>
       <Body style={styles.body}>
         <Container style={styles.outerFrame}>
-          <EmailBrandHeader eyebrow="Admin Email Change" />
+          <EmailBrandHeader eyebrow="Admin Security Notice" />
 
           <Section style={styles.panel}>
-            <Text style={styles.title}>Confirm your new email, {name}.</Text>
+            <Text style={styles.title}>
+              A sign-in email change was requested.
+            </Text>
             <Text style={styles.bodyText}>
-              We received a request to change the email on your WardWise admin
-              account to <span style={styles.targetEmail}>{targetEmail}</span>.
-              Click the button below to confirm. Until you confirm, your
-              existing email stays in use.
+              Hi {name}, we received a request to move your WardWise admin
+              account from <span style={styles.highlight}>{currentEmail}</span>{" "}
+              to <span style={styles.highlight}>{targetEmail}</span>.
+            </Text>
+            <Text style={styles.bodyText}>
+              No change has been completed yet. The new address must still be
+              confirmed before your sign-in email switches.
             </Text>
 
-            <Section style={styles.buttonRow}>
-              <Button href={url} style={styles.button}>
-                Confirm email change
-              </Button>
-            </Section>
-
-            <Text style={styles.fallbackIntro}>
-              If the button above doesn&apos;t work, copy this link into your
-              browser:
-            </Text>
-            <Link href={url} style={styles.fallbackUrl}>
-              {url}
-            </Link>
-
             <Section style={styles.notePanel}>
-              <Text style={styles.noteLabel}>Link Expiry</Text>
-              <Text style={styles.noteText}>
-                This link expires {expiresLabel}. If it has already expired,
-                request a new email change from your admin account page.
-              </Text>
-            </Section>
-
-            <Section style={styles.notePanel}>
-              <Text style={styles.noteLabel}>Request Details</Text>
+              <Text style={styles.noteLabel}>Request details</Text>
               <Text style={styles.noteText}>Requested: {requestedLabel}</Text>
               {requestIp ? (
-                <Text style={styles.noteText}>IP address: {requestIp}</Text>
+                <Text style={styles.noteText}>Source: {requestIp}</Text>
               ) : null}
               {userAgent ? (
                 <Text style={styles.noteText}>Device: {userAgent}</Text>
@@ -107,9 +84,8 @@ export function AdminEmailChangeTemplate({
             </Section>
 
             <Text style={styles.ignoreText}>
-              If you didn&apos;t request this, your account is safe — no changes
-              have been made. You can ignore this email and your existing
-              sign-in email will stay in use.
+              If this was you, no action is needed on this inbox. If this
+              wasn&apos;t you, sign in and change your password immediately.
             </Text>
           </Section>
 
@@ -120,23 +96,20 @@ export function AdminEmailChangeTemplate({
   );
 }
 
-export async function buildAdminEmailChangeEmail(
-  input: AdminEmailChangeEmailInput,
-): Promise<AdminEmailChangeEmail> {
+export async function buildAdminEmailChangeNoticeEmail(
+  input: AdminEmailChangeNoticeEmailInput,
+): Promise<AdminEmailChangeNoticeEmail> {
   const displayName =
     input.name.trim().length > 0 ? input.name.trim() : "there";
-  const expiresLabel = formatAuthLinkExpiresAt(input.expiresAt);
   const requestedLabel = formatAuthLinkExpiresAt(input.requestedAt);
-
-  const subject = `Confirm your new WardWise admin email`;
   const requestIp = formatRequestIpLabel(input.requestIp ?? null);
+  const subject = "Security notice: admin email change requested";
 
   const template = (
-    <AdminEmailChangeTemplate
+    <AdminEmailChangeNoticeTemplate
       name={displayName}
-      url={input.url}
+      currentEmail={input.currentEmail}
       targetEmail={input.targetEmail}
-      expiresLabel={expiresLabel}
       requestedLabel={requestedLabel}
       requestIp={requestIp}
       userAgent={input.userAgent ?? null}
@@ -172,56 +145,27 @@ const styles = {
   title: {
     margin: "0 0 16px",
     color: "#101414",
-    fontSize: "26px",
+    fontSize: "24px",
     fontWeight: "800",
     letterSpacing: "-0.02em",
     lineHeight: "1.2",
   },
   bodyText: {
-    margin: "0 0 24px",
+    margin: "0 0 16px",
     color: "#41535a",
     fontSize: "15px",
     lineHeight: "1.72",
   },
-  targetEmail: {
+  highlight: {
     color: "#16655b",
     fontWeight: "700" as const,
-  },
-  buttonRow: {
-    margin: "0 0 14px",
-  },
-  fallbackIntro: {
-    margin: "0 0 6px",
-    color: "#7a8f96",
-    fontSize: "12px",
-    lineHeight: "1.5",
-  },
-  fallbackUrl: {
-    display: "block",
-    margin: "0 0 24px",
-    color: "#16655b",
-    fontSize: "11px",
-    lineHeight: "1.6",
-    wordBreak: "break-all" as const,
-    textDecoration: "none",
-  },
-  button: {
-    backgroundColor: "#16655b",
-    color: "#f5f5ed",
-    padding: "13px 22px",
-    borderRadius: "2px",
-    textDecoration: "none",
-    fontSize: "11px",
-    fontWeight: "800",
-    letterSpacing: "0.14em",
-    textTransform: "uppercase" as const,
-    display: "inline-block",
   },
   notePanel: {
     padding: "16px 18px",
     backgroundColor: "#f5f5ed",
     border: "1px solid rgba(22, 101, 91, 0.14)",
     borderRadius: "2px",
+    marginTop: "8px",
     marginBottom: "20px",
   },
   noteLabel: {

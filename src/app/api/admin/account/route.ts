@@ -6,7 +6,10 @@ import {
   ADMIN_EMAIL_CHANGE_TTL_MS,
 } from "@/lib/auth/links";
 
-const ACTIVITY_LIMIT = 20;
+// TODO(activity-log): Keep /admin/account as a compact preview. When the
+// dedicated admin activity log page ships, move full history and pagination
+// there instead of growing this feed.
+const ACTIVITY_LIMIT = 10;
 
 export async function GET() {
   const { error, user } = await requireAdmin();
