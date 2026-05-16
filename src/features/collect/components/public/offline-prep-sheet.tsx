@@ -28,7 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useCampaignLgas } from "@/features/collect/hooks/use-collect";
-import { formatGeoDisplayName } from "@/lib/geo/display";
+import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import {
   getEffectiveSelection,
   getPrepIntent,

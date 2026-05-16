@@ -15,7 +15,7 @@ import {
   getCampaignBrandingLabel,
   getCampaignDisplayHeadline,
 } from "@/features/collect/lib/branding";
-import { positionRequiresLgas } from "@/lib/geo/constituency";
+import { positionRequiresLgas } from "@/features/geo/lib/constituency";
 
 type CandidateInfo = {
   id: string;

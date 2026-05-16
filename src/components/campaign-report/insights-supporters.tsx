@@ -44,7 +44,7 @@ import { MobileBulkActionTray } from "@/components/ui/mobile-selection-actions";
 import { formatDisplayDateTime } from "@/lib/date-format";
 import { formatRole } from "@/features/collect/lib/reporting";
 import { InsightsExportMenu } from "./insights-export-menu";
-import { formatGeoDisplayName } from "@/lib/geo/display";
+import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import { cn, formatPersonName } from "@/lib/utils";
 import { useCampaignReportSubmissions } from "@/hooks/use-campaign-report";
 import { useIsPortraitMobile } from "@/hooks/use-mobile";

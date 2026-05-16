@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
-import { nigeriaStates, getLGAsByState } from "@/lib/data/state-lga-locations";
+import { nigeriaStates, getLGAsByState } from "@/features/geo/data/state-lga-locations";
 
 export async function GET() {
   try {

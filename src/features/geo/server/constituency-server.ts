@@ -2,7 +2,7 @@ import { prisma } from "@/lib/core/prisma";
 import {
   normalizeConstituencyLgaIds,
   positionRequiresLgas,
-} from "@/lib/geo/constituency";
+} from "@/features/geo/lib/constituency";
 
 export async function sanitizeCandidateConstituencyLgaIds({
   position,

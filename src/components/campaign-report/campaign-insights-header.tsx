@@ -33,7 +33,7 @@ import {
   formatUpdatedAgo,
   type CampaignReportRangePreset,
 } from "@/features/collect/lib/reporting";
-import { formatGeoDisplayName } from "@/lib/geo/display";
+import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import type { CampaignReportSummary } from "@/types/campaign-report";
 import {
   IconArrowsExchange,

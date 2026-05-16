@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import XLSX from "xlsx";
-import { nigeriaStates } from "../src/lib/data/state-lga-locations";
-import { formatGeoDisplayName } from "../src/lib/geo/display";
+import { nigeriaStates } from "../src/features/geo/data/state-lga-locations";
+import { formatGeoDisplayName } from "../src/features/geo/lib/display";
 import {
   findCanonicalLgasInComposition,
   getStateLgaNames,
@@ -61,7 +61,7 @@ function parseArgs() {
       argValue("--output") ??
       path.join(
         process.cwd(),
-        "src/lib/data/nigerian-federal-constituencies.ts",
+        "src/features/geo/data/nigerian-federal-constituencies.ts",
       ),
     write: args.includes("--write"),
   };

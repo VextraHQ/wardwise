@@ -462,7 +462,7 @@ What shipped matches the spec. A few decisions worth recording so future work do
 
 - **`Missing constituency LGAs` uses `positionRequiresLgas(position)`**, not `!isNational`. Only Senator, House of Reps, and State Assembly seats are flagged. Governor / President / statewide candidates legitimately have no constituency LGAs and would have produced false positives.
 - **`Campaign Insights off` excludes drafts.** Drafts already surface under their own row, so including them here double-counted and made the queue noisier than the underlying problem.
-- **Recent Candidates row resolves `stateCode` to a full state name** via `nigeriaStates` (`src/lib/data/state-lga-locations.ts`) so admins see "Adamawa State" instead of "AD".
+- **Recent Candidates row resolves `stateCode` to a full state name** via `nigeriaStates` (`src/features/geo/data/state-lga-locations.ts`) so admins see "Adamawa State" instead of "AD".
 - **`CampaignRow` shows "No submissions yet"** when `lastSubmissionAt` is null, instead of an em-dash, because the dash read like a missing-data error rather than an expected state for a fresh campaign.
 - **Status color maps and `relativeTime` are duplicated locally** rather than extracted to `src/lib/date.ts` / a shared status module. Mirrors the same maps in `candidate-management.tsx` and `campaign-list.tsx`. Recorded as a follow-up in the Future Enhancements list below — not done in this pass to keep the PR scoped.
 - **Coverage Snapshot is purely informational.** No filter links: the candidate/campaign list pages do not yet support the corresponding filters, and dead links would have violated the "no placeholder routes" rule.

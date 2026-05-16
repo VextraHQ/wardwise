@@ -19,8 +19,8 @@ import {
 } from "@/features/collect/components/public/form-ui";
 import { IconMapPin } from "@tabler/icons-react";
 import type { CreateCandidateFormValues } from "@/features/candidates/schemas/candidate-schemas";
-import { nigeriaStates, getLGAsByState } from "@/lib/data/state-lga-locations";
-import { useGeoLgas } from "@/hooks/use-geo";
+import { nigeriaStates, getLGAsByState } from "@/features/geo/data/state-lga-locations";
+import { useGeoLgas } from "@/features/geo/hooks/use-geo";
 import type { ComboboxSelectGroup } from "@/components/ui/combobox-select";
 import {
   positionRequiresLgas,
@@ -28,12 +28,12 @@ import {
   getConstituencyBoundaryWarnings,
   matchPresetToSeededIds,
   findMatchingPreset,
-} from "@/lib/geo/constituency";
+} from "@/features/geo/lib/constituency";
 import { cn } from "@/lib/utils";
 import {
   getPresetsForState,
   getUnsupportedPresetsForState,
-} from "@/lib/data/nigerian-constituencies";
+} from "@/features/geo/data/nigerian-constituencies";
 import { IconAlertTriangle } from "@tabler/icons-react";
 
 function getConstituencyPlaceholder(position: string) {

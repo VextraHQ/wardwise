@@ -11,7 +11,7 @@ import {
   updateCandidateSchema,
   type UpdateCandidateFormValues,
 } from "@/features/candidates/schemas/candidate-schemas";
-import { nigeriaStates, getLGAsByState } from "@/lib/data/state-lga-locations";
+import { nigeriaStates, getLGAsByState } from "@/features/geo/data/state-lga-locations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useGeoLgas } from "@/hooks/use-geo";
+import { useGeoLgas } from "@/features/geo/hooks/use-geo";
 import {
   NIGERIAN_PARTIES,
   CANDIDATE_TITLES,
@@ -59,11 +59,11 @@ import {
   getConstituencyBoundaryWarnings,
   matchPresetToSeededIds,
   findMatchingPreset,
-} from "@/lib/geo/constituency";
+} from "@/features/geo/lib/constituency";
 import {
   getPresetsForState,
   getUnsupportedPresetsForState,
-} from "@/lib/data/nigerian-constituencies";
+} from "@/features/geo/data/nigerian-constituencies";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 

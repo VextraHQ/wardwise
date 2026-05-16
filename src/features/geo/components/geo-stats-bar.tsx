@@ -6,7 +6,7 @@ import {
   HiOutlineLocationMarker,
   HiOutlineOfficeBuilding,
 } from "react-icons/hi";
-import { useGeoStats } from "@/hooks/use-geo";
+import { useGeoStats } from "@/features/geo/hooks/use-geo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCardSkeleton } from "@/components/admin/admin-skeletons";
 

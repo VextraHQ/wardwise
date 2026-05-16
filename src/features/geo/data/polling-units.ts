@@ -2,7 +2,7 @@
 // Still used by partial geo seeding and the legacy /api/register/locations path.
 // Do not treat this file as the long-term canonical runtime geo source.
 import type { LocationPollingUnit } from "@/types/location";
-import { getWardsByLGA, getWardByCode } from "@/lib/data/wards";
+import { getWardsByLGA, getWardByCode } from "@/features/geo/data/wards";
 
 // Real INEC Polling Units by Ward Code
 // Source: INEC Directory of Polling Units (Revised January 2015)

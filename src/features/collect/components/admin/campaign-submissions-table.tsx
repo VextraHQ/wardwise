@@ -21,7 +21,7 @@ import {
 import { roleLabels } from "@/features/collect/lib/analytics";
 import { formatPU } from "@/features/collect/lib/campaign-submissions";
 import { formatDisplayDateTime } from "@/lib/date-format";
-import { formatGeoDisplayName } from "@/lib/geo/display";
+import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import { cn, formatPersonName } from "@/lib/utils";
 import type { SubmissionWithPU } from "@/features/collect/types/campaign-submissions.types";
 

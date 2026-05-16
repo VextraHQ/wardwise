@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { formatDateRangeLabel, type DateRange } from "@/lib/date-ranges";
-import { formatGeoDisplayName } from "@/lib/geo/display";
+import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import type { CampaignReportRangePreset } from "@/features/collect/lib/reporting";
 
 export type CampaignInsightsScopePreset = CampaignReportRangePreset | "custom";

@@ -7,8 +7,8 @@ import { logAudit } from "@/lib/core/audit";
 import {
   positionToConstituencyType,
   positionRequiresLgas,
-} from "@/lib/geo/constituency";
-import { resolveCandidateCampaignLgaIds } from "@/lib/geo/constituency-server";
+} from "@/features/geo/lib/constituency";
+import { resolveCandidateCampaignLgaIds } from "@/features/geo/server/constituency-server";
 import { normalizeCampaignDisplayName } from "@/features/collect/lib/branding";
 
 export async function GET(request: NextRequest) {

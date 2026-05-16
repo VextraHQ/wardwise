@@ -13,16 +13,16 @@ import {
 } from "@/features/collect/components/public/form-ui";
 import { IconChecklist, IconPencil } from "@tabler/icons-react";
 import type { CreateCandidateFormValues } from "@/features/candidates/schemas/candidate-schemas";
-import { nigeriaStates, getLGAsByState } from "@/lib/data/state-lga-locations";
-import { useGeoLgas } from "@/hooks/use-geo";
+import { nigeriaStates, getLGAsByState } from "@/features/geo/data/state-lga-locations";
+import { useGeoLgas } from "@/features/geo/hooks/use-geo";
 import {
   autoConstituencyName,
   getConstituencyBoundaryWarnings,
   positionRequiresLgas,
   findMatchingPreset,
-} from "@/lib/geo/constituency";
+} from "@/features/geo/lib/constituency";
 import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituency-boundary-alerts";
-import { getPresetsForState } from "@/lib/data/nigerian-constituencies";
+import { getPresetsForState } from "@/features/geo/data/nigerian-constituencies";
 
 function resolveStateName(stateCode: string | null | undefined): string {
   if (!stateCode) return "—";

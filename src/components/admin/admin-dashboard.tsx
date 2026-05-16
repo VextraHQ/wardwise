@@ -25,7 +25,7 @@ import {
 } from "@/hooks/use-admin";
 import { useCampaigns } from "@/features/collect/hooks/use-collect";
 import { isStaleCampaign } from "@/features/collect/lib/campaign-health";
-import { positionRequiresLgas } from "@/lib/geo/constituency";
+import { positionRequiresLgas } from "@/features/geo/lib/constituency";
 import type { CandidateWithUser } from "@/lib/api/admin";
 import type { CampaignSummary } from "@/features/collect/types/collect.types";
 

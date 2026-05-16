@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client";
 import type { Candidate } from "@/features/candidates/types/candidate.types";
 import { createCandidateSchema } from "@/features/candidates/schemas/candidate-schemas";
 import { logAudit } from "@/lib/core/audit";
-import { sanitizeCandidateConstituencyLgaIds } from "@/lib/geo/constituency-server";
+import { sanitizeCandidateConstituencyLgaIds } from "@/features/geo/server/constituency-server";
 import { issueAuthLink } from "@/lib/auth/links";
 import { sendAuthLinkEmail } from "@/lib/email/auth";
 import {

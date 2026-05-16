@@ -48,7 +48,7 @@ import {
 
 import { formatStatusLabel } from "@/lib/admin/dashboard";
 import { formatDisplayDate } from "@/lib/date-format";
-import { nigeriaStates } from "@/lib/data/state-lga-locations";
+import { nigeriaStates } from "@/features/geo/data/state-lga-locations";
 import { cn, formatPersonName } from "@/lib/utils";
 import {
   AdminMobileRecordCard,

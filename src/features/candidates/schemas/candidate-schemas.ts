@@ -4,7 +4,7 @@ import {
   optionalNigerianPhoneSchema,
   requiredTrimmedText,
 } from "@/lib/schemas/field-schemas";
-import { getPositionStateValidationMessage } from "@/lib/geo/constituency";
+import { getPositionStateValidationMessage } from "@/features/geo/lib/constituency";
 
 // Candidate position enum
 export const candidatePositionSchema = z.enum([

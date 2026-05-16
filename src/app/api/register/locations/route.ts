@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { nigeriaStates } from "@/lib/data/state-lga-locations";
-import { getLGAsByState } from "@/lib/data/state-lga-locations";
-import { getWardsByLGA } from "@/lib/data/wards";
-import { getPollingUnitsByWard } from "@/lib/data/polling-units";
+import { nigeriaStates } from "@/features/geo/data/state-lga-locations";
+import { getLGAsByState } from "@/features/geo/data/state-lga-locations";
+import { getWardsByLGA } from "@/features/geo/data/wards";
+import { getPollingUnitsByWard } from "@/features/geo/data/polling-units";
 
 // Legacy static location route kept for the future public voter/NIN flow.
 // Current admin/candidate geo uses DB-backed APIs instead and should not rely on

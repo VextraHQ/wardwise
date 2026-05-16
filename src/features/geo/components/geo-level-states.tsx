@@ -2,8 +2,11 @@
 
 import { useMemo, useState, useEffect, Fragment } from "react";
 import { HiCheck } from "react-icons/hi";
-import { nigeriaStates, type StateData } from "@/lib/data/state-lga-locations";
-import { useGeoStats } from "@/hooks/use-geo";
+import {
+  nigeriaStates,
+  type StateData,
+} from "@/features/geo/data/state-lga-locations";
+import { useGeoStats } from "@/features/geo/hooks/use-geo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";

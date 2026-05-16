@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CampaignOverviewDateFilter } from "@/features/collect/components/admin/campaign-overview-date-filter";
 import { roleLabels } from "@/features/collect/lib/analytics";
-import { formatGeoDisplayName } from "@/lib/geo/display";
+import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import {
   ChartContainer,
   ChartTooltip,

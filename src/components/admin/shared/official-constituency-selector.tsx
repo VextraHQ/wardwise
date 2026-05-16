@@ -4,7 +4,7 @@ import { ComboboxSelect } from "@/components/ui/combobox-select";
 import type {
   ConstituencyPreset,
   UnsupportedConstituencyPreset,
-} from "@/lib/data/nigerian-constituencies";
+} from "@/features/geo/data/nigerian-constituencies";
 
 interface OfficialConstituencySelectorProps {
   value: string;

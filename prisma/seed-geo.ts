@@ -1,8 +1,8 @@
 import { config } from "dotenv";
 import { PrismaClient } from "@prisma/client";
-import { nigeriaLGAs } from "../src/lib/data/state-lga-locations";
-import { wards } from "../src/lib/data/wards";
-import { getPollingUnitsByWard } from "../src/lib/data/polling-units";
+import { nigeriaLGAs } from "../src/features/geo/data/state-lga-locations";
+import { wards } from "../src/features/geo/data/wards";
+import { getPollingUnitsByWard } from "../src/features/geo/data/polling-units";
 
 config();
 

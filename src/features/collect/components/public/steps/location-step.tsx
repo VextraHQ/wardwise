@@ -25,7 +25,7 @@ import {
   StepCard,
   CardSectionHeader,
 } from "@/features/collect/components/public/form-ui";
-import { formatGeoDisplayName } from "@/lib/geo/display";
+import { formatGeoDisplayName } from "@/features/geo/lib/display";
 
 export function LocationStep({
   form,

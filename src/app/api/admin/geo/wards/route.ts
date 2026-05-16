@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import { createWardSchema } from "@/lib/schemas/geo-schemas";
+import { createWardSchema } from "@/features/geo/schemas/geo-schemas";
 import {
   parseOptionalStringParam,
   parsePaginationParams,

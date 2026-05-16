@@ -1,5 +1,5 @@
 import type { ExportFormat } from "@/lib/exports/shared";
-import { formatGeoDisplayName } from "@/lib/geo/display";
+import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import { generateRefCode } from "@/lib/utils";
 
 import type {

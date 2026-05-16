@@ -17,7 +17,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { nigeriaStates } from "@/lib/data/state-lga-locations";
+import { nigeriaStates } from "@/features/geo/data/state-lga-locations";
 
 import { CandidateOverview } from "@/features/candidates/components/candidate-overview";
 import { CandidateCampaigns } from "@/features/candidates/components/candidate-campaigns";

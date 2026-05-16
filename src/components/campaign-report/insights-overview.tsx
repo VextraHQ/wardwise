@@ -13,7 +13,7 @@ import {
   timeAgo,
   type CampaignReportDelta,
 } from "@/features/collect/lib/reporting";
-import { formatGeoDisplayName } from "@/lib/geo/display";
+import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import { formatPersonName } from "@/lib/utils";
 import type {
   CampaignReportSubmission,

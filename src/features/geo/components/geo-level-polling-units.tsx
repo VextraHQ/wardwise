@@ -11,13 +11,12 @@ import {
   HiOutlineMap,
 } from "react-icons/hi";
 import {
-  useGeoLgas,
-  useCreateLga,
-  useUpdateLga,
-  useDeleteLga,
-} from "@/hooks/use-geo";
-import type { GeoLga } from "@/types/geo";
-import { Badge } from "@/components/ui/badge";
+  useGeoPollingUnits,
+  useCreatePollingUnit,
+  useUpdatePollingUnit,
+  useDeletePollingUnit,
+} from "@/features/geo/hooks/use-geo";
+import type { GeoPollingUnit } from "@/types/geo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,45 +62,49 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AdminSearchBar } from "@/components/admin/admin-search-bar";
 import { AdminPagination } from "@/components/admin/admin-pagination";
-import { BulkImportDialog } from "@/components/admin/geo/geo-dialogs/bulk-import-dialog";
-import { formatGeoDisplayName } from "@/lib/geo/display";
+import { BulkImportDialog } from "@/features/geo/components/dialogs/bulk-import-dialog";
+import { formatGeoDisplayName } from "@/features/geo/lib/display";
 
-interface GeoLevelLgasProps {
-  stateCode: string;
-  onDrillDown: (lgaId: number, lgaName: string) => void;
+interface GeoLevelPollingUnitsProps {
+  wardId: number;
+  wardName: string | null;
 }
 
-type SortOption = "name-asc" | "name-desc" | "wards-desc" | "pus-desc";
+type SortOption = "code-asc" | "code-desc" | "name-asc" | "name-desc";
 
-function sortLgas(lgas: GeoLga[], sort: SortOption): GeoLga[] {
-  const sorted = [...lgas];
+function sortPUs(pus: GeoPollingUnit[], sort: SortOption): GeoPollingUnit[] {
+  const sorted = [...pus];
   switch (sort) {
+    case "code-asc":
+      return sorted.sort((a, b) => a.code.localeCompare(b.code));
+    case "code-desc":
+      return sorted.sort((a, b) => b.code.localeCompare(a.code));
     case "name-asc":
       return sorted.sort((a, b) => a.name.localeCompare(b.name));
     case "name-desc":
       return sorted.sort((a, b) => b.name.localeCompare(a.name));
-    case "wards-desc":
-      return sorted.sort((a, b) => b._count.wards - a._count.wards);
-    case "pus-desc":
-      return sorted.sort((a, b) => b.puCount - a.puCount);
     default:
       return sorted;
   }
 }
 
-export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
+export function GeoLevelPollingUnits({
+  wardId,
+  wardName,
+}: GeoLevelPollingUnitsProps) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [sort, setSort] = useState<SortOption>("name-asc");
+  const [sort, setSort] = useState<SortOption>("code-asc");
   const [createOpen, setCreateOpen] = useState(false);
-  const [editingLga, setEditingLga] = useState<GeoLga | null>(null);
-  const [deletingLga, setDeletingLga] = useState<{
+  const [editingPu, setEditingPu] = useState<GeoPollingUnit | null>(null);
+  const [deletingPu, setDeletingPu] = useState<{
     id: number;
     name: string;
   } | null>(null);
 
+  const [formCode, setFormCode] = useState("");
   const [formName, setFormName] = useState("");
   const [importOpen, setImportOpen] = useState(false);
 
@@ -113,7 +116,7 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
     return () => clearTimeout(timeout);
   }, [search]);
 
-  const { data, isLoading } = useGeoLgas(stateCode, {
+  const { data, isLoading } = useGeoPollingUnits(wardId, {
     page,
     pageSize,
     search: debouncedSearch || undefined,
@@ -129,29 +132,36 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
     }
   }, [data, page, totalPages]);
 
-  const lgaData = data?.data;
-  const sortedLgas = useMemo(() => {
-    if (!lgaData) return [];
-    return sortLgas(lgaData, sort);
-  }, [lgaData, sort]);
+  const puData = data?.data;
+  const sortedPUs = useMemo(() => {
+    if (!puData) return [];
+    return sortPUs(puData, sort);
+  }, [puData, sort]);
 
-  const createMutation = useCreateLga();
-  const updateMutation = useUpdateLga();
-  const deleteMutation = useDeleteLga();
+  const createMutation = useCreatePollingUnit();
+  const updateMutation = useUpdatePollingUnit();
+  const deleteMutation = useDeletePollingUnit();
 
   const handleCreate = () => {
-    if (!formName.trim()) return;
+    if (!formCode.trim()) return;
     createMutation.mutate(
-      { name: formName.trim(), stateCode },
+      {
+        code: formCode.trim(),
+        name: formName.trim() || formCode.trim(),
+        wardId,
+      },
       {
         onSuccess: () => {
-          toast.success("LGA created successfully");
+          toast.success("Polling unit created");
           setCreateOpen(false);
+          setFormCode("");
           setFormName("");
         },
         onError: (err) => {
           toast.error(
-            err instanceof Error ? err.message : "Failed to create LGA",
+            err instanceof Error
+              ? err.message
+              : "Failed to create polling unit",
           );
         },
       },
@@ -159,18 +169,27 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
   };
 
   const handleUpdate = () => {
-    if (!editingLga || !formName.trim()) return;
+    if (!editingPu || !formCode.trim()) return;
     updateMutation.mutate(
-      { id: editingLga.id, data: { name: formName.trim() } },
+      {
+        id: editingPu.id,
+        data: {
+          code: formCode.trim(),
+          name: formName.trim() || formCode.trim(),
+        },
+      },
       {
         onSuccess: () => {
-          toast.success("LGA updated successfully");
-          setEditingLga(null);
+          toast.success("Polling unit updated");
+          setEditingPu(null);
+          setFormCode("");
           setFormName("");
         },
         onError: (err) => {
           toast.error(
-            err instanceof Error ? err.message : "Failed to update LGA",
+            err instanceof Error
+              ? err.message
+              : "Failed to update polling unit",
           );
         },
       },
@@ -178,23 +197,24 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
   };
 
   const handleDelete = () => {
-    if (!deletingLga) return;
-    deleteMutation.mutate(deletingLga.id, {
+    if (!deletingPu) return;
+    deleteMutation.mutate(deletingPu.id, {
       onSuccess: () => {
-        toast.success("LGA deleted successfully");
-        setDeletingLga(null);
+        toast.success("Polling unit deleted");
+        setDeletingPu(null);
       },
       onError: (err) => {
         toast.error(
-          err instanceof Error ? err.message : "Failed to delete LGA",
+          err instanceof Error ? err.message : "Failed to delete polling unit",
         );
       },
     });
   };
 
-  const openEdit = (lga: GeoLga) => {
-    setFormName(lga.name);
-    setEditingLga(lga);
+  const openEdit = (pu: GeoPollingUnit) => {
+    setFormCode(pu.code);
+    setFormName(pu.name);
+    setEditingPu(pu);
   };
 
   return (
@@ -203,7 +223,7 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
         <CardHeader className="border-border/60 border-b">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <CardTitle className="text-sm font-semibold tracking-tight">
-              Local Government Areas
+              Polling Units
             </CardTitle>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
               <Button
@@ -218,13 +238,14 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
               <Button
                 size="sm"
                 onClick={() => {
+                  setFormCode("");
                   setFormName("");
                   setCreateOpen(true);
                 }}
                 className="h-9 w-full gap-1.5 rounded-sm font-mono text-[10px] tracking-widest uppercase sm:w-auto sm:text-[11px]"
               >
                 <HiOutlinePlus className="h-4 w-4" />
-                Add LGA
+                Add Polling Unit
               </Button>
             </div>
           </div>
@@ -235,7 +256,7 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
               <AdminSearchBar
                 value={search}
                 onChange={setSearch}
-                placeholder="Search LGAs..."
+                placeholder="Search by code or name..."
               />
             </div>
             <Select
@@ -246,10 +267,10 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="code-asc">Code A-Z</SelectItem>
+                <SelectItem value="code-desc">Code Z-A</SelectItem>
                 <SelectItem value="name-asc">Name A-Z</SelectItem>
                 <SelectItem value="name-desc">Name Z-A</SelectItem>
-                <SelectItem value="wards-desc">Most Wards</SelectItem>
-                <SelectItem value="pus-desc">Most PUs</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -266,13 +287,13 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
               <div>
                 <p className="text-foreground mb-1 font-medium">
                   {debouncedSearch
-                    ? "No LGAs match your search"
-                    : "No LGAs found for this state"}
+                    ? "No polling units match your search"
+                    : "No polling units found for this ward"}
                 </p>
                 <p className="text-muted-foreground text-sm">
                   {debouncedSearch
                     ? "Try adjusting your search terms"
-                    : "Add an LGA using the button above"}
+                    : "Add a polling unit using the button above"}
                 </p>
               </div>
             </div>
@@ -285,13 +306,10 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
                       S/N
                     </TableHead>
                     <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                      INEC Code
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                       Name
-                    </TableHead>
-                    <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
-                      Wards
-                    </TableHead>
-                    <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
-                      Polling Units
                     </TableHead>
                     <TableHead className="text-muted-foreground h-10 w-12 font-mono text-[10px] font-bold tracking-widest uppercase">
                       Actions
@@ -299,36 +317,16 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedLgas.map((lga, idx) => (
-                    <TableRow
-                      key={lga.id}
-                      className={`cursor-pointer transition-colors ${
-                        lga._count.wards === 0
-                          ? "bg-orange-500/5 hover:bg-orange-500/10"
-                          : "hover:bg-muted/50"
-                      }`}
-                      onClick={() => onDrillDown(lga.id, lga.name)}
-                    >
+                  {sortedPUs.map((pu, idx) => (
+                    <TableRow key={pu.id}>
                       <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
                         {(safePage - 1) * pageSize + idx + 1}
                       </TableCell>
-                      <TableCell className="font-medium">
-                        {formatGeoDisplayName(lga.name)}
+                      <TableCell className="font-mono text-sm font-medium">
+                        {pu.code}
                       </TableCell>
-                      <TableCell className="text-right font-mono tabular-nums">
-                        {lga._count.wards === 0 ? (
-                          <Badge
-                            variant="outline"
-                            className="rounded-sm border-orange-500/20 bg-orange-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-orange-600 uppercase"
-                          >
-                            No wards
-                          </Badge>
-                        ) : (
-                          lga._count.wards
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right font-mono tabular-nums">
-                        {lga.puCount.toLocaleString()}
+                      <TableCell className="text-muted-foreground">
+                        {formatGeoDisplayName(pu.name)}
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
@@ -337,23 +335,22 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
-                              onClick={(e) => e.stopPropagation()}
                             >
                               <HiDotsVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <DropdownMenuItem onClick={() => openEdit(lga)}>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openEdit(pu)}>
                               <HiOutlinePencil className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               variant="destructive"
                               onClick={() =>
-                                setDeletingLga({ id: lga.id, name: lga.name })
+                                setDeletingPu({
+                                  id: pu.id,
+                                  name: pu.code || pu.name,
+                                })
                               }
                             >
                               <HiOutlineTrash className="mr-2 h-4 w-4" />
@@ -375,7 +372,7 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
               totalPages={totalPages}
               pageSize={pageSize}
               totalItems={data?.total ?? 0}
-              itemLabel="LGAs"
+              itemLabel="polling units"
               onPageChange={setPage}
               onPageSizeChange={(size) => {
                 setPageSize(size);
@@ -390,21 +387,37 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="rounded-sm">
           <DialogHeader>
-            <DialogTitle>Add LGA</DialogTitle>
+            <DialogTitle>Add Polling Unit</DialogTitle>
             <DialogDescription>
-              Create a new Local Government Area for this state.
+              Create a new polling unit
+              {wardName ? ` in ${formatGeoDisplayName(wardName)}` : ""}.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="lga-name">
-                Name
+              <label className="text-sm font-medium" htmlFor="pu-code">
+                INEC Code
               </label>
               <Input
-                id="lga-name"
+                id="pu-code"
+                value={formCode}
+                onChange={(e) => setFormCode(e.target.value)}
+                placeholder="e.g. 01-02-03-004"
+                className="rounded-sm font-mono"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="pu-name">
+                Name
+                <span className="text-muted-foreground ml-1 text-xs font-normal">
+                  (defaults to code if empty)
+                </span>
+              </label>
+              <Input
+                id="pu-name"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="Enter LGA name"
+                placeholder="Enter polling unit name"
                 className="rounded-sm"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleCreate();
@@ -423,7 +436,7 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
             </Button>
             <Button
               onClick={handleCreate}
-              disabled={!formName.trim() || createMutation.isPending}
+              disabled={!formCode.trim() || createMutation.isPending}
               className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
             >
               {createMutation.isPending ? "Creating..." : "Create"}
@@ -434,28 +447,45 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
 
       {/* Edit Dialog */}
       <Dialog
-        open={editingLga !== null}
+        open={editingPu !== null}
         onOpenChange={(open) => {
-          if (!open) setEditingLga(null);
+          if (!open) setEditingPu(null);
         }}
       >
         <DialogContent className="rounded-sm">
           <DialogHeader>
-            <DialogTitle>Edit LGA</DialogTitle>
+            <DialogTitle>Edit Polling Unit</DialogTitle>
             <DialogDescription>
-              Update the Local Government Area details.
+              Update
+              {editingPu ? ` ${formatGeoDisplayName(editingPu.name)}` : ""}{" "}
+              details.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="edit-lga-name">
-                Name
+              <label className="text-sm font-medium" htmlFor="edit-pu-code">
+                INEC Code
               </label>
               <Input
-                id="edit-lga-name"
+                id="edit-pu-code"
+                value={formCode}
+                onChange={(e) => setFormCode(e.target.value)}
+                placeholder="e.g. 01-02-03-004"
+                className="rounded-sm font-mono"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="edit-pu-name">
+                Name
+                <span className="text-muted-foreground ml-1 text-xs font-normal">
+                  (defaults to code if empty)
+                </span>
+              </label>
+              <Input
+                id="edit-pu-name"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="Enter LGA name"
+                placeholder="Enter polling unit name"
                 className="rounded-sm"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleUpdate();
@@ -466,7 +496,7 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setEditingLga(null)}
+              onClick={() => setEditingPu(null)}
               disabled={updateMutation.isPending}
               className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
             >
@@ -474,7 +504,7 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
             </Button>
             <Button
               onClick={handleUpdate}
-              disabled={!formName.trim() || updateMutation.isPending}
+              disabled={!formCode.trim() || updateMutation.isPending}
               className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
             >
               {updateMutation.isPending ? "Saving..." : "Save Changes"}
@@ -485,19 +515,18 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
 
       {/* Delete Dialog */}
       <AlertDialog
-        open={deletingLga !== null}
+        open={deletingPu !== null}
         onOpenChange={(open) => {
-          if (!open) setDeletingLga(null);
+          if (!open) setDeletingPu(null);
         }}
       >
         <AlertDialogContent className="rounded-sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the LGA
-              {deletingLga &&
-                ` "${formatGeoDisplayName(deletingLga.name)}"`}{" "}
-              and all its wards and polling units.
+              This action cannot be undone. This will permanently delete the
+              polling unit
+              {deletingPu && ` "${formatGeoDisplayName(deletingPu.name)}"`}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -525,7 +554,7 @@ export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
       <BulkImportDialog
         open={importOpen}
         onOpenChange={setImportOpen}
-        level="lga"
+        level="polling-unit"
       />
     </>
   );

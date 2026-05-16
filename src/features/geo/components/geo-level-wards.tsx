@@ -15,7 +15,7 @@ import {
   useCreateWard,
   useUpdateWard,
   useDeleteWard,
-} from "@/hooks/use-geo";
+} from "@/features/geo/hooks/use-geo";
 import type { GeoWard } from "@/types/geo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -63,8 +63,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AdminSearchBar } from "@/components/admin/admin-search-bar";
 import { AdminPagination } from "@/components/admin/admin-pagination";
-import { BulkImportDialog } from "@/components/admin/geo/geo-dialogs/bulk-import-dialog";
-import { formatGeoDisplayName } from "@/lib/geo/display";
+import { BulkImportDialog } from "@/features/geo/components/dialogs/bulk-import-dialog";
+import { formatGeoDisplayName } from "@/features/geo/lib/display";
 
 interface GeoLevelWardsProps {
   lgaId: number;

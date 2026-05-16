@@ -1,5 +1,5 @@
 // Constituency helpers — shared between candidate and campaign modules
-import type { ConstituencyPreset } from "@/lib/data/nigerian-constituencies";
+import type { ConstituencyPreset } from "@/features/geo/data/nigerian-constituencies";
 
 export type ConstituencyBoundaryWarning = {
   severity: "info" | "warning";

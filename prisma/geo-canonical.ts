@@ -3,7 +3,7 @@ import {
   nigeriaStates,
   type LGAData,
   type StateData,
-} from "../src/lib/data/state-lga-locations";
+} from "../src/features/geo/data/state-lga-locations";
 
 export type CanonicalState = StateData;
 export type CanonicalLga = LGAData;

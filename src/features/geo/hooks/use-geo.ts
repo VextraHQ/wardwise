@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminGeoApi } from "@/lib/api/geo";
+import { adminGeoApi } from "@/features/geo/api/geo-api";
 
 // === Query Hooks ===
 

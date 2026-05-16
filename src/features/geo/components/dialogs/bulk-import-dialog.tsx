@@ -3,7 +3,10 @@
 import { useState, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { HiOutlineUpload, HiOutlineDownload } from "react-icons/hi";
-import { useGeoImportPreview, useGeoImportCommit } from "@/hooks/use-geo";
+import {
+  useGeoImportPreview,
+  useGeoImportCommit,
+} from "@/features/geo/hooks/use-geo";
 import type { ImportRowResult } from "@/types/geo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

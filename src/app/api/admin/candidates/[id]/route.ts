@@ -9,8 +9,8 @@ import {
 } from "@/features/candidates/schemas/candidate-schemas";
 import { logAudit } from "@/lib/core/audit";
 import { bumpCandidateSessionVersions } from "@/lib/auth/storage";
-import { sanitizeCandidateConstituencyLgaIds } from "@/lib/geo/constituency-server";
-import { getPositionStateValidationMessage } from "@/lib/geo/constituency";
+import { sanitizeCandidateConstituencyLgaIds } from "@/features/geo/server/constituency-server";
+import { getPositionStateValidationMessage } from "@/features/geo/lib/constituency";
 import {
   pickCollectCampaignSummary,
   pickDraftCampaignSummary,

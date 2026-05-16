@@ -171,7 +171,7 @@ Public form: LGA dropdown shows Fufore and Song only
 ### Phase 1: Schema + Shared Utilities
 
 - [x] Add `constituencyLgaIds Int[]` to Candidate model (Prisma migration)
-- [x] Extract `positionToConstituencyType()` helper to `src/lib/geo/constituency.ts`
+- [x] Extract `positionToConstituencyType()` helper to `src/features/geo/lib/constituency.ts`
 - [x] Extract `LgaCheckboxGrid` shared component from existing `step-coverage-requirements.tsx`
 
 ### Phase 2: Candidate Creation — Add Boundary LGA Selection
@@ -231,8 +231,8 @@ This exception is intentional for faster Collect launch. It allows admins to onb
 | File                                                                    | Role                                                                          |
 | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | `prisma/schema.prisma`                                                  | Candidate model — add `constituencyLgaIds`                                    |
-| `src/lib/geo/constituency.ts`                                           | Shared helpers (position → type, warning rules, LGA name generation)          |
-| `src/lib/geo/constituency-server.ts`                                    | Server-side constituency LGA normalization + state validation                 |
+| `src/features/geo/lib/constituency.ts`                                  | Shared helpers (position → type, warning rules, LGA name generation)          |
+| `src/features/geo/server/constituency-server.ts`                        | Server-side constituency LGA normalization + state validation                 |
 | `src/components/admin/shared/lga-checkbox-grid.tsx`                     | Shared searchable checkbox grid for candidate boundary + campaign restriction |
 | `src/components/admin/shared/constituency-boundary-alerts.tsx`          | Reusable UI for soft warning banners                                          |
 | `src/features/candidates/schemas/candidate-schemas.ts`                  | Candidate validation — add `constituencyLgaIds`                               |

@@ -25,7 +25,7 @@ import {
   getSubmissionRefCode,
 } from "@/features/collect/lib/campaign-submissions";
 import { formatDisplayDateTime } from "@/lib/date-format";
-import { formatGeoDisplayName } from "@/lib/geo/display";
+import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import { formatPersonName } from "@/lib/utils";
 import type {
   SubmissionAuditEntry,

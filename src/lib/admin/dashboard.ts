@@ -1,5 +1,5 @@
 import type { AdminDashboardSummary, CandidateWithUser } from "@/lib/api/admin";
-import { nigeriaStates } from "@/lib/data/state-lga-locations";
+import { nigeriaStates } from "@/features/geo/data/state-lga-locations";
 import type { CampaignSummary } from "@/features/collect/types/collect.types";
 import { formatPersonName } from "@/lib/utils";
 

@@ -7,8 +7,8 @@ import { logAudit } from "@/lib/core/audit";
 import {
   normalizeConstituencyLgaIds,
   positionRequiresLgas,
-} from "@/lib/geo/constituency";
-import { resolveCandidateCampaignLgaIds } from "@/lib/geo/constituency-server";
+} from "@/features/geo/lib/constituency";
+import { resolveCandidateCampaignLgaIds } from "@/features/geo/server/constituency-server";
 import {
   generateReportToken,
   generatePasscode,
