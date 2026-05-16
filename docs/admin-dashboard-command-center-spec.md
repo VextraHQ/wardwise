@@ -190,7 +190,7 @@ Data:
 
 Action menu:
 
-- Reuse `src/components/admin/collect/campaign-actions-menu.tsx`.
+- Reuse `src/features/collect/components/admin/campaign-actions-menu.tsx`.
 - Do not create a second campaign dropdown implementation.
 
 ### 6. Recent Candidates
@@ -245,7 +245,7 @@ Use existing data first. Do not add new API routes in the first implementation p
 Available hooks:
 
 - `useAdminCandidates()` in `src/hooks/use-admin`
-- `useCampaigns()` in `src/hooks/use-collect`
+- `useCampaigns()` in `src/features/collect/hooks/use-collect`
 
 Derived values:
 
@@ -390,7 +390,7 @@ Primary:
 
 Likely reused:
 
-- `src/components/admin/collect/campaign-actions-menu.tsx`
+- `src/features/collect/components/admin/campaign-actions-menu.tsx`
 - `src/components/ui/button.tsx`
 - `src/components/ui/card.tsx`
 - `src/components/ui/badge.tsx`

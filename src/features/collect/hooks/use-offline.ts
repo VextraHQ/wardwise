@@ -9,7 +9,7 @@ import {
   removeFailedSubmissions,
   removePendingSubmission,
   type SyncResult,
-} from "@/lib/offline-queue";
+} from "@/features/collect/lib/offline-queue";
 
 // Tracks the device's network status, manages an offline submission queue,
 // and auto-syncs any pending records the moment connectivity is restored.

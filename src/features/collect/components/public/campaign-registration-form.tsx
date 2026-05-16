@@ -23,7 +23,7 @@ import {
   getCollectErrorCategory,
   track,
 } from "@/lib/analytics/client";
-import { queueSubmission } from "@/lib/offline-queue";
+import { queueSubmission } from "@/features/collect/lib/offline-queue";
 import {
   submitRegistrationSchema,
   type RegistrationFormData,

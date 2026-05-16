@@ -1321,31 +1321,32 @@ If the reviewer finds a bigger improvement, record it as a follow-up task unless
 
 ## Current Status Tracker
 
-| Phase                                        | Status      | Notes                                                     |
-| -------------------------------------------- | ----------- | --------------------------------------------------------- |
-| Phase 0 - Architecture Control Document      | In progress | This document is the starting point.                      |
-| Phase 1 - Prepare Guardrails                 | Not started | Decide import guardrails before moving code.              |
-| Phase 2 - Collect Pure Relocation            | Not started | Best first source-code migration.                         |
-| Phase 3 - Collect Route and Server Thinning  | Not started | Follow after Collect files are relocated.                 |
-| Phase 4 - Candidates Relocation              | Not started | Depends on candidate/canvasser ownership decision.        |
-| Phase 5 - Geo Relocation                     | Not started | Watch static data and client bundle imports.              |
-| Phase 6 - Reporting Relocation               | Not started | Decide Collect vs Reporting ownership for shared helpers. |
-| Phase 7 - Candidate Dashboard Relocation     | Not started | Should be straightforward after earlier migrations.       |
-| Phase 8 - Auth, Admin Shell, and Public Site | Not started | Leaves global folders clean.                              |
-| Phase 9 - Documentation Alignment Sweep      | Not started | Final full-doc search and cleanup.                        |
+| Phase                                        | Status      | Notes                                                                                                                    |
+| -------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Phase 0 - Architecture Control Document      | Complete    | Doc reviewed; target structure and migration rules agreed.                                                               |
+| Phase 1 - Prepare Guardrails                 | Complete    | Import direction documented in `CLAUDE.md`. ESLint boundary plugin deferred until after the first vertical lands.        |
+| Phase 2 - Collect Pure Relocation            | Complete    | Collect components, hooks, lib (incl. `offline-queue.ts`), api, schemas, and types now under `src/features/collect/`.    |
+| Phase 3 - Collect Route and Server Thinning  | Next        | Move `src/lib/server/collect-reporting.{ts,test.ts}` and route-handler orchestration into `src/features/collect/server`. |
+| Phase 4 - Candidates Relocation              | Not started | Depends on candidate/canvasser ownership decision.                                                                       |
+| Phase 5 - Geo Relocation                     | Not started | Watch static data and client bundle imports.                                                                             |
+| Phase 6 - Reporting Relocation               | Not started | Decide Collect vs Reporting ownership for shared helpers.                                                                |
+| Phase 7 - Candidate Dashboard Relocation     | Not started | Should be straightforward after earlier migrations.                                                                      |
+| Phase 8 - Auth, Admin Shell, and Public Site | Not started | Leaves global folders clean.                                                                                             |
+| Phase 9 - Documentation Alignment Sweep      | Not started | Final full-doc search and cleanup.                                                                                       |
 
 ---
 
 ## Immediate Next Todos
 
-1. Review and approve this architecture document.
-2. Create the dedicated architecture-refactor branch.
+1. ~~Review and approve this architecture document.~~ (done)
+2. ~~Create the dedicated architecture-refactor branch.~~ (done — `codex/feature-first-architecture`)
 3. Keep every migration phase on that same branch.
-4. Decide whether Phase 1 should add ESLint import restrictions now or after the first migration.
-5. Start Phase 2 with Collect as the first vertical slice.
+4. ~~Decide whether Phase 1 should add ESLint import restrictions now or after the first migration.~~ (deferred until after a feature lands)
+5. ~~Start Phase 2 with Collect as the first vertical slice.~~ (done)
 6. Keep each phase behavior-preserving unless explicitly documented.
 7. Run verification before every review checkpoint.
-8. Update Collect docs immediately after the Collect move.
+8. ~~Update Collect docs immediately after the Collect move.~~ (done)
+9. Start Phase 3 (Collect route and server thinning): move `src/lib/server/collect-reporting.{ts,test.ts}` and any orchestration in `src/app/api/collect/*` / `src/app/c/[slug]/` into `src/features/collect/server/`.
 
 ---
 

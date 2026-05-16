@@ -37,7 +37,7 @@ Three user types:
 
 - **Auth**: All admin API routes use `requireAdmin()` from `src/lib/auth-helpers.ts` — never inline auth checks
 - **Route protection**: `src/proxy.ts` (Next.js 16's Edge middleware, NOT `middleware.ts`)
-- **Validation**: Zod schemas in `src/lib/schemas/admin-schemas.ts` (candidates, canvassers) and `src/lib/schemas/collect-schemas.ts` (campaigns, submissions), validated both client-side and server-side via `.safeParse()`
+- **Validation**: Zod schemas in `src/lib/schemas/admin-schemas.ts` (candidates, canvassers) and `src/features/collect/schemas/collect-schemas.ts` (campaigns, submissions), validated both client-side and server-side via `.safeParse()`
 - **Audit logging**: `logAudit()` from `src/lib/audit.ts` on all sensitive operations (fire-and-forget)
 - **Rate limiting**: `src/lib/core/rate-limit.ts` — Upstash Redis, null when env vars not set
 - **Geo data**: Database-backed (Lga → Ward → PollingUnit), seeded via `prisma/seed-geo.ts`
