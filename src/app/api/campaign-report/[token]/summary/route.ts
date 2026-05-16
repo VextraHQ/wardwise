@@ -6,7 +6,7 @@ import {
 import {
   getCampaignStats,
   getCampaignHealth,
-} from "@/lib/server/collect-reporting";
+} from "@/features/collect/server/collect-reporting";
 import { getCampaignBrandingType } from "@/features/collect/lib/branding";
 
 type RouteParams = { params: Promise<unknown> };

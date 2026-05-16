@@ -847,7 +847,7 @@ This keeps the report understandable for future developers.
 
 Create a shared reporting layer, for example:
 
-- `src/lib/server/collect-reporting.ts`
+- `src/features/collect/server/collect-reporting.ts`
 
 This module should own:
 
@@ -1094,7 +1094,7 @@ The report follows existing campaign reporting rules:
 | `src/components/campaign-report/report-site-header.tsx`                   | Report-owned site header / sticky anchor                 |
 | `src/features/collect/components/admin/campaign-overview-date-filter.tsx` | Admin-owned date filter shell                            |
 | `src/hooks/use-campaign-insights-scope.ts`                                | Report scope state + derived values                      |
-| `src/lib/server/collect-reporting.ts`                                     | Shared reporting queries used by admin and report routes |
+| `src/features/collect/server/collect-reporting.ts`                        | Shared reporting queries used by admin and report routes |
 | `prisma/schema.prisma`                                                    | Add client report access fields on `Campaign`            |
 
 ---
