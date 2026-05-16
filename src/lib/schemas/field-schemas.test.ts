@@ -123,9 +123,14 @@ describe("apcOrNinSchema", () => {
     expect(apcOrNinSchema.safeParse("01234567890").success).toBe(false);
   });
 
-  it("accepts APC-style alphanumeric codes with / and -", () => {
-    expect(apcOrNinSchema.parse("APC/2023/0042")).toBe("APC/2023/0042");
-    expect(apcOrNinSchema.parse("APC-2023-0042")).toBe("APC-2023-0042");
+  it("accepts numeric-only APC numbers (min 5 digits)", () => {
+    expect(apcOrNinSchema.parse("12345")).toBe("12345");
+    expect(apcOrNinSchema.parse("987654321")).toBe("987654321");
+  });
+
+  it("rejects APC numbers with non-digit characters", () => {
+    expect(apcOrNinSchema.safeParse("APC/2023/0042").success).toBe(false);
+    expect(apcOrNinSchema.safeParse("APC-2023-0042").success).toBe(false);
   });
 
   it("rejects short or garbage input", () => {

@@ -84,7 +84,7 @@ describe("getAuthContext", () => {
   });
 
   it("returns session_expired for expired standard session", async () => {
-    const expired = Date.now() - 13 * 60 * 60 * 1000;
+    const expired = Date.now() - 25 * 60 * 60 * 1000;
     mockGetServerSession.mockResolvedValue(
       makeSession({ loginAt: expired }) as never,
     );
