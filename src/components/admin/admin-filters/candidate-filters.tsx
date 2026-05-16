@@ -10,7 +10,7 @@ import {
 
 import { AdminToolbarFilterSheet } from "@/components/admin/shared/admin-toolbar-filter-sheet";
 
-import type { Candidate } from "@/types/candidate";
+import type { Candidate } from "@/features/candidates/types/candidate.types";
 import { cn } from "@/lib/utils";
 
 export type CandidateCollectFilter =

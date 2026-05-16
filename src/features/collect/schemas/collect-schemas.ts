@@ -190,3 +190,13 @@ export const serverSubmitSchema = submitRegistrationSchema
   .extend({
     campaignSlug: z.string().min(1),
   });
+
+// ── Admin submission moderation (PATCH) ──
+// Used by admin Collect submission detail + bulk routes.
+export const updateSubmissionSchema = z.object({
+  isFlagged: z.boolean().optional(),
+  isVerified: z.boolean().optional(),
+  adminNotes: optionalNullableTrimmedText({ max: 2000 }),
+});
+
+export type UpdateSubmissionValues = z.infer<typeof updateSubmissionSchema>;

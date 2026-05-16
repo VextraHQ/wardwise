@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import { createCanvasserSchema } from "@/lib/schemas/admin-schemas";
+import { createCanvasserSchema } from "@/features/candidates/schemas/canvasser-schemas";
 import {
   parseLimitOffsetParams,
   parseOptionalStringParam,

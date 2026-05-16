@@ -1,6 +1,6 @@
-import type { Candidate } from "@/types/candidate";
+import type { Candidate } from "@/features/candidates/types/candidate.types";
 import type { Voter } from "@/types/voter";
-import type { Canvasser } from "@/types/canvasser";
+import type { Canvasser } from "@/features/candidates/types/canvasser.types";
 
 export interface CandidateWithUser extends Candidate {
   user: {

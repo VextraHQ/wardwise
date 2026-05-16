@@ -19,9 +19,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { nigeriaStates } from "@/lib/data/state-lga-locations";
 
-import { CandidateOverview } from "@/components/admin/candidates/candidate-overview";
-import { CandidateCampaigns } from "@/components/admin/candidates/candidate-campaigns";
-import { CandidateAccount } from "@/components/admin/candidates/candidate-account";
+import { CandidateOverview } from "@/features/candidates/components/candidate-overview";
+import { CandidateCampaigns } from "@/features/candidates/components/candidate-campaigns";
+import { CandidateAccount } from "@/features/candidates/components/candidate-account";
 import {
   AdminResourceState,
   adminResourceStateIcons,

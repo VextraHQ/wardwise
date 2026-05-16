@@ -1,4 +1,4 @@
-import { CreateCandidateForm } from "@/components/admin/candidates/create-candidate-form";
+import { CreateCandidateForm } from "@/features/candidates/components/create-candidate-form";
 import { createAdminMetadata } from "@/lib/core/metadata";
 
 export const metadata = createAdminMetadata({

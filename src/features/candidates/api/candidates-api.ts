@@ -14,7 +14,7 @@
  * 3. Backend should handle location-based filtering
  */
 
-import type { Candidate } from "@/types/candidate";
+import type { Candidate } from "@/features/candidates/types/candidate.types";
 import { candidates } from "@/lib/mock/data/candidates";
 import { getCandidateByIdWithSupporters } from "@/lib/candidate/directory";
 

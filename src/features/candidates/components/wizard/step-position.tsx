@@ -12,7 +12,7 @@ import {
   NavButtons,
 } from "@/features/collect/components/public/form-ui";
 import { IconBuildingCommunity } from "@tabler/icons-react";
-import type { CreateCandidateFormValues } from "@/lib/schemas/admin-schemas";
+import type { CreateCandidateFormValues } from "@/features/candidates/schemas/candidate-schemas";
 import { cn } from "@/lib/utils";
 
 const POSITIONS = [

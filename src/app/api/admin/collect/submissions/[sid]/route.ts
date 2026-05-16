@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import { logAudit } from "@/lib/core/audit";
-import { updateSubmissionSchema } from "@/lib/schemas/admin-schemas";
+import { updateSubmissionSchema } from "@/features/collect/schemas/collect-schemas";
 
 // Shared guard: fetch submission + campaign status, block if closed
 async function getSubmissionWithGuard(sid: string) {

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { dashboardApi } from "@/lib/api/candidate-dashboard";
-import { candidateApi } from "@/lib/api/candidate";
+import { candidateApi } from "@/features/candidates/api/candidates-api";
 
 // Reads candidateId from the active NextAuth session. Returns null if unauthenticated.
 function useCandidateId(): string | null {

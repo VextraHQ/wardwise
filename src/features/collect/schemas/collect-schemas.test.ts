@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   addCampaignCanvasserSchema,
   serverSubmitSchema,
+  updateSubmissionSchema,
 } from "./collect-schemas";
 
 const baseServerSubmission = {
@@ -157,5 +158,45 @@ describe("addCampaignCanvasserSchema", () => {
       phone: "08031234567",
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("updateSubmissionSchema", () => {
+  it("preserves undefined adminNotes when the field is not sent", () => {
+    const result = updateSubmissionSchema.parse({ isVerified: true });
+    expect(result.adminNotes).toBe(undefined);
+    expect(result.isVerified).toBe(true);
+  });
+
+  it("normalizes blank and whitespace adminNotes to null", () => {
+    expect(updateSubmissionSchema.parse({ adminNotes: "" }).adminNotes).toBe(
+      null,
+    );
+    expect(updateSubmissionSchema.parse({ adminNotes: "   " }).adminNotes).toBe(
+      null,
+    );
+    expect(updateSubmissionSchema.parse({ adminNotes: null }).adminNotes).toBe(
+      null,
+    );
+  });
+
+  it("trims non-blank adminNotes", () => {
+    const result = updateSubmissionSchema.parse({ adminNotes: "  hello  " });
+    expect(result.adminNotes).toBe("hello");
+  });
+
+  it("enforces max length on adminNotes", () => {
+    const long = "a".repeat(2001);
+    const result = updateSubmissionSchema.safeParse({ adminNotes: long });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts boolean flags", () => {
+    const result = updateSubmissionSchema.parse({
+      isFlagged: true,
+      isVerified: false,
+    });
+    expect(result.isFlagged).toBe(true);
+    expect(result.isVerified).toBe(false);
   });
 });

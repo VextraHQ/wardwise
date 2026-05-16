@@ -2,11 +2,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import type { Candidate } from "@/types/candidate";
+import type { Candidate } from "@/features/candidates/types/candidate.types";
 import {
   deleteCandidateSchema,
   updateCandidateSchema,
-} from "@/lib/schemas/admin-schemas";
+} from "@/features/candidates/schemas/candidate-schemas";
 import { logAudit } from "@/lib/core/audit";
 import { bumpCandidateSessionVersions } from "@/lib/auth/storage";
 import { sanitizeCandidateConstituencyLgaIds } from "@/lib/geo/constituency-server";
@@ -14,7 +14,7 @@ import { getPositionStateValidationMessage } from "@/lib/geo/constituency";
 import {
   pickCollectCampaignSummary,
   pickDraftCampaignSummary,
-} from "@/lib/admin/candidate-collect-summaries";
+} from "@/features/candidates/lib/candidate-collect-summaries";
 
 const CANDIDATE_INCLUDE = {
   user: {

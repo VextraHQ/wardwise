@@ -1,5 +1,5 @@
 // Mock Canvasser Data - DEMO ONLY
-import type { Canvasser } from "@/types/canvasser";
+import type { Canvasser } from "@/features/candidates/types/canvasser.types";
 
 export const canvassers: Canvasser[] = [
   // Canvassers for APC Governor candidate (Ahmadu Umaru Fintiri)

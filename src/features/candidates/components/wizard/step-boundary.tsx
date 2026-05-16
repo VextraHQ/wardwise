@@ -18,7 +18,7 @@ import {
   NavButtons,
 } from "@/features/collect/components/public/form-ui";
 import { IconMapPin } from "@tabler/icons-react";
-import type { CreateCandidateFormValues } from "@/lib/schemas/admin-schemas";
+import type { CreateCandidateFormValues } from "@/features/candidates/schemas/candidate-schemas";
 import { nigeriaStates, getLGAsByState } from "@/lib/data/state-lga-locations";
 import { useGeoLgas } from "@/hooks/use-geo";
 import type { ComboboxSelectGroup } from "@/components/ui/combobox-select";

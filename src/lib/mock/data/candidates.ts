@@ -7,7 +7,7 @@
 // - getSupportersCount(candidateId) from @/lib/candidate/analytics
 //
 // These functions calculate supporters dynamically from actual voter data.
-import type { Candidate } from "@/types/candidate";
+import type { Candidate } from "@/features/candidates/types/candidate.types";
 
 export const candidates: Candidate[] = [
   // ============================================================================

@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { useCreateCandidate } from "@/hooks/use-admin";
-import { useWizardDraft } from "@/hooks/use-wizard-draft";
+import { useWizardDraft } from "@/hooks/shared/use-wizard-draft";
 import { track } from "@/lib/analytics/client";
 
 import {
@@ -30,13 +30,13 @@ import { StepProgress } from "@/components/ui/step-progress";
 import {
   createCandidateSchema,
   type CreateCandidateFormValues,
-} from "@/lib/schemas/admin-schemas";
+} from "@/features/candidates/schemas/candidate-schemas";
 import { type CreateCandidateResponse } from "@/lib/api/admin";
-import { CredentialsDialog } from "@/components/admin/candidates/credentials-dialog";
-import { StepIdentity } from "@/components/admin/candidates/wizard/step-identity";
-import { StepPosition } from "@/components/admin/candidates/wizard/step-position";
-import { StepBoundary } from "@/components/admin/candidates/wizard/step-boundary";
-import { StepReview } from "@/components/admin/candidates/wizard/step-review";
+import { CredentialsDialog } from "@/features/candidates/components/credentials-dialog";
+import { StepIdentity } from "@/features/candidates/components/wizard/step-identity";
+import { StepPosition } from "@/features/candidates/components/wizard/step-position";
+import { StepBoundary } from "@/features/candidates/components/wizard/step-boundary";
+import { StepReview } from "@/features/candidates/components/wizard/step-review";
 
 const STEP_TITLES = [
   "Identity",

@@ -425,7 +425,7 @@ src/features/collect/components/admin/
 
 **New Campaign wizard (`campaign-wizard.tsx`) — draft autosave**
 
-- Uses the shared `useWizardDraft` hook (`src/hooks/use-wizard-draft.ts`) with storage key `wardwise:campaign-wizard:draft:v2`, `defaultValues` aligned to `createCampaignSchema`, and `isMeaningfulCampaignDraft` so empty shells are not restored.
+- Uses the shared `useWizardDraft` hook (`src/hooks/shared/use-wizard-draft.ts`) with storage key `wardwise:campaign-wizard:draft:v2`, `defaultValues` aligned to `createCampaignSchema`, and `isMeaningfulCampaignDraft` so empty shells are not restored.
 - Debounced (400ms) writes, 24h TTL, restore-on-mount including **wizard step** (resume on step 2 or 3 if that was saved).
 - `StepProgress` receives `stepSubtitles` from `useWatch` for the same recap pattern as create-candidate.
 - **Draft restored** banner + **Discard** (clears storage + resets form + step 0), matching the create-candidate UX.

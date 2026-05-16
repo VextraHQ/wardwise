@@ -13,7 +13,7 @@
  * - 🔮 Future Use: Most other functions are kept for future features (admin panels, search, filtering, etc.)
  */
 
-import type { Candidate } from "@/types/candidate";
+import type { Candidate } from "@/features/candidates/types/candidate.types";
 import { candidates } from "@/lib/mock/data/candidates";
 import { getSupportersCount } from "@/lib/candidate/analytics";
 

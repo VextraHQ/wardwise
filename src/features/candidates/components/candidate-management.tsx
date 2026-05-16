@@ -10,7 +10,7 @@ import {
   IconExternalLink,
 } from "@tabler/icons-react";
 
-import type { Candidate } from "@/types/candidate";
+import type { Candidate } from "@/features/candidates/types/candidate.types";
 import type { CandidateWithUser } from "@/lib/api/admin";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

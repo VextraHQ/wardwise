@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import { updateCanvasserSchema } from "@/lib/schemas/admin-schemas";
+import { updateCanvasserSchema } from "@/features/candidates/schemas/canvasser-schemas";
 
 // GET /api/admin/canvassers/[id] - Get canvasser by ID
 export async function GET(

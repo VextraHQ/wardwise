@@ -10,7 +10,7 @@ import Link from "next/link";
 import { track } from "@/lib/analytics/client";
 import { useAdminCandidates } from "@/hooks/use-admin";
 import { useCreateCampaign } from "@/features/collect/hooks/use-collect";
-import { useWizardDraft } from "@/hooks/use-wizard-draft";
+import { useWizardDraft } from "@/hooks/shared/use-wizard-draft";
 import {
   createCampaignSchema,
   type CreateCampaignData,

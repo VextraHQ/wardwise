@@ -10,7 +10,7 @@ import type { CandidateWithUser } from "@/lib/api/admin";
 import {
   updateCandidateSchema,
   type UpdateCandidateFormValues,
-} from "@/lib/schemas/admin-schemas";
+} from "@/features/candidates/schemas/candidate-schemas";
 import { nigeriaStates, getLGAsByState } from "@/lib/data/state-lga-locations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
