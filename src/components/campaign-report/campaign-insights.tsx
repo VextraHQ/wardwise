@@ -22,8 +22,8 @@ import {
   getPriorRange,
   getRecentWindowCount,
   getVerificationRate,
-} from "@/lib/collect/reporting";
-import { getCampaignDisplayHeadline } from "@/lib/collect/branding";
+} from "@/features/collect/lib/reporting";
+import { getCampaignDisplayHeadline } from "@/features/collect/lib/branding";
 import { IconFlag, IconRefresh } from "@tabler/icons-react";
 
 export function CampaignInsights({ token }: { token: string }) {

@@ -10,7 +10,7 @@ import {
   CardSectionHeader,
   SectionLabel,
   NavButtons,
-} from "@/components/collect/form-ui";
+} from "@/features/collect/components/public/form-ui";
 import { IconChecklist, IconPencil } from "@tabler/icons-react";
 import type { CreateCandidateFormValues } from "@/lib/schemas/admin-schemas";
 import { nigeriaStates, getLGAsByState } from "@/lib/data/state-lga-locations";

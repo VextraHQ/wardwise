@@ -16,7 +16,7 @@ import { CampaignInsights } from "@/components/campaign-report/campaign-insights
 import {
   getCampaignBrandingType,
   getCampaignDisplayHeadline,
-} from "@/lib/collect/branding";
+} from "@/features/collect/lib/branding";
 
 type PageProps = {
   params: Promise<{ token: string }>;

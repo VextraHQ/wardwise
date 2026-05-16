@@ -5,7 +5,7 @@ import { IconChevronRight } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CampaignActionsMenu } from "@/components/admin/collect/campaign-actions-menu";
+import { CampaignActionsMenu } from "@/features/collect/components/admin/campaign-actions-menu";
 
 import type { CandidateWithUser } from "@/lib/api/admin";
 import {
@@ -14,9 +14,9 @@ import {
   type PriorityBucket,
   resolveStateName,
 } from "@/lib/admin/dashboard";
-import { isStaleCampaign } from "@/lib/collect/campaign-health";
+import { isStaleCampaign } from "@/features/collect/lib/campaign-health";
 import { formatRelativeTime } from "@/lib/date-format";
-import type { CampaignSummary } from "@/types/collect";
+import type { CampaignSummary } from "@/features/collect/types/collect.types";
 import { cn, formatPersonName } from "@/lib/utils";
 
 // Badge color styles by priority

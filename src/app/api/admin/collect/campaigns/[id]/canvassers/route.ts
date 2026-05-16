@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import { logAudit } from "@/lib/core/audit";
-import { addCampaignCanvasserSchema } from "@/lib/schemas/collect-schemas";
+import { addCampaignCanvasserSchema } from "@/features/collect/schemas/collect-schemas";
 
 type RouteParams = { params: Promise<{ id: string }> };
 

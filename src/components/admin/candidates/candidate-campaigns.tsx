@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table";
 
 import { AdminPagination } from "@/components/admin/admin-pagination";
-import { CampaignActionsMenu } from "@/components/admin/collect/campaign-actions-menu";
+import { CampaignActionsMenu } from "@/features/collect/components/admin/campaign-actions-menu";
 import {
   AdminMobileRecordCard,
   AdminMobileRecordField,
@@ -36,13 +36,13 @@ import {
   adminResourceStateIcons,
 } from "@/components/admin/shared/admin-resource-state";
 
-import { useCandidateCampaigns } from "@/hooks/use-collect";
+import { useCandidateCampaigns } from "@/features/collect/hooks/use-collect";
 import { formatStatusLabel } from "@/lib/admin/dashboard";
-import { isStaleCampaign } from "@/lib/collect/campaign-health";
-import { getCampaignDisplayHeadline } from "@/lib/collect/branding";
+import { isStaleCampaign } from "@/features/collect/lib/campaign-health";
+import { getCampaignDisplayHeadline } from "@/features/collect/lib/branding";
 import { formatRelativeTime } from "@/lib/date-format";
 import { formatPersonName } from "@/lib/utils";
-import type { CampaignSummary } from "@/types/collect";
+import type { CampaignSummary } from "@/features/collect/types/collect.types";
 
 const STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border/60",

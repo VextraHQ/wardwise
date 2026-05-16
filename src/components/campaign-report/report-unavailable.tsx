@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { AuthCard } from "@/components/auth/auth-card";
-import { RegistrationStepHeader } from "@/components/collect/registration-step-header";
+import { RegistrationStepHeader } from "@/features/collect/components/public/registration-step-header";
 import { IconShieldOff } from "@tabler/icons-react";
 import { COMPANY_INFO } from "@/lib/data/legal-data";
 

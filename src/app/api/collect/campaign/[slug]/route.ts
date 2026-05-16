@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/core/prisma";
-import { getCampaignBrandingType } from "@/lib/collect/branding";
+import { getCampaignBrandingType } from "@/features/collect/lib/branding";
 
 export async function GET(
   _request: Request,

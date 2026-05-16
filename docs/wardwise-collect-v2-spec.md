@@ -146,7 +146,7 @@ model CampaignCanvasser {
 - Service worker scoped to `/c/`, with `/c/*` document navigations and `?_rsc` payloads cached network-first so the campaign page can cold-reopen and hydrate offline after a prior online visit
 - IndexedDB-based submission queue (v2.7), syncs on reconnect when the Collect page is open
 - Selected-LGA offline geo packs (v2.8) — manual preparation lets a field user save the LGAs they need, with wards and polling units, for offline location entry
-- Shared IndexedDB plumbing in `src/lib/collect/offline-storage.ts` so the queue store and geo-pack store share one connection and one version
+- Shared IndexedDB plumbing in `src/features/collect/lib/offline-storage.ts` so the queue store and geo-pack store share one connection and one version
 - Distinct confirmation states for `confirmed`, `queued`, and `failed` submissions
 - Failed review sheet for permanently rejected offline submissions, with per-record dismiss and bulk clear
 - Visual sync, pending, needs-attention, and offline-ready indicators on form
@@ -269,7 +269,7 @@ UX audit and post-submission improvements for the public registration form:
 - If no active draft exists, splash can show a subtle `Last registration on this device` utility with the reference code and completion date
 - Users explicitly begin a new registration; the app does not automatically treat the next visitor as the same person
 
-**Files:** `src/components/collect/campaign-registration-form.tsx`, `src/components/collect/steps/splash-screen.tsx`
+**Files:** `src/features/collect/components/public/campaign-registration-form.tsx`, `src/features/collect/components/public/steps/splash-screen.tsx`
 
 ### Reference ID on Confirmation Screen
 
@@ -282,7 +282,7 @@ UX audit and post-submission improvements for the public registration form:
 - Displayed as a mono-styled badge on the confirmation screen and surfaced later via the same-device reference utility
 - Stored in `collect-submitted-${slug}` localStorage for persistence
 
-**Files:** `src/lib/utils.ts`, `src/components/collect/steps/confirmation-screen.tsx`
+**Files:** `src/lib/utils.ts`, `src/features/collect/components/public/steps/confirmation-screen.tsx`
 
 ### Form UX Polish
 
@@ -304,7 +304,7 @@ UX audit and post-submission improvements for the public registration form:
 - [x] **Confirmation screen progress save** — Fixed bug where `saveProgress` useEffect re-saved screen=6 after localStorage was cleared, causing stale confirmation on refresh
 - [x] **Zod validation messages** — Location step `z.number()` now shows "Select your ward" instead of raw "Invalid input: expected number, received undefined". Also hardened `geo-schemas.ts`
 
-**Files:** `src/components/collect/form-ui.tsx`, `src/components/collect/steps/personal-details-step.tsx`, `src/components/collect/steps/canvasser-step.tsx`, `src/components/collect/steps/role-step.tsx`, `src/components/collect/steps/confirmation-screen.tsx`, `src/components/collect/campaign-registration-form.tsx`
+**Files:** `src/features/collect/components/public/form-ui.tsx`, `src/features/collect/components/public/steps/personal-details-step.tsx`, `src/features/collect/components/public/steps/canvasser-step.tsx`, `src/features/collect/components/public/steps/role-step.tsx`, `src/features/collect/components/public/steps/confirmation-screen.tsx`, `src/features/collect/components/public/campaign-registration-form.tsx`
 
 ---
 
@@ -362,7 +362,7 @@ UX audit and post-submission improvements for the public registration form:
 - [x] **Analytics** — Added events for confirmation state views, failed notice dismiss, failed review open, failed row dismiss, and active failed rehydrate. Rehydrate/dismiss paths include `error_category`.
 - [x] **Back-compat** — Legacy queue rows without `status` are treated as pending. `TrustIndicators` keeps the old `canvasser` prop while adding explicit variants.
 
-**Files:** `src/lib/offline-queue.ts`, `src/hooks/use-offline.ts`, `src/components/collect/campaign-registration-form.tsx`, `src/components/collect/steps/confirmation-screen.tsx`, `src/components/collect/failed-review-sheet.tsx`, `src/components/ui/trust-indicators.tsx`, `src/lib/analytics/client.ts`
+**Files:** `src/lib/offline-queue.ts`, `src/features/collect/hooks/use-offline.ts`, `src/features/collect/components/public/campaign-registration-form.tsx`, `src/features/collect/components/public/steps/confirmation-screen.tsx`, `src/features/collect/components/public/failed-review-sheet.tsx`, `src/components/ui/trust-indicators.tsx`, `src/lib/analytics/client.ts`
 
 **Deliberately not included:** edit-and-retry from a failed row, background sync with the tab closed, CSV export of failed local rows, IndexedDB indexes on `status`, and user-controlled failed-list filtering.
 
@@ -381,17 +381,17 @@ UX audit and post-submission improvements for the public registration form:
 - [x] **Last-known-data rule** — Offline geo packs are convenience data, not authority. If a pack becomes outdated and an offline submission later syncs against a now-closed or now-invalid campaign, the existing v2.7 failed-queue path handles the rejection. No new server-side rejection mechanism was needed.
 - [x] **Shared IndexedDB plumbing** — `src/lib/offline-db.ts` is the single owner of DB name, version, and upgrade path; both `pending-submissions` (v2.7) and `geo-packs` (v2.8) stores open through it.
 
-**Files:** `src/lib/collect/offline-storage.ts`, `src/lib/collect/offline-geo-pack.ts`, `src/lib/collect/offline-geo-health.ts`, `src/lib/collect/offline-prep-selection.ts`, `src/lib/offline-queue.ts`, `src/hooks/use-collect-offline-geo.ts`, `src/hooks/use-collect-geo-resolution.ts`, `src/lib/api/collect.ts`, `src/lib/schemas/collect-schemas.ts`, `src/lib/core/rate-limit.ts`, `src/app/api/collect/offline-pack/route.ts`, `src/app/api/collect/campaign/[slug]/route.ts`, `src/app/c/[slug]/page.tsx`, `src/app/c/[slug]/not-found.tsx`, `src/components/collect/campaign-registration-form.tsx`, `src/components/collect/steps/splash-screen.tsx`, `src/components/collect/steps/location-step.tsx`, `src/components/collect/offline-prep-sheet.tsx`, `src/types/collect.ts`, `public/sw.js`.
+**Files:** `src/features/collect/lib/offline-storage.ts`, `src/features/collect/lib/offline-geo-pack.ts`, `src/features/collect/lib/offline-geo-health.ts`, `src/features/collect/lib/offline-prep-selection.ts`, `src/lib/offline-queue.ts`, `src/features/collect/hooks/use-collect-offline-geo.ts`, `src/features/collect/hooks/use-collect-geo-resolution.ts`, `src/features/collect/api/collect-api.ts`, `src/features/collect/schemas/collect-schemas.ts`, `src/lib/core/rate-limit.ts`, `src/app/api/collect/offline-pack/route.ts`, `src/app/api/collect/campaign/[slug]/route.ts`, `src/app/c/[slug]/page.tsx`, `src/app/c/[slug]/not-found.tsx`, `src/features/collect/components/public/campaign-registration-form.tsx`, `src/features/collect/components/public/steps/splash-screen.tsx`, `src/features/collect/components/public/steps/location-step.tsx`, `src/features/collect/components/public/offline-prep-sheet.tsx`, `src/features/collect/types/collect.types.ts`, `public/sw.js`.
 
 **Post-merge finalization (same PR):**
 
 - [x] **Codex P2** — `scope_invalid` packs surface honestly while offline; geo resolution refuses to source pack data when health is `scope_invalid`; splash and location step both block fresh start with reason-specific copy.
 - [x] **Codex P3** — Location-step inline banner split: emerald "Using offline data" for legitimate offline use; amber "Network issue — using saved data" + Retry only for online-with-failed-live-query.
 - [x] **Remove offline data UX** — Prep sheet zero-selected + existing pack flips the CTA to `Remove offline data` (destructive tone) inside an `AlertDialog`. Online copy is matter-of-fact; offline copy warns the location step will be blocked until reconnect.
-- [x] **Stale-LGA submission bug** — Prep sheet derives `effectiveSelection`, `stalePreparedIds`, and `prepIntent` from `src/lib/collect/offline-prep-selection.ts` at render time. Hidden previously-prepared ids that disappear from the live LGA list are silently excluded from save and surfaced as an inline warning. No more 400-round-trip when scope shrinks after prep.
-- [x] **Pure-logic extraction + tests** — `computeOfflineGeoHealth` and the prep-selection helpers live in `src/lib/collect/`. Vitest coverage in `offline-geo-health.test.ts` (10 cases including the "failed fresh fetch never infers `scope_invalid`" contract and the precedence ordering) and `offline-prep-selection.test.ts` (12 cases).
+- [x] **Stale-LGA submission bug** — Prep sheet derives `effectiveSelection`, `stalePreparedIds`, and `prepIntent` from `src/features/collect/lib/offline-prep-selection.ts` at render time. Hidden previously-prepared ids that disappear from the live LGA list are silently excluded from save and surfaced as an inline warning. No more 400-round-trip when scope shrinks after prep.
+- [x] **Pure-logic extraction + tests** — `computeOfflineGeoHealth` and the prep-selection helpers live in `src/features/collect/lib/`. Vitest coverage in `offline-geo-health.test.ts` (10 cases including the "failed fresh fetch never infers `scope_invalid`" contract and the precedence ordering) and `offline-prep-selection.test.ts` (12 cases).
 - [x] **Mechanical extraction** — Live/offline geo source precedence moved verbatim from `campaign-registration-form.tsx` into `useCollectGeoResolution`. Form file shrinks meaningfully; no behavior change.
-- [x] **Naming convention** — v2.8-introduced modules adopt the `use-collect-*` / `src/lib/collect/*` convention. The single import-line update in `src/lib/offline-queue.ts` follows the renamed shared storage file. v2.7 modules (`use-offline.ts`, `offline-queue.ts`) keep their current paths; a follow-up pure-rename PR will relocate them.
+- [x] **Naming convention** — v2.8-introduced modules adopt the `use-collect-*` / `src/features/collect/lib/*` convention. The single import-line update in `src/lib/offline-queue.ts` follows the renamed shared storage file. v2.7 modules (`use-offline.ts`, `offline-queue.ts`) keep their current paths; a follow-up pure-rename PR will relocate them.
 
 **Deliberately not included:** background preload of whole-campaign geo, edit-and-retry of failed offline rows, background sync with the tab closed, first-ever offline discovery of a campaign slug, custom offline landing page beyond browser default for non-`/c/*` URLs.
 

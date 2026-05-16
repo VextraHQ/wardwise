@@ -27,7 +27,7 @@
 - Admin sidebar: Dashboard → Candidates → Collect
 - Landing page: Collect section added between Security and CTA sections
 - Deduplication: both phone number AND VIN checked per campaign
-- Form refactored into modular step components under `src/components/collect/steps/`
+- Form refactored into modular step components under `src/features/collect/components/public/steps/`
 
 ### What Changed (Batch 3 — Latest)
 
@@ -334,15 +334,15 @@ model PollingUnit {
 
 ### Admin (auth required)
 
-| Route                                           | Method               | Notes                                                                               |
-| ----------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------- |
+| Route                                           | Method               | Notes                                                                                                                                                   |
+| ----------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/api/admin/collect/campaigns`                  | GET + POST           | List with `_count`; GET accepts `?candidateId=` filter; POST creates a **draft** (slug uniqueness); blocked with `409` if candidate already has a draft |
-| `/api/admin/collect/campaigns/[id]`             | GET + PATCH + DELETE |                                                                                     |
-| `/api/admin/collect/campaigns/[id]/submissions` | GET                  | Paginated, filterable; includes PU code and derived registration reference support  |
-| `/api/admin/collect/campaigns/[id]/export`      | GET                  | CSV with PU code column; sanitizes `=+-@`                                           |
-| `/api/admin/collect/campaigns/[id]/canvassers`  | GET                  | Aggregation                                                                         |
-| `/api/admin/collect/lgas`                       | GET                  | All LGAs for campaign wizard                                                        |
-| `/api/admin/collect/submissions/[sid]`          | PATCH                | Flag, verify, notes                                                                 |
+| `/api/admin/collect/campaigns/[id]`             | GET + PATCH + DELETE |                                                                                                                                                         |
+| `/api/admin/collect/campaigns/[id]/submissions` | GET                  | Paginated, filterable; includes PU code and derived registration reference support                                                                      |
+| `/api/admin/collect/campaigns/[id]/export`      | GET                  | CSV with PU code column; sanitizes `=+-@`                                                                                                               |
+| `/api/admin/collect/campaigns/[id]/canvassers`  | GET                  | Aggregation                                                                                                                                             |
+| `/api/admin/collect/lgas`                       | GET                  | All LGAs for campaign wizard                                                                                                                            |
+| `/api/admin/collect/submissions/[sid]`          | PATCH                | Flag, verify, notes                                                                                                                                     |
 
 ### Export Rules
 
@@ -352,7 +352,7 @@ model PollingUnit {
 
 ### Submission Filter Plumbing
 
-- `SubmissionFilters`, `parseSubmissionFilters`, and `buildSubmissionWhere` live in `src/lib/collect/submission-query.ts` (not in `src/lib/exports/submissions.ts`, which is now export/spreadsheet only).
+- `SubmissionFilters`, `parseSubmissionFilters`, and `buildSubmissionWhere` live in `src/features/collect/lib/submission-query.ts` (not in `src/lib/exports/submissions.ts`, which is now export/spreadsheet only).
 - The filter parser uses the shared query-param helpers in `src/lib/server/query-params.ts`, so `?lgaId=12abc` is rejected instead of silently truncating to `12`.
 
 ## File Structure
@@ -360,7 +360,7 @@ model PollingUnit {
 ### Public Form (refactored)
 
 ```
-src/components/collect/
+src/features/collect/components/public/
   campaign-registration-form.tsx  — orchestrator (form state + screen routing)
   failed-review-sheet.tsx         — failed offline submission review + dismiss sheet
   offline-prep-sheet.tsx          — selected-LGA offline geo preparation sheet
@@ -388,37 +388,39 @@ src/app/api/collect/
   offline-pack/route.ts           — bulk LGA/ward/PU download for offline prep (POST)
   submit/route.ts                 — registration submission
 
-src/lib/
-  offline-queue.ts                — pending/failed submission queue (v2.7)
-  collect/
-    offline-storage.ts            — shared IndexedDB opener (one DB, two stores)
-    offline-geo-pack.ts           — per-campaign offline geo pack helpers (v2.8)
-    offline-geo-health.ts         — pure pack-health derivation (testable contract)
-    offline-prep-selection.ts     — pure prep-sheet selection helpers (effective/stale/intent)
+src/features/collect/lib/
+  offline-storage.ts              — shared IndexedDB opener (one DB, two stores)
+  offline-geo-pack.ts             — per-campaign offline geo pack helpers (v2.8)
+  offline-geo-health.ts           — pure pack-health derivation (testable contract)
+  offline-prep-selection.ts       — pure prep-sheet selection helpers (effective/stale/intent)
 
-src/hooks/
+src/features/collect/hooks/
   use-collect.ts                  — public + admin Collect TanStack hooks
   use-collect-form-persistence.ts — local draft autosave + restore plumbing
   use-collect-service-worker.ts   — registers /sw.js scoped to /c/
   use-offline.ts                  — submission queue + sync state (v2.7)
   use-collect-offline-geo.ts      — geo-pack health + prepare/clear actions (v2.8)
   use-collect-geo-resolution.ts   — live-vs-offline geo source precedence (v2.8)
+
+src/lib/
+  offline-queue.ts                — pending/failed submission queue (v2.7; ownership pending Phase 3 review)
 ```
 
 ### Admin
 
 ```
-src/components/admin/collect/
+src/features/collect/components/admin/
   campaign-list.tsx
   campaign-detail.tsx
   campaign-overview.tsx
   campaign-submissions.tsx
   campaign-canvassers.tsx
   campaign-settings.tsx
-  campaign-wizard.tsx
-  step-candidate-setup.tsx            — step 1: candidate + slug + branding
-  step-campaign-collect-config.tsx    — step 2: questions + LGA restrict
-  step-campaign-review.tsx            — step 3: read-only summary + Edit + **Create Draft Campaign**
+  wizard/
+    campaign-wizard.tsx
+    step-candidate-setup.tsx          — step 1: candidate + slug + branding
+    step-campaign-collect-config.tsx  — step 2: questions + LGA restrict
+    step-campaign-review.tsx          — step 3: read-only summary + Edit + **Create Draft Campaign**
 ```
 
 **New Campaign wizard (`campaign-wizard.tsx`) — draft autosave**

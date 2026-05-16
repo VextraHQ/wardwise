@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { FieldLabel, FieldError } from "@/components/collect/form-ui";
+import { FieldLabel, FieldError } from "@/features/collect/components/public/form-ui";
 import { formatGeoDisplayName } from "@/lib/geo/display";
 import { IconSearch } from "@tabler/icons-react";
 

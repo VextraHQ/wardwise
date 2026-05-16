@@ -7,7 +7,7 @@ import {
   parseExportFormat,
 } from "@/lib/exports/shared";
 import { buildSubmissionsExportTable } from "@/lib/exports/submissions";
-import { parseSubmissionFilters } from "@/lib/collect/submission-query";
+import { parseSubmissionFilters } from "@/features/collect/lib/submission-query";
 import { renderXlsx } from "@/lib/exports/xlsx";
 
 export async function GET(

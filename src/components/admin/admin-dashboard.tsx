@@ -23,11 +23,11 @@ import {
   useAdminCandidates,
   useAdminDashboardSummary,
 } from "@/hooks/use-admin";
-import { useCampaigns } from "@/hooks/use-collect";
-import { isStaleCampaign } from "@/lib/collect/campaign-health";
+import { useCampaigns } from "@/features/collect/hooks/use-collect";
+import { isStaleCampaign } from "@/features/collect/lib/campaign-health";
 import { positionRequiresLgas } from "@/lib/geo/constituency";
 import type { CandidateWithUser } from "@/lib/api/admin";
-import type { CampaignSummary } from "@/types/collect";
+import type { CampaignSummary } from "@/features/collect/types/collect.types";
 
 // This function builds up all the buckets of issues that need admin attention.
 // Each bucket is a grouping of problems (like candidates missing info, stale campaigns, etc)

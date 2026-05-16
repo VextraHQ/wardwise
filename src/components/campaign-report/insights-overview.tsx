@@ -5,14 +5,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
-import { ShareInviteCard } from "@/components/collect/share-invite-card";
+import { StepCard, CardSectionHeader } from "@/features/collect/components/public/form-ui";
+import { ShareInviteCard } from "@/features/collect/components/public/share-invite-card";
 import {
   getVerificationRate,
   STATUS_COPY,
   timeAgo,
   type CampaignReportDelta,
-} from "@/lib/collect/reporting";
+} from "@/features/collect/lib/reporting";
 import { formatGeoDisplayName } from "@/lib/geo/display";
 import { formatPersonName } from "@/lib/utils";
 import type {

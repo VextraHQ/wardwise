@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/chart";
 import { Area, AreaChart, CartesianGrid, Line, XAxis, YAxis } from "recharts";
 import { IconChartBar } from "@tabler/icons-react";
-import { formatDateKey } from "@/lib/collect/reporting";
+import { formatDateKey } from "@/features/collect/lib/reporting";
 
 const chartConfig: ChartConfig = {
   count: { label: "Current period", color: "var(--chart-1)" },

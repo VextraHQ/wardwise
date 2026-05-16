@@ -1,6 +1,6 @@
 import type { AdminDashboardSummary, CandidateWithUser } from "@/lib/api/admin";
 import { nigeriaStates } from "@/lib/data/state-lga-locations";
-import type { CampaignSummary } from "@/types/collect";
+import type { CampaignSummary } from "@/features/collect/types/collect.types";
 import { formatPersonName } from "@/lib/utils";
 
 export type PrioritySeverity = "high" | "med" | "low";

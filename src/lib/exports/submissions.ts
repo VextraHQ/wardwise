@@ -3,7 +3,7 @@ import { composeFullName } from "@/lib/utils";
 import {
   buildSubmissionWhere,
   type SubmissionFilters,
-} from "@/lib/collect/submission-query";
+} from "@/features/collect/lib/submission-query";
 import {
   buildExportFilename,
   formatExportDateTime,

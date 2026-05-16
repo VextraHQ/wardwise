@@ -40,7 +40,7 @@ import {
   type CandidateSort,
 } from "@/components/admin/admin-filters/candidate-filters";
 import { AdminPagination } from "@/components/admin/admin-pagination";
-import { CampaignActionMenuItems } from "@/components/admin/collect/campaign-actions-menu";
+import { CampaignActionMenuItems } from "@/features/collect/components/admin/campaign-actions-menu";
 import {
   AdminResourceState,
   adminResourceStateIcons,

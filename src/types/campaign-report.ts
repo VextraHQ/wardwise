@@ -1,4 +1,4 @@
-import type { CampaignBrandingType } from "@/lib/collect/branding";
+import type { CampaignBrandingType } from "@/features/collect/lib/branding";
 
 export type CampaignReportSummary = {
   campaign: {

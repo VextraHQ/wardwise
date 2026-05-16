@@ -3,7 +3,7 @@ import { prisma } from "@/lib/core/prisma";
 import {
   buildSubmissionWhere,
   type SubmissionFilters,
-} from "@/lib/collect/submission-query";
+} from "@/features/collect/lib/submission-query";
 
 const REPORT_TIME_ZONE = "Africa/Lagos";
 const REPORT_UTC_OFFSET = "+01:00";

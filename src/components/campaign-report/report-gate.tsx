@@ -10,11 +10,11 @@ import { IconKey, IconLoader } from "@tabler/icons-react";
 import { Spinner } from "@/components/ui/spinner";
 import { COMPANY_INFO } from "@/lib/data/legal-data";
 import { useUnlockCampaignReport } from "@/hooks/use-campaign-report";
-import type { CampaignBrandingType } from "@/lib/collect/branding";
+import type { CampaignBrandingType } from "@/features/collect/lib/branding";
 import {
   getEffectiveCampaignName,
   shouldShowCandidateTitle,
-} from "@/lib/collect/branding";
+} from "@/features/collect/lib/branding";
 
 export function ReportGate({
   token,

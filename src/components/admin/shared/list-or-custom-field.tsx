@@ -7,7 +7,7 @@ import {
   ComboboxSelect,
   type ComboboxSelectOption,
 } from "@/components/ui/combobox-select";
-import { FieldError } from "@/components/collect/form-ui";
+import { FieldError } from "@/features/collect/components/public/form-ui";
 
 export const LIST_OR_CUSTOM_OTHER_VALUE = "__other__";
 

@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { capitalize } from "@/lib/collect/reporting";
-import type { CampaignBrandingType } from "@/lib/collect/branding";
+import { capitalize } from "@/features/collect/lib/reporting";
+import type { CampaignBrandingType } from "@/features/collect/lib/branding";
 import {
   getEffectiveCampaignName,
   shouldShowCandidateTitle,
-} from "@/lib/collect/branding";
+} from "@/features/collect/lib/branding";
 import { IconCopy, IconExternalLink } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { STATUS_STYLES } from "./insights-helpers";

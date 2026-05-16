@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/core/prisma";
-import { CampaignRegistrationForm } from "@/components/collect/campaign-registration-form";
-import type { PublicCampaign } from "@/types/collect";
+import { CampaignRegistrationForm } from "@/features/collect/components/public/campaign-registration-form";
+import type { PublicCampaign } from "@/features/collect/types/collect.types";
 import {
   createDefaultOpenGraph,
   createDefaultTwitter,
@@ -11,7 +11,7 @@ import {
 import {
   getCampaignBrandingType,
   getCampaignDisplayHeadline,
-} from "@/lib/collect/branding";
+} from "@/features/collect/lib/branding";
 
 type PageProps = {
   params: Promise<{ slug: string }>;

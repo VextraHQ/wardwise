@@ -20,7 +20,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 import type { CandidateWithUser } from "@/lib/api/admin";
-import type { CampaignSummary } from "@/types/collect";
+import type { CampaignSummary } from "@/features/collect/types/collect.types";
 import { cn } from "@/lib/utils";
 
 import {

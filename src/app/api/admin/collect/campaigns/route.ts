@@ -2,14 +2,14 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import { createCampaignSchema } from "@/lib/schemas/collect-schemas";
+import { createCampaignSchema } from "@/features/collect/schemas/collect-schemas";
 import { logAudit } from "@/lib/core/audit";
 import {
   positionToConstituencyType,
   positionRequiresLgas,
 } from "@/lib/geo/constituency";
 import { resolveCandidateCampaignLgaIds } from "@/lib/geo/constituency-server";
-import { normalizeCampaignDisplayName } from "@/lib/collect/branding";
+import { normalizeCampaignDisplayName } from "@/features/collect/lib/branding";
 
 export async function GET(request: NextRequest) {
   try {

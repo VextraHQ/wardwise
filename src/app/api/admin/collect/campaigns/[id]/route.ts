@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import { updateCampaignSchema } from "@/lib/schemas/collect-schemas";
+import { updateCampaignSchema } from "@/features/collect/schemas/collect-schemas";
 import { logAudit } from "@/lib/core/audit";
 import {
   normalizeConstituencyLgaIds,
@@ -14,7 +14,7 @@ import {
   generatePasscode,
   hashPasscode,
 } from "@/lib/server/report-access";
-import { normalizeCampaignDisplayName } from "@/lib/collect/branding";
+import { normalizeCampaignDisplayName } from "@/features/collect/lib/branding";
 
 type RouteParams = { params: Promise<{ id: string }> };
 

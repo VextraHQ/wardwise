@@ -7,7 +7,7 @@ import {
   getCampaignStats,
   getCampaignHealth,
 } from "@/lib/server/collect-reporting";
-import { getCampaignBrandingType } from "@/lib/collect/branding";
+import { getCampaignBrandingType } from "@/features/collect/lib/branding";
 
 type RouteParams = { params: Promise<unknown> };
 

@@ -39,10 +39,10 @@ import {
   AdminMobileRecordTitle,
 } from "@/components/admin/shared/admin-mobile-record-card";
 import { AdminPagination } from "@/components/admin/admin-pagination";
-import { StepCard, CardSectionHeader } from "@/components/collect/form-ui";
+import { StepCard, CardSectionHeader } from "@/features/collect/components/public/form-ui";
 import { MobileBulkActionTray } from "@/components/ui/mobile-selection-actions";
 import { formatDisplayDateTime } from "@/lib/date-format";
-import { formatRole } from "@/lib/collect/reporting";
+import { formatRole } from "@/features/collect/lib/reporting";
 import { InsightsExportMenu } from "./insights-export-menu";
 import { formatGeoDisplayName } from "@/lib/geo/display";
 import { cn, formatPersonName } from "@/lib/utils";

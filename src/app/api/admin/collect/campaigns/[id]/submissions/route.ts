@@ -4,7 +4,7 @@ import { prisma } from "@/lib/core/prisma";
 import {
   buildSubmissionWhere,
   parseSubmissionFilters,
-} from "@/lib/collect/submission-query";
+} from "@/features/collect/lib/submission-query";
 import { parsePaginationParams } from "@/lib/server/query-params";
 import { generateRefCode } from "@/lib/utils";
 

@@ -6,7 +6,7 @@ import { logAudit } from "@/lib/core/audit";
 import {
   buildSubmissionWhere,
   type SubmissionFilters,
-} from "@/lib/collect/submission-query";
+} from "@/features/collect/lib/submission-query";
 
 const bulkActionSchema = z
   .object({

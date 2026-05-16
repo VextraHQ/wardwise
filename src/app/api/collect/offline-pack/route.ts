@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/core/prisma";
 import { getClientIp, offlinePackRateLimit } from "@/lib/core/rate-limit";
-import { offlinePackRequestSchema } from "@/lib/schemas/collect-schemas";
+import { offlinePackRequestSchema } from "@/features/collect/schemas/collect-schemas";
 
 export async function POST(request: NextRequest) {
   try {
