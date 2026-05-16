@@ -57,7 +57,7 @@ Import direction (enforced by convention until ESLint boundaries are added):
 
 - `app/*` may import from `features/*`, `components/{ui,shared}`, `hooks/shared`, `lib/core`, app-wide `lib` services (`lib/email`, `lib/analytics`, `lib/exports`, etc.), and broad `types`.
 - `features/*` may import from the same feature, `components/{ui,shared}`, `hooks/shared`, `lib/core`, and app-wide `lib` services. A feature must not deep-import another feature's private internals; if a cross-feature surface is needed, expose it from a deliberately named file (e.g. `features/collect/lib/branding.ts`).
-- `components/ui`, `components/shared`, `hooks/shared`, and `lib/core` must not import feature code. They are downstream of every feature.
+- `components/ui`, `components/shared`, `hooks/shared`, and `lib/core` must not import feature code. They are feature-agnostic base layers; features depend on them, never the other way around.
 - Path alias stays `@/*` → `./src/*`. shadcn primitives still land in `src/components/ui`.
 
 When adding new code, prefer placing it inside the owning `src/features/<feature>/` tree. Promote to `components/shared`, `hooks/shared`, or `lib/core` only when the code is genuinely product-agnostic and used by multiple stable features.
