@@ -230,6 +230,7 @@ src/hooks/
   shared/
     use-mobile.ts
     use-click-outside.ts
+    use-wizard-draft.ts
 ```
 
 ### `src/lib`
@@ -361,7 +362,6 @@ src/features/
         step-review.tsx
     hooks/
       use-candidates.ts
-      use-wizard-draft.ts
     api/
       candidates-api.ts
     server/
@@ -582,73 +582,74 @@ src/features/
 
 Use this table when reviewing migration PRs.
 
-| Current location                                      | Target location                                                                                                      |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `src/components/collect/*`                            | `src/features/collect/components/public/*`                                                                           |
-| `src/components/collect/steps/*`                      | `src/features/collect/components/public/steps/*`                                                                     |
-| `src/components/admin/collect/*`                      | `src/features/collect/components/admin/*`                                                                            |
-| `src/components/admin/collect/wizard/*`               | `src/features/collect/components/admin/wizard/*`                                                                     |
-| `src/hooks/use-collect*.ts`                           | `src/features/collect/hooks/*`                                                                                       |
-| `src/hooks/use-offline.ts`                            | `src/features/collect/hooks/use-offline.ts` unless it becomes truly app-wide                                         |
-| `src/lib/collect/*`                                   | `src/features/collect/lib/*`                                                                                         |
-| `src/lib/api/collect.ts`                              | `src/features/collect/api/collect-api.ts`                                                                            |
-| `src/lib/schemas/collect-schemas.ts`                  | `src/features/collect/schemas/collect-schemas.ts`                                                                    |
-| `src/types/collect.ts`                                | `src/features/collect/types/collect.types.ts`                                                                        |
-| `src/types/campaign-submissions.ts`                   | `src/features/collect/types/campaign-submissions.types.ts`                                                           |
-| `src/components/admin/candidates/*`                   | `src/features/candidates/components/*`                                                                               |
-| `src/components/admin/candidates/wizard/*`            | `src/features/candidates/components/wizard/*`                                                                        |
-| `src/hooks/use-wizard-draft.ts`                       | `src/features/candidates/hooks/use-wizard-draft.ts` if only candidate wizard uses it                                 |
-| `src/lib/api/candidate.ts`                            | `src/features/candidates/api/candidates-api.ts`                                                                      |
-| `src/lib/schemas/admin-schemas.ts` candidate pieces   | `src/features/candidates/schemas/candidate-schemas.ts`                                                               |
-| `src/types/candidate.ts`                              | `src/features/candidates/types/candidate.types.ts`                                                                   |
-| `src/types/canvasser.ts`                              | `src/features/candidates/types/canvasser.types.ts` or Collect if canvassers become Collect-owned                     |
-| `src/components/candidate-dashboard/*`                | `src/features/candidate-dashboard/components/*`                                                                      |
-| `src/hooks/use-candidate-dashboard.ts`                | `src/features/candidate-dashboard/hooks/use-candidate-dashboard.ts`                                                  |
-| `src/lib/api/candidate-dashboard.ts`                  | `src/features/candidate-dashboard/api/candidate-dashboard-api.ts`                                                    |
-| `src/lib/candidate/*`                                 | `src/features/candidate-dashboard/lib/*` or `src/features/candidates/lib/*` depending on ownership                   |
-| `src/components/admin/geo/*`                          | `src/features/geo/components/*`                                                                                      |
-| `src/hooks/use-geo.ts`                                | `src/features/geo/hooks/use-geo.ts`                                                                                  |
-| `src/lib/api/geo.ts`                                  | `src/features/geo/api/geo-api.ts`                                                                                    |
-| `src/lib/api/location.ts`                             | `src/features/geo/api/location-api.ts`                                                                               |
-| `src/lib/geo/*`                                       | `src/features/geo/lib/*` or `src/features/geo/server/*`                                                              |
-| `src/lib/schemas/geo-schemas.ts`                      | `src/features/geo/schemas/geo-schemas.ts`                                                                            |
-| `src/lib/data/nigerian-*.ts`                          | `src/features/geo/data/*` if used mainly for geo/domain selection                                                    |
-| `src/components/campaign-report/*`                    | `src/features/reporting/components/*`                                                                                |
-| `src/hooks/use-campaign-report.ts`                    | `src/features/reporting/hooks/use-campaign-report.ts`                                                                |
-| `src/hooks/use-campaign-insights-scope.ts`            | `src/features/reporting/hooks/use-campaign-insights-scope.ts`                                                        |
-| `src/lib/api/campaign-report.ts`                      | `src/features/reporting/api/campaign-report-api.ts`                                                                  |
-| `src/lib/server/report-access.ts`                     | `src/features/reporting/server/report-access.ts`                                                                     |
-| `src/lib/server/collect-reporting.ts`                 | `src/features/collect/server/collect-reporting.ts` (resolved in Phase 3 — Collect owns the shared reporting queries) |
-| `src/types/campaign-report.ts`                        | `src/features/reporting/types/campaign-report.types.ts`                                                              |
-| `src/components/auth/*`                               | `src/features/auth/components/*`                                                                                     |
-| `src/components/auth/confirm-email-change-screen.tsx` | `src/features/auth/components/confirm-email-change-screen.tsx`                                                       |
-| `src/lib/auth/*`                                      | `src/features/auth/lib/*` unless the file is app-wide auth infrastructure                                            |
-| `src/lib/schemas/auth-schemas.ts`                     | `src/features/auth/schemas/auth-schemas.ts`                                                                          |
-| `src/components/admin/admin-*`                        | `src/features/admin-shell/components/*`                                                                              |
-| `src/components/admin/account/*`                      | `src/features/admin-shell/components/account/*`                                                                      |
-| `src/components/admin/admin-filters/*`                | `src/features/admin-shell/components/filters/*`                                                                      |
-| `src/components/admin/shared/*`                       | `src/features/admin-shell/components/shared/*` unless truly cross-feature                                            |
-| `src/hooks/use-admin.ts`                              | `src/features/admin-shell/hooks/use-admin.ts`                                                                        |
-| `src/lib/admin/account.ts`                            | `src/features/admin-shell/lib/account.ts`                                                                            |
-| `src/lib/admin/dashboard.ts`                          | `src/features/admin-shell/server/admin-dashboard.ts`                                                                 |
-| `src/components/landing/*`                            | `src/features/public-site/components/landing/*`                                                                      |
-| `src/components/legal/*`                              | `src/features/public-site/components/legal/*`                                                                        |
-| `src/components/public/*`                             | `src/features/public-site/components/support/*`                                                                      |
-| `src/lib/contact/*`                                   | `src/features/public-site/lib/*` or `src/features/public-site/server/*`                                              |
-| `src/lib/schemas/contact-schemas.ts`                  | `src/features/public-site/schemas/contact-schemas.ts`                                                                |
-| `src/lib/landing-data.ts`                             | `src/features/public-site/lib/landing-data.ts`                                                                       |
-| `src/components/layout/logo.tsx`                      | `src/components/shared/logo.tsx`                                                                                     |
-| `src/components/layout/app-footer.tsx`                | `src/components/shared/app-footer.tsx`                                                                               |
-| `src/components/layout/cookie-consent.tsx`            | `src/components/shared/cookie-consent.tsx`                                                                           |
-| `src/components/system/*`                             | `src/components/shared/*`                                                                                            |
-| `src/components/ui/*`                                 | stays `src/components/ui/*`                                                                                          |
-| `src/hooks/use-mobile.ts`                             | `src/hooks/shared/use-mobile.ts`                                                                                     |
-| `src/hooks/use-click-outside.ts`                      | `src/hooks/shared/use-click-outside.ts`                                                                              |
-| `src/lib/core/*`                                      | stays `src/lib/core/*`                                                                                               |
-| `src/lib/core/ip.ts`                                  | stays `src/lib/core/ip.ts`                                                                                           |
-| `src/lib/email/*`                                     | stays `src/lib/email/*`                                                                                              |
-| `src/lib/analytics/*`                                 | stays `src/lib/analytics/*`                                                                                          |
-| `src/lib/exports/*`                                   | stays `src/lib/exports/*` until exports become a feature                                                             |
+| Current location                                      | Target location                                                                                                                                  |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/components/collect/*`                            | `src/features/collect/components/public/*`                                                                                                       |
+| `src/components/collect/steps/*`                      | `src/features/collect/components/public/steps/*`                                                                                                 |
+| `src/components/admin/collect/*`                      | `src/features/collect/components/admin/*`                                                                                                        |
+| `src/components/admin/collect/wizard/*`               | `src/features/collect/components/admin/wizard/*`                                                                                                 |
+| `src/hooks/use-collect*.ts`                           | `src/features/collect/hooks/*`                                                                                                                   |
+| `src/hooks/use-offline.ts`                            | `src/features/collect/hooks/use-offline.ts` unless it becomes truly app-wide                                                                     |
+| `src/lib/collect/*`                                   | `src/features/collect/lib/*`                                                                                                                     |
+| `src/lib/api/collect.ts`                              | `src/features/collect/api/collect-api.ts`                                                                                                        |
+| `src/lib/schemas/collect-schemas.ts`                  | `src/features/collect/schemas/collect-schemas.ts`                                                                                                |
+| `src/types/collect.ts`                                | `src/features/collect/types/collect.types.ts`                                                                                                    |
+| `src/types/campaign-submissions.ts`                   | `src/features/collect/types/campaign-submissions.types.ts`                                                                                       |
+| `src/components/admin/candidates/*`                   | `src/features/candidates/components/*`                                                                                                           |
+| `src/components/admin/candidates/wizard/*`            | `src/features/candidates/components/wizard/*`                                                                                                    |
+| `src/hooks/use-wizard-draft.ts`                       | `src/hooks/shared/use-wizard-draft.ts` (resolved in Phase 4 — promoted to shared because both candidate and Collect campaign wizards consume it) |
+| `src/lib/api/candidate.ts`                            | `src/features/candidates/api/candidates-api.ts`                                                                                                  |
+| `src/lib/schemas/admin-schemas.ts` candidate pieces   | `src/features/candidates/schemas/candidate-schemas.ts`                                                                                           |
+| `src/types/candidate.ts`                              | `src/features/candidates/types/candidate.types.ts`                                                                                               |
+| `src/types/canvasser.ts`                              | `src/features/candidates/types/canvasser.types.ts` or Collect if canvassers become Collect-owned                                                 |
+| `src/components/candidate-dashboard/*`                | `src/features/candidate-dashboard/components/*`                                                                                                  |
+| `src/hooks/use-candidate-dashboard.ts`                | `src/features/candidate-dashboard/hooks/use-candidate-dashboard.ts`                                                                              |
+| `src/lib/api/candidate-dashboard.ts`                  | `src/features/candidate-dashboard/api/candidate-dashboard-api.ts`                                                                                |
+| `src/lib/candidate/directory.ts`                      | `src/features/candidates/lib/directory.ts` (resolved in Phase 4 fixup — admin candidate API consumes it)                                         |
+| `src/lib/candidate/analytics.ts`                      | `src/features/candidate-dashboard/lib/analytics.ts` (Phase 7 — candidate dashboard owns it)                                                      |
+| `src/components/admin/geo/*`                          | `src/features/geo/components/*`                                                                                                                  |
+| `src/hooks/use-geo.ts`                                | `src/features/geo/hooks/use-geo.ts`                                                                                                              |
+| `src/lib/api/geo.ts`                                  | `src/features/geo/api/geo-api.ts`                                                                                                                |
+| `src/lib/api/location.ts`                             | `src/features/geo/api/location-api.ts`                                                                                                           |
+| `src/lib/geo/*`                                       | `src/features/geo/lib/*` or `src/features/geo/server/*`                                                                                          |
+| `src/lib/schemas/geo-schemas.ts`                      | `src/features/geo/schemas/geo-schemas.ts`                                                                                                        |
+| `src/lib/data/nigerian-*.ts`                          | `src/features/geo/data/*` if used mainly for geo/domain selection                                                                                |
+| `src/components/campaign-report/*`                    | `src/features/reporting/components/*`                                                                                                            |
+| `src/hooks/use-campaign-report.ts`                    | `src/features/reporting/hooks/use-campaign-report.ts`                                                                                            |
+| `src/hooks/use-campaign-insights-scope.ts`            | `src/features/reporting/hooks/use-campaign-insights-scope.ts`                                                                                    |
+| `src/lib/api/campaign-report.ts`                      | `src/features/reporting/api/campaign-report-api.ts`                                                                                              |
+| `src/lib/server/report-access.ts`                     | `src/features/reporting/server/report-access.ts`                                                                                                 |
+| `src/lib/server/collect-reporting.ts`                 | `src/features/collect/server/collect-reporting.ts` (resolved in Phase 3 — Collect owns the shared reporting queries)                             |
+| `src/types/campaign-report.ts`                        | `src/features/reporting/types/campaign-report.types.ts`                                                                                          |
+| `src/components/auth/*`                               | `src/features/auth/components/*`                                                                                                                 |
+| `src/components/auth/confirm-email-change-screen.tsx` | `src/features/auth/components/confirm-email-change-screen.tsx`                                                                                   |
+| `src/lib/auth/*`                                      | `src/features/auth/lib/*` unless the file is app-wide auth infrastructure                                                                        |
+| `src/lib/schemas/auth-schemas.ts`                     | `src/features/auth/schemas/auth-schemas.ts`                                                                                                      |
+| `src/components/admin/admin-*`                        | `src/features/admin-shell/components/*`                                                                                                          |
+| `src/components/admin/account/*`                      | `src/features/admin-shell/components/account/*`                                                                                                  |
+| `src/components/admin/admin-filters/*`                | `src/features/admin-shell/components/filters/*`                                                                                                  |
+| `src/components/admin/shared/*`                       | `src/features/admin-shell/components/shared/*` unless truly cross-feature                                                                        |
+| `src/hooks/use-admin.ts`                              | `src/features/admin-shell/hooks/use-admin.ts`                                                                                                    |
+| `src/lib/admin/account.ts`                            | `src/features/admin-shell/lib/account.ts`                                                                                                        |
+| `src/lib/admin/dashboard.ts`                          | `src/features/admin-shell/server/admin-dashboard.ts`                                                                                             |
+| `src/components/landing/*`                            | `src/features/public-site/components/landing/*`                                                                                                  |
+| `src/components/legal/*`                              | `src/features/public-site/components/legal/*`                                                                                                    |
+| `src/components/public/*`                             | `src/features/public-site/components/support/*`                                                                                                  |
+| `src/lib/contact/*`                                   | `src/features/public-site/lib/*` or `src/features/public-site/server/*`                                                                          |
+| `src/lib/schemas/contact-schemas.ts`                  | `src/features/public-site/schemas/contact-schemas.ts`                                                                                            |
+| `src/lib/landing-data.ts`                             | `src/features/public-site/lib/landing-data.ts`                                                                                                   |
+| `src/components/layout/logo.tsx`                      | `src/components/shared/logo.tsx`                                                                                                                 |
+| `src/components/layout/app-footer.tsx`                | `src/components/shared/app-footer.tsx`                                                                                                           |
+| `src/components/layout/cookie-consent.tsx`            | `src/components/shared/cookie-consent.tsx`                                                                                                       |
+| `src/components/system/*`                             | `src/components/shared/*`                                                                                                                        |
+| `src/components/ui/*`                                 | stays `src/components/ui/*`                                                                                                                      |
+| `src/hooks/use-mobile.ts`                             | `src/hooks/shared/use-mobile.ts`                                                                                                                 |
+| `src/hooks/use-click-outside.ts`                      | `src/hooks/shared/use-click-outside.ts`                                                                                                          |
+| `src/lib/core/*`                                      | stays `src/lib/core/*`                                                                                                                           |
+| `src/lib/core/ip.ts`                                  | stays `src/lib/core/ip.ts`                                                                                                                       |
+| `src/lib/email/*`                                     | stays `src/lib/email/*`                                                                                                                          |
+| `src/lib/analytics/*`                                 | stays `src/lib/analytics/*`                                                                                                                      |
+| `src/lib/exports/*`                                   | stays `src/lib/exports/*` until exports become a feature                                                                                         |
 
 ---
 

@@ -235,7 +235,7 @@ This exception is intentional for faster Collect launch. It allows admins to onb
 | `src/lib/geo/constituency-server.ts`                                    | Server-side constituency LGA normalization + state validation                 |
 | `src/components/admin/shared/lga-checkbox-grid.tsx`                     | Shared searchable checkbox grid for candidate boundary + campaign restriction |
 | `src/components/admin/shared/constituency-boundary-alerts.tsx`          | Reusable UI for soft warning banners                                          |
-| `src/lib/schemas/admin-schemas.ts`                                      | Candidate validation — add `constituencyLgaIds`                               |
+| `src/features/candidates/schemas/candidate-schemas.ts`                  | Candidate validation — add `constituencyLgaIds`                               |
 | `src/features/collect/schemas/collect-schemas.ts`                       | Campaign validation — simplify                                                |
 | `src/features/candidates/components/wizard/step-boundary.tsx`           | Candidate create Step 3: LGA boundary + presets                               |
 | `src/features/candidates/components/wizard/step-review.tsx`             | Candidate create Step 4 — review + boundary warning summary                   |
