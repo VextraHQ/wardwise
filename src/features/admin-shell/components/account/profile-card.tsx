@@ -10,7 +10,7 @@ import { useEditModeForm } from "@/features/admin-shell/lib/account";
 import {
   updateAdminProfileSchema,
   type UpdateAdminProfileFormValues,
-} from "@/lib/schemas/admin-schemas";
+} from "@/features/admin-shell/schemas/admin-schemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

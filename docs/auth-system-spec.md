@@ -182,7 +182,7 @@ Email sending is split into a generic transport, small orchestration modules, an
 - `src/lib/email/send.ts` is the generic Resend SDK wrapper (`sendEmail({ to, subject, html, text?, replyTo?, from? })`). Public contact delivery reuses this directly.
 - `src/lib/email/auth.ts` exposes `canSendAuthLinkEmail()` and `sendAuthLinkEmail(...)` for invite/reset delivery, and delegates to `sendEmail` for the actual provider call.
 - `src/lib/email/account-welcome.ts` sends the post–invite password welcome mail (same Resend / From gates as auth links); triggered from `complete-password-setup` after a successful **invite** flow only.
-- `src/lib/email/contact.ts` orchestrates internal contact-form notifications.
+- `src/features/public-site/email/contact-email.ts` orchestrates internal contact-form notifications.
 - Templates under `src/lib/email/templates/*.tsx` render escaped, branded transactional mail (invite, password reset, contact notification, account welcome). Shared chrome lives in `src/lib/email/components/` (e.g. header, footer).
 
 **Local previews:** run `pnpm email:dev` (React Email preview app; defaults to port **3001** so it can run beside `pnpm dev` on **3000**). Preview entry files live in `src/lib/email/previews/` and import the same template components production uses—no duplicate markup.
@@ -202,7 +202,7 @@ Email sending is split into a generic transport, small orchestration modules, an
 | `src/lib/email/send.ts`                                     | Generic Resend wrapper shared by auth + contact + welcome mail              |
 | `src/lib/email/auth.ts`                                     | Auth email capability check + `sendAuthLinkEmail` entrypoint                |
 | `src/lib/email/account-welcome.ts`                          | Welcome email after invite password setup (`sendAccountWelcomeEmail`)       |
-| `src/lib/email/contact.ts`                                  | Public contact form → internal notification email                           |
+| `src/features/public-site/email/contact-email.ts`           | Public contact form → internal notification email                           |
 | `src/lib/email/templates/auth-link.tsx`                     | React Email: invite + password-reset templates                              |
 | `src/lib/email/templates/contact-notification.tsx`          | React Email: internal contact notification                                  |
 | `src/lib/email/templates/account-welcome.tsx`               | React Email: post-setup welcome                                             |

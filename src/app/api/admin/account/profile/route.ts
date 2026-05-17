@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
 import { logAudit } from "@/lib/core/audit";
-import { updateAdminProfileSchema } from "@/lib/schemas/admin-schemas";
+import { updateAdminProfileSchema } from "@/features/admin-shell/schemas/admin-schemas";
 
 export async function PATCH(request: NextRequest) {
   const { error, user } = await requireAdmin();

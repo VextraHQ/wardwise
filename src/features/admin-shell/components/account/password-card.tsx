@@ -18,7 +18,7 @@ import { formatDisplayDateTime, formatRelativeTime } from "@/lib/date-format";
 import {
   changeAdminPasswordSchema,
   type ChangeAdminPasswordFormValues,
-} from "@/lib/schemas/admin-schemas";
+} from "@/features/admin-shell/schemas/admin-schemas";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

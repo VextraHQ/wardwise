@@ -8,7 +8,7 @@ import {
   getClientIp,
 } from "@/lib/core/rate-limit";
 import { ADMIN_EMAIL_CHANGE_TOKEN_TYPE } from "@/features/auth/lib/links";
-import { changeAdminPasswordSchema } from "@/lib/schemas/admin-schemas";
+import { changeAdminPasswordSchema } from "@/features/admin-shell/schemas/admin-schemas";
 
 export async function POST(request: NextRequest) {
   const { error, user } = await requireAdmin();

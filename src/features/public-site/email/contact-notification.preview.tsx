@@ -2,7 +2,7 @@ import {
   ContactNotificationTemplate,
   formatContactSubmittedAt,
   type ContactNotificationEmailInput,
-} from "@/lib/email/templates/contact-notification";
+} from "@/features/public-site/email/contact-notification";
 import { getContactReasonLabel } from "@/features/public-site/lib/contact-reasons";
 
 const fixtureInput: ContactNotificationEmailInput = {

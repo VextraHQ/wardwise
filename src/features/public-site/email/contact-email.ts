@@ -1,7 +1,7 @@
 // Import types and utility functions for processing contact notifications
 import { type ContactReason } from "@/features/public-site/lib/contact-reasons";
 import { readTrimmedEnv, sendEmail } from "@/lib/email/send";
-import { buildContactNotificationEmail } from "@/lib/email/templates/contact-notification";
+import { buildContactNotificationEmail } from "@/features/public-site/email/contact-notification";
 
 // Input type for sending a contact notification email
 export type SendContactNotificationEmailInput = {

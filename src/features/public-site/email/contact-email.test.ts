@@ -15,11 +15,11 @@ vi.mock("@/lib/email/send", () => ({
   sendEmail: mockSendEmail,
 }));
 
-vi.mock("@/lib/email/templates/contact-notification", () => ({
+vi.mock("@/features/public-site/email/contact-notification", () => ({
   buildContactNotificationEmail: mockBuildContactNotificationEmail,
 }));
 
-import { sendContactNotificationEmail } from "@/lib/email/contact";
+import { sendContactNotificationEmail } from "@/features/public-site/email/contact-email";
 
 beforeEach(() => {
   delete process.env.CONTACT_TO_EMAIL;

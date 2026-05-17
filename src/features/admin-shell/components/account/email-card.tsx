@@ -19,7 +19,7 @@ import { formatDisplayDateTime } from "@/lib/date-format";
 import {
   requestAdminEmailChangeSchema,
   type RequestAdminEmailChangeFormValues,
-} from "@/lib/schemas/admin-schemas";
+} from "@/features/admin-shell/schemas/admin-schemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {

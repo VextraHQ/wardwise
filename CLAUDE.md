@@ -37,7 +37,7 @@ Three user types:
 
 - **Auth**: All admin API routes use `requireAdmin()` from `src/features/auth/lib/guards.ts` — never inline auth checks
 - **Route protection**: `src/proxy.ts` (Next.js 16's Edge middleware, NOT `middleware.ts`)
-- **Validation**: Zod schemas live next to their feature: `src/features/candidates/schemas/{candidate,canvasser}-schemas.ts`, `src/features/collect/schemas/collect-schemas.ts` (campaigns + submission moderation). Field-level primitives (phone, email, NIN/VIN/APC) stay in `src/lib/schemas/field-schemas.ts`. Admin-shell self-service schemas (profile/email/password) remain in `src/lib/schemas/admin-schemas.ts` until Phase 8. All mutating routes validate via `.safeParse()` on both client and server.
+- **Validation**: Zod schemas live next to their feature: `src/features/candidates/schemas/{candidate,canvasser}-schemas.ts`, `src/features/collect/schemas/collect-schemas.ts` (campaigns + submission moderation), `src/features/admin-shell/schemas/admin-schemas.ts` (admin self-service profile/email/password), `src/features/auth/schemas/auth-schemas.ts`, `src/features/public-site/schemas/contact-schemas.ts`, `src/features/geo/schemas/geo-schemas.ts`. Field-level primitives (phone, email, NIN/VIN/APC) stay in `src/lib/schemas/field-schemas.ts`. All mutating routes validate via `.safeParse()` on both client and server.
 - **Audit logging**: `logAudit()` from `src/lib/core/audit.ts` on all sensitive operations (fire-and-forget)
 - **Rate limiting**: `src/lib/core/rate-limit.ts` — Upstash Redis, null when env vars not set
 - **Geo data**: Database-backed (Lga → Ward → PollingUnit), seeded via `prisma/seed-geo.ts`

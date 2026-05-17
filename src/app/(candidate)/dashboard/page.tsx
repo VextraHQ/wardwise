@@ -3,7 +3,7 @@ import { DashboardContent } from "@/features/candidate-dashboard/components/dash
 import {
   getCandidateNameForMetadata,
   generateCandidateTitle,
-} from "@/lib/core/metadata-helpers";
+} from "@/features/candidate-dashboard/lib/metadata-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const candidateName = await getCandidateNameForMetadata();

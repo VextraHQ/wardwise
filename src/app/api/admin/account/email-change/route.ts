@@ -17,7 +17,7 @@ import {
   sendAdminEmailChangeEmail,
   sendAdminEmailChangeNoticeEmail,
 } from "@/lib/email/auth";
-import { requestAdminEmailChangeSchema } from "@/lib/schemas/admin-schemas";
+import { requestAdminEmailChangeSchema } from "@/features/admin-shell/schemas/admin-schemas";
 
 export async function POST(request: NextRequest) {
   const { error, user } = await requireAdmin();
