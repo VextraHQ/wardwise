@@ -7,7 +7,7 @@ import {
   useGeoImportPreview,
   useGeoImportCommit,
 } from "@/features/geo/hooks/use-geo";
-import type { ImportRowResult } from "@/types/geo";
+import type { ImportRowResult } from "@/features/geo/types/geo.types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {

@@ -18,7 +18,7 @@ import {
   CANDIDATE_TITLES,
   CANDIDATE_PARTY_OTHER_OPTION,
   CANDIDATE_TITLE_OTHER_OPTION,
-} from "@/lib/data/nigerian-parties";
+} from "@/features/candidates/data/nigerian-parties";
 import { ListOrCustomField } from "@/components/admin/shared/list-or-custom-field";
 
 interface StepIdentityProps {

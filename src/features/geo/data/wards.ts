@@ -1,7 +1,7 @@
 // Transitional static ward seed source.
 // Still used by partial geo seeding and the legacy /api/register/locations path.
 // Do not treat this file as the long-term canonical runtime geo source.
-import type { LocationWard } from "@/types/location";
+import type { LocationWard } from "@/features/geo/types/location.types";
 
 export const wards: LocationWard[] = [
   // Adamawa State (AD)

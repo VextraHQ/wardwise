@@ -3,7 +3,7 @@ import type {
   LocationPollingUnit,
   LocationState,
   LocationWard,
-} from "@/types/location";
+} from "@/features/geo/types/location.types";
 
 // Legacy static location API client kept for the future public voter/NIN flow.
 // Current admin/candidate geo should use DB-backed geo APIs instead.

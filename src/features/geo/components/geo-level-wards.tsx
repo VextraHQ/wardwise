@@ -16,7 +16,7 @@ import {
   useUpdateWard,
   useDeleteWard,
 } from "@/features/geo/hooks/use-geo";
-import type { GeoWard } from "@/types/geo";
+import type { GeoWard } from "@/features/geo/types/geo.types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

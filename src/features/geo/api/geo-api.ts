@@ -7,7 +7,7 @@ import type {
   PaginatedResponse,
   ImportPreviewResponse,
   ImportCommitResponse,
-} from "@/types/geo";
+} from "@/features/geo/types/geo.types";
 
 async function adminApiCall<T>(
   endpoint: string,

@@ -16,7 +16,7 @@ import {
   useUpdateLga,
   useDeleteLga,
 } from "@/features/geo/hooks/use-geo";
-import type { GeoLga } from "@/types/geo";
+import type { GeoLga } from "@/features/geo/types/geo.types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

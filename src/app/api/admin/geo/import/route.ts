@@ -6,7 +6,7 @@ import type {
   ImportRowResult,
   ImportPreviewResponse,
   ImportCommitResponse,
-} from "@/types/geo";
+} from "@/features/geo/types/geo.types";
 
 const MAX_ROWS = 5000;
 
