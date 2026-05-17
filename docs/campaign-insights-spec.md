@@ -823,7 +823,7 @@ Use React Query for the report data layer, consistent with the rest of the app.
 That means:
 
 - query logic lives in hooks
-- raw request construction lives in `src/lib/api/*`
+- raw request construction lives in each feature's `api/*-api.ts` (e.g. `features/reporting/api/campaign-report-api.ts`, `features/collect/api/collect-api.ts`)
 - visual components stay focused on presentation and interaction
 
 This structure is already present and should be preserved rather than scattering

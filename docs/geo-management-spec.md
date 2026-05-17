@@ -152,21 +152,38 @@ All endpoints: auth-gated (super admin), server-side paginated, return `{ data, 
 src/
   app/admin/geo/
     page.tsx                          — Server component, renders GeoManagement
-  components/admin/geo/
+  features/geo/components/
     geo-management.tsx                — Main client component (breadcrumb state, drill-down)
-    lga-list.tsx                      — Level 1: LGA table with search/pagination
-    ward-list.tsx                     — Level 2: Ward table
-    polling-unit-list.tsx             — Level 3: PU table
+    geo-level-states.tsx              — Level 0: state grid
+    geo-level-lgas.tsx                — Level 1: LGA table with search/pagination
+    geo-level-wards.tsx               — Level 2: Ward table
+    geo-level-polling-units.tsx       — Level 3: PU table
     geo-breadcrumb.tsx                — Breadcrumb navigation bar
-    add-lga-dialog.tsx                — Add/edit LGA form dialog
-    add-ward-dialog.tsx               — Add/edit ward form dialog
-    add-polling-unit-dialog.tsx       — Add/edit PU form dialog
-    delete-geo-dialog.tsx             — Shared delete confirmation with impact summary
-    bulk-import-dialog.tsx            — CSV/Excel bulk import
-  hooks/
+    geo-stats-bar.tsx                 — Aggregate counts above the drill-down
+    dialogs/
+      bulk-import-dialog.tsx          — CSV/Excel bulk import
+  features/geo/hooks/
     use-geo.ts                        — React Query hooks for all geo CRUD
-  lib/api/
-    geo.ts                            — API client functions
+  features/geo/api/
+    geo-api.ts                        — API client functions
+    location-api.ts                   — Legacy static-location client
+  features/geo/server/
+    constituency-server.ts            — Server-side constituency LGA validation
+  features/geo/lib/
+    constituency.ts                   — Isomorphic constituency helpers
+    display.ts                        — Geo display formatting
+  features/geo/schemas/
+    geo-schemas.ts                    — LGA/Ward/PU CRUD validation
+  features/geo/data/
+    nigerian-constituencies.ts        — Official Senator + HoR presets
+    nigerian-federal-constituencies.ts
+    nigerian-senatorial-districts.ts
+    state-lga-locations.ts            — Canonical state + LGA reference
+    wards.ts                          — Transitional ward seed data
+    polling-units.ts                  — Transitional PU seed data
+  features/geo/types/
+    geo.types.ts
+    location.types.ts
 ```
 
 ---

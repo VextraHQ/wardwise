@@ -1,5 +1,7 @@
 # WardWise Codebase Review
 
+> **Historical snapshot.** This review was written when the codebase used the older layered layout (`components/`, `hooks/`, `lib/`, `types/`). The codebase has since migrated to a feature-first layout under `src/features/<feature>/`. References below to `components/admin/`, `components/collect/`, `hooks/use-admin.ts`, `lib/api/admin.ts`, etc. are preserved as point-in-time observations. For the current structure, see `docs/wardwise-app-architecture-spec.md`.
+
 ## Overview
 
 | Metric                | Value                                                                             |

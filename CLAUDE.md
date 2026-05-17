@@ -49,9 +49,9 @@ Three user types:
 - Cascade deletes configured: Candidate → User, Candidate → Campaigns → Submissions
 - Always run `pnpm db:generate` after schema changes
 
-### Feature-First Architecture (in progress)
+### Feature-First Architecture
 
-The codebase is migrating from a layered layout (`components/`, `hooks/`, `lib/`, `types/`) to a feature-first layout under `src/features/<feature>/`. The migration is phase-gated on the `codex/feature-first-architecture` branch. See `docs/wardwise-app-architecture-spec.md` for the target structure, current-to-target mapping table, and per-phase scope.
+The codebase is laid out feature-first under `src/features/<feature>/` (collect, candidates, candidate-dashboard, geo, reporting, auth, admin-shell, public-site). See `docs/wardwise-app-architecture-spec.md` for the target structure, current-to-target mapping table, and per-phase migration history.
 
 Import direction (enforced by convention until ESLint boundaries are added):
 
@@ -61,6 +61,8 @@ Import direction (enforced by convention until ESLint boundaries are added):
 - Path alias stays `@/*` → `./src/*`. shadcn primitives still land in `src/components/ui`.
 
 When adding new code, prefer placing it inside the owning `src/features/<feature>/` tree. Promote to `components/shared`, `hooks/shared`, or `lib/core` only when the code is genuinely product-agnostic and used by multiple stable features.
+
+`src/lib/email` is an intentional app-wide email service: provider wrapper, shared components, and the central React Email templates + previews directory. Domain-shaped email files (`account-welcome.ts`, `auth.ts`, the auth/admin templates) live here so the React Email preview workflow stays simple. Move an email module into a feature's own `email/` subfolder **only** when it would otherwise need to import feature internals — as `features/public-site/email/contact-email.ts` does for `contact-reasons`.
 
 ## Specs & Docs
 

@@ -2,12 +2,11 @@
 
 ## Status
 
-- **Source of truth for app structure** as WardWise moves from the current layered layout into a feature-first layout.
-- **Phase-gated migration plan** for a large refactor. Do not move the whole app in one PR.
-- **No compatibility shims** once a file is moved. Old files should be removed and all imports should be updated in the same PR.
-- **Behavior-preserving by default.** A phase should not change product behavior unless that phase explicitly says so.
-- **Single dedicated refactor branch.** Create a new branch for this architecture migration, then keep all phases on that same branch. Do not create a separate branch per phase or per review checkpoint.
-- **Last updated:** 2026-05-13.
+- **Source of truth for app structure.** WardWise's source tree is feature-first under `src/features/<feature>/`.
+- **Migration complete.** All nine phases landed on the `codex/feature-first-architecture` branch (2026-05-17). The doc retains the phase-by-phase history for reference; the Status Tracker section at the bottom shows the resolved status of each phase.
+- **No compatibility shims.** Old paths are removed and every import points at the new feature locations.
+- **Behavior-preserving by default.** Phases changed paths and imports only; no schema, response shape, or product behavior changes outside the explicitly-noted Phase 3 server-thinning extractions.
+- **Last updated:** 2026-05-17.
 
 This document is meant to be readable by every contributor, including a developer joining the project for the first time.
 
@@ -248,6 +247,14 @@ src/lib/
   date-format.ts
   date-ranges.ts
 ```
+
+#### `src/lib/email` policy
+
+`src/lib/email` is an **intentional app-wide email service**. Treat it the same way you would Resend or any third-party email vendor: it owns the provider wrapper (`send.ts`), shared React Email components, and the React Email template + preview workflow.
+
+Domain-shaped email files (e.g. `account-welcome.ts`, `auth.ts`, `templates/auth-link.tsx`) may live here as long as they do **not** import feature internals. Centralising templates and previews keeps the React Email dev workflow simple — splitting them across feature folders would make local preview and test runs more painful for a small architectural win.
+
+When an email module needs feature-only data (the contact form was the first example — it needs `features/public-site/lib/contact-reasons`), move that module into the owning feature's `email/` subfolder instead and keep only the cross-feature shells in `src/lib/email`.
 
 ### `src/types`
 
@@ -1348,7 +1355,7 @@ If the reviewer finds a bigger improvement, record it as a follow-up task unless
 | Phase 6 - Reporting Relocation               | Complete | 13 `campaign-report` components, `insights-helpers.tsx` (kept `.tsx` because JSX) into `features/reporting/lib`, 2 hooks, `campaign-report-api`, `report-access` server module, and `campaign-report.types.ts` now under `src/features/reporting/`. `collect-reporting.ts` correctly left in `features/collect/server` (Phase 3 ownership).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | Phase 7 - Candidate Dashboard Relocation     | Complete | 17 dashboard components, `use-candidate-dashboard` hook, `candidate-dashboard-api` (renamed), and `lib/analytics.ts` now under `src/features/candidate-dashboard/`. Cross-feature dep resolved up-front by inlining a local `getSupportersCount` helper in `features/candidates/lib/directory.ts` so candidates no longer reaches into candidate-dashboard's analytics module.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | Phase 8 - Auth, Admin Shell, and Public Site | Complete | Auth components + lib + schemas under `src/features/auth/`. Admin shell components (with `account/`, `filters/`, `shared/` subdirs), `use-admin`, `lib/account.ts`, `server/admin-dashboard.ts`, and `api/admin-api.ts` under `src/features/admin-shell/`. Public-site landing/legal/support components, contact lib (`turnstile`, `contact-reasons`), schemas, and `landing-data` under `src/features/public-site/`. Shared promotions: `components/{layout/{logo,app-footer,cookie-consent,header},layout/sidebar,system}/*` → `src/components/shared/`; `analytics-provider` → `src/components/shared/`; `hooks/{use-mobile,use-click-outside}` → `src/hooks/shared/`. `lib/data/{legal,support}-data.ts` → `src/lib/constants/` (app-wide brand content). `src/types/voter.ts` kept as broad app-wide type — consumed by candidate-dashboard, admin-shell, and mock data. |
-| Phase 9 - Documentation Alignment Sweep      | Next     | Final full-doc search across `README.md`, `CLAUDE.md`, and `docs/` for any remaining stale paths or omitted phases. Verify the deliberate-cross-feature surfaces note still reflects current usage.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Phase 9 - Documentation Alignment Sweep      | Complete | Final stale-path sweep across `README.md`, `CLAUDE.md`, and `docs/*` cleared all remaining stale references outside the intentional architecture-spec mapping table. `docs/codebase-review.md` marked as a pre-migration historical snapshot. `geo-management-spec` component-structure code block rewritten to reflect the post-Phase-5 layout. `src/lib/email` documented as an intentional app-wide email service in both the architecture spec and CLAUDE.md.                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ---
 
@@ -1368,7 +1375,9 @@ If the reviewer finds a bigger improvement, record it as a follow-up task unless
 12. ~~Start Phase 6 (Reporting relocation). Move `src/components/campaign-report/*`, `use-campaign-report`, `use-campaign-insights-scope`, `lib/api/campaign-report.ts`, `lib/server/report-access.ts`, `src/types/campaign-report.ts` into `features/reporting/`.~~ (done — all reporting components, hooks, API, server module, and types now under `src/features/reporting/`. `insights-helpers.tsx` placed in `features/reporting/lib/` per spec while keeping the `.tsx` extension for its JSX exports.)
 13. ~~Start Phase 7 (Candidate dashboard relocation). Move `src/components/candidate-dashboard/*`, `use-candidate-dashboard`, `lib/api/candidate-dashboard.ts`, and `src/lib/candidate/analytics.ts`. Resolve the `features/candidates/lib/directory.ts → analytics.ts` cross-feature dependency before completing the move.~~ (done — analytics now in `features/candidate-dashboard/lib/`; candidates' directory.ts holds a local `getSupportersCount` that reads `getVotersByCandidateId(id).length` directly.)
 14. ~~Start Phase 8 (Auth, Admin Shell, and Public Site). Move auth, admin-shell, and public-site components/hooks/lib/schemas. Also fold `src/types/voter.ts` to its rightful feature (likely candidate-dashboard) once the consumer audit completes.~~ (done — auth, admin-shell, and public-site features fully populated; shared layer (`components/shared/`, `hooks/shared/`) now hosts the cross-feature primitives; `voter.ts` confirmed cross-feature and kept in `src/types/`.)
-15. Start Phase 9 (documentation alignment sweep). Run the full-doc rg passes from spec §"Migration Phases > Phase 9" and reconcile anything missed.
+15. ~~Start Phase 9 (documentation alignment sweep). Run the full-doc rg passes from spec §"Migration Phases > Phase 9" and reconcile anything missed.~~ (done — final sweep clean; codebase-review marked historical; `src/lib/email` policy documented.)
+
+**Migration complete.** All nine phases — including their fixups — have landed on the `codex/feature-first-architecture` branch. The repo now matches the feature-first target: `src/features/*` populated for all eight domains, `src/components/` only `ui/` and `shared/`, `src/hooks/` only `shared/`, `src/lib/` only app-wide infrastructure, `src/types/` only ambient + cross-feature shared types.
 
 ---
 

@@ -113,9 +113,9 @@ That means HoR needs a careful rollout:
 - leave split-LGA constituencies explicitly unsupported for now
 - add ward/RA precision later for the excluded seats
 
-### 6. Current `src/lib/data/*` file status
+### 6. Current geo data file status
 
-Not all files in `src/lib/data/` serve the same purpose. To reduce confusion for future dev work:
+After the architecture migration, geo data lives under `src/features/geo/data/`, candidate party data under `src/features/candidates/data/`, and app-wide brand content under `src/lib/constants/`. The file status below uses the post-migration paths.
 
 #### Canonical / active sources
 
