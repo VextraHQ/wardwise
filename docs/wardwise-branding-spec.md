@@ -227,7 +227,7 @@ This enables utilities: `bg-brand-lagoon`, `text-brand-pine`, `border-brand-emer
 - [x] `public/brand/` — logo SVGs added (4 files: logomark + logotype × lagoon + offwhite)
 - [x] `src/components/layout/logo.tsx` — refactored to use SVG logomark via `next/image`
 - [x] `src/components/admin/admin-sidebar.tsx` — uses logomark via `next/image`, no hardcoded gradient hex
-- [x] `src/features/candidate-dashboard/components/app-sidebar.tsx` — uses logomark via `next/image`, no hardcoded gradient hex
+- [x] `src/features/candidate-dashboard/components/candidate-sidebar.tsx` — uses logomark via `next/image`, no hardcoded gradient hex
 - [x] All provisional hex values removed (grep confirms zero matches)
 - [x] All `emerald-500` Tailwind utilities replaced with `brand-emerald`
 - [x] Landing page gradients updated to brand rgba values
