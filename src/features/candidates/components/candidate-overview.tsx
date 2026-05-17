@@ -11,7 +11,10 @@ import {
   updateCandidateSchema,
   type UpdateCandidateFormValues,
 } from "@/features/candidates/schemas/candidate-schemas";
-import { nigeriaStates, getLGAsByState } from "@/features/geo/data/state-lga-locations";
+import {
+  nigeriaStates,
+  getLGAsByState,
+} from "@/features/geo/data/state-lga-locations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

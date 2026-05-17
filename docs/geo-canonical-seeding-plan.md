@@ -122,8 +122,8 @@ Not all files in `src/lib/data/` serve the same purpose. To reduce confusion for
 - `src/features/geo/data/state-lga-locations.ts`
   - current canonical source for state metadata + LGA metadata
   - actively used by candidate, collect, geo admin stats, geo import validation
-- `src/lib/data/nigerian-parties.ts`
-  - active runtime options for candidate forms
+- `src/features/candidates/data/nigerian-parties.ts`
+  - active runtime options for candidate forms (relocated to the Candidates feature in the Phase 5 architecture fixup)
 - `src/lib/data/legal-data.ts`
   - unrelated to geo, but active runtime content
 
