@@ -376,7 +376,7 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 | `export-content.tsx`         | ✅ Card + export buttons                                |
 | `help/page.tsx`              | ✅ Card                                                 |
 
-#### Sidebar primitives (`src/components/layout/sidebar/`)
+#### Sidebar primitives (`src/components/shared/sidebar/`)
 
 Used by `candidate-sidebar.tsx`. Phase 8 scope to promote to `components/shared/` (or fold into the feature if not reused after Phase 8 inventory).
 
@@ -387,7 +387,7 @@ Used by `candidate-sidebar.tsx`. Phase 8 scope to promote to `components/shared/
 | `nav-documents.tsx` | ✅ `TOOLS` group label                                          |
 | `nav-user.tsx`      | ✅ `rounded-sm` avatars/dropdowns                               |
 
-### Admin Dashboard (`src/components/admin/`)
+### Admin Dashboard (`src/features/admin-shell/components/`)
 
 > Admin dashboard redesign direction: see `docs/admin-dashboard-command-center-spec.md`.
 > The dashboard should behave as an operations command center: actions first,
@@ -436,7 +436,7 @@ Used by `candidate-sidebar.tsx`. Phase 8 scope to promote to `components/shared/
 | `steps/canvasser-step.tsx`        | ✅ Yes/No with `role="radio"`, `rounded-sm`                  |
 | `steps/confirmation-screen.tsx`   | ✅ Share buttons with `aria-label`, `rounded-sm`             |
 
-### Legal Pages (`src/components/legal/`, `src/components/layout/`)
+### Legal Pages (`src/features/public-site/components/legal/`, `src/components/shared/`)
 
 | Component               | Status                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------- |
@@ -445,7 +445,7 @@ Used by `candidate-sidebar.tsx`. Phase 8 scope to promote to `components/shared/
 | `terms-content.tsx`     | ✅ Uses `LegalSectionContent`                                                   |
 | `cookies-content.tsx`   | ✅ Uses `LegalSectionContent`                                                   |
 
-### Public Support Pages (`src/components/public/`, `src/components/layout/`)
+### Public Support Pages (`src/features/public-site/components/support/`, `src/components/shared/`)
 
 | Component                   | Status                                                                               |
 | --------------------------- | ------------------------------------------------------------------------------------ |
@@ -453,7 +453,7 @@ Used by `candidate-sidebar.tsx`. Phase 8 scope to promote to `components/shared/
 | `support-content.tsx`       | ✅ Accordion `rounded-sm`, contact cards, cockpit button                             |
 | `contact-content.tsx`       | ✅ Theme token alerts, `rounded-sm` inputs, Turnstile state, cockpit submit handling |
 
-### Landing Page (`src/components/landing/`)
+### Landing Page (`src/features/public-site/components/landing/`)
 
 | Component             | Status                                                      |
 | --------------------- | ----------------------------------------------------------- |

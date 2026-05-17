@@ -1,14 +1,14 @@
-import { CallToActionSection } from "@/components/landing/cta-section";
-import { CollectSection } from "@/components/landing/collect-section";
-import { FeaturesSection } from "@/components/landing/features";
-import { HeroSection } from "@/components/landing/hero";
-import { HowItWorksSection } from "@/components/landing/how-it-works";
-import { ImpactSection } from "@/components/landing/impact";
-import { PlatformPillarsSection } from "@/components/landing/platform-pillars";
-import { SecuritySection } from "@/components/landing/security";
-import { SiteFooter } from "@/components/landing/footer";
-import { SiteHeader } from "@/components/landing/header";
-import { ScrollToTop } from "@/components/landing/scroll-to-top";
+import { CallToActionSection } from "@/features/public-site/components/landing/cta-section";
+import { CollectSection } from "@/features/public-site/components/landing/collect-section";
+import { FeaturesSection } from "@/features/public-site/components/landing/features";
+import { HeroSection } from "@/features/public-site/components/landing/hero";
+import { HowItWorksSection } from "@/features/public-site/components/landing/how-it-works";
+import { ImpactSection } from "@/features/public-site/components/landing/impact";
+import { PlatformPillarsSection } from "@/features/public-site/components/landing/platform-pillars";
+import { SecuritySection } from "@/features/public-site/components/landing/security";
+import { SiteFooter } from "@/features/public-site/components/landing/footer";
+import { SiteHeader } from "@/features/public-site/components/landing/header";
+import { ScrollToTop } from "@/features/public-site/components/landing/scroll-to-top";
 export default function Home() {
   return (
     <div className="bg-background text-foreground flex min-h-screen flex-col">

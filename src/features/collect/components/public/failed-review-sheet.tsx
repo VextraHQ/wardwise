@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/shared/use-mobile";
 import { getCollectErrorCategory, track } from "@/lib/analytics/client";
 import type { PendingSubmission } from "@/features/collect/lib/offline-queue";
 import { composeFullName, formatPersonName } from "@/lib/utils";

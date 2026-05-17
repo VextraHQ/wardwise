@@ -1,8 +1,8 @@
-import { getAuthLinkContext } from "@/lib/auth/links";
+import { getAuthLinkContext } from "@/features/auth/lib/links";
 import {
   PasswordSetupScreen,
   PasswordSetupUnavailable,
-} from "@/components/auth/password-setup-screen";
+} from "@/features/auth/components/password-setup-screen";
 import { createAuthMetadata } from "@/lib/core/metadata";
 
 export const metadata = createAuthMetadata({

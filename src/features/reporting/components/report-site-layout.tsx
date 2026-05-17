@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { AppFooter } from "@/components/layout/app-footer";
+import { AppFooter } from "@/components/shared/app-footer";
 import { ReportSiteHeader } from "@/features/reporting/components/report-site-header";
 
 export const REPORT_SITE_HEADER_HEIGHT = "calc(3.75rem + 1px)";

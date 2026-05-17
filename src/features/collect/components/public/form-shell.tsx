@@ -1,10 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Header } from "@/components/layout/header";
+import { Header } from "@/components/shared/header";
 import type { PublicCampaign } from "@/features/collect/types/collect.types";
 import { getCampaignDisplayHeadline } from "@/features/collect/lib/branding";
-import { AppFooter } from "@/components/layout/app-footer";
+import { AppFooter } from "@/components/shared/app-footer";
 
 export function FormShell({
   children,

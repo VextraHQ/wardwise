@@ -3,7 +3,7 @@ import {
   formatContactSubmittedAt,
   type ContactNotificationEmailInput,
 } from "@/lib/email/templates/contact-notification";
-import { getContactReasonLabel } from "@/lib/contact/reasons";
+import { getContactReasonLabel } from "@/features/public-site/lib/contact-reasons";
 
 const fixtureInput: ContactNotificationEmailInput = {
   name: "Jane Campaign",

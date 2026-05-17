@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/shared/use-mobile";
 import { useCampaignLgas } from "@/features/collect/hooks/use-collect";
 import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import {

@@ -21,7 +21,7 @@ import {
   positionRequiresLgas,
   findMatchingPreset,
 } from "@/features/geo/lib/constituency";
-import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituency-boundary-alerts";
+import { ConstituencyBoundaryAlerts } from "@/features/admin-shell/components/shared/constituency-boundary-alerts";
 import { getPresetsForState } from "@/features/geo/data/nigerian-constituencies";
 
 function resolveStateName(stateCode: string | null | undefined): string {

@@ -12,8 +12,8 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
-import { AdminPagination } from "@/components/admin/admin-pagination";
-import { AdminMobileRecordSkeleton } from "@/components/admin/shared/admin-mobile-record-card";
+import { AdminPagination } from "@/features/admin-shell/components/admin-pagination";
+import { AdminMobileRecordSkeleton } from "@/features/admin-shell/components/shared/admin-mobile-record-card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,7 +39,7 @@ import {
   readPreferredExportFormat,
   writePreferredExportFormat,
 } from "@/lib/exports/client-preferences";
-import { useIsPortraitMobile } from "@/hooks/use-mobile";
+import { useIsPortraitMobile } from "@/hooks/shared/use-mobile";
 import {
   buildExportToastMessage,
   deriveSubmissionSelectionState,

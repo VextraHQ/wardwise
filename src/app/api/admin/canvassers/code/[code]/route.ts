@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
 
 // GET /api/admin/canvassers/code/[code] - Get canvasser by code

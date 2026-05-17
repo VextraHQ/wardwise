@@ -1,5 +1,5 @@
 import { CandidateShell } from "@/features/candidate-dashboard/components/candidate-shell";
-import { requirePageRole } from "@/lib/auth/guards";
+import { requirePageRole } from "@/features/auth/lib/guards";
 
 export default async function CandidateLayout({
   children,

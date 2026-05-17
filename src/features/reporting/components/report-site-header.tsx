@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import { HiShieldCheck } from "react-icons/hi";
-import { Logo } from "@/components/layout/logo";
+import { Logo } from "@/components/shared/logo";
 
 export function ReportSiteHeader() {
   return (

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 
 import { track } from "@/lib/analytics/client";
-import { useAdminCandidates } from "@/hooks/use-admin";
+import { useAdminCandidates } from "@/features/admin-shell/hooks/use-admin";
 import { useCreateCampaign } from "@/features/collect/hooks/use-collect";
 import { useWizardDraft } from "@/hooks/shared/use-wizard-draft";
 import {

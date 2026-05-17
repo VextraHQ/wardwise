@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
 import type { Candidate } from "@/features/candidates/types/candidate.types";
@@ -8,7 +8,7 @@ import {
   updateCandidateSchema,
 } from "@/features/candidates/schemas/candidate-schemas";
 import { logAudit } from "@/lib/core/audit";
-import { bumpCandidateSessionVersions } from "@/lib/auth/storage";
+import { bumpCandidateSessionVersions } from "@/features/auth/lib/storage";
 import { sanitizeCandidateConstituencyLgaIds } from "@/features/geo/server/constituency-server";
 import { getPositionStateValidationMessage } from "@/features/geo/lib/constituency";
 import {

@@ -1,13 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
 import { logAudit } from "@/lib/core/audit";
 import {
   adminPasswordChangeRateLimit,
   getClientIp,
 } from "@/lib/core/rate-limit";
-import { ADMIN_EMAIL_CHANGE_TOKEN_TYPE } from "@/lib/auth/links";
+import { ADMIN_EMAIL_CHANGE_TOKEN_TYPE } from "@/features/auth/lib/links";
 import { changeAdminPasswordSchema } from "@/lib/schemas/admin-schemas";
 
 export async function POST(request: NextRequest) {

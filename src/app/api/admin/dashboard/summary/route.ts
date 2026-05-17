@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
 import { getDashboardWindows } from "@/features/collect/server/collect-reporting";
 

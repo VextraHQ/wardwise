@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
 import { logAudit } from "@/lib/core/audit";
-import { createPasswordResetForUser } from "@/lib/auth/links";
+import { createPasswordResetForUser } from "@/features/auth/lib/links";
 
 export async function POST(
   request: NextRequest,

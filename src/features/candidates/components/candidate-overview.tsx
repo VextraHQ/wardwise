@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useUpdateCandidate } from "@/hooks/use-admin";
+import { useUpdateCandidate } from "@/features/admin-shell/hooks/use-admin";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
-import type { CandidateWithUser } from "@/lib/api/admin";
+import type { CandidateWithUser } from "@/features/admin-shell/api/admin-api";
 import {
   updateCandidateSchema,
   type UpdateCandidateFormValues,
@@ -42,7 +42,7 @@ import {
   CANDIDATE_PARTY_OTHER_OPTION,
   CANDIDATE_TITLE_OTHER_OPTION,
 } from "@/features/candidates/data/nigerian-parties";
-import { ListOrCustomField } from "@/components/admin/shared/list-or-custom-field";
+import { ListOrCustomField } from "@/features/admin-shell/components/shared/list-or-custom-field";
 import {
   IconPencil,
   IconX,
@@ -53,9 +53,9 @@ import {
 } from "@tabler/icons-react";
 import { useMemo, useEffect } from "react";
 import type { ZodError } from "zod";
-import { LgaCheckboxGrid } from "@/components/admin/shared/lga-checkbox-grid";
-import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituency-boundary-alerts";
-import { OfficialConstituencySelector } from "@/components/admin/shared/official-constituency-selector";
+import { LgaCheckboxGrid } from "@/features/admin-shell/components/shared/lga-checkbox-grid";
+import { ConstituencyBoundaryAlerts } from "@/features/admin-shell/components/shared/constituency-boundary-alerts";
+import { OfficialConstituencySelector } from "@/features/admin-shell/components/shared/official-constituency-selector";
 import {
   positionRequiresLgas,
   autoConstituencyName,

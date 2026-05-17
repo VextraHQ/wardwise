@@ -1,5 +1,5 @@
-import { AdminShell } from "@/components/admin/admin-shell";
-import { requirePageRole } from "@/lib/auth/guards";
+import { AdminShell } from "@/features/admin-shell/components/admin-shell";
+import { requirePageRole } from "@/features/auth/lib/guards";
 
 export default async function AdminLayout({
   children,

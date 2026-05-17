@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { AuthCard } from "@/components/auth/auth-card";
+import { AuthCard } from "@/features/auth/components/auth-card";
 import { RegistrationStepHeader } from "@/features/collect/components/public/registration-step-header";
 import { IconShieldOff } from "@tabler/icons-react";
-import { COMPANY_INFO } from "@/lib/data/legal-data";
+import { COMPANY_INFO } from "@/lib/constants/legal-data";
 
 export function ReportUnavailable() {
   return (

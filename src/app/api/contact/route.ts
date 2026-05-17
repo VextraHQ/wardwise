@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { sendContactNotificationEmail } from "@/lib/email/contact";
-import { verifyTurnstileToken } from "@/lib/contact/turnstile";
+import { verifyTurnstileToken } from "@/features/public-site/lib/turnstile";
 import { logAudit } from "@/lib/core/audit";
 import { contactRateLimit, getClientIp } from "@/lib/core/rate-limit";
-import { contactFormSchema } from "@/lib/schemas/contact-schemas";
+import { contactFormSchema } from "@/features/public-site/schemas/contact-schemas";
 
 function getEmailDomain(email: string) {
   return email.split("@")[1] ?? "unknown";

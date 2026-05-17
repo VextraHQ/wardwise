@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { emailSchema, requiredTrimmedText } from "@/lib/schemas/field-schemas";
-import { passwordPolicySchema } from "@/lib/schemas/auth-schemas";
+import { passwordPolicySchema } from "@/features/auth/schemas/auth-schemas";
 
 // Update Admin Profile Schema
 export const updateAdminProfileSchema = z.object({

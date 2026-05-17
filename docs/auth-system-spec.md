@@ -118,7 +118,7 @@ It checks:
 
 ### Server Guards
 
-`src/lib/auth/guards.ts` is the main auth wrapper layer.
+`src/features/auth/lib/guards.ts` is the main auth wrapper layer.
 
 Current responsibilities:
 
@@ -193,12 +193,12 @@ Email sending is split into a generic transport, small orchestration modules, an
 
 | File                                                        | Purpose                                                                     |
 | ----------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `src/lib/auth/config.ts`                                    | NextAuth config, login rules, JWT/session fields                            |
-| `src/lib/auth/guards.ts`                                    | Shared server auth wrapper and role guards                                  |
-| `src/lib/auth/session.ts`                                   | Session lifetime policy helpers                                             |
-| `src/lib/auth/redirects.ts`                                 | Safe post-login callback URL and default home resolution                    |
-| `src/lib/auth/storage.ts`                                   | Auth-specific user/session persistence helpers                              |
-| `src/lib/auth/links.ts`                                     | Invite/reset token issuing, hashing, consuming                              |
+| `src/features/auth/lib/config.ts`                           | NextAuth config, login rules, JWT/session fields                            |
+| `src/features/auth/lib/guards.ts`                           | Shared server auth wrapper and role guards                                  |
+| `src/features/auth/lib/session.ts`                          | Session lifetime policy helpers                                             |
+| `src/features/auth/lib/redirects.ts`                        | Safe post-login callback URL and default home resolution                    |
+| `src/features/auth/lib/storage.ts`                          | Auth-specific user/session persistence helpers                              |
+| `src/features/auth/lib/links.ts`                            | Invite/reset token issuing, hashing, consuming                              |
 | `src/lib/email/send.ts`                                     | Generic Resend wrapper shared by auth + contact + welcome mail              |
 | `src/lib/email/auth.ts`                                     | Auth email capability check + `sendAuthLinkEmail` entrypoint                |
 | `src/lib/email/account-welcome.ts`                          | Welcome email after invite password setup (`sendAccountWelcomeEmail`)       |
@@ -208,14 +208,14 @@ Email sending is split into a generic transport, small orchestration modules, an
 | `src/lib/email/templates/account-welcome.tsx`               | React Email: post-setup welcome                                             |
 | `src/lib/email/components/*`                                | Shared header/footer (and similar) across templates                         |
 | `src/lib/email/previews/*`                                  | Dev-only fixtures for `pnpm email:dev`                                      |
-| `src/lib/auth/client.ts`                                    | Browser auth client for login, forgot-password, and setup                   |
+| `src/features/auth/lib/client.ts`                           | Browser auth client for login, forgot-password, and setup                   |
 | `src/lib/core/metadata.ts`                                  | Shared metadata helpers, including non-indexable auth metadata              |
 | `src/proxy.ts`                                              | Entry guard for protected routes                                            |
 | `src/app/(auth)/layout.tsx`                                 | Shared auth-page wrapper and redirect behavior                              |
 | `src/app/(auth)/login/page.tsx`                             | Shared login route                                                          |
 | `src/app/(auth)/forgot-password/page.tsx`                   | Password recovery route                                                     |
 | `src/app/(auth)/reset-password/[token]/page.tsx`            | Setup/reset password route                                                  |
-| `src/components/auth/*`                                     | Shared auth screens and architectural auth card shell                       |
+| `src/features/auth/components/*`                            | Shared auth screens and architectural auth card shell                       |
 | `src/app/api/auth/forgot-password/route.ts`                 | Forgot-password API                                                         |
 | `src/app/api/auth/complete-password-setup/route.ts`         | Password completion API; fires welcome email on successful **invite** setup |
 | `src/app/api/admin/candidates/route.ts`                     | Candidate creation + invite issuing                                         |
@@ -291,19 +291,19 @@ Note: environments that _already_ seeded `admin@wardwise.ng` before this guard l
 
 ### Files
 
-| File                                                   | Purpose                                          |
-| ------------------------------------------------------ | ------------------------------------------------ |
-| `src/app/admin/account/page.tsx`                       | Admin account route shell                        |
-| `src/components/admin/admin-account.tsx`               | Profile / Email / Security / Metadata / Activity |
-| `src/app/api/admin/account/route.ts`                   | `GET` account snapshot                           |
-| `src/app/api/admin/account/profile/route.ts`           | `PATCH` name                                     |
-| `src/app/api/admin/account/email-change/route.ts`      | `POST` + `DELETE` email-change request           |
-| `src/app/api/admin/account/password/route.ts`          | `POST` password change                           |
-| `src/app/api/auth/confirm-email-change/route.ts`       | Public consume (POST only)                       |
-| `src/app/(auth)/confirm-email-change/[token]/page.tsx` | Scanner-safe GET preview page                    |
-| `src/components/auth/confirm-email-change-screen.tsx`  | Client confirm button                            |
-| `src/lib/email/templates/admin-email-change.tsx`       | React Email template                             |
-| `src/lib/auth/links.ts`                                | `admin_email_change` token helpers               |
+| File                                                           | Purpose                                          |
+| -------------------------------------------------------------- | ------------------------------------------------ |
+| `src/app/admin/account/page.tsx`                               | Admin account route shell                        |
+| `src/features/admin-shell/components/admin-account.tsx`        | Profile / Email / Security / Metadata / Activity |
+| `src/app/api/admin/account/route.ts`                           | `GET` account snapshot                           |
+| `src/app/api/admin/account/profile/route.ts`                   | `PATCH` name                                     |
+| `src/app/api/admin/account/email-change/route.ts`              | `POST` + `DELETE` email-change request           |
+| `src/app/api/admin/account/password/route.ts`                  | `POST` password change                           |
+| `src/app/api/auth/confirm-email-change/route.ts`               | Public consume (POST only)                       |
+| `src/app/(auth)/confirm-email-change/[token]/page.tsx`         | Scanner-safe GET preview page                    |
+| `src/features/auth/components/confirm-email-change-screen.tsx` | Client confirm button                            |
+| `src/lib/email/templates/admin-email-change.tsx`               | React Email template                             |
+| `src/features/auth/lib/links.ts`                               | `admin_email_change` token helpers               |
 
 ## Next Improvements
 

@@ -124,7 +124,7 @@ Not all files in `src/lib/data/` serve the same purpose. To reduce confusion for
   - actively used by candidate, collect, geo admin stats, geo import validation
 - `src/features/candidates/data/nigerian-parties.ts`
   - active runtime options for candidate forms (relocated to the Candidates feature in the Phase 5 architecture fixup)
-- `src/lib/data/legal-data.ts`
+- `src/lib/constants/legal-data.ts`
   - unrelated to geo, but active runtime content
 
 #### Active, but needs rebuild / correction

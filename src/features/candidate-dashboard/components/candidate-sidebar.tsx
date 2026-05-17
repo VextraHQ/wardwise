@@ -13,10 +13,10 @@ import {
   IconBell,
 } from "@tabler/icons-react";
 
-import { NavDocuments } from "@/components/layout/sidebar/nav-documents";
-import { NavMain } from "@/components/layout/sidebar/nav-main";
-import { NavSecondary } from "@/components/layout/sidebar/nav-secondary";
-import { NavUser } from "@/components/layout/sidebar/nav-user";
+import { NavDocuments } from "@/components/shared/sidebar/nav-documents";
+import { NavMain } from "@/components/shared/sidebar/nav-main";
+import { NavSecondary } from "@/components/shared/sidebar/nav-secondary";
+import { NavUser } from "@/components/shared/sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -26,7 +26,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Logo } from "@/components/layout/logo";
+import { Logo } from "@/components/shared/logo";
 
 const data = {
   user: {

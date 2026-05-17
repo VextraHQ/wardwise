@@ -5,7 +5,7 @@ import {
   AppStatusScreen,
   getErrorStatusScreenState,
   statusIcons,
-} from "@/components/system/app-status-screen";
+} from "@/components/shared/app-status-screen";
 
 export default function CampaignReportError({
   error,

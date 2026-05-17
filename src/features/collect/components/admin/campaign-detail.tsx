@@ -31,7 +31,7 @@ import {
 import {
   AdminResourceState,
   adminResourceStateIcons,
-} from "@/components/admin/shared/admin-resource-state";
+} from "@/features/admin-shell/components/shared/admin-resource-state";
 import { formatPersonName } from "@/lib/utils";
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {

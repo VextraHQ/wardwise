@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { NotFoundStatusScreen } from "@/components/system/not-found-status-screen";
+import { NotFoundStatusScreen } from "@/components/shared/not-found-status-screen";
 
 export const metadata: Metadata = {
   title: "Page Not Found",

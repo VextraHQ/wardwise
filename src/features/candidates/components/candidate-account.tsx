@@ -7,9 +7,9 @@ import {
   useDeleteCandidate,
   useResetCandidatePassword,
   useUpdateCandidateStatus,
-} from "@/hooks/use-admin";
+} from "@/features/admin-shell/hooks/use-admin";
 
-import type { CandidateWithUser } from "@/lib/api/admin";
+import type { CandidateWithUser } from "@/features/admin-shell/api/admin-api";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

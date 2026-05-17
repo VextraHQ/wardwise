@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { forgotPasswordSchema } from "@/lib/schemas/auth-schemas";
+import { forgotPasswordSchema } from "@/features/auth/schemas/auth-schemas";
 import { prisma } from "@/lib/core/prisma";
 import { getClientIp, recoveryRateLimit } from "@/lib/core/rate-limit";
 import {
   createPasswordResetForUser,
   revokeOutstandingAuthLinks,
-} from "@/lib/auth/links";
+} from "@/features/auth/lib/links";
 import { canSendAuthLinkEmail } from "@/lib/email/auth";
 
 export async function POST(request: Request) {

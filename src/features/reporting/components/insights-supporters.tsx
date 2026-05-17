@@ -37,8 +37,8 @@ import {
   AdminMobileRecordMeta,
   AdminMobileRecordSkeleton,
   AdminMobileRecordTitle,
-} from "@/components/admin/shared/admin-mobile-record-card";
-import { AdminPagination } from "@/components/admin/admin-pagination";
+} from "@/features/admin-shell/components/shared/admin-mobile-record-card";
+import { AdminPagination } from "@/features/admin-shell/components/admin-pagination";
 import {
   StepCard,
   CardSectionHeader,
@@ -50,7 +50,7 @@ import { InsightsExportMenu } from "./insights-export-menu";
 import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import { cn, formatPersonName } from "@/lib/utils";
 import { useCampaignReportSubmissions } from "@/features/reporting/hooks/use-campaign-report";
-import { useIsPortraitMobile } from "@/hooks/use-mobile";
+import { useIsPortraitMobile } from "@/hooks/shared/use-mobile";
 import { SubmissionStatusBadge } from "@/features/reporting/lib/insights-helpers";
 import type { CampaignReportSubmission } from "@/features/reporting/types/campaign-report.types";
 

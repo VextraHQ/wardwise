@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
-import { adminApi, type CandidateWithUser } from "@/lib/api/admin";
+import { adminApi, type CandidateWithUser } from "@/features/admin-shell/api/admin-api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,7 +25,7 @@ import { CandidateAccount } from "@/features/candidates/components/candidate-acc
 import {
   AdminResourceState,
   adminResourceStateIcons,
-} from "@/components/admin/shared/admin-resource-state";
+} from "@/features/admin-shell/components/shared/admin-resource-state";
 
 const ONBOARDING_STATUS_STYLES: Record<string, string> = {
   pending: "bg-orange-500/10 text-orange-600 border-orange-500/20",

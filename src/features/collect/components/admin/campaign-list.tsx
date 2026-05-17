@@ -22,27 +22,27 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
-import { AdminPagination } from "@/components/admin/admin-pagination";
-import { AdminSearchBar } from "@/components/admin/admin-search-bar";
+import { AdminPagination } from "@/features/admin-shell/components/admin-pagination";
+import { AdminSearchBar } from "@/features/admin-shell/components/admin-search-bar";
 import {
   CampaignFilters,
   type CampaignSort,
   type CampaignStatusFilter,
   type CampaignReportFilter,
   type CampaignActivityFilter,
-} from "@/components/admin/admin-filters/campaign-filters";
+} from "@/features/admin-shell/components/filters/campaign-filters";
 import { CampaignActionsMenu } from "@/features/collect/components/admin/campaign-actions-menu";
 import {
   getCampaignBrandingLabel,
   getCampaignDisplayHeadline,
 } from "@/features/collect/lib/branding";
-import { formatStatusLabel } from "@/lib/admin/dashboard";
+import { formatStatusLabel } from "@/features/admin-shell/server/admin-dashboard";
 import { isStaleCampaign } from "@/features/collect/lib/campaign-health";
 import { formatRelativeTime } from "@/lib/date-format";
 import {
   AdminResourceState,
   adminResourceStateIcons,
-} from "@/components/admin/shared/admin-resource-state";
+} from "@/features/admin-shell/components/shared/admin-resource-state";
 import {
   AdminMobileRecordCard,
   AdminMobileRecordField,
@@ -51,7 +51,7 @@ import {
   AdminMobileRecordMeta,
   AdminMobileRecordSkeleton,
   AdminMobileRecordTitle,
-} from "@/components/admin/shared/admin-mobile-record-card";
+} from "@/features/admin-shell/components/shared/admin-mobile-record-card";
 import { cn, formatPersonName } from "@/lib/utils";
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {

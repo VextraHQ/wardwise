@@ -8,7 +8,7 @@ import {
 } from "react-icons/hi";
 import { useGeoStats } from "@/features/geo/hooks/use-geo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatCardSkeleton } from "@/components/admin/admin-skeletons";
+import { StatCardSkeleton } from "@/features/admin-shell/components/admin-skeletons";
 
 export function GeoStatsBar() {
   const { data: stats, isLoading } = useGeoStats();

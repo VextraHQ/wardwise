@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { TermsContent } from "@/components/legal/terms-content";
+import { TermsContent } from "@/features/public-site/components/legal/terms-content";
 
 export const metadata: Metadata = {
   title: "Terms of Service",

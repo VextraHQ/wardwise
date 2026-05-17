@@ -19,7 +19,7 @@ import {
   CANDIDATE_PARTY_OTHER_OPTION,
   CANDIDATE_TITLE_OTHER_OPTION,
 } from "@/features/candidates/data/nigerian-parties";
-import { ListOrCustomField } from "@/components/admin/shared/list-or-custom-field";
+import { ListOrCustomField } from "@/features/admin-shell/components/shared/list-or-custom-field";
 
 interface StepIdentityProps {
   form: UseFormReturn<CreateCandidateFormValues>;

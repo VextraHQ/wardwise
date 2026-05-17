@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAdminCandidates } from "@/hooks/use-admin";
+import { useAdminCandidates } from "@/features/admin-shell/hooks/use-admin";
 import { HiOutlineUserAdd, HiOutlineUserGroup, HiX } from "react-icons/hi";
 import {
   IconClipboardList,
@@ -11,7 +11,7 @@ import {
 } from "@tabler/icons-react";
 
 import type { Candidate } from "@/features/candidates/types/candidate.types";
-import type { CandidateWithUser } from "@/lib/api/admin";
+import type { CandidateWithUser } from "@/features/admin-shell/api/admin-api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,21 +32,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { AdminSearchBar } from "@/components/admin/admin-search-bar";
+import { AdminSearchBar } from "@/features/admin-shell/components/admin-search-bar";
 import {
   CandidateFilters,
   type CandidateCollectFilter,
   type CandidateInsightsFilter,
   type CandidateSort,
-} from "@/components/admin/admin-filters/candidate-filters";
-import { AdminPagination } from "@/components/admin/admin-pagination";
+} from "@/features/admin-shell/components/filters/candidate-filters";
+import { AdminPagination } from "@/features/admin-shell/components/admin-pagination";
 import { CampaignActionMenuItems } from "@/features/collect/components/admin/campaign-actions-menu";
 import {
   AdminResourceState,
   adminResourceStateIcons,
-} from "@/components/admin/shared/admin-resource-state";
+} from "@/features/admin-shell/components/shared/admin-resource-state";
 
-import { formatStatusLabel } from "@/lib/admin/dashboard";
+import { formatStatusLabel } from "@/features/admin-shell/server/admin-dashboard";
 import { formatDisplayDate } from "@/lib/date-format";
 import { nigeriaStates } from "@/features/geo/data/state-lga-locations";
 import { cn, formatPersonName } from "@/lib/utils";
@@ -58,7 +58,7 @@ import {
   AdminMobileRecordMeta,
   AdminMobileRecordSkeleton,
   AdminMobileRecordTitle,
-} from "@/components/admin/shared/admin-mobile-record-card";
+} from "@/features/admin-shell/components/shared/admin-mobile-record-card";
 
 function resolveStateName(stateCode: string | null): string {
   if (!stateCode) return "Nigeria";

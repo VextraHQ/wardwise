@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/shared/use-mobile";
 import type { CampaignInsightsScope } from "@/features/reporting/hooks/use-campaign-insights-scope";
 import {
   formatDateRangeLabel,

@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AuthCard } from "@/components/auth/auth-card";
+import { AuthCard } from "@/features/auth/components/auth-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { IconKey, IconLoader } from "@tabler/icons-react";
 import { Spinner } from "@/components/ui/spinner";
-import { COMPANY_INFO } from "@/lib/data/legal-data";
+import { COMPANY_INFO } from "@/lib/constants/legal-data";
 import { useUnlockCampaignReport } from "@/features/reporting/hooks/use-campaign-report";
 import type { CampaignBrandingType } from "@/features/collect/lib/branding";
 import {

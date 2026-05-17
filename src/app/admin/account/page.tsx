@@ -1,4 +1,4 @@
-import { AdminAccount } from "@/components/admin/admin-account";
+import { AdminAccount } from "@/features/admin-shell/components/admin-account";
 import { createAdminMetadata } from "@/lib/core/metadata";
 
 export const metadata = createAdminMetadata({

@@ -25,7 +25,7 @@ import {
 } from "@tabler/icons-react";
 import type { CreateCampaignData } from "@/features/collect/schemas/collect-schemas";
 import { nigeriaStates, getLGAsByState } from "@/features/geo/data/state-lga-locations";
-import { ConstituencyBoundaryAlerts } from "@/components/admin/shared/constituency-boundary-alerts";
+import { ConstituencyBoundaryAlerts } from "@/features/admin-shell/components/shared/constituency-boundary-alerts";
 import { getConstituencyBoundaryWarnings } from "@/features/geo/lib/constituency";
 import {
   campaignBrandingTypes,

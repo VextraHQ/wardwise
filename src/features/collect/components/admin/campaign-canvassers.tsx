@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useIsPortraitMobile } from "@/hooks/use-mobile";
+import { useIsPortraitMobile } from "@/hooks/shared/use-mobile";
 import {
   Sheet,
   SheetContent,

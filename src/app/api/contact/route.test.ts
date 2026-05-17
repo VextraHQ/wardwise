@@ -23,7 +23,7 @@ vi.mock("@/lib/core/audit", () => ({
   logAudit: mockLogAudit,
 }));
 
-vi.mock("@/lib/contact/turnstile", () => ({
+vi.mock("@/features/public-site/lib/turnstile", () => ({
   verifyTurnstileToken: mockVerifyTurnstileToken,
 }));
 
