@@ -1,4 +1,4 @@
-import type { CandidateCollectCampaignSummary } from "@/features/admin-shell/api/admin-api";
+import type { CandidateCollectCampaignSummary } from "@/features/admin/api/admin-api";
 
 // Campaign rows as loaded for candidate list/detail transforms
 export type CampaignRowForSummaries = {

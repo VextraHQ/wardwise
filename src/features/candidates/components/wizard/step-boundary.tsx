@@ -6,9 +6,9 @@ import { useWatch } from "react-hook-form";
 
 import { Input } from "@/components/ui/input";
 import { ComboboxSelect } from "@/components/ui/combobox-select";
-import { LgaCheckboxGrid } from "@/features/admin-shell/components/shared/lga-checkbox-grid";
-import { ConstituencyBoundaryAlerts } from "@/features/admin-shell/components/shared/constituency-boundary-alerts";
-import { OfficialConstituencySelector } from "@/features/admin-shell/components/shared/official-constituency-selector";
+import { LgaCheckboxGrid } from "@/features/admin/components/shared/lga-checkbox-grid";
+import { ConstituencyBoundaryAlerts } from "@/features/admin/components/shared/constituency-boundary-alerts";
+import { OfficialConstituencySelector } from "@/features/admin/components/shared/official-constituency-selector";
 import {
   StepCard,
   CardSectionHeader,

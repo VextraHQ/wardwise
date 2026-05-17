@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import type { CandidateWithUser } from "@/features/admin-shell/api/admin-api";
+import type { CandidateWithUser } from "@/features/admin/api/admin-api";
 import type { CampaignSummary } from "@/features/collect/types/collect.types";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +27,7 @@ import {
   type DashboardSummary,
   formatDelta,
   type PriorityBucket,
-} from "@/features/admin-shell/server/admin-dashboard";
+} from "@/features/admin/server/admin-dashboard";
 import {
   CampaignRow,
   CandidateRow,
@@ -35,8 +35,8 @@ import {
   PriorityQueueRow,
   PriorityQueueRowSkeleton,
   RowSkeleton,
-} from "@/features/admin-shell/components/admin-dashboard-rows";
-export { CommandStrip } from "@/features/admin-shell/components/admin-command-strip";
+} from "@/features/admin/components/admin-dashboard-rows";
+export { CommandStrip } from "@/features/admin/components/admin-command-strip";
 
 const DELTA_TONE_CLASS: Record<"up" | "down" | "flat", string> = {
   up: "text-primary",

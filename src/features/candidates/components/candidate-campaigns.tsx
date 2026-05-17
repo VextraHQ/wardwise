@@ -37,7 +37,7 @@ import {
 } from "@/components/shared/admin/admin-resource-state";
 
 import { useCandidateCampaigns } from "@/features/collect/hooks/use-collect";
-import { formatStatusLabel } from "@/features/admin-shell/server/admin-dashboard";
+import { formatStatusLabel } from "@/features/admin/server/admin-dashboard";
 import { isStaleCampaign } from "@/features/collect/lib/campaign-health";
 import { getCampaignDisplayHeadline } from "@/features/collect/lib/branding";
 import { formatRelativeTime } from "@/lib/date-format";

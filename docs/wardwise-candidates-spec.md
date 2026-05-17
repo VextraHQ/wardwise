@@ -272,49 +272,49 @@ The shared `ComboboxSelect` component (`src/components/ui/combobox-select.tsx`) 
 
 ## Key Files
 
-| File                                                                            | Purpose                                                                                                                                      |
-| ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `prisma/schema.prisma`                                                          | Candidate model definition                                                                                                                   |
-| `prisma/seed.ts`                                                                | Seed data (11 candidates, 7 canvassers, 6 voters, 1 admin)                                                                                   |
-| `src/features/candidates/types/candidate.types.ts`                              | TypeScript type                                                                                                                              |
-| `src/features/candidates/schemas/candidate-schemas.ts`                          | Zod validation schemas (with FCT superRefine)                                                                                                |
-| `src/features/admin-shell/api/admin-api.ts`                                     | Client-side API helpers                                                                                                                      |
-| `src/features/candidates/data/nigerian-parties.ts`                              | Party + title options                                                                                                                        |
-| `src/features/geo/data/nigerian-constituencies.ts`                              | Official constituency presets (Senator: 109 shipped, HoR: 350 shipped + 10 unsupported split seats)                                          |
-| `src/features/geo/lib/constituency.ts`                                          | Shared isomorphic helpers (position→type, warnings, auto-suggest, preset matching)                                                           |
-| `src/features/geo/server/constituency-server.ts`                                | Server-side constituency LGA validation + state matching                                                                                     |
-| `src/app/api/admin/candidates/route.ts`                                         | GET + POST endpoints                                                                                                                         |
-| `src/app/api/admin/candidates/[id]/route.ts`                                    | GET + PUT + DELETE                                                                                                                           |
-| `src/app/api/admin/candidates/[id]/reset-password/route.ts`                     | Secure reset-link issuing                                                                                                                    |
-| `src/app/admin/candidates/new/page.tsx`                                         | Create route                                                                                                                                 |
-| `src/app/admin/candidates/[id]/page.tsx`                                        | Detail route                                                                                                                                 |
-| `src/features/candidates/components/create-candidate-form.tsx`                  | Wizard orchestrator (4 steps, validation, submission, draft autosave, motion transitions, error routing)                                     |
-| `src/features/candidates/components/wizard/step-identity.tsx`                   | Step 1: title, name, email, phone, party (uses `ListOrCustomField` for title + party; on-blur validation)                                    |
-| `src/features/candidates/components/wizard/step-position.tsx`                   | Step 2: electoral office / `position` (`StepPosition`; radios; focus-within ring + no-op guard)                                              |
-| `src/features/candidates/components/wizard/step-boundary.tsx`                   | Step 3: state, presets, constituency LGAs, constituency name (locked for President + Governor), boundary warnings                            |
-| `src/features/candidates/components/wizard/step-review.tsx`                     | Step 4: section-grouped summary (Identity / Office / Boundary) with section-level Edit buttons + LGA chips + boundary warnings + description |
-| `src/features/admin-shell/components/shared/list-or-custom-field.tsx`           | Shared "pick from list / type your own" composite (Title, Party — used by wizard step 1 + `candidate-overview.tsx`)                          |
-| `src/hooks/shared/use-wizard-draft.ts`                                          | Generic `localStorage` draft hook (debounced save, TTL expiry, restore-on-mount, `discard`/`clear`)                                          |
-| `src/components/ui/step-progress.tsx`                                           | Progress bar; supports optional `stepTitles` and `onStepClick` for clickable back-jumps with per-segment breadcrumb labels                   |
-| `src/features/candidates/components/credentials-dialog.tsx`                     | Post-create secure setup-link display                                                                                                        |
-| `src/features/candidates/components/candidate-detail.tsx`                       | Detail page with tabs                                                                                                                        |
-| `src/features/candidates/components/candidate-overview.tsx`                     | Overview tab (with boundary edit + warnings)                                                                                                 |
-| `src/features/candidates/components/candidate-campaigns.tsx`                    | Campaigns tab                                                                                                                                |
-| `src/features/candidates/components/candidate-account.tsx`                      | Account tab                                                                                                                                  |
-| `src/features/candidates/components/candidate-management.tsx`                   | Table-based list view                                                                                                                        |
-| `src/features/admin-shell/components/shared/lga-checkbox-grid.tsx`              | Shared searchable checkbox grid (candidate boundary + campaign restrict)                                                                     |
-| `src/features/admin-shell/components/shared/official-constituency-selector.tsx` | Shared official constituency picker + source notes                                                                                           |
-| `src/features/admin-shell/components/shared/constituency-boundary-alerts.tsx`   | Reusable soft warning banners for boundary issues                                                                                            |
+| File                                                                      | Purpose                                                                                                                                      |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prisma/schema.prisma`                                                    | Candidate model definition                                                                                                                   |
+| `prisma/seed.ts`                                                          | Seed data (11 candidates, 7 canvassers, 6 voters, 1 admin)                                                                                   |
+| `src/features/candidates/types/candidate.types.ts`                        | TypeScript type                                                                                                                              |
+| `src/features/candidates/schemas/candidate-schemas.ts`                    | Zod validation schemas (with FCT superRefine)                                                                                                |
+| `src/features/admin/api/admin-api.ts`                                     | Client-side API helpers                                                                                                                      |
+| `src/features/candidates/data/nigerian-parties.ts`                        | Party + title options                                                                                                                        |
+| `src/features/geo/data/nigerian-constituencies.ts`                        | Official constituency presets (Senator: 109 shipped, HoR: 350 shipped + 10 unsupported split seats)                                          |
+| `src/features/geo/lib/constituency.ts`                                    | Shared isomorphic helpers (position→type, warnings, auto-suggest, preset matching)                                                           |
+| `src/features/geo/server/constituency-server.ts`                          | Server-side constituency LGA validation + state matching                                                                                     |
+| `src/app/api/admin/candidates/route.ts`                                   | GET + POST endpoints                                                                                                                         |
+| `src/app/api/admin/candidates/[id]/route.ts`                              | GET + PUT + DELETE                                                                                                                           |
+| `src/app/api/admin/candidates/[id]/reset-password/route.ts`               | Secure reset-link issuing                                                                                                                    |
+| `src/app/admin/candidates/new/page.tsx`                                   | Create route                                                                                                                                 |
+| `src/app/admin/candidates/[id]/page.tsx`                                  | Detail route                                                                                                                                 |
+| `src/features/candidates/components/create-candidate-form.tsx`            | Wizard orchestrator (4 steps, validation, submission, draft autosave, motion transitions, error routing)                                     |
+| `src/features/candidates/components/wizard/step-identity.tsx`             | Step 1: title, name, email, phone, party (uses `ListOrCustomField` for title + party; on-blur validation)                                    |
+| `src/features/candidates/components/wizard/step-position.tsx`             | Step 2: electoral office / `position` (`StepPosition`; radios; focus-within ring + no-op guard)                                              |
+| `src/features/candidates/components/wizard/step-boundary.tsx`             | Step 3: state, presets, constituency LGAs, constituency name (locked for President + Governor), boundary warnings                            |
+| `src/features/candidates/components/wizard/step-review.tsx`               | Step 4: section-grouped summary (Identity / Office / Boundary) with section-level Edit buttons + LGA chips + boundary warnings + description |
+| `src/features/admin/components/shared/list-or-custom-field.tsx`           | Shared "pick from list / type your own" composite (Title, Party — used by wizard step 1 + `candidate-overview.tsx`)                          |
+| `src/hooks/shared/use-wizard-draft.ts`                                    | Generic `localStorage` draft hook (debounced save, TTL expiry, restore-on-mount, `discard`/`clear`)                                          |
+| `src/components/ui/step-progress.tsx`                                     | Progress bar; supports optional `stepTitles` and `onStepClick` for clickable back-jumps with per-segment breadcrumb labels                   |
+| `src/features/candidates/components/credentials-dialog.tsx`               | Post-create secure setup-link display                                                                                                        |
+| `src/features/candidates/components/candidate-detail.tsx`                 | Detail page with tabs                                                                                                                        |
+| `src/features/candidates/components/candidate-overview.tsx`               | Overview tab (with boundary edit + warnings)                                                                                                 |
+| `src/features/candidates/components/candidate-campaigns.tsx`              | Campaigns tab                                                                                                                                |
+| `src/features/candidates/components/candidate-account.tsx`                | Account tab                                                                                                                                  |
+| `src/features/candidates/components/candidate-management.tsx`             | Table-based list view                                                                                                                        |
+| `src/features/admin/components/shared/lga-checkbox-grid.tsx`              | Shared searchable checkbox grid (candidate boundary + campaign restrict)                                                                     |
+| `src/features/admin/components/shared/official-constituency-selector.tsx` | Shared official constituency picker + source notes                                                                                           |
+| `src/features/admin/components/shared/constituency-boundary-alerts.tsx`   | Reusable soft warning banners for boundary issues                                                                                            |
 
 ---
 
 ## Deleted Files (replaced)
 
-- `src/features/admin-shell/components/admin-dialogs/create-candidate-dialog.tsx` → replaced by create page
-- `src/features/admin-shell/components/admin-dialogs/edit-candidate-dialog.tsx` → replaced by detail page
-- `src/features/admin-shell/components/admin-dialogs/delete-candidate-dialog.tsx` → replaced by inline reviewed Account tab danger zone
-- `src/features/admin-shell/components/admin-list-item-candidate.tsx` → replaced by table rows
-- `src/features/admin-shell/components/admin-grid-item-candidate.tsx` → replaced by table rows
+- `src/features/admin/components/admin-dialogs/create-candidate-dialog.tsx` → replaced by create page
+- `src/features/admin/components/admin-dialogs/edit-candidate-dialog.tsx` → replaced by detail page
+- `src/features/admin/components/admin-dialogs/delete-candidate-dialog.tsx` → replaced by inline reviewed Account tab danger zone
+- `src/features/admin/components/admin-list-item-candidate.tsx` → replaced by table rows
+- `src/features/admin/components/admin-grid-item-candidate.tsx` → replaced by table rows
 
 ---
 

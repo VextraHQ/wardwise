@@ -12,13 +12,13 @@ import {
   PASSWORD_STALE_DAYS,
   passwordAgeDays,
   useEditModeForm,
-} from "@/features/admin-shell/lib/account";
-import { useChangeAdminPassword } from "@/features/admin-shell/hooks/use-admin";
+} from "@/features/admin/lib/account";
+import { useChangeAdminPassword } from "@/features/admin/hooks/use-admin";
 import { formatDisplayDateTime, formatRelativeTime } from "@/lib/date-format";
 import {
   changeAdminPasswordSchema,
   type ChangeAdminPasswordFormValues,
-} from "@/features/admin-shell/schemas/admin-schemas";
+} from "@/features/admin/schemas/admin-schemas";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,7 +33,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 
-import { RevealablePasswordInput } from "@/features/admin-shell/components/account/ui";
+import { RevealablePasswordInput } from "@/features/admin/components/account/ui";
 
 interface PasswordCardProps {
   passwordChangedAt: string | null;

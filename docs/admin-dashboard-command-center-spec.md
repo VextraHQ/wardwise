@@ -3,7 +3,7 @@
 > Living implementation spec for reworking `/admin` from a passive stats page into an operational command center.
 > Last updated: 2026-04-19
 > Status: **Shipped** on `develop` (M1–M4 complete, see Implementation Notes).
-> Primary file: `src/features/admin-shell/components/admin-dashboard.tsx`
+> Primary file: `src/features/admin/components/admin-dashboard.tsx`
 
 ---
 
@@ -244,7 +244,7 @@ Use existing data first. Do not add new API routes in the first implementation p
 
 Available hooks:
 
-- `useAdminCandidates()` in `src/features/admin-shell/hooks/use-admin`
+- `useAdminCandidates()` in `src/features/admin/hooks/use-admin`
 - `useCampaigns()` in `src/features/collect/hooks/use-collect`
 
 Derived values:
@@ -304,7 +304,7 @@ These should wait until real routes/data are available.
 
 ### Phase 1 - Structure and Derived Data
 
-- [x] Keep work in `src/features/admin-shell/components/admin-dashboard.tsx` unless a subcomponent is clearly reusable.
+- [x] Keep work in `src/features/admin/components/admin-dashboard.tsx` unless a subcomponent is clearly reusable.
 - [x] Replace top button-only strip with a compact Operations Overview section.
 - [x] Add derived arrays/counts for attention items.
 - [x] Build reusable local helpers inside the file:
@@ -386,7 +386,7 @@ Important:
 
 Primary:
 
-- `src/features/admin-shell/components/admin-dashboard.tsx`
+- `src/features/admin/components/admin-dashboard.tsx`
 
 Likely reused:
 
@@ -405,8 +405,8 @@ Do not change unless needed:
 
 ## Verification Checklist
 
-- [x] `pnpm exec prettier --check src/features/admin-shell/components/admin-dashboard.tsx`
-- [x] `pnpm exec eslint src/features/admin-shell/components/admin-dashboard.tsx`
+- [x] `pnpm exec prettier --check src/features/admin/components/admin-dashboard.tsx`
+- [x] `pnpm exec eslint src/features/admin/components/admin-dashboard.tsx`
 - [x] `pnpm exec tsc --noEmit --pretty false`
 - [x] Dashboard loads with zero candidates.
 - [x] Dashboard loads with candidates but no campaigns.
@@ -433,7 +433,7 @@ Use this when handing the task to Claude:
 Please implement the admin dashboard redesign from docs/admin-dashboard-command-center-spec.md.
 
 Scope:
-- Update src/features/admin-shell/components/admin-dashboard.tsx.
+- Update src/features/admin/components/admin-dashboard.tsx.
 - Reuse existing hooks: useAdminCandidates() and useCampaigns().
 - Reuse CampaignActionsMenu for campaign rows.
 - Do not add new API routes or Prisma changes.
@@ -447,8 +447,8 @@ Target UX:
 - Keep Coverage Snapshot lower priority.
 
 Run:
-- pnpm exec prettier --write src/features/admin-shell/components/admin-dashboard.tsx
-- pnpm exec eslint src/features/admin-shell/components/admin-dashboard.tsx
+- pnpm exec prettier --write src/features/admin/components/admin-dashboard.tsx
+- pnpm exec eslint src/features/admin/components/admin-dashboard.tsx
 - pnpm exec tsc --noEmit --pretty false
 
 After implementation, summarize what changed and call out any tradeoffs.

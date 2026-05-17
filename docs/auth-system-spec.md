@@ -294,7 +294,7 @@ Note: environments that _already_ seeded `admin@wardwise.ng` before this guard l
 | File                                                           | Purpose                                          |
 | -------------------------------------------------------------- | ------------------------------------------------ |
 | `src/app/admin/account/page.tsx`                               | Admin account route shell                        |
-| `src/features/admin-shell/components/admin-account.tsx`        | Profile / Email / Security / Metadata / Activity |
+| `src/features/admin/components/admin-account.tsx`              | Profile / Email / Security / Metadata / Activity |
 | `src/app/api/admin/account/route.ts`                           | `GET` account snapshot                           |
 | `src/app/api/admin/account/profile/route.ts`                   | `PATCH` name                                     |
 | `src/app/api/admin/account/email-change/route.ts`              | `POST` + `DELETE` email-change request           |

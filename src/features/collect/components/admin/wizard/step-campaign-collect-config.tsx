@@ -12,7 +12,7 @@ import {
   FieldLabel,
   NavButtons,
 } from "@/features/collect/components/public/form-ui";
-import { LgaCheckboxGrid } from "@/features/admin-shell/components/shared/lga-checkbox-grid";
+import { LgaCheckboxGrid } from "@/features/admin/components/shared/lga-checkbox-grid";
 import { useGeoLgas } from "@/features/geo/hooks/use-geo";
 import { positionRequiresLgas } from "@/features/geo/lib/constituency";
 import type { CreateCampaignData } from "@/features/collect/schemas/collect-schemas";

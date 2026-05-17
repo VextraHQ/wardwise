@@ -30,13 +30,13 @@ import {
   type CampaignStatusFilter,
   type CampaignReportFilter,
   type CampaignActivityFilter,
-} from "@/features/admin-shell/components/filters/campaign-filters";
+} from "@/features/admin/components/filters/campaign-filters";
 import { CampaignActionsMenu } from "@/features/collect/components/admin/campaign-actions-menu";
 import {
   getCampaignBrandingLabel,
   getCampaignDisplayHeadline,
 } from "@/features/collect/lib/branding";
-import { formatStatusLabel } from "@/features/admin-shell/server/admin-dashboard";
+import { formatStatusLabel } from "@/features/admin/server/admin-dashboard";
 import { isStaleCampaign } from "@/features/collect/lib/campaign-health";
 import { formatRelativeTime } from "@/lib/date-format";
 import {

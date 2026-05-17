@@ -5,19 +5,19 @@ import { IconClockHour4 } from "@tabler/icons-react";
 import type {
   AdminAccount,
   AdminAccountActivityItem,
-} from "@/features/admin-shell/api/admin-api";
+} from "@/features/admin/api/admin-api";
 import {
   ACCOUNT_DATETIME_OPTIONS,
   describeActivity,
   getActivityContext,
-} from "@/features/admin-shell/lib/account";
+} from "@/features/admin/lib/account";
 import { formatDisplayDateTime, formatRelativeTime } from "@/lib/date-format";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { OverviewField } from "@/features/admin-shell/components/account/ui";
+import { OverviewField } from "@/features/admin/components/account/ui";
 
 export function AccountRecordCard({ account }: { account: AdminAccount }) {
   return (

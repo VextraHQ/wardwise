@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatRelativeTime } from "@/lib/date-format";
-import { pluralize } from "@/features/admin-shell/server/admin-dashboard";
+import { pluralize } from "@/features/admin/server/admin-dashboard";
 import { cn } from "@/lib/utils";
 
 export function CommandStrip({

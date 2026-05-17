@@ -1,7 +1,7 @@
 import type {
   AdminDashboardSummary,
   CandidateWithUser,
-} from "@/features/admin-shell/api/admin-api";
+} from "@/features/admin/api/admin-api";
 import { nigeriaStates } from "@/features/geo/data/state-lga-locations";
 import type { CampaignSummary } from "@/features/collect/types/collect.types";
 import { formatPersonName } from "@/lib/utils";

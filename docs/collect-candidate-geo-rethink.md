@@ -228,21 +228,21 @@ This exception is intentional for faster Collect launch. It allows admins to onb
 
 ## Key Files
 
-| File                                                                          | Role                                                                          |
-| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `prisma/schema.prisma`                                                        | Candidate model — add `constituencyLgaIds`                                    |
-| `src/features/geo/lib/constituency.ts`                                        | Shared helpers (position → type, warning rules, LGA name generation)          |
-| `src/features/geo/server/constituency-server.ts`                              | Server-side constituency LGA normalization + state validation                 |
-| `src/features/admin-shell/components/shared/lga-checkbox-grid.tsx`            | Shared searchable checkbox grid for candidate boundary + campaign restriction |
-| `src/features/admin-shell/components/shared/constituency-boundary-alerts.tsx` | Reusable UI for soft warning banners                                          |
-| `src/features/candidates/schemas/candidate-schemas.ts`                        | Candidate validation — add `constituencyLgaIds`                               |
-| `src/features/collect/schemas/collect-schemas.ts`                             | Campaign validation — simplify                                                |
-| `src/features/candidates/components/wizard/step-boundary.tsx`                 | Candidate create Step 3: LGA boundary + presets                               |
-| `src/features/candidates/components/wizard/step-review.tsx`                   | Candidate create Step 4 — review + boundary warning summary                   |
-| `src/features/candidates/components/candidate-overview.tsx`                   | Candidate edit page — same boundary UX + warnings                             |
-| `src/features/collect/components/admin/wizard/campaign-wizard.tsx`            | 3-step flow: candidate setup → collect config → review & create               |
-| `src/features/collect/components/admin/wizard/step-candidate-setup.tsx`       | Candidate scope summary + inherited boundary warnings                         |
-| `src/app/api/admin/collect/campaigns/route.ts`                                | Server-side field derivation                                                  |
-| `src/app/api/admin/candidates/route.ts`                                       | Candidate create validation + persistence                                     |
-| `src/app/api/admin/candidates/[id]/route.ts`                                  | Candidate update validation + persistence                                     |
-| `src/features/admin-shell/hooks/use-admin.ts`                                 | Update candidate mutation hooks                                               |
+| File                                                                    | Role                                                                          |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `prisma/schema.prisma`                                                  | Candidate model — add `constituencyLgaIds`                                    |
+| `src/features/geo/lib/constituency.ts`                                  | Shared helpers (position → type, warning rules, LGA name generation)          |
+| `src/features/geo/server/constituency-server.ts`                        | Server-side constituency LGA normalization + state validation                 |
+| `src/features/admin/components/shared/lga-checkbox-grid.tsx`            | Shared searchable checkbox grid for candidate boundary + campaign restriction |
+| `src/features/admin/components/shared/constituency-boundary-alerts.tsx` | Reusable UI for soft warning banners                                          |
+| `src/features/candidates/schemas/candidate-schemas.ts`                  | Candidate validation — add `constituencyLgaIds`                               |
+| `src/features/collect/schemas/collect-schemas.ts`                       | Campaign validation — simplify                                                |
+| `src/features/candidates/components/wizard/step-boundary.tsx`           | Candidate create Step 3: LGA boundary + presets                               |
+| `src/features/candidates/components/wizard/step-review.tsx`             | Candidate create Step 4 — review + boundary warning summary                   |
+| `src/features/candidates/components/candidate-overview.tsx`             | Candidate edit page — same boundary UX + warnings                             |
+| `src/features/collect/components/admin/wizard/campaign-wizard.tsx`      | 3-step flow: candidate setup → collect config → review & create               |
+| `src/features/collect/components/admin/wizard/step-candidate-setup.tsx` | Candidate scope summary + inherited boundary warnings                         |
+| `src/app/api/admin/collect/campaigns/route.ts`                          | Server-side field derivation                                                  |
+| `src/app/api/admin/candidates/route.ts`                                 | Candidate create validation + persistence                                     |
+| `src/app/api/admin/candidates/[id]/route.ts`                            | Candidate update validation + persistence                                     |
+| `src/features/admin/hooks/use-admin.ts`                                 | Update candidate mutation hooks                                               |

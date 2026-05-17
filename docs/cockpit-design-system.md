@@ -387,7 +387,7 @@ Used by `candidate-sidebar.tsx`. Phase 8 scope to promote to `components/shared/
 | `nav-documents.tsx` | ✅ `TOOLS` group label                                          |
 | `nav-user.tsx`      | ✅ `rounded-sm` avatars/dropdowns                               |
 
-### Admin Dashboard (`src/features/admin-shell/components/`)
+### Admin Dashboard (`src/features/admin/components/`)
 
 > Admin dashboard redesign direction: see `docs/admin-dashboard-command-center-spec.md`.
 > The dashboard should behave as an operations command center: actions first,

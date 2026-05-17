@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CampaignActionsMenu } from "@/features/collect/components/admin/campaign-actions-menu";
 
-import type { CandidateWithUser } from "@/features/admin-shell/api/admin-api";
+import type { CandidateWithUser } from "@/features/admin/api/admin-api";
 import {
   campaignDisplay,
   formatStatusLabel,
   type PriorityBucket,
   resolveStateName,
-} from "@/features/admin-shell/server/admin-dashboard";
+} from "@/features/admin/server/admin-dashboard";
 import { isStaleCampaign } from "@/features/collect/lib/campaign-health";
 import { formatRelativeTime } from "@/lib/date-format";
 import type { CampaignSummary } from "@/features/collect/types/collect.types";

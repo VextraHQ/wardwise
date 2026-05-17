@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
 
-import type { AdminAccountActivityItem } from "@/features/admin-shell/api/admin-api";
+import type { AdminAccountActivityItem } from "@/features/admin/api/admin-api";
 import { formatRequestIpLabel } from "@/lib/core/ip";
 
 export const PASSWORD_STALE_DAYS = 90;

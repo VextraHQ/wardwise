@@ -9,17 +9,17 @@ import { toast } from "sonner";
 import {
   ACCOUNT_DATETIME_OPTIONS,
   useEditModeForm,
-} from "@/features/admin-shell/lib/account";
+} from "@/features/admin/lib/account";
 import {
   useCancelAdminEmailChange,
   useRequestAdminEmailChange,
-} from "@/features/admin-shell/hooks/use-admin";
-import type { PendingAdminEmailChange } from "@/features/admin-shell/api/admin-api";
+} from "@/features/admin/hooks/use-admin";
+import type { PendingAdminEmailChange } from "@/features/admin/api/admin-api";
 import { formatDisplayDateTime } from "@/lib/date-format";
 import {
   requestAdminEmailChangeSchema,
   type RequestAdminEmailChangeFormValues,
-} from "@/features/admin-shell/schemas/admin-schemas";
+} from "@/features/admin/schemas/admin-schemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -34,7 +34,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 
-import { RevealablePasswordInput } from "@/features/admin-shell/components/account/ui";
+import { RevealablePasswordInput } from "@/features/admin/components/account/ui";
 
 interface EmailCardProps {
   currentEmail: string;

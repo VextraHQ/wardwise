@@ -4,18 +4,18 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { IconAlertTriangle } from "@tabler/icons-react";
 
-import { useAdminAccount } from "@/features/admin-shell/hooks/use-admin";
-import { ACCOUNT_DATETIME_OPTIONS } from "@/features/admin-shell/lib/account";
+import { useAdminAccount } from "@/features/admin/hooks/use-admin";
+import { ACCOUNT_DATETIME_OPTIONS } from "@/features/admin/lib/account";
 import { formatDisplayDateTime, formatRelativeTime } from "@/lib/date-format";
 
-import { EmailCard } from "@/features/admin-shell/components/account/email-card";
-import { PasswordCard } from "@/features/admin-shell/components/account/password-card";
-import { ProfileCard } from "@/features/admin-shell/components/account/profile-card";
+import { EmailCard } from "@/features/admin/components/account/email-card";
+import { PasswordCard } from "@/features/admin/components/account/password-card";
+import { ProfileCard } from "@/features/admin/components/account/profile-card";
 import {
   AccountRecordCard,
   ActivityCard,
   LoadingState,
-} from "@/features/admin-shell/components/account/support-cards";
+} from "@/features/admin/components/account/support-cards";
 
 type EditingSection = "profile" | "email" | "password" | null;
 

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAdminCandidates } from "@/features/admin-shell/hooks/use-admin";
+import { useAdminCandidates } from "@/features/admin/hooks/use-admin";
 import { HiOutlineUserAdd, HiOutlineUserGroup, HiX } from "react-icons/hi";
 import {
   IconClipboardList,
@@ -11,7 +11,7 @@ import {
 } from "@tabler/icons-react";
 
 import type { Candidate } from "@/features/candidates/types/candidate.types";
-import type { CandidateWithUser } from "@/features/admin-shell/api/admin-api";
+import type { CandidateWithUser } from "@/features/admin/api/admin-api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,7 +38,7 @@ import {
   type CandidateCollectFilter,
   type CandidateInsightsFilter,
   type CandidateSort,
-} from "@/features/admin-shell/components/filters/candidate-filters";
+} from "@/features/admin/components/filters/candidate-filters";
 import { AdminPagination } from "@/components/shared/admin/admin-pagination";
 import { CampaignActionMenuItems } from "@/features/collect/components/admin/campaign-actions-menu";
 import {
@@ -46,7 +46,7 @@ import {
   adminResourceStateIcons,
 } from "@/components/shared/admin/admin-resource-state";
 
-import { formatStatusLabel } from "@/features/admin-shell/server/admin-dashboard";
+import { formatStatusLabel } from "@/features/admin/server/admin-dashboard";
 import { formatDisplayDate } from "@/lib/date-format";
 import { nigeriaStates } from "@/features/geo/data/state-lga-locations";
 import { cn, formatPersonName } from "@/lib/utils";

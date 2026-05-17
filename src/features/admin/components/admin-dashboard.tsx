@@ -9,7 +9,7 @@ import {
   campaignDisplay,
   candidateDisplay,
   type PriorityBucket,
-} from "@/features/admin-shell/server/admin-dashboard";
+} from "@/features/admin/server/admin-dashboard";
 import {
   CommandStrip,
   CoverageStrip,
@@ -18,15 +18,15 @@ import {
   PriorityQueue,
   QuickMoves,
   RecentCandidatesSection,
-} from "@/features/admin-shell/components/admin-dashboard-sections";
+} from "@/features/admin/components/admin-dashboard-sections";
 import {
   useAdminCandidates,
   useAdminDashboardSummary,
-} from "@/features/admin-shell/hooks/use-admin";
+} from "@/features/admin/hooks/use-admin";
 import { useCampaigns } from "@/features/collect/hooks/use-collect";
 import { isStaleCampaign } from "@/features/collect/lib/campaign-health";
 import { positionRequiresLgas } from "@/features/geo/lib/constituency";
-import type { CandidateWithUser } from "@/features/admin-shell/api/admin-api";
+import type { CandidateWithUser } from "@/features/admin/api/admin-api";
 import type { CampaignSummary } from "@/features/collect/types/collect.types";
 
 // This function builds up all the buckets of issues that need admin attention.

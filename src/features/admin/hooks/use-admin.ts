@@ -8,7 +8,7 @@ import {
   type RequestAdminEmailChangeData,
   type UpdateAdminProfileData,
   type UpdateCandidateData,
-} from "@/features/admin-shell/api/admin-api";
+} from "@/features/admin/api/admin-api";
 
 // === Query Hooks ===
 

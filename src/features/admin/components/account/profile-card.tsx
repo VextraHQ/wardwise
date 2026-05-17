@@ -5,12 +5,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { IconDeviceFloppy, IconPencil, IconX } from "@tabler/icons-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useUpdateAdminProfile } from "@/features/admin-shell/hooks/use-admin";
-import { useEditModeForm } from "@/features/admin-shell/lib/account";
+import { useUpdateAdminProfile } from "@/features/admin/hooks/use-admin";
+import { useEditModeForm } from "@/features/admin/lib/account";
 import {
   updateAdminProfileSchema,
   type UpdateAdminProfileFormValues,
-} from "@/features/admin-shell/schemas/admin-schemas";
+} from "@/features/admin/schemas/admin-schemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

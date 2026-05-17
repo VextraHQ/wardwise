@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
-import { useCreateCandidate } from "@/features/admin-shell/hooks/use-admin";
+import { useCreateCandidate } from "@/features/admin/hooks/use-admin";
 import { useWizardDraft } from "@/hooks/shared/use-wizard-draft";
 import { track } from "@/lib/analytics/client";
 
@@ -31,7 +31,7 @@ import {
   createCandidateSchema,
   type CreateCandidateFormValues,
 } from "@/features/candidates/schemas/candidate-schemas";
-import { type CreateCandidateResponse } from "@/features/admin-shell/api/admin-api";
+import { type CreateCandidateResponse } from "@/features/admin/api/admin-api";
 import { CredentialsDialog } from "@/features/candidates/components/credentials-dialog";
 import { StepIdentity } from "@/features/candidates/components/wizard/step-identity";
 import { StepPosition } from "@/features/candidates/components/wizard/step-position";

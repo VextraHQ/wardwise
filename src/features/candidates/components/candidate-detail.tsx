@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   adminApi,
   type CandidateWithUser,
-} from "@/features/admin-shell/api/admin-api";
+} from "@/features/admin/api/admin-api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
