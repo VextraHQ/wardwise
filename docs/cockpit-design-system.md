@@ -363,29 +363,29 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 | `section-cards.tsx`          | ✅ Mono taxonomy eyebrows                               |
 | `dashboard-content.tsx`      | ✅ Ward Coverage card, stat boxes                       |
 | `chart-area-interactive.tsx` | ✅ Tags, toggle/select                                  |
+| `chart-patterns.tsx`         | ✅ All 7 chart cards                                    |
+| `data-table.tsx`             | ✅ Table headers, tabs, badges, pagination              |
+| `analytics-content.tsx`      | ✅ Tab triggers, cards, buttons                         |
+| `supporters-content.tsx`     | ✅ Table, pagination, empty state                       |
+| `wards-content.tsx`          | ✅ Overview card, ward cards, dashed empty state        |
+| `reports-content.tsx`        | ✅ Report cards, stat boxes, tables                     |
+| `pricing-content.tsx`        | ✅ Plan cards, badges, buttons                          |
+| `notifications-content.tsx`  | ✅ Card + badge                                         |
+| `messages-content.tsx`       | ✅ Card                                                 |
+| `settings-content.tsx`       | ✅ Card                                                 |
+| `export-content.tsx`         | ✅ Card + export buttons                                |
+| `help/page.tsx`              | ✅ Card                                                 |
 
 #### Sidebar primitives (`src/components/layout/sidebar/`)
 
 Used by `candidate-sidebar.tsx`. Phase 8 scope to promote to `components/shared/` (or fold into the feature if not reused after Phase 8 inventory).
 
-| Component                   | Status                                                          |
-| --------------------------- | --------------------------------------------------------------- |
-| `nav-main.tsx`              | ✅ Quick Actions button, optional `label` prop for group labels |
-| `nav-secondary.tsx`         | ✅ `SYSTEM` group label, active state tracking                  |
-| `nav-documents.tsx`         | ✅ `TOOLS` group label                                          |
-| `nav-user.tsx`              | ✅ `rounded-sm` avatars/dropdowns                               |
-| `chart-patterns.tsx`        | ✅ All 7 chart cards                                            |
-| `data-table.tsx`            | ✅ Table headers, tabs, badges, pagination                      |
-| `analytics-content.tsx`     | ✅ Tab triggers, cards, buttons                                 |
-| `supporters-content.tsx`    | ✅ Table, pagination, empty state                               |
-| `wards-content.tsx`         | ✅ Overview card, ward cards, dashed empty state                |
-| `reports-content.tsx`       | ✅ Report cards, stat boxes, tables                             |
-| `pricing-content.tsx`       | ✅ Plan cards, badges, buttons                                  |
-| `notifications-content.tsx` | ✅ Card + badge                                                 |
-| `messages-content.tsx`      | ✅ Card                                                         |
-| `settings-content.tsx`      | ✅ Card                                                         |
-| `export-content.tsx`        | ✅ Card + export buttons                                        |
-| `help/page.tsx`             | ✅ Card                                                         |
+| Component           | Status                                                          |
+| ------------------- | --------------------------------------------------------------- |
+| `nav-main.tsx`      | ✅ Quick Actions button, optional `label` prop for group labels |
+| `nav-secondary.tsx` | ✅ `SYSTEM` group label, active state tracking                  |
+| `nav-documents.tsx` | ✅ `TOOLS` group label                                          |
+| `nav-user.tsx`      | ✅ `rounded-sm` avatars/dropdowns                               |
 
 ### Admin Dashboard (`src/components/admin/`)
 
