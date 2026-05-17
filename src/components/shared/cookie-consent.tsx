@@ -35,7 +35,6 @@ import { cn } from "@/lib/utils";
  * The consent value is used to conditionally load analytics.
  * Check consent with: getConsentValue()
  */
-
 type CookieSettingsButtonProps = ComponentProps<typeof Button> & {
   label?: string;
 };
