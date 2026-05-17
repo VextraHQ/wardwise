@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { contactReasonValues } from "@/features/public-site/lib/contact-reasons";
+import { contactReasonValues } from "@/lib/constants/contact-reasons";
 import { emailSchema, requiredTrimmedText } from "@/lib/schemas/field-schemas";
 
 const honeypotSchema = z

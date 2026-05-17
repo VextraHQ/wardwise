@@ -27,7 +27,7 @@ vi.mock("@/features/public-site/lib/turnstile", () => ({
   verifyTurnstileToken: mockVerifyTurnstileToken,
 }));
 
-vi.mock("@/features/public-site/email/contact-email", () => ({
+vi.mock("@/lib/email/contact", () => ({
   sendContactNotificationEmail: mockSendContactNotificationEmail,
 }));
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sendContactNotificationEmail } from "@/features/public-site/email/contact-email";
+import { sendContactNotificationEmail } from "@/lib/email/contact";
 import { verifyTurnstileToken } from "@/features/public-site/lib/turnstile";
 import { logAudit } from "@/lib/core/audit";
 import { contactRateLimit, getClientIp } from "@/lib/core/rate-limit";

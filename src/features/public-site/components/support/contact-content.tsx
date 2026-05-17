@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { contactReasonOptions } from "@/features/public-site/lib/contact-reasons";
+import { contactReasonOptions } from "@/lib/constants/contact-reasons";
 import { COMPANY_INFO } from "@/lib/constants/legal-data";
 import {
   contactFormSchema,

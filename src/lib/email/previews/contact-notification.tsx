@@ -2,8 +2,8 @@ import {
   ContactNotificationTemplate,
   formatContactSubmittedAt,
   type ContactNotificationEmailInput,
-} from "@/features/public-site/email/contact-notification";
-import { getContactReasonLabel } from "@/features/public-site/lib/contact-reasons";
+} from "@/lib/email/templates/contact-notification";
+import { getContactReasonLabel } from "@/lib/constants/contact-reasons";
 
 const fixtureInput: ContactNotificationEmailInput = {
   name: "Jane Campaign",
