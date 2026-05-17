@@ -277,6 +277,10 @@ This is the long-term structure WardWise should move toward.
 
 Do not create empty folders just to match this tree.
 
+### `lib/` vs `server/` inside a feature
+
+Inside a feature, `lib/` is for **isomorphic** code — it runs on either client or server and has no Node-only dependencies. `server/` is for **server-only** modules: anything that imports `@/lib/core/prisma`, reaches into `next/server`, or otherwise can't ship to the browser. The split exists so that an accidental client import of `features/<x>/server/...` lights up at build time rather than silently leaking server code into a client bundle. **Rule of thumb:** if the file imports Prisma, NextAuth server APIs, or a Node built-in, it belongs in `server/`; otherwise `lib/`.
+
 ```text
 src/features/
   collect/
