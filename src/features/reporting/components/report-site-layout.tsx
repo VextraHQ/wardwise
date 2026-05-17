@@ -2,7 +2,7 @@
 
 import type { CSSProperties } from "react";
 import { AppFooter } from "@/components/layout/app-footer";
-import { ReportSiteHeader } from "@/components/campaign-report/report-site-header";
+import { ReportSiteHeader } from "@/features/reporting/components/report-site-header";
 
 export const REPORT_SITE_HEADER_HEIGHT = "calc(3.75rem + 1px)";
 

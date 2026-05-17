@@ -1,7 +1,7 @@
 import type {
   CampaignReportSubmissionsResponse,
   CampaignReportSummary,
-} from "@/types/campaign-report";
+} from "@/features/reporting/types/campaign-report.types";
 
 export type CampaignReportSummaryParams = {
   from?: string;

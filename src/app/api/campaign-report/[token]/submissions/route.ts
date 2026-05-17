@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { validateReportRequest } from "@/lib/server/report-access";
+import { validateReportRequest } from "@/features/reporting/server/report-access";
 import { getRecentSubmissions } from "@/features/collect/server/collect-reporting";
 import {
   parseBooleanParam,

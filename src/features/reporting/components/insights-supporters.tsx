@@ -39,17 +39,20 @@ import {
   AdminMobileRecordTitle,
 } from "@/components/admin/shared/admin-mobile-record-card";
 import { AdminPagination } from "@/components/admin/admin-pagination";
-import { StepCard, CardSectionHeader } from "@/features/collect/components/public/form-ui";
+import {
+  StepCard,
+  CardSectionHeader,
+} from "@/features/collect/components/public/form-ui";
 import { MobileBulkActionTray } from "@/components/ui/mobile-selection-actions";
 import { formatDisplayDateTime } from "@/lib/date-format";
 import { formatRole } from "@/features/collect/lib/reporting";
 import { InsightsExportMenu } from "./insights-export-menu";
 import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import { cn, formatPersonName } from "@/lib/utils";
-import { useCampaignReportSubmissions } from "@/hooks/use-campaign-report";
+import { useCampaignReportSubmissions } from "@/features/reporting/hooks/use-campaign-report";
 import { useIsPortraitMobile } from "@/hooks/use-mobile";
-import { SubmissionStatusBadge } from "./insights-helpers";
-import type { CampaignReportSubmission } from "@/types/campaign-report";
+import { SubmissionStatusBadge } from "@/features/reporting/lib/insights-helpers";
+import type { CampaignReportSubmission } from "@/features/reporting/types/campaign-report.types";
 
 const EMPTY_SUPPORTERS: CampaignReportSubmission[] = [];
 

@@ -5,7 +5,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { StepCard, CardSectionHeader } from "@/features/collect/components/public/form-ui";
+import {
+  StepCard,
+  CardSectionHeader,
+} from "@/features/collect/components/public/form-ui";
 import { ShareInviteCard } from "@/features/collect/components/public/share-invite-card";
 import {
   getVerificationRate,
@@ -18,7 +21,7 @@ import { formatPersonName } from "@/lib/utils";
 import type {
   CampaignReportSubmission,
   CampaignReportSummary,
-} from "@/types/campaign-report";
+} from "@/features/reporting/types/campaign-report.types";
 import {
   IconChartBar,
   IconClipboardList,
@@ -30,7 +33,7 @@ import {
   IconUsersGroup,
   IconExternalLink,
 } from "@tabler/icons-react";
-import { SubmissionStatusBadge } from "./insights-helpers";
+import { SubmissionStatusBadge } from "@/features/reporting/lib/insights-helpers";
 
 const STATUS_BADGE: Record<string, { label: string; style: string }> = {
   active: {

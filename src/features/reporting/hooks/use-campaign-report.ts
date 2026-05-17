@@ -3,7 +3,7 @@ import {
   campaignReportApi,
   type CampaignReportSubmissionsParams,
   type CampaignReportSummaryParams,
-} from "@/lib/api/campaign-report";
+} from "@/features/reporting/api/campaign-report-api";
 
 export function useCampaignReportSummary(
   token: string,

@@ -35,9 +35,9 @@
 - **Shared date UI removed**: `src/components/shared/date-range-filter.tsx` was intentionally deleted
 - **Live-apply semantics made explicit**: custom date changes apply immediately; `Done` closes the surface instead of implying staged apply
 - **Report file split cleaned up**:
-  - scope state lives in `src/hooks/use-campaign-insights-scope.ts`
-  - report header/scope rail lives in `src/components/campaign-report/campaign-insights-header.tsx`
-  - overview tab composition lives in `src/components/campaign-report/insights-overview.tsx`
+  - scope state lives in `src/features/reporting/hooks/use-campaign-insights-scope.ts`
+  - report header/scope rail lives in `src/features/reporting/components/campaign-insights-header.tsx`
+  - overview tab composition lives in `src/features/reporting/components/insights-overview.tsx`
 - **Admin kept operational**: `campaign-overview.tsx` now uses its own local date filter component instead of sharing the report UI shell
 
 ---
@@ -809,11 +809,11 @@ Do not duplicate reporting logic between admin and client.
 Campaign Insights should follow the same general client architecture as the rest of
 the app:
 
-- `src/lib/api/campaign-report.ts` for campaign-report API calls
-- `src/hooks/use-campaign-report.ts` for React Query hooks
+- `src/features/reporting/api/campaign-report-api.ts` for campaign-report API calls
+- `src/features/reporting/hooks/use-campaign-report.ts` for React Query hooks
 - keep top-level page composition in `campaign-insights.tsx`
-- keep report scope state in `src/hooks/use-campaign-insights-scope.ts`
-- keep report-only UI shells inside `src/components/campaign-report/*`
+- keep report scope state in `src/features/reporting/hooks/use-campaign-insights-scope.ts`
+- keep report-only UI shells inside `src/features/reporting/components/*`
 - keep admin-only UI shells inside `src/features/collect/components/admin/*`
 
 ### React Query
@@ -1088,12 +1088,12 @@ The report follows existing campaign reporting rules:
 | File                                                                      | Role                                                     |
 | ------------------------------------------------------------------------- | -------------------------------------------------------- |
 | `src/features/collect/components/admin/campaign-settings.tsx`             | Add client access controls                               |
-| `src/components/campaign-report/campaign-insights.tsx`                    | Report page orchestration                                |
-| `src/components/campaign-report/campaign-insights-header.tsx`             | Report tabs + scope rail + sticky behavior               |
-| `src/components/campaign-report/insights-overview.tsx`                    | Overview tab composition and private subcomponents       |
-| `src/components/campaign-report/report-site-header.tsx`                   | Report-owned site header / sticky anchor                 |
+| `src/features/reporting/components/campaign-insights.tsx`                 | Report page orchestration                                |
+| `src/features/reporting/components/campaign-insights-header.tsx`          | Report tabs + scope rail + sticky behavior               |
+| `src/features/reporting/components/insights-overview.tsx`                 | Overview tab composition and private subcomponents       |
+| `src/features/reporting/components/report-site-header.tsx`                | Report-owned site header / sticky anchor                 |
 | `src/features/collect/components/admin/campaign-overview-date-filter.tsx` | Admin-owned date filter shell                            |
-| `src/hooks/use-campaign-insights-scope.ts`                                | Report scope state + derived values                      |
+| `src/features/reporting/hooks/use-campaign-insights-scope.ts`             | Report scope state + derived values                      |
 | `src/features/collect/server/collect-reporting.ts`                        | Shared reporting queries used by admin and report routes |
 | `prisma/schema.prisma`                                                    | Add client report access fields on `Campaign`            |
 

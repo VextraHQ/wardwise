@@ -14,8 +14,8 @@ import { InsightsOverview, ReadyToCollectState } from "./insights-overview";
 import {
   useCampaignReportSubmissions,
   useCampaignReportSummary,
-} from "@/hooks/use-campaign-report";
-import { useCampaignInsightsScope } from "@/hooks/use-campaign-insights-scope";
+} from "@/features/reporting/hooks/use-campaign-report";
+import { useCampaignInsightsScope } from "@/features/reporting/hooks/use-campaign-insights-scope";
 import {
   computeDelta,
   formatQueryDate,

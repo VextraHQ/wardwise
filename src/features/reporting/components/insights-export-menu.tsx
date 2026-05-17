@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { ExportFormat } from "@/lib/exports/shared";
-import { campaignReportApi } from "@/lib/api/campaign-report";
+import { campaignReportApi } from "@/features/reporting/api/campaign-report-api";
 import {
   getOrderedExportFormats,
   readPreferredExportFormat,

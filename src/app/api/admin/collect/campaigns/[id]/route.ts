@@ -13,7 +13,7 @@ import {
   generateReportToken,
   generatePasscode,
   hashPasscode,
-} from "@/lib/server/report-access";
+} from "@/features/reporting/server/report-access";
 import { normalizeCampaignDisplayName } from "@/features/collect/lib/branding";
 
 type RouteParams = { params: Promise<{ id: string }> };

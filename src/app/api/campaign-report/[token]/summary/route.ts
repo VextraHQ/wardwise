@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import {
   validateReportRequest,
   touchReportLastViewed,
-} from "@/lib/server/report-access";
+} from "@/features/reporting/server/report-access";
 import {
   getCampaignStats,
   getCampaignHealth,

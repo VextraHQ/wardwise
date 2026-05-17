@@ -21,7 +21,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { CampaignInsightsScope } from "@/hooks/use-campaign-insights-scope";
+import type { CampaignInsightsScope } from "@/features/reporting/hooks/use-campaign-insights-scope";
 import {
   formatDateRangeLabel,
   getPresetRange,
@@ -34,7 +34,7 @@ import {
   type CampaignReportRangePreset,
 } from "@/features/collect/lib/reporting";
 import { formatGeoDisplayName } from "@/features/geo/lib/display";
-import type { CampaignReportSummary } from "@/types/campaign-report";
+import type { CampaignReportSummary } from "@/features/reporting/types/campaign-report.types";
 import {
   IconArrowsExchange,
   IconCalendar,
