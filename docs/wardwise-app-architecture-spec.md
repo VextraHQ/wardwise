@@ -321,6 +321,7 @@ src/features/
       get-campaign-submissions.ts
       update-campaign-submission.ts
       campaign-report-access.ts
+      collect-reporting.ts
     schemas/
       collect-schemas.ts
       collect-schemas.test.ts
@@ -466,9 +467,8 @@ src/features/
       campaign-report-api.ts
     server/
       report-access.ts
-      collect-reporting.ts
     lib/
-      insights-helpers.ts
+      insights-helpers.tsx
     types/
       campaign-report.types.ts
 
@@ -620,7 +620,8 @@ Use this table when reviewing migration PRs.
 | `src/lib/data/nigerian-parties.ts`                                                                                              | `src/features/candidates/data/nigerian-parties.ts` (resolved in Phase 5 fixup — Candidates is the sole consumer)                                 |
 | `src/types/geo.ts`                                                                                                              | `src/features/geo/types/geo.types.ts` (resolved in Phase 5 fixup)                                                                                |
 | `src/types/location.ts`                                                                                                         | `src/features/geo/types/location.types.ts` (resolved in Phase 5 fixup)                                                                           |
-| `src/components/campaign-report/*`                                                                                              | `src/features/reporting/components/*`                                                                                                            |
+| `src/components/campaign-report/*.tsx` (excluding `insights-helpers.tsx`)                                                       | `src/features/reporting/components/*`                                                                                                            |
+| `src/components/campaign-report/insights-helpers.tsx`                                                                           | `src/features/reporting/lib/insights-helpers.tsx` (kept `.tsx` extension — file exports JSX-returning helpers around the Badge primitive)        |
 | `src/hooks/use-campaign-report.ts`                                                                                              | `src/features/reporting/hooks/use-campaign-report.ts`                                                                                            |
 | `src/hooks/use-campaign-insights-scope.ts`                                                                                      | `src/features/reporting/hooks/use-campaign-insights-scope.ts`                                                                                    |
 | `src/lib/api/campaign-report.ts`                                                                                                | `src/features/reporting/api/campaign-report-api.ts`                                                                                              |
@@ -704,6 +705,13 @@ Risky:
 ```ts
 import { getCampaignDisplayHeadline } from "@/features/collect/components/public/internal-card";
 ```
+
+### Known intentional cross-feature surfaces
+
+These are deliberate exceptions accepted during phased migration. They are not "private internal" imports — they treat one feature's public surface as a stable dependency for another. Revisit during Phase 9 documentation cleanup if any become painful.
+
+- **Reporting → Collect (Phase 6).** `src/features/reporting/components/*` imports from `@/features/collect/lib/{reporting,branding}` (helper functions) and from `@/features/collect/components/public/{form-ui,share-invite-card,registration-step-header}` (visual primitives shared with the public registration shell). The lib imports are stable named cross-feature surfaces. The component imports are pragmatic — the public report intentionally mirrors the registration shell's look. If `form-ui` and friends start needing a Reporting-specific variant, promote the shared bits to `src/components/shared/` rather than forking.
+- **Candidates → Geo (Phase 4 + 5).** Candidate schemas import `getPositionStateValidationMessage` from `@/features/geo/lib/constituency`; admin candidate components import geo data files (`state-lga-locations`, `nigerian-constituencies`, etc.). Geo is a domain support feature with intentionally public data and lib surfaces.
 
 ---
 
