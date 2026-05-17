@@ -132,7 +132,7 @@ model CampaignCanvasser {
 **Approach:**
 
 - Export route accepts `redacted=true` param
-- Masks names (N\***\* H\*\*\***) and phones (+234\*\*\*789)
+- Masks names (N **H**) and phones (+234789)
 - "Export Redacted" option in export dropdown
 
 ### 9. PWA / Offline Mode
@@ -223,19 +223,19 @@ These were fixed in the `fix/collect-hardening` branch:
 
 Post-merge polish and Codex-identified bug fixes applied on `develop`:
 
-- [x] **Offline queue permanent failures** — Superseded by v2.7: 4xx responses are retained locally as failed rows, surfaced in the form, and excluded from retry until dismissed
-- [x] **Date range end-of-day** — `to` date now includes `T23:59:59.999Z` so same-day ranges work correctly
-- [x] **Bulk audit trail** — Bulk verify/flag/unflag now creates per-submission `SubmissionAuditEntry` records
-- [x] **Cache invalidation** — `campaign-stats`, `campaign-canvassers`, and `submission-audit` queries invalidated after all mutations
-- [x] **Canvasser phone normalization** — Admin and Collect canvasser phone write paths use the shared canonical phone schema
-- [x] **Form header redesign** — Fixed text overlap, removed duplicate candidate name, responsive stacking
-- [x] **Form footer redesign** — Matches landing footer pattern, `/contact` CTA, Vextra branding
-- [x] **Export dropdown indicator** — Chevron icon on export button shows it's a dropdown
-- [x] **Admin notes editable** — Textarea + save button in submission detail sheet (was read-only)
-- [x] **AlertDialog confirmations** — Replaced browser `confirm()` with shadcn AlertDialog for delete actions
-- [x] **Calendar date picker** — Replaced native `<input type="date">` with shadcn Calendar + Popover
-- [x] **Role=canvasser submit UX** — "Submit Registration" label + loading spinner + inline error display
-- [x] **DRY submit error component** — Extracted reusable `SubmitError` from form-ui.tsx
+- **Offline queue permanent failures** — Superseded by v2.7: 4xx responses are retained locally as failed rows, surfaced in the form, and excluded from retry until dismissed
+- **Date range end-of-day** — `to` date now includes `T23:59:59.999Z` so same-day ranges work correctly
+- **Bulk audit trail** — Bulk verify/flag/unflag now creates per-submission `SubmissionAuditEntry` records
+- **Cache invalidation** — `campaign-stats`, `campaign-canvassers`, and `submission-audit` queries invalidated after all mutations
+- **Canvasser phone normalization** — Admin and Collect canvasser phone write paths use the shared canonical phone schema
+- **Form header redesign** — Fixed text overlap, removed duplicate candidate name, responsive stacking
+- **Form footer redesign** — Matches landing footer pattern, `/contact` CTA, Vextra branding
+- **Export dropdown indicator** — Chevron icon on export button shows it's a dropdown
+- **Admin notes editable** — Textarea + save button in submission detail sheet (was read-only)
+- **AlertDialog confirmations** — Replaced browser `confirm()` with shadcn AlertDialog for delete actions
+- **Calendar date picker** — Replaced native `<input type="date">` with shadcn Calendar + Popover
+- **Role=canvasser submit UX** — "Submit Registration" label + loading spinner + inline error display
+- **DRY submit error component** — Extracted reusable `SubmitError` from form-ui.tsx
 
 ---
 
@@ -291,18 +291,18 @@ UX audit and post-submission improvements for the public registration form:
 
 **Changes:**
 
-- [x] **Splash copy** — "Campaign Onboarding" / "System Initialization" / "Ready" → "Supporter Registration" / "Get Started" / "Open"
-- [x] **Offline confirmation text** — "You are supporter #—" → "Your registration is saved and will be submitted when you're back online."
-- [x] **Error font size** — 9px uppercase → 11px sentence case for readability
-- [x] **Phone placeholder** — Canvasser phone now shows `08012345678`
-- [x] **Age placeholder** — "Enter your age" → "Age (18+)"
-- [x] **Role grid responsive** — `grid-cols-3` → `grid-cols-1 sm:grid-cols-3` to prevent cramping on small phones
-- [x] **Nav button overflow** — Back button padding reduced on mobile, next button text scaled down to prevent overflow on "SUBMIT REGISTRATION"
-- [x] **Hydration fix** — `typeof window` checks replaced with `useState` + `useEffect` pattern for share URLs
-- [x] **Confetti suppressed offline** — No confetti for queued submissions (misleading celebration)
-- [x] **WhatsApp share text** — Now mentions "on WardWise" for brand recognition
-- [x] **Confirmation screen progress save** — Fixed bug where `saveProgress` useEffect re-saved screen=6 after localStorage was cleared, causing stale confirmation on refresh
-- [x] **Zod validation messages** — Location step `z.number()` now shows "Select your ward" instead of raw "Invalid input: expected number, received undefined". Also hardened `geo-schemas.ts`
+- **Splash copy** — "Campaign Onboarding" / "System Initialization" / "Ready" → "Supporter Registration" / "Get Started" / "Open"
+- **Offline confirmation text** — "You are supporter #—" → "Your registration is saved and will be submitted when you're back online."
+- **Error font size** — 9px uppercase → 11px sentence case for readability
+- **Phone placeholder** — Canvasser phone now shows `08012345678`
+- **Age placeholder** — "Enter your age" → "Age (18+)"
+- **Role grid responsive** — `grid-cols-3` → `grid-cols-1 sm:grid-cols-3` to prevent cramping on small phones
+- **Nav button overflow** — Back button padding reduced on mobile, next button text scaled down to prevent overflow on "SUBMIT REGISTRATION"
+- **Hydration fix** — `typeof window` checks replaced with `useState` + `useEffect` pattern for share URLs
+- **Confetti suppressed offline** — No confetti for queued submissions (misleading celebration)
+- **WhatsApp share text** — Now mentions "on WardWise" for brand recognition
+- **Confirmation screen progress save** — Fixed bug where `saveProgress` useEffect re-saved screen=6 after localStorage was cleared, causing stale confirmation on refresh
+- **Zod validation messages** — Location step `z.number()` now shows "Select your ward" instead of raw "Invalid input: expected number, received undefined". Also hardened `geo-schemas.ts`
 
 **Files:** `src/features/collect/components/public/form-ui.tsx`, `src/features/collect/components/public/steps/personal-details-step.tsx`, `src/features/collect/components/public/steps/canvasser-step.tsx`, `src/features/collect/components/public/steps/role-step.tsx`, `src/features/collect/components/public/steps/confirmation-screen.tsx`, `src/features/collect/components/public/campaign-registration-form.tsx`
 
@@ -310,57 +310,57 @@ UX audit and post-submission improvements for the public registration form:
 
 ## Completed v2.3 — Admin UX Polish (2026-04-07)
 
-- [x] **Smart bulk actions** — Bulk toolbar now shows contextual buttons based on selected rows' state (Verify/Unverify, Flag/Unflag). Added `unverify` action to bulk API endpoint with audit trail.
-- [x] **Geo display in charts** — LGA and Ward names in campaign overview charts now formatted via `formatGeoDisplayName()` (was showing raw CAPS from DB).
-- [x] **Audit trail race condition** — Audit entry write is now awaited before the response is sent in the single-submission PATCH route. Fixes history not showing new entries immediately after verify/flag actions.
-- [x] **History section scroll** — Added `max-h-40 overflow-y-auto` to submission detail History section to prevent unbounded growth.
-- [x] **Canvasser tab overhaul** — Redesigned layout hierarchy: Referral Leaderboard is now the hero content above the fold with search/export toolbar. Pre-loaded canvasser management moved to a side Sheet ("Public Form Canvassers"). Self-identified canvassers shown as compact stat pill. Added Zod validation, AlertDialog confirmations with referral count context, leaderboard CSV export with `sanitizeCell()`, keyboard-accessible row click-through to submissions filtered by `canvasserName`+`canvasserPhone` (exact match). Submissions tab reads `canvasserName`, `canvasserPhone`, and `role` from URL params with dismissable filter chip.
-- [x] **Public form canvasser dropdown** — Replaced plain `<Select>` with searchable `ComboboxSelect` in `canvasser-step.tsx`. Scales to 50+ preloaded canvassers with type-to-search.
-- [x] **Admin reference lookup** — Admin submissions search now accepts registration references (`WW-XXXXXXXX`), and the submissions table/detail sheet surface the same reference code used on the public confirmation screen. This gives support/admin a simple lookup flow without introducing a separate support console.
+- **Smart bulk actions** — Bulk toolbar now shows contextual buttons based on selected rows' state (Verify/Unverify, Flag/Unflag). Added `unverify` action to bulk API endpoint with audit trail.
+- **Geo display in charts** — LGA and Ward names in campaign overview charts now formatted via `formatGeoDisplayName()` (was showing raw CAPS from DB).
+- **Audit trail race condition** — Audit entry write is now awaited before the response is sent in the single-submission PATCH route. Fixes history not showing new entries immediately after verify/flag actions.
+- **History section scroll** — Added `max-h-40 overflow-y-auto` to submission detail History section to prevent unbounded growth.
+- **Canvasser tab overhaul** — Redesigned layout hierarchy: Referral Leaderboard is now the hero content above the fold with search/export toolbar. Pre-loaded canvasser management moved to a side Sheet ("Public Form Canvassers"). Self-identified canvassers shown as compact stat pill. Added Zod validation, AlertDialog confirmations with referral count context, leaderboard CSV export with `sanitizeCell()`, keyboard-accessible row click-through to submissions filtered by `canvasserName`+`canvasserPhone` (exact match). Submissions tab reads `canvasserName`, `canvasserPhone`, and `role` from URL params with dismissable filter chip.
+- **Public form canvasser dropdown** — Replaced plain `<Select>` with searchable `ComboboxSelect` in `canvasser-step.tsx`. Scales to 50+ preloaded canvassers with type-to-search.
+- **Admin reference lookup** — Admin submissions search now accepts registration references (`WW-XXXXXXXX`), and the submissions table/detail sheet surface the same reference code used on the public confirmation screen. This gives support/admin a simple lookup flow without introducing a separate support console.
 
 ---
 
 ## Completed v2.4 — Admin Export Centralization (2026-04-07)
 
-- [x] **Shared export layer** — Added `src/lib/exports/` with shared sanitize/redaction helpers, CSV rendering, XLSX rendering, submissions export mapping, and canvasser leaderboard export mapping.
-- [x] **Submissions CSV + Excel export** — Existing admin submissions export route now supports `format=csv|xlsx` while preserving redacted export support and campaign-specific filenames.
-- [x] **Leaderboard export moved server-side** — Canvasser leaderboard export no longer assembles files inside the React component; it now downloads from a dedicated admin export route.
-- [x] **Filter alignment improved** — Submissions list and submissions export now share the same filter parsing/building path for `search`, geo filters, verification/flag status, role, and canvasser filters.
-- [x] **Admin export UI expanded** — Submissions dropdown now exposes CSV, Excel, redacted CSV, and redacted Excel. Both export menus also remember the last-used format locally and surface it as the preferred option in the dropdown.
-- [x] **Verification complete** — `pnpm typecheck` and `pnpm build` passed. Smoke test confirmed empty export headers, blank optional cells, escaped multiline CSV content, and spreadsheet formula sanitization. Manual browser QA also confirmed CSV/XLSX downloads, redacted exports, and filter-aligned output. Unauthenticated requests to both export routes were verified to return `401 Unauthorized`.
+- **Shared export layer** — Added `src/lib/exports/` with shared sanitize/redaction helpers, CSV rendering, XLSX rendering, submissions export mapping, and canvasser leaderboard export mapping.
+- **Submissions CSV + Excel export** — Existing admin submissions export route now supports `format=csv|xlsx` while preserving redacted export support and campaign-specific filenames.
+- **Leaderboard export moved server-side** — Canvasser leaderboard export no longer assembles files inside the React component; it now downloads from a dedicated admin export route.
+- **Filter alignment improved** — Submissions list and submissions export now share the same filter parsing/building path for `search`, geo filters, verification/flag status, role, and canvasser filters.
+- **Admin export UI expanded** — Submissions dropdown now exposes CSV, Excel, redacted CSV, and redacted Excel. Both export menus also remember the last-used format locally and surface it as the preferred option in the dropdown.
+- **Verification complete** — `pnpm typecheck` and `pnpm build` passed. Smoke test confirmed empty export headers, blank optional cells, escaped multiline CSV content, and spreadsheet formula sanitization. Manual browser QA also confirmed CSV/XLSX downloads, redacted exports, and filter-aligned output. Unauthenticated requests to both export routes were verified to return `401 Unauthorized`.
 
 ---
 
 ## Completed v2.5 — Admin Review Queue (2026-04-17)
 
-- [x] **Review-first submissions UX** — Submissions tab now frames verification as a `Review Queue` with inline status chips for Pending Review, Verified, Flagged, and All Records.
-- [x] **All-records default with discoverable Pending count** — Submissions open to `All` so search/lookup works predictably; the `Pending` chip shows the pending count so admins can jump into the review queue when needed.
-- [x] **Lean table scanning** — The main table keeps scan-friendly fields only. APC/NIN and VIN remain available in the detail sheet and exports, not the primary table.
-- [x] **All matching bulk actions** — After selecting the current page, admin can escalate to all records matching the active review filters, then verify/flag/unverify/unflag with confirmation.
-- [x] **Filtered bulk endpoint** — Bulk API now supports `scope: "filtered"` with campaign-scoped filters while preserving selected-ID actions.
-- [x] **Audit preserved** — Filtered bulk actions create per-submission audit entries and a campaign-level audit log entry with count, action, scope, and filters.
+- **Review-first submissions UX** — Submissions tab now frames verification as a `Review Queue` with inline status chips for Pending Review, Verified, Flagged, and All Records.
+- **All-records default with discoverable Pending count** — Submissions open to `All` so search/lookup works predictably; the `Pending` chip shows the pending count so admins can jump into the review queue when needed.
+- **Lean table scanning** — The main table keeps scan-friendly fields only. APC/NIN and VIN remain available in the detail sheet and exports, not the primary table.
+- **All matching bulk actions** — After selecting the current page, admin can escalate to all records matching the active review filters, then verify/flag/unverify/unflag with confirmation.
+- **Filtered bulk endpoint** — Bulk API now supports `scope: "filtered"` with campaign-scoped filters while preserving selected-ID actions.
+- **Audit preserved** — Filtered bulk actions create per-submission audit entries and a campaign-level audit log entry with count, action, scope, and filters.
 
 ---
 
 ## Completed v2.6 — Campaign wizard + public form parity (2026-04-19)
 
-- [x] **Admin New Campaign wizard — 3 steps** — `Select Candidate` → **Collect setup** (custom questions + optional LGA restrict; headroom for more / prebuilt question sets) → **Review & create** (summary card with section-level **Edit**, same pattern as create-candidate review). Files: `campaign-wizard.tsx`, `step-campaign-collect-config.tsx`, `step-campaign-review.tsx` (replaces the old combined questions+review step).
-- [x] **Campaign draft persistence** — `useWizardDraft` with key `wardwise:campaign-wizard:draft:v2` (version bump invalidates prior 2-step drafts), restore banner + Discard, `clear()` on successful create. See `wardwise-collect-spec.md` for full detail.
-- [x] **Public `/c/[slug]` Party Information step** — Renders the same footer **TrustIndicators** strip as Personal Details and Location (`DATA_PRIVACY`, `SECURE_ENCRYPTION`, `VERIFIED_CAMPAIGN`) so identity-heavy steps feel consistent.
+- **Admin New Campaign wizard — 3 steps** — `Select Candidate` → **Collect setup** (custom questions + optional LGA restrict; headroom for more / prebuilt question sets) → **Review & create** (summary card with section-level **Edit**, same pattern as create-candidate review). Files: `campaign-wizard.tsx`, `step-campaign-collect-config.tsx`, `step-campaign-review.tsx` (replaces the old combined questions+review step).
+- **Campaign draft persistence** — `useWizardDraft` with key `wardwise:campaign-wizard:draft:v2` (version bump invalidates prior 2-step drafts), restore banner + Discard, `clear()` on successful create. See `wardwise-collect-spec.md` for full detail.
+- **Public `/c/[slug]` Party Information step** — Renders the same footer **TrustIndicators** strip as Personal Details and Location (`DATA_PRIVACY`, `SECURE_ENCRYPTION`, `VERIFIED_CAMPAIGN`) so identity-heavy steps feel consistent.
 
 ---
 
 ## Completed v2.7 — Offline Queue Confirmation + Failed Review (2026-04-21)
 
-- [x] **Queued confirmation is distinct from confirmed success** — Offline submits now show an amber `Pending Upload` confirmation instead of the green `Registration Complete` receipt. Queued state hides reference codes, share actions, and confetti until the server accepts the record.
-- [x] **Queued to confirmed flip** — When a queued submission syncs successfully, the UI can flip to the confirmed state with the real `WW-XXXXXXXX` reference because the sync result carries the server `submissionId` and count.
-- [x] **Failed records stay visible** — Permanent 4xx sync failures are no longer deleted from IndexedDB. Rows are marked `status: "failed"` with `lastError` and `failedAt`, excluded from future retries, and counted separately from pending uploads.
-- [x] **Failed confirmation state** — The active queued confirmation flips to a red `Needs Attention` / `Upload Failed` state when that record is rejected. It shows the server error and avoids any "complete", "verified", or "uploaded" language.
-- [x] **Persistent failed banner** — A destructive banner appears whenever `failedCount > 0`, so missed toasts no longer hide rejected offline records.
-- [x] **Failed review sheet** — The banner's `Review` action opens a sheet listing failed rows newest-first with registrant name when available, rejection time, server error, per-record `Dismiss`, and bulk `Clear all failed notices`.
-- [x] **Active failed rehydration** — The form stores a slug-scoped `{ id }` pointer for the active failed row. On reload, if that row still exists, the user returns to the red failed confirmation with the current `lastError`; stale pointers are removed silently.
-- [x] **Analytics** — Added events for confirmation state views, failed notice dismiss, failed review open, failed row dismiss, and active failed rehydrate. Rehydrate/dismiss paths include `error_category`.
-- [x] **Back-compat** — Legacy queue rows without `status` are treated as pending. `TrustIndicators` keeps the old `canvasser` prop while adding explicit variants.
+- **Queued confirmation is distinct from confirmed success** — Offline submits now show an amber `Pending Upload` confirmation instead of the green `Registration Complete` receipt. Queued state hides reference codes, share actions, and confetti until the server accepts the record.
+- **Queued to confirmed flip** — When a queued submission syncs successfully, the UI can flip to the confirmed state with the real `WW-XXXXXXXX` reference because the sync result carries the server `submissionId` and count.
+- **Failed records stay visible** — Permanent 4xx sync failures are no longer deleted from IndexedDB. Rows are marked `status: "failed"` with `lastError` and `failedAt`, excluded from future retries, and counted separately from pending uploads.
+- **Failed confirmation state** — The active queued confirmation flips to a red `Needs Attention` / `Upload Failed` state when that record is rejected. It shows the server error and avoids any "complete", "verified", or "uploaded" language.
+- **Persistent failed banner** — A destructive banner appears whenever `failedCount > 0`, so missed toasts no longer hide rejected offline records.
+- **Failed review sheet** — The banner's `Review` action opens a sheet listing failed rows newest-first with registrant name when available, rejection time, server error, per-record `Dismiss`, and bulk `Clear all failed notices`.
+- **Active failed rehydration** — The form stores a slug-scoped `{ id }` pointer for the active failed row. On reload, if that row still exists, the user returns to the red failed confirmation with the current `lastError`; stale pointers are removed silently.
+- **Analytics** — Added events for confirmation state views, failed notice dismiss, failed review open, failed row dismiss, and active failed rehydrate. Rehydrate/dismiss paths include `error_category`.
+- **Back-compat** — Legacy queue rows without `status` are treated as pending. `TrustIndicators` keeps the old `canvasser` prop while adding explicit variants.
 
 **Files:** `src/features/collect/lib/offline-queue.ts`, `src/features/collect/hooks/use-offline.ts`, `src/features/collect/components/public/campaign-registration-form.tsx`, `src/features/collect/components/public/steps/confirmation-screen.tsx`, `src/features/collect/components/public/failed-review-sheet.tsx`, `src/components/ui/trust-indicators.tsx`, `src/lib/analytics/client.ts`
 
@@ -370,28 +370,28 @@ UX audit and post-submission improvements for the public registration form:
 
 ## Completed v2.8 — Offline Geo Preparation (2026-04-27)
 
-- [x] **Selected-LGA offline packs** — Field users can open a campaign online once, choose the LGAs they need, and download wards + polling units for those LGAs to IndexedDB. Cap is 50 LGAs per pack (covers any single Nigerian state) with a per-IP rate limit.
-- [x] **Splash-screen offline status card** — A second utility card under the main CTA shows the pack's health and the right action: `Prepare Offline`, `Manage Offline Areas`, `Refresh Offline Data` (mild for `content_outdated`, strong for `scope_invalid`), `Refresh` (for `aged`), or an informational `Offline Ready on this device` when offline.
-- [x] **Honest stale detection** — Health is one of `clean` / `scope_invalid` / `content_outdated` / `aged`. `scope_invalid` is computed only from a fresh allowed-LGA fetch; a failed fetch never infers invalid (no network blip falsely tells the user their pack is broken). `content_outdated` is `campaign.updatedAt > pack.campaignUpdatedAt`. `aged` is `preparedAt > 14d`.
-- [x] **Cold-reopen offline after prior online visit** — Service worker caches `/c/*` document navigations and `?_rsc` GETs network-first with cache fallback, so reopening offline loads + hydrates the campaign page.
-- [x] **Location step uses local data when offline or when live geo fails** — Online with healthy network uses live queries; offline uses pack only; online with a failed live geo query falls back to pack with a visible inline `Using saved offline data` note plus a Retry action. No silent swap.
-- [x] **Honest empty state when offline + no pack** — The location step shows a blocking info card instead of empty selects. The splash blocks fresh-start registration with the same honest treatment.
-- [x] **Restore-path integration** — Saved drafts re-apply their ward/PU against either the live query OR the offline pack, whichever resolves first. Stale ids that don't match either are silently dropped without clearing the rest of the draft.
-- [x] **Lifecycle cleanup** — Closed campaigns clear their stored pack on the next online open (registration form effect). Drafted/deleted campaigns clear their pack via a slug-aware `/c/[slug]/not-found.tsx` that wraps the existing themed `NotFoundStatusScreen`.
-- [x] **Last-known-data rule** — Offline geo packs are convenience data, not authority. If a pack becomes outdated and an offline submission later syncs against a now-closed or now-invalid campaign, the existing v2.7 failed-queue path handles the rejection. No new server-side rejection mechanism was needed.
-- [x] **Shared IndexedDB plumbing** — `src/lib/offline-db.ts` is the single owner of DB name, version, and upgrade path; both `pending-submissions` (v2.7) and `geo-packs` (v2.8) stores open through it.
+- **Selected-LGA offline packs** — Field users can open a campaign online once, choose the LGAs they need, and download wards + polling units for those LGAs to IndexedDB. Cap is 50 LGAs per pack (covers any single Nigerian state) with a per-IP rate limit.
+- **Splash-screen offline status card** — A second utility card under the main CTA shows the pack's health and the right action: `Prepare Offline`, `Manage Offline Areas`, `Refresh Offline Data` (mild for `content_outdated`, strong for `scope_invalid`), `Refresh` (for `aged`), or an informational `Offline Ready on this device` when offline.
+- **Honest stale detection** — Health is one of `clean` / `scope_invalid` / `content_outdated` / `aged`. `scope_invalid` is computed only from a fresh allowed-LGA fetch; a failed fetch never infers invalid (no network blip falsely tells the user their pack is broken). `content_outdated` is `campaign.updatedAt > pack.campaignUpdatedAt`. `aged` is `preparedAt > 14d`.
+- **Cold-reopen offline after prior online visit** — Service worker caches `/c/*` document navigations and `?_rsc` GETs network-first with cache fallback, so reopening offline loads + hydrates the campaign page.
+- **Location step uses local data when offline or when live geo fails** — Online with healthy network uses live queries; offline uses pack only; online with a failed live geo query falls back to pack with a visible inline `Using saved offline data` note plus a Retry action. No silent swap.
+- **Honest empty state when offline + no pack** — The location step shows a blocking info card instead of empty selects. The splash blocks fresh-start registration with the same honest treatment.
+- **Restore-path integration** — Saved drafts re-apply their ward/PU against either the live query OR the offline pack, whichever resolves first. Stale ids that don't match either are silently dropped without clearing the rest of the draft.
+- **Lifecycle cleanup** — Closed campaigns clear their stored pack on the next online open (registration form effect). Drafted/deleted campaigns clear their pack via a slug-aware `/c/[slug]/not-found.tsx` that wraps the existing themed `NotFoundStatusScreen`.
+- **Last-known-data rule** — Offline geo packs are convenience data, not authority. If a pack becomes outdated and an offline submission later syncs against a now-closed or now-invalid campaign, the existing v2.7 failed-queue path handles the rejection. No new server-side rejection mechanism was needed.
+- **Shared IndexedDB plumbing** — `src/lib/offline-db.ts` is the single owner of DB name, version, and upgrade path; both `pending-submissions` (v2.7) and `geo-packs` (v2.8) stores open through it.
 
 **Files:** `src/features/collect/lib/offline-storage.ts`, `src/features/collect/lib/offline-geo-pack.ts`, `src/features/collect/lib/offline-geo-health.ts`, `src/features/collect/lib/offline-prep-selection.ts`, `src/features/collect/lib/offline-queue.ts`, `src/features/collect/hooks/use-collect-offline-geo.ts`, `src/features/collect/hooks/use-collect-geo-resolution.ts`, `src/features/collect/api/collect-api.ts`, `src/features/collect/schemas/collect-schemas.ts`, `src/lib/core/rate-limit.ts`, `src/app/api/collect/offline-pack/route.ts`, `src/app/api/collect/campaign/[slug]/route.ts`, `src/app/c/[slug]/page.tsx`, `src/app/c/[slug]/not-found.tsx`, `src/features/collect/components/public/campaign-registration-form.tsx`, `src/features/collect/components/public/steps/splash-screen.tsx`, `src/features/collect/components/public/steps/location-step.tsx`, `src/features/collect/components/public/offline-prep-sheet.tsx`, `src/features/collect/types/collect.types.ts`, `public/sw.js`.
 
 **Post-merge finalization (same PR):**
 
-- [x] **Codex P2** — `scope_invalid` packs surface honestly while offline; geo resolution refuses to source pack data when health is `scope_invalid`; splash and location step both block fresh start with reason-specific copy.
-- [x] **Codex P3** — Location-step inline banner split: emerald "Using offline data" for legitimate offline use; amber "Network issue — using saved data" + Retry only for online-with-failed-live-query.
-- [x] **Remove offline data UX** — Prep sheet zero-selected + existing pack flips the CTA to `Remove offline data` (destructive tone) inside an `AlertDialog`. Online copy is matter-of-fact; offline copy warns the location step will be blocked until reconnect.
-- [x] **Stale-LGA submission bug** — Prep sheet derives `effectiveSelection`, `stalePreparedIds`, and `prepIntent` from `src/features/collect/lib/offline-prep-selection.ts` at render time. Hidden previously-prepared ids that disappear from the live LGA list are silently excluded from save and surfaced as an inline warning. No more 400-round-trip when scope shrinks after prep.
-- [x] **Pure-logic extraction + tests** — `computeOfflineGeoHealth` and the prep-selection helpers live in `src/features/collect/lib/`. Vitest coverage in `offline-geo-health.test.ts` (10 cases including the "failed fresh fetch never infers `scope_invalid`" contract and the precedence ordering) and `offline-prep-selection.test.ts` (12 cases).
-- [x] **Mechanical extraction** — Live/offline geo source precedence moved verbatim from `campaign-registration-form.tsx` into `useCollectGeoResolution`. Form file shrinks meaningfully; no behavior change.
-- [x] **Naming convention** — v2.8-introduced modules adopt the `use-collect-*` / `src/features/collect/lib/*` convention. The single import-line update in `offline-queue.ts` follows the renamed shared storage file. v2.7 modules (`use-offline.ts`, `offline-queue.ts`) kept their original `src/hooks/` and `src/lib/` paths at the time. **Update (architecture refactor Phase 2):** both files now live in `src/features/collect/{hooks,lib}/` as part of the feature-first relocation; see `docs/wardwise-app-architecture-spec.md`.
+- **Codex P2** — `scope_invalid` packs surface honestly while offline; geo resolution refuses to source pack data when health is `scope_invalid`; splash and location step both block fresh start with reason-specific copy.
+- **Codex P3** — Location-step inline banner split: emerald "Using offline data" for legitimate offline use; amber "Network issue — using saved data" + Retry only for online-with-failed-live-query.
+- **Remove offline data UX** — Prep sheet zero-selected + existing pack flips the CTA to `Remove offline data` (destructive tone) inside an `AlertDialog`. Online copy is matter-of-fact; offline copy warns the location step will be blocked until reconnect.
+- **Stale-LGA submission bug** — Prep sheet derives `effectiveSelection`, `stalePreparedIds`, and `prepIntent` from `src/features/collect/lib/offline-prep-selection.ts` at render time. Hidden previously-prepared ids that disappear from the live LGA list are silently excluded from save and surfaced as an inline warning. No more 400-round-trip when scope shrinks after prep.
+- **Pure-logic extraction + tests** — `computeOfflineGeoHealth` and the prep-selection helpers live in `src/features/collect/lib/`. Vitest coverage in `offline-geo-health.test.ts` (10 cases including the "failed fresh fetch never infers `scope_invalid`" contract and the precedence ordering) and `offline-prep-selection.test.ts` (12 cases).
+- **Mechanical extraction** — Live/offline geo source precedence moved verbatim from `campaign-registration-form.tsx` into `useCollectGeoResolution`. Form file shrinks meaningfully; no behavior change.
+- **Naming convention** — v2.8-introduced modules adopt the `use-collect-*` / `src/features/collect/lib/*` convention. The single import-line update in `offline-queue.ts` follows the renamed shared storage file. v2.7 modules (`use-offline.ts`, `offline-queue.ts`) kept their original `src/hooks/` and `src/lib/` paths at the time. **Update (architecture refactor Phase 2):** both files now live in `src/features/collect/{hooks,lib}/` as part of the feature-first relocation; see `docs/wardwise-app-architecture-spec.md`.
 
 **Deliberately not included:** background preload of whole-campaign geo, edit-and-retry of failed offline rows, background sync with the tab closed, first-ever offline discovery of a campaign slug, custom offline landing page beyond browser default for non-`/c/*` URLs.
 

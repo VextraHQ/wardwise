@@ -3,7 +3,7 @@
 ## Status
 
 - **Collect v1 is complete** — merged to `main`.
-- **Future changes**: Branch off `main` with `fix/collect-*` (bug fixes) or `feature/collect-*` (new features). Keep branches short-lived and scoped to one change.
+- **Future changes**: Branch off `main` with `fix/collect-`_ (bug fixes) or `feature/collect-_` (new features). Keep branches short-lived and scoped to one change.
 - **Production hardening applied** — see `docs/wardwise-hardening-spec.md` for details:
   - Rate limiting on `/api/collect/submit` (Upstash Redis, 10 req/min per IP)
   - Geo hierarchy validation on submit (PU → ward → LGA chain verified)
@@ -262,7 +262,7 @@
 | Pack with `scope_invalid` health               | Splash shows strong "Refresh Required" treatment; verdict only fires after a confirmed-fresh allowed-LGA fetch                                                                   |
 | Pack with `content_outdated` / `aged` health   | Mild refresh prompt; pack still usable as last-known data                                                                                                                        |
 | Selected-LGA-only offline prep                 | Offline location step shows only the prepared LGAs and their wards/units                                                                                                         |
-| Offline cold-reopen after prep                 | `/c/*` page navigation + `?_rsc` GETs are cache-fallback so the campaign page hydrates offline                                                                                   |
+| Offline cold-reopen after prep                 | `/c/`\* page navigation + `?_rsc` GETs are cache-fallback so the campaign page hydrates offline                                                                                  |
 | Online with failing live geo + pack            | Location step swaps to local data with a visible inline note + Retry; never silent                                                                                               |
 | Closed/draft/deleted campaign with stored pack | Pack is cleared on next online open of the closed shell, or via the slug-aware not-found surface                                                                                 |
 | Saved LGAs out of scope after prep             | Prep sheet derives `effectiveSelection` from visibleIds; hidden stale ids are excluded from save and surfaced as an inline amber warning. No 400 round-trip.                     |
@@ -443,17 +443,17 @@ src/features/collect/components/admin/
 
 ## Validation Checklist
 
-- [x] Admin auth protects `/admin` and `/admin/collect`
-- [x] Candidate CRUD still works
-- [x] Campaign creation works
-- [x] Public form respects campaign status (draft/active/paused/closed)
-- [x] Phone + VIN deduplication works
-- [x] Canvasser validation when "Yes" selected
-- [x] CSV export includes PU codes and sanitizes cells
-- [x] QR code generation works
-- [x] Polling units sorted by INEC code
-- [x] Build, lint, and typecheck pass
-- [x] Adamawa official ward + polling unit sync completed
+- Admin auth protects `/admin` and `/admin/collect`
+- Candidate CRUD still works
+- Campaign creation works
+- Public form respects campaign status (draft/active/paused/closed)
+- Phone + VIN deduplication works
+- Canvasser validation when "Yes" selected
+- CSV export includes PU codes and sanitizes cells
+- QR code generation works
+- Polling units sorted by INEC code
+- Build, lint, and typecheck pass
+- Adamawa official ward + polling unit sync completed
 
 ## Working Agreement With Claude
 

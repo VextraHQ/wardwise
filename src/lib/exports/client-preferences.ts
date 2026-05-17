@@ -1,4 +1,4 @@
-import type { ExportFormat } from "./shared";
+import type { ExportFormat } from "@/lib/exports/shared";
 
 const EXPORT_FORMAT_STORAGE_KEY = "wardwise-admin-export-format";
 

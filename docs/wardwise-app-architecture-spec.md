@@ -261,7 +261,7 @@ src/lib/
 
 Domain-shaped email files (e.g. `contact.ts`, `account-welcome.ts`, `auth.ts`, `templates/auth-link.tsx`) may live here as long as they do **not** import feature internals. Centralising templates and previews keeps the React Email dev workflow simple — splitting them across feature folders would make local preview and test runs more painful for a small architectural win.
 
-When email templates and feature UI need the same small option set or label map, prefer a neutral constants module (for example `src/lib/constants/contact-reasons.ts`) over pushing the template into a feature. Move an email module into a feature only when it truly needs feature-private behavior rather than shared reference data.
+When email templates and feature UI need the same small option set or label map, prefer a neutral constants module (for example `src/lib/constants/contact-reasons.ts`) over pushing the template into a feature. The placement is **cycle-breaking, not a claim of broad reuse** — the rule it preserves is "`lib/*` services must not deep-import features." Putting the labels in `lib/constants/` lets both the feature UI and the central email module read them without forcing `lib/email` to depend on a feature. Move an email module into a feature only when it truly needs feature-private behavior rather than shared reference data.
 
 ### `src/types`
 
@@ -718,7 +718,7 @@ import { getCampaignDisplayHeadline } from "@/features/collect/components/public
 
 These are deliberate exceptions accepted during phased migration. They are not "private internal" imports — they treat one feature's public surface as a stable dependency for another. Revisit during Phase 9 documentation cleanup if any become painful.
 
-- **Reporting → Collect (Phase 6).** `src/features/reporting/components/*` imports from `@/features/collect/lib/{reporting,branding}` (helper functions) and from `@/features/collect/components/public/{form-ui,share-invite-card,registration-step-header}` (visual primitives shared with the public registration shell). The lib imports are stable named cross-feature surfaces. The component imports are pragmatic — the public report intentionally mirrors the registration shell's look. If `form-ui` and friends start needing a Reporting-specific variant, promote the shared bits to `src/components/shared/` rather than forking.
+- **Reporting → Collect (Phase 6).** `src/features/reporting/components/`\* imports from `@/features/collect/lib/{reporting,branding}` (helper functions) and from `@/features/collect/components/public/{form-ui,share-invite-card,registration-step-header}` (visual primitives shared with the public registration shell). The lib imports are stable named cross-feature surfaces. The component imports are pragmatic — the public report intentionally mirrors the registration shell's look. If `form-ui` and friends start needing a Reporting-specific variant, promote the shared bits to `src/components/shared/` rather than forking.
 - **Candidates → Geo (Phase 4 + 5).** Candidate schemas import `getPositionStateValidationMessage` from `@/features/geo/lib/constituency`; admin candidate components import geo data files (`state-lga-locations`, `nigerian-constituencies`, etc.). Geo is a domain support feature with intentionally public data and lib surfaces.
 
 ---
@@ -816,7 +816,7 @@ Scope:
 
 - add `src/features/` only when the first feature migration starts
 - decide whether to add ESLint import boundary rules
-- confirm path alias strategy stays `@/*`
+- confirm path alias strategy stays `@/`\*
 - confirm shadcn still writes primitives to `src/components/ui`
 - document review commands in `README.md` or `CLAUDE.md` if the team wants them visible there too
 
@@ -1378,7 +1378,7 @@ If the reviewer finds a bigger improvement, record it as a follow-up task unless
 14. ~~Start Phase 8 (Auth, Admin Shell, and Public Site). Move auth, admin-shell, and public-site components/hooks/lib/schemas. Also fold `src/types/voter.ts` to its rightful feature (likely candidate-dashboard) once the consumer audit completes.~~ (done — auth, admin-shell, and public-site features fully populated; shared layer (`components/shared/`, `hooks/shared/`) now hosts the cross-feature primitives; `voter.ts` confirmed cross-feature and kept in `src/types/`.)
 15. ~~Start Phase 9 (documentation alignment sweep). Run the full-doc rg passes from spec §"Migration Phases > Phase 9" and reconcile anything missed.~~ (done — final sweep clean; codebase-review marked historical; `src/lib/email` policy documented.)
 
-**Migration complete.** All nine phases — including their fixups — have landed on the `codex/feature-first-architecture` branch. The repo now matches the feature-first target: `src/features/*` populated for all eight domains, `src/components/` only `ui/` and `shared/`, `src/hooks/` only `shared/`, `src/lib/` only app-wide infrastructure, `src/types/` only ambient + cross-feature shared types.
+**Migration complete.** All nine phases — including their fixups — have landed on the `codex/feature-first-architecture` branch. The repo now matches the feature-first target: `src/features/`\* populated for all eight domains, `src/components/` only `ui/` and `shared/`, `src/hooks/` only `shared/`, `src/lib/` only app-wide infrastructure, `src/types/` only ambient + cross-feature shared types.
 
 ---
 

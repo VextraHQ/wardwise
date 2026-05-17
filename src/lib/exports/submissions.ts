@@ -10,7 +10,7 @@ import {
   redactId,
   sanitizeSpreadsheetText,
   type ExportTable,
-} from "./shared";
+} from "@/lib/exports/shared";
 
 function getSubmissionNameParts(submission: {
   fullName: string | null;

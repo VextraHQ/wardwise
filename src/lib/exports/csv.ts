@@ -1,4 +1,4 @@
-import type { ExportTable, ExportValue } from "./shared";
+import type { ExportTable, ExportValue } from "@/lib/exports/shared";
 
 function escapeCsvCell(value: ExportValue): string {
   const stringValue = value == null ? "" : String(value);

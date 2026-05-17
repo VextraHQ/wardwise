@@ -10,17 +10,17 @@
 
 ### Completed Hardening Items
 
-- [x] **Cascade deletes** — Candidate → User, Campaign, Submissions all cascade properly
-- [x] **Centralized auth helper** — `requireAdmin()` replaces 24 manual auth checks
-- [x] **Server route guard** — `src/proxy.ts` protects `/admin/*` and `/dashboard/*` at Edge
-- [x] **Secure account lifecycle** — candidate setup and recovery now use one-time auth links instead of admin-shared passwords
-- [x] **Server-side Zod validation** — Candidate create/update, Campaign create/update, Submission update all validated
-- [x] **Rate limiting** — Upstash Redis on `/api/collect/submit` plus split auth protection for login, recovery, and password setup flows
-- [x] **Geo validation** — Submit verifies pollingUnit → ward → LGA hierarchy
-- [x] **Submission delete context** — Optional `?campaignId` param prevents cross-campaign deletes
-- [x] **Audit logging** — DB table + utility for candidate CRUD, campaign CRUD, password reset, submission delete
-- [x] **Canonical phone schema** — Phone write paths normalize valid Nigerian mobile numbers to `+234XXXXXXXXXX`
-- [x] **Environment template** — `.env.example` with all required vars documented
+- **Cascade deletes** — Candidate → User, Campaign, Submissions all cascade properly
+- **Centralized auth helper** — `requireAdmin()` replaces 24 manual auth checks
+- **Server route guard** — `src/proxy.ts` protects `/admin/`_ and `/dashboard/_` at Edge
+- **Secure account lifecycle** — candidate setup and recovery now use one-time auth links instead of admin-shared passwords
+- **Server-side Zod validation** — Candidate create/update, Campaign create/update, Submission update all validated
+- **Rate limiting** — Upstash Redis on `/api/collect/submit` plus split auth protection for login, recovery, and password setup flows
+- **Geo validation** — Submit verifies pollingUnit → ward → LGA hierarchy
+- **Submission delete context** — Optional `?campaignId` param prevents cross-campaign deletes
+- **Audit logging** — DB table + utility for candidate CRUD, campaign CRUD, password reset, submission delete
+- **Canonical phone schema** — Phone write paths normalize valid Nigerian mobile numbers to `+234XXXXXXXXXX`
+- **Environment template** — `.env.example` with all required vars documented
 
 ---
 

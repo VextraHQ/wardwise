@@ -13,10 +13,6 @@
 // Note: Update this when legal/company details change
 // ============================================================================
 
-/**
- * Date when legal documents were last updated.
- * Update this whenever you modify the legal content.
- */
 export const LEGAL_LAST_UPDATED = new Date("2026-04-07");
 export function formatLegalDate(date: Date): string {
   return date.toLocaleDateString("en-US", {
@@ -27,19 +23,12 @@ export function formatLegalDate(date: Date): string {
 }
 
 export const COMPANY_INFO = {
-  /** Product/Platform name */
   name: "WardWise",
-  /** Registered legal entity */
   legalName: "Vextra Limited",
-  /** Parent company website */
   companyWebsite: "https://vextralimited.com",
-  /** General contact email */
   email: "info@wardwise.ng",
-  /** Support email */
   supportEmail: "support@wardwise.ng",
-  /** Headquarters location */
   address: "Abuja, Nigeria",
-  /** Platform URL */
   website: "https://wardwise.ng",
 } as const;
 

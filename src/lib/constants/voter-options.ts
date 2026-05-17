@@ -1,5 +1,4 @@
 // Voter Form Options Centralized dropdown/select options for voter registration and profile forms.
-
 export const OCCUPATION_OPTIONS = [
   { value: "civil-servant", label: "Civil Servant" },
   { value: "teacher", label: "Teacher/Educator" },

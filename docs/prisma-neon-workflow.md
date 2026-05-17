@@ -23,24 +23,28 @@ If you are ready to move beyond `db push`, use the repo-specific migration rollo
 There are **4 different things** involved:
 
 1. **App code**
-   - Next.js, React, API routes, components
-   - Tracked by Git
+
+- Next.js, React, API routes, components
+- Tracked by Git
 
 2. **Prisma schema**
-   - [`prisma/schema.prisma`](/Users/nabeelhassan/Desktop/wardwise-demo/prisma/schema.prisma)
-   - Also tracked by Git
+
+- `[prisma/schema.prisma](/Users/nabeelhassan/Desktop/wardwise-demo/prisma/schema.prisma)`
+- Also tracked by Git
 
 3. **Database**
-   - The actual Postgres/Neon tables and data
-   - Not changed by Git
+
+- The actual Postgres/Neon tables and data
+- Not changed by Git
 
 4. **Prisma command**
-   - This is what actually changes a database
-   - Examples:
-     - `pnpm prisma generate`
-     - `pnpm db:push`
-     - `pnpm db:migrate`
-     - `pnpm db:migrate:deploy`
+
+- This is what actually changes a database
+- Examples:
+  - `pnpm prisma generate`
+  - `pnpm db:push`
+  - `pnpm db:migrate`
+  - `pnpm db:migrate:deploy`
 
 ### Important Rule
 
@@ -117,10 +121,10 @@ Production should **not** use your local `.env.local`.
 
 This repo currently has:
 
-- Prisma scripts in [`package.json`](/Users/nabeelhassan/Desktop/wardwise-demo/package.json)
+- Prisma scripts in `[package.json](/Users/nabeelhassan/Desktop/wardwise-demo/package.json)`
 - **no committed `prisma/migrations/` directory**
 
-That means the repo is effectively still in a **`db push` phase**, even though migration scripts exist.
+That means the repo is effectively still in a `**db push` phase\*\*, even though migration scripts exist.
 
 ### Recommended Current State
 
@@ -138,28 +142,22 @@ Then:
 
 ## Commands In This Repo
 
-From [`package.json`](/Users/nabeelhassan/Desktop/wardwise-demo/package.json):
+From `[package.json](/Users/nabeelhassan/Desktop/wardwise-demo/package.json)`:
 
 - `pnpm prisma generate`
   - Regenerates Prisma client/types after schema changes
-
 - `pnpm db:push`
   - Pushes the schema directly into the target DB
   - Fast
   - No migration files
-
 - `pnpm db:migrate`
   - Creates and applies a migration in development
-
 - `pnpm db:migrate:deploy`
   - Applies committed migrations to production/staging
-
 - `pnpm db:seed`
-  - Seeds demo candidates/users from [`prisma/seed.ts`](/Users/nabeelhassan/Desktop/wardwise-demo/prisma/seed.ts)
-
+  - Seeds demo candidates/users from `[prisma/seed.ts](/Users/nabeelhassan/Desktop/wardwise-demo/prisma/seed.ts)`
 - `pnpm db:seed:geo-core`
   - Seeds canonical state/LGA records
-
 - `pnpm db:sync:adamawa-geo`
   - Syncs Adamawa wards/polling units
 
@@ -170,7 +168,7 @@ From [`package.json`](/Users/nabeelhassan/Desktop/wardwise-demo/package.json):
 While we are still using `db push`, use this workflow:
 
 1. Change code
-2. Change [`prisma/schema.prisma`](/Users/nabeelhassan/Desktop/wardwise-demo/prisma/schema.prisma) if needed
+2. Change `[prisma/schema.prisma](/Users/nabeelhassan/Desktop/wardwise-demo/prisma/schema.prisma)` if needed
 3. Run:
 
 ```bash
@@ -178,10 +176,10 @@ pnpm prisma generate
 pnpm db:push
 ```
 
-4. Test locally against the **dev** database
-5. Push code to GitHub
-6. Deploy app code when ready
-7. Only update the **prod** database intentionally, as a separate step
+1. Test locally against the **dev** database
+2. Push code to GitHub
+3. Deploy app code when ready
+4. Only update the **prod** database intentionally, as a separate step
 
 ### Important
 
@@ -246,11 +244,13 @@ This is valid in testing, but be careful because it can copy real supporter data
 Preferred ways:
 
 1. **Neon clone / branch / copy workflow**
-   - Use Neon’s database copy/branching features if available in your plan
+
+- Use Neon’s database copy/branching features if available in your plan
 
 2. **Postgres dump + restore**
-   - Export prod
-   - Restore into dev
+
+- Export prod
+- Restore into dev
 
 Typical flow:
 
@@ -378,8 +378,8 @@ Instead:
 pnpm db:migrate --name init
 ```
 
-5. Commit the new `prisma/migrations` folder
-6. From then on, use migrations as the standard workflow
+1. Commit the new `prisma/migrations` folder
+2. From then on, use migrations as the standard workflow
 
 This is the cleanest way to become team-scalable.
 

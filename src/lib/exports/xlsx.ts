@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import type { ExportTable } from "./shared";
+import type { ExportTable } from "@/lib/exports/shared";
 
 export function renderXlsx(table: ExportTable): ArrayBuffer {
   const workbook = XLSX.utils.book_new();
