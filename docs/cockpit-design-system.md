@@ -354,7 +354,7 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 
 ## Component Inventory
 
-### Candidate Dashboard (`src/components/candidate-dashboard/`)
+### Candidate Dashboard (`src/features/candidate-dashboard/components/`)
 
 | Component                    | Status                                                          |
 | ---------------------------- | --------------------------------------------------------------- |

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useCandidateSupporters } from "@/hooks/use-candidate-dashboard";
+import { useCandidateSupporters } from "@/features/candidate-dashboard/hooks/use-candidate-dashboard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {

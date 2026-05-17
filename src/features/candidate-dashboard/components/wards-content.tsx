@@ -1,6 +1,6 @@
 "use client";
 
-import { useCandidateWardData } from "@/hooks/use-candidate-dashboard";
+import { useCandidateWardData } from "@/features/candidate-dashboard/hooks/use-candidate-dashboard";
 import {
   Card,
   CardContent,

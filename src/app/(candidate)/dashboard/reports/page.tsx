@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ReportsContent } from "@/components/candidate-dashboard/reports-content";
+import { ReportsContent } from "@/features/candidate-dashboard/components/reports-content";
 
 export const metadata: Metadata = {
   title: "Campaign Reports",

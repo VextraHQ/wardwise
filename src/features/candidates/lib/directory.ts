@@ -15,7 +15,12 @@
 
 import type { Candidate } from "@/features/candidates/types/candidate.types";
 import { candidates } from "@/lib/mock/data/candidates";
-import { getSupportersCount } from "@/lib/candidate/analytics";
+import { getVotersByCandidateId } from "@/lib/mock/data/voters";
+
+// Local count helper — keeps Candidates from depending on Candidate Dashboard's analytics module.
+function getSupportersCount(candidateId: string): number {
+  return getVotersByCandidateId(candidateId).length;
+}
 
 // ============================================================================
 // FILTERING FUNCTIONS

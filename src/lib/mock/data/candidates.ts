@@ -4,7 +4,7 @@
 // For accurate, real-time supporter counts, use:
 // - getCandidateByIdWithSupporters() from @/features/candidates/lib/directory
 // - getCandidatesWithSupporters() from @/features/candidates/lib/directory
-// - getSupportersCount(candidateId) from @/lib/candidate/analytics
+// - getSupportersCount(candidateId) from @/features/candidate-dashboard/lib/analytics
 //
 // These functions calculate supporters dynamically from actual voter data.
 import type { Candidate } from "@/features/candidates/types/candidate.types";

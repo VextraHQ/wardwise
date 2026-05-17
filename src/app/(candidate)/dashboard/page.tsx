@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DashboardContent } from "@/components/candidate-dashboard/dashboard-content";
+import { DashboardContent } from "@/features/candidate-dashboard/components/dashboard-content";
 import {
   getCandidateNameForMetadata,
   generateCandidateTitle,

@@ -1,9 +1,9 @@
 "use client";
 
-import { useCandidateDashboard } from "@/hooks/use-candidate-dashboard";
-import { ChartAreaInteractive } from "@/components/candidate-dashboard/chart-area-interactive";
-import { DataTable } from "@/components/candidate-dashboard/data-table";
-import { SectionCards } from "@/components/candidate-dashboard/section-cards";
+import { useCandidateDashboard } from "@/features/candidate-dashboard/hooks/use-candidate-dashboard";
+import { ChartAreaInteractive } from "@/features/candidate-dashboard/components/chart-area-interactive";
+import { DataTable } from "@/features/candidate-dashboard/components/data-table";
+import { SectionCards } from "@/features/candidate-dashboard/components/section-cards";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Card,

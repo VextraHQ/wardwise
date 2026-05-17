@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   useCandidateDashboard,
   useCandidateRegistrationTrends,
-} from "@/hooks/use-candidate-dashboard";
+} from "@/features/candidate-dashboard/hooks/use-candidate-dashboard";
 import {
   Card,
   CardContent,

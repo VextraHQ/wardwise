@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useCandidateProfile } from "@/hooks/use-candidate-dashboard";
+import { useCandidateProfile } from "@/features/candidate-dashboard/hooks/use-candidate-dashboard";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";

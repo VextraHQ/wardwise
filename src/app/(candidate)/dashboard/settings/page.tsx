@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SettingsContent } from "@/components/candidate-dashboard/settings-content";
+import { SettingsContent } from "@/features/candidate-dashboard/components/settings-content";
 
 export const metadata: Metadata = {
   title: "Settings",

@@ -1,8 +1,8 @@
 "use client";
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { CandidateSidebar } from "@/components/candidate-dashboard/candidate-sidebar";
-import { SiteHeader } from "@/components/candidate-dashboard/site-header";
+import { CandidateSidebar } from "@/features/candidate-dashboard/components/candidate-sidebar";
+import { SiteHeader } from "@/features/candidate-dashboard/components/site-header";
 
 export function CandidateShell({ children }: { children: React.ReactNode }) {
   return (

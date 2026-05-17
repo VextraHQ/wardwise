@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { NotificationsContent } from "@/components/candidate-dashboard/notifications-content";
+import { NotificationsContent } from "@/features/candidate-dashboard/components/notifications-content";
 
 export const metadata: Metadata = {
   title: "Notifications",
