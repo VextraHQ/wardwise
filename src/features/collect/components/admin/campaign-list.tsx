@@ -22,8 +22,8 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
-import { AdminPagination } from "@/features/admin-shell/components/admin-pagination";
-import { AdminSearchBar } from "@/features/admin-shell/components/admin-search-bar";
+import { AdminPagination } from "@/components/shared/admin/admin-pagination";
+import { AdminSearchBar } from "@/components/shared/admin/admin-search-bar";
 import {
   CampaignFilters,
   type CampaignSort,
@@ -42,7 +42,7 @@ import { formatRelativeTime } from "@/lib/date-format";
 import {
   AdminResourceState,
   adminResourceStateIcons,
-} from "@/features/admin-shell/components/shared/admin-resource-state";
+} from "@/components/shared/admin/admin-resource-state";
 import {
   AdminMobileRecordCard,
   AdminMobileRecordField,
@@ -51,7 +51,7 @@ import {
   AdminMobileRecordMeta,
   AdminMobileRecordSkeleton,
   AdminMobileRecordTitle,
-} from "@/features/admin-shell/components/shared/admin-mobile-record-card";
+} from "@/components/shared/admin/admin-mobile-record-card";
 import { cn, formatPersonName } from "@/lib/utils";
 
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {

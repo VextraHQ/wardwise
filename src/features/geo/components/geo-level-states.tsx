@@ -19,11 +19,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AdminSearchBar } from "@/features/admin-shell/components/admin-search-bar";
+import { AdminSearchBar } from "@/components/shared/admin/admin-search-bar";
 import {
   AdminResourceState,
   adminResourceStateIcons,
-} from "@/features/admin-shell/components/shared/admin-resource-state";
+} from "@/components/shared/admin/admin-resource-state";
 import { cn } from "@/lib/utils";
 import { IconChevronRight } from "@tabler/icons-react";
 

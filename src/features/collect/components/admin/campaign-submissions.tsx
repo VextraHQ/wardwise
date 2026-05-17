@@ -12,8 +12,8 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
-import { AdminPagination } from "@/features/admin-shell/components/admin-pagination";
-import { AdminMobileRecordSkeleton } from "@/features/admin-shell/components/shared/admin-mobile-record-card";
+import { AdminPagination } from "@/components/shared/admin/admin-pagination";
+import { AdminMobileRecordSkeleton } from "@/components/shared/admin/admin-mobile-record-card";
 import {
   AlertDialog,
   AlertDialogAction,

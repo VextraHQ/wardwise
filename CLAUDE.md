@@ -62,6 +62,8 @@ Import direction (enforced by convention until ESLint boundaries are added):
 
 When adding new code, prefer placing it inside the owning `src/features/<feature>/` tree. Promote to `components/shared`, `hooks/shared`, or `lib/core` only when the code is genuinely product-agnostic and used by multiple stable features.
 
+`src/components/shared/admin` holds reusable admin-facing UI primitives that are not tied to one admin feature: pagination, search, skeletons, empty/error states, mobile record cards, and toolbar filter sheets. Keep feature-aware admin composites in their owning feature until they can be split without importing feature internals.
+
 `src/lib/email` is an intentional app-wide email service: provider wrapper, shared components, and the central React Email templates + previews directory. Domain-shaped email files (`contact.ts`, `account-welcome.ts`, `auth.ts`, the auth/admin/contact templates) live here so the React Email preview workflow stays simple. Keep feature-specific labels/options in neutral constants (for example `src/lib/constants/contact-reasons.ts`) when email templates and feature UI both need them.
 
 ## Specs & Docs

@@ -19,7 +19,10 @@ import {
 } from "@/features/collect/components/public/form-ui";
 import { IconMapPin } from "@tabler/icons-react";
 import type { CreateCandidateFormValues } from "@/features/candidates/schemas/candidate-schemas";
-import { nigeriaStates, getLGAsByState } from "@/features/geo/data/state-lga-locations";
+import {
+  nigeriaStates,
+  getLGAsByState,
+} from "@/features/geo/data/state-lga-locations";
 import { useGeoLgas } from "@/features/geo/hooks/use-geo";
 import type { ComboboxSelectGroup } from "@/components/ui/combobox-select";
 import {

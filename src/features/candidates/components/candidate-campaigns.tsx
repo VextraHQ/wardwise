@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { AdminPagination } from "@/features/admin-shell/components/admin-pagination";
+import { AdminPagination } from "@/components/shared/admin/admin-pagination";
 import { CampaignActionsMenu } from "@/features/collect/components/admin/campaign-actions-menu";
 import {
   AdminMobileRecordCard,
@@ -30,11 +30,11 @@ import {
   AdminMobileRecordMeta,
   AdminMobileRecordSkeleton,
   AdminMobileRecordTitle,
-} from "@/features/admin-shell/components/shared/admin-mobile-record-card";
+} from "@/components/shared/admin/admin-mobile-record-card";
 import {
   AdminResourceState,
   adminResourceStateIcons,
-} from "@/features/admin-shell/components/shared/admin-resource-state";
+} from "@/components/shared/admin/admin-resource-state";
 
 import { useCandidateCampaigns } from "@/features/collect/hooks/use-collect";
 import { formatStatusLabel } from "@/features/admin-shell/server/admin-dashboard";

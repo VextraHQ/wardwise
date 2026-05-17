@@ -60,8 +60,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { AdminSearchBar } from "@/features/admin-shell/components/admin-search-bar";
-import { AdminPagination } from "@/features/admin-shell/components/admin-pagination";
+import { AdminSearchBar } from "@/components/shared/admin/admin-search-bar";
+import { AdminPagination } from "@/components/shared/admin/admin-pagination";
 import { BulkImportDialog } from "@/features/geo/components/dialogs/bulk-import-dialog";
 import { formatGeoDisplayName } from "@/features/geo/lib/display";
 

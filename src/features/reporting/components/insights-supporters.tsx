@@ -37,8 +37,8 @@ import {
   AdminMobileRecordMeta,
   AdminMobileRecordSkeleton,
   AdminMobileRecordTitle,
-} from "@/features/admin-shell/components/shared/admin-mobile-record-card";
-import { AdminPagination } from "@/features/admin-shell/components/admin-pagination";
+} from "@/components/shared/admin/admin-mobile-record-card";
+import { AdminPagination } from "@/components/shared/admin/admin-pagination";
 import {
   StepCard,
   CardSectionHeader,

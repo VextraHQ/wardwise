@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AdminToolbarFilterSheet } from "@/features/admin-shell/components/shared/admin-toolbar-filter-sheet";
+import { AdminToolbarFilterSheet } from "@/components/shared/admin/admin-toolbar-filter-sheet";
 
 export type CampaignSort =
   | "recent-activity"

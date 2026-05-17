@@ -32,19 +32,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { AdminSearchBar } from "@/features/admin-shell/components/admin-search-bar";
+import { AdminSearchBar } from "@/components/shared/admin/admin-search-bar";
 import {
   CandidateFilters,
   type CandidateCollectFilter,
   type CandidateInsightsFilter,
   type CandidateSort,
 } from "@/features/admin-shell/components/filters/candidate-filters";
-import { AdminPagination } from "@/features/admin-shell/components/admin-pagination";
+import { AdminPagination } from "@/components/shared/admin/admin-pagination";
 import { CampaignActionMenuItems } from "@/features/collect/components/admin/campaign-actions-menu";
 import {
   AdminResourceState,
   adminResourceStateIcons,
-} from "@/features/admin-shell/components/shared/admin-resource-state";
+} from "@/components/shared/admin/admin-resource-state";
 
 import { formatStatusLabel } from "@/features/admin-shell/server/admin-dashboard";
 import { formatDisplayDate } from "@/lib/date-format";
@@ -58,7 +58,7 @@ import {
   AdminMobileRecordMeta,
   AdminMobileRecordSkeleton,
   AdminMobileRecordTitle,
-} from "@/features/admin-shell/components/shared/admin-mobile-record-card";
+} from "@/components/shared/admin/admin-mobile-record-card";
 
 function resolveStateName(stateCode: string | null): string {
   if (!stateCode) return "Nigeria";

@@ -9,7 +9,7 @@ import {
   AdminMobileRecordHeader,
   AdminMobileRecordMeta,
   AdminMobileRecordTitle,
-} from "@/features/admin-shell/components/shared/admin-mobile-record-card";
+} from "@/components/shared/admin/admin-mobile-record-card";
 import {
   Table,
   TableBody,
