@@ -1,20 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import { updateCampaignSchema } from "@/lib/schemas/collect-schemas";
+import { updateCampaignSchema } from "@/features/collect/schemas/collect-schemas";
 import { logAudit } from "@/lib/core/audit";
 import {
   normalizeConstituencyLgaIds,
   positionRequiresLgas,
-} from "@/lib/geo/constituency";
-import { resolveCandidateCampaignLgaIds } from "@/lib/geo/constituency-server";
+} from "@/features/geo/lib/constituency";
+import { resolveCandidateCampaignLgaIds } from "@/features/geo/server/constituency-server";
 import {
   generateReportToken,
   generatePasscode,
   hashPasscode,
-} from "@/lib/server/report-access";
-import { normalizeCampaignDisplayName } from "@/lib/collect/branding";
+} from "@/features/reporting/server/report-access";
+import { normalizeCampaignDisplayName } from "@/features/collect/lib/branding";
 
 type RouteParams = { params: Promise<{ id: string }> };
 

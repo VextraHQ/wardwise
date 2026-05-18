@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getClientIp, passwordSetupRateLimit } from "@/lib/core/rate-limit";
-import { consumeAuthLink } from "@/lib/auth/links";
+import { consumeAuthLink } from "@/features/auth/lib/links";
 import { sendAccountWelcomeEmail } from "@/lib/email/account-welcome";
-import { passwordSetupSchema } from "@/lib/schemas/auth-schemas";
+import { passwordSetupSchema } from "@/features/auth/schemas/auth-schemas";
 
 const requestSchema = z.object({
   token: z.string().min(1, "Missing secure token"),

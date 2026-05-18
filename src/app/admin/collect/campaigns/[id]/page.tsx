@@ -1,4 +1,4 @@
-import { CampaignDetail } from "@/components/admin/collect/campaign-detail";
+import { CampaignDetail } from "@/features/collect/components/admin/campaign-detail";
 import { createAdminMetadata } from "@/lib/core/metadata";
 
 export const metadata = createAdminMetadata({

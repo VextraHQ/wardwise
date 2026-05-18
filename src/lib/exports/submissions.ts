@@ -3,14 +3,14 @@ import { composeFullName } from "@/lib/utils";
 import {
   buildSubmissionWhere,
   type SubmissionFilters,
-} from "@/lib/collect/submission-query";
+} from "@/features/collect/lib/submission-query";
 import {
   buildExportFilename,
   formatExportDateTime,
   redactId,
   sanitizeSpreadsheetText,
   type ExportTable,
-} from "./shared";
+} from "@/lib/exports/shared";
 
 function getSubmissionNameParts(submission: {
   fullName: string | null;
@@ -74,7 +74,7 @@ export async function buildSubmissionsExportTable(
     "Ward",
     "PU Code",
     "Polling Unit",
-    "APC/NIN",
+    "Membership / NIN",
     "VIN",
     "Role",
     ...(campaign.customQuestion1 ? [campaign.customQuestion1] : []),
@@ -107,7 +107,9 @@ export async function buildSubmissionsExportTable(
       sanitizeSpreadsheetText(submission.pollingUnit?.code || ""),
       sanitizeSpreadsheetText(submission.pollingUnitName),
       sanitizeSpreadsheetText(
-        redacted ? redactId(submission.apcRegNumber) : submission.apcRegNumber,
+        redacted
+          ? redactId(submission.identityValue)
+          : submission.identityValue,
       ),
       sanitizeSpreadsheetText(
         redacted

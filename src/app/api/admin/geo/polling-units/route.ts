@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import { createPollingUnitSchema } from "@/lib/schemas/geo-schemas";
+import { createPollingUnitSchema } from "@/features/geo/schemas/geo-schemas";
 import {
   parseOptionalStringParam,
   parsePaginationParams,

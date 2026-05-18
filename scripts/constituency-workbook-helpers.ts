@@ -1,4 +1,4 @@
-import { nigeriaLGAs } from "../src/lib/data/state-lga-locations";
+import { nigeriaLGAs } from "../src/features/geo/data/state-lga-locations";
 
 type AliasTarget = string | string[];
 

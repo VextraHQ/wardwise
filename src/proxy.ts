@@ -1,5 +1,5 @@
 import { withAuth } from "next-auth/middleware";
-import { isSessionWithinLifetime } from "@/lib/auth/session";
+import { isSessionWithinLifetime } from "@/features/auth/lib/session";
 
 export default withAuth(
   function proxy(_req) {

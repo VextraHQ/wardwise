@@ -3,7 +3,7 @@
 > Living implementation spec for reworking `/admin` from a passive stats page into an operational command center.
 > Last updated: 2026-04-19
 > Status: **Shipped** on `develop` (M1–M4 complete, see Implementation Notes).
-> Primary file: `src/components/admin/admin-dashboard.tsx`
+> Primary file: `src/features/admin/components/admin-dashboard.tsx`
 
 ---
 
@@ -190,7 +190,7 @@ Data:
 
 Action menu:
 
-- Reuse `src/components/admin/collect/campaign-actions-menu.tsx`.
+- Reuse `src/features/collect/components/admin/campaign-actions-menu.tsx`.
 - Do not create a second campaign dropdown implementation.
 
 ### 6. Recent Candidates
@@ -244,8 +244,8 @@ Use existing data first. Do not add new API routes in the first implementation p
 
 Available hooks:
 
-- `useAdminCandidates()` in `src/hooks/use-admin`
-- `useCampaigns()` in `src/hooks/use-collect`
+- `useAdminCandidates()` in `src/features/admin/hooks/use-admin`
+- `useCampaigns()` in `src/features/collect/hooks/use-collect`
 
 Derived values:
 
@@ -304,7 +304,7 @@ These should wait until real routes/data are available.
 
 ### Phase 1 - Structure and Derived Data
 
-- [x] Keep work in `src/components/admin/admin-dashboard.tsx` unless a subcomponent is clearly reusable.
+- [x] Keep work in `src/features/admin/components/admin-dashboard.tsx` unless a subcomponent is clearly reusable.
 - [x] Replace top button-only strip with a compact Operations Overview section.
 - [x] Add derived arrays/counts for attention items.
 - [x] Build reusable local helpers inside the file:
@@ -386,11 +386,11 @@ Important:
 
 Primary:
 
-- `src/components/admin/admin-dashboard.tsx`
+- `src/features/admin/components/admin-dashboard.tsx`
 
 Likely reused:
 
-- `src/components/admin/collect/campaign-actions-menu.tsx`
+- `src/features/collect/components/admin/campaign-actions-menu.tsx`
 - `src/components/ui/button.tsx`
 - `src/components/ui/card.tsx`
 - `src/components/ui/badge.tsx`
@@ -405,8 +405,8 @@ Do not change unless needed:
 
 ## Verification Checklist
 
-- [x] `pnpm exec prettier --check src/components/admin/admin-dashboard.tsx`
-- [x] `pnpm exec eslint src/components/admin/admin-dashboard.tsx`
+- [x] `pnpm exec prettier --check src/features/admin/components/admin-dashboard.tsx`
+- [x] `pnpm exec eslint src/features/admin/components/admin-dashboard.tsx`
 - [x] `pnpm exec tsc --noEmit --pretty false`
 - [x] Dashboard loads with zero candidates.
 - [x] Dashboard loads with candidates but no campaigns.
@@ -433,7 +433,7 @@ Use this when handing the task to Claude:
 Please implement the admin dashboard redesign from docs/admin-dashboard-command-center-spec.md.
 
 Scope:
-- Update src/components/admin/admin-dashboard.tsx.
+- Update src/features/admin/components/admin-dashboard.tsx.
 - Reuse existing hooks: useAdminCandidates() and useCampaigns().
 - Reuse CampaignActionsMenu for campaign rows.
 - Do not add new API routes or Prisma changes.
@@ -447,8 +447,8 @@ Target UX:
 - Keep Coverage Snapshot lower priority.
 
 Run:
-- pnpm exec prettier --write src/components/admin/admin-dashboard.tsx
-- pnpm exec eslint src/components/admin/admin-dashboard.tsx
+- pnpm exec prettier --write src/features/admin/components/admin-dashboard.tsx
+- pnpm exec eslint src/features/admin/components/admin-dashboard.tsx
 - pnpm exec tsc --noEmit --pretty false
 
 After implementation, summarize what changed and call out any tradeoffs.
@@ -462,7 +462,7 @@ What shipped matches the spec. A few decisions worth recording so future work do
 
 - **`Missing constituency LGAs` uses `positionRequiresLgas(position)`**, not `!isNational`. Only Senator, House of Reps, and State Assembly seats are flagged. Governor / President / statewide candidates legitimately have no constituency LGAs and would have produced false positives.
 - **`Campaign Insights off` excludes drafts.** Drafts already surface under their own row, so including them here double-counted and made the queue noisier than the underlying problem.
-- **Recent Candidates row resolves `stateCode` to a full state name** via `nigeriaStates` (`src/lib/data/state-lga-locations.ts`) so admins see "Adamawa State" instead of "AD".
+- **Recent Candidates row resolves `stateCode` to a full state name** via `nigeriaStates` (`src/features/geo/data/state-lga-locations.ts`) so admins see "Adamawa State" instead of "AD".
 - **`CampaignRow` shows "No submissions yet"** when `lastSubmissionAt` is null, instead of an em-dash, because the dash read like a missing-data error rather than an expected state for a fresh campaign.
 - **Status color maps and `relativeTime` are duplicated locally** rather than extracted to `src/lib/date.ts` / a shared status module. Mirrors the same maps in `candidate-management.tsx` and `campaign-list.tsx`. Recorded as a follow-up in the Future Enhancements list below — not done in this pass to keep the PR scoped.
 - **Coverage Snapshot is purely informational.** No filter links: the candidate/campaign list pages do not yet support the corresponding filters, and dead links would have violated the "no placeholder routes" rule.

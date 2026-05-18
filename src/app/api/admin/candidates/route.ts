@@ -1,17 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
 import { Prisma } from "@prisma/client";
-import type { Candidate } from "@/types/candidate";
-import { createCandidateSchema } from "@/lib/schemas/admin-schemas";
+import type { Candidate } from "@/features/candidates/types/candidate.types";
+import { createCandidateSchema } from "@/features/candidates/schemas/candidate-schemas";
 import { logAudit } from "@/lib/core/audit";
-import { sanitizeCandidateConstituencyLgaIds } from "@/lib/geo/constituency-server";
-import { issueAuthLink } from "@/lib/auth/links";
+import { sanitizeCandidateConstituencyLgaIds } from "@/features/geo/server/constituency-server";
+import { issueAuthLink } from "@/features/auth/lib/links";
 import { sendAuthLinkEmail } from "@/lib/email/auth";
 import {
   pickCollectCampaignSummary,
   pickDraftCampaignSummary,
-} from "@/lib/admin/candidate-collect-summaries";
+} from "@/features/candidates/lib/candidate-collect-summaries";
 
 // Transform Prisma candidate to API response shape
 function transformCandidate(c: {

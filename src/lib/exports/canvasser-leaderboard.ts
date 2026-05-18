@@ -4,7 +4,7 @@ import {
   formatExportDateTime,
   sanitizeSpreadsheetText,
   type ExportTable,
-} from "./shared";
+} from "@/lib/exports/shared";
 
 export type CanvasserLeaderboardFilters = {
   search?: string;

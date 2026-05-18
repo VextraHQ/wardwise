@@ -10,17 +10,17 @@
 
 ### Completed Hardening Items
 
-- [x] **Cascade deletes** — Candidate → User, Campaign, Submissions all cascade properly
-- [x] **Centralized auth helper** — `requireAdmin()` replaces 24 manual auth checks
-- [x] **Server route guard** — `src/proxy.ts` protects `/admin/*` and `/dashboard/*` at Edge
-- [x] **Secure account lifecycle** — candidate setup and recovery now use one-time auth links instead of admin-shared passwords
-- [x] **Server-side Zod validation** — Candidate create/update, Campaign create/update, Submission update all validated
-- [x] **Rate limiting** — Upstash Redis on `/api/collect/submit` plus split auth protection for login, recovery, and password setup flows
-- [x] **Geo validation** — Submit verifies pollingUnit → ward → LGA hierarchy
-- [x] **Submission delete context** — Optional `?campaignId` param prevents cross-campaign deletes
-- [x] **Audit logging** — DB table + utility for candidate CRUD, campaign CRUD, password reset, submission delete
-- [x] **Canonical phone schema** — Phone write paths normalize valid Nigerian mobile numbers to `+234XXXXXXXXXX`
-- [x] **Environment template** — `.env.example` with all required vars documented
+- **Cascade deletes** — Candidate → User, Campaign, Submissions all cascade properly
+- **Centralized auth helper** — `requireAdmin()` replaces 24 manual auth checks
+- **Server route guard** — `src/proxy.ts` protects `/admin/`_ and `/dashboard/_` at Edge
+- **Secure account lifecycle** — candidate setup and recovery now use one-time auth links instead of admin-shared passwords
+- **Server-side Zod validation** — Candidate create/update, Campaign create/update, Submission update all validated
+- **Rate limiting** — Upstash Redis on `/api/collect/submit` plus split auth protection for login, recovery, and password setup flows
+- **Geo validation** — Submit verifies pollingUnit → ward → LGA hierarchy
+- **Submission delete context** — Optional `?campaignId` param prevents cross-campaign deletes
+- **Audit logging** — DB table + utility for candidate CRUD, campaign CRUD, password reset, submission delete
+- **Canonical phone schema** — Phone write paths normalize valid Nigerian mobile numbers to `+234XXXXXXXXXX`
+- **Environment template** — `.env.example` with all required vars documented
 
 ---
 
@@ -46,17 +46,17 @@ Chosen over in-memory because the app deploys to Vercel (serverless — no share
 
 ## Key Files
 
-| File                               | Purpose                                                                                            |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `src/lib/auth/links.ts`            | One-time invite/reset link lifecycle                                                               |
-| `src/lib/auth/guards.ts`           | Shared auth wrapper layer (`requireAdmin()`, page guards)                                          |
-| `src/proxy.ts`                     | Server-side Edge route protection (Next.js 16 proxy)                                               |
-| `src/lib/core/rate-limit.ts`       | Upstash rate limiters (submit + split auth flows)                                                  |
-| `src/lib/core/audit.ts`            | `logAudit()` fire-and-forget utility                                                               |
-| `src/lib/schemas/field-schemas.ts` | Shared email, phone, NIN, VIN, APC-or-NIN, and trimmed-text primitives                             |
-| `src/lib/schemas/admin-schemas.ts` | All Zod schemas (candidate, canvasser, campaign)                                                   |
-| `src/lib/server/query-params.ts`   | Shared query-param helpers (pagination, limit/offset, strict int/bool parsing — rejects `"12abc"`) |
-| `.env.example`                     | Environment variable template                                                                      |
+| File                                                                                                                                                                                                                                                                                                                | Purpose                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/features/auth/lib/links.ts`                                                                                                                                                                                                                                                                                    | One-time invite/reset link lifecycle                                                                                                                              |
+| `src/features/auth/lib/guards.ts`                                                                                                                                                                                                                                                                                   | Shared auth wrapper layer (`requireAdmin()`, page guards)                                                                                                         |
+| `src/proxy.ts`                                                                                                                                                                                                                                                                                                      | Server-side Edge route protection (Next.js 16 proxy)                                                                                                              |
+| `src/lib/core/rate-limit.ts`                                                                                                                                                                                                                                                                                        | Upstash rate limiters (submit + split auth flows)                                                                                                                 |
+| `src/lib/core/audit.ts`                                                                                                                                                                                                                                                                                             | `logAudit()` fire-and-forget utility                                                                                                                              |
+| `src/lib/schemas/field-schemas.ts`                                                                                                                                                                                                                                                                                  | Shared email, phone, NIN, VIN, legacy membership-or-NIN, and trimmed-text primitives                                                                              |
+| `src/features/candidates/schemas/{candidate,canvasser}-schemas.ts`, `src/features/collect/schemas/collect-schemas.ts`, `src/features/admin/schemas/admin-schemas.ts`, `src/features/auth/schemas/auth-schemas.ts`, `src/features/public-site/schemas/contact-schemas.ts`, `src/features/geo/schemas/geo-schemas.ts` | Feature-owned Zod schemas (admin self-service in `features/admin`, contact in public-site, etc.); only `field-schemas.ts` primitives remain in `src/lib/schemas/` |
+| `src/lib/server/query-params.ts`                                                                                                                                                                                                                                                                                    | Shared query-param helpers (pagination, limit/offset, strict int/bool parsing — rejects `"12abc"`)                                                                |
+| `.env.example`                                                                                                                                                                                                                                                                                                      | Environment variable template                                                                                                                                     |
 
 ---
 

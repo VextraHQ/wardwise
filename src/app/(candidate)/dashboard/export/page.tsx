@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ExportContent } from "@/components/candidate-dashboard/export-content";
+import { ExportContent } from "@/features/candidate-dashboard/components/export-content";
 
 export const metadata: Metadata = {
   title: "Export Data",

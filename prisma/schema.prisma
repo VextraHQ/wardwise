@@ -225,7 +225,7 @@ model CollectSubmission {
   pollingUnitId   Int?
   pollingUnit     PollingUnit?           @relation(fields: [pollingUnitId], references: [id])
   pollingUnitName String
-  apcRegNumber    String?
+  identityValue   String?                @map("apcRegNumber")
   voterIdNumber   String?
   isVerified      Boolean                @default(false)
   role            String // "volunteer" | "member" | "canvasser"

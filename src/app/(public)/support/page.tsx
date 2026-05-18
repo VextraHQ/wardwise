@@ -1,4 +1,4 @@
-import { SupportContent } from "@/components/public/support-content";
+import { SupportContent } from "@/features/public-site/components/support/support-content";
 import { createPublicMetadata } from "@/lib/core/metadata";
 
 export const metadata = createPublicMetadata({

@@ -1,6 +1,6 @@
-import { readAdminEmailChangeTokenPreview } from "@/lib/auth/links";
-import { ConfirmEmailChangeScreen } from "@/components/auth/confirm-email-change-screen";
-import { PasswordSetupUnavailable } from "@/components/auth/password-setup-screen";
+import { readAdminEmailChangeTokenPreview } from "@/features/auth/lib/links";
+import { ConfirmEmailChangeScreen } from "@/features/auth/components/confirm-email-change-screen";
+import { PasswordSetupUnavailable } from "@/features/auth/components/password-setup-screen";
 import { createAuthMetadata } from "@/lib/core/metadata";
 
 export const metadata = createAuthMetadata({

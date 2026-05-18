@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
-import { getDashboardWindows } from "@/lib/server/collect-reporting";
+import { getDashboardWindows } from "@/features/collect/server/collect-reporting";
 
 export async function GET() {
   try {

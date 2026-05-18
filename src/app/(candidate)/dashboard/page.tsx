@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { DashboardContent } from "@/components/candidate-dashboard/dashboard-content";
+import { DashboardContent } from "@/features/candidate-dashboard/components/dashboard-content";
 import {
   getCandidateNameForMetadata,
   generateCandidateTitle,
-} from "@/lib/core/metadata-helpers";
+} from "@/features/candidate-dashboard/lib/metadata-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const candidateName = await getCandidateNameForMetadata();

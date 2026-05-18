@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CookiesContent } from "@/components/legal/cookies-content";
+import { CookiesContent } from "@/features/public-site/components/legal/cookies-content";
 
 export const metadata: Metadata = {
   title: "Cookie Policy",

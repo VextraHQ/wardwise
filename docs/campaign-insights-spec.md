@@ -23,7 +23,7 @@
 
 - Private `/r/[token]` report route, passcode gate, access cookie, and revoked/unavailable states are live
 - Hero, Overview, Supporters, and Analytics tabs are all implemented
-- Read-only export path is live through `/api/campaign-report/*`
+- Read-only export path is live through `/api/campaign-report/`*
 - Report filters now drive summary metrics, compare mode, geography, and analytics consistently
 - Admin campaign settings can enable, preview, regenerate, revoke, and observe report access
 
@@ -35,9 +35,9 @@
 - **Shared date UI removed**: `src/components/shared/date-range-filter.tsx` was intentionally deleted
 - **Live-apply semantics made explicit**: custom date changes apply immediately; `Done` closes the surface instead of implying staged apply
 - **Report file split cleaned up**:
-  - scope state lives in `src/hooks/use-campaign-insights-scope.ts`
-  - report header/scope rail lives in `src/components/campaign-report/campaign-insights-header.tsx`
-  - overview tab composition lives in `src/components/campaign-report/insights-overview.tsx`
+  - scope state lives in `src/features/reporting/hooks/use-campaign-insights-scope.ts`
+  - report header/scope rail lives in `src/features/reporting/components/campaign-insights-header.tsx`
+  - overview tab composition lives in `src/features/reporting/components/insights-overview.tsx`
 - **Admin kept operational**: `campaign-overview.tsx` now uses its own local date filter component instead of sharing the report UI shell
 
 ---
@@ -128,12 +128,14 @@ Export should become a secondary utility action, not the main outcome.
 
 ## Options Considered
 
+
 | Option                               | What it means                                                     | Pros                                          | Cons                                            | Verdict             |
 | ------------------------------------ | ----------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------- | ------------------- |
 | 1. CSV only                          | Admin exports and manually sends data                             | Fastest, zero new UI                          | Feels weak, low product value, admin bottleneck | Not recommended     |
 | 2. Private read-only report (chosen) | Candidate/client sees a private results page with charts + export | Strong value, fast enough, safe, premium feel | Needs light access model + polished UI          | Best current option |
 | 3. Light candidate portal            | Candidate logs in and sees only their own report pages            | More premium, closer to full product          | Auth and permissions overhead                   | Good later step     |
 | 4. Full candidate dashboard          | Candidate-facing campaign OS                                      | Long-term ideal                               | Too much for this launch phase                  | Future phase        |
+
 
 ---
 
@@ -147,7 +149,7 @@ This is intentional:
 - report links can be forwarded
 - passcodes can be shared across campaign stakeholders
 - verification, canvasser management, and record edits are real data-changing
-  actions
+actions
 - write actions require named users, permissions, and audit trails
 
 Allowed in Campaign Insights:
@@ -197,7 +199,7 @@ Future path:
 
 - long-term preferred internal name: `campaign-report`
 - current implemented name: `campaign-report`
-- public API route family uses `/api/campaign-report/*`
+- public API route family uses `/api/campaign-report/`*
 
 ---
 
@@ -318,8 +320,8 @@ Export formatting rules:
 
 - exported dates use human-readable Nigeria time, not raw ISO timestamps
 - redacted exports keep operational names, phone numbers, and canvasser details
-- redacted exports mask high-risk voter identity fields such as `APC/NIN` and
-  `VIN`
+- redacted exports mask high-risk voter identity fields such as `Membership / NIN` and
+`VIN`
 - keep the UI wording as `Redacted`, but treat it as sensitive-ID redaction
 
 ---
@@ -394,7 +396,7 @@ Rules:
 
 - the hero headline total stays all-time and unfiltered
 - date, LGA, role, and compare controls affect the briefing modules and
-  analytics below the hero
+analytics below the hero
 - do not put the scope row above the tabs on the report page
 
 ### 3. Global controls
@@ -435,11 +437,11 @@ Active filters should render as chips directly below the controls, for example:
 Rules:
 
 - `Overview` and `Analytics` follow the same date range, LGA filter, role
-  filter, and compare state
+filter, and compare state
 - `Supporters` keeps its own table filters
 - summary API calls include `from`, `to`, `lga`, and `role` when selected
 - compare queries use the same selected LGA/role filters against the immediately
-  prior date period
+prior date period
 - range changes should never blank the whole page or look like a hard refresh
 - preserve current data while the new range loads in the background
 - desktop filter popovers should anchor cleanly to the right edge of the scope rail rather than floating into card content
@@ -506,7 +508,7 @@ Rules:
 
 - keep this as performance insight, not canvasser management
 - if there is no canvasser activity, show a compact empty state rather than
-  making the section disappear entirely
+making the section disappear entirely
 - do not expose admin-style canvasser controls here
 
 #### `Recent Activity`
@@ -585,9 +587,9 @@ Rules:
 - charts must remain responsive on mobile and desktop
 - momentum must always show visible x-axis dates under the chart
 - if compare mode is on, momentum shows the selected period as the primary
-  filled area and the prior period as a subtle dashed line
+filled area and the prior period as a subtle dashed line
 - geography and audience charts use the currently selected date/LGA/role filter
-  context
+context
 - avoid cramped multi-chart rows that cause overflow
 - donut/pie charts should use a legend below rather than labels floating outside the card
 - if a chart is not readable on mobile, degrade to a ranked list or lighter summary rather than forcing overflow
@@ -610,14 +612,14 @@ angle, remove or merge it.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
-│ [APC] Hon. Mohammad Gidado Mohammad                                      [Copy Form Link]   │
-│ Yola North / Yola South / Girei Federal Constituency                     [Snapshot PDF]     │
-│ Status: Active   Supporters Captured: 1,284                                                   │
+│ [APC] Hon. Mohammad Gidado Mohammad                                      [Copy Form Link]    │
+│ Yola North / Yola South / Girei Federal Constituency                     [Snapshot PDF]      │
+│ Status: Active   Supporters Captured: 1,284                                                  │
 ├──────────────────────────────────────────────────────────────────────────────────────────────┤
 │ [Overview]   [Supporters]   [Analytics]                                                      │
 ├──────────────────────────────────────────────────────────────────────────────────────────────┤
-│ [Today] [7D] [30D] [All Time] [Custom]   [Compare]   [Filters]   [Refresh]                 │
-│ Active filters: [Girei ×] [Volunteer ×] [Clear all]                                         │
+│ [Today] [7D] [30D] [All Time] [Custom]   [Compare]   [Filters]   [Refresh]                   │
+│ Active filters: [Girei ×] [Volunteer ×] [Clear all]                                          │
 └──────────────────────────────────────────────────────────────────────────────────────────────┘
 
 OVERVIEW
@@ -630,10 +632,10 @@ OVERVIEW
 
 ┌────────────────────────────────────────────┬───────────────────────────────────────────────┐
 │ NOW                                        │ HOTSPOTS                                      │
-│ Campaign is actively collecting.           │ Top LGA: Girei                               │
-│ 84 registrations in selected period.       │ Top ward: Jera Bakari                        │
-│ Verification rate: 86%                     │ Most registrations are currently coming      │
-│ Last submission: 8m ago                    │ from Girei, with Jera Bakari leading.        │
+│ Campaign is actively collecting.           │ Top LGA: Girei                                │
+│ 84 registrations in selected period.       │ Top ward: Jera Bakari                         │
+│ Verification rate: 86%                     │ Most registrations are currently coming       │
+│ Last submission: 8m ago                    │ from Girei, with Jera Bakari leading.         │
 └────────────────────────────────────────────┴───────────────────────────────────────────────┘
 
 ┌────────────────────────────────────────────┬───────────────────────────────────────────────┐
@@ -645,15 +647,15 @@ OVERVIEW
 └────────────────────────────────────────────┴───────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
-│ SHARE FORM / BRIEFING                                                                       │
-│ [ QR ]   Copy form link   WhatsApp   SMS                                  [Download Brief] │
+│ SHARE FORM / BRIEFING                                                                        │
+│ [ QR ]   Copy form link   WhatsApp   SMS                                  [Download Brief]   │
 └──────────────────────────────────────────────────────────────────────────────────────────────┘
 
 SUPPORTERS
 
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
-│ Search supporters...     [Status] [LGA] [Ward] [Role]                       [Export]       │
-│ Selected: 12   [Copy Contacts]                                                                │
+│ Search supporters...     [Status] [LGA] [Ward] [Role]                       [Export]         │
+│ Selected: 12   [Copy Contacts]                                                                
 ├──────────────────────────────────────────────────────────────────────────────────────────────┤
 │ □ Name              LGA         Ward         PU           Role        Date        Status     │
 │ □ A. Bello          Girei       Jera Bakari  PU 014       Volunteer   08 Apr      Verified   │
@@ -670,11 +672,11 @@ ANALYTICS
 └──────────────────────────────────────────────────────────────────────────────────────────────┘
 
 ┌────────────────────────────────────────────┬───────────────────────────────────────────────┐
-│ SUBMISSIONS BY LGA                         │ TOP WARDS                                      │
+│ SUBMISSIONS BY LGA                         │ TOP WARDS                                     │
 └────────────────────────────────────────────┴───────────────────────────────────────────────┘
 
 ┌────────────────────────────────────────────┬───────────────────────────────────────────────┐
-│ SUPPORTER ROLES                            │ ACQUISITION MIX                                │
+│ SUPPORTER ROLES                            │ ACQUISITION MIX                               │
 └────────────────────────────────────────────┴───────────────────────────────────────────────┘
 ```
 
@@ -809,12 +811,12 @@ Do not duplicate reporting logic between admin and client.
 Campaign Insights should follow the same general client architecture as the rest of
 the app:
 
-- `src/lib/api/campaign-report.ts` for campaign-report API calls
-- `src/hooks/use-campaign-report.ts` for React Query hooks
+- `src/features/reporting/api/campaign-report-api.ts` for campaign-report API calls
+- `src/features/reporting/hooks/use-campaign-report.ts` for React Query hooks
 - keep top-level page composition in `campaign-insights.tsx`
-- keep report scope state in `src/hooks/use-campaign-insights-scope.ts`
-- keep report-only UI shells inside `src/components/campaign-report/*`
-- keep admin-only UI shells inside `src/components/admin/collect/*`
+- keep report scope state in `src/features/reporting/hooks/use-campaign-insights-scope.ts`
+- keep report-only UI shells inside `src/features/reporting/components/*`
+- keep admin-only UI shells inside `src/features/collect/components/admin/*`
 
 ### React Query
 
@@ -823,7 +825,7 @@ Use React Query for the report data layer, consistent with the rest of the app.
 That means:
 
 - query logic lives in hooks
-- raw request construction lives in `src/lib/api/*`
+- raw request construction lives in each feature's `api/*-api.ts` (e.g. `features/reporting/api/campaign-report-api.ts`, `features/collect/api/collect-api.ts`)
 - visual components stay focused on presentation and interaction
 
 This structure is already present and should be preserved rather than scattering
@@ -847,7 +849,7 @@ This keeps the report understandable for future developers.
 
 Create a shared reporting layer, for example:
 
-- `src/lib/server/collect-reporting.ts`
+- `src/features/collect/server/collect-reporting.ts`
 
 This module should own:
 
@@ -915,11 +917,11 @@ This keeps:
   - stat cards + charts + health
   - accepts `from`, `to`, `lga`, and `role`
   - date/LGA/role filters apply to stats, daily momentum, geography, role, and
-    sex breakdowns
+  sex breakdowns
 - `GET /api/campaign-report/[token]/submissions`
   - recent submissions list
   - accepts `from`, `to`, `lga`, `role`, `search`, and `status` where used by
-    the report UI
+  the report UI
 - `GET /api/campaign-report/[token]/export`
   - read-only CSV / Excel export
 
@@ -1002,75 +1004,75 @@ The report follows existing campaign reporting rules:
 
 ### Phase 1 — Shared reporting layer
 
-- [x] Extract shared stats/submissions/export query helpers out of admin-only routes
-- [x] Keep admin routes working against the shared helper
+- Extract shared stats/submissions/export query helpers out of admin-only routes
+- Keep admin routes working against the shared helper
 
 ### Phase 2 — Campaign access model
 
-- [x] Add client report fields to `Campaign`
-- [x] Add token generation helper
-- [x] Add passcode hashing + verify helper
-- [x] Add last-viewed tracking
+- Add client report fields to `Campaign`
+- Add token generation helper
+- Add passcode hashing + verify helper
+- Add last-viewed tracking
 
 ### Phase 3 — Admin controls
 
-- [x] Add `Client Access` card to campaign settings
-- [x] Enable / revoke / regenerate link
-- [x] Set / reset passcode
-- [x] Add preview action
-- [x] Block draft campaigns from enabling client report access
+- Add `Client Access` card to campaign settings
+- Enable / revoke / regenerate link
+- Set / reset passcode
+- Add preview action
+- Block draft campaigns from enabling client report access
 
 ### Phase 4 — Client report route
 
-- [x] Build `/r/[token]` page shell
-- [x] Build locked/passcode state
-- [x] Build invalid/revoked state
-- [x] Build empty state
-- [x] Build report-loaded state
+- Build `/r/[token]` page shell
+- Build locked/passcode state
+- Build invalid/revoked state
+- Build empty state
+- Build report-loaded state
 
 ### Phase 5 — Client report sections
 
-- [x] Public shell aligned to `/c/[slug]`
-- [x] Access gate aligned to `/login`
-- [x] Hero
-- [x] Tabbed navigation
-- [x] Stat cards
-- [x] Trend chart
-- [x] Top LGAs
-- [x] Top wards
-- [x] Audience breakdown charts
-- [x] Campaign health signals
-- [x] Searchable supporter records table
-- [x] Share utility inside overview
-- [x] Export action aligned to reporting views
-- [x] Copy form link action
-- [x] Admin-style export menu with CSV / Excel / redacted variants
+- Public shell aligned to `/c/[slug]`
+- Access gate aligned to `/login`
+- Hero
+- Tabbed navigation
+- Stat cards
+- Trend chart
+- Top LGAs
+- Top wards
+- Audience breakdown charts
+- Campaign health signals
+- Searchable supporter records table
+- Share utility inside overview
+- Export action aligned to reporting views
+- Copy form link action
+- Admin-style export menu with CSV / Excel / redacted variants
 
 ### Phase 6 — Hardening
 
-- [x] Ensure mobile responsiveness
-- [x] Verify no admin-only actions leak through
-- [x] Verify paused/closed/empty states
-- [x] Verify export authorization through token/passcode path
-- [x] Fix sticky behavior by removing the report overflow trap
-- [x] Replace magic sticky spacing with a report-local header height token
+- Ensure mobile responsiveness
+- Verify no admin-only actions leak through
+- Verify paused/closed/empty states
+- Verify export authorization through token/passcode path
+- Fix sticky behavior by removing the report overflow trap
+- Replace magic sticky spacing with a report-local header height token
 
 ### Phase 7 — IA and visual refinement
 
-- [x] Align the UI label and component/doc naming to `Campaign Insights`
-- [x] Keep tabs first and scope second on the report page
-- [x] Keep the hero focused on identity + one headline metric
-- [x] Reduce repeated overview blocks into `Now`, `Hotspots`, `Field Team Performance`, and `Recent Activity`
-- [x] Keep sharing as a compact overview utility, not a destination
-- [x] Ensure all analytics charts remain readable on both desktop and mobile
-- [x] Keep visible date ticks under momentum charts
-- [x] Keep canvasser insight lightweight and performance-focused
-- [x] Add compare-aware KPI behavior without making Overview feel busy
-- [x] Add prior-period compare overlay to the momentum chart
-- [x] Make date/LGA/role controls drive the summary API and analytics charts
-- [x] Clean up internal module and route naming to `campaign-report`
-- [x] Split report scope state into a hook and local report header module
-- [x] Replace the shared date filter UI with separate report/admin implementations
+- Align the UI label and component/doc naming to `Campaign Insights`
+- Keep tabs first and scope second on the report page
+- Keep the hero focused on identity + one headline metric
+- Reduce repeated overview blocks into `Now`, `Hotspots`, `Field Team Performance`, and `Recent Activity`
+- Keep sharing as a compact overview utility, not a destination
+- Ensure all analytics charts remain readable on both desktop and mobile
+- Keep visible date ticks under momentum charts
+- Keep canvasser insight lightweight and performance-focused
+- Add compare-aware KPI behavior without making Overview feel busy
+- Add prior-period compare overlay to the momentum chart
+- Make date/LGA/role controls drive the summary API and analytics charts
+- Clean up internal module and route naming to `campaign-report`
+- Split report scope state into a hook and local report header module
+- Replace the shared date filter UI with separate report/admin implementations
 
 ## Next Polishing Ideas
 
@@ -1085,17 +1087,19 @@ The report follows existing campaign reporting rules:
 
 ## Key Files
 
-| File                                                             | Role                                                     |
-| ---------------------------------------------------------------- | -------------------------------------------------------- |
-| `src/components/admin/collect/campaign-settings.tsx`             | Add client access controls                               |
-| `src/components/campaign-report/campaign-insights.tsx`           | Report page orchestration                                |
-| `src/components/campaign-report/campaign-insights-header.tsx`    | Report tabs + scope rail + sticky behavior               |
-| `src/components/campaign-report/insights-overview.tsx`           | Overview tab composition and private subcomponents       |
-| `src/components/campaign-report/report-site-header.tsx`          | Report-owned site header / sticky anchor                 |
-| `src/components/admin/collect/campaign-overview-date-filter.tsx` | Admin-owned date filter shell                            |
-| `src/hooks/use-campaign-insights-scope.ts`                       | Report scope state + derived values                      |
-| `src/lib/server/collect-reporting.ts`                            | Shared reporting queries used by admin and report routes |
-| `prisma/schema.prisma`                                           | Add client report access fields on `Campaign`            |
+
+| File                                                                      | Role                                                     |
+| ------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `src/features/collect/components/admin/campaign-settings.tsx`             | Add client access controls                               |
+| `src/features/reporting/components/campaign-insights.tsx`                 | Report page orchestration                                |
+| `src/features/reporting/components/campaign-insights-header.tsx`          | Report tabs + scope rail + sticky behavior               |
+| `src/features/reporting/components/insights-overview.tsx`                 | Overview tab composition and private subcomponents       |
+| `src/features/reporting/components/report-site-header.tsx`                | Report-owned site header / sticky anchor                 |
+| `src/features/collect/components/admin/campaign-overview-date-filter.tsx` | Admin-owned date filter shell                            |
+| `src/features/reporting/hooks/use-campaign-insights-scope.ts`             | Report scope state + derived values                      |
+| `src/features/collect/server/collect-reporting.ts`                        | Shared reporting queries used by admin and report routes |
+| `prisma/schema.prisma`                                                    | Add client report access fields on `Campaign`            |
+
 
 ---
 

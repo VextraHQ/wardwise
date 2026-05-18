@@ -1,4 +1,4 @@
-import { ReportSiteFrame } from "@/components/campaign-report/report-site-layout";
+import { ReportSiteFrame } from "@/features/reporting/components/report-site-layout";
 
 export default function ReportLayout({
   children,

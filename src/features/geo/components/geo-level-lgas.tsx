@@ -1,0 +1,532 @@
+"use client";
+
+import { useState, useEffect, useMemo } from "react";
+import { toast } from "sonner";
+import {
+  HiOutlinePlus,
+  HiOutlinePencil,
+  HiOutlineTrash,
+  HiDotsVertical,
+  HiOutlineUpload,
+  HiOutlineMap,
+} from "react-icons/hi";
+import {
+  useGeoLgas,
+  useCreateLga,
+  useUpdateLga,
+  useDeleteLga,
+} from "@/features/geo/hooks/use-geo";
+import type { GeoLga } from "@/features/geo/types/geo.types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AdminSearchBar } from "@/components/shared/admin/admin-search-bar";
+import { AdminPagination } from "@/components/shared/admin/admin-pagination";
+import { BulkImportDialog } from "@/features/geo/components/dialogs/bulk-import-dialog";
+import { formatGeoDisplayName } from "@/features/geo/lib/display";
+
+interface GeoLevelLgasProps {
+  stateCode: string;
+  onDrillDown: (lgaId: number, lgaName: string) => void;
+}
+
+type SortOption = "name-asc" | "name-desc" | "wards-desc" | "pus-desc";
+
+function sortLgas(lgas: GeoLga[], sort: SortOption): GeoLga[] {
+  const sorted = [...lgas];
+  switch (sort) {
+    case "name-asc":
+      return sorted.sort((a, b) => a.name.localeCompare(b.name));
+    case "name-desc":
+      return sorted.sort((a, b) => b.name.localeCompare(a.name));
+    case "wards-desc":
+      return sorted.sort((a, b) => b._count.wards - a._count.wards);
+    case "pus-desc":
+      return sorted.sort((a, b) => b.puCount - a.puCount);
+    default:
+      return sorted;
+  }
+}
+
+export function GeoLevelLgas({ stateCode, onDrillDown }: GeoLevelLgasProps) {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sort, setSort] = useState<SortOption>("name-asc");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editingLga, setEditingLga] = useState<GeoLga | null>(null);
+  const [deletingLga, setDeletingLga] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+
+  const [formName, setFormName] = useState("");
+  const [importOpen, setImportOpen] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  const { data, isLoading } = useGeoLgas(stateCode, {
+    page,
+    pageSize,
+    search: debouncedSearch || undefined,
+  });
+
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / pageSize)) : 1;
+  const safePage = Math.min(page, totalPages);
+
+  useEffect(() => {
+    if (data && page > totalPages) {
+      const timeoutId = window.setTimeout(() => setPage(totalPages), 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [data, page, totalPages]);
+
+  const lgaData = data?.data;
+  const sortedLgas = useMemo(() => {
+    if (!lgaData) return [];
+    return sortLgas(lgaData, sort);
+  }, [lgaData, sort]);
+
+  const createMutation = useCreateLga();
+  const updateMutation = useUpdateLga();
+  const deleteMutation = useDeleteLga();
+
+  const handleCreate = () => {
+    if (!formName.trim()) return;
+    createMutation.mutate(
+      { name: formName.trim(), stateCode },
+      {
+        onSuccess: () => {
+          toast.success("LGA created successfully");
+          setCreateOpen(false);
+          setFormName("");
+        },
+        onError: (err) => {
+          toast.error(
+            err instanceof Error ? err.message : "Failed to create LGA",
+          );
+        },
+      },
+    );
+  };
+
+  const handleUpdate = () => {
+    if (!editingLga || !formName.trim()) return;
+    updateMutation.mutate(
+      { id: editingLga.id, data: { name: formName.trim() } },
+      {
+        onSuccess: () => {
+          toast.success("LGA updated successfully");
+          setEditingLga(null);
+          setFormName("");
+        },
+        onError: (err) => {
+          toast.error(
+            err instanceof Error ? err.message : "Failed to update LGA",
+          );
+        },
+      },
+    );
+  };
+
+  const handleDelete = () => {
+    if (!deletingLga) return;
+    deleteMutation.mutate(deletingLga.id, {
+      onSuccess: () => {
+        toast.success("LGA deleted successfully");
+        setDeletingLga(null);
+      },
+      onError: (err) => {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to delete LGA",
+        );
+      },
+    });
+  };
+
+  const openEdit = (lga: GeoLga) => {
+    setFormName(lga.name);
+    setEditingLga(lga);
+  };
+
+  return (
+    <>
+      <Card className="border-border/60 rounded-sm shadow-none">
+        <CardHeader className="border-border/60 border-b">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <CardTitle className="text-sm font-semibold tracking-tight">
+              Local Government Areas
+            </CardTitle>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setImportOpen(true)}
+                className="h-9 w-full gap-1.5 rounded-sm font-mono text-[10px] tracking-widest uppercase sm:w-auto sm:text-[11px]"
+              >
+                <HiOutlineUpload className="h-4 w-4" />
+                Import CSV / Excel
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setFormName("");
+                  setCreateOpen(true);
+                }}
+                className="h-9 w-full gap-1.5 rounded-sm font-mono text-[10px] tracking-widest uppercase sm:w-auto sm:text-[11px]"
+              >
+                <HiOutlinePlus className="h-4 w-4" />
+                Add LGA
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex-1">
+              <AdminSearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Search LGAs..."
+              />
+            </div>
+            <Select
+              value={sort}
+              onValueChange={(v) => setSort(v as SortOption)}
+            >
+              <SelectTrigger className="w-full rounded-sm sm:w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name-asc">Name A-Z</SelectItem>
+                <SelectItem value="name-desc">Name Z-A</SelectItem>
+                <SelectItem value="wards-desc">Most Wards</SelectItem>
+                <SelectItem value="pus-desc">Most PUs</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          ) : !data || data.data.length === 0 ? (
+            <div className="border-border flex flex-col items-center gap-3 rounded-sm border border-dashed py-12 text-center">
+              <HiOutlineMap className="text-muted-foreground h-10 w-10" />
+              <div>
+                <p className="text-foreground mb-1 font-medium">
+                  {debouncedSearch
+                    ? "No LGAs match your search"
+                    : "No LGAs found for this state"}
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  {debouncedSearch
+                    ? "Try adjusting your search terms"
+                    : "Add an LGA using the button above"}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-sm border">
+              <Table>
+                <TableHeader className="bg-muted/30 sticky top-0 z-10">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-muted-foreground h-10 w-14 text-center font-mono text-[10px] font-bold tracking-widest uppercase">
+                      S/N
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Name
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Wards
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-10 text-right font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Polling Units
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-10 w-12 font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Actions
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedLgas.map((lga, idx) => (
+                    <TableRow
+                      key={lga.id}
+                      className={`cursor-pointer transition-colors ${
+                        lga._count.wards === 0
+                          ? "bg-orange-500/5 hover:bg-orange-500/10"
+                          : "hover:bg-muted/50"
+                      }`}
+                      onClick={() => onDrillDown(lga.id, lga.name)}
+                    >
+                      <TableCell className="text-muted-foreground text-center font-mono text-xs tabular-nums">
+                        {(safePage - 1) * pageSize + idx + 1}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {formatGeoDisplayName(lga.name)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">
+                        {lga._count.wards === 0 ? (
+                          <Badge
+                            variant="outline"
+                            className="rounded-sm border-orange-500/20 bg-orange-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-orange-600 uppercase"
+                          >
+                            No wards
+                          </Badge>
+                        ) : (
+                          lga._count.wards
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">
+                        {lga.puCount.toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <HiDotsVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <DropdownMenuItem onClick={() => openEdit(lga)}>
+                              <HiOutlinePencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() =>
+                                setDeletingLga({ id: lga.id, name: lga.name })
+                              }
+                            >
+                              <HiOutlineTrash className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          <div className="pt-4">
+            <AdminPagination
+              currentPage={safePage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              totalItems={data?.total ?? 0}
+              itemLabel="LGAs"
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPage(1);
+              }}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Create Dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="rounded-sm">
+          <DialogHeader>
+            <DialogTitle>Add LGA</DialogTitle>
+            <DialogDescription>
+              Create a new Local Government Area for this state.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="lga-name">
+                Name
+              </label>
+              <Input
+                id="lga-name"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                placeholder="Enter LGA name"
+                className="rounded-sm"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleCreate();
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCreateOpen(false)}
+              disabled={createMutation.isPending}
+              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreate}
+              disabled={!formName.trim() || createMutation.isPending}
+              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            >
+              {createMutation.isPending ? "Creating..." : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog
+        open={editingLga !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditingLga(null);
+        }}
+      >
+        <DialogContent className="rounded-sm">
+          <DialogHeader>
+            <DialogTitle>Edit LGA</DialogTitle>
+            <DialogDescription>
+              Update the Local Government Area details.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="edit-lga-name">
+                Name
+              </label>
+              <Input
+                id="edit-lga-name"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                placeholder="Enter LGA name"
+                className="rounded-sm"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleUpdate();
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditingLga(null)}
+              disabled={updateMutation.isPending}
+              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdate}
+              disabled={!formName.trim() || updateMutation.isPending}
+              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+            >
+              {updateMutation.isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <AlertDialog
+        open={deletingLga !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingLga(null);
+        }}
+      >
+        <AlertDialogContent className="rounded-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the LGA
+              {deletingLga &&
+                ` "${formatGeoDisplayName(deletingLga.name)}"`}{" "}
+              and all its wards and polling units.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive hover:bg-destructive/90"
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <BulkImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        level="lga"
+      />
+    </>
+  );
+}

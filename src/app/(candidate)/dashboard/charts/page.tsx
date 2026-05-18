@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ChartPatternsShowcase } from "@/components/candidate-dashboard/chart-patterns";
+import { ChartPatternsShowcase } from "@/features/candidate-dashboard/components/chart-patterns";
 
 export const metadata: Metadata = {
   title: "Charts",

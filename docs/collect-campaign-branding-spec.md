@@ -267,12 +267,12 @@ Build a first-class org/movement entity only when at least one of these becomes 
 | File                                                | Purpose                                           |
 | --------------------------------------------------- | ------------------------------------------------- |
 | `prisma/schema.prisma`                              | Add campaign branding fields                      |
-| `src/lib/schemas/collect-schemas.ts`                | Validate `brandingType` and `displayName`         |
+| `src/features/collect/schemas/collect-schemas.ts`   | Validate `brandingType` and `displayName`         |
 | `src/app/api/admin/collect/campaigns/route.ts`      | Persist new fields on create                      |
 | `src/app/api/admin/collect/campaigns/[id]/route.ts` | Persist new fields on update                      |
 | `src/app/api/collect/campaign/[slug]/route.ts`      | Return branding fields to public form             |
-| `src/components/admin/collect/*`                    | Show effective campaign name in Collect admin UI  |
-| `src/components/collect/*`                          | Show effective campaign name in public Collect UI |
+| `src/features/collect/components/admin/*`           | Show effective campaign name in Collect admin UI  |
+| `src/features/collect/components/public/*`          | Show effective campaign name in public Collect UI |
 
 ---
 

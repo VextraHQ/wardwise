@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
 import { logAudit } from "@/lib/core/audit";
 import {
@@ -12,12 +12,12 @@ import {
   ADMIN_EMAIL_CHANGE_TTL_MS,
   createAdminEmailChangeToken,
   revokeAdminEmailChangeTokensForUser,
-} from "@/lib/auth/links";
+} from "@/features/auth/lib/links";
 import {
   sendAdminEmailChangeEmail,
   sendAdminEmailChangeNoticeEmail,
 } from "@/lib/email/auth";
-import { requestAdminEmailChangeSchema } from "@/lib/schemas/admin-schemas";
+import { requestAdminEmailChangeSchema } from "@/features/admin/schemas/admin-schemas";
 
 export async function POST(request: NextRequest) {
   const { error, user } = await requireAdmin();

@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import {
   validateReportRequest,
   touchReportLastViewed,
-} from "@/lib/server/report-access";
+} from "@/features/reporting/server/report-access";
 import {
   getCampaignStats,
   getCampaignHealth,
-} from "@/lib/server/collect-reporting";
-import { getCampaignBrandingType } from "@/lib/collect/branding";
+} from "@/features/collect/server/collect-reporting";
+import { getCampaignBrandingType } from "@/features/collect/lib/branding";
 
 type RouteParams = { params: Promise<unknown> };
 

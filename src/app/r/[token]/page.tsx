@@ -4,19 +4,19 @@ import {
   validateReportToken,
   verifyReportCookie,
   REPORT_COOKIE_NAME,
-} from "@/lib/server/report-access";
+} from "@/features/reporting/server/report-access";
 import {
   createDefaultOpenGraph,
   createDefaultTwitter,
   getSiteUrl,
 } from "@/lib/core/metadata";
-import { ReportGate } from "@/components/campaign-report/report-gate";
-import { ReportUnavailable } from "@/components/campaign-report/report-unavailable";
-import { CampaignInsights } from "@/components/campaign-report/campaign-insights";
+import { ReportGate } from "@/features/reporting/components/report-gate";
+import { ReportUnavailable } from "@/features/reporting/components/report-unavailable";
+import { CampaignInsights } from "@/features/reporting/components/campaign-insights";
 import {
   getCampaignBrandingType,
   getCampaignDisplayHeadline,
-} from "@/lib/collect/branding";
+} from "@/features/collect/lib/branding";
 
 type PageProps = {
   params: Promise<{ token: string }>;

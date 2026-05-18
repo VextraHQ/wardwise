@@ -1,6 +1,6 @@
-import { LoginScreen } from "@/components/auth/login-screen";
-import { redirectAuthenticatedUser } from "@/lib/auth/guards";
-import { sanitizeAuthCallbackUrl } from "@/lib/auth/redirects";
+import { LoginScreen } from "@/features/auth/components/login-screen";
+import { redirectAuthenticatedUser } from "@/features/auth/lib/guards";
+import { sanitizeAuthCallbackUrl } from "@/features/auth/lib/redirects";
 import { createAuthMetadata } from "@/lib/core/metadata";
 
 export const metadata = createAuthMetadata({

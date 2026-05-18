@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import XLSX from "xlsx";
-import { nigeriaStates } from "../src/lib/data/state-lga-locations";
+import { nigeriaStates } from "../src/features/geo/data/state-lga-locations";
 import {
   buildStateLgaLookup,
   getStateLgaNames,
@@ -71,7 +71,10 @@ function parseArgs() {
     inputPath: argValue("--input"),
     outputPath:
       argValue("--output") ??
-      path.join(process.cwd(), "src/lib/data/nigerian-senatorial-districts.ts"),
+      path.join(
+        process.cwd(),
+        "src/features/geo/data/nigerian-senatorial-districts.ts",
+      ),
     write: args.includes("--write"),
   };
 }

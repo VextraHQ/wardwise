@@ -9,7 +9,7 @@ import {
 import {
   consumeAdminEmailChangeToken,
   hashAdminEmailChangeToken,
-} from "@/lib/auth/links";
+} from "@/features/auth/lib/links";
 
 const bodySchema = z.object({
   token: z.string().min(1, "Token is required"),

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
 import {
   ADMIN_EMAIL_CHANGE_TOKEN_TYPE,
   ADMIN_EMAIL_CHANGE_TTL_MS,
-} from "@/lib/auth/links";
+} from "@/features/auth/lib/links";
 
 // TODO(activity-log): Keep /admin/account as a compact preview. When the
 // dedicated admin activity log page ships, move full history and pagination

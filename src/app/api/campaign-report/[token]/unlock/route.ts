@@ -5,7 +5,7 @@ import {
   signReportCookie,
   touchReportLastViewed,
   REPORT_COOKIE_NAME,
-} from "@/lib/server/report-access";
+} from "@/features/reporting/server/report-access";
 import { reportUnlockRateLimit, getClientIp } from "@/lib/core/rate-limit";
 import { logAudit } from "@/lib/core/audit";
 

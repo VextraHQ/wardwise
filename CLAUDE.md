@@ -35,10 +35,10 @@ Three user types:
 
 ### Key Patterns
 
-- **Auth**: All admin API routes use `requireAdmin()` from `src/lib/auth-helpers.ts` — never inline auth checks
+- **Auth**: All admin API routes use `requireAdmin()` from `src/features/auth/lib/guards.ts` — never inline auth checks
 - **Route protection**: `src/proxy.ts` (Next.js 16's Edge middleware, NOT `middleware.ts`)
-- **Validation**: Zod schemas in `src/lib/schemas/admin-schemas.ts` (candidates, canvassers) and `src/lib/schemas/collect-schemas.ts` (campaigns, submissions), validated both client-side and server-side via `.safeParse()`
-- **Audit logging**: `logAudit()` from `src/lib/audit.ts` on all sensitive operations (fire-and-forget)
+- **Validation**: Zod schemas live next to their feature: `src/features/candidates/schemas/{candidate,canvasser}-schemas.ts`, `src/features/collect/schemas/collect-schemas.ts` (campaigns + submission moderation), `src/features/admin/schemas/admin-schemas.ts` (admin self-service profile/email/password), `src/features/auth/schemas/auth-schemas.ts`, `src/features/public-site/schemas/contact-schemas.ts`, `src/features/geo/schemas/geo-schemas.ts`. Field-level primitives (phone, email, NIN/VIN/APC) stay in `src/lib/schemas/field-schemas.ts`. All mutating routes validate via `.safeParse()` on both client and server.
+- **Audit logging**: `logAudit()` from `src/lib/core/audit.ts` on all sensitive operations (fire-and-forget)
 - **Rate limiting**: `src/lib/core/rate-limit.ts` — Upstash Redis, null when env vars not set
 - **Geo data**: Database-backed (Lga → Ward → PollingUnit), seeded via `prisma/seed-geo.ts`
 - **State codes**: Always 2-letter codes (e.g., "AD" for Adamawa), never free-text names
@@ -48,6 +48,23 @@ Three user types:
 - Transitioning to `prisma migrate dev` for production. Use migrations for schema changes going forward.
 - Cascade deletes configured: Candidate → User, Candidate → Campaigns → Submissions
 - Always run `pnpm db:generate` after schema changes
+
+### Feature-First Architecture
+
+The codebase is laid out feature-first under `src/features/<feature>/` (collect, candidates, candidate-dashboard, geo, reporting, auth, admin, public-site). See `docs/wardwise-app-architecture-spec.md` for the target structure, current-to-target mapping table, and per-phase migration history.
+
+Import direction (enforced by convention until ESLint boundaries are added):
+
+- `app/*` may import from `features/*`, `components/{ui,shared}`, `hooks/shared`, `lib/core`, app-wide `lib` services (`lib/email`, `lib/analytics`, `lib/exports`, etc.), and broad `types`.
+- `features/*` may import from the same feature, `components/{ui,shared}`, `hooks/shared`, `lib/core`, and app-wide `lib` services. A feature must not deep-import another feature's private internals; if a cross-feature surface is needed, expose it from a deliberately named file (e.g. `features/collect/lib/branding.ts`).
+- `components/ui`, `components/shared`, `hooks/shared`, and `lib/core` must not import feature code. They are feature-agnostic base layers; features depend on them, never the other way around.
+- Path alias stays `@/*` → `./src/*`. shadcn primitives still land in `src/components/ui`.
+
+When adding new code, prefer placing it inside the owning `src/features/<feature>/` tree. Promote to `components/shared`, `hooks/shared`, or `lib/core` only when the code is genuinely product-agnostic and used by multiple stable features.
+
+`src/components/shared/admin` holds reusable admin-facing UI primitives that are not tied to one admin feature: pagination, search, skeletons, empty/error states, mobile record cards, and toolbar filter sheets. Keep feature-aware admin composites in their owning feature until they can be split without importing feature internals.
+
+`src/lib/email` is an intentional app-wide email service: provider wrapper, shared components, and the central React Email templates + previews directory. Domain-shaped email files (`contact.ts`, `account-welcome.ts`, `auth.ts`, the auth/admin/contact templates) live here so the React Email preview workflow stays simple. Keep feature-specific labels/options in neutral constants (for example `src/lib/constants/contact-reasons.ts`) when email templates and feature UI both need them.
 
 ## Specs & Docs
 

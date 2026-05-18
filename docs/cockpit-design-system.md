@@ -354,71 +354,78 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 
 ## Component Inventory
 
-### Candidate Dashboard (`src/components/candidate-dashboard/`)
+### Candidate Dashboard (`src/features/candidate-dashboard/components/`)
 
-| Component                    | Status                                                          |
-| ---------------------------- | --------------------------------------------------------------- |
-| `site-header.tsx`            | ✅ Cockpit header with `//` separator, mono role prefix         |
-| `app-sidebar.tsx`            | ✅ `rounded-sm` logo, `font-bold tracking-tight`                |
-| `nav-main.tsx`               | ✅ Quick Actions button, optional `label` prop for group labels |
-| `nav-secondary.tsx`          | ✅ `SYSTEM` group label, active state tracking                  |
-| `nav-documents.tsx`          | ✅ `TOOLS` group label                                          |
-| `nav-user.tsx`               | ✅ `rounded-sm` avatars/dropdowns                               |
-| `section-cards.tsx`          | ✅ Mono taxonomy eyebrows                                       |
-| `dashboard-content.tsx`      | ✅ Ward Coverage card, stat boxes                               |
-| `chart-area-interactive.tsx` | ✅ Tags, toggle/select                                          |
-| `chart-patterns.tsx`         | ✅ All 7 chart cards                                            |
-| `data-table.tsx`             | ✅ Table headers, tabs, badges, pagination                      |
-| `analytics-content.tsx`      | ✅ Tab triggers, cards, buttons                                 |
-| `supporters-content.tsx`     | ✅ Table, pagination, empty state                               |
-| `wards-content.tsx`          | ✅ Overview card, ward cards, dashed empty state                |
-| `reports-content.tsx`        | ✅ Report cards, stat boxes, tables                             |
-| `pricing-content.tsx`        | ✅ Plan cards, badges, buttons                                  |
-| `notifications-content.tsx`  | ✅ Card + badge                                                 |
-| `messages-content.tsx`       | ✅ Card                                                         |
-| `settings-content.tsx`       | ✅ Card                                                         |
-| `export-content.tsx`         | ✅ Card + export buttons                                        |
-| `help/page.tsx`              | ✅ Card                                                         |
+| Component                    | Status                                                  |
+| ---------------------------- | ------------------------------------------------------- |
+| `site-header.tsx`            | ✅ Cockpit header with `//` separator, mono role prefix |
+| `candidate-sidebar.tsx`      | ✅ `rounded-sm` logo, `font-bold tracking-tight`        |
+| `section-cards.tsx`          | ✅ Mono taxonomy eyebrows                               |
+| `dashboard-content.tsx`      | ✅ Ward Coverage card, stat boxes                       |
+| `chart-area-interactive.tsx` | ✅ Tags, toggle/select                                  |
+| `chart-patterns.tsx`         | ✅ All 7 chart cards                                    |
+| `data-table.tsx`             | ✅ Table headers, tabs, badges, pagination              |
+| `analytics-content.tsx`      | ✅ Tab triggers, cards, buttons                         |
+| `supporters-content.tsx`     | ✅ Table, pagination, empty state                       |
+| `wards-content.tsx`          | ✅ Overview card, ward cards, dashed empty state        |
+| `reports-content.tsx`        | ✅ Report cards, stat boxes, tables                     |
+| `pricing-content.tsx`        | ✅ Plan cards, badges, buttons                          |
+| `notifications-content.tsx`  | ✅ Card + badge                                         |
+| `messages-content.tsx`       | ✅ Card                                                 |
+| `settings-content.tsx`       | ✅ Card                                                 |
+| `export-content.tsx`         | ✅ Card + export buttons                                |
+| `help/page.tsx`              | ✅ Card                                                 |
 
-### Admin Dashboard (`src/components/admin/`)
+#### Sidebar primitives (`src/components/shared/sidebar/`)
+
+Used by `candidate-sidebar.tsx`. Phase 8 scope to promote to `components/shared/` (or fold into the feature if not reused after Phase 8 inventory).
+
+| Component           | Status                                                          |
+| ------------------- | --------------------------------------------------------------- |
+| `nav-main.tsx`      | ✅ Quick Actions button, optional `label` prop for group labels |
+| `nav-secondary.tsx` | ✅ `SYSTEM` group label, active state tracking                  |
+| `nav-documents.tsx` | ✅ `TOOLS` group label                                          |
+| `nav-user.tsx`      | ✅ `rounded-sm` avatars/dropdowns                               |
+
+### Admin Dashboard (`src/features/admin/components/`)
 
 > Admin dashboard redesign direction: see `docs/admin-dashboard-command-center-spec.md`.
 > The dashboard should behave as an operations command center: actions first,
 > problems second, metrics third, live previews next, coverage/context last.
 
-| Component                                | Status                                                    |
-| ---------------------------------------- | --------------------------------------------------------- |
-| `admin-header.tsx`                       | ✅ `Admin //` prefix, Super Admin badge, mono description |
-| `admin-sidebar.tsx`                      | ✅ `OPERATIONS` group label, `rounded-sm` logo            |
-| `admin-nav-user.tsx`                     | ✅ `rounded-sm` avatar/dropdown                           |
-| `admin-dashboard.tsx`                    | ✅ Stat cards, coverage snapshot, dashed empty states     |
-| `admin-skeletons.tsx`                    | ✅ All `rounded-sm`                                       |
-| `admin-search-bar.tsx`                   | ✅ `rounded-sm border-border/60`                          |
-| `admin-pagination.tsx`                   | ✅ Mono labels, `rounded-sm` buttons                      |
-| `admin-filters/candidate-filters.tsx`    | ✅ Cockpit selects/buttons                                |
-| `candidates/candidate-management.tsx`    | ✅ Table view, S/N, Location column, pagination           |
-| `candidates/candidate-detail.tsx`        | ✅ Breadcrumb, tabs, badges, gradient divider             |
-| `candidates/candidate-overview.tsx`      | ✅ Stat cards, grouped sections, inline edit              |
-| `candidates/candidate-campaigns.tsx`     | ✅ Table, S/N, pagination                                 |
-| `candidates/candidate-account.tsx`       | ✅ Status select, password reset, inline reviewed danger zone |
-| `admin-account.tsx`                      | ✅ Follows Admin Account UX Standard: inline profile, dialog security flows |
-| `collect/campaign-list.tsx`              | ✅ Stat cards, table, dashed empty state                  |
-| `collect/campaign-detail.tsx`            | ✅ Breadcrumb, tabs, badges                               |
-| `collect/campaign-overview.tsx`          | ✅ Chart cards, dashed empty states                       |
-| `collect/campaign-submissions.tsx`       | ✅ Table, search, dashed empty state                      |
-| `collect/campaign-canvassers.tsx`        | ✅ Table, mono labels                                     |
-| `collect/campaign-settings.tsx`          | ✅ Cards, danger zone                                     |
-| `collect/wizard/` (4 files)              | ✅ All cockpit treatment                                  |
-| `geo/geo-stats-bar.tsx`                  | ✅ Stat cards, mono labels                                |
-| `geo/geo-breadcrumb.tsx`                 | ✅ `rounded-sm`                                           |
-| `geo/geo-management.tsx`                 | ✅ Skeleton pattern                                       |
-| `geo/geo-level-states.tsx`               | ✅ Cards, tables, badges                                  |
-| `geo/geo-level-lgas.tsx`                 | ✅ Cards, tables, buttons                                 |
-| `geo/geo-level-wards.tsx`                | ✅ Cards, tables                                          |
-| `geo/geo-level-polling-units.tsx`        | ✅ Cards, tables                                          |
-| `geo/geo-dialogs/bulk-import-dialog.tsx` | ✅ `rounded-sm` dialog                                    |
+| Component                                      | Status                                                                      |
+| ---------------------------------------------- | --------------------------------------------------------------------------- |
+| `admin-header.tsx`                             | ✅ `Admin //` prefix, Super Admin badge, mono description                   |
+| `admin-sidebar.tsx`                            | ✅ `OPERATIONS` group label, `rounded-sm` logo                              |
+| `admin-nav-user.tsx`                           | ✅ `rounded-sm` avatar/dropdown                                             |
+| `admin-dashboard.tsx`                          | ✅ Stat cards, coverage snapshot, dashed empty states                       |
+| `components/shared/admin/admin-skeletons.tsx`  | ✅ All `rounded-sm`                                                         |
+| `components/shared/admin/admin-search-bar.tsx` | ✅ `rounded-sm border-border/60`                                            |
+| `components/shared/admin/admin-pagination.tsx` | ✅ Mono labels, `rounded-sm` buttons                                        |
+| `admin-filters/candidate-filters.tsx`          | ✅ Cockpit selects/buttons                                                  |
+| `candidates/candidate-management.tsx`          | ✅ Table view, S/N, Location column, pagination                             |
+| `candidates/candidate-detail.tsx`              | ✅ Breadcrumb, tabs, badges, gradient divider                               |
+| `candidates/candidate-overview.tsx`            | ✅ Stat cards, grouped sections, inline edit                                |
+| `candidates/candidate-campaigns.tsx`           | ✅ Table, S/N, pagination                                                   |
+| `candidates/candidate-account.tsx`             | ✅ Status select, password reset, inline reviewed danger zone               |
+| `admin-account.tsx`                            | ✅ Follows Admin Account UX Standard: inline profile, dialog security flows |
+| `collect/campaign-list.tsx`                    | ✅ Stat cards, table, dashed empty state                                    |
+| `collect/campaign-detail.tsx`                  | ✅ Breadcrumb, tabs, badges                                                 |
+| `collect/campaign-overview.tsx`                | ✅ Chart cards, dashed empty states                                         |
+| `collect/campaign-submissions.tsx`             | ✅ Table, search, dashed empty state                                        |
+| `collect/campaign-canvassers.tsx`              | ✅ Table, mono labels                                                       |
+| `collect/campaign-settings.tsx`                | ✅ Cards, danger zone                                                       |
+| `collect/wizard/` (4 files)                    | ✅ All cockpit treatment                                                    |
+| `geo/geo-stats-bar.tsx`                        | ✅ Stat cards, mono labels                                                  |
+| `geo/geo-breadcrumb.tsx`                       | ✅ `rounded-sm`                                                             |
+| `geo/geo-management.tsx`                       | ✅ Skeleton pattern                                                         |
+| `geo/geo-level-states.tsx`                     | ✅ Cards, tables, badges                                                    |
+| `geo/geo-level-lgas.tsx`                       | ✅ Cards, tables, buttons                                                   |
+| `geo/geo-level-wards.tsx`                      | ✅ Cards, tables                                                            |
+| `geo/geo-level-polling-units.tsx`              | ✅ Cards, tables                                                            |
+| `geo/geo-dialogs/bulk-import-dialog.tsx`       | ✅ `rounded-sm` dialog                                                      |
 
-### Collect Flow (`src/components/collect/`)
+### Collect Flow (`src/features/collect/components/public/`)
 
 | Component                         | Status                                                       |
 | --------------------------------- | ------------------------------------------------------------ |
@@ -429,7 +436,7 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 | `steps/canvasser-step.tsx`        | ✅ Yes/No with `role="radio"`, `rounded-sm`                  |
 | `steps/confirmation-screen.tsx`   | ✅ Share buttons with `aria-label`, `rounded-sm`             |
 
-### Legal Pages (`src/components/legal/`, `src/components/layout/`)
+### Legal Pages (`src/features/public-site/components/legal/`, `src/components/shared/`)
 
 | Component               | Status                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------- |
@@ -438,7 +445,7 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 | `terms-content.tsx`     | ✅ Uses `LegalSectionContent`                                                   |
 | `cookies-content.tsx`   | ✅ Uses `LegalSectionContent`                                                   |
 
-### Public Support Pages (`src/components/public/`, `src/components/layout/`)
+### Public Support Pages (`src/features/public-site/components/support/`, `src/components/shared/`)
 
 | Component                   | Status                                                                               |
 | --------------------------- | ------------------------------------------------------------------------------------ |
@@ -446,7 +453,7 @@ All share buttons (WhatsApp, SMS, Email, Copy) require `aria-label`:
 | `support-content.tsx`       | ✅ Accordion `rounded-sm`, contact cards, cockpit button                             |
 | `contact-content.tsx`       | ✅ Theme token alerts, `rounded-sm` inputs, Turnstile state, cockpit submit handling |
 
-### Landing Page (`src/components/landing/`)
+### Landing Page (`src/features/public-site/components/landing/`)
 
 | Component             | Status                                                      |
 | --------------------- | ----------------------------------------------------------- |

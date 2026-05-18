@@ -95,6 +95,20 @@ export const ninSchema = z
     message: "Please enter a valid NIN (sequential patterns not allowed)",
   });
 
+// Party membership IDs vary by campaign and may include letters, numbers,
+// hyphens, or slashes. Keep the format broad enough for party-specific IDs
+// while still rejecting whitespace and punctuation-heavy garbage.
+const PARTY_MEMBERSHIP_REGEX = /^[A-Z0-9/-]{3,30}$/;
+export const partyMembershipNumberSchema = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .min(1, "Membership number is required")
+  .refine(
+    (v) => PARTY_MEMBERSHIP_REGEX.test(v),
+    "Enter a valid membership number (letters, numbers, hyphens, or slashes only)",
+  );
+
 // Voter ID / VIN per INEC spec: exactly 19 alphanumeric characters, uppercased.
 export const voterIdVinSchema = z
   .string()
@@ -105,22 +119,23 @@ export const voterIdVinSchema = z
     "VIN must be exactly 19 alphanumeric characters",
   );
 
-// APC-or-NIN hybrid validator used on the Collect form.
+// Legacy membership-or-NIN hybrid validator used for back-compat with previously
+// queued Collect payloads and older test coverage.
 // - Exactly 11 digits → validated as NIN (reject all-same-digit and sequential dummies)
-// - Otherwise → APC number must be numeric-only (minimum 5 digits)
-const APC_NUMBER_REGEX = /^\d{5,20}$/;
-export const apcOrNinSchema = z
+// - Otherwise → legacy membership number must be numeric-only (minimum 5 digits)
+const MEMBERSHIP_NUMBER_REGEX = /^\d{5,20}$/;
+export const membershipOrNinSchema = z
   .string()
   .trim()
-  .min(1, "APC Registration Number or NIN is required")
+  .min(1, "Membership Number or NIN is required")
   .refine((val) => {
     if (NIN_REGEX.test(val)) {
       if (/^(\d)\1{10}$/.test(val)) return false;
       if (val === "12345678901" || val === "01234567890") return false;
       return true;
     }
-    return APC_NUMBER_REGEX.test(val);
-  }, "Enter a valid NIN (11 digits) or APC number (numbers only, min 5 digits)");
+    return MEMBERSHIP_NUMBER_REGEX.test(val);
+  }, "Enter a valid NIN (11 digits) or membership number (numbers only, min 5 digits)");
 
 // Trimmed text helpers — shared primitives for Collect and admin inputs.
 // Trim happens BEFORE min/max so whitespace-only input cannot satisfy min.

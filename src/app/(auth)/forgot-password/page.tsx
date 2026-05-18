@@ -1,5 +1,5 @@
-import { ForgotPasswordScreen } from "@/components/auth/forgot-password-screen";
-import { redirectAuthenticatedUser } from "@/lib/auth/guards";
+import { ForgotPasswordScreen } from "@/features/auth/components/forgot-password-screen";
+import { redirectAuthenticatedUser } from "@/features/auth/lib/guards";
 import { createAuthMetadata } from "@/lib/core/metadata";
 
 export const metadata = createAuthMetadata({

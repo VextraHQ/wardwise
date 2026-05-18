@@ -11,8 +11,8 @@
 
 Adamawa's current ward and polling-unit data in WardWise is partial and uses a mix of:
 
-- legacy static seed data in [`src/lib/data/wards.ts`](/Users/nabeelhassan/Desktop/wardwise-demo/src/lib/data/wards.ts)
-- legacy static polling units in [`src/lib/data/polling-units.ts`](/Users/nabeelhassan/Desktop/wardwise-demo/src/lib/data/polling-units.ts)
+- legacy static seed data in [`src/features/geo/data/wards.ts`](/Users/nabeelhassan/Desktop/wardwise-demo/src/features/geo/data/wards.ts)
+- legacy static polling units in [`src/features/geo/data/polling-units.ts`](/Users/nabeelhassan/Desktop/wardwise-demo/src/features/geo/data/polling-units.ts)
 - partial database rows seeded from those files
 
 This causes two issues:

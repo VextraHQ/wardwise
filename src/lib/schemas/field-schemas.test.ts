@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  apcOrNinSchema,
+  membershipOrNinSchema,
   emailSchema,
   isValidNigerianPhone,
   nigerianPhoneSchema,
@@ -10,6 +10,7 @@ import {
   optionalNigerianPhoneSchema,
   optionalNullableTrimmedText,
   optionalTrimmedText,
+  partyMembershipNumberSchema,
   requiredTrimmedText,
   toLocalPhoneDisplay,
   voterIdVinSchema,
@@ -112,26 +113,53 @@ describe("ninSchema", () => {
   });
 });
 
-describe("apcOrNinSchema", () => {
+describe("membershipOrNinSchema", () => {
   it("accepts a real 11-digit NIN", () => {
-    expect(apcOrNinSchema.parse("12345678905")).toBe("12345678905");
+    expect(membershipOrNinSchema.parse("12345678905")).toBe("12345678905");
   });
 
   it("rejects all-same-digit NIN and sequential dummies", () => {
-    expect(apcOrNinSchema.safeParse("11111111111").success).toBe(false);
-    expect(apcOrNinSchema.safeParse("12345678901").success).toBe(false);
-    expect(apcOrNinSchema.safeParse("01234567890").success).toBe(false);
+    expect(membershipOrNinSchema.safeParse("11111111111").success).toBe(false);
+    expect(membershipOrNinSchema.safeParse("12345678901").success).toBe(false);
+    expect(membershipOrNinSchema.safeParse("01234567890").success).toBe(false);
   });
 
-  it("accepts APC-style alphanumeric codes with / and -", () => {
-    expect(apcOrNinSchema.parse("APC/2023/0042")).toBe("APC/2023/0042");
-    expect(apcOrNinSchema.parse("APC-2023-0042")).toBe("APC-2023-0042");
+  it("accepts numeric-only membership numbers (min 5 digits)", () => {
+    expect(membershipOrNinSchema.parse("12345")).toBe("12345");
+    expect(membershipOrNinSchema.parse("987654321")).toBe("987654321");
+  });
+
+  it("rejects membership numbers with non-digit characters", () => {
+    expect(membershipOrNinSchema.safeParse("MEM/2023/0042").success).toBe(
+      false,
+    );
+    expect(membershipOrNinSchema.safeParse("MEM-2023-0042").success).toBe(
+      false,
+    );
   });
 
   it("rejects short or garbage input", () => {
-    expect(apcOrNinSchema.safeParse("ab").success).toBe(false);
-    expect(apcOrNinSchema.safeParse("").success).toBe(false);
-    expect(apcOrNinSchema.safeParse("has spaces").success).toBe(false);
+    expect(membershipOrNinSchema.safeParse("ab").success).toBe(false);
+    expect(membershipOrNinSchema.safeParse("").success).toBe(false);
+    expect(membershipOrNinSchema.safeParse("has spaces").success).toBe(false);
+  });
+});
+
+describe("partyMembershipNumberSchema", () => {
+  it("accepts alphanumeric party membership numbers with separators", () => {
+    expect(partyMembershipNumberSchema.parse("pdp-ad/2042")).toBe(
+      "PDP-AD/2042",
+    );
+    expect(partyMembershipNumberSchema.parse("lp-77-ward12")).toBe(
+      "LP-77-WARD12",
+    );
+  });
+
+  it("rejects spaces and punctuation-heavy garbage", () => {
+    expect(partyMembershipNumberSchema.safeParse("has spaces").success).toBe(
+      false,
+    );
+    expect(partyMembershipNumberSchema.safeParse("###").success).toBe(false);
   });
 });
 

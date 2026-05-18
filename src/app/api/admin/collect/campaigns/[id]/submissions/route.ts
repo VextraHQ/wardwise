@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
 import {
   buildSubmissionWhere,
   parseSubmissionFilters,
-} from "@/lib/collect/submission-query";
+} from "@/features/collect/lib/submission-query";
 import { parsePaginationParams } from "@/lib/server/query-params";
 import { generateRefCode } from "@/lib/utils";
 
@@ -36,10 +36,10 @@ export async function GET(
       prisma.collectSubmission.count({ where }),
     ]);
 
-    const serialized = submissions.map((s) => ({
-      ...s,
-      refCode: generateRefCode(s.id),
-      createdAt: s.createdAt.toISOString(),
+    const serialized = submissions.map((submission) => ({
+      ...submission,
+      refCode: generateRefCode(submission.id),
+      createdAt: submission.createdAt.toISOString(),
     }));
 
     return NextResponse.json({

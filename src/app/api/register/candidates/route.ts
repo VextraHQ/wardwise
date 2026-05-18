@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { candidateApi } from "@/lib/api/candidate";
+import { candidateApi } from "@/features/candidates/api/candidates-api";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);

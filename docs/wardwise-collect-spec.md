@@ -3,7 +3,7 @@
 ## Status
 
 - **Collect v1 is complete** — merged to `main`.
-- **Future changes**: Branch off `main` with `fix/collect-*` (bug fixes) or `feature/collect-*` (new features). Keep branches short-lived and scoped to one change.
+- **Future changes**: Branch off `main` with `fix/collect-`_ (bug fixes) or `feature/collect-_` (new features). Keep branches short-lived and scoped to one change.
 - **Production hardening applied** — see `docs/wardwise-hardening-spec.md` for details:
   - Rate limiting on `/api/collect/submit` (Upstash Redis, 10 req/min per IP)
   - Geo hierarchy validation on submit (PU → ward → LGA chain verified)
@@ -27,11 +27,11 @@
 - Admin sidebar: Dashboard → Candidates → Collect
 - Landing page: Collect section added between Security and CTA sections
 - Deduplication: both phone number AND VIN checked per campaign
-- Form refactored into modular step components under `src/components/collect/steps/`
+- Form refactored into modular step components under `src/features/collect/components/public/steps/`
 
 ### What Changed (Batch 3 — Latest)
 
-- **NIN/VIN/APC format validation**: NIN must be exactly 11 digits, VIN must be exactly 19 alphanumeric characters (INEC standard), APC number must be alphanumeric. Validation in both client schemas and server API route.
+- **NIN/VIN/identity format validation**: NIN must be exactly 11 digits, VIN must be exactly 19 alphanumeric characters (INEC standard), and membership/NIN validation is enforced in both client schemas and the server API route.
 - **Deduplication alerts**: Both inline error card (orange for duplicates) and toast notification shown when phone or VIN duplicate detected.
 - **Landing page nav**: Added "Collect" section link to header navigation. CTA buttons now scroll to `#collect` section instead of external links.
 - **Powered by Vextra Limited**: Subtle branding added to public form footer in `form-shell.tsx`.
@@ -39,13 +39,13 @@
 - **Admin canvassers table**: Added S/N column with consistent styling.
 - **Delete submission**: Full CRUD — admin can delete individual submissions via detail sheet (with confirmation dialog). API DELETE endpoint, hook, and API client added.
 - **Admin dashboard widget**: Added Collect Campaigns and Collect Registrations stat cards to main admin dashboard. Grid expanded to 5 columns.
-- **Campaign settings sync**: Removed APC/VIN field mode dropdowns (since both are always required now). Shows "Required" badges instead.
+- **Campaign settings sync**: Removed identity/VIN field mode dropdowns (since both are always required now). Shows "Required" badges instead.
 - **Campaign overview analytics**: Added cumulative registration trend line chart and top wards horizontal bar chart. New `getCumulativeRegistrations` and `getSubmissionsByWard` analytics helpers.
 
 ### What Changed (Hardening — Latest)
 
 - **Schema consolidation**: Campaign create/update schemas unified into `collect-schemas.ts` (single source of truth). Removed duplicate definitions from `admin-schemas.ts`.
-- **Dead config removal**: Removed `requireApcReg` and `requireVoterId` from Prisma schema, API routes, types, wizard, and settings UI. APC/NIN and VIN are always required — no configurable option needed.
+- **Dead config removal**: Removed `requireApcReg` and `requireVoterId` from Prisma schema, API routes, types, wizard, and settings UI. Membership / NIN and VIN are always required — no configurable option needed.
 - **Settings UI cleanup**: Removed static "Field Requirements" card (non-actionable). Settings now shows: Status controls, Campaign Details, Danger Zone.
 - **VIN case normalization**: VIN is now uppercased via Zod `.transform()` before storage and duplicate checking. Prevents case-variant bypass of dedup.
 - **Geo name trust fix**: Submit route now derives `lgaName`, `wardName`, `pollingUnitName` from validated DB records instead of trusting client-provided names.
@@ -91,7 +91,7 @@
 ### What Changed (Batch 8 — Admin Review Queue)
 
 - **Submissions open to `All` with status filter chips**: admin submissions default to the full list for predictable search/lookup; inline chips for `All`, `Pending`, `Verified`, `Flagged` (counts shown inline) let admins jump into the review queue when needed.
-- **Table stays lean**: APC/NIN and VIN remain in the detail sheet/export instead of crowding the main scanning table.
+- **Table stays lean**: Membership / NIN and VIN remain in the detail sheet/export instead of crowding the main scanning table.
 - **Bulk verification is safer**: admins can verify/flag selected rows as before, or escalate from selected-page rows to all records matching the current filters.
 - **Filtered bulk actions are confirmed**: all-matching actions show the count and active filters before applying changes.
 - **Audit trail preserved**: filtered bulk verify/flag/unverify/unflag writes per-submission audit entries and logs the campaign-level bulk action.
@@ -119,6 +119,15 @@
 - **Location messaging stays contextual**: the location step still owns the small local notes for `Using offline data`, online fallback with retry, and full offline blocking states because those messages explain the dropdown behavior directly.
 - **Confirmation remains the outcome surface**: confirmed, queued, and failed confirmation states were intentionally left structurally unchanged so the polish stays focused on task-flow calmness rather than changing the result model.
 
+### What Changed (Batch 13 — Identity & Verification Refresh)
+
+- **Public step 3 is now clearer**: `Party Information` has been replaced by `Identity & Verification`, with an explicit choice between `Party Membership` and `National ID (NIN)`.
+- **Validation matches the chosen method**: when registrants choose `National ID`, the field enforces a real 11-digit NIN; when they choose `Party Membership`, the field accepts broader party-style membership IDs (letters, numbers, hyphens, slashes).
+- **VIN remains required**: the public form still requires VIN alongside the chosen identity detail for verification and duplicate prevention.
+- **Neutral admin/export wording**: detail-sheet and export labels now use `Membership / NIN` instead of APC-specific wording.
+- **Canonical domain naming**: active Collect feature code and Prisma now use `identityValue` as the canonical field name. The physical database column remains mapped from the legacy `apcRegNumber` name for a controlled persistence transition.
+- **Hard cutover applied**: stale saved drafts and queued offline rows using old identity keys are no longer adapted. Incompatible drafts are discarded; incompatible queued rows fail with a clear re-entry message.
+
 ### What Changed (Batch 11 — Reporting Date Filters)
 
 - **Shared reporting date utilities**: date preset ranges, query formatting, picker bounds, and display labels now live in `src/lib/date-ranges.ts`.
@@ -130,7 +139,7 @@
 ### What Changed (Batch 2)
 
 - **LGA dropdown**: Shows only the campaign's `enabledLgaIds` (inherited from candidate's constituency boundary, or restricted subset).
-- **APC/NIN field**: Renamed to "APC Registration Number or NIN". Now required.
+- **Identity field**: Membership / NIN stays required, and the public form now frames it as an explicit verification-method choice rather than APC-specific wording.
 - **VIN field**: Now required. Used for deduplication alongside phone number.
 - **Role options**: Volunteer / Member / Canvasser (3 options).
 - **Canvasser validation**: Both name and phone required when "Yes" selected.
@@ -162,7 +171,7 @@
 
 ### Form Configuration
 
-- **APC/NIN**: Required field. Accepts either APC membership number or National Identification Number (NIN).
+- **Membership Number or NIN**: Required field. Registrants explicitly choose whether they are using a party membership number or a National Identification Number (NIN).
 - **VIN (Voter ID)**: Required field. Used for deduplication.
 - Custom Question 1 and Custom Question 2 are included in v1, stored per submission.
 
@@ -216,7 +225,7 @@
 | 0      | Campaign splash → Begin Registration                                                                                                                                                     |
 | 1      | Personal details: first name, middle name?, last name, phone, email?, sex, age, occupation, marital status, custom questions                                                             |
 | 2      | Location: cascading LGA → Ward → Polling Unit (with INEC codes)                                                                                                                          |
-| 3      | Party info: APC/NIN (required) + VIN (required)                                                                                                                                          |
+| 3      | Identity & Verification: choose `Party Membership` or `National ID (NIN)`, then enter the selected ID + VIN (required)                                                                  |
 | 4      | Role: Volunteer / Member / Canvasser (3 cards)                                                                                                                                           |
 | 5      | Canvasser: Yes/No toggle → name + phone if Yes (required when Yes)                                                                                                                       |
 | 6      | Confirmation: state-aware receipt (`confirmed`, `queued`, or `failed`), registration reference only after server acceptance, New Registration button, share actions only after confirmed |
@@ -253,6 +262,7 @@
 | Duplicate VIN                                  | 409 → "Already Registered" error box                                                                                                                                             |
 | Missing canvasser Yes/No                       | Submit button stays disabled on canvasser step                                                                                                                                   |
 | Invalid submit payload                         | 400 → first field-level validation message shown                                                                                                                                 |
+| Legacy queued payload with old identity keys   | Marked failed locally with a clear “re-enter it” message instead of being adapted or silently half-submitted                                                                    |
 | Network error during online submit             | Error displayed, localStorage preserves progress                                                                                                                                 |
 | Offline submit                                 | Submission is queued in IndexedDB and the confirmation shows `Pending Upload`                                                                                                    |
 | Queued sync success                            | Row is removed locally; active confirmation flips to confirmed when server receipt is known                                                                                      |
@@ -262,7 +272,7 @@
 | Pack with `scope_invalid` health               | Splash shows strong "Refresh Required" treatment; verdict only fires after a confirmed-fresh allowed-LGA fetch                                                                   |
 | Pack with `content_outdated` / `aged` health   | Mild refresh prompt; pack still usable as last-known data                                                                                                                        |
 | Selected-LGA-only offline prep                 | Offline location step shows only the prepared LGAs and their wards/units                                                                                                         |
-| Offline cold-reopen after prep                 | `/c/*` page navigation + `?_rsc` GETs are cache-fallback so the campaign page hydrates offline                                                                                   |
+| Offline cold-reopen after prep                 | `/c/`\* page navigation + `?_rsc` GETs are cache-fallback so the campaign page hydrates offline                                                                                  |
 | Online with failing live geo + pack            | Location step swaps to local data with a visible inline note + Retry; never silent                                                                                               |
 | Closed/draft/deleted campaign with stored pack | Pack is cleared on next online open of the closed shell, or via the slug-aware not-found surface                                                                                 |
 | Saved LGAs out of scope after prep             | Prep sheet derives `effectiveSelection` from visibleIds; hidden stale ids are excluded from save and surfaced as an inline amber warning. No 400 round-trip.                     |
@@ -317,7 +327,7 @@ model PollingUnit {
 - Stores split name fields (`firstName`, `middleName`, `lastName`) plus composed `fullName`
 - Stores both FK references (lgaId, wardId, pollingUnitId) AND display names
 - `role`: "volunteer" | "member" | "canvasser"
-- `apcRegNumber`: stores APC number or NIN
+- `identityValue`: canonical app/API/Prisma field; currently mapped to the legacy physical database column name `apcRegNumber`
 - `voterIdNumber`: stores VIN
 
 ## API Routes
@@ -334,25 +344,25 @@ model PollingUnit {
 
 ### Admin (auth required)
 
-| Route                                           | Method               | Notes                                                                               |
-| ----------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------- |
+| Route                                           | Method               | Notes                                                                                                                                                   |
+| ----------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/api/admin/collect/campaigns`                  | GET + POST           | List with `_count`; GET accepts `?candidateId=` filter; POST creates a **draft** (slug uniqueness); blocked with `409` if candidate already has a draft |
-| `/api/admin/collect/campaigns/[id]`             | GET + PATCH + DELETE |                                                                                     |
-| `/api/admin/collect/campaigns/[id]/submissions` | GET                  | Paginated, filterable; includes PU code and derived registration reference support  |
-| `/api/admin/collect/campaigns/[id]/export`      | GET                  | CSV with PU code column; sanitizes `=+-@`                                           |
-| `/api/admin/collect/campaigns/[id]/canvassers`  | GET                  | Aggregation                                                                         |
-| `/api/admin/collect/lgas`                       | GET                  | All LGAs for campaign wizard                                                        |
-| `/api/admin/collect/submissions/[sid]`          | PATCH                | Flag, verify, notes                                                                 |
+| `/api/admin/collect/campaigns/[id]`             | GET + PATCH + DELETE |                                                                                                                                                         |
+| `/api/admin/collect/campaigns/[id]/submissions` | GET                  | Paginated, filterable; includes PU code and derived registration reference support                                                                      |
+| `/api/admin/collect/campaigns/[id]/export`      | GET                  | CSV with PU code column; sanitizes `=+-@`                                                                                                               |
+| `/api/admin/collect/campaigns/[id]/canvassers`  | GET                  | Aggregation                                                                                                                                             |
+| `/api/admin/collect/lgas`                       | GET                  | All LGAs for campaign wizard                                                                                                                            |
+| `/api/admin/collect/submissions/[sid]`          | PATCH                | Flag, verify, notes                                                                                                                                     |
 
 ### Export Rules
 
 - Submission and canvasser exports use human-readable Nigeria time instead of raw ISO timestamps.
 - Redacted submission exports keep operational names, phone numbers, and canvasser details visible.
-- Redacted submission exports mask sensitive voter identity fields such as `APC/NIN` and `VIN`.
+- Redacted submission exports mask sensitive voter identity fields such as `Membership / NIN` and `VIN`.
 
 ### Submission Filter Plumbing
 
-- `SubmissionFilters`, `parseSubmissionFilters`, and `buildSubmissionWhere` live in `src/lib/collect/submission-query.ts` (not in `src/lib/exports/submissions.ts`, which is now export/spreadsheet only).
+- `SubmissionFilters`, `parseSubmissionFilters`, and `buildSubmissionWhere` live in `src/features/collect/lib/submission-query.ts` (not in `src/lib/exports/submissions.ts`, which is now export/spreadsheet only).
 - The filter parser uses the shared query-param helpers in `src/lib/server/query-params.ts`, so `?lgaId=12abc` is rejected instead of silently truncating to `12`.
 
 ## File Structure
@@ -360,7 +370,7 @@ model PollingUnit {
 ### Public Form (refactored)
 
 ```
-src/components/collect/
+src/features/collect/components/public/
   campaign-registration-form.tsx  — orchestrator (form state + screen routing)
   failed-review-sheet.tsx         — failed offline submission review + dismiss sheet
   offline-prep-sheet.tsx          — selected-LGA offline geo preparation sheet
@@ -388,42 +398,44 @@ src/app/api/collect/
   offline-pack/route.ts           — bulk LGA/ward/PU download for offline prep (POST)
   submit/route.ts                 — registration submission
 
-src/lib/
-  offline-queue.ts                — pending/failed submission queue (v2.7)
-  collect/
-    offline-storage.ts            — shared IndexedDB opener (one DB, two stores)
-    offline-geo-pack.ts           — per-campaign offline geo pack helpers (v2.8)
-    offline-geo-health.ts         — pure pack-health derivation (testable contract)
-    offline-prep-selection.ts     — pure prep-sheet selection helpers (effective/stale/intent)
+src/features/collect/lib/
+  offline-storage.ts              — shared IndexedDB opener (one DB, two stores)
+  offline-geo-pack.ts             — per-campaign offline geo pack helpers (v2.8)
+  offline-geo-health.ts           — pure pack-health derivation (testable contract)
+  offline-prep-selection.ts       — pure prep-sheet selection helpers (effective/stale/intent)
 
-src/hooks/
+src/features/collect/hooks/
   use-collect.ts                  — public + admin Collect TanStack hooks
   use-collect-form-persistence.ts — local draft autosave + restore plumbing
   use-collect-service-worker.ts   — registers /sw.js scoped to /c/
   use-offline.ts                  — submission queue + sync state (v2.7)
   use-collect-offline-geo.ts      — geo-pack health + prepare/clear actions (v2.8)
   use-collect-geo-resolution.ts   — live-vs-offline geo source precedence (v2.8)
+
+src/lib/
+  offline-queue.ts                — pending/failed submission queue (v2.7; ownership pending Phase 3 review)
 ```
 
 ### Admin
 
 ```
-src/components/admin/collect/
+src/features/collect/components/admin/
   campaign-list.tsx
   campaign-detail.tsx
   campaign-overview.tsx
   campaign-submissions.tsx
   campaign-canvassers.tsx
   campaign-settings.tsx
-  campaign-wizard.tsx
-  step-candidate-setup.tsx            — step 1: candidate + slug + branding
-  step-campaign-collect-config.tsx    — step 2: questions + LGA restrict
-  step-campaign-review.tsx            — step 3: read-only summary + Edit + **Create Draft Campaign**
+  wizard/
+    campaign-wizard.tsx
+    step-candidate-setup.tsx          — step 1: candidate + slug + branding
+    step-campaign-collect-config.tsx  — step 2: questions + LGA restrict
+    step-campaign-review.tsx          — step 3: read-only summary + Edit + **Create Draft Campaign**
 ```
 
 **New Campaign wizard (`campaign-wizard.tsx`) — draft autosave**
 
-- Uses the shared `useWizardDraft` hook (`src/hooks/use-wizard-draft.ts`) with storage key `wardwise:campaign-wizard:draft:v2`, `defaultValues` aligned to `createCampaignSchema`, and `isMeaningfulCampaignDraft` so empty shells are not restored.
+- Uses the shared `useWizardDraft` hook (`src/hooks/shared/use-wizard-draft.ts`) with storage key `wardwise:campaign-wizard:draft:v2`, `defaultValues` aligned to `createCampaignSchema`, and `isMeaningfulCampaignDraft` so empty shells are not restored.
 - Debounced (400ms) writes, 24h TTL, restore-on-mount including **wizard step** (resume on step 2 or 3 if that was saved).
 - `StepProgress` receives `stepSubtitles` from `useWatch` for the same recap pattern as create-candidate.
 - **Draft restored** banner + **Discard** (clears storage + resets form + step 0), matching the create-candidate UX.
@@ -441,17 +453,17 @@ src/components/admin/collect/
 
 ## Validation Checklist
 
-- [x] Admin auth protects `/admin` and `/admin/collect`
-- [x] Candidate CRUD still works
-- [x] Campaign creation works
-- [x] Public form respects campaign status (draft/active/paused/closed)
-- [x] Phone + VIN deduplication works
-- [x] Canvasser validation when "Yes" selected
-- [x] CSV export includes PU codes and sanitizes cells
-- [x] QR code generation works
-- [x] Polling units sorted by INEC code
-- [x] Build, lint, and typecheck pass
-- [x] Adamawa official ward + polling unit sync completed
+- Admin auth protects `/admin` and `/admin/collect`
+- Candidate CRUD still works
+- Campaign creation works
+- Public form respects campaign status (draft/active/paused/closed)
+- Phone + VIN deduplication works
+- Canvasser validation when "Yes" selected
+- CSV export includes PU codes and sanitizes cells
+- QR code generation works
+- Polling units sorted by INEC code
+- Build, lint, and typecheck pass
+- Adamawa official ward + polling unit sync completed
 
 ## Working Agreement With Claude
 

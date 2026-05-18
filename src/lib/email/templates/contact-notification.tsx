@@ -13,7 +13,7 @@ import { render } from "@react-email/render";
 import {
   getContactReasonLabel,
   type ContactReason,
-} from "@/lib/contact/reasons";
+} from "@/lib/constants/contact-reasons";
 import { EmailBrandHeader } from "@/lib/email/components/email-brand-header";
 import { EmailStandardFooter } from "@/lib/email/components/email-standard-footer";
 

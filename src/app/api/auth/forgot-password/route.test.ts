@@ -18,7 +18,7 @@ vi.mock("@/lib/core/rate-limit", () => ({
   getClientIp: vi.fn().mockReturnValue("127.0.0.1"),
 }));
 
-vi.mock("@/lib/auth/links", () => ({
+vi.mock("@/features/auth/lib/links", () => ({
   createPasswordResetForUser: vi.fn().mockResolvedValue({
     token: "test-token",
     url: "http://localhost:3000/reset-password/test-token",

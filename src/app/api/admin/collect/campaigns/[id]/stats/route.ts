@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
-import { getCampaignStats } from "@/lib/server/collect-reporting";
+import { getCampaignStats } from "@/features/collect/server/collect-reporting";
 
 export async function GET(
   request: NextRequest,

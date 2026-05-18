@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
-import { nigeriaStates } from "@/lib/data/state-lga-locations";
+import { nigeriaStates } from "@/features/geo/data/state-lga-locations";
 import type {
   ImportRowResult,
   ImportPreviewResponse,
   ImportCommitResponse,
-} from "@/types/geo";
+} from "@/features/geo/types/geo.types";
 
 const MAX_ROWS = 5000;
 

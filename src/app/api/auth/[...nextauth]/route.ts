@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import NextAuth from "next-auth";
-import { authOptions } from "@/lib/auth/config";
+import { authOptions } from "@/features/auth/lib/config";
 import { getClientIp, loginRateLimit } from "@/lib/core/rate-limit";
 
 const handler = NextAuth(authOptions);

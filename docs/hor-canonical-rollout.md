@@ -87,14 +87,14 @@ Reason:
 
 ## Files
 
-| File                                                       | Role                                                       |
-| ---------------------------------------------------------- | ---------------------------------------------------------- |
-| `scripts/constituency-workbook-helpers.ts`                 | Shared INEC workbook parsing + name normalization helpers  |
-| `scripts/rebuild-hor-presets.ts`                           | Generates safe HoR presets and unsupported split-seat list |
-| `src/lib/data/nigerian-federal-constituencies.ts`          | Generated HoR preset data                                  |
-| `src/lib/data/nigerian-constituencies.ts`                  | Runtime wrapper exposing Senator + HoR presets             |
-| `src/components/admin/candidates/wizard/step-boundary.tsx` | Candidate create Step 3 preset / boundary UX               |
-| `src/components/admin/candidates/candidate-overview.tsx`   | Candidate edit preset UX                                   |
+| File                                                          | Role                                                       |
+| ------------------------------------------------------------- | ---------------------------------------------------------- |
+| `scripts/constituency-workbook-helpers.ts`                    | Shared INEC workbook parsing + name normalization helpers  |
+| `scripts/rebuild-hor-presets.ts`                              | Generates safe HoR presets and unsupported split-seat list |
+| `src/features/geo/data/nigerian-federal-constituencies.ts`    | Generated HoR preset data                                  |
+| `src/features/geo/data/nigerian-constituencies.ts`            | Runtime wrapper exposing Senator + HoR presets             |
+| `src/features/candidates/components/wizard/step-boundary.tsx` | Candidate create Step 3 preset / boundary UX               |
+| `src/features/candidates/components/candidate-overview.tsx`   | Candidate edit preset UX                                   |
 
 ---
 

@@ -5,8 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import {
   AppStatusScreen,
   statusIcons,
-} from "@/components/system/app-status-screen";
-import { clearOfflineGeoPack } from "@/lib/collect/offline-geo-pack";
+} from "@/components/shared/app-status-screen";
+import { clearOfflineGeoPack } from "@/features/collect/lib/offline-geo-pack";
 
 // Removes any offline map data for the missing campaign (by slug)
 function ClearOfflinePackForSlug() {

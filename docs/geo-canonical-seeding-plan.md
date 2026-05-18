@@ -47,7 +47,7 @@ These layers used to be mixed, and that was the reason for this plan:
 
 ### 1. Base state + LGA data
 
-`src/lib/data/state-lga-locations.ts` currently contains:
+`src/features/geo/data/state-lga-locations.ts` currently contains:
 
 - `37` state-level entries (`36` states + `FCT`)
 - `774` LGAs
@@ -85,7 +85,7 @@ Audit result:
 
 - official INEC spreadsheet was fetched and parsed
 - `scripts/rebuild-senator-presets.ts` now regenerates the Senator dataset from source
-- the generated output in `src/lib/data/nigerian-senatorial-districts.ts` validates exact per-state LGA coverage
+- the generated output in `src/features/geo/data/nigerian-senatorial-districts.ts` validates exact per-state LGA coverage
 - a small set of source-era spelling drifts and legacy sheet spellings are normalized during generation
 
 Conclusion:
@@ -113,34 +113,34 @@ That means HoR needs a careful rollout:
 - leave split-LGA constituencies explicitly unsupported for now
 - add ward/RA precision later for the excluded seats
 
-### 6. Current `src/lib/data/*` file status
+### 6. Current geo data file status
 
-Not all files in `src/lib/data/` serve the same purpose. To reduce confusion for future dev work:
+After the architecture migration, geo data lives under `src/features/geo/data/`, candidate party data under `src/features/candidates/data/`, and app-wide brand content under `src/lib/constants/`. The file status below uses the post-migration paths.
 
 #### Canonical / active sources
 
-- `src/lib/data/state-lga-locations.ts`
+- `src/features/geo/data/state-lga-locations.ts`
   - current canonical source for state metadata + LGA metadata
   - actively used by candidate, collect, geo admin stats, geo import validation
-- `src/lib/data/nigerian-parties.ts`
-  - active runtime options for candidate forms
-- `src/lib/data/legal-data.ts`
+- `src/features/candidates/data/nigerian-parties.ts`
+  - active runtime options for candidate forms (relocated to the Candidates feature in the Phase 5 architecture fixup)
+- `src/lib/constants/legal-data.ts`
   - unrelated to geo, but active runtime content
 
 #### Active, but needs rebuild / correction
 
-- `src/lib/data/nigerian-constituencies.ts`
+- `src/features/geo/data/nigerian-constituencies.ts`
   - active runtime source for official constituency presets
   - currently used in candidate create/edit
   - Senator section must be rebuilt from official INEC source before expansion
 
 #### Transitional static seed sources
 
-- `src/lib/data/wards.ts`
+- `src/features/geo/data/wards.ts`
   - still used by `prisma/seed-geo.ts`
   - still used by `/api/register/locations`
   - should be treated as a transitional seed/input file, not canonical long-term runtime geo
-- `src/lib/data/polling-units.ts`
+- `src/features/geo/data/polling-units.ts`
   - still used by `prisma/seed-geo.ts`
   - still used by `/api/register/locations`
   - contains both real seeded data and fallback generation behavior, so it is not a clean canonical source
@@ -148,8 +148,8 @@ Not all files in `src/lib/data/` serve the same purpose. To reduce confusion for
 #### Likely legacy path to retire later
 
 - `/api/register/locations` still reads static `state-lga-locations.ts`, `wards.ts`, and `polling-units.ts`
-- `src/lib/api/location.ts` still exists as a client for that route
-- current in-repo search found no active frontend callers to `src/lib/api/location.ts`
+- `src/features/geo/api/location-api.ts` still exists as a client for that route
+- current in-repo search found no active frontend callers to `src/features/geo/api/location-api.ts`
 
 Conclusion:
 
@@ -411,25 +411,25 @@ After DB-backed geo coverage is mature enough:
 
 ## Key Files
 
-| File                                              | Role                                                                    |
-| ------------------------------------------------- | ----------------------------------------------------------------------- |
-| `prisma/audit-geo.ts`                             | Canonical geo audit: coverage, missing LGAs, duplicates, drift checks   |
-| `prisma/seed-states-lgas.ts`                      | Add-only canonical state/LGA seed script                                |
-| `prisma/fix-lga-canonical-names.ts`               | Applies verified canonical LGA name corrections to the live DB          |
-| `prisma/geo-canonical.ts`                         | Shared canonical geo helpers for audit + seed                           |
-| `src/lib/data/state-lga-locations.ts`             | Canonical v1 source for states + LGAs                                   |
-| `prisma/seed-geo.ts`                              | Current partial geo seed (LGAs with ward data only)                     |
-| `scripts/rebuild-senator-presets.ts`              | Rebuilds source-audited Senator presets from the official INEC workbook |
-| `src/lib/data/nigerian-senatorial-districts.ts`   | Generated Senator presets validated against canonical LGAs              |
-| `scripts/rebuild-hor-presets.ts`                  | Rebuilds safe HoR presets + unsupported split-LGA list from INEC        |
-| `src/lib/data/nigerian-federal-constituencies.ts` | Generated HoR presets (`350`) + unsupported split-LGA seats (`10`)      |
-| `src/lib/data/nigerian-constituencies.ts`         | Thin constituency preset wrapper used by candidate create/edit          |
-| `src/lib/data/wards.ts`                           | Transitional static ward seed source                                    |
-| `src/lib/data/polling-units.ts`                   | Transitional static polling-unit seed source                            |
-| `src/app/api/register/locations/route.ts`         | Legacy static runtime location route kept for future public voter / NIN |
-| `src/lib/api/location.ts`                         | Legacy static client for `/api/register/locations`                      |
-| `prisma/schema.prisma`                            | `Lga`, `Ward`, `PollingUnit` uniqueness constraints                     |
-| `docs/collect-candidate-geo-rethink.md`           | Candidate-driven geo architecture already shipped                       |
+| File                                                       | Role                                                                    |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `prisma/audit-geo.ts`                                      | Canonical geo audit: coverage, missing LGAs, duplicates, drift checks   |
+| `prisma/seed-states-lgas.ts`                               | Add-only canonical state/LGA seed script                                |
+| `prisma/fix-lga-canonical-names.ts`                        | Applies verified canonical LGA name corrections to the live DB          |
+| `prisma/geo-canonical.ts`                                  | Shared canonical geo helpers for audit + seed                           |
+| `src/features/geo/data/state-lga-locations.ts`             | Canonical v1 source for states + LGAs                                   |
+| `prisma/seed-geo.ts`                                       | Current partial geo seed (LGAs with ward data only)                     |
+| `scripts/rebuild-senator-presets.ts`                       | Rebuilds source-audited Senator presets from the official INEC workbook |
+| `src/features/geo/data/nigerian-senatorial-districts.ts`   | Generated Senator presets validated against canonical LGAs              |
+| `scripts/rebuild-hor-presets.ts`                           | Rebuilds safe HoR presets + unsupported split-LGA list from INEC        |
+| `src/features/geo/data/nigerian-federal-constituencies.ts` | Generated HoR presets (`350`) + unsupported split-LGA seats (`10`)      |
+| `src/features/geo/data/nigerian-constituencies.ts`         | Thin constituency preset wrapper used by candidate create/edit          |
+| `src/features/geo/data/wards.ts`                           | Transitional static ward seed source                                    |
+| `src/features/geo/data/polling-units.ts`                   | Transitional static polling-unit seed source                            |
+| `src/app/api/register/locations/route.ts`                  | Legacy static runtime location route kept for future public voter / NIN |
+| `src/features/geo/api/location-api.ts`                     | Legacy static client for `/api/register/locations`                      |
+| `prisma/schema.prisma`                                     | `Lga`, `Ward`, `PollingUnit` uniqueness constraints                     |
+| `docs/collect-candidate-geo-rethink.md`                    | Candidate-driven geo architecture already shipped                       |
 
 ---
 

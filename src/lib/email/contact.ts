@@ -1,5 +1,5 @@
 // Import types and utility functions for processing contact notifications
-import { type ContactReason } from "@/lib/contact/reasons";
+import { type ContactReason } from "@/lib/constants/contact-reasons";
 import { readTrimmedEnv, sendEmail } from "@/lib/email/send";
 import { buildContactNotificationEmail } from "@/lib/email/templates/contact-notification";
 

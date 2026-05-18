@@ -62,6 +62,33 @@ const eslintConfig = defineConfig([
     },
   },
 
+  // Architecture boundary: base layers must not import feature code.
+  // `components/ui`, `components/shared`, `hooks/shared`, and `lib/core` are
+  // feature-agnostic. Features depend on them, never the other way around.
+  // See docs/wardwise-app-architecture-spec.md > Import Direction Rules.
+  {
+    files: [
+      "src/components/ui/**",
+      "src/components/shared/**",
+      "src/hooks/shared/**",
+      "src/lib/core/**",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/features/*", "@/features/*/**"],
+              message:
+                "Base layers (components/ui, components/shared, hooks/shared, lib/core) must not import feature code. If a primitive needs feature data, it belongs in the owning feature — not the base layer.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // JavaScript files configuration (for config files, scripts, etc.)
   {
     files: ["**/*.{js,jsx,mjs,cjs}"],

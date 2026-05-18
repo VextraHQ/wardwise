@@ -1,4 +1,4 @@
-import { ContactContent } from "@/components/public/contact-content";
+import { ContactContent } from "@/features/public-site/components/support/contact-content";
 import { createPublicMetadata } from "@/lib/core/metadata";
 
 export const metadata = createPublicMetadata({

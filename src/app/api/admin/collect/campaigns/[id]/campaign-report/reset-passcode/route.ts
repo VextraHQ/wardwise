@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
 import { logAudit } from "@/lib/core/audit";
-import { generatePasscode, hashPasscode } from "@/lib/server/report-access";
+import {
+  generatePasscode,
+  hashPasscode,
+} from "@/features/reporting/server/report-access";
 
 type RouteParams = { params: Promise<unknown> };
 
