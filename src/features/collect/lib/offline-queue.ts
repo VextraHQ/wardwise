@@ -170,7 +170,9 @@ function getLegacyIdentityQueueError(data: Record<string, unknown>): string | nu
   const hasLegacyIdentityValue =
     typeof data.apcRegNumber === "string" ||
     typeof data.membershipNumber === "string";
-  const hasCurrentIdentityValue = typeof data.identityValue === "string";
+  const hasCurrentIdentityValue =
+    typeof data.identityValue === "string" &&
+    data.identityValue.trim().length > 0;
 
   if (hasLegacyIdentityValue && !hasCurrentIdentityValue) {
     return "This offline registration was saved before the latest form update and can no longer be submitted. Please re-enter it.";

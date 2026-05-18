@@ -69,8 +69,11 @@ interface UseCollectFormPersistenceReturn {
 function isLegacyIdentityDraft(data: unknown): boolean {
   if (!data || typeof data !== "object") return false;
   const record = data as Record<string, unknown>;
+  const hasCurrentIdentityValue =
+    typeof record.identityValue === "string" &&
+    record.identityValue.trim().length > 0;
   return (
-    typeof record.identityValue !== "string" &&
+    !hasCurrentIdentityValue &&
     (typeof record.apcRegNumber === "string" ||
       typeof record.membershipNumber === "string")
   );
