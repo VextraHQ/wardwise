@@ -335,7 +335,7 @@ UX audit and post-submission improvements for the public registration form:
 
 - **Review-first submissions UX** — Submissions tab now frames verification as a `Review Queue` with inline status chips for Pending Review, Verified, Flagged, and All Records.
 - **All-records default with discoverable Pending count** — Submissions open to `All` so search/lookup works predictably; the `Pending` chip shows the pending count so admins can jump into the review queue when needed.
-- **Lean table scanning** — The main table keeps scan-friendly fields only. APC/NIN and VIN remain available in the detail sheet and exports, not the primary table.
+- **Lean table scanning** — The main table keeps scan-friendly fields only. Membership / NIN and VIN remain available in the detail sheet and exports, not the primary table.
 - **All matching bulk actions** — After selecting the current page, admin can escalate to all records matching the active review filters, then verify/flag/unverify/unflag with confirmation.
 - **Filtered bulk endpoint** — Bulk API now supports `scope: "filtered"` with campaign-scoped filters while preserving selected-ID actions.
 - **Audit preserved** — Filtered bulk actions create per-submission audit entries and a campaign-level audit log entry with count, action, scope, and filters.
@@ -346,7 +346,16 @@ UX audit and post-submission improvements for the public registration form:
 
 - **Admin New Campaign wizard — 3 steps** — `Select Candidate` → **Collect setup** (custom questions + optional LGA restrict; headroom for more / prebuilt question sets) → **Review & create** (summary card with section-level **Edit**, same pattern as create-candidate review). Files: `campaign-wizard.tsx`, `step-campaign-collect-config.tsx`, `step-campaign-review.tsx` (replaces the old combined questions+review step).
 - **Campaign draft persistence** — `useWizardDraft` with key `wardwise:campaign-wizard:draft:v2` (version bump invalidates prior 2-step drafts), restore banner + Discard, `clear()` on successful create. See `wardwise-collect-spec.md` for full detail.
-- **Public `/c/[slug]` Party Information step** — Renders the same footer **TrustIndicators** strip as Personal Details and Location (`DATA_PRIVACY`, `SECURE_ENCRYPTION`, `VERIFIED_CAMPAIGN`) so identity-heavy steps feel consistent.
+- **Public `/c/[slug]` Identity & Verification step** — Renders the same footer **TrustIndicators** strip as Personal Details and Location (`DATA_PRIVACY`, `SECURE_ENCRYPTION`, `VERIFIED_CAMPAIGN`) so identity-heavy steps feel consistent.
+
+---
+
+## Completed v2.9 — Identity & Verification Refresh (2026-05-18)
+
+- **Public step 3 renamed and clarified** — `Party Information` is now `Identity & Verification`, with an explicit choice between `Party Membership` and `National ID (NIN)`.
+- **Chosen-method validation** — Membership entries now accept party-style IDs with letters, numbers, hyphens, or slashes, while NIN stays strict at 11 digits.
+- **Neutral admin/export wording** — Admin detail sheets and submission exports now use `Membership / NIN` instead of APC-specific labels.
+- **Back-compat preserved** — Older saved drafts infer a best-effort verification method on restore, and queued offline rows without `identityType` still sync through legacy server validation.
 
 ---
 

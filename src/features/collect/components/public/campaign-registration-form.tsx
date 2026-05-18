@@ -81,6 +81,8 @@ function createCollectDefaultValues({
     wardName: "",
     pollingUnitId: undefined as unknown as number,
     pollingUnitName: "",
+    identityType:
+      undefined as unknown as RegistrationFormData["identityType"],
     apcRegNumber: "",
     voterIdNumber: "",
     role: undefined as unknown as RegistrationFormData["role"],
@@ -779,7 +781,12 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
         )}
 
         {screen === 3 && (
-          <PartyInfoStep form={form} onBack={goBack} onNext={validateAndNext} />
+          <PartyInfoStep
+            party={campaign.party}
+            form={form}
+            onBack={goBack}
+            onNext={validateAndNext}
+          />
         )}
 
         {screen === 4 && (

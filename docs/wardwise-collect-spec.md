@@ -31,7 +31,7 @@
 
 ### What Changed (Batch 3 — Latest)
 
-- **NIN/VIN/APC format validation**: NIN must be exactly 11 digits, VIN must be exactly 19 alphanumeric characters (INEC standard), APC number must be alphanumeric. Validation in both client schemas and server API route.
+- **NIN/VIN/identity format validation**: NIN must be exactly 11 digits, VIN must be exactly 19 alphanumeric characters (INEC standard), and membership/NIN validation is enforced in both client schemas and the server API route.
 - **Deduplication alerts**: Both inline error card (orange for duplicates) and toast notification shown when phone or VIN duplicate detected.
 - **Landing page nav**: Added "Collect" section link to header navigation. CTA buttons now scroll to `#collect` section instead of external links.
 - **Powered by Vextra Limited**: Subtle branding added to public form footer in `form-shell.tsx`.
@@ -39,13 +39,13 @@
 - **Admin canvassers table**: Added S/N column with consistent styling.
 - **Delete submission**: Full CRUD — admin can delete individual submissions via detail sheet (with confirmation dialog). API DELETE endpoint, hook, and API client added.
 - **Admin dashboard widget**: Added Collect Campaigns and Collect Registrations stat cards to main admin dashboard. Grid expanded to 5 columns.
-- **Campaign settings sync**: Removed APC/VIN field mode dropdowns (since both are always required now). Shows "Required" badges instead.
+- **Campaign settings sync**: Removed identity/VIN field mode dropdowns (since both are always required now). Shows "Required" badges instead.
 - **Campaign overview analytics**: Added cumulative registration trend line chart and top wards horizontal bar chart. New `getCumulativeRegistrations` and `getSubmissionsByWard` analytics helpers.
 
 ### What Changed (Hardening — Latest)
 
 - **Schema consolidation**: Campaign create/update schemas unified into `collect-schemas.ts` (single source of truth). Removed duplicate definitions from `admin-schemas.ts`.
-- **Dead config removal**: Removed `requireApcReg` and `requireVoterId` from Prisma schema, API routes, types, wizard, and settings UI. APC/NIN and VIN are always required — no configurable option needed.
+- **Dead config removal**: Removed `requireApcReg` and `requireVoterId` from Prisma schema, API routes, types, wizard, and settings UI. Membership / NIN and VIN are always required — no configurable option needed.
 - **Settings UI cleanup**: Removed static "Field Requirements" card (non-actionable). Settings now shows: Status controls, Campaign Details, Danger Zone.
 - **VIN case normalization**: VIN is now uppercased via Zod `.transform()` before storage and duplicate checking. Prevents case-variant bypass of dedup.
 - **Geo name trust fix**: Submit route now derives `lgaName`, `wardName`, `pollingUnitName` from validated DB records instead of trusting client-provided names.
@@ -91,7 +91,7 @@
 ### What Changed (Batch 8 — Admin Review Queue)
 
 - **Submissions open to `All` with status filter chips**: admin submissions default to the full list for predictable search/lookup; inline chips for `All`, `Pending`, `Verified`, `Flagged` (counts shown inline) let admins jump into the review queue when needed.
-- **Table stays lean**: APC/NIN and VIN remain in the detail sheet/export instead of crowding the main scanning table.
+- **Table stays lean**: Membership / NIN and VIN remain in the detail sheet/export instead of crowding the main scanning table.
 - **Bulk verification is safer**: admins can verify/flag selected rows as before, or escalate from selected-page rows to all records matching the current filters.
 - **Filtered bulk actions are confirmed**: all-matching actions show the count and active filters before applying changes.
 - **Audit trail preserved**: filtered bulk verify/flag/unverify/unflag writes per-submission audit entries and logs the campaign-level bulk action.
@@ -119,6 +119,14 @@
 - **Location messaging stays contextual**: the location step still owns the small local notes for `Using offline data`, online fallback with retry, and full offline blocking states because those messages explain the dropdown behavior directly.
 - **Confirmation remains the outcome surface**: confirmed, queued, and failed confirmation states were intentionally left structurally unchanged so the polish stays focused on task-flow calmness rather than changing the result model.
 
+### What Changed (Batch 13 — Identity & Verification Refresh)
+
+- **Public step 3 is now clearer**: `Party Information` has been replaced by `Identity & Verification`, with an explicit choice between `Party Membership` and `National ID (NIN)`.
+- **Validation matches the chosen method**: when registrants choose `National ID`, the field enforces a real 11-digit NIN; when they choose `Party Membership`, the field accepts broader party-style membership IDs (letters, numbers, hyphens, slashes).
+- **VIN remains required**: the public form still requires VIN alongside the chosen identity detail for verification and duplicate prevention.
+- **Neutral admin/export wording**: detail-sheet and export labels now use `Membership / NIN` instead of APC-specific wording.
+- **Back-compat preserved**: old local drafts infer a best-effort identity method on restore, and older queued offline payloads without the new `identityType` field still sync through the legacy server validator.
+
 ### What Changed (Batch 11 — Reporting Date Filters)
 
 - **Shared reporting date utilities**: date preset ranges, query formatting, picker bounds, and display labels now live in `src/lib/date-ranges.ts`.
@@ -130,7 +138,7 @@
 ### What Changed (Batch 2)
 
 - **LGA dropdown**: Shows only the campaign's `enabledLgaIds` (inherited from candidate's constituency boundary, or restricted subset).
-- **APC/NIN field**: Renamed to "APC Registration Number or NIN". Now required.
+- **Identity field**: Membership / NIN stays required, and the public form now frames it as an explicit verification-method choice rather than APC-specific wording.
 - **VIN field**: Now required. Used for deduplication alongside phone number.
 - **Role options**: Volunteer / Member / Canvasser (3 options).
 - **Canvasser validation**: Both name and phone required when "Yes" selected.
@@ -162,7 +170,7 @@
 
 ### Form Configuration
 
-- **APC/NIN**: Required field. Accepts either APC membership number or National Identification Number (NIN).
+- **Membership Number or NIN**: Required field. Registrants explicitly choose whether they are using a party membership number or a National Identification Number (NIN).
 - **VIN (Voter ID)**: Required field. Used for deduplication.
 - Custom Question 1 and Custom Question 2 are included in v1, stored per submission.
 
@@ -216,7 +224,7 @@
 | 0      | Campaign splash → Begin Registration                                                                                                                                                     |
 | 1      | Personal details: first name, middle name?, last name, phone, email?, sex, age, occupation, marital status, custom questions                                                             |
 | 2      | Location: cascading LGA → Ward → Polling Unit (with INEC codes)                                                                                                                          |
-| 3      | Party info: APC/NIN (required) + VIN (required)                                                                                                                                          |
+| 3      | Identity & Verification: choose `Party Membership` or `National ID (NIN)`, then enter the selected ID + VIN (required)                                                                  |
 | 4      | Role: Volunteer / Member / Canvasser (3 cards)                                                                                                                                           |
 | 5      | Canvasser: Yes/No toggle → name + phone if Yes (required when Yes)                                                                                                                       |
 | 6      | Confirmation: state-aware receipt (`confirmed`, `queued`, or `failed`), registration reference only after server acceptance, New Registration button, share actions only after confirmed |
@@ -253,6 +261,7 @@
 | Duplicate VIN                                  | 409 → "Already Registered" error box                                                                                                                                             |
 | Missing canvasser Yes/No                       | Submit button stays disabled on canvasser step                                                                                                                                   |
 | Invalid submit payload                         | 400 → first field-level validation message shown                                                                                                                                 |
+| Legacy queued payload without `identityType`   | Still accepted server-side through the hybrid legacy validator so older offline rows can sync after the UI upgrade                                                               |
 | Network error during online submit             | Error displayed, localStorage preserves progress                                                                                                                                 |
 | Offline submit                                 | Submission is queued in IndexedDB and the confirmation shows `Pending Upload`                                                                                                    |
 | Queued sync success                            | Row is removed locally; active confirmation flips to confirmed when server receipt is known                                                                                      |
@@ -317,7 +326,7 @@ model PollingUnit {
 - Stores split name fields (`firstName`, `middleName`, `lastName`) plus composed `fullName`
 - Stores both FK references (lgaId, wardId, pollingUnitId) AND display names
 - `role`: "volunteer" | "member" | "canvasser"
-- `apcRegNumber`: stores APC number or NIN
+- `apcRegNumber`: legacy field name; currently stores the selected party membership number or NIN
 - `voterIdNumber`: stores VIN
 
 ## API Routes
@@ -348,7 +357,7 @@ model PollingUnit {
 
 - Submission and canvasser exports use human-readable Nigeria time instead of raw ISO timestamps.
 - Redacted submission exports keep operational names, phone numbers, and canvasser details visible.
-- Redacted submission exports mask sensitive voter identity fields such as `APC/NIN` and `VIN`.
+- Redacted submission exports mask sensitive voter identity fields such as `Membership / NIN` and `VIN`.
 
 ### Submission Filter Plumbing
 

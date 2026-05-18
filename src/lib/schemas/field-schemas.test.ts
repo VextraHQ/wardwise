@@ -10,6 +10,7 @@ import {
   optionalNigerianPhoneSchema,
   optionalNullableTrimmedText,
   optionalTrimmedText,
+  partyMembershipNumberSchema,
   requiredTrimmedText,
   toLocalPhoneDisplay,
   voterIdVinSchema,
@@ -137,6 +138,24 @@ describe("apcOrNinSchema", () => {
     expect(apcOrNinSchema.safeParse("ab").success).toBe(false);
     expect(apcOrNinSchema.safeParse("").success).toBe(false);
     expect(apcOrNinSchema.safeParse("has spaces").success).toBe(false);
+  });
+});
+
+describe("partyMembershipNumberSchema", () => {
+  it("accepts alphanumeric party membership numbers with separators", () => {
+    expect(partyMembershipNumberSchema.parse("pdp-ad/2042")).toBe(
+      "PDP-AD/2042",
+    );
+    expect(partyMembershipNumberSchema.parse("lp-77-ward12")).toBe(
+      "LP-77-WARD12",
+    );
+  });
+
+  it("rejects spaces and punctuation-heavy garbage", () => {
+    expect(partyMembershipNumberSchema.safeParse("has spaces").success).toBe(
+      false,
+    );
+    expect(partyMembershipNumberSchema.safeParse("###").success).toBe(false);
   });
 });
 

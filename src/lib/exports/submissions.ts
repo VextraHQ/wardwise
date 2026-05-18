@@ -74,7 +74,7 @@ export async function buildSubmissionsExportTable(
     "Ward",
     "PU Code",
     "Polling Unit",
-    "APC/NIN",
+    "Membership / NIN",
     "VIN",
     "Role",
     ...(campaign.customQuestion1 ? [campaign.customQuestion1] : []),

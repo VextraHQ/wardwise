@@ -16,7 +16,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useWatch } from "react-hook-form";
-import type { RegistrationFormData } from "@/features/collect/schemas/collect-schemas";
+import {
+  inferLegacyCollectIdentityType,
+  type RegistrationFormData,
+} from "@/features/collect/schemas/collect-schemas";
 
 // ── Types ──
 export type DeviceSubmissionData = {
@@ -195,6 +198,18 @@ export function useCollectFormPersistence({
       Object.entries(data).forEach(([key, value]) => {
         setValue(key as keyof RegistrationFormData, value as string | number);
       });
+
+      // Older saved drafts predate the explicit identity-method choice. Use a
+      // best-effort inference so resumed progress stays smooth after the UI
+      // upgrade. New submissions still require an explicit choice in the step UI.
+      if (!data.identityType && data.apcRegNumber) {
+        const inferredIdentityType = inferLegacyCollectIdentityType(
+          data.apcRegNumber,
+        );
+        if (inferredIdentityType) {
+          setValue("identityType", inferredIdentityType);
+        }
+      }
 
       setHasCanvasser(
         savedUiState?.hasCanvasser ??

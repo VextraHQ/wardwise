@@ -24,9 +24,9 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { StepProgress } from "@/components/ui/step-progress";
-import { StepCandidateSetup } from "./step-candidate-setup";
-import { StepCampaignCollectConfig } from "./step-campaign-collect-config";
-import { StepCampaignReview } from "./step-campaign-review";
+import { StepCandidateSetup } from "@/features/collect/components/admin/wizard/step-candidate-setup";
+import { StepCampaignCollectConfig } from "@/features/collect/components/admin/wizard/step-campaign-collect-config";
+import { StepCampaignReview } from "@/features/collect/components/admin/wizard/step-campaign-review";
 
 type WizardSelectedCandidate = {
   id: string;

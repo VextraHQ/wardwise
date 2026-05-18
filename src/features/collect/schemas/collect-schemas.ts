@@ -2,10 +2,12 @@ import { z } from "zod";
 import {
   apcOrNinSchema,
   nigerianPhoneSchema,
+  ninSchema,
   optionalEmailSchema,
   optionalNigerianPhoneSchema,
   optionalNullableTrimmedText,
   optionalTrimmedText,
+  partyMembershipNumberSchema,
   requiredTrimmedText,
   voterIdVinSchema,
 } from "@/lib/schemas/field-schemas";
@@ -13,6 +15,63 @@ import {
   campaignBrandingTypes,
   normalizeCampaignDisplayName,
 } from "@/features/collect/lib/branding";
+
+export const collectIdentityTypes = ["membership", "nin"] as const;
+export type CollectIdentityType = (typeof collectIdentityTypes)[number];
+
+export function inferLegacyCollectIdentityType(
+  value: string | null | undefined,
+): CollectIdentityType | undefined {
+  if (!value?.trim()) return undefined;
+  return ninSchema.safeParse(value).success ? "nin" : "membership";
+}
+
+function addSchemaIssue(
+  ctx: z.RefinementCtx,
+  path: (string | number)[],
+  message: string,
+) {
+  ctx.addIssue({
+    code: z.ZodIssueCode.custom,
+    path,
+    message,
+  });
+}
+
+function validateIdentityValue(
+  value: string,
+  identityType: CollectIdentityType | undefined,
+) {
+  if (identityType === "nin") {
+    return ninSchema.safeParse(value);
+  }
+  if (identityType === "membership") {
+    return partyMembershipNumberSchema.safeParse(value);
+  }
+  return apcOrNinSchema.safeParse(value);
+}
+
+function normalizeIdentityValue(
+  value: string,
+  identityType: CollectIdentityType | undefined,
+) {
+  if (identityType === "nin") {
+    return ninSchema.parse(value);
+  }
+  if (identityType === "membership") {
+    return partyMembershipNumberSchema.parse(value);
+  }
+  return apcOrNinSchema.parse(value);
+}
+
+const clientIdentityTypeSchema = z.enum(collectIdentityTypes, {
+  message: "Choose a verification method",
+});
+
+const baseIdentityFieldSchema = z
+  .string()
+  .transform((v) => v.trim())
+  .pipe(z.string().min(1, "Enter your membership number or NIN"));
 
 // Screen 1: Personal details
 export const screen1Schema = z.object({
@@ -50,9 +109,11 @@ export const screen2Schema = z.object({
   pollingUnitName: z.string().min(1),
 });
 
-// Screen 3: Party info — APC/NIN and VIN are both required
+// Screen 3: Identity & verification — choose either party membership number
+// or NIN, plus VIN for deduplication.
 export const screen3Schema = z.object({
-  apcRegNumber: apcOrNinSchema,
+  identityType: clientIdentityTypeSchema,
+  apcRegNumber: baseIdentityFieldSchema,
   voterIdNumber: voterIdVinSchema,
 });
 
@@ -85,32 +146,19 @@ export const submitRegistrationSchema = screen1Schema
   .merge(screen3Schema)
   .merge(screen4Schema)
   .merge(screen5Schema)
-  .merge(customQuestionsSchema);
+  .merge(customQuestionsSchema)
+  .superRefine((data, ctx) => {
+    const result = validateIdentityValue(data.apcRegNumber, data.identityType);
+    if (!result.success) {
+      addSchemaIssue(
+        ctx,
+        ["apcRegNumber"],
+        result.error.issues[0]?.message || "Enter a valid identification number",
+      );
+    }
+  });
 
-export type RegistrationFormData = {
-  firstName: string;
-  middleName?: string | undefined;
-  lastName: string;
-  phone: string;
-  email?: string | undefined;
-  sex: "male" | "female";
-  age: number;
-  occupation: string;
-  maritalStatus: "single" | "married" | "divorced" | "widowed";
-  lgaId: number;
-  lgaName: string;
-  wardId: number;
-  wardName: string;
-  pollingUnitId: number;
-  pollingUnitName: string;
-  apcRegNumber: string;
-  voterIdNumber: string;
-  role: "volunteer" | "member" | "canvasser";
-  canvasserName?: string | undefined;
-  canvasserPhone?: string | undefined;
-  customAnswer1?: string | undefined;
-  customAnswer2?: string | undefined;
-};
+export type RegistrationFormData = z.input<typeof submitRegistrationSchema>;
 
 // ── Admin: Campaign schemas (single source of truth) ──
 
@@ -185,11 +233,41 @@ export type OfflinePackRequest = z.infer<typeof offlinePackRequestSchema>;
 
 // ── Server submit schema (extends client schema with campaignSlug, drops client-only name fields) ──
 
-export const serverSubmitSchema = submitRegistrationSchema
-  .omit({ lgaName: true, wardName: true, pollingUnitName: true })
+const serverIdentitySchema = z.object({
+  identityType: clientIdentityTypeSchema.optional(),
+  apcRegNumber: baseIdentityFieldSchema,
+  voterIdNumber: voterIdVinSchema,
+});
+
+export const serverSubmitSchema = screen1Schema
+  .merge(
+    screen2Schema.omit({
+      lgaName: true,
+      wardName: true,
+      pollingUnitName: true,
+    }),
+  )
+  .merge(serverIdentitySchema)
+  .merge(screen4Schema)
+  .merge(screen5Schema)
+  .merge(customQuestionsSchema)
   .extend({
     campaignSlug: z.string().min(1),
-  });
+  })
+  .superRefine((data, ctx) => {
+    const result = validateIdentityValue(data.apcRegNumber, data.identityType);
+    if (!result.success) {
+      addSchemaIssue(
+        ctx,
+        ["apcRegNumber"],
+        result.error.issues[0]?.message || "Enter a valid identification number",
+      );
+    }
+  })
+  .transform((data) => ({
+    ...data,
+    apcRegNumber: normalizeIdentityValue(data.apcRegNumber, data.identityType),
+  }));
 
 // ── Admin submission moderation (PATCH) ──
 // Used by admin Collect submission detail + bulk routes.

@@ -18,6 +18,10 @@ import {
   ComboboxSelect,
   type ComboboxSelectOption,
 } from "@/components/ui/combobox-select";
+import {
+  MARITAL_STATUS_OPTIONS,
+  OCCUPATION_OPTIONS,
+} from "@/lib/constants/voter-options";
 import { RegistrationStepHeader } from "@/features/collect/components/public/registration-step-header";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import {
@@ -34,37 +38,9 @@ import {
 import { sanitizePhoneInputEvent } from "@/features/collect/lib/phone-input-utils";
 import { cn } from "@/lib/utils";
 
-const OCCUPATION_OPTIONS: ComboboxSelectOption[] = [
-  { value: "civil-servant", label: "Civil Servant" },
-  { value: "teacher", label: "Teacher/Educator" },
-  { value: "healthcare-worker", label: "Healthcare Worker" },
-  { value: "farmer", label: "Farmer" },
-  { value: "trader", label: "Trader/Business Owner" },
-  { value: "artisan", label: "Artisan (Carpenter, Tailor, etc.)" },
-  { value: "student", label: "Student" },
-  { value: "unemployed", label: "Unemployed" },
-  { value: "retired", label: "Retired" },
-  { value: "private-sector", label: "Private Sector Employee" },
-  { value: "security", label: "Security Personnel" },
-  { value: "driver", label: "Driver/Transport Worker" },
-  { value: "engineer", label: "Engineer" },
-  { value: "lawyer", label: "Lawyer" },
-  { value: "doctor", label: "Doctor/Medical Professional" },
-  { value: "nurse", label: "Nurse" },
-  { value: "accountant", label: "Accountant" },
-  { value: "banker", label: "Banker" },
-  { value: "journalist", label: "Journalist/Media" },
-  { value: "pastor", label: "Pastor/Religious Leader" },
-  { value: "imam", label: "Imam/Religious Leader" },
-  { value: "self-employed", label: "Self Employed" },
-  { value: "other", label: "Other" },
-];
-
-const MARITAL_OPTIONS: ComboboxSelectOption[] = [
-  { value: "single", label: "Single" },
-  { value: "married", label: "Married" },
-  { value: "divorced", label: "Divorced" },
-  { value: "widowed", label: "Widowed" },
+const collectOccupationOptions: ComboboxSelectOption[] = [...OCCUPATION_OPTIONS];
+const maritalStatusOptions: ComboboxSelectOption[] = [
+  ...MARITAL_STATUS_OPTIONS,
 ];
 const toggleToListActionClass =
   "border-border/70 bg-muted/40 text-foreground/80 hover:bg-muted/70 h-6 rounded-sm border px-2 text-[11px] font-medium transition-colors";
@@ -286,7 +262,7 @@ export function PersonalDetailsStep({
                 <div className="space-y-1.5">
                   <FieldLabel>Marital Status</FieldLabel>
                   <ComboboxSelect
-                    options={MARITAL_OPTIONS}
+                    options={maritalStatusOptions}
                     value={watch("maritalStatus") || ""}
                     onValueChange={(v) =>
                       setValue(
@@ -305,10 +281,14 @@ export function PersonalDetailsStep({
               {/* Occupation */}
               <div className="space-y-1.5">
                 <FieldLabel>Occupation</FieldLabel>
+                <FieldHint>
+                  Choose the closest match. Can&apos;t find it? Type it
+                  manually.
+                </FieldHint>
                 {occupationMode === "select" ? (
                   <div className="space-y-2">
                     <ComboboxSelect
-                      options={OCCUPATION_OPTIONS}
+                      options={collectOccupationOptions}
                       value={watch("occupation") || ""}
                       onValueChange={(v) => {
                         if (v === "other") {
@@ -318,10 +298,25 @@ export function PersonalDetailsStep({
                           setValue("occupation", v);
                         }
                       }}
-                      placeholder="Select occupation"
+                      placeholder="Search or select occupation"
                       searchPlaceholder="Search occupations..."
                       emptyMessage="No occupation found."
                     />
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-muted-foreground text-[11px]">
+                        Prefer to type it?
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOccupationMode("custom");
+                          setValue("occupation", "");
+                        }}
+                        className={toggleToListActionClass}
+                      >
+                        Type manually
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-1.5">
@@ -340,10 +335,13 @@ export function PersonalDetailsStep({
                       </p>
                       <button
                         type="button"
-                        onClick={() => setOccupationMode("select")}
+                        onClick={() => {
+                          setOccupationMode("select");
+                          setValue("occupation", "");
+                        }}
                         className={toggleToListActionClass}
                       >
-                        Use list
+                        Back to list
                       </button>
                     </div>
                   </div>

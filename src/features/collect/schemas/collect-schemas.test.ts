@@ -19,6 +19,7 @@ const baseServerSubmission = {
   lgaId: 1,
   wardId: 1,
   pollingUnitId: 1,
+  identityType: "nin",
   apcRegNumber: "12345678904",
   voterIdNumber: "ABC1234567890123456",
   role: "member",
@@ -94,17 +95,29 @@ describe("serverSubmitSchema field normalization", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects APC/NIN values with alphabetic prefixes", () => {
+  it("rejects non-numeric values when NIN is selected", () => {
     const result = serverSubmitSchema.safeParse({
       ...baseServerSubmission,
+      identityType: "nin",
       apcRegNumber: "apc234728347292",
     });
     expect(result.success).toBe(false);
   });
 
-  it("accepts numeric APC registration values", () => {
+  it("accepts explicit membership numbers with letters and separators", () => {
     const result = serverSubmitSchema.safeParse({
       ...baseServerSubmission,
+      identityType: "membership",
+      apcRegNumber: "PDP-AD/2042",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("keeps legacy APC/NIN payloads working when identityType is absent", () => {
+    const { identityType: _identityType, ...legacyPayload } =
+      baseServerSubmission;
+    const result = serverSubmitSchema.safeParse({
+      ...legacyPayload,
       apcRegNumber: "234728347292",
     });
     expect(result.success).toBe(true);
