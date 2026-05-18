@@ -355,7 +355,7 @@ UX audit and post-submission improvements for the public registration form:
 - **Public step 3 renamed and clarified** — `Party Information` is now `Identity & Verification`, with an explicit choice between `Party Membership` and `National ID (NIN)`.
 - **Chosen-method validation** — Membership entries now accept party-style IDs with letters, numbers, hyphens, or slashes, while NIN stays strict at 11 digits.
 - **Neutral admin/export wording** — Admin detail sheets and submission exports now use `Membership / NIN` instead of APC-specific labels.
-- **Canonical app/API field** — Active Collect feature code now uses `identityValue`, while persistence still maps to the legacy Prisma column until the later DB rename pass.
+- **Canonical app/API/Prisma field** — Active Collect feature code and Prisma now use `identityValue`. The physical database column is still mapped from the legacy `apcRegNumber` name during the persistence transition.
 - **Hard cutover behavior** — Older saved drafts are discarded rather than inferred, and queued offline rows with old identity keys fail locally with a clear re-entry message.
 
 ---

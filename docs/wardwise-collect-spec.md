@@ -125,7 +125,7 @@
 - **Validation matches the chosen method**: when registrants choose `National ID`, the field enforces a real 11-digit NIN; when they choose `Party Membership`, the field accepts broader party-style membership IDs (letters, numbers, hyphens, slashes).
 - **VIN remains required**: the public form still requires VIN alongside the chosen identity detail for verification and duplicate prevention.
 - **Neutral admin/export wording**: detail-sheet and export labels now use `Membership / NIN` instead of APC-specific wording.
-- **Canonical domain naming**: active Collect feature code now uses `identityValue` as the canonical app/API field name, while Prisma storage still writes to the legacy `apcRegNumber` column at the DB boundary.
+- **Canonical domain naming**: active Collect feature code and Prisma now use `identityValue` as the canonical field name. The physical database column remains mapped from the legacy `apcRegNumber` name for a controlled persistence transition.
 - **Hard cutover applied**: stale saved drafts and queued offline rows using old identity keys are no longer adapted. Incompatible drafts are discarded; incompatible queued rows fail with a clear re-entry message.
 
 ### What Changed (Batch 11 — Reporting Date Filters)
@@ -327,7 +327,7 @@ model PollingUnit {
 - Stores split name fields (`firstName`, `middleName`, `lastName`) plus composed `fullName`
 - Stores both FK references (lgaId, wardId, pollingUnitId) AND display names
 - `role`: "volunteer" | "member" | "canvasser"
-- `apcRegNumber`: legacy Prisma/DB column; active feature code maps this to canonical app/API field `identityValue`
+- `identityValue`: canonical app/API/Prisma field; currently mapped to the legacy physical database column name `apcRegNumber`
 - `voterIdNumber`: stores VIN
 
 ## API Routes

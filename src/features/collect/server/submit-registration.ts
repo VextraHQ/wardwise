@@ -110,7 +110,7 @@ export async function submitRegistration(
         wardName: pu.ward.name,
         pollingUnitId: data.pollingUnitId,
         pollingUnitName: pu.name,
-        apcRegNumber: data.identityValue,
+        identityValue: data.identityValue,
         voterIdNumber: data.voterIdNumber,
         role: data.role,
         customAnswer1: data.customAnswer1 || null,

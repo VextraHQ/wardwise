@@ -197,12 +197,9 @@ export async function PATCH(
       await prisma.submissionAuditEntry.createMany({ data: auditEntries });
     }
 
-    const { apcRegNumber, ...serializedSubmission } = submission;
-
     return NextResponse.json({
       submission: {
-        ...serializedSubmission,
-        identityValue: apcRegNumber,
+        ...submission,
         createdAt: submission.createdAt.toISOString(),
       },
     });

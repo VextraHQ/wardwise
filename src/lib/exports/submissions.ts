@@ -32,17 +32,6 @@ function getSubmissionNameParts(submission: {
   };
 }
 
-function mapSubmissionIdentity<
-  T extends {
-    apcRegNumber: string | null;
-  },
->({ apcRegNumber, ...submission }: T) {
-  return {
-    ...submission,
-    identityValue: apcRegNumber,
-  };
-}
-
 export async function buildSubmissionsExportTable(
   campaignId: string,
   options: {
@@ -98,8 +87,7 @@ export async function buildSubmissionsExportTable(
     "Date",
   ];
 
-  const rows = submissions.map((rawSubmission) => {
-    const submission = mapSubmissionIdentity(rawSubmission);
+  const rows = submissions.map((submission) => {
     const name = getSubmissionNameParts(submission);
     const redacted = Boolean(options.redacted);
 
