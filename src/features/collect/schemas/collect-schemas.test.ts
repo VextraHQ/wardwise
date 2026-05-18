@@ -20,7 +20,7 @@ const baseServerSubmission = {
   wardId: 1,
   pollingUnitId: 1,
   identityType: "nin",
-  apcRegNumber: "12345678904",
+  membershipNumber: "12345678904",
   voterIdNumber: "ABC1234567890123456",
   role: "member",
   canvasserName: "Madina",
@@ -99,7 +99,7 @@ describe("serverSubmitSchema field normalization", () => {
     const result = serverSubmitSchema.safeParse({
       ...baseServerSubmission,
       identityType: "nin",
-      apcRegNumber: "apc234728347292",
+      membershipNumber: "apc234728347292",
     });
     expect(result.success).toBe(false);
   });
@@ -108,7 +108,7 @@ describe("serverSubmitSchema field normalization", () => {
     const result = serverSubmitSchema.safeParse({
       ...baseServerSubmission,
       identityType: "membership",
-      apcRegNumber: "PDP-AD/2042",
+      membershipNumber: "PDP-AD/2042",
     });
     expect(result.success).toBe(true);
   });
@@ -118,7 +118,7 @@ describe("serverSubmitSchema field normalization", () => {
       baseServerSubmission;
     const result = serverSubmitSchema.safeParse({
       ...legacyPayload,
-      apcRegNumber: "234728347292",
+      membershipNumber: "234728347292",
     });
     expect(result.success).toBe(true);
   });

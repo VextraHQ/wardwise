@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  apcOrNinSchema,
+  membershipOrNinSchema,
   nigerianPhoneSchema,
   ninSchema,
   optionalEmailSchema,
@@ -48,7 +48,7 @@ function validateIdentityValue(
   if (identityType === "membership") {
     return partyMembershipNumberSchema.safeParse(value);
   }
-  return apcOrNinSchema.safeParse(value);
+  return membershipOrNinSchema.safeParse(value);
 }
 
 function normalizeIdentityValue(
@@ -61,7 +61,7 @@ function normalizeIdentityValue(
   if (identityType === "membership") {
     return partyMembershipNumberSchema.parse(value);
   }
-  return apcOrNinSchema.parse(value);
+  return membershipOrNinSchema.parse(value);
 }
 
 const clientIdentityTypeSchema = z.enum(collectIdentityTypes, {
@@ -113,7 +113,7 @@ export const screen2Schema = z.object({
 // or NIN, plus VIN for deduplication.
 export const screen3Schema = z.object({
   identityType: clientIdentityTypeSchema,
-  apcRegNumber: baseIdentityFieldSchema,
+  membershipNumber: baseIdentityFieldSchema,
   voterIdNumber: voterIdVinSchema,
 });
 
@@ -148,12 +148,16 @@ export const submitRegistrationSchema = screen1Schema
   .merge(screen5Schema)
   .merge(customQuestionsSchema)
   .superRefine((data, ctx) => {
-    const result = validateIdentityValue(data.apcRegNumber, data.identityType);
+    const result = validateIdentityValue(
+      data.membershipNumber,
+      data.identityType,
+    );
     if (!result.success) {
       addSchemaIssue(
         ctx,
-        ["apcRegNumber"],
-        result.error.issues[0]?.message || "Enter a valid identification number",
+        ["membershipNumber"],
+        result.error.issues[0]?.message ||
+          "Enter a valid identification number",
       );
     }
   });
@@ -235,7 +239,7 @@ export type OfflinePackRequest = z.infer<typeof offlinePackRequestSchema>;
 
 const serverIdentitySchema = z.object({
   identityType: clientIdentityTypeSchema.optional(),
-  apcRegNumber: baseIdentityFieldSchema,
+  membershipNumber: baseIdentityFieldSchema,
   voterIdNumber: voterIdVinSchema,
 });
 
@@ -255,18 +259,25 @@ export const serverSubmitSchema = screen1Schema
     campaignSlug: z.string().min(1),
   })
   .superRefine((data, ctx) => {
-    const result = validateIdentityValue(data.apcRegNumber, data.identityType);
+    const result = validateIdentityValue(
+      data.membershipNumber,
+      data.identityType,
+    );
     if (!result.success) {
       addSchemaIssue(
         ctx,
-        ["apcRegNumber"],
-        result.error.issues[0]?.message || "Enter a valid identification number",
+        ["membershipNumber"],
+        result.error.issues[0]?.message ||
+          "Enter a valid identification number",
       );
     }
   })
   .transform((data) => ({
     ...data,
-    apcRegNumber: normalizeIdentityValue(data.apcRegNumber, data.identityType),
+    membershipNumber: normalizeIdentityValue(
+      data.membershipNumber,
+      data.identityType,
+    ),
   }));
 
 // ── Admin submission moderation (PATCH) ──

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  apcOrNinSchema,
+  membershipOrNinSchema,
   emailSchema,
   isValidNigerianPhone,
   nigerianPhoneSchema,
@@ -113,31 +113,35 @@ describe("ninSchema", () => {
   });
 });
 
-describe("apcOrNinSchema", () => {
+describe("membershipOrNinSchema", () => {
   it("accepts a real 11-digit NIN", () => {
-    expect(apcOrNinSchema.parse("12345678905")).toBe("12345678905");
+    expect(membershipOrNinSchema.parse("12345678905")).toBe("12345678905");
   });
 
   it("rejects all-same-digit NIN and sequential dummies", () => {
-    expect(apcOrNinSchema.safeParse("11111111111").success).toBe(false);
-    expect(apcOrNinSchema.safeParse("12345678901").success).toBe(false);
-    expect(apcOrNinSchema.safeParse("01234567890").success).toBe(false);
+    expect(membershipOrNinSchema.safeParse("11111111111").success).toBe(false);
+    expect(membershipOrNinSchema.safeParse("12345678901").success).toBe(false);
+    expect(membershipOrNinSchema.safeParse("01234567890").success).toBe(false);
   });
 
-  it("accepts numeric-only APC numbers (min 5 digits)", () => {
-    expect(apcOrNinSchema.parse("12345")).toBe("12345");
-    expect(apcOrNinSchema.parse("987654321")).toBe("987654321");
+  it("accepts numeric-only membership numbers (min 5 digits)", () => {
+    expect(membershipOrNinSchema.parse("12345")).toBe("12345");
+    expect(membershipOrNinSchema.parse("987654321")).toBe("987654321");
   });
 
-  it("rejects APC numbers with non-digit characters", () => {
-    expect(apcOrNinSchema.safeParse("APC/2023/0042").success).toBe(false);
-    expect(apcOrNinSchema.safeParse("APC-2023-0042").success).toBe(false);
+  it("rejects membership numbers with non-digit characters", () => {
+    expect(membershipOrNinSchema.safeParse("APC/2023/0042").success).toBe(
+      false,
+    );
+    expect(membershipOrNinSchema.safeParse("APC-2023-0042").success).toBe(
+      false,
+    );
   });
 
   it("rejects short or garbage input", () => {
-    expect(apcOrNinSchema.safeParse("ab").success).toBe(false);
-    expect(apcOrNinSchema.safeParse("").success).toBe(false);
-    expect(apcOrNinSchema.safeParse("has spaces").success).toBe(false);
+    expect(membershipOrNinSchema.safeParse("ab").success).toBe(false);
+    expect(membershipOrNinSchema.safeParse("").success).toBe(false);
+    expect(membershipOrNinSchema.safeParse("has spaces").success).toBe(false);
   });
 });
 
