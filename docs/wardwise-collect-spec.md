@@ -1,5 +1,7 @@
 # WardWise Collect Canonical Spec
 
+> See also: `wardwise-collect-v2-spec.md`, `wardwise-collect-v3-form-configuration-spec.md`, `campaign-insights-spec.md`, `wardwise-hardening-spec.md`
+
 ## Status
 
 - **Collect v1 is complete** — merged to `main`.
@@ -151,6 +153,7 @@
 ### What Is Pending
 
 - Official ward + polling unit sync for additional states beyond Adamawa (for example Bauchi)
+- Collect v3 form configuration rollout — campaign-level verification requirements, first-class support-group capture, and verification-aware reporting. See `docs/wardwise-collect-v3-form-configuration-spec.md`.
 - Future precision work for split-LGA constituencies lives in `docs/geo-canonical-seeding-plan.md`
 
 ## Locked Product Decisions
@@ -225,7 +228,7 @@
 | 0      | Campaign splash → Begin Registration                                                                                                                                                     |
 | 1      | Personal details: first name, middle name?, last name, phone, email?, sex, age, occupation, marital status, custom questions                                                             |
 | 2      | Location: cascading LGA → Ward → Polling Unit (with INEC codes)                                                                                                                          |
-| 3      | Identity & Verification: choose `Party Membership` or `National ID (NIN)`, then enter the selected ID + VIN (required)                                                                  |
+| 3      | Identity & Verification: choose `Party Membership` or `National ID (NIN)`, then enter the selected ID + VIN (required)                                                                   |
 | 4      | Role: Volunteer / Member / Canvasser (3 cards)                                                                                                                                           |
 | 5      | Canvasser: Yes/No toggle → name + phone if Yes (required when Yes)                                                                                                                       |
 | 6      | Confirmation: state-aware receipt (`confirmed`, `queued`, or `failed`), registration reference only after server acceptance, New Registration button, share actions only after confirmed |
@@ -262,7 +265,7 @@
 | Duplicate VIN                                  | 409 → "Already Registered" error box                                                                                                                                             |
 | Missing canvasser Yes/No                       | Submit button stays disabled on canvasser step                                                                                                                                   |
 | Invalid submit payload                         | 400 → first field-level validation message shown                                                                                                                                 |
-| Legacy queued payload with old identity keys   | Marked failed locally with a clear “re-enter it” message instead of being adapted or silently half-submitted                                                                    |
+| Legacy queued payload with old identity keys   | Marked failed locally with a clear “re-enter it” message instead of being adapted or silently half-submitted                                                                     |
 | Network error during online submit             | Error displayed, localStorage preserves progress                                                                                                                                 |
 | Offline submit                                 | Submission is queued in IndexedDB and the confirmation shows `Pending Upload`                                                                                                    |
 | Queued sync success                            | Row is removed locally; active confirmation flips to confirmed when server receipt is known                                                                                      |

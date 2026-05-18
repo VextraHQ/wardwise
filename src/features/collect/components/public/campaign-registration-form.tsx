@@ -81,8 +81,7 @@ function createCollectDefaultValues({
     wardName: "",
     pollingUnitId: undefined as unknown as number,
     pollingUnitName: "",
-    identityType:
-      undefined as unknown as RegistrationFormData["identityType"],
+    identityType: undefined as unknown as RegistrationFormData["identityType"],
     identityValue: "",
     voterIdNumber: "",
     role: undefined as unknown as RegistrationFormData["role"],

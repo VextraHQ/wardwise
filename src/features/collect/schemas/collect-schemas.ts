@@ -30,7 +30,10 @@ function addSchemaIssue(
   });
 }
 
-function validateIdentityValue(value: string, identityType: CollectIdentityType) {
+function validateIdentityValue(
+  value: string,
+  identityType: CollectIdentityType,
+) {
   if (identityType === "nin") {
     return ninSchema.safeParse(value);
   }
@@ -251,7 +254,10 @@ export const serverSubmitSchema = screen1Schema
   })
   .transform((data) => ({
     ...data,
-    identityValue: normalizeIdentityValue(data.identityValue, data.identityType),
+    identityValue: normalizeIdentityValue(
+      data.identityValue,
+      data.identityType,
+    ),
   }));
 
 // ── Admin submission moderation (PATCH) ──

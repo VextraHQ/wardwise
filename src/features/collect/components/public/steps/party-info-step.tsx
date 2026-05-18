@@ -114,7 +114,8 @@ export function PartyInfoStep({
                     <div
                       className={cn(
                         "border-border/60 bg-muted/20 text-muted-foreground mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-sm border",
-                        selected && "border-primary/20 bg-primary/10 text-primary",
+                        selected &&
+                          "border-primary/20 bg-primary/10 text-primary",
                       )}
                     >
                       <Icon className="size-4.5" />
@@ -169,10 +170,8 @@ export function PartyInfoStep({
                 <FieldError error={errors.voterIdNumber?.message} />
                 <FieldHint>
                   On your voter card. We pair it with your{" "}
-                  {identityType === "nin"
-                    ? "NIN"
-                    : "membership number"}{" "}
-                  to confirm your registration and prevent duplicates.
+                  {identityType === "nin" ? "NIN" : "membership number"} to
+                  confirm your registration and prevent duplicates.
                 </FieldHint>
               </div>
             </div>

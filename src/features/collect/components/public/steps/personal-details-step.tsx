@@ -38,7 +38,9 @@ import {
 import { sanitizePhoneInputEvent } from "@/features/collect/lib/phone-input-utils";
 import { cn } from "@/lib/utils";
 
-const collectOccupationOptions: ComboboxSelectOption[] = [...OCCUPATION_OPTIONS];
+const collectOccupationOptions: ComboboxSelectOption[] = [
+  ...OCCUPATION_OPTIONS,
+];
 const maritalStatusOptions: ComboboxSelectOption[] = [
   ...MARITAL_STATUS_OPTIONS,
 ];

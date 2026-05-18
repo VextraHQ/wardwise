@@ -2,7 +2,7 @@
 
 > Private read-only campaign reporting for clients on top of Collect.
 > Branch: `develop` | Last updated: 2026-04-26
-> See also: `wardwise-collect-spec.md`, `wardwise-collect-v2-spec.md`, `wardwise-hardening-spec.md`
+> See also: `wardwise-collect-spec.md`, `wardwise-collect-v2-spec.md`, `wardwise-collect-v3-form-configuration-spec.md`, `wardwise-hardening-spec.md`
 
 ---
 
@@ -23,9 +23,15 @@
 
 - Private `/r/[token]` report route, passcode gate, access cookie, and revoked/unavailable states are live
 - Hero, Overview, Supporters, and Analytics tabs are all implemented
-- Read-only export path is live through `/api/campaign-report/`*
+- Read-only export path is live through `/api/campaign-report/`\*
 - Report filters now drive summary metrics, compare mode, geography, and analytics consistently
 - Admin campaign settings can enable, preview, regenerate, revoke, and observe report access
+
+### Next Reporting Alignment
+
+- Collect v3 planning introduces campaign-level verification requirements and first-class support-group capture
+- Campaign Insights should expose verification coverage, missing-verification follow-up signals, and support-group analytics rather than only raw totals
+- Source of truth for that rollout lives in `docs/wardwise-collect-v3-form-configuration-spec.md`
 
 ### What Changed (Batch 2 — Scope + Architecture Cleanup)
 
@@ -128,14 +134,12 @@ Export should become a secondary utility action, not the main outcome.
 
 ## Options Considered
 
-
 | Option                               | What it means                                                     | Pros                                          | Cons                                            | Verdict             |
 | ------------------------------------ | ----------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------- | ------------------- |
 | 1. CSV only                          | Admin exports and manually sends data                             | Fastest, zero new UI                          | Feels weak, low product value, admin bottleneck | Not recommended     |
 | 2. Private read-only report (chosen) | Candidate/client sees a private results page with charts + export | Strong value, fast enough, safe, premium feel | Needs light access model + polished UI          | Best current option |
 | 3. Light candidate portal            | Candidate logs in and sees only their own report pages            | More premium, closer to full product          | Auth and permissions overhead                   | Good later step     |
 | 4. Full candidate dashboard          | Candidate-facing campaign OS                                      | Long-term ideal                               | Too much for this launch phase                  | Future phase        |
-
 
 ---
 
@@ -149,7 +153,7 @@ This is intentional:
 - report links can be forwarded
 - passcodes can be shared across campaign stakeholders
 - verification, canvasser management, and record edits are real data-changing
-actions
+  actions
 - write actions require named users, permissions, and audit trails
 
 Allowed in Campaign Insights:
@@ -199,7 +203,7 @@ Future path:
 
 - long-term preferred internal name: `campaign-report`
 - current implemented name: `campaign-report`
-- public API route family uses `/api/campaign-report/`*
+- public API route family uses `/api/campaign-report/`\*
 
 ---
 
@@ -321,7 +325,7 @@ Export formatting rules:
 - exported dates use human-readable Nigeria time, not raw ISO timestamps
 - redacted exports keep operational names, phone numbers, and canvasser details
 - redacted exports mask high-risk voter identity fields such as `Membership / NIN` and
-`VIN`
+  `VIN`
 - keep the UI wording as `Redacted`, but treat it as sensitive-ID redaction
 
 ---
@@ -396,7 +400,7 @@ Rules:
 
 - the hero headline total stays all-time and unfiltered
 - date, LGA, role, and compare controls affect the briefing modules and
-analytics below the hero
+  analytics below the hero
 - do not put the scope row above the tabs on the report page
 
 ### 3. Global controls
@@ -437,11 +441,11 @@ Active filters should render as chips directly below the controls, for example:
 Rules:
 
 - `Overview` and `Analytics` follow the same date range, LGA filter, role
-filter, and compare state
+  filter, and compare state
 - `Supporters` keeps its own table filters
 - summary API calls include `from`, `to`, `lga`, and `role` when selected
 - compare queries use the same selected LGA/role filters against the immediately
-prior date period
+  prior date period
 - range changes should never blank the whole page or look like a hard refresh
 - preserve current data while the new range loads in the background
 - desktop filter popovers should anchor cleanly to the right edge of the scope rail rather than floating into card content
@@ -508,7 +512,7 @@ Rules:
 
 - keep this as performance insight, not canvasser management
 - if there is no canvasser activity, show a compact empty state rather than
-making the section disappear entirely
+  making the section disappear entirely
 - do not expose admin-style canvasser controls here
 
 #### `Recent Activity`
@@ -587,9 +591,9 @@ Rules:
 - charts must remain responsive on mobile and desktop
 - momentum must always show visible x-axis dates under the chart
 - if compare mode is on, momentum shows the selected period as the primary
-filled area and the prior period as a subtle dashed line
+  filled area and the prior period as a subtle dashed line
 - geography and audience charts use the currently selected date/LGA/role filter
-context
+  context
 - avoid cramped multi-chart rows that cause overflow
 - donut/pie charts should use a legend below rather than labels floating outside the card
 - if a chart is not readable on mobile, degrade to a ranked list or lighter summary rather than forcing overflow
@@ -655,7 +659,7 @@ SUPPORTERS
 
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
 │ Search supporters...     [Status] [LGA] [Ward] [Role]                       [Export]         │
-│ Selected: 12   [Copy Contacts]                                                                
+│ Selected: 12   [Copy Contacts]
 ├──────────────────────────────────────────────────────────────────────────────────────────────┤
 │ □ Name              LGA         Ward         PU           Role        Date        Status     │
 │ □ A. Bello          Girei       Jera Bakari  PU 014       Volunteer   08 Apr      Verified   │
@@ -917,11 +921,11 @@ This keeps:
   - stat cards + charts + health
   - accepts `from`, `to`, `lga`, and `role`
   - date/LGA/role filters apply to stats, daily momentum, geography, role, and
-  sex breakdowns
+    sex breakdowns
 - `GET /api/campaign-report/[token]/submissions`
   - recent submissions list
   - accepts `from`, `to`, `lga`, `role`, `search`, and `status` where used by
-  the report UI
+    the report UI
 - `GET /api/campaign-report/[token]/export`
   - read-only CSV / Excel export
 
@@ -1087,7 +1091,6 @@ The report follows existing campaign reporting rules:
 
 ## Key Files
 
-
 | File                                                                      | Role                                                     |
 | ------------------------------------------------------------------------- | -------------------------------------------------------- |
 | `src/features/collect/components/admin/campaign-settings.tsx`             | Add client access controls                               |
@@ -1099,7 +1102,6 @@ The report follows existing campaign reporting rules:
 | `src/features/reporting/hooks/use-campaign-insights-scope.ts`             | Report scope state + derived values                      |
 | `src/features/collect/server/collect-reporting.ts`                        | Shared reporting queries used by admin and report routes |
 | `prisma/schema.prisma`                                                    | Add client report access fields on `Campaign`            |
-
 
 ---
 

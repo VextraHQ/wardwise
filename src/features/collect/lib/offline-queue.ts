@@ -166,7 +166,9 @@ export type SyncResult = {
   failed: { id: number; analyticsId?: string; error: string }[];
 };
 
-function getLegacyIdentityQueueError(data: Record<string, unknown>): string | null {
+function getLegacyIdentityQueueError(
+  data: Record<string, unknown>,
+): string | null {
   const hasLegacyIdentityValue =
     typeof data.apcRegNumber === "string" ||
     typeof data.membershipNumber === "string";
