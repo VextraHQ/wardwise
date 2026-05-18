@@ -36,10 +36,11 @@ export async function GET(
       prisma.collectSubmission.count({ where }),
     ]);
 
-    const serialized = submissions.map((s) => ({
-      ...s,
-      refCode: generateRefCode(s.id),
-      createdAt: s.createdAt.toISOString(),
+    const serialized = submissions.map(({ apcRegNumber, ...submission }) => ({
+      ...submission,
+      identityValue: apcRegNumber,
+      refCode: generateRefCode(submission.id),
+      createdAt: submission.createdAt.toISOString(),
     }));
 
     return NextResponse.json({

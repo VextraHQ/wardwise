@@ -130,10 +130,10 @@ describe("membershipOrNinSchema", () => {
   });
 
   it("rejects membership numbers with non-digit characters", () => {
-    expect(membershipOrNinSchema.safeParse("APC/2023/0042").success).toBe(
+    expect(membershipOrNinSchema.safeParse("MEM/2023/0042").success).toBe(
       false,
     );
-    expect(membershipOrNinSchema.safeParse("APC-2023-0042").success).toBe(
+    expect(membershipOrNinSchema.safeParse("MEM-2023-0042").success).toBe(
       false,
     );
   });

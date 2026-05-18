@@ -125,7 +125,8 @@
 - **Validation matches the chosen method**: when registrants choose `National ID`, the field enforces a real 11-digit NIN; when they choose `Party Membership`, the field accepts broader party-style membership IDs (letters, numbers, hyphens, slashes).
 - **VIN remains required**: the public form still requires VIN alongside the chosen identity detail for verification and duplicate prevention.
 - **Neutral admin/export wording**: detail-sheet and export labels now use `Membership / NIN` instead of APC-specific wording.
-- **Back-compat preserved**: old local drafts infer a best-effort identity method on restore, and older queued offline payloads without the new `identityType` field still sync through the legacy server validator.
+- **Canonical domain naming**: active Collect feature code now uses `identityValue` as the canonical app/API field name, while Prisma storage still writes to the legacy `apcRegNumber` column at the DB boundary.
+- **Hard cutover applied**: stale saved drafts and queued offline rows using old identity keys are no longer adapted. Incompatible drafts are discarded; incompatible queued rows fail with a clear re-entry message.
 
 ### What Changed (Batch 11 — Reporting Date Filters)
 
@@ -261,7 +262,7 @@
 | Duplicate VIN                                  | 409 → "Already Registered" error box                                                                                                                                             |
 | Missing canvasser Yes/No                       | Submit button stays disabled on canvasser step                                                                                                                                   |
 | Invalid submit payload                         | 400 → first field-level validation message shown                                                                                                                                 |
-| Legacy queued payload without `identityType`   | Still accepted server-side through the hybrid legacy validator so older offline rows can sync after the UI upgrade                                                               |
+| Legacy queued payload with old identity keys   | Marked failed locally with a clear “re-enter it” message instead of being adapted or silently half-submitted                                                                    |
 | Network error during online submit             | Error displayed, localStorage preserves progress                                                                                                                                 |
 | Offline submit                                 | Submission is queued in IndexedDB and the confirmation shows `Pending Upload`                                                                                                    |
 | Queued sync success                            | Row is removed locally; active confirmation flips to confirmed when server receipt is known                                                                                      |
@@ -326,7 +327,7 @@ model PollingUnit {
 - Stores split name fields (`firstName`, `middleName`, `lastName`) plus composed `fullName`
 - Stores both FK references (lgaId, wardId, pollingUnitId) AND display names
 - `role`: "volunteer" | "member" | "canvasser"
-- `apcRegNumber`: legacy field name; currently stores the selected party membership number or NIN
+- `apcRegNumber`: legacy Prisma/DB column; active feature code maps this to canonical app/API field `identityValue`
 - `voterIdNumber`: stores VIN
 
 ## API Routes

@@ -144,12 +144,12 @@ export function PartyInfoStep({
                   )}
                 </InputIcon>
                 <Input
-                  {...register("apcRegNumber")}
+                  {...register("identityValue")}
                   placeholder={identityPlaceholder}
                   className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-mono font-medium tracking-wider transition-all placeholder:text-xs"
                 />
               </div>
-              <FieldError error={errors.apcRegNumber?.message} />
+              <FieldError error={errors.identityValue?.message} />
               <FieldHint>{identityHint}</FieldHint>
             </div>
 

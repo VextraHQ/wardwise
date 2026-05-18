@@ -54,7 +54,7 @@ export type CollectSubmission = {
   wardName: string;
   pollingUnitId: number | null;
   pollingUnitName: string;
-  apcRegNumber: string | null;
+  identityValue: string | null;
   voterIdNumber: string | null;
   isVerified: boolean;
   role: string; // "volunteer" | "member" | "canvasser"

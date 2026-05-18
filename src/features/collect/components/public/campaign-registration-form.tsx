@@ -83,7 +83,7 @@ function createCollectDefaultValues({
     pollingUnitName: "",
     identityType:
       undefined as unknown as RegistrationFormData["identityType"],
-    apcRegNumber: "",
+    identityValue: "",
     voterIdNumber: "",
     role: undefined as unknown as RegistrationFormData["role"],
     customAnswer1: "",

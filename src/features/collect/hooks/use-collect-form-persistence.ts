@@ -16,10 +16,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useWatch } from "react-hook-form";
-import {
-  inferLegacyCollectIdentityType,
-  type RegistrationFormData,
-} from "@/features/collect/schemas/collect-schemas";
+import type { RegistrationFormData } from "@/features/collect/schemas/collect-schemas";
 
 // ── Types ──
 export type DeviceSubmissionData = {
@@ -67,6 +64,16 @@ interface UseCollectFormPersistenceReturn {
   clearProgress: () => void;
   /** Ref — true while a restore is in progress (suppresses auto-save) */
   skipProgressSaveRef: React.RefObject<boolean>;
+}
+
+function isLegacyIdentityDraft(data: unknown): boolean {
+  if (!data || typeof data !== "object") return false;
+  const record = data as Record<string, unknown>;
+  return (
+    typeof record.identityValue !== "string" &&
+    (typeof record.apcRegNumber === "string" ||
+      typeof record.membershipNumber === "string")
+  );
 }
 
 // ── Hook ──
@@ -160,8 +167,16 @@ export function useCollectFormPersistence({
     const saved = localStorage.getItem(storageKey);
     if (saved) {
       try {
-        const { screen: savedScreen } = JSON.parse(saved);
-        if (savedScreen > 0) {
+        const parsed = JSON.parse(saved) as {
+          screen?: number;
+          data?: unknown;
+        };
+        if (isLegacyIdentityDraft(parsed.data)) {
+          localStorage.removeItem(storageKey);
+          return;
+        }
+        const savedScreen = parsed.screen;
+        if (typeof savedScreen === "number" && savedScreen > 0) {
           setHasSavedProgress(true);
         }
       } catch {
@@ -182,6 +197,11 @@ export function useCollectFormPersistence({
         uiState: savedUiState,
       } = JSON.parse(saved);
 
+      if (isLegacyIdentityDraft(data)) {
+        localStorage.removeItem(storageKey);
+        return;
+      }
+
       skipLocationResetRef.current = true;
       skipProgressSaveRef.current = true;
 
@@ -198,18 +218,6 @@ export function useCollectFormPersistence({
       Object.entries(data).forEach(([key, value]) => {
         setValue(key as keyof RegistrationFormData, value as string | number);
       });
-
-      // Older saved drafts predate the explicit identity-method choice. Use a
-      // best-effort inference so resumed progress stays smooth after the UI
-      // upgrade. New submissions still require an explicit choice in the step UI.
-      if (!data.identityType && data.apcRegNumber) {
-        const inferredIdentityType = inferLegacyCollectIdentityType(
-          data.apcRegNumber,
-        );
-        if (inferredIdentityType) {
-          setValue("identityType", inferredIdentityType);
-        }
-      }
 
       setHasCanvasser(
         savedUiState?.hasCanvasser ??

@@ -137,7 +137,7 @@ export function CampaignSubmissionDetailSheet({
               <Section label="Verification Info">
                 <Field
                   label="Membership / NIN"
-                  value={selected.apcRegNumber || "—"}
+                  value={selected.identityValue || "—"}
                   mono
                 />
                 <Field

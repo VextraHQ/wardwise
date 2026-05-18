@@ -166,6 +166,19 @@ export type SyncResult = {
   failed: { id: number; analyticsId?: string; error: string }[];
 };
 
+function getLegacyIdentityQueueError(data: Record<string, unknown>): string | null {
+  const hasLegacyIdentityValue =
+    typeof data.apcRegNumber === "string" ||
+    typeof data.membershipNumber === "string";
+  const hasCurrentIdentityValue = typeof data.identityValue === "string";
+
+  if (hasLegacyIdentityValue && !hasCurrentIdentityValue) {
+    return "This offline registration was saved before the latest form update and can no longer be submitted. Please re-enter it.";
+  }
+
+  return null;
+}
+
 /** Flush all pending submissions to the server. Returns synced count and permanent failures. */
 export async function syncPendingSubmissions(): Promise<SyncResult> {
   // getPendingSubmissions() filters out status === "failed" so failed rows are
@@ -177,6 +190,23 @@ export async function syncPendingSubmissions(): Promise<SyncResult> {
 
   for (const entry of pending) {
     try {
+      const legacyIdentityError = getLegacyIdentityQueueError(
+        entry.data as Record<string, unknown>,
+      );
+      if (legacyIdentityError) {
+        await updatePendingSubmission(entry.id!, {
+          status: "failed",
+          lastError: legacyIdentityError,
+          failedAt: new Date().toISOString(),
+        });
+        failed.push({
+          id: entry.id!,
+          analyticsId: entry.analyticsId,
+          error: legacyIdentityError,
+        });
+        continue;
+      }
+
       const response = await fetch("/api/collect/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

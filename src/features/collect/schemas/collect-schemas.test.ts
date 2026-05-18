@@ -20,7 +20,7 @@ const baseServerSubmission = {
   wardId: 1,
   pollingUnitId: 1,
   identityType: "nin",
-  membershipNumber: "12345678904",
+  identityValue: "12345678904",
   voterIdNumber: "ABC1234567890123456",
   role: "member",
   canvasserName: "Madina",
@@ -99,7 +99,7 @@ describe("serverSubmitSchema field normalization", () => {
     const result = serverSubmitSchema.safeParse({
       ...baseServerSubmission,
       identityType: "nin",
-      membershipNumber: "apc234728347292",
+      identityValue: "apc234728347292",
     });
     expect(result.success).toBe(false);
   });
@@ -108,19 +108,27 @@ describe("serverSubmitSchema field normalization", () => {
     const result = serverSubmitSchema.safeParse({
       ...baseServerSubmission,
       identityType: "membership",
-      membershipNumber: "PDP-AD/2042",
+      identityValue: "PDP-AD/2042",
     });
     expect(result.success).toBe(true);
   });
 
-  it("keeps legacy APC/NIN payloads working when identityType is absent", () => {
-    const { identityType: _identityType, ...legacyPayload } =
-      baseServerSubmission;
+  it("rejects payloads that still use the old membershipNumber key", () => {
+    const { identityValue: _identityValue, ...payload } = baseServerSubmission;
     const result = serverSubmitSchema.safeParse({
-      ...legacyPayload,
+      ...payload,
       membershipNumber: "234728347292",
     });
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects payloads that still use the old apcRegNumber key", () => {
+    const { identityValue: _identityValue, ...payload } = baseServerSubmission;
+    const result = serverSubmitSchema.safeParse({
+      ...payload,
+      apcRegNumber: "234728347292",
+    });
+    expect(result.success).toBe(false);
   });
 
   it("trims custom answers and keeps blank as empty string", () => {

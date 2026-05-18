@@ -1,6 +1,5 @@
 import { z } from "zod";
 import {
-  membershipOrNinSchema,
   nigerianPhoneSchema,
   ninSchema,
   optionalEmailSchema,
@@ -19,13 +18,6 @@ import {
 export const collectIdentityTypes = ["membership", "nin"] as const;
 export type CollectIdentityType = (typeof collectIdentityTypes)[number];
 
-export function inferLegacyCollectIdentityType(
-  value: string | null | undefined,
-): CollectIdentityType | undefined {
-  if (!value?.trim()) return undefined;
-  return ninSchema.safeParse(value).success ? "nin" : "membership";
-}
-
 function addSchemaIssue(
   ctx: z.RefinementCtx,
   path: (string | number)[],
@@ -38,30 +30,21 @@ function addSchemaIssue(
   });
 }
 
-function validateIdentityValue(
-  value: string,
-  identityType: CollectIdentityType | undefined,
-) {
+function validateIdentityValue(value: string, identityType: CollectIdentityType) {
   if (identityType === "nin") {
     return ninSchema.safeParse(value);
   }
-  if (identityType === "membership") {
-    return partyMembershipNumberSchema.safeParse(value);
-  }
-  return membershipOrNinSchema.safeParse(value);
+  return partyMembershipNumberSchema.safeParse(value);
 }
 
 function normalizeIdentityValue(
   value: string,
-  identityType: CollectIdentityType | undefined,
+  identityType: CollectIdentityType,
 ) {
   if (identityType === "nin") {
     return ninSchema.parse(value);
   }
-  if (identityType === "membership") {
-    return partyMembershipNumberSchema.parse(value);
-  }
-  return membershipOrNinSchema.parse(value);
+  return partyMembershipNumberSchema.parse(value);
 }
 
 const clientIdentityTypeSchema = z.enum(collectIdentityTypes, {
@@ -113,7 +96,7 @@ export const screen2Schema = z.object({
 // or NIN, plus VIN for deduplication.
 export const screen3Schema = z.object({
   identityType: clientIdentityTypeSchema,
-  membershipNumber: baseIdentityFieldSchema,
+  identityValue: baseIdentityFieldSchema,
   voterIdNumber: voterIdVinSchema,
 });
 
@@ -148,14 +131,11 @@ export const submitRegistrationSchema = screen1Schema
   .merge(screen5Schema)
   .merge(customQuestionsSchema)
   .superRefine((data, ctx) => {
-    const result = validateIdentityValue(
-      data.membershipNumber,
-      data.identityType,
-    );
+    const result = validateIdentityValue(data.identityValue, data.identityType);
     if (!result.success) {
       addSchemaIssue(
         ctx,
-        ["membershipNumber"],
+        ["identityValue"],
         result.error.issues[0]?.message ||
           "Enter a valid identification number",
       );
@@ -238,8 +218,8 @@ export type OfflinePackRequest = z.infer<typeof offlinePackRequestSchema>;
 // ── Server submit schema (extends client schema with campaignSlug, drops client-only name fields) ──
 
 const serverIdentitySchema = z.object({
-  identityType: clientIdentityTypeSchema.optional(),
-  membershipNumber: baseIdentityFieldSchema,
+  identityType: clientIdentityTypeSchema,
+  identityValue: baseIdentityFieldSchema,
   voterIdNumber: voterIdVinSchema,
 });
 
@@ -259,14 +239,11 @@ export const serverSubmitSchema = screen1Schema
     campaignSlug: z.string().min(1),
   })
   .superRefine((data, ctx) => {
-    const result = validateIdentityValue(
-      data.membershipNumber,
-      data.identityType,
-    );
+    const result = validateIdentityValue(data.identityValue, data.identityType);
     if (!result.success) {
       addSchemaIssue(
         ctx,
-        ["membershipNumber"],
+        ["identityValue"],
         result.error.issues[0]?.message ||
           "Enter a valid identification number",
       );
@@ -274,10 +251,7 @@ export const serverSubmitSchema = screen1Schema
   })
   .transform((data) => ({
     ...data,
-    membershipNumber: normalizeIdentityValue(
-      data.membershipNumber,
-      data.identityType,
-    ),
+    identityValue: normalizeIdentityValue(data.identityValue, data.identityType),
   }));
 
 // ── Admin submission moderation (PATCH) ──
