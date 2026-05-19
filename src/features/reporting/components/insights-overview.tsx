@@ -33,7 +33,7 @@ import {
   IconUsersGroup,
   IconExternalLink,
 } from "@tabler/icons-react";
-import { SubmissionStatusBadge } from "@/features/reporting/lib/insights-helpers";
+import { SubmissionStatusBadge } from "@/features/reporting/components/ui/insights-helpers";
 
 const STATUS_BADGE: Record<string, { label: string; style: string }> = {
   active: {

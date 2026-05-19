@@ -59,6 +59,8 @@ export function RoleStep({
   supportGroupFieldLabel,
   backLabel = "Back",
   nextLabel = "Continue",
+  navMobileLayout = "inline",
+  backVariant = "outline",
 }: {
   form: UseFormReturn<RegistrationFormData>;
   onBack: () => void;
@@ -69,6 +71,8 @@ export function RoleStep({
   supportGroupFieldLabel?: string | null;
   backLabel?: string;
   nextLabel?: string;
+  navMobileLayout?: "inline" | "stacked";
+  backVariant?: "outline" | "ghost";
 }) {
   const {
     register,
@@ -172,6 +176,8 @@ export function RoleStep({
               onNext={onNext}
               backLabel={backLabel}
               nextLabel={nextLabel}
+              mobileLayout={navMobileLayout}
+              backVariant={backVariant}
               isLoading={isSubmitting}
             />
 

@@ -153,6 +153,9 @@
 - **Receipt opt-in moved to the final review stage**: the `Email me a registration confirmation` checkbox no longer lives in the role/canvasser step; it now appears in the review step where it reads like a final delivery preference.
 - **Edit cancellation is safe**: if a supporter starts editing from review and uses `Return to review`, the form restores the original reviewed values instead of leaving half-finished edits behind.
 - **Review-aware role branching**: editing the role step respects the canvasser skip logic. Changing into `canvasser` returns directly to review; changing into other roles routes through the canvasser referral step once, then returns to review.
+- **Mobile review is compressed on purpose**: mobile now uses compact review summary sections instead of the full desktop field grid, so supporters confirm the essentials without a long wall of stacked labels or nested card padding.
+- **Mobile edit actions stay familiar**: normal steps keep the back/continue side-by-side rhythm, while edit-from-review mode keeps the compact mobile layout but uses the same familiar outline back-button treatment for `Cancel edit` so the flow still feels consistent on small screens.
+- **Shared step chrome is lighter on mobile**: step headers, card padding, and progress spacing were tightened so the whole flow feels shorter and less top-heavy on phones.
 
 ### What Changed (Collect v3 Phase 4 — Receipt Email)
 

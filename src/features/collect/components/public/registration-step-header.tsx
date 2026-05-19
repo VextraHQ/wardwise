@@ -15,12 +15,17 @@ export function RegistrationStepHeader({
   className,
 }: RegistrationStepHeaderProps) {
   return (
-    <div className={cn("mb-4 space-y-2.5 text-center", className)}>
+    <div
+      className={cn(
+        "mb-3 space-y-2 text-center sm:mb-4 sm:space-y-2.5",
+        className,
+      )}
+    >
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
-        className="space-y-2.5"
+        className="space-y-2 sm:space-y-2.5"
       >
         <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl">
           {title.includes(" ") ? (
@@ -34,7 +39,7 @@ export function RegistrationStepHeader({
             title
           )}
         </h1>
-        <p className="text-muted-foreground mx-auto max-w-lg text-sm leading-relaxed font-medium sm:text-base">
+        <p className="text-muted-foreground mx-auto max-w-lg text-[13px] leading-relaxed font-medium sm:text-base">
           {description}
         </p>
       </motion.div>

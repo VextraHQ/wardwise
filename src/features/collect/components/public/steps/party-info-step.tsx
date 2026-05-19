@@ -46,6 +46,8 @@ export function PartyInfoStep({
   voterIdRequirement = "required",
   backLabel = "Back",
   nextLabel = "Continue",
+  navMobileLayout = "inline",
+  backVariant = "outline",
 }: {
   party: string;
   form: UseFormReturn<RegistrationFormData>;
@@ -55,6 +57,8 @@ export function PartyInfoStep({
   voterIdRequirement?: "required" | "optional";
   backLabel?: string;
   nextLabel?: string;
+  navMobileLayout?: "inline" | "stacked";
+  backVariant?: "outline" | "ghost";
 }) {
   const {
     register,
@@ -246,6 +250,8 @@ export function PartyInfoStep({
               onNext={onNext}
               backLabel={backLabel}
               nextLabel={nextLabel}
+              mobileLayout={navMobileLayout}
+              backVariant={backVariant}
             />
           </div>
         </StepCard>

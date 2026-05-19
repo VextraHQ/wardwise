@@ -46,6 +46,8 @@ export function LocationStep({
   onNext,
   backLabel = "Back",
   nextLabel = "Continue",
+  navMobileLayout = "inline",
+  backVariant = "outline",
 }: {
   form: UseFormReturn<RegistrationFormData>;
   lgas: GeoLga[];
@@ -65,6 +67,8 @@ export function LocationStep({
   onNext: () => void;
   backLabel?: string;
   nextLabel?: string;
+  navMobileLayout?: "inline" | "stacked";
+  backVariant?: "outline" | "ghost";
 }) {
   const {
     setValue,
@@ -152,6 +156,8 @@ export function LocationStep({
                 onNext={onNext}
                 backLabel={backLabel}
                 nextLabel={nextLabel}
+                mobileLayout={navMobileLayout}
+                backVariant={backVariant}
                 nextDisabled
               />
             </div>
@@ -296,6 +302,8 @@ export function LocationStep({
               onNext={onNext}
               backLabel={backLabel}
               nextLabel={nextLabel}
+              mobileLayout={navMobileLayout}
+              backVariant={backVariant}
             />
           </div>
         </StepCard>

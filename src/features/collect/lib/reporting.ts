@@ -6,6 +6,15 @@ import {
 } from "@/lib/date-ranges";
 import { formatDisplayDate, formatRelativeTime } from "@/lib/date-format";
 
+export {
+  capitalize,
+  formatMaritalStatusDisplay,
+  formatOccupationDisplay,
+  formatRole,
+  formatSexDisplay,
+  titleCase,
+} from "@/features/collect/lib/display-format";
+
 export type CampaignReportRangePreset = Extract<
   DateRangePreset,
   "today" | "7d" | "30d" | "all"
@@ -132,22 +141,4 @@ export function timeAgo(isoDate: string | null): string {
       month: "short",
     },
   });
-}
-
-/** Capitalizes the first letter of a string */
-export function capitalize(value: string): string {
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-/** Converts a string to title case */
-export function titleCase(value: string): string {
-  return value
-    .split(/[\s_-]+/)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join(" ");
-}
-
-/** Formats a role name to title case */
-export function formatRole(role: string): string {
-  return capitalize(role);
 }

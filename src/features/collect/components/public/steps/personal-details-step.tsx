@@ -56,6 +56,8 @@ export function PersonalDetailsStep({
   onNext,
   backLabel = "Back",
   nextLabel = "Continue",
+  navMobileLayout = "inline",
+  backVariant = "outline",
 }: {
   form: UseFormReturn<RegistrationFormData>;
   campaign: PublicCampaign;
@@ -65,6 +67,8 @@ export function PersonalDetailsStep({
   onNext: () => void;
   backLabel?: string;
   nextLabel?: string;
+  navMobileLayout?: "inline" | "stacked";
+  backVariant?: "outline" | "ghost";
 }) {
   const {
     register,
@@ -395,6 +399,8 @@ export function PersonalDetailsStep({
               onNext={onNext}
               backLabel={backLabel}
               nextLabel={nextLabel}
+              mobileLayout={navMobileLayout}
+              backVariant={backVariant}
             />
           </div>
         </StepCard>

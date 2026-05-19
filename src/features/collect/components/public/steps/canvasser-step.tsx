@@ -39,6 +39,8 @@ export function CanvasserStep({
   onNext,
   backLabel = "Back",
   nextLabel = "Continue",
+  navMobileLayout = "inline",
+  backVariant = "outline",
   nextDisabled,
   preloadedCanvassers = [],
 }: {
@@ -52,6 +54,8 @@ export function CanvasserStep({
   onNext: () => void;
   backLabel?: string;
   nextLabel?: string;
+  navMobileLayout?: "inline" | "stacked";
+  backVariant?: "outline" | "ghost";
   nextDisabled?: boolean;
   preloadedCanvassers?: PreloadedCanvasser[];
 }) {
@@ -272,6 +276,8 @@ export function CanvasserStep({
               onNext={onNext}
               backLabel={backLabel}
               nextLabel={nextLabel}
+              mobileLayout={navMobileLayout}
+              backVariant={backVariant}
               isLoading={isSubmitting}
               nextDisabled={nextDisabled}
             />

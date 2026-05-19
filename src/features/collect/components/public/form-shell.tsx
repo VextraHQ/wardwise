@@ -30,8 +30,8 @@ export function FormShell({
 
         {statusBanner}
         <div
-          className={`mx-auto flex w-full max-w-2xl flex-1 flex-col justify-start px-4 ${
-            statusBanner ? "pt-2 pb-4 sm:pt-4 sm:pb-8" : "py-4 sm:py-8"
+          className={`mx-auto flex w-full max-w-2xl flex-1 flex-col justify-start px-3 sm:px-4 ${
+            statusBanner ? "pt-2 pb-4 sm:pt-4 sm:pb-8" : "py-3 sm:py-8"
           }`}
         >
           {children}

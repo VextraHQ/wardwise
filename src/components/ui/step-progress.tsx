@@ -242,7 +242,7 @@ export function StepProgress({
   return (
     <div
       className={cn(
-        "mx-auto w-full space-y-4 rounded-sm transition-shadow duration-300",
+        "mx-auto w-full space-y-3 rounded-sm transition-shadow duration-300 sm:space-y-4",
         flashBar && "ring-destructive/40 ring-2",
         className,
       )}
@@ -250,9 +250,9 @@ export function StepProgress({
       <span className="sr-only" aria-live="polite" aria-atomic="true">
         {liveMessage}
       </span>
-      <div className="flex items-end justify-between px-0.5">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2.5">
+      <div className="flex items-end justify-between gap-3 px-0.5">
+        <div className="min-w-0 space-y-1">
+          <div className="flex items-center gap-2">
             {navigable && totalSteps > 1 ? (
               isMobile ? (
                 <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
@@ -260,7 +260,10 @@ export function StepProgress({
                     <button
                       type="button"
                       aria-label={`Step ${currentStep} of ${totalSteps}. Open navigation menu`}
-                      className={triggerClass}
+                      className={cn(
+                        triggerClass,
+                        "px-1.5 text-[10px] sm:px-2 sm:text-xs",
+                      )}
                     >
                       {triggerLabel}
                     </button>
@@ -322,7 +325,7 @@ export function StepProgress({
             ) : (
               <span
                 className={cn(
-                  "text-[11px] font-extrabold tracking-widest whitespace-nowrap uppercase sm:text-xs",
+                  "text-[10px] font-extrabold tracking-widest whitespace-nowrap uppercase sm:text-xs",
                   canvasser ? "text-amber-600" : "text-primary",
                 )}
               >
@@ -330,17 +333,17 @@ export function StepProgress({
               </span>
             )}
             <div className="bg-border h-3 w-px" />
-            <span className="text-muted-foreground text-[11px] font-bold tracking-widest whitespace-nowrap sm:text-xs">
+            <span className="text-muted-foreground text-[10px] font-bold tracking-widest whitespace-nowrap sm:text-xs">
               {contextLabel}
             </span>
           </div>
 
-          <h3 className="text-foreground text-sm font-bold tracking-widest uppercase">
+          <h3 className="text-foreground truncate text-[13px] font-bold tracking-widest uppercase sm:text-sm">
             {stepTitle}
           </h3>
         </div>
 
-        <div className="ml-2 shrink-0 text-right sm:ml-4">
+        <div className="shrink-0 text-right">
           <div className="flex items-center gap-1 opacity-70 grayscale sm:gap-1.5">
             <div className="bg-primary size-1 rounded-full" />
             <span className="text-muted-foreground font-mono text-xs font-bold tracking-tighter whitespace-nowrap uppercase italic">

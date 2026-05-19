@@ -902,7 +902,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
               if (targetScreen < screen) setScreen(targetScreen);
             }}
             validationFlashNonce={validationFlashNonce}
-            className="mb-6"
+            className="mb-4 sm:mb-6"
           />
         )}
 
@@ -931,8 +931,10 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             setOccupationMode={setOccupationMode}
             onBack={goBack}
             onNext={validateAndNext}
-            backLabel={isEditingFromReview ? "Return to review" : "Back"}
+            backLabel={isEditingFromReview ? "Cancel edit" : "Back"}
             nextLabel={isEditingFromReview ? "Save & return" : "Continue"}
+            navMobileLayout={isEditingFromReview ? "stacked" : "inline"}
+            backVariant="outline"
           />
         )}
 
@@ -954,8 +956,10 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             onRetry={geo.retryGeo}
             onBack={goBack}
             onNext={validateAndNext}
-            backLabel={isEditingFromReview ? "Return to review" : "Back"}
+            backLabel={isEditingFromReview ? "Cancel edit" : "Back"}
             nextLabel={isEditingFromReview ? "Save & return" : "Continue"}
+            navMobileLayout={isEditingFromReview ? "stacked" : "inline"}
+            backVariant="outline"
           />
         )}
 
@@ -975,8 +979,10 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
                 | "required"
                 | "optional"
             }
-            backLabel={isEditingFromReview ? "Return to review" : "Back"}
+            backLabel={isEditingFromReview ? "Cancel edit" : "Back"}
             nextLabel={isEditingFromReview ? "Save & return" : "Continue"}
+            navMobileLayout={isEditingFromReview ? "stacked" : "inline"}
+            backVariant="outline"
           />
         )}
 
@@ -989,12 +995,14 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
               (campaign.supportGroupFieldMode || "off") as "off" | "optional"
             }
             supportGroupFieldLabel={campaign.supportGroupFieldLabel}
-            backLabel={isEditingFromReview ? "Return to review" : "Back"}
+            backLabel={isEditingFromReview ? "Cancel edit" : "Back"}
             nextLabel={
               isEditingFromReview && skipCanvasserStep
                 ? "Save & return"
                 : "Continue"
             }
+            navMobileLayout={isEditingFromReview ? "stacked" : "inline"}
+            backVariant="outline"
           />
         )}
 
@@ -1011,8 +1019,10 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             submitError={submitMutation.error?.message}
             onBack={goBack}
             onNext={validateAndNext}
-            backLabel={isEditingFromReview ? "Return to review" : "Back"}
+            backLabel={isEditingFromReview ? "Cancel edit" : "Back"}
             nextLabel={isEditingFromReview ? "Save & return" : "Continue"}
+            navMobileLayout={isEditingFromReview ? "stacked" : "inline"}
+            backVariant="outline"
             nextDisabled={hasCanvasser === null}
             preloadedCanvassers={campaign.campaignCanvassers}
           />

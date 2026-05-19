@@ -88,6 +88,8 @@ export function NavButtons({
   onNext,
   backLabel = "Back",
   nextLabel = "Continue",
+  mobileLayout = "inline",
+  backVariant = "outline",
   nextDisabled = false,
   isLoading = false,
 }: {
@@ -95,18 +97,35 @@ export function NavButtons({
   onNext: () => void;
   backLabel?: string;
   nextLabel?: string;
+  mobileLayout?: "inline" | "stacked";
+  backVariant?: "outline" | "ghost";
   nextDisabled?: boolean;
   isLoading?: boolean;
 }) {
+  const stackedOnMobile = mobileLayout === "stacked";
+
   return (
-    <div className="flex w-full gap-3 sm:gap-4">
+    <div
+      className={cn(
+        "flex w-full gap-3 sm:gap-4",
+        stackedOnMobile ? "flex-col sm:flex-row" : "flex-row",
+      )}
+    >
       <Button
         type="button"
-        variant="outline"
+        variant={backVariant}
         onClick={onBack}
         disabled={isLoading}
         aria-label="Go back to previous step"
-        className="hover:bg-muted/10 h-12 min-h-12 shrink-0 rounded-sm px-4 text-[10px] font-bold tracking-widest uppercase sm:h-11 sm:min-h-0 sm:px-8 sm:text-xs"
+        className={cn(
+          "hover:bg-muted/10 h-12 min-h-12 shrink-0 rounded-sm px-4 text-[10px] font-bold tracking-widest uppercase sm:h-11 sm:min-h-0 sm:px-8 sm:text-xs",
+          stackedOnMobile
+            ? "order-2 w-full justify-center sm:order-1 sm:w-auto"
+            : "",
+          backVariant === "outline"
+            ? "text-muted-foreground hover:text-foreground px-2 shadow-none"
+            : "",
+        )}
       >
         <HiArrowLeft className="mr-2 h-4 w-4 shrink-0" />
         {backLabel}
@@ -116,7 +135,10 @@ export function NavButtons({
         onClick={onNext}
         disabled={nextDisabled || isLoading}
         aria-label={nextLabel}
-        className="bg-primary text-primary-foreground hover:bg-primary/95 h-12 min-h-12 min-w-0 flex-1 rounded-sm text-[10px] font-bold tracking-widest uppercase transition-all active:scale-95 sm:h-11 sm:min-h-0 sm:text-xs"
+        className={cn(
+          "bg-primary text-primary-foreground hover:bg-primary/95 h-12 min-h-12 min-w-0 flex-1 rounded-sm text-[10px] font-bold tracking-widest uppercase transition-all active:scale-95 sm:h-11 sm:min-h-0 sm:text-xs",
+          stackedOnMobile ? "order-1 w-full sm:order-2" : "",
+        )}
       >
         {isLoading ? (
           <>
@@ -196,7 +218,7 @@ export function StepCard({ children }: { children: React.ReactNode }) {
     <div className="border-border/60 bg-card relative overflow-hidden border shadow-[0_20px_40px_-12px_rgba(0,0,0,0.04)]">
       <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
       <div className="border-primary absolute top-0 right-0 size-5 border-t border-r" />
-      <div className="p-7 sm:p-10">{children}</div>
+      <div className="p-5 sm:p-10">{children}</div>
     </div>
   );
 }
@@ -214,9 +236,9 @@ export function CardSectionHeader({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="border-border/50 mb-6 flex items-center justify-between border-b pb-6">
+    <div className="border-border/50 mb-4 flex items-center justify-between border-b pb-4 sm:mb-6 sm:pb-6">
       <div className="space-y-1">
-        <h2 className="text-foreground text-lg font-bold tracking-tight uppercase">
+        <h2 className="text-foreground text-base font-bold tracking-tight uppercase sm:text-lg">
           {title}
         </h2>
         <div className="flex items-center gap-2">
@@ -227,7 +249,7 @@ export function CardSectionHeader({
           </p>
         </div>
       </div>
-      <div className="bg-primary/5 text-primary border-primary/20 flex size-9 items-center justify-center rounded-sm border">
+      <div className="bg-primary/5 text-primary border-primary/20 flex size-8 items-center justify-center rounded-sm border sm:size-9">
         {icon}
       </div>
     </div>

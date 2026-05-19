@@ -17,7 +17,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { titleCase } from "@/features/collect/lib/reporting";
+import { titleCase } from "@/features/collect/lib/display-format";
 
 const roleChartConfig: ChartConfig = {
   count: { label: "Supporters", color: "var(--chart-1)" },

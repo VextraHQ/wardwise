@@ -384,6 +384,7 @@ Goals:
 - give supporters one final calm summary
 - make receipt opt-in feel like a delivery preference, not a random side field
 - allow targeted edits without walking through every later step again
+- stay compact on phones, since the overwhelming majority of registrations are mobile
 
 Suggested interaction:
 
@@ -407,6 +408,12 @@ If a supporter taps `Edit` from review:
 - they are taken to the relevant step
 - the primary action becomes `Save & Return`
 - after validation, they jump straight back to review
+
+Mobile-first treatment:
+
+- normal steps keep the familiar back/continue side-by-side pattern
+- edit-from-review mode switches to a stacked mobile treatment with a dominant primary action while keeping the secondary `Cancel edit` control on the familiar outline back-button style
+- the review step itself collapses into compact summary sections on mobile instead of rendering the full desktop field grid or nested card-within-card panels
 
 Special case:
 
