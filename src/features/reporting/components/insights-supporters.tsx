@@ -45,13 +45,18 @@ import {
 } from "@/features/collect/components/public/form-ui";
 import { MobileBulkActionTray } from "@/components/ui/mobile-selection-actions";
 import { formatDisplayDateTime } from "@/lib/date-format";
-import { formatRole } from "@/features/collect/lib/reporting";
+import {
+  formatMaritalStatusDisplay,
+  formatOccupationDisplay,
+  formatRole,
+  formatSexDisplay,
+} from "@/features/collect/lib/display-format";
 import { InsightsExportMenu } from "./insights-export-menu";
 import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import { cn, formatPersonName } from "@/lib/utils";
 import { useCampaignReportSubmissions } from "@/features/reporting/hooks/use-campaign-report";
 import { useIsPortraitMobile } from "@/hooks/shared/use-mobile";
-import { SubmissionStatusBadge } from "@/features/reporting/lib/insights-helpers";
+import { SubmissionStatusBadge } from "@/features/reporting/components/ui/insights-helpers";
 import type { CampaignReportSubmission } from "@/features/reporting/types/campaign-report.types";
 
 const EMPTY_SUPPORTERS: CampaignReportSubmission[] = [];
@@ -581,7 +586,10 @@ export function InsightsSupporters({
                     label="Email"
                     value={selectedSubmission.email || "—"}
                   />
-                  <Field label="Sex" value={selectedSubmission.sex} />
+                  <Field
+                    label="Sex"
+                    value={formatSexDisplay(selectedSubmission.sex)}
+                  />
                   <Field
                     label="Age"
                     value={String(selectedSubmission.age)}
@@ -589,11 +597,15 @@ export function InsightsSupporters({
                   />
                   <Field
                     label="Occupation"
-                    value={selectedSubmission.occupation}
+                    value={formatOccupationDisplay(
+                      selectedSubmission.occupation,
+                    )}
                   />
                   <Field
                     label="Marital Status"
-                    value={selectedSubmission.maritalStatus}
+                    value={formatMaritalStatusDisplay(
+                      selectedSubmission.maritalStatus,
+                    )}
                   />
                 </Section>
 

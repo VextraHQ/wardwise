@@ -24,7 +24,7 @@
   - `prisma/seed-states-lgas.ts` — idempotent national LGA seed
   - `prisma/audit-geo.ts` — live-vs-canonical geo audit plus spreadsheet-escape artifact check
   - `scripts/sync_state_wards_pus.mjs` — official state ward/PU sync pipeline
-- Public form at `/c/[slug]`: 7-screen multi-step registration with localStorage persistence
+- Public form at `/c/[slug]`: 8-screen multi-step registration with localStorage persistence and a dedicated review step before submit
 - Admin: Campaign CRUD, submissions table with PU codes, CSV export, QR codes, canvasser aggregation
 - Admin sidebar: Dashboard → Candidates → Collect
 - Landing page: Collect section added between Security and CTA sections
@@ -41,13 +41,13 @@
 - **Admin canvassers table**: Added S/N column with consistent styling.
 - **Delete submission**: Full CRUD — admin can delete individual submissions via detail sheet (with confirmation dialog). API DELETE endpoint, hook, and API client added.
 - **Admin dashboard widget**: Added Collect Campaigns and Collect Registrations stat cards to main admin dashboard. Grid expanded to 5 columns.
-- **Campaign settings sync**: Removed identity/VIN field mode dropdowns (since both are always required now). Shows "Required" badges instead.
+- **Campaign settings sync**: Legacy identity/VIN requirement toggles were removed at this stage while the form was still strict-by-default. This was later superseded by Collect v3 `Form Configuration`.
 - **Campaign overview analytics**: Added cumulative registration trend line chart and top wards horizontal bar chart. New `getCumulativeRegistrations` and `getSubmissionsByWard` analytics helpers.
 
 ### What Changed (Hardening — Latest)
 
 - **Schema consolidation**: Campaign create/update schemas unified into `collect-schemas.ts` (single source of truth). Removed duplicate definitions from `admin-schemas.ts`.
-- **Dead config removal**: Removed `requireApcReg` and `requireVoterId` from Prisma schema, API routes, types, wizard, and settings UI. Membership / NIN and VIN are always required — no configurable option needed.
+- **Dead config removal**: Removed the old `requireApcReg` and `requireVoterId` booleans from Prisma schema, API routes, types, wizard, and settings UI. Collect v3 later reintroduced requirement control in the cleaner `identityRequirement` / `voterIdRequirement` model instead of those legacy flags.
 - **Settings UI cleanup**: Removed static "Field Requirements" card (non-actionable). Settings now shows: Status controls, Campaign Details, Danger Zone.
 - **VIN case normalization**: VIN is now uppercased via Zod `.transform()` before storage and duplicate checking. Prevents case-variant bypass of dedup.
 - **Geo name trust fix**: Submit route now derives `lgaName`, `wardName`, `pollingUnitName` from validated DB records instead of trusting client-provided names.
@@ -141,10 +141,29 @@
 
 - **Public step 3 is now clearer**: `Party Information` has been replaced by `Identity & Verification`, with an explicit choice between `Party Membership` and `National ID (NIN)`.
 - **Validation matches the chosen method**: when registrants choose `National ID`, the field enforces a real 11-digit NIN; when they choose `Party Membership`, the field accepts broader party-style membership IDs (letters, numbers, hyphens, slashes).
-- **VIN remains required**: the public form still requires VIN alongside the chosen identity detail for verification and duplicate prevention.
+- **VIN remained required at this stage**: later Collect v3 made VIN `required | optional` per campaign while preserving format validation and deduplication when provided.
 - **Neutral admin/export wording**: detail-sheet and export labels now use `Membership / NIN` instead of APC-specific wording.
 - **Canonical domain naming**: active Collect feature code and Prisma now use `identityValue` as the canonical field name. The physical database column remains mapped from the legacy `apcRegNumber` name for a controlled persistence transition.
 - **Hard cutover applied**: stale saved drafts and queued offline rows using old identity keys are no longer adapted. Incompatible drafts are discarded; incompatible queued rows fail with a clear re-entry message.
+
+### What Changed (Batch 14 — Review Step + Receipt Placement)
+
+- **Dedicated `Review & Submit` step**: the public form now ends with a real review screen before submission instead of submitting directly from the role/canvasser branch.
+- **Section-level edit links**: supporters can jump from review back to `Personal Details`, `Location`, `Verification`, `Role & Support`, or `Canvasser Referral`, then save and return straight to review instead of walking the remaining wizard steps again.
+- **Receipt opt-in moved to the final review stage**: the `Email me a registration confirmation` checkbox no longer lives in the role/canvasser step; it now appears in the review step where it reads like a final delivery preference.
+- **Edit cancellation is safe**: if a supporter starts editing from review and uses `Return to review`, the form restores the original reviewed values instead of leaving half-finished edits behind.
+- **Review-aware role branching**: editing the role step respects the canvasser skip logic. Changing into `canvasser` returns directly to review; changing into other roles routes through the canvasser referral step once, then returns to review.
+- **Mobile review is compressed on purpose**: mobile now uses compact review summary sections instead of the full desktop field grid, so supporters confirm the essentials without a long wall of stacked labels or nested card padding.
+- **Mobile edit actions stay familiar**: normal steps keep the back/continue side-by-side rhythm, while edit-from-review mode keeps the compact mobile layout but uses the same familiar outline back-button treatment for `Cancel edit` so the flow still feels consistent on small screens.
+- **Shared step chrome is lighter on mobile**: step headers, card padding, and progress spacing were tightened so the whole flow feels shorter and less top-heavy on phones.
+
+### What Changed (Collect v3 Phase 4 — Receipt Email)
+
+- **Campaign-level receipt mode**: `receiptEmailMode` on Campaign controls whether registration receipts are off or opt-in.
+- **Submission receipt tracking**: `wantsEmailReceipt` and `receiptEmailSentAt` are stored on CollectSubmission.
+- **Receipt visibility is honest**: the opt-in only appears when the campaign has receipt mode enabled, email transport is configured, and the supporter has entered a valid email address.
+- **Receipt content is privacy-safe**: the email includes campaign/candidate, reference code, location, role, and support group when present, but never full NIN or VIN.
+- **Receipt sending is non-blocking**: the registration still succeeds even if email delivery fails, and successful sends stamp `receiptEmailSentAt`.
 
 ### What Changed (Batch 11 — Reporting Date Filters)
 
@@ -157,8 +176,8 @@
 ### What Changed (Batch 2)
 
 - **LGA dropdown**: Shows only the campaign's `enabledLgaIds` (inherited from candidate's constituency boundary, or restricted subset).
-- **Identity field**: Membership / NIN stays required, and the public form now frames it as an explicit verification-method choice rather than APC-specific wording.
-- **VIN field**: Now required. Used for deduplication alongside phone number.
+- **Identity field**: at this stage Membership / NIN stayed required, and the public form reframed it as an explicit verification-method choice rather than APC-specific wording. Later Collect v3 made this campaign-configurable.
+- **VIN field**: at this stage VIN became required and was used for deduplication alongside phone number. Later Collect v3 made this campaign-configurable.
 - **Role options**: Volunteer / Member / Canvasser (3 options).
 - **Canvasser validation**: Both name and phone required when "Yes" selected.
 - **New Registration button**: Added to confirmation screen.
@@ -169,8 +188,8 @@
 ### What Is Pending
 
 - Official ward + polling unit sync for additional states beyond Adamawa (for example Bauchi)
-- Collect v3 form configuration rollout — campaign-level verification requirements, first-class support-group capture, and verification-aware reporting. See `docs/wardwise-collect-v3-form-configuration-spec.md`.
 - Future precision work for split-LGA constituencies lives in `docs/geo-canonical-seeding-plan.md`
+- Follow-up Collect refinements such as support-group saved filters, richer Top Groups analytics, and candidate-facing follow-up tooling remain optional product extensions rather than foundation work
 
 ## Locked Product Decisions
 
@@ -190,8 +209,10 @@
 
 ### Form Configuration
 
-- **Membership Number or NIN**: Required field. Registrants explicitly choose whether they are using a party membership number or a National Identification Number (NIN).
-- **VIN (Voter ID)**: Required field. Used for deduplication.
+- **Membership Number or NIN**: Per-campaign `required | optional`. Registrants explicitly choose whether they are using a party membership number or a National Identification Number (NIN).
+- **VIN (Voter ID)**: Per-campaign `required | optional`. Used for deduplication when provided.
+- **Support group / association**: Per-campaign `off | optional`, with an editable public label and normalized analytics key.
+- **Receipt email**: Per-campaign `off | opt_in`. Supporters only see the opt-in when a valid email is entered and transport is configured.
 - Custom Question 1 and Custom Question 2 are included in v1, stored per submission.
 
 ### Geography
@@ -244,10 +265,11 @@
 | 0      | Campaign splash → Begin Registration                                                                                                                                                     |
 | 1      | Personal details: first name, middle name?, last name, phone, email?, sex, age, occupation, marital status, custom questions                                                             |
 | 2      | Location: cascading LGA → Ward → Polling Unit (with INEC codes)                                                                                                                          |
-| 3      | Identity & Verification: choose `Party Membership` or `National ID (NIN)`, then enter the selected ID + VIN (required)                                                                   |
-| 4      | Role: Volunteer / Member / Canvasser (3 cards)                                                                                                                                           |
-| 5      | Canvasser: Yes/No toggle → name + phone if Yes (required when Yes)                                                                                                                       |
-| 6      | Confirmation: state-aware receipt (`confirmed`, `queued`, or `failed`), registration reference only after server acceptance, New Registration button, share actions only after confirmed |
+| 3      | Identity & Verification: choose `Party Membership` or `National ID (NIN)` when used, then enter the selected ID + VIN according to the campaign’s required/optional rules               |
+| 4      | Role & Support: Volunteer / Member / Canvasser (3 cards) + optional support group / association field when enabled                                                                       |
+| 5      | Canvasser: Yes/No toggle → name + phone if Yes (required when Yes, skipped when role is `canvasser`)                                                                                    |
+| 6      | Review & Submit: full summary with section-level `Edit`, review-safe `Save & return` editing loop, and optional receipt-email opt-in when available                                      |
+| 7      | Confirmation: state-aware receipt (`confirmed`, `queued`, or `failed`), registration reference only after server acceptance, New Registration button, share actions only after confirmed |
 
 ### Persistence
 
@@ -256,6 +278,7 @@
 - Completed submissions are still stored in the database, but splash no longer auto-personalizes the experience as a returning-user takeover.
 - Instead, same-device completion metadata is stored under `collect-submitted-${slug}` and used only for a subtle `Last registration on this device` utility card with the reference code.
 - Saved progress includes lightweight UI state needed to restore the flow accurately (for example canvasser yes/no choice and occupation input mode).
+- The review step remembers when a supporter is editing from review, so `Save & return` jumps straight back to the summary instead of forcing them through all later screens again.
 - The confirmation screen now also shows a copyable `Registration Reference` and explains that the campaign team will review and verify the registration.
 - Offline submissions are stored in IndexedDB until sync. Pending rows show an amber queued confirmation; successful sync removes the row and can flip to confirmed; permanent 4xx failures remain locally as failed rows for review/dismiss.
 - Active failed confirmations store a slug-scoped local pointer (`collect-active-failed-${slug}`) so reload can return to the same failed row while it still exists.

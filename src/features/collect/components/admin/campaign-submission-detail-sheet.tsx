@@ -24,6 +24,11 @@ import {
   formatPU,
   getSubmissionRefCode,
 } from "@/features/collect/lib/campaign-submissions";
+import {
+  formatMaritalStatusDisplay,
+  formatOccupationDisplay,
+  formatSexDisplay,
+} from "@/features/collect/lib/display-format";
 import { formatDisplayDateTime } from "@/lib/date-format";
 import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import { formatPersonName } from "@/lib/utils";
@@ -116,10 +121,16 @@ export function CampaignSubmissionDetailSheet({
             <div className="min-w-0 space-y-6 p-5">
               <Section label="Personal Identity">
                 <Field label="Email" value={selected.email || "—"} />
-                <Field label="Sex" value={selected.sex} />
+                <Field label="Sex" value={formatSexDisplay(selected.sex)} />
                 <Field label="Age" value={String(selected.age)} />
-                <Field label="Occupation" value={selected.occupation} />
-                <Field label="Marital Status" value={selected.maritalStatus} />
+                <Field
+                  label="Occupation"
+                  value={formatOccupationDisplay(selected.occupation)}
+                />
+                <Field
+                  label="Marital Status"
+                  value={formatMaritalStatusDisplay(selected.maritalStatus)}
+                />
               </Section>
 
               <Section label="Location Data">

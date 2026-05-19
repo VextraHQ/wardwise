@@ -10,7 +10,7 @@ import {
 } from "@/features/collect/lib/branding";
 import { IconCopy, IconExternalLink } from "@tabler/icons-react";
 import { toast } from "sonner";
-import { STATUS_STYLES } from "@/features/reporting/lib/insights-helpers";
+import { STATUS_STYLES } from "@/features/reporting/components/ui/insights-helpers";
 
 export function InsightsHero({
   campaign,

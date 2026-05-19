@@ -44,6 +44,10 @@ export function PartyInfoStep({
   onNext,
   identityRequirement = "required",
   voterIdRequirement = "required",
+  backLabel = "Back",
+  nextLabel = "Continue",
+  navMobileLayout = "inline",
+  backVariant = "outline",
 }: {
   party: string;
   form: UseFormReturn<RegistrationFormData>;
@@ -51,6 +55,10 @@ export function PartyInfoStep({
   onNext: () => void;
   identityRequirement?: "required" | "optional";
   voterIdRequirement?: "required" | "optional";
+  backLabel?: string;
+  nextLabel?: string;
+  navMobileLayout?: "inline" | "stacked";
+  backVariant?: "outline" | "ghost";
 }) {
   const {
     register,
@@ -237,7 +245,14 @@ export function PartyInfoStep({
             </div>
 
             <Separator />
-            <NavButtons onBack={onBack} onNext={onNext} />
+            <NavButtons
+              onBack={onBack}
+              onNext={onNext}
+              backLabel={backLabel}
+              nextLabel={nextLabel}
+              mobileLayout={navMobileLayout}
+              backVariant={backVariant}
+            />
           </div>
         </StepCard>
       </motion.div>

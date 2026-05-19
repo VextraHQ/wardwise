@@ -1,6 +1,6 @@
 import type { RegistrationFormData } from "@/features/collect/schemas/collect-schemas";
 
-export const COLLECT_TOTAL_SCREENS = 7; // 0=splash, 1-5=input, 6=confirmation
+export const COLLECT_TOTAL_SCREENS = 8; // 0=splash, 1-6=input, 7=confirmation
 export const COLLECT_CONFIRMATION_SCREEN = COLLECT_TOTAL_SCREENS - 1;
 export const COLLECT_LAST_INPUT_SCREEN = COLLECT_TOTAL_SCREENS - 2;
 
@@ -11,6 +11,7 @@ export const COLLECT_STEP_TITLES = [
   "Identity & Verification",
   "Your Role",
   "Canvasser",
+  "Review & Submit",
   "Confirmation",
 ] as const;
 
@@ -21,6 +22,7 @@ export const COLLECT_STEP_KEYS = [
   "identity_verification",
   "role",
   "canvasser",
+  "review_submit",
   "confirmation",
 ] as const;
 
@@ -47,6 +49,7 @@ const SCREEN_FIELD_MAP: Record<number, (keyof RegistrationFormData)[]> = {
   3: ["identityType", "identityValue", "voterIdNumber"],
   4: ["role", "supportGroupName"],
   5: ["canvasserName", "canvasserPhone"],
+  6: ["wantsEmailReceipt"],
 };
 
 export function getCollectScreenFields(screen: number) {
@@ -62,10 +65,27 @@ export function getCollectProgressCurrentStep(
 
 export function getCollectProgressStepTitles(skipCanvasserStep: boolean) {
   return skipCanvasserStep
-    ? COLLECT_STEP_TITLES.slice(1, 5)
-    : COLLECT_STEP_TITLES.slice(1, 6);
+    ? [
+        COLLECT_STEP_TITLES[1],
+        COLLECT_STEP_TITLES[2],
+        COLLECT_STEP_TITLES[3],
+        COLLECT_STEP_TITLES[4],
+        COLLECT_STEP_TITLES[6],
+      ]
+    : COLLECT_STEP_TITLES.slice(1, 7);
 }
 
 export function getCollectProgressTotalSteps(skipCanvasserStep: boolean) {
   return COLLECT_LAST_INPUT_SCREEN - (skipCanvasserStep ? 1 : 0);
+}
+
+export function getCollectScreenFromProgressStep(
+  index: number,
+  skipCanvasserStep: boolean,
+) {
+  if (!skipCanvasserStep) {
+    return index + 1;
+  }
+
+  return index >= 4 ? index + 2 : index + 1;
 }

@@ -12,7 +12,6 @@ import type { UseFormReturn } from "react-hook-form";
 import type { RegistrationFormData } from "@/features/collect/schemas/collect-schemas";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { RegistrationStepHeader } from "@/features/collect/components/public/registration-step-header";
@@ -58,7 +57,10 @@ export function RoleStep({
   submitError,
   supportGroupFieldMode = "off",
   supportGroupFieldLabel,
-  showReceiptOptIn = false,
+  backLabel = "Back",
+  nextLabel = "Continue",
+  navMobileLayout = "inline",
+  backVariant = "outline",
 }: {
   form: UseFormReturn<RegistrationFormData>;
   onBack: () => void;
@@ -67,7 +69,10 @@ export function RoleStep({
   submitError?: string;
   supportGroupFieldMode?: "off" | "optional";
   supportGroupFieldLabel?: string | null;
-  showReceiptOptIn?: boolean;
+  backLabel?: string;
+  nextLabel?: string;
+  navMobileLayout?: "inline" | "stacked";
+  backVariant?: "outline" | "ghost";
 }) {
   const {
     register,
@@ -76,7 +81,6 @@ export function RoleStep({
     formState: { errors },
   } = form;
   const selectedRole = watch("role");
-  const wantsEmailReceipt = watch("wantsEmailReceipt");
 
   const showSupportGroup = supportGroupFieldMode === "optional";
   const groupLabel =
@@ -166,41 +170,14 @@ export function RoleStep({
               </>
             )}
 
-            {showReceiptOptIn && (
-              <>
-                <Separator />
-                <label className="flex cursor-pointer items-start gap-3">
-                  <Checkbox
-                    checked={Boolean(wantsEmailReceipt)}
-                    onCheckedChange={(checked) =>
-                      setValue("wantsEmailReceipt", Boolean(checked), {
-                        shouldDirty: true,
-                      })
-                    }
-                    className="mt-0.5 shrink-0"
-                  />
-                  <div className="space-y-0.5">
-                    <p className="text-foreground text-sm font-medium leading-snug">
-                      Email me a registration confirmation
-                    </p>
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                      A summary will be sent to your email address after
-                      submission.
-                    </p>
-                  </div>
-                </label>
-              </>
-            )}
-
             <Separator />
             <NavButtons
               onBack={onBack}
               onNext={onNext}
-              nextLabel={
-                selectedRole === "canvasser"
-                  ? "Submit registration"
-                  : "Continue"
-              }
+              backLabel={backLabel}
+              nextLabel={nextLabel}
+              mobileLayout={navMobileLayout}
+              backVariant={backVariant}
               isLoading={isSubmitting}
             />
 

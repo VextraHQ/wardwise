@@ -54,6 +54,10 @@ export function PersonalDetailsStep({
   setOccupationMode,
   onBack,
   onNext,
+  backLabel = "Back",
+  nextLabel = "Continue",
+  navMobileLayout = "inline",
+  backVariant = "outline",
 }: {
   form: UseFormReturn<RegistrationFormData>;
   campaign: PublicCampaign;
@@ -61,6 +65,10 @@ export function PersonalDetailsStep({
   setOccupationMode: (mode: "select" | "custom") => void;
   onBack: () => void;
   onNext: () => void;
+  backLabel?: string;
+  nextLabel?: string;
+  navMobileLayout?: "inline" | "stacked";
+  backVariant?: "outline" | "ghost";
 }) {
   const {
     register,
@@ -386,7 +394,14 @@ export function PersonalDetailsStep({
             )}
 
             <Separator />
-            <NavButtons onBack={onBack} onNext={onNext} />
+            <NavButtons
+              onBack={onBack}
+              onNext={onNext}
+              backLabel={backLabel}
+              nextLabel={nextLabel}
+              mobileLayout={navMobileLayout}
+              backVariant={backVariant}
+            />
           </div>
         </StepCard>
       </motion.div>

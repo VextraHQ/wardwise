@@ -11,6 +11,7 @@ import {
   Text,
 } from "@react-email/components";
 import { render } from "@react-email/render";
+import { formatRole } from "@/features/collect/lib/display-format";
 import { EmailBrandHeader } from "@/lib/email/components/email-brand-header";
 import { EmailStandardFooter } from "@/lib/email/components/email-standard-footer";
 
@@ -40,10 +41,6 @@ function formatSubmittedAt(date: Date): string {
     timeStyle: "short",
     timeZone: "Africa/Lagos",
   }).format(date);
-}
-
-function formatRole(role: string): string {
-  return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
 export function RegistrationReceiptTemplate({

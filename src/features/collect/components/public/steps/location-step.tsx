@@ -44,6 +44,10 @@ export function LocationStep({
   onRetry,
   onBack,
   onNext,
+  backLabel = "Back",
+  nextLabel = "Continue",
+  navMobileLayout = "inline",
+  backVariant = "outline",
 }: {
   form: UseFormReturn<RegistrationFormData>;
   lgas: GeoLga[];
@@ -61,6 +65,10 @@ export function LocationStep({
   onRetry?: () => void;
   onBack: () => void;
   onNext: () => void;
+  backLabel?: string;
+  nextLabel?: string;
+  navMobileLayout?: "inline" | "stacked";
+  backVariant?: "outline" | "ghost";
 }) {
   const {
     setValue,
@@ -143,7 +151,15 @@ export function LocationStep({
                 {blockBody}
               </p>
               <Separator className="my-4" />
-              <NavButtons onBack={onBack} onNext={onNext} nextDisabled />
+              <NavButtons
+                onBack={onBack}
+                onNext={onNext}
+                backLabel={backLabel}
+                nextLabel={nextLabel}
+                mobileLayout={navMobileLayout}
+                backVariant={backVariant}
+                nextDisabled
+              />
             </div>
           </StepCard>
         </motion.div>
@@ -281,7 +297,14 @@ export function LocationStep({
             </div>
 
             <Separator />
-            <NavButtons onBack={onBack} onNext={onNext} />
+            <NavButtons
+              onBack={onBack}
+              onNext={onNext}
+              backLabel={backLabel}
+              nextLabel={nextLabel}
+              mobileLayout={navMobileLayout}
+              backVariant={backVariant}
+            />
           </div>
         </StepCard>
       </motion.div>
