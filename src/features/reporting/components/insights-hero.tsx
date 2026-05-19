@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { capitalize } from "@/features/collect/lib/reporting";
+import { capitalize, timeAgo } from "@/features/collect/lib/reporting";
 import type { CampaignBrandingType } from "@/features/collect/lib/branding";
 import {
   getEffectiveCampaignName,
@@ -15,6 +15,9 @@ import { STATUS_STYLES } from "@/features/reporting/components/ui/insights-helpe
 export function InsightsHero({
   campaign,
   total,
+  verifiedRate,
+  lastSubmissionAt,
+  activeScopeLabel,
 }: {
   campaign: {
     candidateName: string;
@@ -29,6 +32,9 @@ export function InsightsHero({
     enabledLgaCount: number;
   };
   total: number;
+  verifiedRate: number;
+  lastSubmissionAt: string | null;
+  activeScopeLabel: string;
 }) {
   const formUrl =
     typeof window !== "undefined"
@@ -36,6 +42,20 @@ export function InsightsHero({
       : "";
   const campaignName = getEffectiveCampaignName(campaign);
   const showCandidateTitle = shouldShowCandidateTitle(campaign);
+  const quickFacts = [
+    {
+      label: "Verified",
+      value: `${verifiedRate}%`,
+    },
+    {
+      label: "Last activity",
+      value: lastSubmissionAt ? timeAgo(lastSubmissionAt) : "No activity yet",
+    },
+    {
+      label: "Scope",
+      value: activeScopeLabel,
+    },
+  ];
 
   const handleCopyFormLink = async () => {
     try {
@@ -53,7 +73,7 @@ export function InsightsHero({
 
   return (
     <Card className="border-border/60 overflow-hidden rounded-sm shadow-none">
-      <CardContent className="space-y-4 sm:space-y-0">
+      <CardContent className="space-y-4">
         {/* Mobile: big number first, then identity */}
         <div className="border-border/60 flex flex-wrap items-start justify-between gap-3 border-b pb-4 sm:hidden">
           <div>
@@ -151,6 +171,22 @@ export function InsightsHero({
               {total.toLocaleString()}
             </p>
           </div>
+        </div>
+
+        <div className="border-border/60 grid gap-2 border-t pt-4 sm:grid-cols-3">
+          {quickFacts.map((fact) => (
+            <div
+              key={fact.label}
+              className="bg-muted/20 border-border/50 rounded-sm border px-3 py-2.5"
+            >
+              <p className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
+                {fact.label}
+              </p>
+              <p className="text-foreground mt-1 text-sm font-semibold">
+                {fact.value}
+              </p>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

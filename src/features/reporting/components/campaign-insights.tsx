@@ -9,6 +9,7 @@ import { InsightsSupporters } from "./insights-supporters";
 import { InsightsMomentum } from "./insights-momentum";
 import { InsightsGeography } from "./insights-geography";
 import { InsightsBreakdown } from "./insights-breakdown";
+import { InsightsQuality } from "./insights-quality";
 import { CampaignInsightsHeader } from "./campaign-insights-header";
 import { InsightsOverview, ReadyToCollectState } from "./insights-overview";
 import {
@@ -169,7 +170,13 @@ export function CampaignInsights({ token }: { token: string }) {
 
   return (
     <div className="space-y-4">
-      <InsightsHero campaign={summary.campaign} total={allTimeTotal} />
+      <InsightsHero
+        campaign={summary.campaign}
+        total={allTimeTotal}
+        verifiedRate={verifiedRate}
+        lastSubmissionAt={summary.health.lastSubmissionAt}
+        activeScopeLabel={scope.activeScopeLabel}
+      />
 
       <Tabs defaultValue="overview" className="space-y-5">
         <CampaignInsightsHeader
@@ -192,6 +199,8 @@ export function CampaignInsights({ token }: { token: string }) {
             isEmpty={isEmpty}
             recentWindowCount={recentWindowCount}
             verifiedRate={verifiedRate}
+            activeScopeLabel={scope.activeScopeLabel}
+            hasCompare={scope.effectiveCompareOn && Boolean(priorSummary)}
           />
         </TabsContent>
 
@@ -222,6 +231,18 @@ export function CampaignInsights({ token }: { token: string }) {
                     : undefined
                 }
                 periodLabel={momentumLabel}
+              />
+              <InsightsQuality
+                total={summary.stats.total}
+                verified={summary.stats.verified}
+                withVin={summary.stats.withVin}
+                withIdentity={summary.stats.withIdentity}
+                withBoth={summary.stats.withBoth}
+                withSupportGroup={summary.stats.withSupportGroup}
+                byGroup={summary.stats.byGroup}
+                showGroupStats={
+                  (summary.campaign.supportGroupFieldMode ?? "off") !== "off"
+                }
               />
               <InsightsGeography
                 byLga={summary.stats.byLga}

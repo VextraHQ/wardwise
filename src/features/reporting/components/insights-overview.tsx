@@ -73,6 +73,197 @@ function OverviewPanel({
   );
 }
 
+function BriefingCard({
+  total,
+  verified,
+  withBoth,
+  withSupportGroup,
+  showGroupStats,
+  deltas,
+  activeScopeLabel,
+  hasCompare,
+}: {
+  total: number;
+  verified: number;
+  withBoth: number;
+  withSupportGroup: number;
+  showGroupStats: boolean;
+  deltas?: {
+    total: CampaignReportDelta | null;
+    verified: CampaignReportDelta | null;
+    flagged: CampaignReportDelta | null;
+  };
+  activeScopeLabel: string;
+  hasCompare: boolean;
+}) {
+  const verifiedRate = getVerificationRate(total, verified);
+  const supportGroupRate =
+    total > 0 ? Math.round((withSupportGroup / total) * 100) : 0;
+  const fullyReadyRate = total > 0 ? Math.round((withBoth / total) * 100) : 0;
+
+  const lead = hasCompare
+    ? deltas?.total
+      ? `Supporter capture is ${deltas.total.positive ? "up" : "down"} ${deltas.total.value} compared with the prior period.`
+      : `This view is stable versus the prior period.`
+    : `${total.toLocaleString()} supporters are currently visible in ${activeScopeLabel.toLowerCase()}.`;
+
+  const verificationStory =
+    verifiedRate >= 70
+      ? `Verification coverage is strong at ${verifiedRate}%, giving the campaign a cleaner supporter picture.`
+      : verifiedRate >= 40
+        ? `Verification coverage is building at ${verifiedRate}%, with room to deepen supporter profiles over time.`
+        : `Verification coverage is still light at ${verifiedRate}%, so this view is strongest for reach and momentum rather than deep profile detail.`;
+
+  const supportGroupStory = showGroupStats
+    ? supportGroupRate > 0
+      ? `${supportGroupRate}% of supporters are tagged to a support group so far, giving the campaign a clearer picture of organized support.`
+      : "Support-group tagging is available here, but this view does not have tagged supporters yet."
+    : `${fullyReadyRate}% of supporters in this view are fully verification-ready with both identity and VIN.`;
+
+  const signals = [
+    {
+      label: "Supporters",
+      value: total.toLocaleString(),
+      detail:
+        hasCompare && deltas?.total ? deltas.total.value : activeScopeLabel,
+    },
+    {
+      label: "Verified",
+      value: verified.toLocaleString(),
+      detail:
+        hasCompare && deltas?.verified
+          ? deltas.verified.value
+          : `${verifiedRate}% of total`,
+    },
+    {
+      label: "Both details shared",
+      value: withBoth.toLocaleString(),
+      detail: `${fullyReadyRate}% shared VIN and NIN/membership`,
+    },
+    ...(showGroupStats
+      ? [
+          {
+            label: "Group tagged",
+            value: withSupportGroup.toLocaleString(),
+            detail: `${supportGroupRate}% linked to a support group`,
+          },
+        ]
+      : [
+          {
+            label: "Coverage depth",
+            value: `${fullyReadyRate}%`,
+            detail: "shared both VIN and NIN/membership",
+          },
+        ]),
+  ];
+
+  return (
+    <OverviewPanel title={hasCompare ? "What Changed" : "Current Picture"}>
+      <div className="space-y-3">
+        <div className="bg-muted/20 border-border/60 rounded-sm border px-3 py-3">
+          <p className="text-foreground text-sm font-semibold leading-relaxed">
+            {lead}
+          </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {signals.map((signal) => (
+            <div
+              key={signal.label}
+              className="border-border/60 rounded-sm border border-dashed px-3 py-3"
+            >
+              <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                {signal.label}
+              </p>
+              <p className="text-foreground mt-2 font-mono text-lg font-semibold tabular-nums">
+                {signal.value}
+              </p>
+              <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+                {signal.detail}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-2">
+          {[verificationStory, supportGroupStory].map((story) => (
+            <div
+              key={story}
+              className="border-border/60 flex items-start gap-3 rounded-sm border px-3 py-2.5"
+            >
+              <div className="bg-primary/10 text-primary mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-sm">
+                <IconSparkles className="h-3.5 w-3.5" />
+              </div>
+              <p className="text-foreground text-sm leading-relaxed">{story}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </OverviewPanel>
+  );
+}
+
+function VerificationSnapshotCard({
+  total,
+  withVin,
+  withIdentity,
+  withBoth,
+}: {
+  total: number;
+  withVin: number;
+  withIdentity: number;
+  withBoth: number;
+}) {
+  const missingVin = Math.max(total - withVin, 0);
+  const metrics = [
+    {
+      label: "VIN Shared",
+      value: withVin.toLocaleString(),
+      subtitle: `${total > 0 ? Math.round((withVin / total) * 100) : 0}%`,
+    },
+    {
+      label: "VIN Missing",
+      value: missingVin.toLocaleString(),
+      subtitle: `${total > 0 ? Math.round((missingVin / total) * 100) : 0}%`,
+    },
+    {
+      label: "NIN / Membership",
+      value: withIdentity.toLocaleString(),
+      subtitle: `${total > 0 ? Math.round((withIdentity / total) * 100) : 0}%`,
+    },
+    {
+      label: "Both Shared",
+      value: withBoth.toLocaleString(),
+      subtitle: `${total > 0 ? Math.round((withBoth / total) * 100) : 0}%`,
+    },
+  ];
+
+  return (
+    <OverviewPanel title="Verification Coverage">
+      <div className="space-y-4">
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          A quick look at how much verification detail supporters shared in this
+          view.
+        </p>
+
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {metrics.map((item) => (
+            <div key={item.label} className="space-y-1">
+              <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                {item.label}
+              </p>
+              <p className="text-foreground font-mono text-lg font-semibold tabular-nums">
+                {item.value}
+              </p>
+              <p className="text-muted-foreground text-xs">{item.subtitle}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </OverviewPanel>
+  );
+}
+
 function StatsGrid({
   total,
   verified,
@@ -522,6 +713,8 @@ type InsightsOverviewProps = {
   isEmpty: boolean;
   recentWindowCount: number;
   verifiedRate: number;
+  activeScopeLabel: string;
+  hasCompare: boolean;
 };
 
 export function InsightsOverview({
@@ -535,6 +728,8 @@ export function InsightsOverview({
   isEmpty,
   recentWindowCount,
   verifiedRate,
+  activeScopeLabel,
+  hasCompare,
 }: InsightsOverviewProps) {
   if (isEmpty) {
     return (
@@ -547,10 +742,6 @@ export function InsightsOverview({
     );
   }
 
-  const { total, withVin, withIdentity, withBoth, withSupportGroup, byGroup } =
-    summary.stats;
-  const pct = (n: number) =>
-    total > 0 ? `${Math.round((n / total) * 100)}%` : "—";
   const showGroupStats =
     (summary.campaign.supportGroupFieldMode ?? "off") !== "off";
 
@@ -564,81 +755,27 @@ export function InsightsOverview({
         deltas={deltas}
       />
 
-      {/* Verification Coverage */}
-      <OverviewPanel title="Verification Coverage">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {[
-            {
-              label: "With VIN",
-              value: withVin.toLocaleString(),
-              sub: pct(withVin),
-            },
-            {
-              label: "Missing VIN",
-              value: (total - withVin).toLocaleString(),
-              sub: pct(total - withVin),
-            },
-            {
-              label: "With Identity",
-              value: withIdentity.toLocaleString(),
-              sub: pct(withIdentity),
-            },
-            {
-              label: "With Both",
-              value: withBoth.toLocaleString(),
-              sub: pct(withBoth),
-            },
-          ].map((item) => (
-            <div key={item.label} className="space-y-1">
-              <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-                {item.label}
-              </p>
-              <p className="font-mono text-lg font-semibold tabular-nums">
-                {item.value}
-              </p>
-              <p className="text-muted-foreground text-xs">{item.sub}</p>
-            </div>
-          ))}
-        </div>
-      </OverviewPanel>
-
-      {/* Support Group Capture — only shown when field is enabled */}
-      {showGroupStats && (
-        <OverviewPanel title="Support Groups">
-          <div className="space-y-4">
-            <div className="flex items-baseline gap-3">
-              <span className="font-mono text-2xl font-semibold tabular-nums">
-                {withSupportGroup.toLocaleString()}
-              </span>
-              <span className="text-muted-foreground text-sm">
-                supporters with a group ({pct(withSupportGroup)} capture rate)
-              </span>
-            </div>
-            {byGroup.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-                  Top Groups
-                </p>
-                <div className="space-y-1.5">
-                  {byGroup.slice(0, 5).map((g, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between gap-4 text-sm"
-                    >
-                      <span className="truncate font-medium">{g.group}</span>
-                      <span className="text-muted-foreground shrink-0 font-mono text-xs tabular-nums">
-                        {g.count.toLocaleString()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </OverviewPanel>
-      )}
-
       <div className="space-y-6">
+        <BriefingCard
+          total={summary.stats.total}
+          verified={summary.stats.verified}
+          withBoth={summary.stats.withBoth}
+          withSupportGroup={summary.stats.withSupportGroup}
+          showGroupStats={showGroupStats}
+          deltas={deltas}
+          activeScopeLabel={activeScopeLabel}
+          hasCompare={hasCompare}
+        />
+
+        <VerificationSnapshotCard
+          total={summary.stats.total}
+          withVin={summary.stats.withVin}
+          withIdentity={summary.stats.withIdentity}
+          withBoth={summary.stats.withBoth}
+        />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <NowCard
           formStatus={summary.health.formStatus}
           lastSubmissionAt={summary.health.lastSubmissionAt}
@@ -651,7 +788,9 @@ export function InsightsOverview({
           byLga={summary.stats.byLga}
           byWard={summary.stats.byWard}
         />
+      </div>
 
+      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <FieldTeamPerformanceCard health={summary.health} />
 
         <RecentActivityCard
@@ -664,15 +803,15 @@ export function InsightsOverview({
               : undefined
           }
         />
-
-        <ShareInviteCard
-          campaignSlug={summary.campaign.slug}
-          campaignName={campaignName}
-          party={summary.campaign.party}
-          constituency={summary.campaign.constituency}
-          qrSize={180}
-        />
       </div>
+
+      <ShareInviteCard
+        campaignSlug={summary.campaign.slug}
+        campaignName={campaignName}
+        party={summary.campaign.party}
+        constituency={summary.campaign.constituency}
+        qrSize={180}
+      />
     </>
   );
 }

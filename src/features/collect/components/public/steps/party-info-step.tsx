@@ -5,6 +5,7 @@ import { ClipboardList, Fingerprint } from "lucide-react";
 import { motion } from "motion/react";
 import type { UseFormReturn } from "react-hook-form";
 import type { RegistrationFormData } from "@/features/collect/schemas/collect-schemas";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -83,6 +84,14 @@ export function PartyInfoStep({
   const identityOptional = identityRequirement === "optional";
   const vinOptional = voterIdRequirement === "optional";
 
+  function clearIdentitySelection() {
+    setValue("identityType", undefined as unknown as "membership" | "nin", {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setValue("identityValue", "", { shouldValidate: true });
+  }
+
   return (
     <div className="space-y-6">
       <RegistrationStepHeader
@@ -156,26 +165,24 @@ export function PartyInfoStep({
                   );
                 })}
               </div>
-              {/* Error and escape link share one row — no extra vertical space */}
-              <div className="flex min-h-4 items-center justify-between gap-2">
-                <FieldError error={errors.identityType?.message} />
-                {identityOptional && identityType && (
-                  <button
+              <FieldError error={errors.identityType?.message} />
+              {identityOptional && identityType && (
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-muted-foreground min-w-0 text-xs leading-snug">
+                    Rather skip verification?
+                  </p>
+                  <Button
                     type="button"
-                    onClick={() => {
-                      setValue(
-                        "identityType",
-                        undefined as unknown as "membership" | "nin",
-                        { shouldDirty: true, shouldValidate: true },
-                      );
-                      setValue("identityValue", "", { shouldValidate: true });
-                    }}
-                    className="text-muted-foreground hover:text-foreground ml-auto shrink-0 text-xs underline underline-offset-2 transition-colors"
+                    variant="outline"
+                    size="sm"
+                    onClick={clearIdentitySelection}
+                    aria-label="Skip verification and leave this section blank"
+                    className="border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/10 h-7 shrink-0 rounded-sm px-2.5 text-xs font-medium shadow-none"
                   >
                     Leave blank instead
-                  </button>
-                )}
-              </div>
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="space-y-1.5">
