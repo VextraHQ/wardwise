@@ -54,6 +54,8 @@ export function PersonalDetailsStep({
   setOccupationMode,
   onBack,
   onNext,
+  backLabel = "Back",
+  nextLabel = "Continue",
 }: {
   form: UseFormReturn<RegistrationFormData>;
   campaign: PublicCampaign;
@@ -61,6 +63,8 @@ export function PersonalDetailsStep({
   setOccupationMode: (mode: "select" | "custom") => void;
   onBack: () => void;
   onNext: () => void;
+  backLabel?: string;
+  nextLabel?: string;
 }) {
   const {
     register,
@@ -386,7 +390,12 @@ export function PersonalDetailsStep({
             )}
 
             <Separator />
-            <NavButtons onBack={onBack} onNext={onNext} />
+            <NavButtons
+              onBack={onBack}
+              onNext={onNext}
+              backLabel={backLabel}
+              nextLabel={nextLabel}
+            />
           </div>
         </StepCard>
       </motion.div>

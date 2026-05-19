@@ -42,6 +42,7 @@ import {
   COLLECT_STEP_TITLES,
   COLLECT_TOTAL_SCREENS,
   getCollectProgressCurrentStep,
+  getCollectScreenFromProgressStep,
   getCollectProgressStepTitles,
   getCollectProgressTotalSteps,
   getCollectScreenFields,
@@ -57,12 +58,19 @@ import { LocationStep } from "@/features/collect/components/public/steps/locatio
 import { PartyInfoStep } from "@/features/collect/components/public/steps/party-info-step";
 import { RoleStep } from "@/features/collect/components/public/steps/role-step";
 import { CanvasserStep } from "@/features/collect/components/public/steps/canvasser-step";
+import { ReviewStep } from "@/features/collect/components/public/steps/review-step";
 import { CollectConnectivityBanner } from "@/features/collect/components/public/collect-connectivity-banner";
 import { FailedReviewSheet } from "@/features/collect/components/public/failed-review-sheet";
 import { OfflinePrepSheet } from "@/features/collect/components/public/offline-prep-sheet";
 import { ConfirmationScreen } from "@/features/collect/components/public/steps/confirmation-screen";
 
 type Props = { initialCampaign: PublicCampaign };
+
+type ReviewEditSnapshot = {
+  values: RegistrationFormData;
+  hasCanvasser: boolean | null;
+  occupationMode: "select" | "custom";
+};
 
 function createCollectDefaultValues({
   prefilledCanvasserName,
@@ -136,6 +144,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   const [validationFlashNonce, setValidationFlashNonce] = useState(0);
   const [failedReviewOpen, setFailedReviewOpen] = useState(false);
   const [offlinePrepOpen, setOfflinePrepOpen] = useState(false);
+  const [returnToReview, setReturnToReview] = useState(false);
 
   const offlineGeo = useCollectOfflineGeo(campaign);
 
@@ -252,6 +261,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   const wardId = useWatch({ control: form.control, name: "wardId" });
   const skipLocationResetRef = useRef(false);
   const lastTrackedStepRef = useRef<string | null>(null);
+  const reviewEditSnapshotRef = useRef<ReviewEditSnapshot | null>(null);
 
   // Holds pending location values that need to be re-applied once query data loads
   const pendingRestoreRef = useRef<{
@@ -396,6 +406,14 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     typeof emailValue === "string" &&
     emailValue.includes("@") &&
     emailValue.length > 3;
+  const isEditingFromReview =
+    returnToReview && screen > 0 && screen < COLLECT_LAST_INPUT_SCREEN;
+
+  useEffect(() => {
+    if (!showReceiptOptIn) {
+      setValue("wantsEmailReceipt", false, { shouldDirty: false });
+    }
+  }, [setValue, showReceiptOptIn]);
 
   useEffect(() => {
     if (screen <= 0 || screen >= COLLECT_CONFIRMATION_SCREEN) return;
@@ -469,6 +487,8 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
         }
         showConfirmedSubmission(result.submission.id, result.count);
         clearProgress();
+        setReturnToReview(false);
+        reviewEditSnapshotRef.current = null;
         track("collect_submission_succeeded", {
           ...submissionProperties,
           submission_source: "online",
@@ -572,8 +592,49 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     setHasCanvasser(prefilledCanvasserName ? true : null);
     setCanvasserStepError("");
     setOccupationMode("select");
+    setReturnToReview(false);
+    reviewEditSnapshotRef.current = null;
     lastTrackedStepRef.current = null;
     clearProgress();
+  };
+
+  const beginReviewEdit = (targetScreen: number) => {
+    reviewEditSnapshotRef.current = {
+      values: form.getValues(),
+      hasCanvasser,
+      occupationMode,
+    };
+    setReturnToReview(true);
+    setScreen(targetScreen);
+  };
+
+  const finishReviewEdit = (targetScreen = COLLECT_LAST_INPUT_SCREEN) => {
+    setReturnToReview(false);
+    reviewEditSnapshotRef.current = null;
+    setScreen(targetScreen);
+  };
+
+  const cancelReviewEdit = () => {
+    const snapshot = reviewEditSnapshotRef.current;
+    if (snapshot) {
+      skipLocationResetRef.current = true;
+      pendingRestoreRef.current = {
+        wardId: snapshot.values.wardId,
+        wardName: snapshot.values.wardName,
+        pollingUnitId: snapshot.values.pollingUnitId,
+        pollingUnitName: snapshot.values.pollingUnitName,
+      };
+      form.reset(snapshot.values);
+      setHasCanvasser(snapshot.hasCanvasser);
+      setOccupationMode(snapshot.occupationMode);
+      window.setTimeout(() => {
+        skipLocationResetRef.current = false;
+      }, 0);
+    }
+    setCanvasserStepError("");
+    setReturnToReview(false);
+    reviewEditSnapshotRef.current = null;
+    setScreen(COLLECT_LAST_INPUT_SCREEN);
   };
 
   const handleCopyLastReference = async () => {
@@ -654,6 +715,11 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       }
     }
 
+    if (returnToReview && (screen === 1 || screen === 2 || screen === 3)) {
+      finishReviewEdit();
+      return;
+    }
+
     // Canvasser validation: if "Yes" selected, require both name and phone
     if (screen === 5) {
       setCanvasserStepError("");
@@ -690,14 +756,28 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
           return;
         }
       }
+
+      if (returnToReview) {
+        finishReviewEdit();
+        return;
+      }
     }
 
-    // Role step: if role is "canvasser", skip canvasser step and submit directly
+    // Role step: if role is "canvasser", skip canvasser step and go straight to review
     if (screen === 4 && skipCanvasserStep) {
       setHasCanvasser(false);
       setValue("canvasserName", "");
       setValue("canvasserPhone", "");
-      doSubmit();
+      if (returnToReview) {
+        finishReviewEdit();
+        return;
+      }
+      setScreen(COLLECT_LAST_INPUT_SCREEN);
+      return;
+    }
+
+    if (screen === 4 && returnToReview) {
+      setScreen(5);
       return;
     }
 
@@ -712,8 +792,11 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
 
   const goBack = () => {
     if (screen > 0) {
-      // Skip canvasser step when going back from confirmation
-      if (screen === COLLECT_CONFIRMATION_SCREEN && skipCanvasserStep) {
+      if (isEditingFromReview) {
+        cancelReviewEdit();
+        return;
+      }
+      if (screen === COLLECT_LAST_INPUT_SCREEN && skipCanvasserStep) {
         setScreen(4); // go back to role step
         return;
       }
@@ -732,6 +815,8 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       has_prefilled_canvasser: Boolean(prefilledCanvasserName),
     });
     lastTrackedStepRef.current = null;
+    setReturnToReview(false);
+    reviewEditSnapshotRef.current = null;
     setScreen(1);
   };
 
@@ -749,6 +834,8 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       has_saved_progress: hasSavedProgress,
     });
     lastTrackedStepRef.current = null;
+    setReturnToReview(false);
+    reviewEditSnapshotRef.current = null;
     restoreProgress();
   };
 
@@ -805,10 +892,13 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             stepTitles={getCollectProgressStepTitles(skipCanvasserStep)}
             onStepClick={(index) => {
               // StepProgress only invokes this for completed segments.
-              // Step index is 0-based over the progress-bar slice; +1 maps
-              // it back to the form's screen index (since screen 0 is the
-              // splash which the bar never represents).
-              const targetScreen = index + 1;
+              // Step index is 0-based over the progress-bar slice. We map it
+              // back to the actual screen index, collapsing the canvasser step
+              // when the selected role skips it.
+              const targetScreen = getCollectScreenFromProgressStep(
+                index,
+                skipCanvasserStep,
+              );
               if (targetScreen < screen) setScreen(targetScreen);
             }}
             validationFlashNonce={validationFlashNonce}
@@ -841,6 +931,8 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             setOccupationMode={setOccupationMode}
             onBack={goBack}
             onNext={validateAndNext}
+            backLabel={isEditingFromReview ? "Return to review" : "Back"}
+            nextLabel={isEditingFromReview ? "Save & return" : "Continue"}
           />
         )}
 
@@ -862,6 +954,8 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             onRetry={geo.retryGeo}
             onBack={goBack}
             onNext={validateAndNext}
+            backLabel={isEditingFromReview ? "Return to review" : "Back"}
+            nextLabel={isEditingFromReview ? "Save & return" : "Continue"}
           />
         )}
 
@@ -881,6 +975,8 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
                 | "required"
                 | "optional"
             }
+            backLabel={isEditingFromReview ? "Return to review" : "Back"}
+            nextLabel={isEditingFromReview ? "Save & return" : "Continue"}
           />
         )}
 
@@ -889,15 +985,16 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             form={form}
             onBack={goBack}
             onNext={validateAndNext}
-            isSubmitting={skipCanvasserStep && submitMutation.isPending}
-            submitError={
-              skipCanvasserStep ? submitMutation.error?.message : undefined
-            }
             supportGroupFieldMode={
               (campaign.supportGroupFieldMode || "off") as "off" | "optional"
             }
             supportGroupFieldLabel={campaign.supportGroupFieldLabel}
-            showReceiptOptIn={skipCanvasserStep && showReceiptOptIn}
+            backLabel={isEditingFromReview ? "Return to review" : "Back"}
+            nextLabel={
+              isEditingFromReview && skipCanvasserStep
+                ? "Save & return"
+                : "Continue"
+            }
           />
         )}
 
@@ -914,9 +1011,24 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             submitError={submitMutation.error?.message}
             onBack={goBack}
             onNext={validateAndNext}
+            backLabel={isEditingFromReview ? "Return to review" : "Back"}
+            nextLabel={isEditingFromReview ? "Save & return" : "Continue"}
             nextDisabled={hasCanvasser === null}
             preloadedCanvassers={campaign.campaignCanvassers}
+          />
+        )}
+
+        {screen === COLLECT_LAST_INPUT_SCREEN && (
+          <ReviewStep
+            campaign={campaign}
+            form={form}
+            hasCanvasser={hasCanvasser}
+            onBack={goBack}
+            onSubmit={validateAndNext}
+            onEditStep={beginReviewEdit}
             showReceiptOptIn={showReceiptOptIn}
+            isSubmitting={submitMutation.isPending}
+            submitError={submitMutation.error?.message}
           />
         )}
 

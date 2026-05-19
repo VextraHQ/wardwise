@@ -193,7 +193,7 @@ export function makeScreen3Schema(config: {
     });
 }
 
-// Screen 4: Role + optional support group + optional receipt opt-in
+// Screen 4: Role + optional support group
 export const screen4Schema = z.object({
   role: z.enum(["volunteer", "member", "canvasser"], {
     message: "Please select a role",
@@ -203,7 +203,6 @@ export const screen4Schema = z.object({
     .optional()
     .or(z.literal(""))
     .transform((v) => v?.trim() || ""),
-  wantsEmailReceipt: z.boolean().optional(),
 });
 
 // Screen 5: Canvasser attribution
@@ -214,6 +213,11 @@ export const screen5Schema = z.object({
     .optional()
     .or(z.literal("")),
   canvasserPhone: optionalNigerianPhoneSchema,
+});
+
+// Screen 6: Review preferences
+export const screen6Schema = z.object({
+  wantsEmailReceipt: z.boolean().optional(),
 });
 
 // Custom questions
@@ -228,6 +232,7 @@ export const submitRegistrationSchema = screen1Schema
   .merge(screen3Schema)
   .merge(screen4Schema)
   .merge(screen5Schema)
+  .merge(screen6Schema)
   .merge(customQuestionsSchema)
   .superRefine((data, ctx) => {
     const result = validateIdentityValue(data.identityValue, data.identityType);
@@ -251,6 +256,7 @@ export function makeSubmitRegistrationSchema(config: {
     .merge(makeScreen3Schema(config))
     .merge(screen4Schema)
     .merge(screen5Schema)
+    .merge(screen6Schema)
     .merge(customQuestionsSchema);
 }
 
@@ -369,10 +375,10 @@ export const serverSubmitSchema = screen1Schema
   .merge(serverIdentitySchema)
   .merge(screen4Schema)
   .merge(screen5Schema)
+  .merge(screen6Schema)
   .merge(customQuestionsSchema)
   .extend({
     campaignSlug: z.string().min(1),
-    wantsEmailReceipt: z.boolean().optional(),
   });
 
 // ── Admin submission moderation (PATCH) ──

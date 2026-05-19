@@ -44,6 +44,8 @@ export function PartyInfoStep({
   onNext,
   identityRequirement = "required",
   voterIdRequirement = "required",
+  backLabel = "Back",
+  nextLabel = "Continue",
 }: {
   party: string;
   form: UseFormReturn<RegistrationFormData>;
@@ -51,6 +53,8 @@ export function PartyInfoStep({
   onNext: () => void;
   identityRequirement?: "required" | "optional";
   voterIdRequirement?: "required" | "optional";
+  backLabel?: string;
+  nextLabel?: string;
 }) {
   const {
     register,
@@ -237,7 +241,12 @@ export function PartyInfoStep({
             </div>
 
             <Separator />
-            <NavButtons onBack={onBack} onNext={onNext} />
+            <NavButtons
+              onBack={onBack}
+              onNext={onNext}
+              backLabel={backLabel}
+              nextLabel={nextLabel}
+            />
           </div>
         </StepCard>
       </motion.div>

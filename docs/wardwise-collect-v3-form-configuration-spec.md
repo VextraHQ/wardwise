@@ -1,19 +1,19 @@
 # WardWise Collect v3 — Form Configuration + Verification Intelligence Spec
 
 > Focused implementation spec for campaign-level form configuration, support-group capture, and verification-aware reporting.
-> Last updated: 2026-05-18
+> Last updated: 2026-05-19
 > See also: `wardwise-collect-spec.md` (v1 canonical), `wardwise-collect-v2-spec.md`, `campaign-insights-spec.md`, `auth-system-spec.md`
 
 ---
 
 ## Status
 
-- **Shipped** — all Phase 1–3 scope implemented on `develop`
+- **Shipped** — all Phase 1–4 scope implemented
 - **Direction chosen** — verification requirements move to per-campaign form configuration ✓
 - **Direction chosen** — support-group capture becomes a first-class campaign field, not a generic custom question ✓
 - **Direction chosen** — active campaigns can be updated in place; the public slug/link stays the same ✓
 - **Direction chosen** — optional verification fields improve submission accessibility, while reporting makes missing verification visible ✓
-- **Phase 4 (email receipt)** — not implemented in this pass; campaign schema reserves `receiptEmailMode` for future use
+- **Shipped** — opt-in registration receipt email now lives on the final review step, gated by campaign setting + valid email + configured transport
 
 ---
 
@@ -147,6 +147,15 @@ Role
 Support group / association [Optional]
 [ ________________________ ]
 
+Public Step 5
+--------------------------------------------------
+Review & Submit
+
+- full summary before submit
+- section-level Edit actions
+- "Save & Return" flow when editing from review
+- optional receipt email checkbox when available
+
 Admin / Campaign Insights
 --------------------------------------------------
 Supporters Table
@@ -191,7 +200,6 @@ Overview / Analytics
 - support-group filters
 - “missing verification” quick filters
 - richer Top Groups charts
-- opt-in registration receipt email
 - possible admin-defined support-group options for cleaner analytics
 
 ---
@@ -206,8 +214,7 @@ Add:
 - `voterIdRequirement` — `"required" | "optional"`
 - `supportGroupFieldMode` — `"off" | "optional"`
 - `supportGroupFieldLabel` — `String?`
-- later:
-  - `receiptEmailMode` — `"off" | "opt_in"`
+- `receiptEmailMode` — `"off" | "opt_in"`
 
 ### CollectSubmission
 
@@ -216,9 +223,8 @@ Add:
 - `identityType` — `"membership" | "nin" | null`
 - `supportGroupName` — `String?`
 - `supportGroupKey` — `String?`
-- later:
-  - `wantsEmailReceipt` — `Boolean @default(false)`
-  - `receiptEmailSentAt` — `DateTime?`
+- `wantsEmailReceipt` — `Boolean @default(false)`
+- `receiptEmailSentAt` — `DateTime?`
 
 ### Important note
 
@@ -368,6 +374,47 @@ Role
 Support group / association [Optional]
 [ ________________________ ]
 ```
+
+### Step 5 — Review & Submit
+
+The public form now ends with a dedicated review step before the confirmation screen.
+
+Goals:
+
+- give supporters one final calm summary
+- make receipt opt-in feel like a delivery preference, not a random side field
+- allow targeted edits without walking through every later step again
+
+Suggested interaction:
+
+```text
+Review & Submit
+
+Personal Details      [ Edit ]
+Location              [ Edit ]
+Verification          [ Edit ]
+Role & Support        [ Edit ]
+Canvasser Referral    [ Edit ]
+Receipt Email         [ Optional checkbox when available ]
+
+[ Back ] [ Submit Registration ]
+```
+
+### Edit and return behavior
+
+If a supporter taps `Edit` from review:
+
+- they are taken to the relevant step
+- the primary action becomes `Save & Return`
+- after validation, they jump straight back to review
+
+Special case:
+
+- editing `Role & Support` may still route through the canvasser referral step when the selected role requires it
+
+Safety rule:
+
+- if the supporter exits an edit via `Return to review`, the previously reviewed snapshot is restored so half-finished edits do not leak back into the summary
 
 ### Why not use custom questions here?
 
@@ -731,10 +778,13 @@ Handling:
 
 ### Phase 4 — Optional email receipt
 
-- campaign setting
-- public opt-in
-- transactional template
-- offline sync delivery behavior
+Implemented:
+
+- campaign setting via `receiptEmailMode`
+- public opt-in on the review step
+- transactional registration receipt template
+- delivery only when email is valid, campaign mode is enabled, and transport is configured
+- offline-compatible behavior: queued submissions send the receipt only after a successful sync
 
 ---
 
