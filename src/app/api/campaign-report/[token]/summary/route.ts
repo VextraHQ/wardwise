@@ -49,6 +49,7 @@ export async function GET(request: Request, { params }: RouteParams) {
         slug: campaign.slug,
         status: campaign.status,
         enabledLgaCount: campaign.enabledLgaIds.length,
+        supportGroupFieldMode: campaign.supportGroupFieldMode,
       },
       stats,
       health,

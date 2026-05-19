@@ -22,6 +22,17 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { track } from "@/lib/analytics/client";
 import {
@@ -86,6 +97,24 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
     useState<Campaign["brandingType"]>("candidate");
   const [displayName, setDisplayName] = useState("");
 
+  // Form configuration state
+  const [identityRequirement, setIdentityRequirement] = useState<
+    "required" | "optional"
+  >("required");
+  const [voterIdRequirement, setVoterIdRequirement] = useState<
+    "required" | "optional"
+  >("required");
+  const [supportGroupFieldMode, setSupportGroupFieldMode] = useState<
+    "off" | "optional"
+  >("off");
+  const [supportGroupFieldLabel, setSupportGroupFieldLabel] = useState("");
+  const [receiptEmailMode, setReceiptEmailMode] = useState<"off" | "opt_in">(
+    "off",
+  );
+  const [stricterConfirmPending, setStricterConfirmPending] = useState<
+    (() => void) | null
+  >(null);
+
   const submissionCount = campaign?._count?.submissions ?? 0;
 
   // Client report derived state
@@ -129,6 +158,19 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
     if (!campaign) return;
     setBrandingType(campaign.brandingType);
     setDisplayName(campaign.displayName ?? "");
+    setIdentityRequirement(
+      (campaign.identityRequirement as "required" | "optional") ?? "required",
+    );
+    setVoterIdRequirement(
+      (campaign.voterIdRequirement as "required" | "optional") ?? "required",
+    );
+    setSupportGroupFieldMode(
+      (campaign.supportGroupFieldMode as "off" | "optional") ?? "off",
+    );
+    setSupportGroupFieldLabel(campaign.supportGroupFieldLabel ?? "");
+    setReceiptEmailMode(
+      (campaign.receiptEmailMode as "off" | "opt_in") ?? "off",
+    );
   }, [campaign]);
 
   if (isLoading || !campaign) {
@@ -281,6 +323,56 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
     }
   };
 
+  const formConfigDirty =
+    identityRequirement !== (campaign.identityRequirement ?? "required") ||
+    voterIdRequirement !== (campaign.voterIdRequirement ?? "required") ||
+    supportGroupFieldMode !== (campaign.supportGroupFieldMode ?? "off") ||
+    supportGroupFieldLabel !== (campaign.supportGroupFieldLabel ?? "") ||
+    receiptEmailMode !== (campaign.receiptEmailMode ?? "off");
+
+  const doSaveFormConfig = () => {
+    updateMutation.mutate(
+      {
+        identityRequirement,
+        voterIdRequirement,
+        supportGroupFieldMode,
+        supportGroupFieldLabel: supportGroupFieldLabel.trim() || null,
+        receiptEmailMode,
+      },
+      {
+        onSuccess: () => {
+          track("admin_campaign_updated", {
+            action: "form_config_updated",
+            campaign_id: campaignId,
+          });
+          toast.success("Form configuration saved");
+        },
+        onError: (e) => toast.error(e.message),
+      },
+    );
+  };
+
+  const handleSaveFormConfig = () => {
+    if (campaign.status !== "active") {
+      doSaveFormConfig();
+      return;
+    }
+    // Warn when making an active form stricter
+    const wasIdentityRequired =
+      (campaign.identityRequirement ?? "required") === "required";
+    const wasVinRequired =
+      (campaign.voterIdRequirement ?? "required") === "required";
+    const makingStricter =
+      (!wasIdentityRequired && identityRequirement === "required") ||
+      (!wasVinRequired && voterIdRequirement === "required");
+
+    if (makingStricter) {
+      setStricterConfirmPending(() => doSaveFormConfig);
+    } else {
+      doSaveFormConfig();
+    }
+  };
+
   const campaignName = getCampaignDisplayHeadline(campaign);
   const brandingDirty =
     brandingType !== campaign.brandingType ||
@@ -312,7 +404,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-3">
       {/* Status Control */}
       <Card className="border-border/60 bg-card rounded-sm shadow-none">
         <CardHeader className="border-border/50 border-b">
@@ -906,6 +998,244 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
           )}
         </CardContent>
       </Card>
+
+      {/* Form Configuration */}
+      <Card className="border-border/60 bg-card rounded-sm shadow-none">
+        <CardHeader className="border-border/50 border-b">
+          <CardTitle className="text-sm font-semibold tracking-tight">
+            Form configuration
+          </CardTitle>
+          <CardDescription className="text-muted-foreground mt-1 text-sm leading-relaxed">
+            Control what supporters are asked to provide when they register.
+            Optional fields reduce friction but may increase manual review
+            later.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          {/* Verification Requirements */}
+          <div className="space-y-4">
+            <Label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+              Verification requirements
+            </Label>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+              <div className="min-w-0 space-y-0.5">
+                <p className="text-sm font-medium">Membership / NIN</p>
+                <p className="text-muted-foreground text-xs">
+                  Party membership or National ID
+                </p>
+              </div>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                value={identityRequirement}
+                onValueChange={(v) => {
+                  if (v) setIdentityRequirement(v as "required" | "optional");
+                }}
+                className="grid w-full grid-cols-2 rounded-sm shadow-none! sm:flex sm:w-auto sm:shrink-0"
+              >
+                <ToggleGroupItem
+                  value="required"
+                  className="h-9 flex-1 rounded-none px-3 font-mono text-[10px] font-bold tracking-widest uppercase first:rounded-l-sm last:rounded-r-sm sm:h-8 sm:flex-initial"
+                >
+                  Required
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="optional"
+                  className="h-9 flex-1 rounded-none px-3 font-mono text-[10px] font-bold tracking-widest uppercase first:rounded-l-sm last:rounded-r-sm sm:h-8 sm:flex-initial"
+                >
+                  Optional
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+              <div className="min-w-0 space-y-0.5">
+                <p className="text-sm font-medium">Voter ID (VIN)</p>
+                <p className="text-muted-foreground text-xs">
+                  INEC Voter ID from the PVC
+                </p>
+              </div>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                value={voterIdRequirement}
+                onValueChange={(v) => {
+                  if (v) setVoterIdRequirement(v as "required" | "optional");
+                }}
+                className="grid w-full grid-cols-2 rounded-sm shadow-none! sm:flex sm:w-auto sm:shrink-0"
+              >
+                <ToggleGroupItem
+                  value="required"
+                  className="h-9 flex-1 rounded-none px-3 font-mono text-[10px] font-bold tracking-widest uppercase first:rounded-l-sm last:rounded-r-sm sm:h-8 sm:flex-initial"
+                >
+                  Required
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="optional"
+                  className="h-9 flex-1 rounded-none px-3 font-mono text-[10px] font-bold tracking-widest uppercase first:rounded-l-sm last:rounded-r-sm sm:h-8 sm:flex-initial"
+                >
+                  Optional
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Support Network */}
+          <div className="space-y-4">
+            <Label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+              Support network
+            </Label>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+              <div className="min-w-0 space-y-0.5">
+                <p className="text-sm font-medium">Support group field</p>
+                <p className="text-muted-foreground text-xs">
+                  Ask supporters for a group or association name
+                </p>
+              </div>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                value={supportGroupFieldMode}
+                onValueChange={(v) => {
+                  if (v) setSupportGroupFieldMode(v as "off" | "optional");
+                }}
+                className="grid w-full grid-cols-2 rounded-sm shadow-none! sm:flex sm:w-auto sm:shrink-0"
+              >
+                <ToggleGroupItem
+                  value="off"
+                  className="h-9 flex-1 rounded-none px-3 font-mono text-[10px] font-bold tracking-widest uppercase first:rounded-l-sm last:rounded-r-sm sm:h-8 sm:flex-initial"
+                >
+                  Off
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="optional"
+                  className="h-9 flex-1 rounded-none px-3 font-mono text-[10px] font-bold tracking-widest uppercase first:rounded-l-sm last:rounded-r-sm sm:h-8 sm:flex-initial"
+                >
+                  Optional
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+
+            {supportGroupFieldMode === "optional" && (
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="support-group-label"
+                  className="text-muted-foreground text-xs font-medium tracking-wider uppercase"
+                >
+                  Public label
+                </Label>
+                <Input
+                  id="support-group-label"
+                  value={supportGroupFieldLabel}
+                  onChange={(e) => setSupportGroupFieldLabel(e.target.value)}
+                  placeholder="Support group / association"
+                  maxLength={100}
+                  className="w-full max-w-md text-sm sm:max-w-xs"
+                />
+                <p className="text-muted-foreground text-xs">
+                  Shown to supporters on the registration form
+                </p>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Receipt Email */}
+          <div className="space-y-4">
+            <Label className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+              Registration receipt
+            </Label>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+              <div className="min-w-0 space-y-0.5">
+                <p className="text-sm font-medium">Email receipt opt-in</p>
+                <p className="text-muted-foreground text-xs">
+                  Let supporters opt in to a confirmation email at submission
+                </p>
+              </div>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                value={receiptEmailMode}
+                onValueChange={(v) => {
+                  if (v) setReceiptEmailMode(v as "off" | "opt_in");
+                }}
+                className="grid w-full grid-cols-2 rounded-sm shadow-none! sm:flex sm:w-auto sm:shrink-0"
+              >
+                <ToggleGroupItem
+                  value="off"
+                  className="h-9 flex-1 rounded-none px-3 font-mono text-[10px] font-bold tracking-widest uppercase first:rounded-l-sm last:rounded-r-sm sm:h-8 sm:flex-initial"
+                >
+                  Off
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="opt_in"
+                  className="h-9 flex-1 rounded-none px-3 font-mono text-[10px] font-bold tracking-widest uppercase first:rounded-l-sm last:rounded-r-sm sm:h-8 sm:flex-initial"
+                >
+                  Opt-in
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+            {receiptEmailMode === "opt_in" && (
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                Shown on the public form only when outbound email is configured.
+                Confirmation covers registration summary — not NIN or VIN.
+              </p>
+            )}
+          </div>
+
+          <div className="border-border/40 flex items-center justify-end gap-3 border-t pt-4">
+            <Button
+              size="sm"
+              className="rounded-sm font-mono text-[11px] tracking-widest uppercase"
+              onClick={handleSaveFormConfig}
+              disabled={updateMutation.isPending || !formConfigDirty}
+            >
+              {updateMutation.isPending ? (
+                <Spinner className="mr-1.5 size-3.5" />
+              ) : null}
+              Save configuration
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Confirmation dialog for making active form stricter */}
+      <AlertDialog
+        open={stricterConfirmPending !== null}
+        onOpenChange={(open) => {
+          if (!open) setStricterConfirmPending(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Make this active form stricter?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are making this active form stricter. People who have already
+              started filling it in may need to complete the new required fields
+              before their registration can be submitted. Offline queued
+              registrations may also fail if they are missing the newly required
+              data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                stricterConfirmPending?.();
+                setStricterConfirmPending(null);
+              }}
+            >
+              Yes, make it stricter
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Danger Zone */}
       <Card className="border-destructive/25 bg-destructive/5 dark:border-destructive/35 dark:bg-destructive/10 rounded-sm border shadow-none">

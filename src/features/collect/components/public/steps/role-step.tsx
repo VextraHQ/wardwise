@@ -6,15 +6,22 @@ import {
   HiClipboardList,
   HiShieldCheck,
 } from "react-icons/hi";
+import { UsersRound } from "lucide-react";
 import { motion } from "motion/react";
 import type { UseFormReturn } from "react-hook-form";
 import type { RegistrationFormData } from "@/features/collect/schemas/collect-schemas";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { RegistrationStepHeader } from "@/features/collect/components/public/registration-step-header";
 import {
   CollectMobilePrivacyNote,
+  FieldLabel,
+  FieldHint,
   FieldError,
+  InputIcon,
   NavButtons,
   SubmitError,
   StepCard,
@@ -49,25 +56,41 @@ export function RoleStep({
   onNext,
   isSubmitting = false,
   submitError,
+  supportGroupFieldMode = "off",
+  supportGroupFieldLabel,
+  showReceiptOptIn = false,
 }: {
   form: UseFormReturn<RegistrationFormData>;
   onBack: () => void;
   onNext: () => void;
   isSubmitting?: boolean;
   submitError?: string;
+  supportGroupFieldMode?: "off" | "optional";
+  supportGroupFieldLabel?: string | null;
+  showReceiptOptIn?: boolean;
 }) {
   const {
+    register,
     setValue,
     watch,
     formState: { errors },
   } = form;
   const selectedRole = watch("role");
+  const wantsEmailReceipt = watch("wantsEmailReceipt");
+
+  const showSupportGroup = supportGroupFieldMode === "optional";
+  const groupLabel =
+    supportGroupFieldLabel?.trim() || "Support group / association";
 
   return (
     <div className="space-y-6">
       <RegistrationStepHeader
-        title="Choose Your Role"
-        description="Select how you'd like to contribute to the campaign"
+        title={showSupportGroup ? "Role & Support Network" : "Choose Your Role"}
+        description={
+          showSupportGroup
+            ? "Select your role and let us know if you're affiliated with a group or association."
+            : "Select how you'd like to contribute to the campaign"
+        }
       />
 
       <motion.div
@@ -108,8 +131,66 @@ export function RoleStep({
                   </button>
                 );
               })}
+              <FieldError error={errors.role?.message} />
             </div>
-            <FieldError error={errors.role?.message} />
+
+            {showSupportGroup && (
+              <>
+                <Separator />
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <FieldLabel>{groupLabel}</FieldLabel>
+                    <Badge
+                      variant="outline"
+                      className="text-muted-foreground border-border/60 rounded-sm px-1.5 py-0 text-[10px] font-medium"
+                    >
+                      Optional
+                    </Badge>
+                  </div>
+                  <div className="relative">
+                    <InputIcon>
+                      <UsersRound className="text-muted-foreground size-3.5" />
+                    </InputIcon>
+                    <Input
+                      {...register("supportGroupName")}
+                      placeholder={`e.g. Youth Wing, Women's Forum`}
+                      maxLength={100}
+                      className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 transition-all placeholder:text-xs"
+                    />
+                  </div>
+                  <FieldHint>
+                    Enter the name of any group, association, or network you
+                    represent. Leave blank if none.
+                  </FieldHint>
+                </div>
+              </>
+            )}
+
+            {showReceiptOptIn && (
+              <>
+                <Separator />
+                <label className="flex cursor-pointer items-start gap-3">
+                  <Checkbox
+                    checked={Boolean(wantsEmailReceipt)}
+                    onCheckedChange={(checked) =>
+                      setValue("wantsEmailReceipt", Boolean(checked), {
+                        shouldDirty: true,
+                      })
+                    }
+                    className="mt-0.5 shrink-0"
+                  />
+                  <div className="space-y-0.5">
+                    <p className="text-foreground text-sm font-medium leading-snug">
+                      Email me a registration confirmation
+                    </p>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      A summary will be sent to your email address after
+                      submission.
+                    </p>
+                  </div>
+                </label>
+              </>
+            )}
 
             <Separator />
             <NavButtons

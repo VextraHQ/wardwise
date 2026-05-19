@@ -35,6 +35,17 @@ export type BulkSubmissionActionInput = {
 
 // Helpers
 
+// Typed error from a public collect API call — carries `reason` for client routing.
+export class CollectApiError extends Error {
+  constructor(
+    message: string,
+    public readonly reason?: string,
+  ) {
+    super(message);
+    this.name = "CollectApiError";
+  }
+}
+
 // Used for API calls that don't need to be admin/authenticated
 async function publicApiCall<T>(
   endpoint: string,
@@ -57,7 +68,7 @@ async function publicApiCall<T>(
       typeof firstDetail === "string" && firstDetail.length > 0
         ? `${error.error || "Validation failed"}: ${firstDetail}`
         : error.error || `Error: ${response.statusText}`;
-    throw new Error(message);
+    throw new CollectApiError(message, error.reason as string | undefined);
   }
   return response.json();
 }

@@ -2,7 +2,7 @@
 
 > Living document. Update as features are built or priorities shift.
 > Last updated: 2026-04-21
-> See also: `wardwise-collect-spec.md` (v1), `wardwise-hardening-spec.md`, `collect-admin-export-plan.md`
+> See also: `wardwise-collect-spec.md` (v1), `wardwise-collect-v3-form-configuration-spec.md`, `wardwise-hardening-spec.md`, `collect-admin-export-plan.md`
 
 ## Status
 

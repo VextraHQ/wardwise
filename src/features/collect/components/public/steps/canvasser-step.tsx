@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import type { UseFormReturn } from "react-hook-form";
 import type { RegistrationFormData } from "@/features/collect/schemas/collect-schemas";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   ComboboxSelect,
   type ComboboxSelectOption,
@@ -39,6 +40,7 @@ export function CanvasserStep({
   onNext,
   nextDisabled,
   preloadedCanvassers = [],
+  showReceiptOptIn = false,
 }: {
   form: UseFormReturn<RegistrationFormData>;
   hasCanvasser: boolean | null;
@@ -50,6 +52,7 @@ export function CanvasserStep({
   onNext: () => void;
   nextDisabled?: boolean;
   preloadedCanvassers?: PreloadedCanvasser[];
+  showReceiptOptIn?: boolean;
 }) {
   const {
     register,
@@ -58,6 +61,7 @@ export function CanvasserStep({
     clearErrors,
     formState: { errors },
   } = form;
+  const wantsEmailReceipt = watch("wantsEmailReceipt");
 
   const hasPreloaded = preloadedCanvassers.length > 0;
   const currentCanvasserName = watch("canvasserName")?.trim();
@@ -259,6 +263,32 @@ export function CanvasserStep({
                   <FieldError error={errors.canvasserPhone?.message} />
                 </div>
               </div>
+            )}
+
+            {showReceiptOptIn && (
+              <>
+                <Separator />
+                <label className="flex cursor-pointer items-start gap-3">
+                  <Checkbox
+                    checked={Boolean(wantsEmailReceipt)}
+                    onCheckedChange={(checked) =>
+                      setValue("wantsEmailReceipt", Boolean(checked), {
+                        shouldDirty: true,
+                      })
+                    }
+                    className="mt-0.5 shrink-0"
+                  />
+                  <div className="space-y-0.5">
+                    <p className="text-foreground text-sm font-medium leading-snug">
+                      Email me a registration confirmation
+                    </p>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      A summary will be sent to your email address after
+                      submission.
+                    </p>
+                  </div>
+                </label>
+              </>
             )}
 
             <Separator />

@@ -16,6 +16,11 @@ export type Campaign = {
   customQuestion1: string | null;
   customQuestion2: string | null;
   status: string; // "draft" | "active" | "paused" | "closed"
+  identityRequirement: string; // "required" | "optional"
+  voterIdRequirement: string; // "required" | "optional"
+  supportGroupFieldMode: string; // "off" | "optional"
+  supportGroupFieldLabel: string | null;
+  receiptEmailMode: string; // "off" | "opt_in"
   clientReportEnabled: boolean;
   clientReportToken: string | null;
   clientReportLastViewedAt: string | null;
@@ -55,7 +60,10 @@ export type CollectSubmission = {
   pollingUnitId: number | null;
   pollingUnitName: string;
   identityValue: string | null;
+  identityType: string | null; // "membership" | "nin" | null
   voterIdNumber: string | null;
+  supportGroupName: string | null;
+  supportGroupKey: string | null;
   isVerified: boolean;
   role: string; // "volunteer" | "member" | "canvasser"
   customAnswer1: string | null;
@@ -82,6 +90,12 @@ export type PublicCampaign = {
   customQuestion1: string | null;
   customQuestion2: string | null;
   status: string;
+  identityRequirement: string; // "required" | "optional"
+  voterIdRequirement: string; // "required" | "optional"
+  supportGroupFieldMode: string; // "off" | "optional"
+  supportGroupFieldLabel: string | null;
+  receiptEmailMode: string; // "off" | "opt_in"
+  receiptEmailAvailable: boolean; // true when mode is opt_in AND transport is configured
   updatedAt: string;
   campaignCanvassers?: { id: string; name: string; phone: string }[];
 };

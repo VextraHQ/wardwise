@@ -547,6 +547,13 @@ export function InsightsOverview({
     );
   }
 
+  const { total, withVin, withIdentity, withBoth, withSupportGroup, byGroup } =
+    summary.stats;
+  const pct = (n: number) =>
+    total > 0 ? `${Math.round((n / total) * 100)}%` : "—";
+  const showGroupStats =
+    (summary.campaign.supportGroupFieldMode ?? "off") !== "off";
+
   return (
     <>
       <StatsGrid
@@ -556,6 +563,80 @@ export function InsightsOverview({
         enabledLgaCount={summary.campaign.enabledLgaCount}
         deltas={deltas}
       />
+
+      {/* Verification Coverage */}
+      <OverviewPanel title="Verification Coverage">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {[
+            {
+              label: "With VIN",
+              value: withVin.toLocaleString(),
+              sub: pct(withVin),
+            },
+            {
+              label: "Missing VIN",
+              value: (total - withVin).toLocaleString(),
+              sub: pct(total - withVin),
+            },
+            {
+              label: "With Identity",
+              value: withIdentity.toLocaleString(),
+              sub: pct(withIdentity),
+            },
+            {
+              label: "With Both",
+              value: withBoth.toLocaleString(),
+              sub: pct(withBoth),
+            },
+          ].map((item) => (
+            <div key={item.label} className="space-y-1">
+              <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                {item.label}
+              </p>
+              <p className="font-mono text-lg font-semibold tabular-nums">
+                {item.value}
+              </p>
+              <p className="text-muted-foreground text-xs">{item.sub}</p>
+            </div>
+          ))}
+        </div>
+      </OverviewPanel>
+
+      {/* Support Group Capture — only shown when field is enabled */}
+      {showGroupStats && (
+        <OverviewPanel title="Support Groups">
+          <div className="space-y-4">
+            <div className="flex items-baseline gap-3">
+              <span className="font-mono text-2xl font-semibold tabular-nums">
+                {withSupportGroup.toLocaleString()}
+              </span>
+              <span className="text-muted-foreground text-sm">
+                supporters with a group ({pct(withSupportGroup)} capture rate)
+              </span>
+            </div>
+            {byGroup.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Top Groups
+                </p>
+                <div className="space-y-1.5">
+                  {byGroup.slice(0, 5).map((g, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between gap-4 text-sm"
+                    >
+                      <span className="truncate font-medium">{g.group}</span>
+                      <span className="text-muted-foreground shrink-0 font-mono text-xs tabular-nums">
+                        {g.count.toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </OverviewPanel>
+      )}
 
       <div className="space-y-6">
         <NowCard

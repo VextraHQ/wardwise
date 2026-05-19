@@ -48,6 +48,9 @@ export function buildSubmissionWhere(
       { lastName: { contains: filters.search, mode: "insensitive" } },
       { phone: { contains: filters.search } },
       { email: { contains: filters.search, mode: "insensitive" } },
+      {
+        supportGroupName: { contains: filters.search, mode: "insensitive" },
+      },
       ...(refCodePrefix ? [{ id: { startsWith: refCodePrefix } }] : []),
     ];
   }

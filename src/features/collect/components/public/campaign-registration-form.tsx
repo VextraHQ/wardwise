@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useForm, useWatch, type UseFormReturn } from "react-hook-form";
+import {
+  useForm,
+  useWatch,
+  type UseFormReturn,
+  type Resolver,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -25,9 +30,11 @@ import {
 } from "@/lib/analytics/client";
 import { queueSubmission } from "@/features/collect/lib/offline-queue";
 import {
-  submitRegistrationSchema,
+  makeSubmitRegistrationSchema,
   type RegistrationFormData,
+  type CollectVerificationRequirement,
 } from "@/features/collect/schemas/collect-schemas";
+import { CollectApiError } from "@/features/collect/api/collect-api";
 import {
   COLLECT_CONFIRMATION_SCREEN,
   COLLECT_LAST_INPUT_SCREEN,
@@ -81,11 +88,12 @@ function createCollectDefaultValues({
     wardName: "",
     pollingUnitId: undefined as unknown as number,
     pollingUnitName: "",
-    identityType:
-      undefined as unknown as RegistrationFormData["identityType"],
+    identityType: undefined as unknown as RegistrationFormData["identityType"],
     identityValue: "",
     voterIdNumber: "",
     role: undefined as unknown as RegistrationFormData["role"],
+    supportGroupName: "",
+    wantsEmailReceipt: false,
     customAnswer1: "",
     customAnswer2: "",
     canvasserName: prefilledCanvasserName,
@@ -94,7 +102,8 @@ function createCollectDefaultValues({
 }
 
 function focusFirstFieldError(
-  form: UseFormReturn<RegistrationFormData>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  form: UseFormReturn<RegistrationFormData, any, any>,
   fields: (keyof RegistrationFormData)[],
 ) {
   const errs = form.formState.errors;
@@ -144,8 +153,15 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     clearLastSyncResult,
   } = useOffline();
 
+  const formSchema = makeSubmitRegistrationSchema({
+    identityRequirement: (campaign.identityRequirement ||
+      "required") as CollectVerificationRequirement,
+    voterIdRequirement: (campaign.voterIdRequirement ||
+      "required") as CollectVerificationRequirement,
+  });
+
   const form = useForm<RegistrationFormData>({
-    resolver: zodResolver(submitRegistrationSchema),
+    resolver: zodResolver(formSchema) as Resolver<RegistrationFormData>,
     defaultValues: createCollectDefaultValues({
       prefilledCanvasserName,
       prefilledCanvasserPhone,
@@ -374,6 +390,12 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
 
   const role = useWatch({ control: form.control, name: "role" });
   const skipCanvasserStep = role === "canvasser";
+  const emailValue = useWatch({ control: form.control, name: "email" });
+  const showReceiptOptIn =
+    Boolean(campaign.receiptEmailAvailable) &&
+    typeof emailValue === "string" &&
+    emailValue.includes("@") &&
+    emailValue.length > 3;
 
   useEffect(() => {
     if (screen <= 0 || screen >= COLLECT_CONFIRMATION_SCREEN) return;
@@ -455,12 +477,75 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       },
       onError: (error) => {
         const msg = error.message || "";
+        const reason =
+          error instanceof CollectApiError ? error.reason : undefined;
         track("collect_submission_failed", {
           analytics_id: analyticsId,
           error_category: getCollectErrorCategory(msg),
           submission_source: "online",
+          reason: reason ?? "unknown",
         });
-        if (msg.includes("already registered")) {
+        if (reason === "identity_required") {
+          setScreen(3);
+          form.setError("identityType", {
+            message: "Please complete your identity verification.",
+          });
+          toast.error("Verification Required", {
+            description:
+              "This form now requires identity verification. Please fill in the fields.",
+            duration: 6000,
+          });
+        } else if (reason === "identity_incomplete") {
+          const identityType = form.getValues("identityType");
+          const identityValue = form.getValues("identityValue")?.trim();
+          const hasType = Boolean(identityType);
+          const hasValue = Boolean(identityValue);
+
+          setScreen(3);
+
+          if (hasType && !hasValue) {
+            form.setError("identityValue", {
+              message:
+                'Enter the number for the selected method, or use "Leave blank instead" to skip this optional section.',
+            });
+          } else if (!hasType && hasValue) {
+            form.setError("identityType", {
+              message:
+                "Choose a verification method for this number, or clear it to skip this optional section.",
+            });
+          } else {
+            form.setError("identityType", {
+              message:
+                'Complete this optional section, or use "Leave blank instead" to skip it.',
+            });
+          }
+
+          toast.error("Complete this section or leave it blank", {
+            description:
+              'You selected a verification method. Enter the number, or use "Leave blank instead" to skip this optional section.',
+            duration: 6000,
+          });
+        } else if (reason === "vin_required") {
+          setScreen(3);
+          form.setError("voterIdNumber", {
+            message: "Voter ID (VIN) is required for this campaign.",
+          });
+          toast.error("Voter ID Required", {
+            description: "This form now requires your Voter ID number.",
+            duration: 6000,
+          });
+        } else if (reason === "invalid_vin_format") {
+          setScreen(3);
+          form.setError("voterIdNumber", {
+            message:
+              "Voter ID must be exactly 19 alphanumeric characters. Please check your PVC.",
+          });
+          toast.error("Invalid Voter ID", {
+            description:
+              "Please re-enter your Voter ID — it must be exactly 19 characters.",
+            duration: 6000,
+          });
+        } else if (msg.includes("already registered")) {
           toast.error("Duplicate Registration", {
             description:
               "This phone number or VIN has already been registered for this campaign.",
@@ -786,6 +871,16 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             form={form}
             onBack={goBack}
             onNext={validateAndNext}
+            identityRequirement={
+              (campaign.identityRequirement || "required") as
+                | "required"
+                | "optional"
+            }
+            voterIdRequirement={
+              (campaign.voterIdRequirement || "required") as
+                | "required"
+                | "optional"
+            }
           />
         )}
 
@@ -798,6 +893,11 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             submitError={
               skipCanvasserStep ? submitMutation.error?.message : undefined
             }
+            supportGroupFieldMode={
+              (campaign.supportGroupFieldMode || "off") as "off" | "optional"
+            }
+            supportGroupFieldLabel={campaign.supportGroupFieldLabel}
+            showReceiptOptIn={skipCanvasserStep && showReceiptOptIn}
           />
         )}
 
@@ -816,6 +916,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             onNext={validateAndNext}
             nextDisabled={hasCanvasser === null}
             preloadedCanvassers={campaign.campaignCanvassers}
+            showReceiptOptIn={showReceiptOptIn}
           />
         )}
 

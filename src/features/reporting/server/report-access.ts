@@ -50,6 +50,7 @@ export async function validateReportToken(token: string) {
       constituencyType: true,
       enabledLgaIds: true,
       status: true,
+      supportGroupFieldMode: true,
       clientReportEnabled: true,
       clientReportPasscodeHash: true,
       clientReportLastViewedAt: true,

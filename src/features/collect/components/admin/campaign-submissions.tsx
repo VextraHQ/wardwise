@@ -27,11 +27,13 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useBulkSubmissionAction,
+  useCampaign,
   useCampaignSubmissions,
   useDeleteSubmission,
   useSubmissionAudit,
   useUpdateSubmission,
 } from "@/features/collect/hooks/use-collect";
+import type { Campaign } from "@/features/collect/types/collect.types";
 import { track } from "@/lib/analytics/client";
 import { adminCollectApi } from "@/features/collect/api/collect-api";
 import { roleLabels } from "@/features/collect/lib/analytics";
@@ -77,6 +79,14 @@ const bulkActionIcons = {
 export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  const { data: campaignData } = useCampaign(campaignId) as {
+    data: Campaign | undefined;
+  };
+  const showGroupColumn =
+    campaignData != null && campaignData.supportGroupFieldMode !== "off";
+  const groupColumnLabel =
+    campaignData?.supportGroupFieldLabel?.trim() || "Group";
   const isPortraitMobile = useIsPortraitMobile();
 
   const [page, setPage] = useState(1);
@@ -398,7 +408,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     : `${selectionState.selectedCount} selected`;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-3">
       <CampaignSubmissionsToolbar
         reviewStatus={reviewStatus}
         reviewCounts={reviewCounts}
@@ -471,6 +481,8 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
             onToggleSelectAll={toggleSelectAll}
             onToggleSelect={toggleSelect}
             onOpenSubmission={openSubmission}
+            showGroupColumn={showGroupColumn}
+            groupColumnLabel={groupColumnLabel}
           />
 
           <AdminPagination

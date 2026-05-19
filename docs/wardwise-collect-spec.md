@@ -1,5 +1,7 @@
 # WardWise Collect Canonical Spec
 
+> See also: `wardwise-collect-v2-spec.md`, `wardwise-collect-v3-form-configuration-spec.md`, `campaign-insights-spec.md`, `wardwise-hardening-spec.md`
+
 ## Status
 
 - **Collect v1 is complete** — merged to `main`.
@@ -119,6 +121,22 @@
 - **Location messaging stays contextual**: the location step still owns the small local notes for `Using offline data`, online fallback with retry, and full offline blocking states because those messages explain the dropdown behavior directly.
 - **Confirmation remains the outcome surface**: confirmed, queued, and failed confirmation states were intentionally left structurally unchanged so the polish stays focused on task-flow calmness rather than changing the result model.
 
+### What Changed (Collect v3 — Form Configuration + Verification Intelligence)
+
+- **Per-campaign verification requirements**: `identityRequirement` and `voterIdRequirement` on Campaign control whether Membership/NIN and VIN are required or optional for each campaign. Existing campaigns default to `"required"` to preserve current behavior.
+- **Optional identity logic**: when optional, blank is allowed; if one of `identityType` / `identityValue` is partially filled, both are required. Identity format validation still applies when filled.
+- **Optional VIN with safe dedup**: when optional, VIN is blank-allowed but still format-validated when provided. VIN deduplicate check is skipped entirely when no VIN is submitted.
+- **First-class support group field**: `supportGroupFieldMode` (`"off"` / `"optional"`) and `supportGroupFieldLabel` on Campaign. Public Step 4 shows the field when mode is `"optional"`. `supportGroupName` and `supportGroupKey` stored on CollectSubmission — key is normalized (lowercase, punctuation→space, collapsed whitespace) for analytics grouping while display value is preserved.
+- **`identityType` stored on submissions**: new `identityType` field (`"membership"` / `"nin"` / `null`) allows reporting to distinguish identity methods without re-parsing the value.
+- **Public form respects campaign config**: `PartyInfoStep` shows Required/Optional badges based on `identityRequirement`/`voterIdRequirement`. `RoleStep` conditionally shows the support group field.
+- **Structured server error reasons**: submit failures now include a `reason` field (e.g. `identity_required`, `vin_required`). The public client (`CollectApiError`) carries `reason` so the form can navigate back to step 3 with field-level errors rather than showing a generic toast.
+- **Admin Form Configuration UI**: new section in campaign settings to configure verification requirements and support group field. Relaxing settings saves immediately; making active forms stricter shows a confirmation dialog.
+- **Admin submissions table Group column**: conditionally shown when `supportGroupFieldMode !== "off"`. Detail sheet shows Identity Type and Support Group.
+- **Search includes support group**: submission search queries also match `supportGroupName`.
+- **Export adds Identity Type and Support Group columns**: stable column headers regardless of the campaign's custom label.
+- **Campaign Insights verification coverage**: `withVin`, `withIdentity`, `withSupportGroup` counts + a "Verification Coverage" panel and a conditional "Support Groups" panel with Top Groups list.
+- **Reporting payload updated**: `LightSubmission`, `CampaignReportSubmission`, and `CampaignReportSummary` carry `identityType`, `supportGroupName`, and `supportGroupFieldMode` so Insights components can render Group-aware UI.
+
 ### What Changed (Batch 13 — Identity & Verification Refresh)
 
 - **Public step 3 is now clearer**: `Party Information` has been replaced by `Identity & Verification`, with an explicit choice between `Party Membership` and `National ID (NIN)`.
@@ -151,6 +169,7 @@
 ### What Is Pending
 
 - Official ward + polling unit sync for additional states beyond Adamawa (for example Bauchi)
+- Collect v3 form configuration rollout — campaign-level verification requirements, first-class support-group capture, and verification-aware reporting. See `docs/wardwise-collect-v3-form-configuration-spec.md`.
 - Future precision work for split-LGA constituencies lives in `docs/geo-canonical-seeding-plan.md`
 
 ## Locked Product Decisions
@@ -225,7 +244,7 @@
 | 0      | Campaign splash → Begin Registration                                                                                                                                                     |
 | 1      | Personal details: first name, middle name?, last name, phone, email?, sex, age, occupation, marital status, custom questions                                                             |
 | 2      | Location: cascading LGA → Ward → Polling Unit (with INEC codes)                                                                                                                          |
-| 3      | Identity & Verification: choose `Party Membership` or `National ID (NIN)`, then enter the selected ID + VIN (required)                                                                  |
+| 3      | Identity & Verification: choose `Party Membership` or `National ID (NIN)`, then enter the selected ID + VIN (required)                                                                   |
 | 4      | Role: Volunteer / Member / Canvasser (3 cards)                                                                                                                                           |
 | 5      | Canvasser: Yes/No toggle → name + phone if Yes (required when Yes)                                                                                                                       |
 | 6      | Confirmation: state-aware receipt (`confirmed`, `queued`, or `failed`), registration reference only after server acceptance, New Registration button, share actions only after confirmed |
@@ -262,7 +281,7 @@
 | Duplicate VIN                                  | 409 → "Already Registered" error box                                                                                                                                             |
 | Missing canvasser Yes/No                       | Submit button stays disabled on canvasser step                                                                                                                                   |
 | Invalid submit payload                         | 400 → first field-level validation message shown                                                                                                                                 |
-| Legacy queued payload with old identity keys   | Marked failed locally with a clear “re-enter it” message instead of being adapted or silently half-submitted                                                                    |
+| Legacy queued payload with old identity keys   | Marked failed locally with a clear “re-enter it” message instead of being adapted or silently half-submitted                                                                     |
 | Network error during online submit             | Error displayed, localStorage preserves progress                                                                                                                                 |
 | Offline submit                                 | Submission is queued in IndexedDB and the confirmation shows `Pending Upload`                                                                                                    |
 | Queued sync success                            | Row is removed locally; active confirmation flips to confirmed when server receipt is known                                                                                      |

@@ -18,6 +18,25 @@ import {
 export const collectIdentityTypes = ["membership", "nin"] as const;
 export type CollectIdentityType = (typeof collectIdentityTypes)[number];
 
+export const collectVerificationRequirements = [
+  "required",
+  "optional",
+] as const;
+export type CollectVerificationRequirement =
+  (typeof collectVerificationRequirements)[number];
+
+export const collectSupportGroupModes = ["off", "optional"] as const;
+export type CollectSupportGroupMode = (typeof collectSupportGroupModes)[number];
+
+export function normalizeSupportGroupKey(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ") // punctuation → space first
+    .replace(/\s+/g, " ") // then collapse whitespace
+    .trim();
+}
+
 function addSchemaIssue(
   ctx: z.RefinementCtx,
   path: (string | number)[],
@@ -30,14 +49,17 @@ function addSchemaIssue(
   });
 }
 
-function validateIdentityValue(value: string, identityType: CollectIdentityType) {
+export function validateIdentityValue(
+  value: string,
+  identityType: CollectIdentityType,
+) {
   if (identityType === "nin") {
     return ninSchema.safeParse(value);
   }
   return partyMembershipNumberSchema.safeParse(value);
 }
 
-function normalizeIdentityValue(
+export function normalizeIdentityValue(
   value: string,
   identityType: CollectIdentityType,
 ) {
@@ -92,19 +114,96 @@ export const screen2Schema = z.object({
   pollingUnitName: z.string().min(1),
 });
 
-// Screen 3: Identity & verification — choose either party membership number
-// or NIN, plus VIN for deduplication.
+// Screen 3: Identity & verification (static strict version — legacy / fallback)
 export const screen3Schema = z.object({
   identityType: clientIdentityTypeSchema,
   identityValue: baseIdentityFieldSchema,
   voterIdNumber: voterIdVinSchema,
 });
 
-// Screen 4: Role
+// Config-aware factory for screen 3 — respects per-campaign verification requirements.
+export function makeScreen3Schema(config: {
+  identityRequirement: CollectVerificationRequirement;
+  voterIdRequirement: CollectVerificationRequirement;
+}) {
+  const identityRequired = config.identityRequirement === "required";
+  const vinRequired = config.voterIdRequirement === "required";
+
+  const identityTypeField = identityRequired
+    ? clientIdentityTypeSchema
+    : z
+        .enum(collectIdentityTypes, { message: "Choose a verification method" })
+        .optional()
+        .nullable();
+
+  const identityValueField = identityRequired
+    ? baseIdentityFieldSchema
+    : z
+        .string()
+        .optional()
+        .or(z.literal(""))
+        .transform((v) => v?.trim() || "");
+
+  const voterIdField = vinRequired
+    ? voterIdVinSchema
+    : z
+        .string()
+        .optional()
+        .or(z.literal(""))
+        .transform((v) => v?.trim() || "")
+        .pipe(z.union([z.literal(""), voterIdVinSchema]));
+
+  return z
+    .object({
+      identityType: identityTypeField,
+      identityValue: identityValueField,
+      voterIdNumber: voterIdField,
+    })
+    .superRefine((data, ctx) => {
+      // For optional identity: if one field is filled, require the other
+      if (!identityRequired) {
+        const hasType = Boolean(data.identityType);
+        const hasValue = Boolean(data.identityValue?.trim());
+        if (hasType && !hasValue) {
+          addSchemaIssue(
+            ctx,
+            ["identityValue"],
+            "Enter your membership number or NIN",
+          );
+        }
+        if (hasValue && !hasType) {
+          addSchemaIssue(ctx, ["identityType"], "Choose a verification method");
+        }
+      }
+      // Validate identity value when filled
+      if (data.identityType && data.identityValue?.trim()) {
+        const result = validateIdentityValue(
+          data.identityValue,
+          data.identityType as CollectIdentityType,
+        );
+        if (!result.success) {
+          addSchemaIssue(
+            ctx,
+            ["identityValue"],
+            result.error.issues[0]?.message ??
+              "Enter a valid identification number",
+          );
+        }
+      }
+    });
+}
+
+// Screen 4: Role + optional support group + optional receipt opt-in
 export const screen4Schema = z.object({
   role: z.enum(["volunteer", "member", "canvasser"], {
     message: "Please select a role",
   }),
+  supportGroupName: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .transform((v) => v?.trim() || ""),
+  wantsEmailReceipt: z.boolean().optional(),
 });
 
 // Screen 5: Canvasser attribution
@@ -123,7 +222,7 @@ export const customQuestionsSchema = z.object({
   customAnswer2: optionalTrimmedText({ max: 500 }),
 });
 
-// Full submission schema (merge of all screens)
+// Full submission schema (strict — used when campaign config is not yet loaded)
 export const submitRegistrationSchema = screen1Schema
   .merge(screen2Schema)
   .merge(screen3Schema)
@@ -141,6 +240,19 @@ export const submitRegistrationSchema = screen1Schema
       );
     }
   });
+
+// Config-aware factory for the full client submission schema.
+export function makeSubmitRegistrationSchema(config: {
+  identityRequirement: CollectVerificationRequirement;
+  voterIdRequirement: CollectVerificationRequirement;
+}) {
+  return screen1Schema
+    .merge(screen2Schema)
+    .merge(makeScreen3Schema(config))
+    .merge(screen4Schema)
+    .merge(screen5Schema)
+    .merge(customQuestionsSchema);
+}
 
 export type RegistrationFormData = z.input<typeof submitRegistrationSchema>;
 
@@ -179,9 +291,17 @@ export const createCampaignSchema = z
 
 export type CreateCampaignData = z.infer<typeof createCampaignSchema>;
 
+export const collectReceiptEmailModes = ["off", "opt_in"] as const;
+export type CollectReceiptEmailMode = (typeof collectReceiptEmailModes)[number];
+
 export const updateCampaignSchema = createCampaignSchema.partial().extend({
   status: z.enum(["draft", "active", "paused", "closed"]).optional(),
   clientReportEnabled: z.boolean().optional(),
+  identityRequirement: z.enum(collectVerificationRequirements).optional(),
+  voterIdRequirement: z.enum(collectVerificationRequirements).optional(),
+  supportGroupFieldMode: z.enum(collectSupportGroupModes).optional(),
+  supportGroupFieldLabel: optionalNullableTrimmedText({ max: 100 }),
+  receiptEmailMode: z.enum(collectReceiptEmailModes).optional(),
 });
 
 export type UpdateCampaignData = z.infer<typeof updateCampaignSchema>;
@@ -216,11 +336,26 @@ export const offlinePackRequestSchema = z.object({
 export type OfflinePackRequest = z.infer<typeof offlinePackRequestSchema>;
 
 // ── Server submit schema (extends client schema with campaignSlug, drops client-only name fields) ──
+// Identity and VIN are optional at the schema level — campaign-config business
+// rules (required vs optional) are enforced inside submitRegistration() after
+// looking up the campaign. This prevents the route from rejecting valid optional
+// submissions before campaign config is even read.
 
 const serverIdentitySchema = z.object({
-  identityType: clientIdentityTypeSchema,
-  identityValue: baseIdentityFieldSchema,
-  voterIdNumber: voterIdVinSchema,
+  identityType: z
+    .enum(collectIdentityTypes, { message: "Choose a verification method" })
+    .optional()
+    .nullable(),
+  identityValue: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .transform((v) => v?.trim() || ""),
+  voterIdNumber: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .transform((v) => v?.trim() || ""),
 });
 
 export const serverSubmitSchema = screen1Schema
@@ -237,22 +372,8 @@ export const serverSubmitSchema = screen1Schema
   .merge(customQuestionsSchema)
   .extend({
     campaignSlug: z.string().min(1),
-  })
-  .superRefine((data, ctx) => {
-    const result = validateIdentityValue(data.identityValue, data.identityType);
-    if (!result.success) {
-      addSchemaIssue(
-        ctx,
-        ["identityValue"],
-        result.error.issues[0]?.message ||
-          "Enter a valid identification number",
-      );
-    }
-  })
-  .transform((data) => ({
-    ...data,
-    identityValue: normalizeIdentityValue(data.identityValue, data.identityType),
-  }));
+    wantsEmailReceipt: z.boolean().optional(),
+  });
 
 // ── Admin submission moderation (PATCH) ──
 // Used by admin Collect submission detail + bulk routes.

@@ -1090,6 +1090,7 @@ Scope:
 - `CLAUDE.md`
 - `docs/wardwise-collect-spec.md`
 - `docs/wardwise-collect-v2-spec.md`
+- `docs/wardwise-collect-v3-form-configuration-spec.md`
 - `docs/collect-campaign-branding-spec.md`
 - `docs/collect-candidate-geo-rethink.md`
 - `docs/campaign-insights-spec.md`
@@ -1193,18 +1194,18 @@ Each PR description should include:
 
 Use this map to avoid missing old docs.
 
-| Domain              | Docs to update when moved                                                                                                                              |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Architecture        | `docs/wardwise-app-architecture-spec.md`, `README.md`, `CLAUDE.md`                                                                                     |
-| Collect             | `docs/wardwise-collect-spec.md`, `docs/wardwise-collect-v2-spec.md`, `docs/collect-campaign-branding-spec.md`, `docs/collect-candidate-geo-rethink.md` |
-| Candidates          | `docs/wardwise-candidates-spec.md`, `docs/auth-system-spec.md` when onboarding/auth paths are referenced                                               |
-| Candidate dashboard | `docs/codebase-review.md`, dashboard-related sections in `README.md` and `CLAUDE.md`                                                                   |
-| Geo                 | `docs/geo-management-spec.md`, `docs/geo-canonical-seeding-plan.md`, `docs/hor-canonical-rollout.md`, `docs/adamawa-ward-pu-sync.md`                   |
-| Reporting           | `docs/campaign-insights-spec.md`, reporting sections in Collect docs                                                                                   |
-| Admin shell         | `docs/admin-dashboard-command-center-spec.md`, `docs/cockpit-design-system.md`                                                                         |
-| Auth                | `docs/auth-system-spec.md`, `docs/wardwise-hardening-spec.md`, `CLAUDE.md`                                                                             |
-| Public site         | `README.md`, public/contact/support docs if created later                                                                                              |
-| Infrastructure      | `docs/wardwise-hardening-spec.md`, `docs/prisma-neon-workflow.md`, `CLAUDE.md`                                                                         |
+| Domain              | Docs to update when moved                                                                                                                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Architecture        | `docs/wardwise-app-architecture-spec.md`, `README.md`, `CLAUDE.md`                                                                                                                                            |
+| Collect             | `docs/wardwise-collect-spec.md`, `docs/wardwise-collect-v2-spec.md`, `docs/wardwise-collect-v3-form-configuration-spec.md`, `docs/collect-campaign-branding-spec.md`, `docs/collect-candidate-geo-rethink.md` |
+| Candidates          | `docs/wardwise-candidates-spec.md`, `docs/auth-system-spec.md` when onboarding/auth paths are referenced                                                                                                      |
+| Candidate dashboard | `docs/codebase-review.md`, dashboard-related sections in `README.md` and `CLAUDE.md`                                                                                                                          |
+| Geo                 | `docs/geo-management-spec.md`, `docs/geo-canonical-seeding-plan.md`, `docs/hor-canonical-rollout.md`, `docs/adamawa-ward-pu-sync.md`                                                                          |
+| Reporting           | `docs/campaign-insights-spec.md`, reporting sections in Collect docs                                                                                                                                          |
+| Admin shell         | `docs/admin-dashboard-command-center-spec.md`, `docs/cockpit-design-system.md`                                                                                                                                |
+| Auth                | `docs/auth-system-spec.md`, `docs/wardwise-hardening-spec.md`, `CLAUDE.md`                                                                                                                                    |
+| Public site         | `README.md`, public/contact/support docs if created later                                                                                                                                                     |
+| Infrastructure      | `docs/wardwise-hardening-spec.md`, `docs/prisma-neon-workflow.md`, `CLAUDE.md`                                                                                                                                |
 
 ---
 

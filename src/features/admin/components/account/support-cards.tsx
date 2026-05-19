@@ -8,12 +8,14 @@ import type {
 } from "@/features/admin/api/admin-api";
 import {
   ACCOUNT_DATETIME_OPTIONS,
+  ADMIN_ACCOUNT_ACTIVITY_PREVIEW_LIMIT,
   describeActivity,
   getActivityContext,
 } from "@/features/admin/lib/account";
 import { formatDisplayDateTime, formatRelativeTime } from "@/lib/date-format";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -72,12 +74,25 @@ export function ActivityCard({
 }: {
   activity: AdminAccountActivityItem[];
 }) {
+  const atPreviewLimit =
+    activity.length >= ADMIN_ACCOUNT_ACTIVITY_PREVIEW_LIMIT;
+
   return (
     <Card className="border-border/60 rounded-sm shadow-none">
-      <CardHeader className="border-border/60 border-b px-4 sm:px-6">
+      <CardHeader className="border-border/60 flex flex-row items-start justify-between gap-3 border-b px-4 sm:px-6">
         <CardTitle className="text-foreground font-mono text-[11px] font-bold tracking-widest uppercase">
           Recent Account Activity
         </CardTitle>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled
+          title="Full team audit log is coming soon"
+          className="text-muted-foreground h-7 shrink-0 rounded-sm px-2 font-mono text-[10px] font-bold tracking-widest uppercase"
+        >
+          View all
+        </Button>
       </CardHeader>
       <CardContent className="px-4 sm:px-6">
         {activity.length === 0 ? (
@@ -97,10 +112,13 @@ export function ActivityCard({
         ) : (
           <div className="space-y-3">
             <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-              Showing latest {activity.length}{" "}
+              Latest {activity.length}{" "}
               {activity.length === 1 ? "event" : "events"}
+              {atPreviewLimit
+                ? ` (max ${ADMIN_ACCOUNT_ACTIVITY_PREVIEW_LIMIT})`
+                : ""}
             </p>
-            <ul className="divide-border/60 divide-y">
+            <ul className="divide-border/60 max-h-72 divide-y overflow-y-auto overscroll-contain">
               {activity.map((entry) => {
                 const isFailed = entry.action === "admin.account.login_failed";
                 const detail = getActivityContext(entry);

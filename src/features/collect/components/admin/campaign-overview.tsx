@@ -133,7 +133,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(formUrl)}&size=256x256`;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-3">
       <CampaignOverviewDateFilter
         value={{ from: dateFrom, to: dateTo }}
         activePreset={activeRange}

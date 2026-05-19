@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/core/prisma";
 import { getCampaignBrandingType } from "@/features/collect/lib/branding";
 import type { PublicCampaign } from "@/features/collect/types/collect.types";
+import { canSendRegistrationReceipt } from "@/lib/email/registration-receipt";
 
 /**
  * Load the public-facing campaign payload for `/c/[slug]` (SSR page and JSON API).
@@ -27,6 +28,11 @@ export async function getPublicCampaign(
       customQuestion1: true,
       customQuestion2: true,
       status: true,
+      identityRequirement: true,
+      voterIdRequirement: true,
+      supportGroupFieldMode: true,
+      supportGroupFieldLabel: true,
+      receiptEmailMode: true,
       updatedAt: true,
       campaignCanvassers: {
         select: { id: true, name: true, phone: true },
@@ -42,6 +48,8 @@ export async function getPublicCampaign(
   return {
     ...campaign,
     brandingType: getCampaignBrandingType(campaign.brandingType),
+    receiptEmailAvailable:
+      campaign.receiptEmailMode === "opt_in" && canSendRegistrationReceipt(),
     updatedAt: campaign.updatedAt.toISOString(),
   };
 }
