@@ -29,8 +29,8 @@
 
 ### Collect v3 Reporting Changes (Shipped)
 
-- **Verification Coverage panel**: shows `With VIN`, `Missing VIN`, `With Identity`, and `With Both` counts and percentages in the Overview tab
-- **Support Groups panel**: conditionally shown when `supportGroupFieldMode !== "off"` — displays capture rate and Top Groups list (grouped by normalized key, displayed by most-common name variant)
+- **Verification Coverage snapshot**: now appears in `Overview` as a compact summary, and in `Analytics` as a deeper `Verification Details` panel using clearer supporter-facing `VIN` and `NIN / Membership` wording
+- **Support Groups panel**: conditionally shown in `Analytics` when `supportGroupFieldMode !== "off"` — displays capture rate, top group, ranked mobile list, and desktop chart (grouped by normalized key, displayed by most-common name variant)
 - **`CampaignReportSummary` updated**: `campaign.supportGroupFieldMode`, `stats.withVin`, `stats.withIdentity`, `stats.withSupportGroup`, `stats.byGroup` are now part of the summary payload
 - **`CampaignReportSubmission` updated**: `identityType` and `supportGroupName` included for Supporters tab rendering
 - **Source of truth**: `docs/wardwise-collect-v3-form-configuration-spec.md`
@@ -465,6 +465,14 @@ Use clear top-level tabs:
 The overview should work even for candidates who do not like reading charts
 first. It should feel like an executive briefing.
 
+Rules:
+
+- keep the tone calm and strategic, not warning-heavy
+- lead with momentum, current picture, hotspots, and field performance
+- avoid red-light “attention needed” framing in the top candidate view unless something is truly broken
+- keep deeper profile and support-group quality detail in `Analytics`, not as an alarm card in `Overview`
+- keep a lightweight verification snapshot visible in `Overview` so candidates can see coverage without leaving the first tab
+
 #### KPI strip
 
 Show:
@@ -578,6 +586,8 @@ Analytics should explain.
 Show:
 
 - `Momentum` full width
+- `Verification Details`
+- `Support Groups`
 - `Submissions by LGA`
 - `Top Wards`
 - `Supporter Roles`
@@ -594,6 +604,8 @@ Rules:
 - momentum must always show visible x-axis dates under the chart
 - if compare mode is on, momentum shows the selected period as the primary
   filled area and the prior period as a subtle dashed line
+- support-group analytics should be visual, not card-only: ranked list on mobile, chart on desktop
+- profile coverage should use calm completeness language and neutral/positive tones rather than danger styling
 - geography and audience charts use the currently selected date/LGA/role filter
   context
 - avoid cramped multi-chart rows that cause overflow
