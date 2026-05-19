@@ -9,6 +9,7 @@ import {
 // TODO(activity-log): Keep /admin/account as a compact preview. When the
 // dedicated admin activity log page ships, move full history and pagination
 // there instead of growing this feed.
+// Keep in sync with ADMIN_ACCOUNT_ACTIVITY_PREVIEW_LIMIT in features/admin/lib/account.ts
 const ACTIVITY_LIMIT = 10;
 
 export async function GET() {

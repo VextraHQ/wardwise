@@ -27,11 +27,13 @@
 - Report filters now drive summary metrics, compare mode, geography, and analytics consistently
 - Admin campaign settings can enable, preview, regenerate, revoke, and observe report access
 
-### Next Reporting Alignment
+### Collect v3 Reporting Changes (Shipped)
 
-- Collect v3 planning introduces campaign-level verification requirements and first-class support-group capture
-- Campaign Insights should expose verification coverage, missing-verification follow-up signals, and support-group analytics rather than only raw totals
-- Source of truth for that rollout lives in `docs/wardwise-collect-v3-form-configuration-spec.md`
+- **Verification Coverage panel**: shows `With VIN`, `Missing VIN`, `With Identity`, and `With Both` counts and percentages in the Overview tab
+- **Support Groups panel**: conditionally shown when `supportGroupFieldMode !== "off"` — displays capture rate and Top Groups list (grouped by normalized key, displayed by most-common name variant)
+- **`CampaignReportSummary` updated**: `campaign.supportGroupFieldMode`, `stats.withVin`, `stats.withIdentity`, `stats.withSupportGroup`, `stats.byGroup` are now part of the summary payload
+- **`CampaignReportSubmission` updated**: `identityType` and `supportGroupName` included for Supporters tab rendering
+- **Source of truth**: `docs/wardwise-collect-v3-form-configuration-spec.md`
 
 ### What Changed (Batch 2 — Scope + Architecture Cleanup)
 

@@ -12,11 +12,17 @@ export type CampaignReportSummary = {
     slug: string;
     status: string;
     enabledLgaCount: number;
+    supportGroupFieldMode: string;
   };
   stats: {
     total: number;
     verified: number;
     flagged: number;
+    withVin: number;
+    withIdentity: number;
+    withBoth: number;
+    withSupportGroup: number;
+    byGroup: { group: string; count: number }[];
     daily: { date: string; count: number; cumulative: number }[];
     byLga: { lga: string; count: number }[];
     byWard: { ward: string; count: number }[];
@@ -45,6 +51,8 @@ export type CampaignReportSubmission = {
   pollingUnitName: string;
   pollingUnitCode: string | null;
   role: string;
+  identityType: string | null;
+  supportGroupName: string | null;
   canvasserName: string | null;
   canvasserPhone: string | null;
   isVerified: boolean;

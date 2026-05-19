@@ -180,6 +180,11 @@ model Campaign {
   customQuestion1          String?
   customQuestion2          String?
   status                   String              @default("draft") // "draft" | "active" | "paused" | "closed"
+  identityRequirement      String              @default("required") // "required" | "optional"
+  voterIdRequirement       String              @default("required") // "required" | "optional"
+  supportGroupFieldMode    String              @default("off") // "off" | "optional"
+  supportGroupFieldLabel   String?
+  receiptEmailMode         String              @default("off") // "off" | "opt_in"
   clientReportEnabled      Boolean             @default(false)
   clientReportToken        String?             @unique
   clientReportPasscodeHash String?
@@ -222,11 +227,16 @@ model CollectSubmission {
   wardId          Int?
   ward            Ward?                  @relation(fields: [wardId], references: [id])
   wardName        String
-  pollingUnitId   Int?
+  pollingUnitId   Int?                                                                                                             
   pollingUnit     PollingUnit?           @relation(fields: [pollingUnitId], references: [id])
   pollingUnitName String
   identityValue   String?                @map("apcRegNumber")
+  identityType    String?                // "membership" | "nin" | null
   voterIdNumber   String?
+  supportGroupName String?
+  supportGroupKey  String?
+  wantsEmailReceipt Boolean              @default(false)
+  receiptEmailSentAt DateTime?
   isVerified      Boolean                @default(false)
   role            String // "volunteer" | "member" | "canvasser"
   customAnswer1   String?

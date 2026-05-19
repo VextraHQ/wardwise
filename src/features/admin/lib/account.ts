@@ -6,6 +6,8 @@ import type { AdminAccountActivityItem } from "@/features/admin/api/admin-api";
 import { formatRequestIpLabel } from "@/lib/core/ip";
 
 export const PASSWORD_STALE_DAYS = 90;
+/** Matches `ACTIVITY_LIMIT` in `/api/admin/account`. */
+export const ADMIN_ACCOUNT_ACTIVITY_PREVIEW_LIMIT = 10;
 export const ACCOUNT_DATETIME_OPTIONS: Intl.DateTimeFormatOptions = {
   day: "numeric",
   month: "short",

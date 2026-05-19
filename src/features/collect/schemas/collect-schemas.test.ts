@@ -79,29 +79,34 @@ describe("serverSubmitSchema field normalization", () => {
     expect(result.success).toBe(false);
   });
 
-  it("uppercases VIN", () => {
+  it("passes VIN through as-is (normalisation happens in submitRegistration, not schema)", () => {
+    // serverSubmitSchema makes VIN optional so the route can parse before
+    // reading campaign config. VIN uppercasing is applied inside submitRegistration.
     const result = serverSubmitSchema.parse({
       ...baseServerSubmission,
       voterIdNumber: "abc1234567890123456",
     });
-    expect(result.voterIdNumber).toBe("ABC1234567890123456");
+    expect(result.voterIdNumber).toBe("abc1234567890123456");
   });
 
-  it("rejects VIN of wrong length", () => {
+  it("accepts VIN of wrong length at schema level (format enforcement is in submitRegistration)", () => {
+    // VIN format is validated in submitRegistration after campaign config lookup.
     const result = serverSubmitSchema.safeParse({
       ...baseServerSubmission,
       voterIdNumber: "ABC123456789012345",
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
-  it("rejects non-numeric values when NIN is selected", () => {
+  it("accepts non-numeric identity values at schema level (identity format is validated in submitRegistration)", () => {
+    // Identity value validation (NIN digits, membership format) is done in
+    // submitRegistration after the campaign config is known.
     const result = serverSubmitSchema.safeParse({
       ...baseServerSubmission,
       identityType: "nin",
       identityValue: "apc234728347292",
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("accepts explicit membership numbers with letters and separators", () => {
@@ -113,22 +118,24 @@ describe("serverSubmitSchema field normalization", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects payloads that still use the old membershipNumber key", () => {
+  it("accepts payloads without identityValue (identity is optional at schema level)", () => {
+    // Identity fields are optional in serverSubmitSchema — campaign-specific
+    // requirements are enforced inside submitRegistration.
     const { identityValue: _identityValue, ...payload } = baseServerSubmission;
     const result = serverSubmitSchema.safeParse({
       ...payload,
       membershipNumber: "234728347292",
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
-  it("rejects payloads that still use the old apcRegNumber key", () => {
+  it("accepts payloads with unknown keys (old apcRegNumber ignored, identityValue is optional)", () => {
     const { identityValue: _identityValue, ...payload } = baseServerSubmission;
     const result = serverSubmitSchema.safeParse({
       ...payload,
       apcRegNumber: "234728347292",
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("trims custom answers and keeps blank as empty string", () => {

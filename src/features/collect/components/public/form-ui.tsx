@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { HiArrowRight, HiArrowLeft } from "react-icons/hi";
-import { IconLoader } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Spinner } from "@/components/ui/spinner";
 
 /** Mobile-only line below a collect step card (trust strip is hidden there). */
 export function CollectMobilePrivacyNote() {
@@ -118,7 +118,7 @@ export function NavButtons({
       >
         {isLoading ? (
           <>
-            <IconLoader className="mr-2 h-4 w-4 shrink-0 animate-spin" />
+            <Spinner className="mr-2 h-4 w-4 shrink-0 animate-spin" />
             Submitting...
           </>
         ) : (

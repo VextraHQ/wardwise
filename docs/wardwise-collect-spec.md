@@ -121,6 +121,22 @@
 - **Location messaging stays contextual**: the location step still owns the small local notes for `Using offline data`, online fallback with retry, and full offline blocking states because those messages explain the dropdown behavior directly.
 - **Confirmation remains the outcome surface**: confirmed, queued, and failed confirmation states were intentionally left structurally unchanged so the polish stays focused on task-flow calmness rather than changing the result model.
 
+### What Changed (Collect v3 — Form Configuration + Verification Intelligence)
+
+- **Per-campaign verification requirements**: `identityRequirement` and `voterIdRequirement` on Campaign control whether Membership/NIN and VIN are required or optional for each campaign. Existing campaigns default to `"required"` to preserve current behavior.
+- **Optional identity logic**: when optional, blank is allowed; if one of `identityType` / `identityValue` is partially filled, both are required. Identity format validation still applies when filled.
+- **Optional VIN with safe dedup**: when optional, VIN is blank-allowed but still format-validated when provided. VIN deduplicate check is skipped entirely when no VIN is submitted.
+- **First-class support group field**: `supportGroupFieldMode` (`"off"` / `"optional"`) and `supportGroupFieldLabel` on Campaign. Public Step 4 shows the field when mode is `"optional"`. `supportGroupName` and `supportGroupKey` stored on CollectSubmission — key is normalized (lowercase, punctuation→space, collapsed whitespace) for analytics grouping while display value is preserved.
+- **`identityType` stored on submissions**: new `identityType` field (`"membership"` / `"nin"` / `null`) allows reporting to distinguish identity methods without re-parsing the value.
+- **Public form respects campaign config**: `PartyInfoStep` shows Required/Optional badges based on `identityRequirement`/`voterIdRequirement`. `RoleStep` conditionally shows the support group field.
+- **Structured server error reasons**: submit failures now include a `reason` field (e.g. `identity_required`, `vin_required`). The public client (`CollectApiError`) carries `reason` so the form can navigate back to step 3 with field-level errors rather than showing a generic toast.
+- **Admin Form Configuration UI**: new section in campaign settings to configure verification requirements and support group field. Relaxing settings saves immediately; making active forms stricter shows a confirmation dialog.
+- **Admin submissions table Group column**: conditionally shown when `supportGroupFieldMode !== "off"`. Detail sheet shows Identity Type and Support Group.
+- **Search includes support group**: submission search queries also match `supportGroupName`.
+- **Export adds Identity Type and Support Group columns**: stable column headers regardless of the campaign's custom label.
+- **Campaign Insights verification coverage**: `withVin`, `withIdentity`, `withSupportGroup` counts + a "Verification Coverage" panel and a conditional "Support Groups" panel with Top Groups list.
+- **Reporting payload updated**: `LightSubmission`, `CampaignReportSubmission`, and `CampaignReportSummary` carry `identityType`, `supportGroupName`, and `supportGroupFieldMode` so Insights components can render Group-aware UI.
+
 ### What Changed (Batch 13 — Identity & Verification Refresh)
 
 - **Public step 3 is now clearer**: `Party Information` has been replaced by `Identity & Verification`, with an explicit choice between `Party Membership` and `National ID (NIN)`.

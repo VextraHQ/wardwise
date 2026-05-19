@@ -45,7 +45,7 @@ const SCREEN_FIELD_MAP: Record<number, (keyof RegistrationFormData)[]> = {
     "pollingUnitName",
   ],
   3: ["identityType", "identityValue", "voterIdNumber"],
-  4: ["role"],
+  4: ["role", "supportGroupName"],
   5: ["canvasserName", "canvasserPhone"],
 };
 

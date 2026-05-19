@@ -8,11 +8,12 @@
 
 ## Status
 
-- **Direction chosen** — verification requirements move to per-campaign form configuration
-- **Direction chosen** — support-group capture becomes a first-class campaign field, not a generic custom question
-- **Direction chosen** — active campaigns can be updated in place; the public slug/link stays the same
-- **Direction chosen** — optional verification fields improve submission accessibility, while reporting makes missing verification visible
-- **Direction chosen** — receipt email, if added, should be an opt-in registration receipt, not a raw “send me all my answers” dump
+- **Shipped** — all Phase 1–3 scope implemented on `develop`
+- **Direction chosen** — verification requirements move to per-campaign form configuration ✓
+- **Direction chosen** — support-group capture becomes a first-class campaign field, not a generic custom question ✓
+- **Direction chosen** — active campaigns can be updated in place; the public slug/link stays the same ✓
+- **Direction chosen** — optional verification fields improve submission accessibility, while reporting makes missing verification visible ✓
+- **Phase 4 (email receipt)** — not implemented in this pass; campaign schema reserves `receiptEmailMode` for future use
 
 ---
 

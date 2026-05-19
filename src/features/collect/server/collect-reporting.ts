@@ -71,6 +71,11 @@ export type CampaignStats = {
   total: number;
   verified: number;
   flagged: number;
+  withVin: number;
+  withIdentity: number;
+  withBoth: number;
+  withSupportGroup: number;
+  byGroup: { group: string; count: number }[];
   daily: { date: string; count: number; cumulative: number }[];
   byLga: { lga: string; count: number }[];
   byWard: { ward: string; count: number }[];
@@ -98,6 +103,8 @@ export type LightSubmission = {
   lgaName: string;
   wardName: string;
   pollingUnitName: string;
+  identityType: string | null;
+  supportGroupName: string | null;
   pollingUnitCode: string | null;
   role: string;
   canvasserName: string | null;
@@ -162,7 +169,16 @@ export async function getCampaignStats(
   const dailyWhereSql = Prisma.join(dailyWhereConditions, " AND ");
 
   // Gather all counts and breakdowns in parallel for performance
-  const [totals, dailyRaw, byLga, byWard, byRole, bySex] = await Promise.all([
+  const [
+    totals,
+    dailyRaw,
+    byLga,
+    byWard,
+    byRole,
+    bySex,
+    verificationCounts,
+    byGroupKeys,
+  ] = await Promise.all([
     // Total, verified and flagged submissions
     prisma.collectSubmission
       .aggregate({
@@ -183,11 +199,11 @@ export async function getCampaignStats(
 
     // Number of submissions per day (grouped by day in Lagos time)
     prisma.$queryRaw<{ date: string; count: bigint }[]>`
-      SELECT DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE})::text as date, COUNT(*)::bigint as count
-      FROM "CollectSubmission"
-      WHERE ${dailyWhereSql}
-      GROUP BY 1 ORDER BY 1 ASC
-    `,
+        SELECT DATE("createdAt" AT TIME ZONE ${REPORT_TIME_ZONE})::text as date, COUNT(*)::bigint as count
+        FROM "CollectSubmission"
+        WHERE ${dailyWhereSql}
+        GROUP BY 1 ORDER BY 1 ASC
+      `,
 
     // Number of submissions per LGA (grouped by LGA)
     prisma.collectSubmission.groupBy({
@@ -219,7 +235,58 @@ export async function getCampaignStats(
       where: baseWhere,
       _count: true,
     }),
+
+    // Verification coverage counts
+    Promise.all([
+      prisma.collectSubmission.count({
+        where: { ...baseWhere, voterIdNumber: { not: null } },
+      }),
+      prisma.collectSubmission.count({
+        where: { ...baseWhere, identityValue: { not: null } },
+      }),
+      // Real intersection — both VIN and identity present
+      prisma.collectSubmission.count({
+        where: {
+          ...baseWhere,
+          voterIdNumber: { not: null },
+          identityValue: { not: null },
+        },
+      }),
+      prisma.collectSubmission.count({
+        where: { ...baseWhere, supportGroupName: { not: null } },
+      }),
+    ]),
+
+    // Support group analytics: group by key only to correctly merge spelling variants
+    prisma.collectSubmission.groupBy({
+      by: ["supportGroupKey"],
+      where: { ...baseWhere, supportGroupKey: { not: null } },
+      _count: true,
+      orderBy: { _count: { supportGroupKey: "desc" } },
+      take: 10,
+    }),
   ]);
+
+  // Resolve a representative display name for each support group key.
+  // The inner lookup uses baseWhere (not just campaignId) so filtered views
+  // pick the most-common name within the active date/LGA/role slice.
+  const [withVin, withIdentity, withBoth, withSupportGroup] =
+    verificationCounts;
+  const byGroup = await Promise.all(
+    byGroupKeys.map(async (kg) => {
+      const top = await prisma.collectSubmission.groupBy({
+        by: ["supportGroupName"],
+        where: { ...baseWhere, supportGroupKey: kg.supportGroupKey },
+        _count: true,
+        orderBy: { _count: { supportGroupName: "desc" } },
+        take: 1,
+      });
+      return {
+        group: top[0]?.supportGroupName ?? kg.supportGroupKey ?? "",
+        count: kg._count,
+      };
+    }),
+  );
 
   // Calculate the cumulative (running) total for daily trend
   let cumulative = 0;
@@ -233,6 +300,11 @@ export async function getCampaignStats(
     total: totals.total,
     verified: totals.verified,
     flagged: totals.flagged,
+    withVin,
+    withIdentity,
+    withBoth,
+    withSupportGroup,
+    byGroup,
     daily,
     byLga: byLga.map((g) => ({ lga: g.lgaName, count: g._count })),
     byWard: disambiguateWards(byWard),
@@ -293,6 +365,8 @@ export async function getRecentSubmissions(
         pollingUnitName: true,
         pollingUnit: { select: { code: true } },
         role: true,
+        identityType: true,
+        supportGroupName: true,
         canvasserName: true,
         canvasserPhone: true,
         isVerified: true,
@@ -319,6 +393,8 @@ export async function getRecentSubmissions(
       pollingUnitName: s.pollingUnitName,
       pollingUnitCode: s.pollingUnit?.code ?? null,
       role: s.role,
+      identityType: s.identityType,
+      supportGroupName: s.supportGroupName,
       canvasserName: s.canvasserName,
       canvasserPhone: s.canvasserPhone,
       isVerified: s.isVerified,

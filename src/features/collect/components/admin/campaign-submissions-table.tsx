@@ -34,6 +34,8 @@ type CampaignSubmissionsTableProps = {
   onToggleSelectAll: () => void;
   onToggleSelect: (id: string) => void;
   onOpenSubmission: (submission: SubmissionWithPU) => void;
+  showGroupColumn?: boolean;
+  groupColumnLabel?: string;
 };
 
 export function CampaignSubmissionsTable({
@@ -45,6 +47,8 @@ export function CampaignSubmissionsTable({
   onToggleSelectAll,
   onToggleSelect,
   onOpenSubmission,
+  showGroupColumn = false,
+  groupColumnLabel = "Group",
 }: CampaignSubmissionsTableProps) {
   return (
     <>
@@ -103,6 +107,12 @@ export function CampaignSubmissionsTable({
                       {roleLabels[submission.role] || submission.role}
                     </Badge>
                   </AdminMobileRecordField>
+                  {showGroupColumn ? (
+                    <AdminMobileRecordField
+                      label={groupColumnLabel}
+                      value={submission.supportGroupName || "—"}
+                    />
+                  ) : null}
                   <AdminMobileRecordField
                     label="Submitted"
                     value={formatDisplayDateTime(submission.createdAt)}
@@ -147,6 +157,11 @@ export function CampaignSubmissionsTable({
               <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                 Role
               </TableHead>
+              {showGroupColumn && (
+                <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase md:table-cell">
+                  {groupColumnLabel}
+                </TableHead>
+              )}
               <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                 Status
               </TableHead>
@@ -206,6 +221,11 @@ export function CampaignSubmissionsTable({
                     {roleLabels[submission.role] || submission.role}
                   </Badge>
                 </TableCell>
+                {showGroupColumn && (
+                  <TableCell className="text-muted-foreground hidden max-w-[160px] truncate md:table-cell">
+                    {submission.supportGroupName || "—"}
+                  </TableCell>
+                )}
                 <TableCell>
                   <SubmissionStatusBadges submission={submission} />
                 </TableCell>

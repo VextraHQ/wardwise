@@ -99,7 +99,7 @@ export function AdminAccount() {
       {isLoading || !account ? (
         <LoadingState />
       ) : (
-        <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.2fr)_360px]">
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.2fr)_360px]">
           <div className="space-y-5">
             <ProfileCard
               name={account.name}
@@ -127,7 +127,7 @@ export function AdminAccount() {
             />
           </div>
 
-          <aside className="space-y-5 xl:sticky xl:top-16">
+          <aside className="space-y-5 lg:sticky lg:top-(--header-height) lg:z-10 lg:h-fit lg:self-start">
             <AccountRecordCard account={account} />
             <ActivityCard activity={activity} />
           </aside>

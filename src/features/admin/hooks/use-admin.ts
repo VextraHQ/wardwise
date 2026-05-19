@@ -134,8 +134,9 @@ export function useAdminAccount() {
   return useQuery({
     queryKey: ADMIN_ACCOUNT_KEY,
     queryFn: () => adminApi.account.get(),
-    staleTime: 60 * 1000,
-    refetchOnWindowFocus: false,
+    staleTime: 30 * 1000,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 }
 

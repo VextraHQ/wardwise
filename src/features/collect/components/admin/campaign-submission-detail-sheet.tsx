@@ -136,6 +136,16 @@ export function CampaignSubmissionDetailSheet({
 
               <Section label="Verification Info">
                 <Field
+                  label="Identity Type"
+                  value={
+                    selected.identityType === "membership"
+                      ? "Party Membership"
+                      : selected.identityType === "nin"
+                        ? "National ID (NIN)"
+                        : "—"
+                  }
+                />
+                <Field
                   label="Membership / NIN"
                   value={selected.identityValue || "—"}
                   mono
@@ -145,6 +155,12 @@ export function CampaignSubmissionDetailSheet({
                   value={selected.voterIdNumber || "—"}
                   mono
                 />
+                {selected.supportGroupName && (
+                  <Field
+                    label="Support Group"
+                    value={selected.supportGroupName}
+                  />
+                )}
               </Section>
 
               <Section label="Source & Context">

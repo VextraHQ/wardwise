@@ -311,7 +311,7 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-3">
       {/* Header: subtitle + stat pills — one row grid on narrow screens */}
       <div className="space-y-2 sm:space-y-3">
         <p className="text-muted-foreground text-[11px] leading-snug sm:text-xs">

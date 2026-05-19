@@ -239,6 +239,21 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           customQuestion2: d.customQuestion2,
         }),
         ...(d.status !== undefined && { status: d.status }),
+        ...(d.identityRequirement !== undefined && {
+          identityRequirement: d.identityRequirement,
+        }),
+        ...(d.voterIdRequirement !== undefined && {
+          voterIdRequirement: d.voterIdRequirement,
+        }),
+        ...(d.supportGroupFieldMode !== undefined && {
+          supportGroupFieldMode: d.supportGroupFieldMode,
+        }),
+        ...(d.supportGroupFieldLabel !== undefined && {
+          supportGroupFieldLabel: d.supportGroupFieldLabel,
+        }),
+        ...(d.receiptEmailMode !== undefined && {
+          receiptEmailMode: d.receiptEmailMode,
+        }),
         ...clientReportData,
       },
     });

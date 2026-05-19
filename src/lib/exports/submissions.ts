@@ -42,7 +42,12 @@ export async function buildSubmissionsExportTable(
 ): Promise<ExportTable | null> {
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },
-    select: { slug: true, customQuestion1: true, customQuestion2: true },
+    select: {
+      slug: true,
+      customQuestion1: true,
+      customQuestion2: true,
+      supportGroupFieldMode: true,
+    },
   });
 
   if (!campaign) {
@@ -75,7 +80,9 @@ export async function buildSubmissionsExportTable(
     "PU Code",
     "Polling Unit",
     "Membership / NIN",
+    "Identity Type",
     "VIN",
+    "Support Group",
     "Role",
     ...(campaign.customQuestion1 ? [campaign.customQuestion1] : []),
     ...(campaign.customQuestion2 ? [campaign.customQuestion2] : []),
@@ -112,10 +119,18 @@ export async function buildSubmissionsExportTable(
           : submission.identityValue,
       ),
       sanitizeSpreadsheetText(
+        submission.identityType === "membership"
+          ? "Party Membership"
+          : submission.identityType === "nin"
+            ? "National ID (NIN)"
+            : "",
+      ),
+      sanitizeSpreadsheetText(
         redacted
           ? redactId(submission.voterIdNumber)
           : submission.voterIdNumber,
       ),
+      sanitizeSpreadsheetText(submission.supportGroupName),
       sanitizeSpreadsheetText(submission.role),
       ...(campaign.customQuestion1
         ? [sanitizeSpreadsheetText(submission.customAnswer1)]

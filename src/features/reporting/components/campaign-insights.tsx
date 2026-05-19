@@ -196,7 +196,12 @@ export function CampaignInsights({ token }: { token: string }) {
         </TabsContent>
 
         <TabsContent value="supporters">
-          <InsightsSupporters token={token} />
+          <InsightsSupporters
+            token={token}
+            showGroupColumn={
+              (summary.campaign.supportGroupFieldMode ?? "off") !== "off"
+            }
+          />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">

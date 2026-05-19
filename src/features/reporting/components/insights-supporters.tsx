@@ -115,7 +115,13 @@ function Field({
   );
 }
 
-export function InsightsSupporters({ token }: { token: string }) {
+export function InsightsSupporters({
+  token,
+  showGroupColumn = false,
+}: {
+  token: string;
+  showGroupColumn?: boolean;
+}) {
   const isPortraitMobile = useIsPortraitMobile();
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
@@ -316,6 +322,11 @@ export function InsightsSupporters({ token }: { token: string }) {
                     <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                       Role
                     </TableHead>
+                    {showGroupColumn && (
+                      <TableHead className="text-muted-foreground hidden h-10 font-mono text-[10px] font-bold tracking-widest uppercase lg:table-cell">
+                        Group
+                      </TableHead>
+                    )}
                     <TableHead className="text-muted-foreground h-10 font-mono text-[10px] font-bold tracking-widest uppercase">
                       Status
                     </TableHead>
@@ -377,6 +388,11 @@ export function InsightsSupporters({ token }: { token: string }) {
                           {formatRole(submission.role)}
                         </Badge>
                       </TableCell>
+                      {showGroupColumn && (
+                        <TableCell className="text-muted-foreground hidden max-w-[140px] truncate text-xs lg:table-cell">
+                          {submission.supportGroupName || "—"}
+                        </TableCell>
+                      )}
                       <TableCell>
                         <div className="flex min-w-0 flex-wrap justify-end gap-1">
                           <SubmissionStatusBadge
@@ -602,6 +618,22 @@ export function InsightsSupporters({ token }: { token: string }) {
                     label="Role"
                     value={formatRole(selectedSubmission.role)}
                   />
+                  {selectedSubmission.identityType && (
+                    <Field
+                      label="Identity Type"
+                      value={
+                        selectedSubmission.identityType === "membership"
+                          ? "Party Membership"
+                          : "National ID (NIN)"
+                      }
+                    />
+                  )}
+                  {selectedSubmission.supportGroupName && (
+                    <Field
+                      label="Support Group"
+                      value={selectedSubmission.supportGroupName}
+                    />
+                  )}
                   <Field
                     label="Status"
                     value={
