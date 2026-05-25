@@ -28,12 +28,21 @@ export type CampaignReportSummary = {
     byWard: { ward: string; count: number }[];
     byRole: { role: string; count: number }[];
     bySex: { sex: string; count: number }[];
+    referredCount: number;
+    directCount: number;
+    knownSourceCount: number;
+    otherNameCount: number;
+    topKnownSources: {
+      id: string;
+      name: string;
+      phone: string;
+      count: number;
+    }[];
+    otherReferralNames: { name: string; phone: string | null; count: number }[];
   };
   health: {
     lastSubmissionAt: string | null;
-    canvasserCount: number;
     formStatus: string;
-    topCanvassers: { name: string; phone: string; count: number }[];
   };
 };
 
@@ -55,6 +64,7 @@ export type CampaignReportSubmission = {
   supportGroupName: string | null;
   canvasserName: string | null;
   canvasserPhone: string | null;
+  campaignCanvasserId: string | null;
   isVerified: boolean;
   isFlagged: boolean;
   createdAt: string;

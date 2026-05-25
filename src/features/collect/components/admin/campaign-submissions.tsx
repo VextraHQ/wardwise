@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComponentType } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
   IconFlag,
@@ -36,7 +36,7 @@ import {
 import type { Campaign } from "@/features/collect/types/collect.types";
 import { track } from "@/lib/analytics/client";
 import { adminCollectApi } from "@/features/collect/api/collect-api";
-import { roleLabels } from "@/features/collect/lib/analytics";
+import { formatRole } from "@/features/collect/lib/display-format";
 import {
   readPreferredExportFormat,
   writePreferredExportFormat,
@@ -102,6 +102,15 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
   const [canvasserPhoneFilter, setCanvasserPhoneFilter] = useState<
     string | null
   >(() => searchParams.get("canvasserPhone"));
+  const [canvasserIdFilter, setCanvasserIdFilter] = useState<string | null>(
+    () => searchParams.get("campaignCanvasserId"),
+  );
+  const [canvasserFilterLabel, setCanvasserFilterLabel] = useState<
+    string | null
+  >(
+    () =>
+      searchParams.get("canvasserLabel") || searchParams.get("canvasserName"),
+  );
   const [selected, setSelected] = useState<SubmissionWithPU | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [confirmDialog, setConfirmDialog] =
@@ -112,21 +121,18 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [allMatchingSelected, setAllMatchingSelected] = useState(false);
 
-  useEffect(() => {
-    const hasCanvasserParam = searchParams.has("canvasserName");
-    const hasRoleParam = searchParams.has("role");
-    if (hasCanvasserParam || hasRoleParam) {
-      const sp = new URLSearchParams(searchParams.toString());
-      sp.delete("canvasserName");
-      sp.delete("canvasserPhone");
-      sp.delete("role");
-      router.replace(`?${sp.toString()}`);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   const clearSelection = () => {
     setSelectedIds(new Set());
     setAllMatchingSelected(false);
+  };
+
+  const clearCanvasserDrilldown = () => {
+    const sp = new URLSearchParams(searchParams.toString());
+    sp.delete("canvasserName");
+    sp.delete("canvasserPhone");
+    sp.delete("campaignCanvasserId");
+    sp.delete("canvasserLabel");
+    router.replace(`?${sp.toString()}`);
   };
 
   const baseFilters: SubmissionActiveFilters = {
@@ -134,6 +140,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     role: roleFilter !== "all" ? roleFilter : undefined,
     canvasserName: canvasserFilter || undefined,
     canvasserPhone: canvasserPhoneFilter || undefined,
+    campaignCanvasserId: canvasserIdFilter || undefined,
   };
   const statusFilters = getReviewStatusFilters(reviewStatus);
   const activeFilters: SubmissionActiveFilters = {
@@ -275,10 +282,8 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
     const filters = [
       `Status: ${getReviewStatusLabel(reviewStatus)}`,
       search.trim() ? `Search: "${search.trim()}"` : null,
-      roleFilter !== "all"
-        ? `Role: ${roleLabels[roleFilter] || roleFilter}`
-        : null,
-      canvasserFilter ? `Canvasser: ${canvasserFilter}` : null,
+      roleFilter !== "all" ? `Role: ${formatRole(roleFilter)}` : null,
+      canvasserFilterLabel ? `Canvasser: ${canvasserFilterLabel}` : null,
     ].filter(Boolean);
 
     setConfirmDialog({
@@ -322,7 +327,12 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
           hasSearch: search.trim().length > 0,
           hasStatusFilter: reviewStatus !== "all",
           hasRoleFilter: roleFilter !== "all",
-          hasCanvasserFilter: Boolean(canvasserFilter || canvasserPhoneFilter),
+          hasCanvasserFilter: Boolean(
+            canvasserFilter ||
+            canvasserPhoneFilter ||
+            canvasserIdFilter ||
+            canvasserFilterLabel,
+          ),
         }),
       );
     } catch {
@@ -429,10 +439,13 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
           setPage(1);
           clearSelection();
         }}
-        canvasserFilter={canvasserFilter}
+        canvasserFilter={canvasserFilterLabel}
         onClearCanvasserFilter={() => {
           setCanvasserFilter(null);
           setCanvasserPhoneFilter(null);
+          setCanvasserIdFilter(null);
+          setCanvasserFilterLabel(null);
+          clearCanvasserDrilldown();
           setPage(1);
           clearSelection();
         }}

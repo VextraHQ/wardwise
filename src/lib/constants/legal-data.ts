@@ -26,8 +26,8 @@ export const COMPANY_INFO = {
   name: "WardWise",
   legalName: "Vextra Limited",
   companyWebsite: "https://vextralimited.com",
-  email: "info@wardwise.ng",
-  supportEmail: "support@wardwise.ng",
+  email: "info@vextralimited.com",
+  supportEmail: "info@vextralimited.com",
   address: "Abuja, Nigeria",
   website: "https://wardwise.ng",
 } as const;

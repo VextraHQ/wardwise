@@ -167,6 +167,16 @@ export async function submitRegistration(
     ? normalizeSupportGroupKey(rawSupportGroup)
     : null;
 
+  // Validate submitted canvasser ID belongs to this campaign (silently discard if stale/crafted)
+  let resolvedCanvasserId: string | null = null;
+  if (data.selectedCampaignCanvasserId) {
+    const canvasserMatch = await prisma.campaignCanvasser.findFirst({
+      where: { id: data.selectedCampaignCanvasserId, campaignId: campaign.id },
+      select: { id: true },
+    });
+    resolvedCanvasserId = canvasserMatch?.id ?? null;
+  }
+
   const wantsReceipt =
     Boolean(data.wantsEmailReceipt) &&
     Boolean(data.email) &&
@@ -203,6 +213,7 @@ export async function submitRegistration(
         customAnswer2: data.customAnswer2 || null,
         canvasserName: data.canvasserName || null,
         canvasserPhone: data.canvasserPhone || null,
+        campaignCanvasserId: resolvedCanvasserId,
         wantsEmailReceipt: wantsReceipt,
       },
     });

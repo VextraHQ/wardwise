@@ -96,7 +96,7 @@ export function ConfirmationScreen(props: ConfirmationScreenProps) {
         aria-live="polite"
         aria-atomic="true"
       >
-        <div className="mb-5 flex justify-center">
+        <div className="mb-5 flex justify-center py-2">
           <div className="relative">
             {props.state === "confirmed" ? (
               <>

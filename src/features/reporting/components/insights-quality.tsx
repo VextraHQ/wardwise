@@ -54,16 +54,26 @@ function DetailNote({ children }: { children: React.ReactNode }) {
   );
 }
 
+function SectionEyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+      {children}
+    </p>
+  );
+}
+
 function CoverageRow({
   label,
   value,
   total,
   color,
+  description,
 }: {
   label: string;
   value: number;
   total: number;
   color: string;
+  description?: string;
 }) {
   const percent = pct(total, value);
 
@@ -81,6 +91,53 @@ function CoverageRow({
           style={{
             width: `${Math.max(percent, value > 0 ? 4 : 0)}%`,
             backgroundColor: color,
+          }}
+        />
+      </div>
+      {description ? (
+        <p className="text-muted-foreground text-xs leading-relaxed">
+          {description}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function ReviewProgressCard({
+  verified,
+  total,
+}: {
+  verified: number;
+  total: number;
+}) {
+  const percent = pct(total, verified);
+
+  return (
+    <div className="bg-muted/20 border-border/60 space-y-3 rounded-sm border px-3 py-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-foreground text-sm font-semibold">
+            Verified by admin
+          </p>
+          <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+            Records the campaign team has already reviewed and confirmed.
+          </p>
+        </div>
+        <div className="shrink-0 text-right">
+          <p className="font-mono text-lg font-semibold tabular-nums">
+            {verified.toLocaleString()}
+          </p>
+          <p className="text-muted-foreground font-mono text-xs">
+            {percent}% of total
+          </p>
+        </div>
+      </div>
+      <div className="bg-muted h-1.5 overflow-hidden rounded-full">
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${Math.max(percent, verified > 0 ? 4 : 0)}%`,
+            backgroundColor: "var(--chart-4)",
           }}
         />
       </div>
@@ -132,6 +189,7 @@ export function InsightsQuality({
   withVin,
   withIdentity,
   withBoth,
+  withoutVinAndIdentity,
   withSupportGroup,
   byGroup,
   showGroupStats,
@@ -141,17 +199,15 @@ export function InsightsQuality({
   withVin: number;
   withIdentity: number;
   withBoth: number;
+  withoutVinAndIdentity: number;
   withSupportGroup: number;
   byGroup: { group: string; count: number }[];
   showGroupStats: boolean;
 }) {
   const topGroup = byGroup[0];
-  const topGroups = byGroup.slice(0, 6);
-  const combinedLeaders = byGroup
-    .slice(0, 3)
-    .reduce((sum, item) => sum + item.count, 0);
+  const topGroups = byGroup.slice(0, 5);
+  const combinedLeaders = topGroups.reduce((sum, item) => sum + item.count, 0);
   const groupCaptureRate = pctLabel(total, withSupportGroup);
-  const missingVin = Math.max(total - withVin, 0);
   const groupChartData = topGroups.map((group) => ({
     group: group.group,
     count: group.count,
@@ -171,70 +227,54 @@ export function InsightsQuality({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            A quick look at how many supporters shared their VIN, NIN or
-            membership details, or both in this view.
-          </p>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <QualityStat
-              label="VIN Shared"
-              value={withVin.toLocaleString()}
-              subtitle={pctLabel(total, withVin)}
-            />
-            <QualityStat
-              label="VIN Missing"
-              value={missingVin.toLocaleString()}
-              subtitle={pctLabel(total, missingVin)}
-            />
-            <QualityStat
-              label="NIN / Membership"
-              value={withIdentity.toLocaleString()}
-              subtitle={pctLabel(total, withIdentity)}
-            />
-            <QualityStat
-              label="Both Shared"
-              value={withBoth.toLocaleString()}
-              subtitle={pctLabel(total, withBoth)}
-            />
+          <div className="space-y-3">
+            <div className="space-y-3 rounded-sm border border-dashed px-3 py-3">
+              <CoverageRow
+                label="Supporters who shared VIN"
+                value={withVin}
+                total={total}
+                color="var(--chart-1)"
+                description="Helps confirm polling-unit registration and avoid duplicate VIN entries."
+              />
+              <CoverageRow
+                label="Supporters who shared NIN or membership"
+                value={withIdentity}
+                total={total}
+                color="var(--chart-2)"
+                description="Shows how many supporters shared one of the core identity details available in this campaign."
+              />
+              <CoverageRow
+                label="Supporters who shared both"
+                value={withBoth}
+                total={total}
+                color="var(--chart-3)"
+                description="These records are the most complete for follow-up and verification work."
+              />
+              <CoverageRow
+                label="Supporters who shared neither VIN nor NIN or membership"
+                value={withoutVinAndIdentity}
+                total={total}
+                color="var(--muted-foreground)"
+                description="These supporters did not share any verification details."
+              />
+            </div>
           </div>
 
-          <div className="space-y-3 rounded-sm border border-dashed px-3 py-3">
-            <CoverageRow
-              label="Supporters who shared VIN"
-              value={withVin}
-              total={total}
-              color="var(--chart-1)"
-            />
-            <CoverageRow
-              label="Supporters who shared NIN or membership"
-              value={withIdentity}
-              total={total}
-              color="var(--chart-2)"
-            />
-            <CoverageRow
-              label="Supporters who shared both"
-              value={withBoth}
-              total={total}
-              color="var(--chart-3)"
-            />
-            <CoverageRow
-              label="Verified by admin"
-              value={verified}
-              total={total}
-              color="var(--chart-4)"
-            />
+          <div className="space-y-3">
+            <SectionEyebrow>Admin Review Progress</SectionEyebrow>
+            <ReviewProgressCard verified={verified} total={total} />
           </div>
 
-          <DetailNote>
-            {withBoth === 0
-              ? "Supporters are coming in, but none in this view have shared both VIN and NIN or membership details yet."
-              : `${withBoth.toLocaleString()} supporters in this view shared both VIN and NIN or membership details, making follow-up cleaner for the campaign team.`}
-          </DetailNote>
+          {withBoth === 0 ? (
+            <DetailNote>
+              Supporters are coming in, but none in this view have shared both
+              VIN and NIN or membership details yet.
+            </DetailNote>
+          ) : null}
 
           <p className="text-muted-foreground text-xs leading-relaxed">
-            Verified is separate from supporter count. It shows records the
-            admin team has already checked.
+            Shared details come from supporters during registration. Verified
+            records are a separate admin review step.
           </p>
         </CardContent>
       </Card>
@@ -264,10 +304,10 @@ export function InsightsQuality({
               <>
                 <div className="space-y-3">
                   <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-                    Group Leaders
+                    Leading Groups
                   </p>
 
-                  <GroupRankedList items={topGroups.slice(0, 5)} />
+                  <GroupRankedList items={topGroups} />
 
                   <div className="hidden lg:block">
                     <ChartContainer
@@ -308,7 +348,7 @@ export function InsightsQuality({
 
                 <DetailNote>
                   {combinedLeaders > 0
-                    ? `The top ${Math.min(byGroup.length, 3)} group${byGroup.length > 1 ? "s" : ""} account for ${combinedLeaders.toLocaleString()} tagged supporters in this view.`
+                    ? `Showing the top ${topGroups.length} group${topGroups.length > 1 ? "s" : ""} in this view. Together they account for ${combinedLeaders.toLocaleString()} tagged supporters${byGroup.length > topGroups.length ? ". Use Supporters to browse every tagged supporter." : "."}`
                     : "Support-group trends will appear here once supporters begin tagging themselves."}
                 </DetailNote>
               </>

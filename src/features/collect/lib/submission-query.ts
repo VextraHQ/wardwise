@@ -15,6 +15,7 @@ export type SubmissionFilters = {
   isVerified?: boolean;
   canvasserName?: string;
   canvasserPhone?: string;
+  campaignCanvasserId?: string;
 };
 
 export function parseSubmissionFilters(
@@ -29,6 +30,10 @@ export function parseSubmissionFilters(
     isVerified: parseBooleanParam(searchParams.get("isVerified")),
     canvasserName: parseOptionalStringParam(searchParams, "canvasserName"),
     canvasserPhone: parseOptionalStringParam(searchParams, "canvasserPhone"),
+    campaignCanvasserId: parseOptionalStringParam(
+      searchParams,
+      "campaignCanvasserId",
+    ),
   };
 }
 
@@ -67,6 +72,9 @@ export function buildSubmissionWhere(
     };
   }
   if (filters.canvasserPhone) where.canvasserPhone = filters.canvasserPhone;
+  if (filters.campaignCanvasserId) {
+    where.campaignCanvasserId = filters.campaignCanvasserId;
+  }
 
   return where;
 }

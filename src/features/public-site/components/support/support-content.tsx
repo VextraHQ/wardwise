@@ -30,6 +30,14 @@ const categoryNames = {
   technical: "Technical Issues",
 } as const;
 
+const supportChannelIcons = {
+  email: HiMail,
+  website: HiGlobeAlt,
+  phone: HiMail,
+  whatsapp: HiMail,
+  twitter: HiMail,
+} as const;
+
 function FAQAccordion({
   items,
   category,
@@ -120,14 +128,18 @@ export function SupportContent() {
             </div>
 
             <div className="divide-border/60 divide-y">
-              {supportChannels.map((channel) => (
-                <Link
-                  key={channel.name}
-                  href={channel.href}
-                  className="hover:bg-primary/5 flex items-start gap-3 px-5 py-4 transition-colors"
-                >
+              {supportChannels.map((channel) => {
+                const ChannelIcon =
+                  supportChannelIcons[channel.icon] ?? HiMail;
+
+                return (
+                  <Link
+                    key={channel.name}
+                    href={channel.href}
+                    className="hover:bg-primary/5 flex items-start gap-3 px-5 py-4 transition-colors"
+                  >
                   <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-sm">
-                    <HiMail className="size-4" />
+                    <ChannelIcon className="size-4" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="text-foreground text-sm font-semibold">
@@ -140,8 +152,9 @@ export function SupportContent() {
                       {channel.contact}
                     </p>
                   </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           </div>
 

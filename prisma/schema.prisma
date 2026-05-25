@@ -196,13 +196,14 @@ model Campaign {
 }
 
 model CampaignCanvasser {
-  id         String   @id @default(cuid())
-  campaignId String
-  name       String
-  phone      String
-  zone       String?
-  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
+  id          String              @id @default(cuid())
+  campaignId  String
+  name        String
+  phone       String
+  zone        String?
+  campaign    Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  submissions CollectSubmission[]
+  createdAt   DateTime            @default(now())
 
   @@unique([campaignId, phone])
 }
@@ -241,9 +242,11 @@ model CollectSubmission {
   role            String // "volunteer" | "member" | "canvasser"
   customAnswer1   String?
   customAnswer2   String?
-  canvasserName   String?
-  canvasserPhone  String?
-  isFlagged       Boolean                @default(false)
+  canvasserName       String?
+  canvasserPhone      String?
+  campaignCanvasserId String?
+  campaignCanvasser   CampaignCanvasser?     @relation(fields: [campaignCanvasserId], references: [id], onDelete: SetNull)
+  isFlagged           Boolean                @default(false)
   adminNotes      String?
   createdAt       DateTime               @default(now())
   auditEntries    SubmissionAuditEntry[]

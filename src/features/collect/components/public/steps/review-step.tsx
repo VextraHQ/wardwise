@@ -220,7 +220,7 @@ export function ReviewStep({
         : "Referred by a canvasser"
       : hasCanvasser === false
         ? "Not referred by a canvasser"
-        : "Canvasser referral not answered";
+        : "Canvasser Referral not answered";
   const canvasserDetail =
     hasCanvasser && values.canvasserPhone?.trim()
       ? values.canvasserPhone.trim()

@@ -7,7 +7,7 @@ import { getCollectErrorCategory, track } from "@/lib/analytics/client";
 import {
   getFailedSubmissionById,
   type SyncResult,
-} from "@/features/collect/lib/offline-queue";
+} from "@/features/collect/lib/offline/offline-queue";
 import type { RegistrationFormData } from "@/features/collect/schemas/collect-schemas";
 import { composeFullName, generateRefCode } from "@/lib/utils";
 

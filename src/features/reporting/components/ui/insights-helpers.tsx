@@ -44,7 +44,7 @@ export function SubmissionStatusBadge({
       variant="outline"
       className="rounded-sm border-orange-500/20 bg-orange-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-orange-600 uppercase"
     >
-      Pending Review
+      Pending
     </Badge>
   );
 }

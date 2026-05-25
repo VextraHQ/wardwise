@@ -47,9 +47,7 @@ export function formatMaritalStatusDisplay(
 ): string {
   if (!value?.trim()) return "—";
   const trimmed = value.trim();
-  return (
-    MARITAL_STATUS_LABELS.get(trimmed.toLowerCase()) ?? titleCase(trimmed)
-  );
+  return MARITAL_STATUS_LABELS.get(trimmed.toLowerCase()) ?? titleCase(trimmed);
 }
 
 /** Formats an occupation value for display */
@@ -61,7 +59,17 @@ export function formatOccupationDisplay(
   return OCCUPATION_LABELS.get(trimmed.toLowerCase()) ?? titleCase(trimmed);
 }
 
-/** Formats a role name to title case */
+/** Known Collect registration roles (incl. legacy stored values). */
+export const COLLECT_ROLE_LABELS: Record<string, string> = {
+  volunteer: "Volunteer",
+  member: "Member",
+  canvasser: "Canvasser",
+  women_leader: "Women Leader",
+  coordinator: "Coordinator",
+  youth_leader: "Youth Leader",
+};
+
+/** Formats a submission/form role for display. */
 export function formatRole(role: string): string {
-  return capitalize(role);
+  return COLLECT_ROLE_LABELS[role] ?? role;
 }

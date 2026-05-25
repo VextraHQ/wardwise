@@ -1,7 +1,7 @@
 import {
   openOfflineDb,
   PENDING_SUBMISSIONS_STORE as STORE_NAME,
-} from "@/features/collect/lib/offline-storage";
+} from "@/features/collect/lib/offline/offline-storage";
 
 /** Opens the database */
 function openDb(): Promise<IDBDatabase> {

@@ -22,6 +22,8 @@ describe("display-format", () => {
     expect(formatSexDisplay("male")).toBe("Male");
     expect(formatMaritalStatusDisplay("widowed")).toBe("Widowed");
     expect(formatRole("canvasser")).toBe("Canvasser");
+    expect(formatRole("women_leader")).toBe("Women Leader");
+    expect(formatRole("custom_role_slug")).toBe("custom_role_slug");
   });
 
   it("title-cases underscore and hyphen separated values", () => {

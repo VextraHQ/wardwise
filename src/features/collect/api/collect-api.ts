@@ -6,8 +6,9 @@ import type {
   GeoLga,
   GeoWard,
   GeoPollingUnit,
-  CanvasserSummary,
   CampaignCanvasserRecord,
+  ReferralActivityItem,
+  PossibleMatch,
 } from "@/features/collect/types/collect.types";
 
 // Filters for listing submissions (pagination & search)
@@ -22,6 +23,7 @@ export type SubmissionListFilters = {
   isVerified?: boolean;
   canvasserName?: string;
   canvasserPhone?: string;
+  campaignCanvasserId?: string;
 };
 
 // Used for bulk actions on submissions (like bulk verify/delete)
@@ -241,6 +243,7 @@ export const adminCollectApi = {
             : undefined,
         canvasserName: params?.canvasserName,
         canvasserPhone: params?.canvasserPhone,
+        campaignCanvasserId: params?.campaignCanvasserId,
       })}`,
     ),
 
@@ -293,6 +296,7 @@ export const adminCollectApi = {
       isVerified?: boolean;
       canvasserName?: string;
       canvasserPhone?: string;
+      campaignCanvasserId?: string;
       format?: "csv" | "xlsx";
       redacted?: boolean;
     },
@@ -312,6 +316,7 @@ export const adminCollectApi = {
           : undefined,
       canvasserName: filters?.canvasserName,
       canvasserPhone: filters?.canvasserPhone,
+      campaignCanvasserId: filters?.campaignCanvasserId,
       format: filters?.format || "csv",
       redacted: filters?.redacted ? "true" : undefined,
     });
@@ -330,11 +335,13 @@ export const adminCollectApi = {
     filters?: {
       search?: string;
       format?: "csv" | "xlsx";
+      type?: "known" | "manual";
     },
   ) => {
     const params = qs({
       search: filters?.search,
       format: filters?.format || "csv",
+      type: filters?.type,
     });
     const response = await fetch(
       `/api/admin/collect/campaigns/${campaignId}/canvassers/export${params}`,
@@ -346,11 +353,11 @@ export const adminCollectApi = {
   },
 
   // ----- Canvasser Management -----
-  // Get all canvassers for a campaign
+  // Get all canvassers for a campaign (roster + referral activity)
   getCanvassers: (campaignId: string) =>
     adminApiCall<{
       preloaded: CampaignCanvasserRecord[];
-      canvassers: CanvasserSummary[];
+      referralActivity: ReferralActivityItem[];
       selfIdentifiedCount: number;
     }>(`/campaigns/${campaignId}/canvassers`),
 
@@ -369,6 +376,26 @@ export const adminCollectApi = {
     adminApiCall<{ success: boolean }>(
       `/campaigns/${campaignId}/canvassers/${canvasserId}`,
       { method: "DELETE" },
+    ),
+
+  // Get possible matches between manual referral names and roster canvassers
+  getCanvasserMatches: (campaignId: string) =>
+    adminApiCall<{ matches: PossibleMatch[] }>(
+      `/campaigns/${campaignId}/canvassers/matches`,
+    ),
+
+  // Link manual referral submissions to a stable roster canvasser
+  linkToRoster: (
+    campaignId: string,
+    data: {
+      manualName: string;
+      manualPhone: string | null;
+      canvasserId: string;
+    },
+  ) =>
+    adminApiCall<{ linkedCount: number }>(
+      `/campaigns/${campaignId}/canvassers/link`,
+      { method: "POST", body: JSON.stringify(data) },
     ),
 
   // ----- Aggregated Stats / Dashboard -----

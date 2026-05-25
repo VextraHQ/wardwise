@@ -8,7 +8,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CampaignOverviewDateFilter } from "@/features/collect/components/admin/campaign-overview-date-filter";
-import { roleLabels } from "@/features/collect/lib/analytics";
+import { formatRole } from "@/features/collect/lib/display-format";
 import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import {
   ChartContainer,
@@ -376,7 +376,7 @@ export function CampaignOverview({ campaignId }: { campaignId: string }) {
                     key={r.role}
                     className="flex items-center justify-between text-sm"
                   >
-                    <span>{roleLabels[r.role] || r.role}</span>
+                    <span>{formatRole(r.role)}</span>
                     <span className="font-mono font-medium tabular-nums">
                       {r.count}
                     </span>

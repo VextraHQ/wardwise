@@ -22,8 +22,16 @@ export async function GET(
       request.nextUrl.searchParams.get("format"),
     );
     const search = request.nextUrl.searchParams.get("search") || undefined;
+    const typeParam = request.nextUrl.searchParams.get("type");
+    const type =
+      typeParam === "known" || typeParam === "manual"
+        ? typeParam
+        : undefined;
 
-    const table = await buildCanvasserLeaderboardExportTable(id, { search });
+    const table = await buildCanvasserLeaderboardExportTable(id, {
+      search,
+      type,
+    });
     if (!table) {
       return NextResponse.json(
         { error: "Campaign not found" },

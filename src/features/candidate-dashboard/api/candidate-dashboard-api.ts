@@ -5,7 +5,7 @@
  * and demographic breakdowns.
  *
  * MOCK vs PRODUCTION:
- * - Mock: Uses candidate analytics from @/features/candidate-dashboard/lib/analytics
+ * - Mock: Uses voter metrics from @/features/candidate-dashboard/lib/mock-voter-metrics
  * - Mock: Filters supporters with pagination, search, date ranges
  * - Production: Replace with real API endpoints that query database
  *
@@ -20,7 +20,7 @@ import type {
   getCandidateDashboardData,
   getWardCoverage,
   getDemographics,
-} from "@/features/candidate-dashboard/lib/analytics";
+} from "@/features/candidate-dashboard/lib/mock-voter-metrics";
 
 // Simple helper for API calls (for real API)
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -62,7 +62,7 @@ export const dashboardApi = {
       );
       await new Promise((resolve) => setTimeout(resolve, 800));
       const { getCandidateDashboardData } =
-        await import("@/features/candidate-dashboard/lib/analytics");
+        await import("@/features/candidate-dashboard/lib/mock-voter-metrics");
       const dashboard = getCandidateDashboardData(candidateId);
       return { dashboard };
     }
@@ -173,7 +173,7 @@ export const dashboardApi = {
       console.log(`🏘️ Mock: Getting ward data for candidate ${candidateId}`);
       await new Promise((resolve) => setTimeout(resolve, 500));
       const { getWardCoverage } =
-        await import("@/features/candidate-dashboard/lib/analytics");
+        await import("@/features/candidate-dashboard/lib/mock-voter-metrics");
       const wardData = getWardCoverage(candidateId);
       return { wardData };
     }
@@ -192,7 +192,7 @@ export const dashboardApi = {
       console.log(`📊 Mock: Getting demographics for candidate ${candidateId}`);
       await new Promise((resolve) => setTimeout(resolve, 400));
       const { getDemographics } =
-        await import("@/features/candidate-dashboard/lib/analytics");
+        await import("@/features/candidate-dashboard/lib/mock-voter-metrics");
       const demographics = getDemographics(candidateId);
       return { demographics };
     }

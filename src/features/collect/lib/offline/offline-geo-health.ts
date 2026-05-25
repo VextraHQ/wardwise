@@ -12,7 +12,7 @@
  * Note: If allowed LGAs couldn't be fetched (freshAllowedSet is null), ignore scope_invalid.
  */
 
-import type { OfflineGeoPack } from "@/features/collect/lib/offline-geo-pack";
+import type { OfflineGeoPack } from "@/features/collect/lib/offline/offline-geo-pack";
 
 export type OfflineGeoHealth =
   | "no_pack"

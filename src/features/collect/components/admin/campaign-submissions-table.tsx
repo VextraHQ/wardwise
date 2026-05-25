@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { roleLabels } from "@/features/collect/lib/analytics";
+import { formatRole } from "@/features/collect/lib/display-format";
 import { formatPU } from "@/features/collect/lib/campaign-submissions";
 import { formatDisplayDateTime } from "@/lib/date-format";
 import { formatGeoDisplayName } from "@/features/geo/lib/display";
@@ -104,7 +104,7 @@ export function CampaignSubmissionsTable({
                       variant="outline"
                       className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
                     >
-                      {roleLabels[submission.role] || submission.role}
+                      {formatRole(submission.role)}
                     </Badge>
                   </AdminMobileRecordField>
                   {showGroupColumn ? (
@@ -218,7 +218,7 @@ export function CampaignSubmissionsTable({
                     variant="outline"
                     className="rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase"
                   >
-                    {roleLabels[submission.role] || submission.role}
+                    {formatRole(submission.role)}
                   </Badge>
                 </TableCell>
                 {showGroupColumn && (
@@ -269,7 +269,7 @@ function SubmissionStatusBadges({
           variant="outline"
           className="rounded-sm border-orange-500/20 bg-orange-500/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest text-orange-600 uppercase"
         >
-          Pending Review
+          Pending
         </Badge>
       )}
     </div>

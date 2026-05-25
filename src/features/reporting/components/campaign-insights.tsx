@@ -12,6 +12,7 @@ import { InsightsBreakdown } from "./insights-breakdown";
 import { InsightsQuality } from "./insights-quality";
 import { CampaignInsightsHeader } from "./campaign-insights-header";
 import { InsightsOverview, ReadyToCollectState } from "./insights-overview";
+import { InsightsReferral } from "./insights-referral";
 import {
   useCampaignReportSubmissions,
   useCampaignReportSummary,
@@ -167,6 +168,13 @@ export function CampaignInsights({ token }: { token: string }) {
       ? `${scope.activeScopeLabel} vs prior period`
       : scope.activeScopeLabel;
   const filterSource = filterOptionSummary ?? summary;
+  const withoutVinAndIdentity = Math.max(
+    0,
+    summary.stats.total -
+      (summary.stats.withVin +
+        summary.stats.withIdentity -
+        summary.stats.withBoth),
+  );
 
   return (
     <div className="space-y-4">
@@ -238,6 +246,7 @@ export function CampaignInsights({ token }: { token: string }) {
                 withVin={summary.stats.withVin}
                 withIdentity={summary.stats.withIdentity}
                 withBoth={summary.stats.withBoth}
+                withoutVinAndIdentity={withoutVinAndIdentity}
                 withSupportGroup={summary.stats.withSupportGroup}
                 byGroup={summary.stats.byGroup}
                 showGroupStats={
@@ -251,6 +260,12 @@ export function CampaignInsights({ token }: { token: string }) {
               <InsightsBreakdown
                 byRole={summary.stats.byRole}
                 bySex={summary.stats.bySex}
+              />
+              <InsightsReferral
+                referredCount={summary.stats.referredCount}
+                directCount={summary.stats.directCount}
+                topKnownSources={summary.stats.topKnownSources}
+                otherReferralNames={summary.stats.otherReferralNames}
               />
             </>
           )}

@@ -252,6 +252,36 @@ export function useRemoveCanvasser(campaignId: string) {
   });
 }
 
+// Fetches possible matches between manual referral names and roster canvassers.
+export function useCanvasserPossibleMatches(campaignId: string) {
+  return useQuery({
+    queryKey: ["canvasser-matches", campaignId],
+    queryFn: () => adminCollectApi.getCanvasserMatches(campaignId),
+    enabled: !!campaignId,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+// Links a group of manual referral submissions to a stable roster canvasser.
+export function useLinkToRoster(campaignId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      manualName: string;
+      manualPhone: string | null;
+      canvasserId: string;
+    }) => adminCollectApi.linkToRoster(campaignId, data),
+    onSuccess: () => {
+      void qc.invalidateQueries({
+        queryKey: ["campaign-canvassers", campaignId],
+      });
+      void qc.invalidateQueries({
+        queryKey: ["canvasser-matches", campaignId],
+      });
+    },
+  });
+}
+
 // Retrieves the cryptographic event trail for a specific submission record.
 export function useSubmissionAudit(sid: string | null) {
   return useQuery({

@@ -81,13 +81,18 @@ export type CampaignStats = {
   byWard: { ward: string; count: number }[];
   byRole: { role: string; count: number }[];
   bySex: { sex: string; count: number }[];
+  // Referral attribution (filter-aware)
+  referredCount: number;
+  directCount: number;
+  knownSourceCount: number;
+  otherNameCount: number;
+  topKnownSources: { id: string; name: string; phone: string; count: number }[];
+  otherReferralNames: { name: string; phone: string | null; count: number }[];
 };
 
 export type CampaignHealth = {
   lastSubmissionAt: string | null;
-  canvasserCount: number;
   formStatus: string;
-  topCanvassers: { name: string; phone: string; count: number }[];
 };
 
 // A simplified submission for dashboards (all relevant info, lighter than the full model)
@@ -109,6 +114,7 @@ export type LightSubmission = {
   role: string;
   canvasserName: string | null;
   canvasserPhone: string | null;
+  campaignCanvasserId: string | null;
   isVerified: boolean;
   isFlagged: boolean;
   createdAt: string;
@@ -178,6 +184,10 @@ export async function getCampaignStats(
     bySex,
     verificationCounts,
     byGroupKeys,
+    referralCounts,
+    topKnownSourcesRaw,
+    otherReferralNamesRaw,
+    otherNameCount,
   ] = await Promise.all([
     // Total, verified and flagged submissions
     prisma.collectSubmission
@@ -265,6 +275,76 @@ export async function getCampaignStats(
       orderBy: { _count: { supportGroupKey: "desc" } },
       take: 10,
     }),
+
+    // Referral: referred (has canvasserName) vs direct (no canvasserName)
+    Promise.all([
+      prisma.collectSubmission.count({
+        where: { ...baseWhere, canvasserName: { not: null } },
+      }),
+      prisma.collectSubmission.count({
+        where: { ...baseWhere, canvasserName: null },
+      }),
+    ]),
+
+    // Top known sources: group by stable campaignCanvasserId (linked submissions)
+    prisma.collectSubmission
+      .groupBy({
+        by: ["campaignCanvasserId"],
+        where: { ...baseWhere, campaignCanvasserId: { not: null } },
+        _count: true,
+        orderBy: { _count: { campaignCanvasserId: "desc" } },
+      })
+      .then(async (groups) => {
+        const ids = groups.map((g) => g.campaignCanvasserId!);
+        if (ids.length === 0) return [];
+        const canvassers = await prisma.campaignCanvasser.findMany({
+          where: { id: { in: ids } },
+          select: { id: true, name: true, phone: true },
+        });
+        const map = new Map(canvassers.map((c) => [c.id, c]));
+        return groups
+          .map((g) => ({
+            id: g.campaignCanvasserId!,
+            name: map.get(g.campaignCanvasserId!)?.name ?? "Unknown",
+            phone: map.get(g.campaignCanvasserId!)?.phone ?? "",
+            count: g._count,
+          }))
+          .filter((x) => map.has(x.id));
+      }),
+
+    // Other referral names: manual entries without a stable link, top 20 for display
+    prisma.collectSubmission
+      .groupBy({
+        by: ["canvasserName", "canvasserPhone"],
+        where: {
+          ...baseWhere,
+          campaignCanvasserId: null,
+          canvasserName: { not: null },
+        },
+        _count: true,
+        orderBy: { _count: { canvasserName: "desc" } },
+        take: 20,
+      })
+      .then((groups) =>
+        groups.map((g) => ({
+          name: g.canvasserName!,
+          phone: g.canvasserPhone ?? null,
+          count: g._count,
+        })),
+      ),
+
+    // True count of distinct manual referral sources (not capped by take:20)
+    prisma.collectSubmission
+      .groupBy({
+        by: ["canvasserName", "canvasserPhone"],
+        where: {
+          ...baseWhere,
+          campaignCanvasserId: null,
+          canvasserName: { not: null },
+        },
+        _count: true,
+      })
+      .then((groups) => groups.length),
   ]);
 
   // Resolve a representative display name for each support group key.
@@ -296,6 +376,8 @@ export async function getCampaignStats(
     return { date: d.date, count, cumulative };
   });
 
+  const [referredCount, directCount] = referralCounts;
+
   return {
     total: totals.total,
     verified: totals.verified,
@@ -310,6 +392,12 @@ export async function getCampaignStats(
     byWard: disambiguateWards(byWard),
     byRole: byRole.map((g) => ({ role: g.role, count: g._count })),
     bySex: bySex.map((g) => ({ sex: g.sex, count: g._count })),
+    referredCount,
+    directCount,
+    knownSourceCount: topKnownSourcesRaw.length,
+    otherNameCount,
+    topKnownSources: topKnownSourcesRaw,
+    otherReferralNames: otherReferralNamesRaw,
   };
 }
 
@@ -369,6 +457,7 @@ export async function getRecentSubmissions(
         supportGroupName: true,
         canvasserName: true,
         canvasserPhone: true,
+        campaignCanvasserId: true,
         isVerified: true,
         isFlagged: true,
         createdAt: true,
@@ -397,6 +486,7 @@ export async function getRecentSubmissions(
       supportGroupName: s.supportGroupName,
       canvasserName: s.canvasserName,
       canvasserPhone: s.canvasserPhone,
+      campaignCanvasserId: s.campaignCanvasserId,
       isVerified: s.isVerified,
       isFlagged: s.isFlagged,
       createdAt: s.createdAt.toISOString(),
@@ -405,45 +495,24 @@ export async function getRecentSubmissions(
   };
 }
 
-// Fetch campaign health/summary: last submission time, canvassers, form status, top canvassers by submissions
+// Fetch campaign health/summary: last submission time and form status
 export async function getCampaignHealth(
   campaignId: string,
 ): Promise<CampaignHealth> {
-  // Multi-query for performance: status, most recent submission, canvasser count, and top canvassers
-  const [campaign, lastSubmission, canvasserCount, topCanvassers] =
-    await Promise.all([
-      prisma.campaign.findUnique({
-        where: { id: campaignId },
-        select: { status: true },
-      }),
-      prisma.collectSubmission.findFirst({
-        where: { campaignId },
-        orderBy: { createdAt: "desc" },
-        select: { createdAt: true },
-      }),
-      prisma.campaignCanvasser.count({ where: { campaignId } }),
-      prisma.collectSubmission.groupBy({
-        by: ["canvasserName", "canvasserPhone"],
-        where: {
-          campaignId,
-          canvasserName: { not: null },
-        },
-        _count: true,
-        orderBy: { _count: { canvasserName: "desc" } },
-        take: 5,
-      }),
-    ]);
+  const [campaign, lastSubmission] = await Promise.all([
+    prisma.campaign.findUnique({
+      where: { id: campaignId },
+      select: { status: true },
+    }),
+    prisma.collectSubmission.findFirst({
+      where: { campaignId },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    }),
+  ]);
 
   return {
     lastSubmissionAt: lastSubmission?.createdAt.toISOString() ?? null,
-    canvasserCount,
     formStatus: campaign?.status ?? "draft",
-    topCanvassers: topCanvassers
-      .filter((row) => row.canvasserName)
-      .map((row) => ({
-        name: row.canvasserName ?? "Unknown",
-        phone: row.canvasserPhone ?? "—",
-        count: row._count,
-      })),
   };
 }

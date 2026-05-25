@@ -6,13 +6,13 @@ import { publicCollectApi } from "@/features/collect/api/collect-api";
 import {
   computeOfflineGeoHealth,
   type OfflineGeoHealth,
-} from "@/features/collect/lib/offline-geo-health";
+} from "@/features/collect/lib/offline/offline-geo-health";
 import {
   clearOfflineGeoPack,
   getOfflineGeoPack,
   saveOfflineGeoPack,
   type OfflineGeoPack,
-} from "@/features/collect/lib/offline-geo-pack";
+} from "@/features/collect/lib/offline/offline-geo-pack";
 import type {
   GeoLga,
   GeoWard,
@@ -36,7 +36,7 @@ export type UseCollectOfflineGeoReturn = {
 /**
  * Handles per-campaign offline geo data, storing it in IndexedDB.
  * The logic for checking how "healthy" (up-to-date/synced) the offline data is,
- * lives in '@/features/collect/lib/offline-geo-health'.
+ * lives in '@/features/collect/lib/offline/offline-geo-health'.
  */
 export function useCollectOfflineGeo(
   campaign: PublicCampaign,

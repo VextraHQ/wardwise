@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { HiUser, HiPhone, HiUsers, HiCheckCircle } from "react-icons/hi";
 import { motion } from "motion/react";
 import type { UseFormReturn } from "react-hook-form";
@@ -11,6 +11,7 @@ import {
   type ComboboxSelectOption,
 } from "@/components/ui/combobox-select";
 import { Separator } from "@/components/ui/separator";
+import { normalizeNigerianPhoneInput } from "@/lib/schemas/field-schemas";
 import { TrustIndicators } from "@/components/ui/trust-indicators";
 import { RegistrationStepHeader } from "@/features/collect/components/public/registration-step-header";
 import {
@@ -27,6 +28,13 @@ import { sanitizePhoneInputEvent } from "@/features/collect/lib/phone-input-util
 import { cn } from "@/lib/utils";
 
 type PreloadedCanvasser = { id: string; name: string; phone: string };
+
+function normalizeCanvasserNameForMatch(value?: string | null) {
+  return (value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
 
 export function CanvasserStep({
   form,
@@ -70,36 +78,87 @@ export function CanvasserStep({
   const hasPreloaded = preloadedCanvassers.length > 0;
   const currentCanvasserName = watch("canvasserName")?.trim();
   const currentCanvasserPhone = watch("canvasserPhone")?.trim();
+  const normalizedCurrentCanvasserName = normalizeCanvasserNameForMatch(
+    currentCanvasserName,
+  );
+  const normalizedCurrentCanvasserPhone = normalizeNigerianPhoneInput(
+    currentCanvasserPhone ?? "",
+  );
   const [manualCanvasserEntry, setManualCanvasserEntry] = useState(false);
   const matchedCanvasser = useMemo(
     () =>
       preloadedCanvassers.find(
         (canvasser) =>
-          canvasser.name === currentCanvasserName &&
-          canvasser.phone === currentCanvasserPhone,
+          normalizeCanvasserNameForMatch(canvasser.name) ===
+            normalizedCurrentCanvasserName &&
+          normalizeNigerianPhoneInput(canvasser.phone) ===
+            normalizedCurrentCanvasserPhone,
       ) || null,
-    [currentCanvasserName, currentCanvasserPhone, preloadedCanvassers],
+    [
+      normalizedCurrentCanvasserName,
+      normalizedCurrentCanvasserPhone,
+      preloadedCanvassers,
+    ],
   );
+  const hasTypedCanvasserDetails =
+    !!currentCanvasserName || !!currentCanvasserPhone;
   const isOther =
     !!hasCanvasser &&
     hasPreloaded &&
-    !matchedCanvasser &&
-    (manualCanvasserEntry || !!currentCanvasserName || !!currentCanvasserPhone);
+    (manualCanvasserEntry ||
+      (!matchedCanvasser && hasTypedCanvasserDetails));
   const selectedCanvasserId = useMemo(() => {
     if (!hasCanvasser || preloadedCanvassers.length === 0) {
       return "";
+    }
+
+    if (manualCanvasserEntry || isOther) {
+      return "__other__";
     }
 
     if (matchedCanvasser) {
       return matchedCanvasser.id;
     }
 
-    if (isOther) {
-      return "__other__";
+    return "";
+  }, [
+    hasCanvasser,
+    isOther,
+    manualCanvasserEntry,
+    matchedCanvasser,
+    preloadedCanvassers,
+  ]);
+
+  useEffect(() => {
+    if (!hasCanvasser || !hasPreloaded) {
+      setValue("selectedCampaignCanvasserId", undefined);
+      return;
     }
 
-    return "";
-  }, [hasCanvasser, isOther, matchedCanvasser, preloadedCanvassers]);
+    if (manualCanvasserEntry) {
+      setValue(
+        "selectedCampaignCanvasserId",
+        matchedCanvasser?.id || undefined,
+      );
+      return;
+    }
+
+    if (matchedCanvasser) {
+      setValue("selectedCampaignCanvasserId", matchedCanvasser.id);
+      return;
+    }
+
+    if (hasTypedCanvasserDetails) {
+      setValue("selectedCampaignCanvasserId", undefined);
+    }
+  }, [
+    hasCanvasser,
+    hasPreloaded,
+    hasTypedCanvasserDetails,
+    manualCanvasserEntry,
+    matchedCanvasser,
+    setValue,
+  ]);
 
   const canvasserOptions: ComboboxSelectOption[] = useMemo(
     () => [
@@ -123,6 +182,7 @@ export function CanvasserStep({
         shouldDirty: true,
         shouldValidate: true,
       });
+      setValue("selectedCampaignCanvasserId", undefined);
       clearErrors(["canvasserName", "canvasserPhone"]);
       return;
     }
@@ -138,6 +198,7 @@ export function CanvasserStep({
         shouldDirty: true,
         shouldValidate: true,
       });
+      setValue("selectedCampaignCanvasserId", undefined);
       return;
     }
 
@@ -151,6 +212,7 @@ export function CanvasserStep({
         shouldDirty: true,
         shouldValidate: true,
       });
+      setValue("selectedCampaignCanvasserId", canvasser.id);
       clearErrors(["canvasserName", "canvasserPhone"]);
     }
   };
@@ -202,6 +264,7 @@ export function CanvasserStep({
                     setManualCanvasserEntry(false);
                     setValue("canvasserName", "");
                     setValue("canvasserPhone", "");
+                    setValue("selectedCampaignCanvasserId", undefined);
                   }}
                   className={cn(
                     "border-border bg-card hover:border-primary/50 focus-visible:ring-primary flex cursor-pointer items-center justify-center gap-2 rounded-sm border-2 p-3 transition-all focus-visible:ring-2 focus-visible:outline-none",
@@ -231,41 +294,54 @@ export function CanvasserStep({
             )}
 
             {hasCanvasser && (!hasPreloaded || isOther) && (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <FieldLabel>Canvasser Name</FieldLabel>
-                  <div className="relative">
-                    <InputIcon>
-                      <HiUser className="text-muted-foreground size-3.5" />
-                    </InputIcon>
-                    <Input
-                      {...register("canvasserName")}
-                      autoComplete="name"
-                      placeholder="Canvasser's name"
-                      className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-medium transition-all placeholder:text-xs"
-                    />
+              <div className="space-y-3">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <FieldLabel>Canvasser Name</FieldLabel>
+                    <div className="relative">
+                      <InputIcon>
+                        <HiUser className="text-muted-foreground size-3.5" />
+                      </InputIcon>
+                      <Input
+                        {...register("canvasserName")}
+                        autoComplete="name"
+                        placeholder="Canvasser's name"
+                        className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-medium transition-all placeholder:text-xs"
+                      />
+                    </div>
+                    <FieldError error={errors.canvasserName?.message} />
                   </div>
-                  <FieldError error={errors.canvasserName?.message} />
-                </div>
-                <div className="space-y-1.5">
-                  <FieldLabel>Canvasser Phone</FieldLabel>
-                  <div className="relative">
-                    <InputIcon>
-                      <HiPhone className="text-muted-foreground size-3.5" />
-                    </InputIcon>
-                    <Input
-                      {...register("canvasserPhone")}
-                      placeholder="08012345678"
-                      type="tel"
-                      inputMode="tel"
-                      pattern="[0-9+() .-]*"
-                      autoComplete="tel"
-                      onInput={sanitizePhoneInputEvent}
-                      className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-mono font-medium tracking-wider transition-all placeholder:text-xs"
-                    />
+                  <div className="space-y-1.5">
+                    <FieldLabel>Canvasser Phone</FieldLabel>
+                    <div className="relative">
+                      <InputIcon>
+                        <HiPhone className="text-muted-foreground size-3.5" />
+                      </InputIcon>
+                      <Input
+                        {...register("canvasserPhone")}
+                        placeholder="08012345678"
+                        type="tel"
+                        inputMode="tel"
+                        pattern="[0-9+() .-]*"
+                        autoComplete="tel"
+                        onInput={sanitizePhoneInputEvent}
+                        className="border-border/60 bg-muted/5 focus:border-primary focus:ring-primary placeholder:text-muted-foreground/50 h-12 pl-12 font-mono font-medium tracking-wider transition-all placeholder:text-xs"
+                      />
+                    </div>
+                    <FieldError error={errors.canvasserPhone?.message} />
                   </div>
-                  <FieldError error={errors.canvasserPhone?.message} />
                 </div>
+
+                {hasPreloaded && matchedCanvasser ? (
+                  <p className="text-muted-foreground text-xs leading-relaxed">
+                    This matches{" "}
+                    <span className="text-foreground font-medium">
+                      {matchedCanvasser.name}
+                    </span>{" "}
+                    on the public form list, so it will be attributed to that
+                    canvasser automatically.
+                  </p>
+                ) : null}
               </div>
             )}
 

@@ -213,6 +213,7 @@ export const screen5Schema = z.object({
     .optional()
     .or(z.literal("")),
   canvasserPhone: optionalNigerianPhoneSchema,
+  selectedCampaignCanvasserId: z.string().optional(),
 });
 
 // Screen 6: Review preferences

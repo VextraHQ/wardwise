@@ -101,12 +101,6 @@ function BriefingCard({
     total > 0 ? Math.round((withSupportGroup / total) * 100) : 0;
   const fullyReadyRate = total > 0 ? Math.round((withBoth / total) * 100) : 0;
 
-  const lead = hasCompare
-    ? deltas?.total
-      ? `Supporter capture is ${deltas.total.positive ? "up" : "down"} ${deltas.total.value} compared with the prior period.`
-      : `This view is stable versus the prior period.`
-    : `${total.toLocaleString()} supporters are currently visible in ${activeScopeLabel.toLowerCase()}.`;
-
   const verificationStory =
     verifiedRate >= 70
       ? `Verification coverage is strong at ${verifiedRate}%, giving the campaign a cleaner supporter picture.`
@@ -159,106 +153,37 @@ function BriefingCard({
 
   return (
     <OverviewPanel title={hasCompare ? "What Changed" : "Current Picture"}>
-      <div className="space-y-3">
-        <div className="bg-muted/20 border-border/60 rounded-sm border px-3 py-3">
-          <p className="text-foreground text-sm font-semibold leading-relaxed">
-            {lead}
-          </p>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {signals.map((signal) => (
-            <div
-              key={signal.label}
-              className="border-border/60 rounded-sm border border-dashed px-3 py-3"
-            >
-              <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-                {signal.label}
-              </p>
-              <p className="text-foreground mt-2 font-mono text-lg font-semibold tabular-nums">
-                {signal.value}
-              </p>
-              <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-                {signal.detail}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <div className="space-y-2">
-          {[verificationStory, supportGroupStory].map((story) => (
-            <div
-              key={story}
-              className="border-border/60 flex items-start gap-3 rounded-sm border px-3 py-2.5"
-            >
-              <div className="bg-primary/10 text-primary mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-sm">
-                <IconSparkles className="h-3.5 w-3.5" />
-              </div>
-              <p className="text-foreground text-sm leading-relaxed">{story}</p>
-            </div>
-          ))}
-        </div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {signals.map((signal) => (
+          <div
+            key={signal.label}
+            className="border-border/60 rounded-sm border border-dashed px-3 py-3"
+          >
+            <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+              {signal.label}
+            </p>
+            <p className="text-foreground mt-2 font-mono text-lg font-semibold tabular-nums">
+              {signal.value}
+            </p>
+            <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+              {signal.detail}
+            </p>
+          </div>
+        ))}
       </div>
-    </OverviewPanel>
-  );
-}
 
-function VerificationSnapshotCard({
-  total,
-  withVin,
-  withIdentity,
-  withBoth,
-}: {
-  total: number;
-  withVin: number;
-  withIdentity: number;
-  withBoth: number;
-}) {
-  const missingVin = Math.max(total - withVin, 0);
-  const metrics = [
-    {
-      label: "VIN Shared",
-      value: withVin.toLocaleString(),
-      subtitle: `${total > 0 ? Math.round((withVin / total) * 100) : 0}%`,
-    },
-    {
-      label: "VIN Missing",
-      value: missingVin.toLocaleString(),
-      subtitle: `${total > 0 ? Math.round((missingVin / total) * 100) : 0}%`,
-    },
-    {
-      label: "NIN / Membership",
-      value: withIdentity.toLocaleString(),
-      subtitle: `${total > 0 ? Math.round((withIdentity / total) * 100) : 0}%`,
-    },
-    {
-      label: "Both Shared",
-      value: withBoth.toLocaleString(),
-      subtitle: `${total > 0 ? Math.round((withBoth / total) * 100) : 0}%`,
-    },
-  ];
-
-  return (
-    <OverviewPanel title="Verification Coverage">
-      <div className="space-y-4">
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          A quick look at how much verification detail supporters shared in this
-          view.
-        </p>
-
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {metrics.map((item) => (
-            <div key={item.label} className="space-y-1">
-              <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-                {item.label}
-              </p>
-              <p className="text-foreground font-mono text-lg font-semibold tabular-nums">
-                {item.value}
-              </p>
-              <p className="text-muted-foreground text-xs">{item.subtitle}</p>
+      <div className="space-y-2">
+        {[verificationStory, supportGroupStory].map((story) => (
+          <div
+            key={story}
+            className="border-border/60 flex items-start gap-3 rounded-sm border px-3 py-2.5"
+          >
+            <div className="bg-primary/10 text-primary mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-sm">
+              <IconSparkles className="h-3.5 w-3.5" />
             </div>
-          ))}
-        </div>
+            <p className="text-foreground text-sm leading-relaxed">{story}</p>
+          </div>
+        ))}
       </div>
     </OverviewPanel>
   );
@@ -482,70 +407,130 @@ function HotspotsCard({
   );
 }
 
-function FieldTeamPerformanceCard({
-  health,
-}: Pick<CampaignReportSummary, "health">) {
-  const lead = health.topCanvassers[0];
-  const leaderboard = health.topCanvassers.slice(0, 3);
+function ReferralActivityCard({
+  referredCount,
+  directCount,
+  knownSourceCount,
+  otherNameCount,
+  topKnownSources,
+}: Pick<
+  CampaignReportSummary["stats"],
+  | "referredCount"
+  | "directCount"
+  | "knownSourceCount"
+  | "otherNameCount"
+  | "topKnownSources"
+>) {
+  const topSource = topKnownSources[0];
+  const totalSupporters = referredCount + directCount;
+  const referredPct =
+    totalSupporters > 0
+      ? Math.round((referredCount / totalSupporters) * 100)
+      : 0;
+  const directPct = totalSupporters > 0 ? Math.max(0, 100 - referredPct) : 0;
 
   return (
-    <OverviewPanel title="Field Team Performance">
-      {health.topCanvassers.length === 0 ? (
+    <OverviewPanel title="Canvasser Activity">
+      {totalSupporters > 0 ? (
+        <div className="border-border/60 rounded-sm border px-3 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+              Supporter Split
+            </p>
+            <p className="text-muted-foreground text-xs">
+              {referredPct}% canvasser-referred · {directPct}% direct
+            </p>
+          </div>
+          <div className="bg-muted mt-2 h-2 overflow-hidden rounded-full">
+            <div
+              className="bg-primary h-full"
+              style={{ width: `${referredPct}%` }}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          {
+            label: "Canvasser-Referred",
+            value: referredCount,
+            detail: "Named a canvasser during signup",
+          },
+          {
+            label: "Direct Supporters",
+            value: directCount,
+            detail: "Submitted without a canvasser",
+          },
+          {
+            label: "Listed Canvassers",
+            value: knownSourceCount,
+            detail: "Already linked to your canvasser list",
+          },
+          {
+            label: "Typed Canvasser Names",
+            value: otherNameCount,
+            detail: "Still coming in as typed entries",
+          },
+        ].map((item) => (
+          <div
+            key={item.label}
+            className="border-border/60 rounded-sm border px-3 py-3"
+          >
+            <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+              {item.label}
+            </p>
+            <p className="text-foreground mt-2 font-mono text-2xl font-semibold">
+              {item.value.toLocaleString()}
+            </p>
+            <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+              {item.detail}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {referredCount === 0 && (
         <div className="border-border/60 flex flex-col items-center rounded-sm border border-dashed px-3 py-8 text-center">
           <IconUsersGroup className="text-muted-foreground/40 mb-2 h-7 w-7" />
           <p className="text-muted-foreground text-sm font-medium">
             No canvasser activity yet
           </p>
           <p className="text-muted-foreground/70 mt-1 text-xs">
-            Once canvassers submit records, their contribution will appear here.
+            This section will fill once supporters start naming canvassers.
           </p>
         </div>
-      ) : (
-        <>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="border-border/60 rounded-sm border px-3 py-3">
-              <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-                Active Canvassers
-              </p>
-              <p className="text-foreground mt-2 font-mono text-2xl font-semibold">
-                {health.canvasserCount.toLocaleString()}
-              </p>
-            </div>
+      )}
 
-            <div className="border-border/60 rounded-sm border px-3 py-3">
-              <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
-                Top Canvasser
-              </p>
-              <p className="text-foreground mt-2 text-base font-semibold">
-                {lead.name}
-              </p>
-              <p className="text-muted-foreground mt-1 text-xs">
-                {lead.count.toLocaleString()} submissions
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            {leaderboard.map((canvasser, index) => (
-              <div
-                key={`${canvasser.name}-${index}`}
-                className="border-border/60 flex items-center justify-between gap-4 rounded-sm border border-dashed px-3 py-2.5"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">
-                    <span className="text-muted-foreground mr-1.5 font-mono text-xs">
-                      {index + 1}.
-                    </span>
-                    {canvasser.name}
-                  </p>
-                </div>
-                <span className="font-mono text-xs font-semibold tabular-nums">
-                  {canvasser.count}
-                </span>
+      {referredCount > 0 && (
+        <div className="space-y-2">
+          <p className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+            Spotlight
+          </p>
+          {topSource ? (
+            <div className="border-border/60 flex items-center justify-between gap-4 rounded-sm border border-dashed px-3 py-2.5">
+              <div className="min-w-0">
+                <p className="text-muted-foreground text-[11px] font-medium tracking-wide uppercase">
+                  Top Listed Canvasser
+                </p>
+                <p className="truncate text-sm font-semibold">
+                  {topSource.name}
+                </p>
               </div>
-            ))}
-          </div>
-        </>
+              <span className="shrink-0 font-mono text-xs font-semibold tabular-nums">
+                {topSource.count}
+              </span>
+            </div>
+          ) : (
+            <div className="bg-muted/20 border-border/60 rounded-sm border px-3 py-3">
+              <p className="text-foreground text-sm leading-relaxed">
+                Canvasser names are being captured, but they are still coming in
+                as typed entries rather than matching the campaign's saved
+                canvasser list.
+              </p>
+            </div>
+          )}
+        </div>
       )}
     </OverviewPanel>
   );
@@ -755,25 +740,16 @@ export function InsightsOverview({
         deltas={deltas}
       />
 
-      <div className="space-y-6">
-        <BriefingCard
-          total={summary.stats.total}
-          verified={summary.stats.verified}
-          withBoth={summary.stats.withBoth}
-          withSupportGroup={summary.stats.withSupportGroup}
-          showGroupStats={showGroupStats}
-          deltas={deltas}
-          activeScopeLabel={activeScopeLabel}
-          hasCompare={hasCompare}
-        />
-
-        <VerificationSnapshotCard
-          total={summary.stats.total}
-          withVin={summary.stats.withVin}
-          withIdentity={summary.stats.withIdentity}
-          withBoth={summary.stats.withBoth}
-        />
-      </div>
+      <BriefingCard
+        total={summary.stats.total}
+        verified={summary.stats.verified}
+        withBoth={summary.stats.withBoth}
+        withSupportGroup={summary.stats.withSupportGroup}
+        showGroupStats={showGroupStats}
+        deltas={deltas}
+        activeScopeLabel={activeScopeLabel}
+        hasCompare={hasCompare}
+      />
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <NowCard
@@ -791,7 +767,13 @@ export function InsightsOverview({
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <FieldTeamPerformanceCard health={summary.health} />
+        <ReferralActivityCard
+          referredCount={summary.stats.referredCount}
+          directCount={summary.stats.directCount}
+          knownSourceCount={summary.stats.knownSourceCount}
+          otherNameCount={summary.stats.otherNameCount}
+          topKnownSources={summary.stats.topKnownSources}
+        />
 
         <RecentActivityCard
           submissions={recentSubmissions}

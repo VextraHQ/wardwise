@@ -6,7 +6,7 @@
 - **Migration complete.** All nine phases landed on the `codex/feature-first-architecture` branch (2026-05-17). The doc retains the phase-by-phase history for reference; the Status Tracker section at the bottom shows the resolved status of each phase.
 - **No compatibility shims.** Old paths are removed and every import points at the new feature locations.
 - **Behavior-preserving by default.** Phases changed paths and imports only; no schema, response shape, or product behavior changes outside the explicitly-noted Phase 3 server-thinning extractions.
-- **Last updated:** 2026-05-17.
+- **Last updated:** 2026-05-25 (Collect `lib/offline/`, registration helpers, candidates directory/overview splits, candidate-dashboard `mock-voter-metrics`).
 
 This document is meant to be readable by every contributor, including a developer joining the project for the first time.
 
@@ -291,6 +291,8 @@ Inside a feature, `components/` is flat by default. Add a subfolder **only when 
 
 When none of these apply, keep `components/` flat. A single-child wrapper folder ("just in case we add a public version later") makes the structure noisier without buying organization.
 
+Inside `lib/`, a **topic subfolder** is acceptable when several modules share one concern — Collect uses `lib/offline/` for IndexedDB queue + geo pack + prep helpers (2026-05-25). Do not nest `lib/` deeply; one level is enough.
+
 ### Public surface (no `index.ts` barrels)
 
 Features deliberately do not export through an `index.ts` barrel. Cross-feature consumers reach in via explicit module paths (`import { foo } from "@/features/<x>/lib/foo"`). This keeps grep-driven navigation honest, avoids barrel-induced circulars, and preserves tree-shaking certainty. The implicit public surface is enforced by **folder convention**: `api/`, `types/`, `lib/`, `data/`, and `schemas/` are the parts other features may import; `components/`, `hooks/`, `server/`, and `email/` are private to the owning feature. Documented exceptions (e.g. Reporting → Collect form-ui) are listed in the "Known intentional cross-feature surfaces" section below.
@@ -358,23 +360,27 @@ src/features/
       collect-schemas.ts
       collect-schemas.test.ts
     lib/
-      analytics.ts
       branding.ts
       campaign-health.ts
       campaign-submissions.ts
-      offline-geo-health.ts
-      offline-geo-health.test.ts
-      offline-geo-pack.ts
-      offline-prep-selection.ts
-      offline-prep-selection.test.ts
-      offline-storage.ts
+      collect-form-utils.ts
+      collect-submit-errors.ts
+      display-format.ts
+      display-format.test.ts
+      offline/
+        offline-geo-health.ts
+        offline-geo-health.test.ts
+        offline-geo-pack.ts
+        offline-prep-selection.ts
+        offline-prep-selection.test.ts
+        offline-queue.ts
+        offline-storage.ts
       phone-input-utils.ts
       phone-input-utils.test.ts
       reporting.ts
       step-flow.ts
       submission-query.ts
       submission-query.test.ts
-      validation.ts
     types/
       collect.types.ts
       campaign-submissions.types.ts
@@ -382,8 +388,14 @@ src/features/
   candidates/
     components/
       candidate-management.tsx
+      candidate-directory-badges.tsx
+      candidate-directory-records.tsx
       candidate-detail.tsx
       candidate-overview.tsx
+      overview/
+        candidate-overview-ui.tsx
+        candidate-overview-stats-card.tsx
+        candidate-overview-profile-card.tsx
       candidate-account.tsx
       candidate-campaigns.tsx
       create-candidate-form.tsx
@@ -394,6 +406,7 @@ src/features/
         step-boundary.tsx
         step-review.tsx
     hooks/
+      use-candidate-directory.ts
       use-candidates.ts
     api/
       candidates-api.ts
@@ -407,6 +420,7 @@ src/features/
       candidate-schemas.test.ts
     lib/
       candidate-collect-summaries.ts
+      candidate-overview-helpers.ts
       directory.ts
     types/
       candidate.types.ts
@@ -438,7 +452,8 @@ src/features/
     server/
       get-candidate-dashboard.ts
     lib/
-      analytics.ts
+      mock-voter-metrics.ts
+      metadata-helpers.ts
     types/
       candidate-dashboard.types.ts
 
@@ -634,7 +649,7 @@ Use this table when reviewing migration PRs.
 | `src/hooks/use-candidate-dashboard.ts`                                                                                          | `src/features/candidate-dashboard/hooks/use-candidate-dashboard.ts`                                                                              |
 | `src/lib/api/candidate-dashboard.ts`                                                                                            | `src/features/candidate-dashboard/api/candidate-dashboard-api.ts`                                                                                |
 | `src/lib/candidate/directory.ts`                                                                                                | `src/features/candidates/lib/directory.ts` (resolved in Phase 4 fixup — admin candidate API consumes it)                                         |
-| `src/lib/candidate/analytics.ts`                                                                                                | `src/features/candidate-dashboard/lib/analytics.ts` (resolved in Phase 7)                                                                        |
+| `src/lib/candidate/analytics.ts`                                                                                                | `src/features/candidate-dashboard/lib/mock-voter-metrics.ts` (renamed 2026-05-25; mock voter metrics only)                                         |
 | `src/components/admin/geo/*`                                                                                                    | `src/features/geo/components/*`                                                                                                                  |
 | `src/hooks/use-geo.ts`                                                                                                          | `src/features/geo/hooks/use-geo.ts`                                                                                                              |
 | `src/lib/api/geo.ts`                                                                                                            | `src/features/geo/api/geo-api.ts`                                                                                                                |
@@ -1373,7 +1388,7 @@ If the reviewer finds a bigger improvement, record it as a follow-up task unless
 | Phase 4 - Candidates Relocation              | Complete | Admin candidate components, wizard, API, types, schemas, and `candidate-collect-summaries` now under `src/features/candidates/`. `use-wizard-draft` promoted to `src/hooks/shared/`. Legacy `Canvasser` stays with candidates; `CampaignCanvasser` already in Collect. `updateSubmissionSchema` folded into `features/collect/schemas/collect-schemas.ts` (Phase 2 cleanup).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | Phase 5 - Geo Relocation                     | Complete | Admin geo components, hook, lib (incl. `constituency-server` → `server/`), api (renamed `{geo,location}-api.ts`), schemas, types (`geo.types.ts`, `location.types.ts`), and 6 geo data files (`nigerian-{constituencies,federal-constituencies,senatorial-districts}`, `state-lga-locations`, `wards`, `polling-units`) now under `src/features/geo/`. `nigerian-parties.ts` moved to `src/features/candidates/data/` (Candidates is the sole consumer). Bundle composition preserved — file moves only, no barrel re-exports introduced.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Phase 6 - Reporting Relocation               | Complete | 13 `campaign-report` components, `insights-helpers.tsx` (kept `.tsx` because JSX) into `features/reporting/lib`, 2 hooks, `campaign-report-api`, `report-access` server module, and `campaign-report.types.ts` now under `src/features/reporting/`. `collect-reporting.ts` correctly left in `features/collect/server` (Phase 3 ownership).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Phase 7 - Candidate Dashboard Relocation     | Complete | 17 dashboard components, `use-candidate-dashboard` hook, `candidate-dashboard-api` (renamed), and `lib/analytics.ts` now under `src/features/candidate-dashboard/`. Cross-feature dep resolved up-front by inlining a local `getSupportersCount` helper in `features/candidates/lib/directory.ts` so candidates no longer reaches into candidate-dashboard's analytics module.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Phase 7 - Candidate Dashboard Relocation     | Complete | 17 dashboard components, `use-candidate-dashboard` hook, `candidate-dashboard-api` (renamed), and `lib/mock-voter-metrics.ts` (formerly `lib/analytics.ts`) under `src/features/candidate-dashboard/`. Cross-feature dep resolved up-front by inlining a local `getSupportersCount` helper in `features/candidates/lib/directory.ts` so candidates no longer reaches into candidate-dashboard's mock metrics module.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | Phase 8 - Auth, Admin Shell, and Public Site | Complete | Auth components + lib + schemas under `src/features/auth/`. Admin shell components (with `account/`, `filters/`, `shared/` subdirs), `use-admin`, `lib/account.ts`, `server/admin-dashboard.ts`, and `api/admin-api.ts` under `src/features/admin/` (originally landed as `features/admin-shell/`; renamed to `features/admin/` during the post-Phase-9 cleanup since the folder holds the full admin surface, not just the shell). Pure cross-feature admin list/search/skeleton primitives were promoted to `src/components/shared/admin/` during the post-Phase-9 revision. Public-site landing/legal/support components, contact lib (`turnstile`), schemas, and `landing-data` under `src/features/public-site/`. Shared promotions: `components/{layout/{logo,app-footer,cookie-consent,header},layout/sidebar,system}/*` → `src/components/shared/`; `analytics-provider` → `src/components/shared/`; `hooks/{use-mobile,use-click-outside}` → `src/hooks/shared/`. `lib/data/{legal,support}-data.ts` and `contact-reasons.ts` → `src/lib/constants/` (app-wide brand/contact reference content). `src/types/voter.ts` kept as broad app-wide type — consumed by candidate-dashboard, admin, and mock data. |
 | Phase 9 - Documentation Alignment Sweep      | Complete | Final stale-path sweep across `README.md`, `CLAUDE.md`, and `docs/*` cleared all remaining stale references outside the intentional architecture-spec mapping table. `docs/codebase-review.md` marked as a pre-migration historical snapshot. `geo-management-spec` component-structure code block rewritten to reflect the post-Phase-5 layout. `src/lib/email` documented as an intentional app-wide email service in both the architecture spec and CLAUDE.md.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
@@ -1393,7 +1408,7 @@ If the reviewer finds a bigger improvement, record it as a follow-up task unless
 10. ~~Start Phase 4 (Candidates relocation). Decide canvasser ownership (`candidates` vs `collect`) before moving so the canvasser model lands in the right feature.~~ (done — legacy `Canvasser` + `canvasser-schemas.ts` stay with candidates; `CampaignCanvasser` is already Collect-owned. `use-wizard-draft` promoted to `hooks/shared/` because both candidate and campaign wizards depend on it.)
 11. ~~Start Phase 5 (Geo relocation). Move `src/components/admin/geo/*`, `use-geo`, `lib/geo/*`, geo API clients, schemas, and data files. Watch bundle impact for static geo data.~~ (done — all geo files now under `src/features/geo/`; CLI scripts and prisma seed files updated to new paths. Phase 5 fixup additionally moved `src/types/{geo,location}.ts` into `features/geo/types/` and relocated `nigerian-parties.ts` to `features/candidates/data/`.)
 12. ~~Start Phase 6 (Reporting relocation). Move `src/components/campaign-report/*`, `use-campaign-report`, `use-campaign-insights-scope`, `lib/api/campaign-report.ts`, `lib/server/report-access.ts`, `src/types/campaign-report.ts` into `features/reporting/`.~~ (done — all reporting components, hooks, API, server module, and types now under `src/features/reporting/`. `insights-helpers.tsx` placed in `features/reporting/lib/` per spec while keeping the `.tsx` extension for its JSX exports.)
-13. ~~Start Phase 7 (Candidate dashboard relocation). Move `src/components/candidate-dashboard/*`, `use-candidate-dashboard`, `lib/api/candidate-dashboard.ts`, and `src/lib/candidate/analytics.ts`. Resolve the `features/candidates/lib/directory.ts → analytics.ts` cross-feature dependency before completing the move.~~ (done — analytics now in `features/candidate-dashboard/lib/`; candidates' directory.ts holds a local `getSupportersCount` that reads `getVotersByCandidateId(id).length` directly.)
+13. ~~Start Phase 7 (Candidate dashboard relocation). Move `src/components/candidate-dashboard/*`, `use-candidate-dashboard`, `lib/api/candidate-dashboard.ts`, and `src/lib/candidate/analytics.ts`. Resolve the `features/candidates/lib/directory.ts → analytics.ts` cross-feature dependency before completing the move.~~ (done — mock metrics now in `features/candidate-dashboard/lib/mock-voter-metrics.ts`; candidates' `directory.ts` holds a local `getSupportersCount` that reads `getVotersByCandidateId(id).length` directly.)
 14. ~~Start Phase 8 (Auth, Admin Shell, and Public Site). Move auth, admin-shell, and public-site components/hooks/lib/schemas. Also fold `src/types/voter.ts` to its rightful feature (likely candidate-dashboard) once the consumer audit completes.~~ (done — auth, admin (originally `admin-shell`, renamed post-Phase-9), and public-site features fully populated; shared layer (`components/shared/`, `hooks/shared/`) now hosts the cross-feature primitives; `voter.ts` confirmed cross-feature and kept in `src/types/`.)
 15. ~~Start Phase 9 (documentation alignment sweep). Run the full-doc rg passes from spec §"Migration Phases > Phase 9" and reconcile anything missed.~~ (done — final sweep clean; codebase-review marked historical; `src/lib/email` policy documented.)
 

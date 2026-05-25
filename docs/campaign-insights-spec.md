@@ -2,7 +2,7 @@
 
 > Private read-only campaign reporting for clients on top of Collect.
 > Branch: `develop` | Last updated: 2026-04-26
-> See also: `wardwise-collect-spec.md`, `wardwise-collect-v2-spec.md`, `wardwise-collect-v3-form-configuration-spec.md`, `wardwise-hardening-spec.md`
+> See also: `wardwise-collect-spec.md`, `wardwise-collect-v2-spec.md`, `wardwise-collect-v3-form-configuration-spec.md`, `wardwise-collect-v4-referral-attribution-spec.md`, `wardwise-hardening-spec.md`
 
 ---
 
@@ -34,6 +34,7 @@
 - **`CampaignReportSummary` updated**: `campaign.supportGroupFieldMode`, `stats.withVin`, `stats.withIdentity`, `stats.withSupportGroup`, `stats.byGroup` are now part of the summary payload
 - **`CampaignReportSubmission` updated**: `identityType` and `supportGroupName` included for Supporters tab rendering
 - **Source of truth**: `docs/wardwise-collect-v3-form-configuration-spec.md`
+- **Next phase**: referral-source cleanup and candidate-facing `Referral Activity` reporting are tracked separately in `docs/wardwise-collect-v4-referral-attribution-spec.md`
 
 ### What Changed (Batch 2 — Scope + Architecture Cleanup)
 

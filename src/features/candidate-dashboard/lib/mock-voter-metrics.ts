@@ -1,21 +1,8 @@
 /**
- * Voter Analytics Functions
+ * Mock voter metrics for the candidate dashboard (demo / prototype).
  *
- * Comprehensive analytics functions for analyzing voter/supporter data.
- * All functions read from voters.ts data - single source of truth.
- *
- * These functions calculate real metrics from voter data:
- * - Supporter counts and distributions
- * - Ward coverage and polling unit statistics
- * - Demographic breakdowns
- * - Registration trends over time
- *
- * NOTE: All functions filter by candidateId to ensure data isolation.
- * Each candidate sees only their own supporters and metrics.
- *
- * These analytics can be used by:
- * - Candidates (for dashboards)
- * - Admin (for platform-wide analytics)
+ * Reads from `@/lib/mock/data/voters` — not PostHog or production Collect analytics.
+ * Each function filters by `candidateId` so dashboard views stay isolated per candidate.
  */
 
 import type { Voter } from "@/types/voter";

@@ -6,7 +6,7 @@ import {
   AppStatusScreen,
   statusIcons,
 } from "@/components/shared/app-status-screen";
-import { clearOfflineGeoPack } from "@/features/collect/lib/offline-geo-pack";
+import { clearOfflineGeoPack } from "@/features/collect/lib/offline/offline-geo-pack";
 
 // Removes any offline map data for the missing campaign (by slug)
 function ClearOfflinePackForSlug() {

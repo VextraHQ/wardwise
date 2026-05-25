@@ -87,7 +87,7 @@ export interface SupportChannel {
   name: string;
   description: string;
   contact: string;
-  icon: "email" | "phone" | "whatsapp" | "twitter";
+  icon: "email" | "website" | "phone" | "whatsapp" | "twitter";
   action: string;
   href: string;
 }
@@ -95,19 +95,19 @@ export interface SupportChannel {
 export const supportChannels: SupportChannel[] = [
   {
     name: "Email Support",
-    description: "Get detailed help via email",
+    description: "Handled by the WardWise team at Vextra Limited",
     contact: COMPANY_INFO.supportEmail,
     icon: "email",
     action: "Send Email",
     href: `mailto:${COMPANY_INFO.supportEmail}`,
   },
   {
-    name: "General Inquiries",
-    description: "For partnerships and press",
-    contact: COMPANY_INFO.email,
-    icon: "email",
-    action: "Contact Us",
-    href: `mailto:${COMPANY_INFO.email}`,
+    name: "Company Website",
+    description: "Learn more about the team behind WardWise",
+    contact: COMPANY_INFO.companyWebsite.replace(/^https?:\/\//, ""),
+    icon: "website",
+    action: "Visit Website",
+    href: COMPANY_INFO.companyWebsite,
   },
 ];
 

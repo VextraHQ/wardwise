@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useIsMobile } from "@/hooks/shared/use-mobile";
 import { getCollectErrorCategory, track } from "@/lib/analytics/client";
-import type { PendingSubmission } from "@/features/collect/lib/offline-queue";
+import type { PendingSubmission } from "@/features/collect/lib/offline/offline-queue";
 import { composeFullName, formatPersonName } from "@/lib/utils";
 
 // Sorts failed submissions with the most recently failed at the top.

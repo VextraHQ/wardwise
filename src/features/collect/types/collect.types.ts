@@ -70,6 +70,7 @@ export type CollectSubmission = {
   customAnswer2: string | null;
   canvasserName: string | null;
   canvasserPhone: string | null;
+  campaignCanvasserId: string | null;
   isFlagged: boolean;
   adminNotes: string | null;
   createdAt: string;
@@ -125,7 +126,7 @@ export type CampaignCanvasserRecord = {
   createdAt: string;
 };
 
-// Canvasser aggregation from submissions
+// Canvasser aggregation from submissions (legacy shape — used by export helper)
 export type CanvasserSummary = {
   canvasserName: string;
   canvasserPhone: string;
@@ -133,4 +134,29 @@ export type CanvasserSummary = {
   verified: number;
   flagged: number;
   lastActive: string | null;
+};
+
+// Referral activity item (v4 — distinguishes known vs manual)
+export type ReferralActivityItem = {
+  type: "known" | "manual";
+  canvasserId?: string; // only for type="known"
+  name: string;
+  phone: string | null;
+  count: number;
+  verified: number;
+  flagged: number;
+  lastActive: string | null;
+};
+
+// Possible match between a manual referral name and a roster canvasser
+export type PossibleMatch = {
+  manualName: string;
+  manualPhone: string | null;
+  submissionCount: number;
+  suggestions: {
+    canvasserId: string;
+    canvasserName: string;
+    canvasserPhone: string;
+    confidence: "high" | "medium";
+  }[];
 };

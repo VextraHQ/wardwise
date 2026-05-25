@@ -19,7 +19,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { roleLabels } from "@/features/collect/lib/analytics";
+import { formatRole } from "@/features/collect/lib/display-format";
 import {
   formatPU,
   getSubmissionRefCode,
@@ -90,7 +90,7 @@ export function CampaignSubmissionDetailSheet({
                   variant="outline"
                   className="bg-primary/5 border-primary/20 text-primary shrink-0 rounded-sm px-1.5 py-0 font-mono text-[10px] font-bold tracking-widest uppercase"
                 >
-                  {roleLabels[selected.role] || selected.role}
+                  {formatRole(selected.role)}
                 </Badge>
               )}
             </div>
@@ -177,7 +177,7 @@ export function CampaignSubmissionDetailSheet({
               <Section label="Source & Context">
                 <Field
                   label="Assigned Role"
-                  value={roleLabels[selected.role] || selected.role}
+                  value={formatRole(selected.role)}
                 />
                 {selected.role !== "canvasser" && (
                   <>

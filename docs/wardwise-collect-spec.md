@@ -1,6 +1,6 @@
 # WardWise Collect Canonical Spec
 
-> See also: `wardwise-collect-v2-spec.md`, `wardwise-collect-v3-form-configuration-spec.md`, `campaign-insights-spec.md`, `wardwise-hardening-spec.md`
+> See also: `wardwise-collect-v2-spec.md`, `wardwise-collect-v3-form-configuration-spec.md`, `wardwise-collect-v4-referral-attribution-spec.md`, `campaign-insights-spec.md`, `wardwise-hardening-spec.md`
 
 ## Status
 
@@ -95,8 +95,13 @@
 - **Submissions open to `All` with status filter chips**: admin submissions default to the full list for predictable search/lookup; inline chips for `All`, `Pending`, `Verified`, `Flagged` (counts shown inline) let admins jump into the review queue when needed.
 - **Table stays lean**: Membership / NIN and VIN remain in the detail sheet/export instead of crowding the main scanning table.
 - **Bulk verification is safer**: admins can verify/flag selected rows as before, or escalate from selected-page rows to all records matching the current filters.
-- **Filtered bulk actions are confirmed**: all-matching actions show the count and active filters before applying changes.
 - **Audit trail preserved**: filtered bulk verify/flag/unverify/unflag writes per-submission audit entries and logs the campaign-level bulk action.
+
+- **Filtered bulk actions are confirmed**: all-matching actions show the count and active filters before applying changes.
+
+### Next Focus (Planned)
+
+- **Referral attribution / canvasser intelligence**: future stable canvasser linking, cleaner candidate-facing referral reporting, and admin-side roster / referral / possible-match cleanup now live in the focused planning doc [wardwise-collect-v4-referral-attribution-spec.md](/Users/nabeelhassan/Desktop/wardwise-demo/docs/wardwise-collect-v4-referral-attribution-spec.md).
 
 ### What Changed (Batch 9 — Offline Queue UX)
 
@@ -441,10 +446,15 @@ src/app/api/collect/
   submit/route.ts                 — registration submission
 
 src/features/collect/lib/
-  offline-storage.ts              — shared IndexedDB opener (one DB, two stores)
-  offline-geo-pack.ts             — per-campaign offline geo pack helpers (v2.8)
-  offline-geo-health.ts           — pure pack-health derivation (testable contract)
-  offline-prep-selection.ts       — pure prep-sheet selection helpers (effective/stale/intent)
+  collect-form-utils.ts           — default form values, review-edit nav props, focus helper
+  collect-submit-errors.ts        — API submit reason → screen/field/toast mapping
+  display-format.ts               — shared Collect display labels (incl. role labels)
+  offline/
+    offline-storage.ts            — shared IndexedDB opener (one DB, two stores)
+    offline-queue.ts              — pending/failed submission queue (v2.7)
+    offline-geo-pack.ts           — per-campaign offline geo pack helpers (v2.8)
+    offline-geo-health.ts         — pure pack-health derivation (testable contract)
+    offline-prep-selection.ts     — pure prep-sheet selection helpers (effective/stale/intent)
 
 src/features/collect/hooks/
   use-collect.ts                  — public + admin Collect TanStack hooks
@@ -454,8 +464,6 @@ src/features/collect/hooks/
   use-collect-offline-geo.ts      — geo-pack health + prepare/clear actions (v2.8)
   use-collect-geo-resolution.ts   — live-vs-offline geo source precedence (v2.8)
 
-src/lib/
-  offline-queue.ts                — pending/failed submission queue (v2.7; ownership pending Phase 3 review)
 ```
 
 ### Admin

@@ -663,16 +663,44 @@ export function InsightsSupporters({
                   />
                 </Section>
 
-                <Section label="Source">
-                  <Field
-                    label="Canvasser"
-                    value={selectedSubmission.canvasserName || "Direct / Self"}
-                  />
-                  <Field
-                    label="Contact"
-                    value={selectedSubmission.canvasserPhone || "—"}
-                    mono
-                  />
+                <Section label="Canvasser Referral">
+                  {(() => {
+                    const sub = selectedSubmission;
+                    if (sub.campaignCanvasserId) {
+                      return (
+                        <>
+                          <Field label="Type" value="Known source" />
+                          <Field
+                            label="Name"
+                            value={sub.canvasserName || "—"}
+                          />
+                          {sub.canvasserPhone && (
+                            <Field
+                              label="Contact"
+                              value={sub.canvasserPhone}
+                              mono
+                            />
+                          )}
+                        </>
+                      );
+                    }
+                    if (sub.canvasserName) {
+                      return (
+                        <>
+                          <Field label="Type" value="Manual entry" />
+                          <Field label="Name" value={sub.canvasserName} />
+                          {sub.canvasserPhone && (
+                            <Field
+                              label="Contact"
+                              value={sub.canvasserPhone}
+                              mono
+                            />
+                          )}
+                        </>
+                      );
+                    }
+                    return <Field label="Type" value="Direct" />;
+                  })()}
                 </Section>
               </div>
             )}

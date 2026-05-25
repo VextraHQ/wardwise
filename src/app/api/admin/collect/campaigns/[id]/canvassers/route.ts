@@ -14,56 +14,111 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
     const { id } = await params;
 
-    // Fetch both pre-loaded canvassers and submission-aggregated stats
-    const [preloaded, canvasserStats, selfIdentifiedCount] = await Promise.all([
-      prisma.campaignCanvasser.findMany({
-        where: { campaignId: id },
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.$queryRaw<
-        {
-          canvasserName: string;
-          canvasserPhone: string | null;
-          total: bigint;
-          verified: bigint;
-          flagged: bigint;
-          lastActive: Date | null;
-        }[]
-      >`
-        SELECT
-          "canvasserName",
-          "canvasserPhone",
-          COUNT(*)::bigint as total,
-          COUNT(*) FILTER (WHERE "isVerified" = true)::bigint as verified,
-          COUNT(*) FILTER (WHERE "isFlagged" = true)::bigint as flagged,
-          MAX("createdAt") as "lastActive"
-        FROM "CollectSubmission"
-        WHERE "campaignId" = ${id}
-          AND "canvasserName" IS NOT NULL
-          AND "canvasserName" != ''
-        GROUP BY "canvasserName", "canvasserPhone"
-        ORDER BY total DESC
-      `,
-      prisma.collectSubmission.count({
-        where: { campaignId: id, role: "canvasser" },
-      }),
-    ]);
+    // Fetch pre-loaded roster, referral activity (known + manual), and self-identified count
+    const [preloaded, knownStats, manualStats, selfIdentifiedCount] =
+      await Promise.all([
+        prisma.campaignCanvasser.findMany({
+          where: { campaignId: id },
+          orderBy: { createdAt: "desc" },
+        }),
+        // Known: group by stable campaignCanvasserId (linked submissions)
+        prisma.$queryRaw<
+          {
+            campaignCanvasserId: string;
+            total: bigint;
+            verified: bigint;
+            flagged: bigint;
+            lastActive: Date | null;
+          }[]
+        >`
+          SELECT
+            "campaignCanvasserId",
+            COUNT(*)::bigint as total,
+            COUNT(*) FILTER (WHERE "isVerified" = true)::bigint as verified,
+            COUNT(*) FILTER (WHERE "isFlagged" = true)::bigint as flagged,
+            MAX("createdAt") as "lastActive"
+          FROM "CollectSubmission"
+          WHERE "campaignId" = ${id}
+            AND "campaignCanvasserId" IS NOT NULL
+          GROUP BY "campaignCanvasserId"
+          ORDER BY total DESC
+        `,
+        // Manual: group by (canvasserName, canvasserPhone) where no stable link
+        prisma.$queryRaw<
+          {
+            canvasserName: string;
+            canvasserPhone: string | null;
+            total: bigint;
+            verified: bigint;
+            flagged: bigint;
+            lastActive: Date | null;
+          }[]
+        >`
+          SELECT
+            "canvasserName",
+            "canvasserPhone",
+            COUNT(*)::bigint as total,
+            COUNT(*) FILTER (WHERE "isVerified" = true)::bigint as verified,
+            COUNT(*) FILTER (WHERE "isFlagged" = true)::bigint as flagged,
+            MAX("createdAt") as "lastActive"
+          FROM "CollectSubmission"
+          WHERE "campaignId" = ${id}
+            AND "campaignCanvasserId" IS NULL
+            AND "canvasserName" IS NOT NULL
+            AND "canvasserName" != ''
+          GROUP BY "canvasserName", "canvasserPhone"
+          ORDER BY total DESC
+        `,
+        prisma.collectSubmission.count({
+          where: { campaignId: id, role: "canvasser" },
+        }),
+      ]);
 
-    const canvassers = canvasserStats.map((r) => ({
-      canvasserName: r.canvasserName,
-      canvasserPhone: r.canvasserPhone || "",
-      _count: Number(r.total),
-      verified: Number(r.verified),
-      flagged: Number(r.flagged),
-      lastActive: r.lastActive?.toISOString() || null,
-    }));
+    // Resolve canvasser names for known entries
+    const knownIds = knownStats.map((r) => r.campaignCanvasserId);
+    const rosterMap = new Map(
+      preloaded.map((c) => [c.id, { name: c.name, phone: c.phone }]),
+    );
+    // Also fetch any canvassers that may have been deleted (not in preloaded)
+    const missingIds = knownIds.filter((id) => !rosterMap.has(id));
+    if (missingIds.length > 0) {
+      const extra = await prisma.campaignCanvasser.findMany({
+        where: { id: { in: missingIds } },
+        select: { id: true, name: true, phone: true },
+      });
+      extra.forEach((c) =>
+        rosterMap.set(c.id, { name: c.name, phone: c.phone }),
+      );
+    }
+
+    const referralActivity = [
+      ...knownStats.map((r) => ({
+        type: "known" as const,
+        canvasserId: r.campaignCanvasserId,
+        name: rosterMap.get(r.campaignCanvasserId)?.name ?? "Unknown",
+        phone: rosterMap.get(r.campaignCanvasserId)?.phone ?? null,
+        count: Number(r.total),
+        verified: Number(r.verified),
+        flagged: Number(r.flagged),
+        lastActive: r.lastActive?.toISOString() ?? null,
+      })),
+      ...manualStats.map((r) => ({
+        type: "manual" as const,
+        name: r.canvasserName,
+        phone: r.canvasserPhone ?? null,
+        count: Number(r.total),
+        verified: Number(r.verified),
+        flagged: Number(r.flagged),
+        lastActive: r.lastActive?.toISOString() ?? null,
+      })),
+    ].sort((a, b) => b.count - a.count);
 
     return NextResponse.json({
       preloaded: preloaded.map((c) => ({
         ...c,
         createdAt: c.createdAt.toISOString(),
       })),
-      canvassers,
+      referralActivity,
       selfIdentifiedCount,
     });
   } catch (error) {

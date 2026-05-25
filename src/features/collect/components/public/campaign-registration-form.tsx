@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import {
-  useForm,
-  useWatch,
-  type UseFormReturn,
-  type Resolver,
-} from "react-hook-form";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -28,13 +23,22 @@ import {
   getCollectErrorCategory,
   track,
 } from "@/lib/analytics/client";
-import { queueSubmission } from "@/features/collect/lib/offline-queue";
+import { queueSubmission } from "@/features/collect/lib/offline/offline-queue";
 import {
   makeSubmitRegistrationSchema,
   type RegistrationFormData,
   type CollectVerificationRequirement,
 } from "@/features/collect/schemas/collect-schemas";
 import { CollectApiError } from "@/features/collect/api/collect-api";
+import {
+  createCollectDefaultValues,
+  focusFirstFieldError,
+  getReviewEditNavProps,
+} from "@/features/collect/lib/collect-form-utils";
+import {
+  applyCollectSubmitError,
+  HANDLED_SUBMIT_REASONS,
+} from "@/features/collect/lib/collect-submit-errors";
 import {
   COLLECT_CONFIRMATION_SCREEN,
   COLLECT_LAST_INPUT_SCREEN,
@@ -71,62 +75,6 @@ type ReviewEditSnapshot = {
   hasCanvasser: boolean | null;
   occupationMode: "select" | "custom";
 };
-
-function createCollectDefaultValues({
-  prefilledCanvasserName,
-  prefilledCanvasserPhone,
-}: {
-  prefilledCanvasserName: string;
-  prefilledCanvasserPhone: string;
-}): RegistrationFormData {
-  return {
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    phone: "",
-    email: "",
-    sex: undefined as unknown as RegistrationFormData["sex"],
-    age: undefined as unknown as number,
-    occupation: "",
-    maritalStatus:
-      undefined as unknown as RegistrationFormData["maritalStatus"],
-    lgaId: undefined as unknown as number,
-    lgaName: "",
-    wardId: undefined as unknown as number,
-    wardName: "",
-    pollingUnitId: undefined as unknown as number,
-    pollingUnitName: "",
-    identityType: undefined as unknown as RegistrationFormData["identityType"],
-    identityValue: "",
-    voterIdNumber: "",
-    role: undefined as unknown as RegistrationFormData["role"],
-    supportGroupName: "",
-    wantsEmailReceipt: false,
-    customAnswer1: "",
-    customAnswer2: "",
-    canvasserName: prefilledCanvasserName,
-    canvasserPhone: prefilledCanvasserPhone,
-  };
-}
-
-function focusFirstFieldError(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  form: UseFormReturn<RegistrationFormData, any, any>,
-  fields: (keyof RegistrationFormData)[],
-) {
-  const errs = form.formState.errors;
-  for (const f of fields) {
-    if (!errs[f]) continue;
-    void form.setFocus(f);
-    window.requestAnimationFrame(() => {
-      document.activeElement?.scrollIntoView?.({
-        behavior: "smooth",
-        block: "center",
-      });
-    });
-    return;
-  }
-}
 
 export function CampaignRegistrationForm({ initialCampaign }: Props) {
   const campaign = initialCampaign;
@@ -397,6 +345,13 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
   }, [prefilledCanvasserName, prefilledCanvasserPhone, setValue]);
 
   const submitMutation = useSubmitRegistration();
+  const submitErrorReason =
+    submitMutation.error instanceof CollectApiError
+      ? submitMutation.error.reason
+      : undefined;
+  const submitInlineError = HANDLED_SUBMIT_REASONS.has(submitErrorReason ?? "")
+    ? undefined
+    : submitMutation.error?.message;
 
   const role = useWatch({ control: form.control, name: "role" });
   const skipCanvasserStep = role === "canvasser";
@@ -408,6 +363,15 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
     emailValue.length > 3;
   const isEditingFromReview =
     returnToReview && screen > 0 && screen < COLLECT_LAST_INPUT_SCREEN;
+  const reviewEditNav = getReviewEditNavProps(isEditingFromReview);
+  const roleStepNav = getReviewEditNavProps(
+    isEditingFromReview,
+    isEditingFromReview
+      ? skipCanvasserStep
+        ? "Save & return"
+        : "Continue"
+      : undefined,
+  );
 
   useEffect(() => {
     if (!showReceiptOptIn) {
@@ -476,6 +440,12 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
 
     const submitStarted = performance.now();
     submitMutation.reset();
+    form.clearErrors([
+      "phone",
+      "identityType",
+      "identityValue",
+      "voterIdNumber",
+    ]);
 
     submitMutation.mutate(payload, {
       onSuccess: (result) => {
@@ -505,77 +475,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
           submission_source: "online",
           reason: reason ?? "unknown",
         });
-        if (reason === "identity_required") {
-          setScreen(3);
-          form.setError("identityType", {
-            message: "Please complete your identity verification.",
-          });
-          toast.error("Verification Required", {
-            description:
-              "This form now requires identity verification. Please fill in the fields.",
-            duration: 6000,
-          });
-        } else if (reason === "identity_incomplete") {
-          const identityType = form.getValues("identityType");
-          const identityValue = form.getValues("identityValue")?.trim();
-          const hasType = Boolean(identityType);
-          const hasValue = Boolean(identityValue);
-
-          setScreen(3);
-
-          if (hasType && !hasValue) {
-            form.setError("identityValue", {
-              message:
-                'Enter the number for the selected method, or use "Leave blank instead" to skip this optional section.',
-            });
-          } else if (!hasType && hasValue) {
-            form.setError("identityType", {
-              message:
-                "Choose a verification method for this number, or clear it to skip this optional section.",
-            });
-          } else {
-            form.setError("identityType", {
-              message:
-                'Complete this optional section, or use "Leave blank instead" to skip it.',
-            });
-          }
-
-          toast.error("Complete this section or leave it blank", {
-            description:
-              'You selected a verification method. Enter the number, or use "Leave blank instead" to skip this optional section.',
-            duration: 6000,
-          });
-        } else if (reason === "vin_required") {
-          setScreen(3);
-          form.setError("voterIdNumber", {
-            message: "Voter ID (VIN) is required for this campaign.",
-          });
-          toast.error("Voter ID Required", {
-            description: "This form now requires your Voter ID number.",
-            duration: 6000,
-          });
-        } else if (reason === "invalid_vin_format") {
-          setScreen(3);
-          form.setError("voterIdNumber", {
-            message:
-              "Voter ID must be exactly 19 alphanumeric characters. Please check your PVC.",
-          });
-          toast.error("Invalid Voter ID", {
-            description:
-              "Please re-enter your Voter ID — it must be exactly 19 characters.",
-            duration: 6000,
-          });
-        } else if (msg.includes("already registered")) {
-          toast.error("Duplicate Registration", {
-            description:
-              "This phone number or VIN has already been registered for this campaign.",
-            duration: 6000,
-          });
-        } else {
-          toast.error("Submission Failed", {
-            description: msg || "Please try again.",
-          });
-        }
+        applyCollectSubmitError({ error, form, setScreen });
       },
     });
   };
@@ -727,6 +627,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       if (!hasCanvasser) {
         setValue("canvasserName", "");
         setValue("canvasserPhone", "");
+        setValue("selectedCampaignCanvasserId", undefined);
       } else {
         const trimmedName = form.getValues("canvasserName")?.trim();
         const trimmedPhone = form.getValues("canvasserPhone")?.trim();
@@ -768,6 +669,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
       setHasCanvasser(false);
       setValue("canvasserName", "");
       setValue("canvasserPhone", "");
+      setValue("selectedCampaignCanvasserId", undefined);
       if (returnToReview) {
         finishReviewEdit();
         return;
@@ -931,10 +833,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             setOccupationMode={setOccupationMode}
             onBack={goBack}
             onNext={validateAndNext}
-            backLabel={isEditingFromReview ? "Cancel edit" : "Back"}
-            nextLabel={isEditingFromReview ? "Save & return" : "Continue"}
-            navMobileLayout={isEditingFromReview ? "stacked" : "inline"}
-            backVariant="outline"
+            {...reviewEditNav}
           />
         )}
 
@@ -956,10 +855,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             onRetry={geo.retryGeo}
             onBack={goBack}
             onNext={validateAndNext}
-            backLabel={isEditingFromReview ? "Cancel edit" : "Back"}
-            nextLabel={isEditingFromReview ? "Save & return" : "Continue"}
-            navMobileLayout={isEditingFromReview ? "stacked" : "inline"}
-            backVariant="outline"
+            {...reviewEditNav}
           />
         )}
 
@@ -979,10 +875,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
                 | "required"
                 | "optional"
             }
-            backLabel={isEditingFromReview ? "Cancel edit" : "Back"}
-            nextLabel={isEditingFromReview ? "Save & return" : "Continue"}
-            navMobileLayout={isEditingFromReview ? "stacked" : "inline"}
-            backVariant="outline"
+            {...reviewEditNav}
           />
         )}
 
@@ -995,14 +888,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
               (campaign.supportGroupFieldMode || "off") as "off" | "optional"
             }
             supportGroupFieldLabel={campaign.supportGroupFieldLabel}
-            backLabel={isEditingFromReview ? "Cancel edit" : "Back"}
-            nextLabel={
-              isEditingFromReview && skipCanvasserStep
-                ? "Save & return"
-                : "Continue"
-            }
-            navMobileLayout={isEditingFromReview ? "stacked" : "inline"}
-            backVariant="outline"
+            {...roleStepNav}
           />
         )}
 
@@ -1016,13 +902,10 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             }}
             selectionError={canvasserStepError}
             isSubmitting={submitMutation.isPending}
-            submitError={submitMutation.error?.message}
+            submitError={submitInlineError}
             onBack={goBack}
             onNext={validateAndNext}
-            backLabel={isEditingFromReview ? "Cancel edit" : "Back"}
-            nextLabel={isEditingFromReview ? "Save & return" : "Continue"}
-            navMobileLayout={isEditingFromReview ? "stacked" : "inline"}
-            backVariant="outline"
+            {...reviewEditNav}
             nextDisabled={hasCanvasser === null}
             preloadedCanvassers={campaign.campaignCanvassers}
           />
@@ -1038,7 +921,7 @@ export function CampaignRegistrationForm({ initialCampaign }: Props) {
             onEditStep={beginReviewEdit}
             showReceiptOptIn={showReceiptOptIn}
             isSubmitting={submitMutation.isPending}
-            submitError={submitMutation.error?.message}
+            submitError={submitInlineError}
           />
         )}
 

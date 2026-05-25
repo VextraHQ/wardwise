@@ -34,7 +34,7 @@ import {
   getPrepIntent,
   getStalePreparedIds,
   getVisibleIds,
-} from "@/features/collect/lib/offline-prep-selection";
+} from "@/features/collect/lib/offline/offline-prep-selection";
 
 type Props = {
   open: boolean;

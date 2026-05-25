@@ -442,13 +442,16 @@ export function ContactContent({
                 </div>
                 <div className="space-y-1">
                   <p className="text-foreground text-sm font-semibold">
-                    General inquiries
+                    Email support
+                  </p>
+                  <p className="text-muted-foreground text-sm leading-6">
+                    Handled by the WardWise team at Vextra Limited.
                   </p>
                   <a
-                    href={`mailto:${COMPANY_INFO.email}`}
+                    href={`mailto:${COMPANY_INFO.supportEmail}`}
                     className="text-primary text-sm font-medium hover:underline"
                   >
-                    {COMPANY_INFO.email}
+                    {COMPANY_INFO.supportEmail}
                   </a>
                 </div>
               </div>

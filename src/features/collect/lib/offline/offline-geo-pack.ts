@@ -17,7 +17,7 @@ import type {
 import {
   GEO_PACKS_STORE,
   openOfflineDb,
-} from "@/features/collect/lib/offline-storage";
+} from "@/features/collect/lib/offline/offline-storage";
 
 export type OfflineGeoPack = {
   campaignSlug: string;

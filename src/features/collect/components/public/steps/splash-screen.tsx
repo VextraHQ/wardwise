@@ -15,7 +15,7 @@ import {
   CardSectionHeader,
 } from "@/features/collect/components/public/form-ui";
 import type { DeviceSubmissionData } from "@/features/collect/hooks/use-collect-form-persistence";
-import type { OfflineGeoHealth } from "@/features/collect/lib/offline-geo-health";
+import type { OfflineGeoHealth } from "@/features/collect/lib/offline/offline-geo-health";
 import {
   getEffectiveCampaignName,
   shouldShowCandidateTitle,
