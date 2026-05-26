@@ -1,574 +1,153 @@
-# WardWise Collect v4 — Referral Attribution & Canvasser Intelligence Spec
+# WardWise Collect v4 — Streamlined Canvasser System Spec
 
-> Focused implementation spec for stable future referral attribution, legacy-safe canvasser cleanup, and better candidate-facing referral reporting.
-> Last updated: 2026-05-19
+> Current source of truth for canvasser attribution, admin canvasser activity, and candidate-facing canvasser reporting.
+> Last updated: 2026-05-25
+> Supersedes the earlier v4 direction that explored broader referral-cleanup and duplicate-resolution workflows.
 > See also: `wardwise-collect-spec.md`, `wardwise-collect-v3-form-configuration-spec.md`, `campaign-insights-spec.md`
 
 ---
 
 ## Status
 
-- **Planned** — not yet implemented
-- **Direction chosen** — preserve old referral text; do not silently rewrite history
-- **Direction chosen** — future dropdown-selected canvassers must link to a stable canvasser record
-- **Direction chosen** — candidate reporting should present `Referral Activity`, not fragile raw canvasser management
-- **Direction chosen** — admin owns cleanup through `Roster`, `Referral Activity`, and `Possible Matches`
+- **Implemented direction** — keep the canvasser system simple, honest, and easy to explain
+- **Implemented direction** — saved-list selection remains the trusted attribution path
+- **Implemented direction** — typed-in canvasser entries remain raw supporter-provided text
+- **Implemented direction** — cleanup only helps with obvious typed-in -> saved-list matches
+- **Explicitly not in scope** — typed-in -> typed-in dedupe, fuzzy merge engines, or historical rewriting
 
 ---
 
-## Why This Exists
+## Product Model
 
-Collect currently mixes two different referral realities:
+Collect now treats canvasser attribution as two practical states:
 
-- a clean admin-managed **canvasser roster**
-- messy **manual referral text** typed by supporters
+### 1. `From List`
 
-That creates product problems:
+- supporter selected a saved canvasser from the public form dropdown
+- submission stores `campaignCanvasserId`
+- original `canvasserName` / `canvasserPhone` snapshots are still preserved
+- this is the trusted path used for cleaner grouping in admin and reporting
 
-- the same person can appear multiple times with slightly different spellings
-- `Active Canvassers` can show `0` while `Top Canvasser` still shows names from submissions
-- candidate-facing reporting looks weaker than it should because raw referral noise leaks into the report
-- admin has no real cleanup workflow for matching old/manual referral names to known canvassers
+### 2. `Typed In`
 
-This spec separates those concerns cleanly.
+- supporter typed a canvasser name manually
+- submission keeps the raw `canvasserName` / `canvasserPhone`
+- no stable list link is assumed unless admin explicitly links it later
+- this is visible, useful, and intentionally a little messy
 
----
-
-## Product Goals
-
-1. Improve all future dropdown-selected referral attribution so one real canvasser groups correctly.
-2. Preserve old raw referral submissions without falsifying history.
-3. Make candidate reports read like polished campaign intelligence, not admin cleanup output.
-4. Give admin a real referral cleanup workflow for live campaigns and legacy data.
-5. Keep implementation risk low by improving structure going forward before trying to “fix everything” historically.
+This is the entire production model. We do not introduce a third “smartly deduped” canvasser state in this version.
 
 ---
 
-## Non-Goals
+## Core Rules
 
-- Full candidate-side canvasser management
-- Automatic aggressive deduplication of all legacy referral names
-- Rewriting or overwriting original typed canvasser names on old submissions
-- Turning the candidate report into an admin moderation surface
-- Creating a new top-level `Canvassers` tab in Campaign Insights
+### Public form
 
----
-
-## Core Decisions
-
-### 1. Old submissions stay truthful
-
-Do not overwrite legacy `canvasserName` / `canvasserPhone` values on existing submissions.
-
-Allowed:
-
-- add stable linkage metadata to old rows later
-- show admin suggestions
-- let admin manually link old rows to a known canvasser
-
-Not allowed:
-
-- silently replacing `Jamila Ibrahim` with `Jamila Jauro`
-- force-merging similar names without confidence
-
-### 2. Future submissions get stable attribution
-
-If a supporter chooses a preloaded canvasser from the public dropdown:
-
-- store a stable `campaignCanvasserId`
-- also keep the submitted name/phone snapshot for historical display
-
-If a supporter manually types a canvasser:
-
-- keep it as manual referral text
-- do not pretend it is a known canvasser
-
-### 3. Candidate reports show polished truth
-
-Campaign Insights should not show messy raw operational duplicates as if they are clean people records.
-
-Candidate-facing reporting should emphasize:
-
-- `Referred Supporters`
-- `Direct Supporters`
-- `Known Referral Sources`
-- `Other Referral Names`
-
-Admin-only cleanup detail belongs in admin.
-
-### 4. Admin sees messy truth and can improve it
-
-Admin canvasser UX becomes three clear areas:
-
-- `Roster`
-- `Referral Activity`
-- `Possible Matches`
-
-This is where duplicates, alias suggestions, and manual linking live.
-
-### 5. No new top-level reporting tab
-
-Keep Campaign Insights tabs as:
-
-- `Overview`
-- `Supporters`
-- `Analytics`
-
-Referral intelligence should be integrated into those tabs, not expanded into a new top-level destination.
-
----
-
-## Data Model Direction
-
-### `CollectSubmission`
-
-Add:
-
-```prisma
-campaignCanvasserId String?
-campaignCanvasser   CampaignCanvasser? @relation(fields: [campaignCanvasserId], references: [id], onDelete: SetNull)
-```
-
-Keep existing snapshot fields:
-
-- `canvasserName`
-- `canvasserPhone`
-
-Why:
-
-- `campaignCanvasserId` gives clean grouping for future linked submissions
-- snapshots preserve exactly what was submitted at the time
-
-No destructive rename needed.
-
-### Optional later phase
-
-If alias cleanup grows, we can later add:
-
-```prisma
-model CampaignCanvasserAlias {
-  id                 String   @id @default(cuid())
-  campaignId         String
-  campaignCanvasserId String
-  aliasName          String
-  aliasPhone         String?
-  createdAt          DateTime @default(now())
-}
-```
-
-This is not required for Phase 1.
-
----
-
-## Referral States
-
-Every submission should effectively fall into one of these states:
-
-### 1. Direct
-
-- no canvasser selected
-- no manual referral entered
-
-### 2. Known referral source
-
-- preloaded canvasser selected
-- stable `campaignCanvasserId` present
-
-### 3. Manual referral name
-
-- supporter typed a canvasser/referral source manually
-- no stable canvasser link yet
-
-### 4. Possible match
-
-- admin-side interpretation only
-- a manual referral may likely match a known roster canvasser, but has not been linked yet
-
-Candidate reporting should not foreground state 4.
-
----
-
-## Legacy Data Strategy
-
-### Safe rule
-
-Do not rewrite old submission text.
-
-### Safe auto-linking allowed
-
-We may auto-link old rows only when confidence is high, for example:
-
-- exact phone match to one and only one roster canvasser
-
-Even then:
-
-- set `campaignCanvasserId`
-- keep original typed name/phone untouched
-
-### Manual linking for uncertain cases
-
-Examples:
-
-- `Jamila Ibrahim`
-- `Jamila Ibrahim Jauro`
-- `Jamila Jauro`
-
-These should surface in `Possible Matches`, where admin can choose:
-
-- `Link to Jamila Jauro`
-- `Keep separate`
-
-### Never auto-merge by fuzzy name alone
-
-Do not auto-merge based only on:
-
-- similar names
-- initials
-- partial tokens
-
-This is too risky in live political data.
-
----
-
-## Public Form Behavior
-
-### Before
-
-```text
-Canvasser Details
-- If preloaded canvassers exist, supporter can choose from dropdown
-- Otherwise supporter types name and phone manually
-```
-
-### After
-
-```text
-Canvasser Details
-- Dropdown selection writes stable canvasser link + snapshot
-- Manual entry remains manual referral text + snapshot
-```
-
-Supporter-facing UX does not need major visual change in Phase 1.
-
-The important change is in how the selected canvasser is stored.
-
----
-
-## Candidate Report UX
-
-### Before
-
-```text
-Field Team Performance
-- Active Canvassers: 0
-- Top Canvasser: Jamila Ibrahim
-
-Leaderboard
-1. Jamila Ibrahim .......... 29
-2. Jamila Ibrahim Jauro .... 9
-3. City boy movement ....... 2
-```
-
-Problems:
-
-- mixes roster count with submission text
-- same person can appear multiple times
-- candidate cannot tell what is clean vs raw
-
-### After
-
-#### Overview
-
-```text
-Referral Activity
-- Referred Supporters
-- Direct Supporters
-- Known Referral Sources
-- Other Referral Names
-```
-
-#### Analytics
-
-```text
-Referral Activity
-
-Referral Split
-- Referred submissions
-- Direct / self submissions
-
-Top Known Sources
-1. Jamila Jauro ............ 38
-
-Other Referral Names
-- Jamila Ibrahim ........... 29
-- Jamila Ibrahim Jauro ..... 9
-- City Boy Movement ........ 2
-
-Helper note
-Other referral names may contain alternate spellings or manually typed entries.
-```
-
-#### Supporters Tab
-
-```text
-Filters
-- Search
-- Status
-- Role
-- Referral Source
-
-Detail sheet
-- Referral type: Known / Manual / Direct
-- Referral source name
-- Referral source phone
-```
-
-### Candidate wording
-
-Prefer skim-friendly terms:
-
-- `Referred Supporters`
-- `Direct Supporters`
-- `Known Referral Sources`
-- `Other Referral Names`
-
-Avoid leading with:
-
-- `Possible matches`
-- `Alias`
-- `Active Canvassers` when the metric is not truly activity-based
-
----
-
-## Admin UX
-
-### Before
-
-One mixed canvasser page:
-
-- preloaded dropdown list
-- referral leaderboard
-- self-identified count
-
-### After
-
-```text
-Canvasser Attribution
-
-[ Roster ] [ Referral Activity ] [ Possible Matches ]
-```
-
-### `Roster`
-
-Purpose:
-
-- maintain the clean public form dropdown
-
-Features:
-
-- paginated table
-- search
-- add/remove canvasser
-- phone uniqueness guard
-- zone support
-
-### `Referral Activity`
-
-Purpose:
-
-- show what submissions are actually attributing
-
-Features:
-
-- paginated leaderboard
-- search
-- badges:
-  - `Known`
-  - `Manual`
-- click row -> filtered submissions
-- export
-
-### `Possible Matches`
-
-Purpose:
-
-- help admin clean ambiguous manual names without rewriting history
-
-Example:
-
-```text
-Jamila Ibrahim .............. 29
-Suggested match: Jamila Jauro
-[ Link to roster ] [ Keep separate ]
-
-Jamila Ibrahim Jauro ........ 9
-Suggested match: Jamila Jauro
-[ Link to roster ] [ Keep separate ]
-```
-
-### `Self-Identified`
-
-Keep as a stat/filter, not a whole separate management space.
-
-That is a different signal:
-
-- supporter role = `canvasser`
-
-It should not be conflated with referral attribution.
-
----
-
-## Matching Heuristics
-
-### Safe auto-link
-
-- exact phone match to one roster canvasser
-
-### Suggest only
-
-- normalized exact name match
-- near-name token match
-- same phone with slightly different name spelling
-
-### Never auto-link
-
-- similar name, different phone
-- group/movement names
-- empty/incomplete entries
-
-### Group or movement names remain valid
-
-Examples like:
-
-- `City Boy Movement`
-- `MGM Youth Team`
-
-should remain as manual referral sources, not forced into person-based canvasser logic.
-
----
-
-## Reporting Metric Rules
-
-### Candidate report
-
-`Referral Activity` should be based on submission attribution in the active filtered view.
-
-Not on:
-
-- raw roster count
-- total preloaded canvassers
+- Selecting a saved canvasser stores stable list attribution through `campaignCanvasserId`
+- Typing a canvasser manually stores raw text only
+- Manual entry must not force unexpected UI mode changes just because it resembles a saved canvasser
+- Phone normalization can help recognize the same saved canvasser across display formats, but it must not turn free text into hidden auto-merges
 
 ### Admin
 
-Can still show both:
+- `Canvasser Activity` is the main operational view
+- row states remain only:
+  - `From List`
+  - `Typed In`
+- cleanup is intentionally narrow:
+  - only show typed-in entries that clearly match someone already on the saved canvasser list
+  - do not compare typed-in entries against other typed-in entries
+  - do not auto-merge by fuzzy name similarity
+- deleting a saved canvasser removes them from future dropdown choices only
+  - old submissions keep their original name/phone snapshots
+  - old list-backed rows may fall back into the raw/manual bucket if the stable list record is gone
 
-- roster size
-- referral activity count
+### Campaign Insights
 
-But they must remain visibly separate metrics.
-
----
-
-## Edge Cases
-
-### 1. Preloaded canvasser selected
-
-- stable link stored
-- future reporting groups correctly
-
-### 2. Manual entry of same real person
-
-- remains manual unless auto-link is high-confidence or admin links it
-
-### 3. Same phone, different name
-
-- strong candidate for linking
-
-### 4. Same/similar name, different phone
-
-- do not auto-link
-
-### 5. Group name instead of person
-
-- keep as manual referral source
-
-### 6. Deleted roster canvasser
-
-- keep submission snapshots
-- `campaignCanvasserId` may go null via `onDelete: SetNull`
-- historical report still renders the original snapshots
-
-### 7. Current live campaigns without preloaded canvassers
-
-- candidate report should still work using referral activity language
-- admin cleanup remains possible later
-
-### 8. Long names and mobile tables
-
-- truncate in leaderboard/table rows
-- show full value in sheet/detail
-
-### 9. Pagination
-
-- admin referral activity must be paginated
-- roster should also be paginated once the count grows
+- canvasser intelligence stays inside existing tabs:
+  - `Overview`
+  - `Supporters`
+  - `Analytics`
+- candidate-facing wording should stay simple:
+  - `Canvasser Activity`
+  - `Listed Canvassers`
+  - `Typed Canvasser Names`
+- reporting should not imply that typed-in names have been fully resolved unless they are truly linked to a saved canvasser
 
 ---
 
-## Phased Implementation Plan
+## Cleanup Scope
 
-### Phase 1 — Future Stable Attribution ✅ Shipped
+Cleanup is not a duplicate-resolution engine.
 
-- `campaignCanvasserId` added to `CollectSubmission` (FK to `CampaignCanvasser`, `onDelete: SetNull`)
-- `selectedCampaignCanvasserId` added to screen5Schema / serverSubmitSchema
-- Public form `canvasser-step.tsx` writes the ID when a preloaded canvasser is selected
-- Server validates the ID belongs to the campaign before persisting (silently discards stale/crafted IDs)
-- `campaign-registration-form.tsx` centrally clears the ID in both skip-canvasser-step paths
+It exists only to answer one admin question:
 
-### Phase 2 — Candidate Reporting Rewrite ✅ Shipped
+> “Does this typed-in canvasser name clearly match someone already on my saved canvasser list?”
 
-- `CampaignStats` gains filter-aware referral metrics: `referredCount`, `directCount`, `knownSourceCount`, `otherNameCount`, `topKnownSources`, `otherReferralNames`
-- `CampaignHealth` slimmed: removed `canvasserCount` / `topCanvassers` (submission-driven metrics are in `stats` now)
-- `FieldTeamPerformanceCard` → `ReferralActivityCard` in `insights-overview.tsx`
-- New `InsightsReferral` component in Analytics tab: referral split, top known sources, other names with helper note
-- `insights-supporters.tsx` detail sheet now shows referral type (Known / Manual / Direct)
+Allowed signals for cleanup suggestions:
 
-### Phase 3 — Admin Canvasser UX Cleanup ✅ Shipped
+- exact normalized phone match to a saved canvasser
+- exact normalized name match to a saved canvasser
 
-- `campaign-canvassers.tsx` refactored into 3 tabs: **Roster** / **Referral Activity** / **Possible Matches**
-- Referral Activity tab: Known/Manual badges, click Known row → drill-down by `campaignCanvasserId`
-- Possible Matches tab: phone + normalized-name matching, Link-to-Roster action, Keep Separate (client-side)
-- New API routes: `GET /canvassers/matches`, `POST /canvassers/link`
-- `submission-query.ts` and `collect-api.ts` thread `campaignCanvasserId` filter end-to-end
-- Canvasser export gains `Type` column (Known/Manual) appended at end
+Not in scope:
 
-### Optional Phase 4 — Safe Legacy Auto-Link Backfill
+- typed-in name vs another typed-in name
+- fuzzy or token-overlap merges
+- “probably the same person” suggestions without a saved-list anchor
 
-Not implemented as a background script. Admin uses the "Link to Roster" action in Possible Matches for confirmed cases. Bulk exact-phone backfill can be a separate admin tool if needed later.
+Example:
+
+- `Dauda Yunusa` typed with the same phone as a saved canvasser can appear in cleanup
+- `Liman Yusuf` vs `Liman Yusuf Abdullahi` should remain two `Typed In` rows unless admin later creates or links a real saved-list canvasser entry
 
 ---
 
-## Verification / Rollout Checklist
+## UI Direction
 
-1. Future dropdown-selected canvasser submissions group under one known source.
-2. Manual typed names still submit successfully.
-3. Candidate report no longer shows misleading `Active Canvassers` based on roster size.
-4. Old submissions remain historically intact.
-5. Admin can distinguish:
-   - roster canvassers
-   - manual referral names
-   - possible duplicates
-6. Paginated canvasser tables remain fast and readable on mobile and desktop.
+### Admin canvasser screen
+
+- Keep the main table primary and lightweight
+- Use the same table/pagination language as the rest of admin
+- Avoid wrapping the table in overly heavy dashboard cards
+- Keep cleanup visually secondary so it reads like optional admin help, not half the feature
+- `Manage Canvasser List` remains configuration
+- `Canvasser Activity` remains the main operational view
+
+### Candidate reporting
+
+- Keep the canvasser story readable at a glance
+- Use the same card/surface treatment as the rest of Campaign Insights
+- Do not surface admin-cleanup concepts to candidates
 
 ---
 
-## Recommendation
+## Data / Schema
 
-Build this as a focused v4 feature, not a patch inside v3.
+No new schema changes are part of this streamlining pass.
 
-The safest product path is:
+The current stable attribution model remains:
 
-- preserve old truth
-- clean future attribution
-- improve candidate report language immediately
-- add admin cleanup tools where uncertainty really belongs
+- `campaignCanvasserId`
+- `canvasserName`
+- `canvasserPhone`
+
+No alias model, typed-in dedupe model, or additional canvasser state is introduced here.
+
+---
+
+## Acceptance Criteria
+
+- selecting a saved canvasser still stores stable attribution
+- typing a canvasser manually still remains raw/manual
+- `From List` and `Typed In` filters still work in admin
+- export still respects the active canvasser filters
+- cleanup only shows rows with clear saved-list matches
+- typed-in rows that only resemble other typed-in rows do not appear in cleanup
+- deleting a saved canvasser removes them from future dropdown choices without destroying old submission history
+- Campaign Insights uses the same simplified canvasser vocabulary across tabs
+
+---
+
+## Notes For Later
+
+If typed-in -> typed-in dedupe ever becomes important, treat it as a separate future feature with its own product decision, not as an extension of this streamlined canvasser system.

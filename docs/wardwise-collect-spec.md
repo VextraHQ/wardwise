@@ -101,7 +101,7 @@
 
 ### Next Focus (Planned)
 
-- **Referral attribution / canvasser intelligence**: future stable canvasser linking, cleaner candidate-facing referral reporting, and admin-side roster / referral / possible-match cleanup now live in the focused planning doc [wardwise-collect-v4-referral-attribution-spec.md](/Users/nabeelhassan/Desktop/wardwise-demo/docs/wardwise-collect-v4-referral-attribution-spec.md).
+- **Canvasser system alignment**: the simplified production model for saved-list attribution, raw typed-in entries, and narrow saved-list cleanup now lives in [wardwise-collect-v4-referral-attribution-spec.md](/Users/nabeelhassan/Desktop/wardwise-demo/docs/wardwise-collect-v4-referral-attribution-spec.md).
 
 ### What Changed (Batch 9 — Offline Queue UX)
 

@@ -34,7 +34,7 @@
 - **`CampaignReportSummary` updated**: `campaign.supportGroupFieldMode`, `stats.withVin`, `stats.withIdentity`, `stats.withSupportGroup`, `stats.byGroup` are now part of the summary payload
 - **`CampaignReportSubmission` updated**: `identityType` and `supportGroupName` included for Supporters tab rendering
 - **Source of truth**: `docs/wardwise-collect-v3-form-configuration-spec.md`
-- **Next phase**: referral-source cleanup and candidate-facing `Referral Activity` reporting are tracked separately in `docs/wardwise-collect-v4-referral-attribution-spec.md`
+- **Current canvasser direction**: simplified canvasser attribution, narrow saved-list cleanup, and candidate-facing `Canvasser Activity` reporting are tracked in `docs/wardwise-collect-v4-referral-attribution-spec.md`
 
 ### What Changed (Batch 2 — Scope + Architecture Cleanup)
 

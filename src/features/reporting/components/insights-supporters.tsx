@@ -669,7 +669,7 @@ export function InsightsSupporters({
                     if (sub.campaignCanvasserId) {
                       return (
                         <>
-                          <Field label="Type" value="Known source" />
+                          <Field label="Type" value="From List" />
                           <Field
                             label="Name"
                             value={sub.canvasserName || "—"}
@@ -687,7 +687,7 @@ export function InsightsSupporters({
                     if (sub.canvasserName) {
                       return (
                         <>
-                          <Field label="Type" value="Manual entry" />
+                          <Field label="Type" value="Typed In" />
                           <Field label="Name" value={sub.canvasserName} />
                           {sub.canvasserPhone && (
                             <Field

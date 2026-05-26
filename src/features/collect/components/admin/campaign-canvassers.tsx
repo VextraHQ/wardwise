@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Sheet,
   SheetContent,
@@ -108,6 +109,33 @@ function sourceFilterLabel(filter: Exclude<SourceFilter, "all">) {
 
 function sourceTypeLabel(type: ReferralActivityItem["type"]) {
   return type === "known" ? "From List" : "Typed In";
+}
+
+function normalizeCleanupName(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
+function cleanupConfidenceMeta({
+  confidence,
+  namesMatch,
+}: {
+  confidence: "high" | "medium";
+  namesMatch: boolean;
+}) {
+  return confidence === "high"
+    ? {
+        label: namesMatch ? "Exact phone + name match" : "Exact phone match",
+        badgeClass:
+          "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+      }
+    : {
+        label: "Exact name match",
+        badgeClass:
+          "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+      };
 }
 
 function PublicFormListManager({
@@ -554,7 +582,7 @@ function ReferralActivitySection({
             </Badge>
             <p className="text-muted-foreground text-xs">
               {sourceFilter === "all"
-                ? "Showing all canvasser sources"
+                ? "Showing all canvasser entries"
                 : `Showing ${sourceFilterLabel(sourceFilter).toLowerCase()} only`}
             </p>
           </div>
@@ -715,7 +743,7 @@ function ReferralActivitySection({
               totalPages={totalPages}
               pageSize={pageSize}
               totalItems={filtered.length}
-              itemLabel="canvasser sources"
+              itemLabel="canvasser entries"
               onPageChange={setPage}
               onPageSizeChange={(size) => {
                 setPageSize(size);
@@ -737,26 +765,42 @@ function ReferralActivitySection({
   );
 }
 
-function NeedsCleanupSection({
+function CleanupWorkspace({
   matches,
   isLoading,
   linkMutation,
+  isMobile,
 }: {
   matches: PossibleMatch[];
   isLoading: boolean;
   linkMutation: ReturnType<typeof useLinkToRoster>;
+  isMobile: boolean;
 }) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeLinkKey, setActiveLinkKey] = useState<string | null>(null);
 
-  const visibleMatches = matches.filter(
-    (match) =>
-      !dismissed.has(`${match.manualName}__${match.manualPhone ?? ""}`),
+  const getMatchKey = (match: PossibleMatch) =>
+    `${match.manualName}__${match.manualPhone ?? ""}`;
+  const getSuggestionKey = (
+    match: PossibleMatch,
+    suggestion: PossibleMatch["suggestions"][0],
+  ) => `${getMatchKey(match)}__${suggestion.canvasserId}`;
+
+  const visibleMatches = useMemo(
+    () => matches.filter((match) => !dismissed.has(getMatchKey(match))),
+    [dismissed, matches],
   );
 
   const handleLink = (
     match: PossibleMatch,
     suggestion: PossibleMatch["suggestions"][0],
   ) => {
+    if (linkMutation.isPending) return;
+
+    const suggestionKey = getSuggestionKey(match, suggestion);
+    setActiveLinkKey(suggestionKey);
+
     linkMutation.mutate(
       {
         manualName: match.manualName,
@@ -769,33 +813,24 @@ function NeedsCleanupSection({
             `Linked ${linkedCount} submission${linkedCount !== 1 ? "s" : ""} to ${suggestion.canvasserName}`,
           );
           setDismissed(
-            (current) =>
-              new Set([
-                ...current,
-                `${match.manualName}__${match.manualPhone ?? ""}`,
-              ]),
+            (current) => new Set([...current, getMatchKey(match)]),
           );
         },
         onError: (error) => toast.error(error.message),
+        onSettled: () => setActiveLinkKey(null),
       },
     );
   };
 
   const handleDismiss = (match: PossibleMatch) => {
-    setDismissed(
-      (current) =>
-        new Set([
-          ...current,
-          `${match.manualName}__${match.manualPhone ?? ""}`,
-        ]),
-    );
+    setDismissed((current) => new Set([...current, getMatchKey(match)]));
   };
 
   if (isLoading) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-3">
         {Array.from({ length: 3 }).map((_, index) => (
-          <Skeleton key={index} className="h-20 w-full rounded-sm" />
+          <Skeleton key={index} className="h-36 w-full rounded-sm" />
         ))}
       </div>
     );
@@ -803,98 +838,308 @@ function NeedsCleanupSection({
 
   if (visibleMatches.length === 0) {
     return (
-      <div className="border-border flex flex-col items-center gap-3 rounded-sm border border-dashed py-10 text-center">
+      <div className="border-border flex flex-col items-center gap-3 rounded-sm border border-dashed py-12 text-center">
         <IconSparkles className="text-muted-foreground h-8 w-8" />
         <p className="text-muted-foreground text-sm font-medium">
           Nothing left to review right now.
         </p>
         <p className="text-muted-foreground/70 text-xs leading-relaxed">
-          When typed-in canvasser names closely resemble your saved list, they
-          will appear here for cleanup.
+          Only typed-in canvasser names that clearly match someone on your saved
+          list will appear here.
         </p>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-3">
-      <p className="text-muted-foreground text-xs leading-relaxed">
-        These typed-in canvasser names may already belong to someone on your
-        saved canvasser list. Link them when you are confident, or keep them
-        separate if they are genuinely different.
-      </p>
+  const currentIndex =
+    visibleMatches.length === 0
+      ? 0
+      : Math.min(activeIndex, visibleMatches.length - 1);
+  const activeMatch = visibleMatches[currentIndex];
 
-      <div className="space-y-2">
-        {visibleMatches.map((match) => (
-          <div
-            key={`${match.manualName}__${match.manualPhone ?? ""}`}
-            className="border-border/60 space-y-2 rounded-sm border p-3"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">
-                  {formatPersonName(match.manualName)}
+  if (isMobile && activeMatch) {
+    return (
+      <div className="space-y-4">
+        <div className="border-border/60 bg-muted/20 rounded-sm border px-4 py-3">
+          <div className="flex items-center gap-2">
+            <p className="font-mono text-[10px] font-bold tracking-widest uppercase">
+              Match Review
+            </p>
+            <Badge
+              variant="secondary"
+              className="rounded-sm px-1.5 py-0 font-mono text-[10px] tabular-nums"
+            >
+              {visibleMatches.length}
+            </Badge>
+          </div>
+          <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
+            Match {currentIndex + 1} of {visibleMatches.length}. Review the
+            typed-in entry and link it only if the saved canvasser is clearly
+            the same person.
+          </p>
+        </div>
+
+        <div className="border-border/60 bg-card overflow-hidden rounded-sm border shadow-none">
+          <div className="flex items-start justify-between gap-3 px-4 py-4">
+            <div className="min-w-0 space-y-2">
+              <div className="flex items-center gap-2">
+                <p className="font-mono text-[10px] font-bold tracking-widest uppercase">
+                  Typed In
                 </p>
-                {match.manualPhone ? (
-                  <p className="text-muted-foreground font-mono text-xs">
-                    {match.manualPhone}
-                  </p>
-                ) : null}
-                <p className="text-muted-foreground mt-0.5 text-xs">
-                  {match.submissionCount} submission
-                  {match.submissionCount !== 1 ? "s" : ""}
-                </p>
+                <Badge
+                  variant="secondary"
+                  className="rounded-sm px-1.5 py-0 font-mono text-[10px] tabular-nums"
+                >
+                  {activeMatch.submissionCount}
+                </Badge>
               </div>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground h-7 shrink-0 rounded-sm font-mono text-[10px] tracking-widest uppercase"
-                onClick={() => handleDismiss(match)}
-              >
-                Keep separate
-              </Button>
+              <p className="text-base font-semibold">
+                {formatPersonName(activeMatch.manualName)}
+              </p>
+              <p className="text-muted-foreground font-mono text-xs">
+                {activeMatch.manualPhone || "No phone shared"}
+              </p>
+              <p className="text-muted-foreground text-xs">
+                {activeMatch.submissionCount} submission
+                {activeMatch.submissionCount !== 1 ? "s" : ""}
+              </p>
             </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground h-8 shrink-0 rounded-sm font-mono text-[10px] tracking-widest uppercase"
+              onClick={() => handleDismiss(activeMatch)}
+            >
+              Keep Separate
+            </Button>
+          </div>
 
-            {match.suggestions.map((suggestion) => (
-              <div
-                key={suggestion.canvasserId}
-                className="border-border/40 bg-muted/20 flex items-center justify-between gap-3 rounded-sm border px-3 py-2"
-              >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "shrink-0 rounded-sm px-1.5 py-0 font-mono text-[9px] font-bold tracking-widest uppercase",
-                        suggestion.confidence === "high"
-                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                          : "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400",
-                      )}
+          <div className="border-border/60 border-t px-4 py-4">
+            <p className="font-mono text-[10px] font-bold tracking-widest uppercase">
+              Suggested Saved List Match
+            </p>
+            <div className="mt-3 space-y-3">
+              {activeMatch.suggestions.map((suggestion) => {
+                const matchMeta = cleanupConfidenceMeta({
+                  confidence: suggestion.confidence,
+                  namesMatch:
+                    normalizeCleanupName(activeMatch.manualName) ===
+                      normalizeCleanupName(suggestion.canvasserName),
+                });
+                const isLinkingThis =
+                  linkMutation.isPending &&
+                  activeLinkKey === getSuggestionKey(activeMatch, suggestion);
+
+                return (
+                  <div
+                    key={suggestion.canvasserId}
+                    className="border-border/60 bg-muted/10 rounded-sm border px-3 py-3"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold">
+                        {formatPersonName(suggestion.canvasserName)}
+                      </p>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "rounded-sm px-1.5 py-0 font-mono text-[9px] font-bold tracking-widest uppercase",
+                          matchMeta.badgeClass,
+                        )}
+                      >
+                        {matchMeta.label}
+                      </Badge>
+                    </div>
+                    <p className="text-muted-foreground mt-1 font-mono text-xs">
+                      {suggestion.canvasserPhone}
+                    </p>
+                    <Button
+                      size="sm"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 mt-3 h-8 w-full rounded-sm font-mono text-[10px] tracking-widest uppercase"
+                      disabled={isLinkingThis}
+                      onClick={() => handleLink(activeMatch, suggestion)}
                     >
-                      {suggestion.confidence === "high" ? "High" : "Suggested"}
-                    </Badge>
-                    <span className="truncate text-sm font-medium">
-                      {formatPersonName(suggestion.canvasserName)}
-                    </span>
+                      {isLinkingThis ? (
+                        <>
+                          <Spinner className="mr-1 h-3 w-3" />
+                          Linking...
+                        </>
+                      ) : (
+                        <>
+                          <IconLink className="mr-1 h-3 w-3" />
+                          Link to List
+                        </>
+                      )}
+                    </Button>
                   </div>
-                  <p className="text-muted-foreground mt-0.5 font-mono text-xs">
-                    {suggestion.canvasserPhone}
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="border-border/60 bg-background/95 sticky bottom-0 space-y-2 border-t pt-3 pb-1 backdrop-blur-sm">
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-8 rounded-sm font-mono text-[10px] tracking-widest uppercase"
+              disabled={currentIndex === 0}
+              onClick={() => setActiveIndex((current) => Math.max(0, current - 1))}
+            >
+              Previous
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-8 rounded-sm font-mono text-[10px] tracking-widest uppercase"
+              disabled={currentIndex === visibleMatches.length - 1}
+              onClick={() =>
+                setActiveIndex((current) =>
+                  Math.min(visibleMatches.length - 1, current + 1),
+                )
+              }
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="border-border/60 bg-muted/20 flex items-center justify-between gap-3 rounded-sm border px-4 py-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="font-mono text-[10px] font-bold tracking-widest uppercase">
+              Match Review
+            </p>
+            <Badge
+              variant="secondary"
+              className="rounded-sm px-1.5 py-0 font-mono text-[10px] tabular-nums"
+            >
+              {visibleMatches.length}
+            </Badge>
+          </div>
+          <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+            Typed-in names only appear here when they clearly match someone on
+            your saved canvasser list.
+          </p>
+        </div>
+      </div>
+
+      <div className="border-border/60 bg-card overflow-hidden rounded-sm border shadow-none">
+        {visibleMatches.map((match, index) => (
+          <div
+            key={getMatchKey(match)}
+            className={cn(
+              "grid gap-4 px-4 py-4",
+              index > 0 && "border-border/60 border-t",
+              "xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]",
+            )}
+          >
+            <div className="space-y-3 xl:border-r xl:border-dashed xl:border-border/60 xl:pr-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono text-[10px] font-bold tracking-widest uppercase">
+                      Typed In
+                    </p>
+                    <Badge
+                      variant="secondary"
+                      className="rounded-sm px-1.5 py-0 font-mono text-[10px] tabular-nums"
+                    >
+                      {match.submissionCount}
+                    </Badge>
+                  </div>
+                  <p className="text-base font-semibold">
+                    {formatPersonName(match.manualName)}
+                  </p>
+                  <p className="text-muted-foreground font-mono text-xs">
+                    {match.manualPhone || "No phone shared"}
+                  </p>
+                  <p className="text-muted-foreground text-xs">
+                    {match.submissionCount} submission
+                    {match.submissionCount !== 1 ? "s" : ""}
                   </p>
                 </div>
-
                 <Button
+                  variant="ghost"
                   size="sm"
-                  variant="outline"
-                  className="h-7 shrink-0 rounded-sm font-mono text-[10px] tracking-widest uppercase"
-                  disabled={linkMutation.isPending}
-                  onClick={() => handleLink(match, suggestion)}
+                  className="text-muted-foreground hover:text-foreground h-8 shrink-0 rounded-sm font-mono text-[10px] tracking-widest uppercase"
+                  onClick={() => handleDismiss(match)}
                 >
-                  <IconLink className="mr-1 h-3 w-3" />
-                  Link to List
+                  Keep Separate
                 </Button>
               </div>
-            ))}
+            </div>
+
+            <div className="space-y-2">
+              <p className="font-mono text-[10px] font-bold tracking-widest uppercase">
+                Suggested Saved List Match
+                {match.suggestions.length > 1 ? "es" : ""}
+              </p>
+
+              {match.suggestions.map((suggestion) => {
+                const matchMeta = cleanupConfidenceMeta({
+                  confidence: suggestion.confidence,
+                  namesMatch:
+                    normalizeCleanupName(match.manualName) ===
+                      normalizeCleanupName(suggestion.canvasserName),
+                });
+                const isLinkingThis =
+                  linkMutation.isPending &&
+                  activeLinkKey === getSuggestionKey(match, suggestion);
+
+                return (
+                  <div
+                    key={suggestion.canvasserId}
+                    className="border-border/60 bg-muted/10 flex items-center justify-between gap-3 rounded-sm border px-3 py-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate text-sm font-semibold">
+                          {formatPersonName(suggestion.canvasserName)}
+                        </p>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "rounded-sm px-1.5 py-0 font-mono text-[9px] font-bold tracking-widest uppercase",
+                            matchMeta.badgeClass,
+                          )}
+                        >
+                          {matchMeta.label}
+                        </Badge>
+                      </div>
+                      <p className="text-muted-foreground mt-1 font-mono text-xs">
+                        {suggestion.canvasserPhone}
+                      </p>
+                    </div>
+
+                    <Button
+                      size="sm"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 shrink-0 rounded-sm font-mono text-[10px] tracking-widest uppercase"
+                      disabled={isLinkingThis}
+                      onClick={() => handleLink(match, suggestion)}
+                    >
+                      {isLinkingThis ? (
+                        <>
+                          <Spinner className="mr-1 h-3 w-3" />
+                          Linking...
+                        </>
+                      ) : (
+                        <>
+                          <IconLink className="mr-1 h-3 w-3" />
+                          Link to List
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ))}
       </div>
@@ -1006,58 +1251,63 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
 
   return (
     <div className="space-y-5 pt-3">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <Tabs
-          value={sourceFilter}
-          onValueChange={(value) => focusReferralSection(value as SourceFilter)}
-        >
-          <TabsList className="bg-muted w-fit max-w-full justify-start overflow-x-auto rounded-sm p-1 [scrollbar-width:none] sm:overflow-visible [&::-webkit-scrollbar]:hidden">
-            {(
-              [
-                {
-                  key: "all",
-                  label: "All Sources",
-                  count: referralActivity.length,
-                },
-                {
-                  key: "manual",
-                  label: "Typed In",
-                  count: manualEntries.length,
-                },
-                {
-                  key: "known",
-                  label: "From List",
-                  count: knownEntries.length,
-                },
-              ] as const
-            ).map((option) => (
-              <TabsTrigger
-                key={option.key}
-                value={option.key}
-                className="flex-none rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase"
-              >
-                {option.label}
-                <Badge
-                  variant="secondary"
-                  className="ml-1.5 rounded-sm px-1.5 py-0 font-mono text-[10px] tabular-nums"
+      <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3 lg:gap-y-2">
+        <div className="max-w-full min-w-0 flex-1">
+          <Tabs
+            value={sourceFilter}
+            onValueChange={(value) =>
+              focusReferralSection(value as SourceFilter)
+            }
+          >
+            <TabsList className="bg-muted w-fit max-w-full justify-start overflow-x-auto rounded-sm p-1 [scrollbar-width:none] lg:max-w-full [&::-webkit-scrollbar]:hidden">
+              {(
+                [
+                  {
+                    key: "all",
+                    label: "All",
+                    count: referralActivity.length,
+                  },
+                  {
+                    key: "manual",
+                    label: "Typed In",
+                    count: manualEntries.length,
+                  },
+                  {
+                    key: "known",
+                    label: "From List",
+                    count: knownEntries.length,
+                  },
+                ] as const
+              ).map((option) => (
+                <TabsTrigger
+                  key={option.key}
+                  value={option.key}
+                  className="flex-none rounded-sm px-3 font-mono text-[10px] font-bold tracking-widest uppercase"
                 >
-                  {option.count}
-                </Badge>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+                  {option.label}
+                  <Badge
+                    variant="secondary"
+                    className="ml-1.5 rounded-sm px-1.5 py-0 font-mono text-[10px] tabular-nums"
+                  >
+                    {option.count}
+                  </Badge>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
 
         {/* Desktop View */}
-        <div className="hidden items-center gap-2 lg:flex">
+        <div className="hidden shrink-0 flex-wrap items-center justify-end gap-2 lg:ml-auto lg:flex">
           <Button
             type="button"
             variant="outline"
             size="sm"
+            title="Manage Canvasser List"
             className="hover:bg-muted h-8 shrink-0 rounded-sm font-mono text-[10px] tracking-widest uppercase shadow-sm transition-all"
             onClick={() => setPublicListOpen(true)}
           >
-            Manage Canvasser List
+            Manage List
             <Badge
               variant="secondary"
               className="ml-1.5 rounded-sm px-1.5 py-0 font-mono text-[10px] tabular-nums"
@@ -1087,15 +1337,16 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
             type="button"
             variant="outline"
             size="sm"
+            title="Canvasser Cleanup"
             className={cn(
               "hover:bg-muted h-8 shrink-0 rounded-sm font-mono text-[10px] tracking-widest uppercase shadow-sm transition-all",
               possibleMatches.length > 0 &&
                 "border-amber-500/25 bg-amber-500/5 text-amber-800 hover:bg-amber-500/10 dark:text-amber-200",
             )}
-            onClick={() => setCleanupOpen((current) => !current)}
+            onClick={() => setCleanupOpen(true)}
             disabled={possibleMatches.length === 0}
           >
-            Canvasser Cleanup
+            Cleanup
             <Badge
               variant="secondary"
               className="ml-1.5 rounded-sm px-1.5 py-0 font-mono text-[10px] tabular-nums"
@@ -1142,14 +1393,14 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
             <Button
               type="button"
               variant="outline"
-              className={cn(
-                "hover:bg-muted h-8 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase shadow-sm transition-all",
-                possibleMatches.length > 0 &&
-                  "border-amber-500/25 bg-amber-500/5 text-amber-800 hover:bg-amber-500/10 dark:text-amber-200",
-              )}
-              onClick={() => setCleanupOpen((current) => !current)}
-              disabled={possibleMatches.length === 0}
-            >
+            className={cn(
+              "hover:bg-muted h-8 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase shadow-sm transition-all",
+              possibleMatches.length > 0 &&
+                "border-amber-500/25 bg-amber-500/5 text-amber-800 hover:bg-amber-500/10 dark:text-amber-200",
+            )}
+            onClick={() => setCleanupOpen(true)}
+            disabled={possibleMatches.length === 0}
+          >
               Cleanup
               <Badge
                 variant="secondary"
@@ -1162,10 +1413,7 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
         </div>
       </div>
 
-      <div
-        ref={referralSectionRef}
-        className="border-border/60 bg-card rounded-sm border p-4 shadow-none sm:p-5"
-      >
+      <div ref={referralSectionRef}>
         <ReferralActivitySection
           key={sourceFilter}
           referralActivity={referralActivity}
@@ -1177,90 +1425,98 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
         />
       </div>
 
-      {cleanupOpen || possibleMatches.length > 0 ? (
-        <div className="border-border/60 bg-card rounded-sm border p-4 shadow-none sm:p-5">
-          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
-              <p className="font-mono text-[10px] font-bold tracking-widest uppercase">
-                Canvasser Cleanup
-              </p>
-              <Badge
-                variant="secondary"
-                className="rounded-sm px-1.5 py-0 font-mono text-[10px] tabular-nums"
-              >
-                {possibleMatches.length}
-              </Badge>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 rounded-sm font-mono text-[10px] tracking-widest uppercase"
-              onClick={() => setCleanupOpen((current) => !current)}
-            >
-              {cleanupOpen ? "Hide Cleanup" : "Show Cleanup"}
-            </Button>
-          </div>
-
-          {cleanupOpen ? (
-            <NeedsCleanupSection
-              matches={possibleMatches}
-              isLoading={matchesLoading}
-              linkMutation={linkMutation}
-            />
-          ) : (
-            <p className="text-muted-foreground text-xs">
-              Open this when you want to review typed-in names against your
-              saved canvasser list.
-            </p>
-          )}
-        </div>
-      ) : null}
-
       {isMobile ? (
-        <Drawer open={publicListOpen} onOpenChange={setPublicListOpen}>
-          <DrawerContent className="max-h-[90vh]">
-            <DrawerHeader className="border-border/60 bg-background/95 sticky top-0 z-10 border-b px-4 py-3 text-left backdrop-blur-sm">
-              <DrawerTitle className="font-mono text-xs font-bold tracking-widest uppercase sm:text-sm">
-                Manage Canvasser List
-              </DrawerTitle>
-              <DrawerDescription className="text-xs">
-                Add or remove canvassers supporters can choose directly from the
-                public form dropdown.
-              </DrawerDescription>
-            </DrawerHeader>
-            <div className="overflow-y-auto px-4 py-4 pb-12">
-              <PublicFormListManager
-                preloaded={preloaded}
-                addMutation={addMutation}
-                removeMutation={removeMutation}
-                onRemoveClick={handleRemoveClick}
-              />
-            </div>
-          </DrawerContent>
-        </Drawer>
+        <>
+          <Drawer open={cleanupOpen} onOpenChange={setCleanupOpen}>
+            <DrawerContent className="max-h-[92vh]">
+              <DrawerHeader className="border-border/60 bg-background/95 sticky top-0 z-10 border-b px-4 py-3 text-left backdrop-blur-sm">
+                <DrawerTitle className="font-mono text-xs font-bold tracking-widest uppercase sm:text-sm">
+                  Canvasser Cleanup
+                </DrawerTitle>
+                <DrawerDescription className="text-xs leading-relaxed">
+                  Review typed-in canvasser names against your saved canvasser
+                  list and link only the ones that are clearly the same person.
+                </DrawerDescription>
+              </DrawerHeader>
+              <div className="overflow-y-auto px-4 py-4 pb-12">
+                <CleanupWorkspace
+                  matches={possibleMatches}
+                  isLoading={matchesLoading}
+                  linkMutation={linkMutation}
+                  isMobile
+                />
+              </div>
+            </DrawerContent>
+          </Drawer>
+
+          <Drawer open={publicListOpen} onOpenChange={setPublicListOpen}>
+            <DrawerContent className="max-h-[90vh]">
+              <DrawerHeader className="border-border/60 bg-background/95 sticky top-0 z-10 border-b px-4 py-3 text-left backdrop-blur-sm">
+                <DrawerTitle className="font-mono text-xs font-bold tracking-widest uppercase sm:text-sm">
+                  Manage Canvasser List
+                </DrawerTitle>
+                <DrawerDescription className="text-xs">
+                  Add or remove canvassers supporters can choose directly from the
+                  public form dropdown.
+                </DrawerDescription>
+              </DrawerHeader>
+              <div className="overflow-y-auto px-4 py-4 pb-12">
+                <PublicFormListManager
+                  preloaded={preloaded}
+                  addMutation={addMutation}
+                  removeMutation={removeMutation}
+                  onRemoveClick={handleRemoveClick}
+                />
+              </div>
+            </DrawerContent>
+          </Drawer>
+        </>
       ) : (
-        <Sheet open={publicListOpen} onOpenChange={setPublicListOpen}>
-          <SheetContent side="right" className="w-full p-0 sm:max-w-md">
-            <SheetHeader className="border-border/60 bg-background/95 sticky top-0 z-10 border-b px-4 py-3 pr-10 backdrop-blur-sm">
-              <SheetTitle className="font-mono text-xs font-bold tracking-widest uppercase sm:text-sm">
-                Manage Canvasser List
-              </SheetTitle>
-              <SheetDescription className="text-left text-xs">
-                Add or remove canvassers supporters can choose directly from the
-                public form dropdown.
-              </SheetDescription>
-            </SheetHeader>
-            <div className="h-full overflow-y-auto px-4 py-4">
-              <PublicFormListManager
-                preloaded={preloaded}
-                addMutation={addMutation}
-                removeMutation={removeMutation}
-                onRemoveClick={handleRemoveClick}
-              />
-            </div>
-          </SheetContent>
-        </Sheet>
+        <>
+          <Sheet open={cleanupOpen} onOpenChange={setCleanupOpen}>
+            <SheetContent side="right" className="w-full p-0 sm:max-w-xl">
+              <SheetHeader className="border-border/60 bg-background/95 sticky top-0 z-10 border-b px-4 py-3 pr-10 backdrop-blur-sm">
+                <SheetTitle className="font-mono text-xs font-bold tracking-widest uppercase sm:text-sm">
+                  Canvasser Cleanup
+                </SheetTitle>
+                <SheetDescription className="text-left text-xs leading-relaxed">
+                  Compare typed-in canvasser names with your saved canvasser
+                  list, then link only the clear matches.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="h-full overflow-y-auto px-4 py-4">
+                <CleanupWorkspace
+                  matches={possibleMatches}
+                  isLoading={matchesLoading}
+                  linkMutation={linkMutation}
+                  isMobile={false}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <Sheet open={publicListOpen} onOpenChange={setPublicListOpen}>
+            <SheetContent side="right" className="w-full p-0 sm:max-w-md">
+              <SheetHeader className="border-border/60 bg-background/95 sticky top-0 z-10 border-b px-4 py-3 pr-10 backdrop-blur-sm">
+                <SheetTitle className="font-mono text-xs font-bold tracking-widest uppercase sm:text-sm">
+                  Manage Canvasser List
+                </SheetTitle>
+                <SheetDescription className="text-left text-xs">
+                  Add or remove canvassers supporters can choose directly from the
+                  public form dropdown.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="h-full overflow-y-auto px-4 py-4">
+                <PublicFormListManager
+                  preloaded={preloaded}
+                  addMutation={addMutation}
+                  removeMutation={removeMutation}
+                  onRemoveClick={handleRemoveClick}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </>
       )}
 
       <AlertDialog

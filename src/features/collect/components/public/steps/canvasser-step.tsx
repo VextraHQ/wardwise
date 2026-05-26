@@ -136,10 +136,9 @@ export function CanvasserStep({
     }
 
     if (manualCanvasserEntry) {
-      setValue(
-        "selectedCampaignCanvasserId",
-        matchedCanvasser?.id || undefined,
-      );
+      // "Other" stays a true typed-in/manual path even if the details happen
+      // to match a saved canvasser later.
+      setValue("selectedCampaignCanvasserId", undefined);
       return;
     }
 

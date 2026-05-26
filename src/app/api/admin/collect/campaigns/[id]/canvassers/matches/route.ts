@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/features/auth/lib/guards";
 import { prisma } from "@/lib/core/prisma";
+import { normalizeNigerianPhoneInput } from "@/lib/schemas/field-schemas";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -27,6 +28,15 @@ function normalizeNameForMatch(name: string): string {
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function normalizePhoneForMatch(phone?: string | null): string | null {
+  if (!phone) {
+    return null;
+  }
+
+  const normalized = normalizeNigerianPhoneInput(phone);
+  return normalized || null;
 }
 
 function isGroupName(normalizedName: string): boolean {
@@ -66,7 +76,10 @@ export async function GET(_request: Request, { params }: RouteParams) {
     const rosterByPhone = new Map<string, (typeof roster)[0]>();
     const rosterNormalized: { id: string; norm: string; name: string; phone: string }[] = [];
     for (const c of roster) {
-      rosterByPhone.set(c.phone, c);
+      const normalizedPhone = normalizePhoneForMatch(c.phone);
+      if (normalizedPhone) {
+        rosterByPhone.set(normalizedPhone, c);
+      }
       rosterNormalized.push({ id: c.id, norm: normalizeNameForMatch(c.name), name: c.name, phone: c.phone });
     }
 
@@ -80,6 +93,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
     for (const group of manualGroups) {
       const manualName = group.canvasserName!;
       const manualPhone = group.canvasserPhone ?? null;
+      const normalizedManualPhone = normalizePhoneForMatch(manualPhone);
       const norm = normalizeNameForMatch(manualName);
 
       // Skip group/org names
@@ -88,8 +102,8 @@ export async function GET(_request: Request, { params }: RouteParams) {
       const suggestions: (typeof matches)[0]["suggestions"] = [];
 
       // High confidence: exact phone match to a roster canvasser
-      if (manualPhone) {
-        const phoneMatch = rosterByPhone.get(manualPhone);
+      if (normalizedManualPhone) {
+        const phoneMatch = rosterByPhone.get(normalizedManualPhone);
         if (phoneMatch) {
           suggestions.push({
             canvasserId: phoneMatch.id,
