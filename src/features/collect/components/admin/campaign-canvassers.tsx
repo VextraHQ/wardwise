@@ -112,10 +112,7 @@ function sourceTypeLabel(type: ReferralActivityItem["type"]) {
 }
 
 function normalizeCleanupName(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 function cleanupConfidenceMeta({
@@ -812,9 +809,7 @@ function CleanupWorkspace({
           toast.success(
             `Linked ${linkedCount} submission${linkedCount !== 1 ? "s" : ""} to ${suggestion.canvasserName}`,
           );
-          setDismissed(
-            (current) => new Set([...current, getMatchKey(match)]),
-          );
+          setDismissed((current) => new Set([...current, getMatchKey(match)]));
         },
         onError: (error) => toast.error(error.message),
         onSettled: () => setActiveLinkKey(null),
@@ -925,7 +920,7 @@ function CleanupWorkspace({
                   confidence: suggestion.confidence,
                   namesMatch:
                     normalizeCleanupName(activeMatch.manualName) ===
-                      normalizeCleanupName(suggestion.canvasserName),
+                    normalizeCleanupName(suggestion.canvasserName),
                 });
                 const isLinkingThis =
                   linkMutation.isPending &&
@@ -985,7 +980,9 @@ function CleanupWorkspace({
               variant="outline"
               className="h-8 rounded-sm font-mono text-[10px] tracking-widest uppercase"
               disabled={currentIndex === 0}
-              onClick={() => setActiveIndex((current) => Math.max(0, current - 1))}
+              onClick={() =>
+                setActiveIndex((current) => Math.max(0, current - 1))
+              }
             >
               Previous
             </Button>
@@ -1035,12 +1032,11 @@ function CleanupWorkspace({
           <div
             key={getMatchKey(match)}
             className={cn(
-              "grid gap-4 px-4 py-4",
+              "space-y-3 px-4 py-4",
               index > 0 && "border-border/60 border-t",
-              "xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]",
             )}
           >
-            <div className="space-y-3 xl:border-r xl:border-dashed xl:border-border/60 xl:pr-4">
+            <div className="space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
@@ -1087,7 +1083,7 @@ function CleanupWorkspace({
                   confidence: suggestion.confidence,
                   namesMatch:
                     normalizeCleanupName(match.manualName) ===
-                      normalizeCleanupName(suggestion.canvasserName),
+                    normalizeCleanupName(suggestion.canvasserName),
                 });
                 const isLinkingThis =
                   linkMutation.isPending &&
@@ -1393,14 +1389,14 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
             <Button
               type="button"
               variant="outline"
-            className={cn(
-              "hover:bg-muted h-8 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase shadow-sm transition-all",
-              possibleMatches.length > 0 &&
-                "border-amber-500/25 bg-amber-500/5 text-amber-800 hover:bg-amber-500/10 dark:text-amber-200",
-            )}
-            onClick={() => setCleanupOpen(true)}
-            disabled={possibleMatches.length === 0}
-          >
+              className={cn(
+                "hover:bg-muted h-8 rounded-sm font-mono text-[10px] font-bold tracking-widest uppercase shadow-sm transition-all",
+                possibleMatches.length > 0 &&
+                  "border-amber-500/25 bg-amber-500/5 text-amber-800 hover:bg-amber-500/10 dark:text-amber-200",
+              )}
+              onClick={() => setCleanupOpen(true)}
+              disabled={possibleMatches.length === 0}
+            >
               Cleanup
               <Badge
                 variant="secondary"
@@ -1456,8 +1452,8 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
                   Manage Canvasser List
                 </DrawerTitle>
                 <DrawerDescription className="text-xs">
-                  Add or remove canvassers supporters can choose directly from the
-                  public form dropdown.
+                  Add or remove canvassers supporters can choose directly from
+                  the public form dropdown.
                 </DrawerDescription>
               </DrawerHeader>
               <div className="overflow-y-auto px-4 py-4 pb-12">
@@ -1502,8 +1498,8 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
                   Manage Canvasser List
                 </SheetTitle>
                 <SheetDescription className="text-left text-xs">
-                  Add or remove canvassers supporters can choose directly from the
-                  public form dropdown.
+                  Add or remove canvassers supporters can choose directly from
+                  the public form dropdown.
                 </SheetDescription>
               </SheetHeader>
               <div className="h-full overflow-y-auto px-4 py-4">
