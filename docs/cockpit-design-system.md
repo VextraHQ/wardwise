@@ -539,6 +539,8 @@ Used by `candidate-sidebar.tsx`. Phase 8 scope to promote to `components/shared/
 
 ### Cockpit Tab Trigger
 
+Use Radix `Tabs` for **navigation** — switching whole panels (campaign detail, candidate detail):
+
 ```tsx
 <TabsTrigger
   className="font-mono text-[10px] font-bold tracking-widest uppercase"
@@ -547,6 +549,27 @@ Used by `candidate-sidebar.tsx`. Phase 8 scope to promote to `components/shared/
   Tab Label
 </TabsTrigger>
 ```
+
+### Cockpit Filter Tabs
+
+Use `AdminFilterTabs` from `@/components/shared/admin/admin-filter-tabs` for **in-page list filters** (status, review state, source type). Do not use Radix `Tabs` for filters — it reads like page navigation.
+
+```tsx
+<AdminFilterTabs
+  value={statusFilter}
+  onValueChange={setStatusFilter}
+  ariaLabel="Filter by status"
+  options={[
+    { value: "all", label: "All", count: 42 },
+    { value: "active", label: "Active", count: 12 },
+  ]}
+/>
+```
+
+- Tray: `border-border/60 bg-muted/25 rounded-sm border p-1` (matches view-mode toggle density)
+- Active segment: `bg-background` lift + `border-primary/20`
+- Counts: small mono chips beside the label (`bg-primary/10` when active)
+- Optional `className` on the tray for layout (e.g. `w-full md:flex-1`, `mt-2`)
 
 ### Empty State
 

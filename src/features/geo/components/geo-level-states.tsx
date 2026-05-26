@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AdminSearchBar } from "@/components/shared/admin/admin-search-bar";
+import { AdminFilterTabs } from "@/components/shared/admin/admin-filter-tabs";
 import {
   AdminResourceState,
   adminResourceStateIcons,
@@ -28,6 +29,13 @@ import { cn } from "@/lib/utils";
 import { IconChevronRight } from "@tabler/icons-react";
 
 type SeedStatus = "all" | "complete" | "partial" | "not-seeded";
+
+const GEO_STATE_STATUS_TABS: { value: SeedStatus; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "complete", label: "Complete" },
+  { value: "partial", label: "Partial" },
+  { value: "not-seeded", label: "Not Seeded" },
+];
 
 interface GeoLevelStatesProps {
   onDrillDown: (stateCode: string) => void;
@@ -285,12 +293,21 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
     );
   };
 
-  const STATUS_TABS: { value: SeedStatus; label: string }[] = [
-    { value: "all", label: "All" },
-    { value: "complete", label: "Complete" },
-    { value: "partial", label: "Partial" },
-    { value: "not-seeded", label: "Not Seeded" },
-  ];
+  const statusFilterOptions = useMemo(
+    () =>
+      GEO_STATE_STATUS_TABS.map(({ value, label }) => {
+        const count =
+          value === "all"
+            ? nigeriaStates.length
+            : statusCounts[value as keyof typeof statusCounts];
+        return {
+          value,
+          label,
+          count: isLoading ? "—" : count,
+        };
+      }),
+    [isLoading, statusCounts],
+  );
 
   return (
     <Card className="border-border/60 min-w-0 rounded-sm shadow-none">
@@ -312,49 +329,13 @@ export function GeoLevelStates({ onDrillDown }: GeoLevelStatesProps) {
           />
         </div>
 
-        {/* Status filter tabs */}
-        <div className="border-border/60 bg-muted/20 mt-2 w-full min-w-0 overflow-hidden rounded-sm border p-1 sm:w-fit">
-          <div
-            role="group"
-            aria-label="Filter states by seeding status"
-            className={cn(
-              "flex min-w-0 items-center gap-1 overflow-x-auto sm:flex-wrap sm:overflow-visible",
-              "mask-[linear-gradient(90deg,#000_0,#000_calc(100%-2.5rem),transparent)] [-webkit-mask-image:linear-gradient(90deg,#000_0,#000_calc(100%-2.5rem),transparent)] sm:mask-none sm:[-webkit-mask-image:none]",
-            )}
-          >
-            {STATUS_TABS.map(({ value, label }) => {
-              const isActive = seedStatus === value;
-              const count =
-                value === "all"
-                  ? nigeriaStates.length
-                  : statusCounts[value as keyof typeof statusCounts];
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={isActive}
-                  onClick={() => setSeedStatus(value)}
-                  className={cn(
-                    "inline-flex min-w-max shrink-0 items-center justify-between gap-2 rounded-sm border px-2.5 py-1.5 text-left font-mono text-[10px] font-bold tracking-widest uppercase transition-colors sm:w-auto sm:min-w-0 sm:shrink sm:justify-center",
-                    isActive
-                      ? "border-primary/25 bg-primary/12 text-primary shadow-sm"
-                      : "text-muted-foreground hover:bg-background/70 hover:text-foreground border-transparent",
-                  )}
-                >
-                  <span className="truncate">{label}</span>
-                  <span
-                    className={cn(
-                      "bg-background/80 text-muted-foreground/80 rounded-sm px-1.5 py-px text-[9px] tabular-nums sm:text-[10px]",
-                      isActive && "bg-background text-primary shadow-sm",
-                    )}
-                  >
-                    {isLoading ? "—" : count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <AdminFilterTabs
+          value={seedStatus}
+          onValueChange={setSeedStatus}
+          ariaLabel="Filter states by seeding status"
+          className="mt-2 w-full sm:w-fit"
+          options={statusFilterOptions}
+        />
       </CardHeader>
 
       <CardContent>

@@ -32,7 +32,7 @@ import {
 } from "@/features/collect/lib/campaign-submissions";
 import { getOrderedExportFormats } from "@/lib/exports/client-preferences";
 import type { ExportFormat } from "@/lib/exports/shared";
-import { cn } from "@/lib/utils";
+import { AdminFilterTabs } from "@/components/shared/admin/admin-filter-tabs";
 import type { ReviewStatus } from "@/features/collect/types/campaign-submissions.types";
 
 const exportFormatIcons = {
@@ -74,39 +74,16 @@ export function CampaignSubmissionsToolbar({
   return (
     <>
       <div className="grid grid-cols-1 gap-2 lg:grid-cols-[auto_minmax(18rem,1fr)_auto] lg:items-center lg:gap-3">
-        <div
-          role="group"
-          aria-label="Filter by review status"
-          className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {REVIEW_STATUSES.map((status) => {
-            const isActive = reviewStatus === status.value;
-            return (
-              <button
-                key={status.value}
-                type="button"
-                aria-pressed={isActive}
-                onClick={() => onReviewStatusChange(status.value)}
-                className={cn(
-                  "inline-flex shrink-0 items-center gap-1.5 rounded-sm px-2.5 py-1.5 font-mono text-[10px] font-bold tracking-widest whitespace-nowrap uppercase transition-colors",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
-              >
-                <span>{status.label}</span>
-                <span
-                  className={cn(
-                    "tabular-nums",
-                    isActive ? "text-primary/70" : "text-muted-foreground/60",
-                  )}
-                >
-                  {reviewCounts[status.value].toLocaleString()}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <AdminFilterTabs
+          value={reviewStatus}
+          onValueChange={onReviewStatusChange}
+          ariaLabel="Filter by review status"
+          options={REVIEW_STATUSES.map((status) => ({
+            value: status.value,
+            label: status.label,
+            count: reviewCounts[status.value],
+          }))}
+        />
         <div className="relative min-w-0 lg:min-w-72 xl:min-w-88">
           <IconSearch className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input

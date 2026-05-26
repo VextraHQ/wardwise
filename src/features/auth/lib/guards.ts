@@ -61,6 +61,39 @@ function unauthorized(message: string, status = 401) {
   return NextResponse.json({ error: message }, { status });
 }
 
+function logDevAuthGuardEvent(
+  event:
+    | "page_redirect_to_login"
+    | "page_redirect_wrong_role"
+    | "api_auth_rejected"
+    | "api_wrong_role",
+  {
+    role,
+    context,
+  }: {
+    role?: AppRole;
+    context: AuthContext;
+  },
+) {
+  if (process.env.NODE_ENV === "production") {
+    return;
+  }
+
+  console.warn("[auth-guard]", {
+    event,
+    requiredRole: role ?? null,
+    reason: context.reason,
+    sessionUserId: context.session?.user?.id ?? null,
+    sessionRole: context.session?.user?.role ?? null,
+    sessionVersion: context.session?.user?.sessionVersion ?? null,
+    rememberMe: context.session?.user?.rememberMe ?? null,
+    loginAt: context.session?.user?.loginAt ?? null,
+    dbUserId: context.user?.id ?? null,
+    dbRole: context.user?.role ?? null,
+    dbSessionVersion: context.user?.sessionVersion ?? null,
+  });
+}
+
 export async function getAuthContext(): Promise<AuthContext> {
   const session = await getServerSession(authOptions);
 
@@ -123,6 +156,7 @@ export async function requireRole(role: AppRole): Promise<RequireRoleResult> {
   const context = await getAuthContext();
 
   if (context.reason !== "ok" || !context.user || !context.session) {
+    logDevAuthGuardEvent("api_auth_rejected", { role, context });
     return {
       error: getAuthErrorResponse(context.reason),
       session: null,
@@ -132,6 +166,7 @@ export async function requireRole(role: AppRole): Promise<RequireRoleResult> {
   }
 
   if (context.user.role !== role) {
+    logDevAuthGuardEvent("api_wrong_role", { role, context });
     return {
       error: unauthorized("Forbidden", 403),
       session: null,
@@ -165,10 +200,12 @@ export async function requirePageRole(role: AppRole) {
   const context = await getAuthContext();
 
   if (context.reason !== "ok" || !context.user) {
+    logDevAuthGuardEvent("page_redirect_to_login", { role, context });
     redirect("/login");
   }
 
   if (context.user.role !== role) {
+    logDevAuthGuardEvent("page_redirect_wrong_role", { role, context });
     redirect(getDefaultHomePath(context.user.role));
   }
 

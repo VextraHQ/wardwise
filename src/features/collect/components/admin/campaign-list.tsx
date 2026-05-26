@@ -23,6 +23,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { AdminPagination } from "@/components/shared/admin/admin-pagination";
+import { AdminFilterTabs } from "@/components/shared/admin/admin-filter-tabs";
 import { AdminSearchBar } from "@/components/shared/admin/admin-search-bar";
 import {
   CampaignFilters,
@@ -369,12 +370,15 @@ export function CampaignList() {
         <SummaryStripSkeleton />
       ) : campaigns ? (
         <div className="border-border/60 flex flex-col gap-2 border-b py-2 md:flex-row md:items-center md:justify-between md:gap-3 md:py-1">
-          <div
-            role="group"
-            aria-label="Filter campaigns by status"
-            className="flex w-full min-w-0 items-center gap-0.5 overflow-x-auto pb-0.5 [scrollbar-width:none] md:flex-1 md:pb-0 [&::-webkit-scrollbar]:hidden"
-          >
-            {(
+          <AdminFilterTabs
+            value={statusFilter}
+            onValueChange={(value) => {
+              setStatusFilter(value);
+              setPage(1);
+            }}
+            ariaLabel="Filter campaigns by status"
+            className="max-w-fit md:flex-1"
+            options={(
               [
                 { value: "all", label: "All" },
                 { value: "active", label: "Active" },
@@ -382,37 +386,12 @@ export function CampaignList() {
                 { value: "paused", label: "Paused" },
                 { value: "closed", label: "Closed" },
               ] as const
-            ).map(({ value, label }) => {
-              const isActive = statusFilter === value;
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={isActive}
-                  onClick={() => {
-                    setStatusFilter(value);
-                    setPage(1);
-                  }}
-                  className={cn(
-                    "inline-flex shrink-0 items-center gap-1.5 rounded-sm px-2.5 py-1.5 font-mono text-[10px] font-bold tracking-widest whitespace-nowrap uppercase transition-colors",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
-                >
-                  {label}
-                  <span
-                    className={cn(
-                      "tabular-nums",
-                      isActive ? "text-primary/70" : "text-muted-foreground/60",
-                    )}
-                  >
-                    {statusCounts[value].toLocaleString()}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+            ).map(({ value, label }) => ({
+              value,
+              label,
+              count: statusCounts[value],
+            }))}
+          />
 
           <div className="border-border/40 text-muted-foreground flex w-full flex-wrap items-center justify-end gap-x-3 gap-y-1 border-t pt-2 md:w-auto md:shrink-0 md:flex-nowrap md:border-t-0 md:pt-0 md:pl-2">
             {filteredStale > 0 && (
