@@ -6,6 +6,7 @@ import {
   useCampaignCanvassers,
   useAddCanvasser,
   useRemoveCanvasser,
+  useUpdateCanvasser,
   useCanvasserPossibleMatches,
   useLinkToRoster,
 } from "@/features/collect/hooks/use-collect";
@@ -61,6 +62,7 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
   const referralSectionRef = useRef<HTMLDivElement | null>(null);
   const { data, isLoading } = useCampaignCanvassers(campaignId);
   const addMutation = useAddCanvasser(campaignId);
+  const updateMutation = useUpdateCanvasser(campaignId);
   const removeMutation = useRemoveCanvasser(campaignId);
   const { data: matchesData, isLoading: matchesLoading } =
     useCanvasserPossibleMatches(campaignId);
@@ -324,7 +326,7 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
                   list and link only the ones that are clearly the same person.
                 </DrawerDescription>
               </DrawerHeader>
-              <div className="overflow-y-auto px-4 py-4 pb-12">
+              <div className="overflow-y-auto px-4 pb-12">
                 <CampaignCanvassersCleanupWorkspace
                   matches={possibleMatches}
                   isLoading={matchesLoading}
@@ -346,10 +348,11 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
                   the public form dropdown.
                 </DrawerDescription>
               </DrawerHeader>
-              <div className="overflow-y-auto px-4 py-4 pb-12">
+              <div className="overflow-y-auto px-4 pb-12">
                 <CampaignCanvassersPublicList
                   preloaded={preloaded}
                   addMutation={addMutation}
+                  updateMutation={updateMutation}
                   removeMutation={removeMutation}
                   onRemoveClick={handleRemoveClick}
                 />
@@ -370,7 +373,7 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
                   list, then link only the clear matches.
                 </SheetDescription>
               </SheetHeader>
-              <div className="h-full overflow-y-auto px-4 py-4">
+              <div className="h-full overflow-y-auto px-4">
                 <CampaignCanvassersCleanupWorkspace
                   matches={possibleMatches}
                   isLoading={matchesLoading}
@@ -392,10 +395,11 @@ export function CampaignCanvassers({ campaignId }: { campaignId: string }) {
                   the public form dropdown.
                 </SheetDescription>
               </SheetHeader>
-              <div className="h-full overflow-y-auto px-4 py-4">
+              <div className="h-full overflow-y-auto px-4">
                 <CampaignCanvassersPublicList
                   preloaded={preloaded}
                   addMutation={addMutation}
+                  updateMutation={updateMutation}
                   removeMutation={removeMutation}
                   onRemoveClick={handleRemoveClick}
                 />

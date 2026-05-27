@@ -236,6 +236,27 @@ export function useAddCanvasser(campaignId: string) {
       adminCollectApi.addCanvasser(campaignId, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["campaign-canvassers", campaignId] });
+      qc.invalidateQueries({ queryKey: ["canvasser-matches", campaignId] });
+    },
+  });
+}
+
+// Updates a saved canvasser on the campaign roster.
+export function useUpdateCanvasser(campaignId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      canvasserId: string;
+      data: { name: string; phone: string; zone?: string };
+    }) =>
+      adminCollectApi.updateCanvasser(
+        campaignId,
+        input.canvasserId,
+        input.data,
+      ),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["campaign-canvassers", campaignId] });
+      qc.invalidateQueries({ queryKey: ["canvasser-matches", campaignId] });
     },
   });
 }
@@ -248,6 +269,7 @@ export function useRemoveCanvasser(campaignId: string) {
       adminCollectApi.removeCanvasser(campaignId, canvasserId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["campaign-canvassers", campaignId] });
+      qc.invalidateQueries({ queryKey: ["canvasser-matches", campaignId] });
     },
   });
 }

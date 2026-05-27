@@ -371,6 +371,17 @@ export const adminCollectApi = {
       { method: "POST", body: JSON.stringify(data) },
     ),
 
+  // Update a saved canvasser on the campaign list
+  updateCanvasser: (
+    campaignId: string,
+    canvasserId: string,
+    data: { name: string; phone: string; zone?: string },
+  ) =>
+    adminApiCall<{ canvasser: CampaignCanvasserRecord }>(
+      `/campaigns/${campaignId}/canvassers/${canvasserId}`,
+      { method: "PUT", body: JSON.stringify(data) },
+    ),
+
   // Remove a canvasser from the campaign
   removeCanvasser: (campaignId: string, canvasserId: string) =>
     adminApiCall<{ success: boolean }>(
