@@ -11,6 +11,7 @@ import {
   getDefaultHomePath,
   resolvePostLoginRedirect,
 } from "@/features/auth/lib/redirects";
+import { isPrismaConnectivityError } from "@/lib/core/prisma-errors";
 
 export { getDefaultHomePath };
 
@@ -61,6 +62,25 @@ function unauthorized(message: string, status = 401) {
   return NextResponse.json({ error: message }, { status });
 }
 
+function getSessionBackedUser(session: AuthSession): AuthUser | null {
+  if (!session.user?.id || !session.user.role) {
+    return null;
+  }
+
+  return {
+    id: session.user.id,
+    role: session.user.role,
+    candidateId: session.user.candidateId ?? null,
+    sessionVersion: session.user.sessionVersion ?? 0,
+    candidate:
+      session.user.role === "candidate"
+        ? {
+            onboardingStatus: session.user.onboardingStatus ?? "pending",
+          }
+        : null,
+  };
+}
+
 function logDevAuthGuardEvent(
   event:
     | "page_redirect_to_login"
@@ -105,7 +125,28 @@ export async function getAuthContext(): Promise<AuthContext> {
     return { session, user: null, reason: "session_expired" };
   }
 
-  const { user: dbUser } = await readAuthUserById(session.user.id);
+  let dbUser;
+  try {
+    ({ user: dbUser } = await readAuthUserById(session.user.id));
+  } catch (error) {
+    if (
+      process.env.NODE_ENV !== "production" &&
+      isPrismaConnectivityError(error)
+    ) {
+      const sessionBackedUser = getSessionBackedUser(session);
+
+      if (sessionBackedUser) {
+        console.warn("[auth-guard] Using session fallback due to DB outage", {
+          userId: session.user.id,
+          role: session.user.role,
+        });
+        return { session, user: sessionBackedUser, reason: "ok" };
+      }
+    }
+
+    throw error;
+  }
+
   const user = dbUser
     ? {
         id: dbUser.id,

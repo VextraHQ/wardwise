@@ -10,6 +10,7 @@ import {
   readAuthUserById,
   recordSuccessfulLogin,
 } from "@/features/auth/lib/storage";
+import { isPrismaConnectivityError } from "@/lib/core/prisma-errors";
 import { normalizeEmailInput } from "@/lib/schemas/field-schemas";
 import { getCandidateStatusLoginError } from "@/features/auth/lib/errors";
 import { logAudit } from "@/lib/core/audit";
@@ -195,22 +196,40 @@ export const authOptions: NextAuthOptions = {
           token.email = update.email;
         }
       } else if (token.sub && isSessionDueForRefresh(token.lastValidatedAt)) {
-        const { user: dbUser } = await readAuthUserById(token.sub);
+        try {
+          const { user: dbUser } = await readAuthUserById(token.sub);
 
-        if (!dbUser) {
-          token.onboardingStatus = "suspended";
+          if (!dbUser) {
+            token.onboardingStatus = "suspended";
+            token.lastValidatedAt = Date.now();
+            return token;
+          }
+
+          token.role = dbUser.role;
+          token.name = dbUser.name;
+          token.email = dbUser.email;
+          token.candidateId = dbUser.candidateId ?? undefined;
+          token.onboardingStatus =
+            dbUser.candidate?.onboardingStatus ?? undefined;
+          token.sessionVersion = dbUser.sessionVersion;
           token.lastValidatedAt = Date.now();
-          return token;
-        }
+        } catch (error) {
+          if (
+            process.env.NODE_ENV !== "production" &&
+            isPrismaConnectivityError(error)
+          ) {
+            console.warn(
+              "[auth] Session DB refresh skipped due to connectivity issue",
+              {
+                userId: token.sub,
+              },
+            );
+            token.lastValidatedAt = Date.now();
+            return token;
+          }
 
-        token.role = dbUser.role;
-        token.name = dbUser.name;
-        token.email = dbUser.email;
-        token.candidateId = dbUser.candidateId ?? undefined;
-        token.onboardingStatus =
-          dbUser.candidate?.onboardingStatus ?? undefined;
-        token.sessionVersion = dbUser.sessionVersion;
-        token.lastValidatedAt = Date.now();
+          throw error;
+        }
       }
 
       return token;
