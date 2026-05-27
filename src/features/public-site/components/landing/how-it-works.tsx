@@ -1,27 +1,34 @@
 "use client";
 
 import { motion } from "motion/react";
+import { LandingSectionEyebrow } from "@/features/public-site/components/landing/landing-section-eyebrow";
 import { processSteps } from "@/features/public-site/lib/landing-data";
 import { cn } from "@/lib/utils";
 
 const stepRoleInfo = {
   "01": {
     actor: "Supporters",
-    theme: "primary",
     accent: "bg-primary",
     textClass: "text-primary",
+    pills: ["Shared form", "Supporter record"],
+    pillClass:
+      "border-primary/20 bg-primary/5 text-primary border px-2.5 py-1 text-[9px] font-bold tracking-wide uppercase",
   },
   "02": {
-    actor: "Canvassers",
-    theme: "orange",
+    actor: "Field teams",
     accent: "bg-orange-500",
     textClass: "text-orange-600",
+    pills: ["Ward tagged", "Field sync"],
+    pillClass:
+      "border border-orange-500/20 bg-orange-500/5 px-2.5 py-1 text-[9px] font-bold tracking-wide text-orange-600 uppercase",
   },
   "03": {
-    actor: "Candidates",
-    theme: "emerald",
+    actor: "Campaign leads",
     accent: "bg-brand-emerald",
     textClass: "text-brand-lagoon",
+    pills: ["Coverage view", "Next moves"],
+    pillClass:
+      "border-brand-emerald/20 bg-brand-emerald/5 text-brand-lagoon border px-2.5 py-1 text-[9px] font-bold tracking-wide uppercase",
   },
 };
 
@@ -29,24 +36,20 @@ export function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="border-border/40 bg-muted relative border-y py-20 lg:py-28"
+      className="border-border/40 bg-muted text-foreground relative overflow-hidden border-y py-20 lg:py-28"
     >
       <div className="relative mx-auto max-w-7xl px-6">
-        <div className="relative mx-auto mb-16 max-w-4xl text-center">
+        <div className="relative mx-auto mb-14 max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-6 flex flex-col items-center"
           >
-            <div className="flex items-center gap-2">
-              <span className="border-primary text-primary border-l-2 pl-4 font-mono text-[9px] font-black tracking-[0.4em] uppercase">
-                How It Works
-              </span>
-              <span className="text-muted-foreground font-mono text-[8px] tracking-widest uppercase">
-                Field to report
-              </span>
-            </div>
+            <LandingSectionEyebrow
+              align="center"
+              label="How It Works"
+              hint="Field to campaign action"
+            />
           </motion.div>
 
           <motion.h2
@@ -54,55 +57,43 @@ export function HowItWorksSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.1]"
+            className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.15]"
           >
             How support moves <br />
-            <span className="text-primary font-serif font-normal italic">
+            <span className="text-primary font-serif italic">
               from the field to campaign action.
             </span>
           </motion.h2>
         </div>
 
-        {/* Horizontal Protocol Pipeline */}
-        <div className="border-border/60 bg-background relative border">
-          {/* Technical Hardware Corners */}
-          <div className="border-primary absolute -top-px -left-px size-3 border-t-2 border-l-2" />
-          <div className="border-primary absolute -top-px -right-px size-3 border-t-2 border-r-2" />
-          <div className="border-primary absolute -bottom-px -left-px size-3 border-b-2 border-l-2" />
-          <div className="border-primary absolute -right-px -bottom-px size-3 border-r-2 border-b-2" />
-
-          <div className="divide-border/60 grid grid-cols-1 divide-y lg:grid-cols-3 lg:divide-x lg:divide-y-0">
+        <div className="border-border/60 bg-card relative grid grid-cols-1 gap-px overflow-hidden rounded-3xl border p-px shadow-none">
+          <div className="divide-border/60 bg-card grid grid-cols-1 divide-y lg:grid-cols-3 lg:divide-x lg:divide-y-0">
             {processSteps.map((step, index) => {
               const info =
                 stepRoleInfo[step.number as keyof typeof stepRoleInfo];
 
               return (
-                <motion.div
+                <motion.article
                   key={step.number}
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="group relative flex flex-col p-8 sm:p-12"
+                  className="group relative flex flex-col p-8 sm:p-10"
                 >
-                  {/* Subtle Phase ID Overlay */}
-                  <div className="text-muted-foreground/30 absolute top-6 right-6 font-mono text-[9px] font-black tracking-widest uppercase">
-                    SEG_{step.number}
-                  </div>
-
-                  <div className="mb-10 flex flex-col items-start gap-4">
+                  <div className="mb-8 flex flex-col items-start gap-4">
                     <div className="flex items-center gap-3">
                       <span
                         className={cn(
-                          "font-mono text-[10px] font-black italic",
+                          "text-[10px] font-black tracking-widest uppercase",
                           info.textClass,
                         )}
                       >
-                        PHASE
+                        Step {step.number}
                       </span>
                       <span
                         className={cn(
-                          "text-3xl font-black tracking-tighter italic sm:text-4xl",
+                          "text-3xl font-black tracking-tighter sm:text-4xl",
                           info.textClass,
                         )}
                       >
@@ -113,8 +104,8 @@ export function HowItWorksSection() {
                       <div
                         className={cn("size-1.5 rounded-full", info.accent)}
                       />
-                      <span className="text-muted-foreground font-mono text-[10px] font-black tracking-widest uppercase">
-                        Role: {info.actor}
+                      <span className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
+                        {info.actor}
                       </span>
                     </div>
                   </div>
@@ -129,46 +120,20 @@ export function HowItWorksSection() {
                       </p>
                     </div>
 
-                    {/* Operational Output Tooltip */}
-                    <div className="bg-muted/30 border-border/40 border-t pt-6">
-                      <p className="text-muted-foreground mb-3 font-mono text-[8px] font-black tracking-[0.2em] uppercase">
-                        Campaign Output:
+                    <div className="border-border/40 border-t pt-6">
+                      <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+                        You get
                       </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {index === 0 && (
-                          <>
-                            <span className="border-primary/20 bg-primary/5 text-primary rounded-sm border px-2 py-0.5 text-[9px] font-black tracking-wider uppercase">
-                              Shared Form
-                            </span>
-                            <span className="border-primary/20 bg-primary/5 text-primary rounded-sm border px-2 py-0.5 text-[9px] font-black tracking-wider uppercase">
-                              Supporter Record
-                            </span>
-                          </>
-                        )}
-                        {index === 1 && (
-                          <>
-                            <span className="rounded-sm border border-orange-500/20 bg-orange-500/5 px-2 py-0.5 text-[9px] font-black tracking-wider text-orange-600 uppercase">
-                              Ward Tagged
-                            </span>
-                            <span className="rounded-sm border border-orange-500/20 bg-orange-500/5 px-2 py-0.5 text-[9px] font-black tracking-wider text-orange-600 uppercase">
-                              Field Sync
-                            </span>
-                          </>
-                        )}
-                        {index === 2 && (
-                          <>
-                            <span className="border-brand-emerald/20 bg-brand-emerald/5 text-brand-lagoon rounded-sm border px-2 py-0.5 text-[9px] font-black tracking-wider uppercase">
-                              Coverage View
-                            </span>
-                            <span className="border-brand-emerald/20 bg-brand-emerald/5 text-brand-lagoon rounded-sm border px-2 py-0.5 text-[9px] font-black tracking-wider uppercase">
-                              Next Moves
-                            </span>
-                          </>
-                        )}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {info.pills.map((pill) => (
+                          <span key={pill} className={info.pillClass}>
+                            {pill}
+                          </span>
+                        ))}
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </motion.article>
               );
             })}
           </div>

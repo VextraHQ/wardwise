@@ -15,6 +15,8 @@ The goal of this pass is not to redesign the whole landing page. It is to make t
 
 This spec also includes a support-center FAQ alignment pass, because the public support answers should match the same product story as the landing page.
 
+There is also a visual-system alignment need: the landing page currently mixes a more editorial public-site feel with stronger cockpit/admin cues in some sections. The mix is not inherently wrong, but it now needs to feel intentional and systemized rather than accidental.
+
 ---
 
 ## Primary Goal
@@ -44,6 +46,287 @@ Not as:
 Core story:
 
 **WardWise helps campaigns capture supporters from the field, organize them by LGA, ward, and polling unit, and use that information to make better campaign decisions.**
+
+---
+
+## Visual System Direction
+
+### Landing mode vs cockpit mode
+
+WardWise should not make the public landing page look exactly like the admin cockpit.
+
+Instead:
+
+- the landing page should feel **clearer, warmer, and more persuasive**
+- the product-proof sections should borrow **selected operational cues** from the cockpit
+- the full page should still feel like one brand family
+
+### Intentional mix is allowed
+
+This pass should not flatten sections that already look good.
+
+The goal is:
+
+- remove accidental inconsistency
+- preserve intentional contrast
+- protect sections that already have a strong public/product feel
+
+So yes, the landing page can mix:
+
+- calmer editorial sections
+- more architectural or cockpit-adjacent product sections
+
+as long as that contrast feels deliberate rather than random.
+
+### Recommended ratio
+
+Think of the landing page as:
+
+- **70% landing/editorial**
+- **30% cockpit/operational**
+
+That means:
+
+- the page should still feel premium and easy to understand for non-technical visitors
+- only the sections that prove real product depth should lean more operational
+
+### What should stay shared with the cockpit
+
+These should feel consistent across public and admin surfaces:
+
+- border color logic
+- radius scale
+- eyebrow/meta label language
+- status-pill treatment
+- typography hierarchy
+- muted surface logic
+- card spacing rhythm
+
+### What should not be copied 1:1 from the cockpit
+
+Avoid making the landing page feel like an admin dashboard by default.
+
+Do not overuse:
+
+- hard technical/internal codes
+- overly dense panel stacks
+- heavy operational chrome in every section
+- admin-style information overload
+
+### Section posture model
+
+Use two visual postures on the landing page:
+
+#### 1. Editorial sections
+
+More open, more persuasive, more spacious.
+
+Best for:
+
+- How It Works
+- Security
+- CTA
+- Support
+
+#### 2. Operational sections
+
+More structured, more data-shaped, more cockpit-adjacent.
+
+Best for:
+
+- Hero right-side command view
+- Features
+- Platform Pillars
+- Impact
+- Collect
+
+### Shared shell rules
+
+The landing page should use a limited number of shell styles, but it does not need to force every section into the same rounded bordered treatment.
+
+Recommended:
+
+1. **Open section shell**
+   - mostly for narrative/editorial sections
+   - uses spacing and typography as the primary structure
+
+2. **Rounded bordered product surface**
+   - for operational/product-proof sections
+   - soft large radius
+   - low-contrast border
+   - restrained muted fill
+
+Do not invent a new shell style per section without a clear reason.
+
+Also:
+
+- if a section already works well with a different but related shell treatment, preserve it
+- alignment matters more than total visual sameness
+
+### Radius and border discipline
+
+The page should feel like one family.
+
+Recommended:
+
+- outer product modules: large rounded corners consistently
+- inner cards: one smaller repeated radius
+- avoid mixing sharp rectangles, rounded-sm, and very large radii without a hierarchy reason
+- maintain one border opacity scale instead of section-specific random contrast
+
+This does not mean every section must gain more rounded corners. If a section already feels right, leave it alone and align only the parts that feel out of family.
+
+### Cockpit cues that are allowed
+
+Use these selectively:
+
+- eyebrow/meta labels
+- dashed dividers
+- state/status pills
+- small operational summaries
+- selector lists
+- compact tables or path views
+- map/report-style detail modules
+
+### Cockpit cues that should be restrained
+
+- pseudo-internal code names
+- decorative system IDs that do not improve trust
+- too many simultaneous data cards
+- unnecessary technical abbreviations
+
+---
+
+## Top-to-Bottom Landing UX Pass
+
+This pass should be reviewed as one continuous storytelling flow, not as disconnected sections.
+
+### 1. Hero
+
+Role:
+
+- establish trust quickly
+- explain WardWise clearly
+- show one strong local proof point
+
+Rules:
+
+- keep Adamawa specificity here
+- keep the right-side command panel operational and locally grounded
+- do not broaden the hero into a generic all-Nigeria story
+- the hero is the place where local realism is strongest
+
+### 2. How It Works
+
+Role:
+
+- simplify the workflow
+- reduce anxiety
+- explain the product as a campaign process
+
+Rules:
+
+- should feel mostly editorial
+- may keep subtle operational cues
+- should not feel like a systems pipeline diagram
+
+### 3. Features
+
+Role:
+
+- translate platform capabilities into campaign advantages
+
+Rules:
+
+- this can carry moderate cockpit flavor
+- cards should feel structured and deliberate
+- explanations should remain human and practical
+
+### 4. Platform Pillars
+
+Role:
+
+- show how the system fits together
+
+Rules:
+
+- structured product surface is appropriate here
+- card family should align with Features and Collect
+- keep the hierarchy calm and readable
+
+### 5. Impact
+
+Role:
+
+- show that WardWise scales beyond one live state without losing structure
+
+Rules:
+
+- keep this state-first, not wall-of-geography-first
+- use a selector or guided path feel
+- show the same hierarchy carrying from state to LGA to ward to polling unit
+- this section should feel operational, but still easy to skim
+
+Impact should not become:
+
+- a random national heatmap
+- a giant list of locations
+- a generic “Nigeria expansion” boast
+
+It should feel like:
+
+- one live state example
+- several next-state rollout paths
+- one reusable geo structure
+
+### 6. Security
+
+Role:
+
+- reassure without sounding paranoid or theatrical
+
+Rules:
+
+- keep it mostly editorial
+- use cleaner trust language
+- avoid “military-grade / sovereign-vault” overstatement
+
+### 7. Collect
+
+Role:
+
+- prove the product in the clearest possible way
+
+Rules:
+
+- should be one of the strongest operational sections on the page
+- may borrow cockpit cues more heavily than Security or CTA
+- should feel like a real product module, not just a marketing card
+
+### 8. CTA
+
+Role:
+
+- convert interest into demo/contact action
+
+Rules:
+
+- should become calmer again
+- keep just enough system credibility
+- do not overload the CTA with fake ops metadata
+
+### 9. Support / FAQ
+
+Role:
+
+- reinforce understanding
+- reduce confusion before contact
+
+Rules:
+
+- should feel editorial and helpful
+- must use the same product voice as the landing page
+- no separate “support department” language style
 
 ---
 
@@ -131,6 +414,68 @@ Avoid leaning too heavily on:
 - “civic intelligence engine”
 - “proprietary” unless the claim is essential
 - “constituents” when “supporters” is clearer
+
+---
+
+## Phase 1B — Visual System Alignment
+
+### Objective
+
+Turn the landing page into a deliberate public-facing design system rather than a section-by-section mix of admin and editorial patterns.
+
+### Required outcomes
+
+- define which sections are editorial vs operational
+- align radius, border, and surface logic across the page where needed
+- keep cockpit cues only where product proof matters
+- remove accidental inconsistency between sections
+- do not rewrite strong sections just for sameness
+
+### Key decisions
+
+#### Hero
+
+- keep Adamawa-specific proof
+- preserve operational right-side module
+- preserve the architectural/cockpit cues on the right side
+
+#### Impact
+
+- use a guided rollout view
+- state selector on the left
+- structured geo detail on the right
+- state-first reading model, ward/polling-unit one layer deeper
+- bring it closer to the product-proof family without cloning the hero
+
+#### Collect
+
+- preserve stronger product-module feel
+
+#### Security / CTA / Support
+
+- remain calmer and more editorial
+
+### Protection rule
+
+If a section already looks good and matches its intended posture, do not “fix” it just to make it more similar to another section.
+
+Examples:
+
+- Hero right-side command view should keep its architectural/cockpit cues
+- Collect can keep a stronger rounded product-surface feel
+- Impact can be aligned without being visually identical to Hero or Collect
+
+### Clean PR framing
+
+This should be implemented as a focused **landing visual-system alignment PR**, not as an unbounded redesign.
+
+The PR should cover:
+
+- section-shell consistency
+- radius/border/surface consistency
+- impact-section geo rollout treatment
+- cockpit-cue restraint and placement
+- support/FAQ voice alignment if still pending
 
 ---
 
@@ -232,6 +577,15 @@ This section should emphasize:
 - structured grassroots growth
 - visibility across real locations
 - credible field reporting
+
+Impact should now be treated as a **guided rollout visual**, not just a copy block.
+
+Preferred behavior:
+
+- selector-style state list
+- selected-state detail panel
+- visible `state -> LGA -> ward -> polling unit` hierarchy
+- one live proof state plus several next-state rollout paths
 
 ### Collect Section
 
@@ -357,6 +711,7 @@ This pass should not:
 - introduce new product claims that are not yet shipped
 - turn the landing page into a technical architecture showcase
 - widen into unrelated dashboard or product redesign work
+- make the public landing page visually identical to the admin cockpit
 
 ---
 
@@ -374,16 +729,20 @@ This pass should not:
 1. Hero right-side demo panel still looks premium after data/content changes.
 2. Mobile readability remains strong.
 3. No section becomes too dense after copy cleanup.
+4. Impact reads as a guided geo rollout path, not a wall of locations.
+5. The landing page feels like one intentional visual family from top to bottom.
+6. Editorial sections and operational sections feel deliberately different, not randomly inconsistent.
 
 ---
 
 ## Implementation Note
 
-This should be treated as a **copy-and-positioning cleanup with selective demo-data refinement**, not a full visual rebuild.
+This should be treated as a **copy, positioning, and landing visual-system alignment pass**, not a full visual rebuild.
 
-The visual system is already strong enough. The main opportunity is making the page:
+The visual language already has strong ingredients. The opportunity now is to make it:
 
 - easier to understand
 - easier to trust
 - easier to sell
-
+- more internally consistent
+- more clearly separated from the admin cockpit without losing product credibility

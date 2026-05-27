@@ -23,7 +23,7 @@ export function CallToActionSection() {
         : "Candidate Login";
 
   return (
-    <section className="bg-background relative overflow-hidden py-24 lg:py-40">
+    <section className="border-border/40 bg-muted relative overflow-hidden border-t py-24 lg:py-40">
       {/* Structural Anchor Line */}
       <div
         className="bg-border/40 absolute top-0 left-1/2 hidden h-full w-px -translate-x-1/2 lg:block"

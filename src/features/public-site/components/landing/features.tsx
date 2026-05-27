@@ -1,20 +1,43 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LandingSectionEyebrow } from "@/features/public-site/components/landing/landing-section-eyebrow";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 import { HiArrowRight } from "react-icons/hi";
-import Image from "next/image";
+
+const fieldTeamAvatars = [
+  {
+    src: "/images/avatars/agent-1.png",
+    alt: "Field agent Adewale",
+    initials: "AO",
+  },
+  {
+    src: "/images/avatars/agent-2.png",
+    alt: "Field agent Ngozi",
+    initials: "NE",
+  },
+  {
+    src: "/images/avatars/agent-3.png",
+    alt: "Field agent Chukwudi",
+    initials: "CB",
+  },
+  {
+    src: "/images/avatars/agent-4.png",
+    alt: "Field agent Amina",
+    initials: "AM",
+  },
+] as const;
 
 const features = [
   {
     id: "geo",
-    tag: "ELECTORAL MAP",
+    tag: "Electoral map",
     title: "Real Electoral Geography",
     description:
       "WardWise organizes supporter data the same way campaigns work on the ground: state, LGA, ward, and polling unit.",
     visual: (
       <div className="bg-muted/20 relative h-full w-full overflow-hidden">
-        {/* Technical Coordinate System */}
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -22,14 +45,15 @@ const features = [
               "linear-gradient(#0A645A 1px, transparent 1px), linear-gradient(to right, #0A645A 1px, transparent 1px)",
             backgroundSize: "30px 30px",
           }}
+          aria-hidden
         />
 
         <svg
           className="absolute inset-0 h-full w-full p-8"
           viewBox="0 0 400 300"
           preserveAspectRatio="xMidYMid meet"
+          aria-hidden
         >
-          {/* Connection Path */}
           <motion.path
             d="M60 220 Q 180 240, 200 150 T 340 80"
             fill="none"
@@ -42,11 +66,10 @@ const features = [
             transition={{ duration: 2, ease: "easeInOut" }}
           />
 
-          {/* Nodes */}
           {[
-            { x: 60, y: 220, label: "PU 014" },
-            { x: 200, y: 150, label: "JAMBUTU" },
-            { x: 340, y: 80, label: "YOLA NORTH" },
+            { x: 60, y: 220, label: "Polling unit" },
+            { x: 200, y: 150, label: "Jambutu" },
+            { x: 340, y: 80, label: "Yola North" },
           ].map((node, i) => (
             <g key={i}>
               <motion.circle
@@ -61,7 +84,7 @@ const features = [
                   damping: 20,
                   delay: 0.6 + i * 0.2,
                 }}
-                className="fill-primary shadow-sm"
+                className="fill-primary"
               />
               <motion.text
                 x={node.x + 12}
@@ -69,7 +92,7 @@ const features = [
                 initial={{ opacity: 0, x: -5 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ delay: 1 + i * 0.2 }}
-                className="fill-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase"
+                className="fill-muted-foreground text-[9px] font-bold tracking-wide uppercase"
               >
                 {node.label}
               </motion.text>
@@ -81,26 +104,26 @@ const features = [
   },
   {
     id: "sync",
-    tag: "FIELD SYNC",
+    tag: "Field sync",
     title: "Low-Signal Field Sync",
     description:
       "Field teams can keep capturing supporters on mobile and sync their work once network signal returns.",
     visual: (
       <div className="bg-muted/10 relative flex h-full w-full flex-col justify-center px-12">
         <div className="mb-3 flex items-center justify-between">
-          <span className="text-muted-foreground font-mono text-[9px] tracking-[0.2em]">
-            FIELD_SYNC
+          <span className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+            Field sync
           </span>
           <div className="flex items-center gap-1.5">
             <div className="bg-brand-emerald size-1.5 animate-pulse rounded-full" />
-            <span className="text-brand-lagoon font-mono text-[9px] font-bold uppercase">
+            <span className="text-brand-lagoon text-[9px] font-bold uppercase">
               Active
             </span>
           </div>
         </div>
 
         <div className="space-y-3">
-          <div className="bg-background border-border relative flex h-10 w-full items-center justify-between overflow-hidden rounded-lg border px-4">
+          <div className="bg-background border-border relative flex h-10 w-full items-center justify-between overflow-hidden rounded-2xl border px-4">
             <motion.div
               animate={{ x: ["-100%", "300%"] }}
               transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
@@ -129,9 +152,9 @@ const features = [
               ))}
             </div>
           </div>
-          <div className="text-muted-foreground flex items-center justify-between font-mono text-[8px] tracking-widest">
-            <span>OFFLINE SAFE</span>
-            <span>SYNC READY</span>
+          <div className="text-muted-foreground flex items-center justify-between text-[9px] font-bold tracking-wide uppercase">
+            <span>Offline safe</span>
+            <span>Sync ready</span>
           </div>
         </div>
       </div>
@@ -139,31 +162,16 @@ const features = [
   },
   {
     id: "sec",
-    tag: "ACCESS CONTROL",
+    tag: "Access control",
     title: "Trusted Team Access",
     description:
       "Canvassers, managers, and candidates each get the level of access they need while campaign records stay controlled.",
     visual: (
       <div className="bg-muted/20 relative flex h-full w-full flex-col justify-center gap-6 p-10 lg:p-14">
         {[
-          {
-            role: "ADMIN",
-            color: "bg-primary",
-            percentage: 100,
-            access: "FULL_CONTROL",
-          },
-          {
-            role: "CANDIDATE",
-            color: "bg-brand-emerald",
-            percentage: 75,
-            access: "REPORT_VIEW",
-          },
-          {
-            role: "CANVASSER",
-            color: "bg-orange-500",
-            percentage: 40,
-            access: "FIELD_ONLY",
-          },
+          { role: "Admin", color: "bg-primary", percentage: 100 },
+          { role: "Candidate", color: "bg-brand-emerald", percentage: 75 },
+          { role: "Canvasser", color: "bg-orange-500", percentage: 40 },
         ].map((item, i) => (
           <div key={i} className="flex flex-col gap-2.5">
             <div className="flex items-center justify-between px-1">
@@ -171,13 +179,10 @@ const features = [
                 <div
                   className={cn("size-2 shrink-0 rounded-full", item.color)}
                 />
-                <span className="text-foreground text-[10px] leading-none font-bold tracking-widest">
+                <span className="text-foreground text-[10px] font-bold tracking-wide">
                   {item.role}
                 </span>
               </div>
-              <span className="text-muted-foreground font-mono text-[8px] tracking-tighter opacity-60">
-                {item.access}
-              </span>
             </div>
             <div className="bg-background border-border/80 h-2 w-full overflow-hidden rounded-full border">
               <motion.div
@@ -202,38 +207,35 @@ export function FeaturesSection() {
   return (
     <section
       id="features"
-      className="bg-background border-border/40 relative border-b py-16 sm:py-20 lg:py-24"
+      className="bg-background text-foreground border-border/40 relative overflow-hidden border-b py-16 sm:py-20 lg:py-24"
     >
       <div className="relative mx-auto max-w-7xl px-6">
-        {/* Header - Technical & Compact */}
         <div className="mb-12 grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-end lg:gap-8">
           <div className="lg:col-span-7">
             <motion.div
               initial={{ opacity: 0, x: -10 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="mb-8 flex items-center gap-2"
             >
-              <span className="text-primary border-primary/30 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
-                Built for campaigns
-              </span>
-              <span className="text-muted-foreground font-mono text-[9px] tracking-widest uppercase">
-                Field-ready design
-              </span>
+              <LandingSectionEyebrow
+                align="left"
+                label="Built for campaigns"
+                hint="Field-ready design"
+              />
             </motion.div>
 
             <motion.h2
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.15]"
-          >
-            Built for the way <br />
-            <span className="text-primary font-serif italic">
-              campaigns actually work.
-            </span>
-          </motion.h2>
+              transition={{ delay: 0.1 }}
+              className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.15]"
+            >
+              Built for the way <br />
+              <span className="text-primary font-serif italic">
+                campaigns actually work.
+              </span>
+            </motion.h2>
           </div>
 
           <motion.div
@@ -251,101 +253,83 @@ export function FeaturesSection() {
           </motion.div>
         </div>
 
-        {/* Feature Matrix - Advanced Grid */}
-        <div className="bg-border border-border mx-auto grid max-w-7xl gap-px overflow-hidden rounded-[3rem] border shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+        <div className="border-border/60 bg-border relative grid gap-px overflow-hidden rounded-3xl border shadow-none">
           {features.map((feature, index) => (
             <motion.div
               key={feature.id}
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1, duration: 1 }}
-              className="bg-background group relative flex min-h-[400px] flex-col lg:grid lg:grid-cols-2 lg:items-center"
+              transition={{ delay: index * 0.1, duration: 0.6 }}
+              className="bg-background group relative flex min-h-[380px] flex-col lg:grid lg:grid-cols-2 lg:items-center"
             >
-              {/* Text Module */}
-              <div className="order-last p-10 sm:p-16 lg:order-0">
-                <div className="mb-6 flex items-center gap-3">
-                  <span className="text-muted-foreground/40 font-mono text-[9px] font-bold tracking-widest uppercase">
-                    CAMPAIGN_LAYER_0{index + 1}
-                  </span>
-                  <div className="bg-border h-px w-4" />
-                </div>
+              <div className="order-last p-8 sm:p-12 lg:order-0">
+                <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+                  Capability {index + 1}
+                </p>
 
-                <h3 className="text-foreground group-hover:text-primary mb-6 text-3xl font-bold tracking-tight transition-colors duration-500">
+                <h3 className="text-foreground group-hover:text-primary mt-4 mb-4 text-2xl font-bold tracking-tight transition-colors duration-500 sm:text-3xl">
                   {feature.title}
                 </h3>
 
-                <p className="text-muted-foreground mb-10 max-w-md text-base leading-relaxed">
+                <p className="text-muted-foreground mb-8 max-w-md text-base leading-relaxed">
                   {feature.description}
                 </p>
 
-                <button className="text-primary group/btn flex items-center gap-2 text-[10px] font-black tracking-widest uppercase">
-                  <span>Why it matters</span>
-                  <HiArrowRight className="size-3 -translate-x-1 opacity-0 transition-all duration-300 group-hover/btn:translate-x-0 group-hover/btn:opacity-100" />
-                </button>
-
-                <div className="mt-12 flex items-center gap-3">
+                <div className="flex items-center gap-3">
                   <div className="bg-border group-hover:bg-primary h-px w-8 transition-all duration-500 group-hover:w-12" />
-                  <span className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                  <span className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
                     {feature.tag}
                   </span>
                 </div>
               </div>
 
-              {/* Visual Module */}
-              <div className="border-border group-hover:bg-muted/5 h-[320px] border-b transition-colors duration-700 lg:h-full lg:border-b-0 lg:border-l">
+              <div className="border-border/60 group-hover:bg-muted/5 h-[280px] border-b transition-colors duration-700 lg:h-full lg:border-b-0 lg:border-l">
                 {feature.visual}
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Audit Validation Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
-            className="border-border/40 mt-24 flex flex-col items-center justify-between gap-12 border-t pt-20 lg:flex-row"
-          >
-          <div className="flex-1">
-            <h4 className="text-foreground mb-4 text-xl font-bold tracking-tight">
+          className="border-border/40 mt-16 flex flex-col items-start justify-between gap-10 border-t pt-14 lg:flex-row lg:items-center"
+        >
+          <div className="max-w-xl">
+            <h4 className="text-foreground mb-3 text-xl font-bold tracking-tight">
               Campaign-ready controls
             </h4>
-            <p className="text-muted-foreground max-w-lg text-base leading-relaxed">
-              Unlike generic field tools, WardWise is built to keep field work
-              readable and auditable so campaigns can trust what they are seeing
-              without turning operations into spreadsheet cleanup.
+            <p className="text-muted-foreground text-base leading-relaxed">
+              Unlike generic field tools, WardWise keeps field work readable and
+              auditable so campaigns can trust what they are seeing without
+              turning operations into spreadsheet cleanup.
             </p>
           </div>
 
-          <div className="bg-muted/30 border-border flex w-full flex-col items-center gap-6 rounded-3xl border p-8 sm:w-auto sm:flex-row sm:gap-8 sm:px-10 sm:py-6">
-            <div className="flex shrink-0 -space-x-4">
-              {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className="border-background bg-muted size-10 overflow-hidden rounded-full border-4"
+          <div className="border-border/40 bg-muted/20 flex w-full flex-col items-center gap-6 rounded-2xl border p-6 sm:w-auto sm:flex-row sm:gap-8">
+            <div className="flex shrink-0 -space-x-3">
+              {fieldTeamAvatars.map((agent) => (
+                <Avatar
+                  key={agent.src}
+                  className="border-background size-10 border-2"
                 >
-                  <Image
-                    src={`https://i.pravatar.cc/100?u=${i + 60}`}
-                    alt="System Auditor"
-                    width={40}
-                    height={40}
-                    className="h-full w-full object-cover opacity-60 grayscale transition-all duration-500 hover:grayscale-0"
-                  />
-                </div>
+                  <AvatarImage src={agent.src} alt={agent.alt} />
+                  <AvatarFallback className="bg-muted text-muted-foreground text-[10px] font-bold">
+                    {agent.initials}
+                  </AvatarFallback>
+                </Avatar>
               ))}
             </div>
-            <div className="border-border flex flex-col items-center border-t pt-6 text-center sm:block sm:border-t-0 sm:border-l sm:pt-0 sm:pl-8 sm:text-left">
-              <p className="text-foreground mb-2 text-[11px] font-black tracking-[0.2em] whitespace-nowrap uppercase sm:mb-1 sm:text-[10px] sm:tracking-[0.3em]">
-                Audit Log Active
+            <div className="border-border flex flex-col items-center border-t pt-5 text-center sm:border-t-0 sm:border-l sm:pt-0 sm:pl-6 sm:text-left">
+              <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+                Audit trail
               </p>
-              <div className="flex items-center justify-center gap-2 sm:justify-start">
-                <div className="bg-primary size-1.5 shrink-0 rounded-full" />
-                <p className="text-muted-foreground max-w-[200px] text-xs font-medium tracking-wide sm:max-w-none sm:text-[10px]">
-                  Verification layer synced across every active workspace
-                </p>
-              </div>
+              <p className="text-muted-foreground mt-1 max-w-[220px] text-xs leading-relaxed sm:max-w-none">
+                Sensitive changes stay traceable across every active workspace.
+              </p>
             </div>
           </div>
         </motion.div>

@@ -4,6 +4,7 @@ import {
   coreStats,
   impactHighlights,
 } from "@/features/public-site/lib/landing-data";
+import { LandingSectionEyebrow } from "@/features/public-site/components/landing/landing-section-eyebrow";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 import { useState } from "react";
@@ -12,16 +13,12 @@ type RolloutState = {
   state: string;
   status: "live" | "growing" | "planned";
   stage: string;
-  lgas: string[];
-  wardView: string[];
-  unitView: string;
+  paths: { lga: string; ward: string; unit: string }[];
   coverage: string;
   note: string;
 };
 
-type RolloutStatus = RolloutState["status"];
-
-function rolloutStatusClassName(status: RolloutStatus) {
+function rolloutStatusClass(status: RolloutState["status"]) {
   if (status === "live") return "bg-primary/10 text-primary";
   if (status === "growing") return "bg-orange-500/10 text-orange-600";
   return "bg-muted text-muted-foreground";
@@ -36,6 +33,14 @@ function RolloutStatePicker({
   selectedState: RolloutState;
   onSelect: (state: RolloutState) => void;
 }) {
+  const pickerButtonClass = (isActive: boolean) =>
+    cn(
+      "w-full rounded-2xl border border-border/60 text-left transition-colors px-4 py-3.5",
+      isActive
+        ? "border-primary/40 bg-primary/5"
+        : "bg-background/80 hover:border-primary/30 hover:bg-muted/30",
+    );
+
   return (
     <>
       <div
@@ -53,10 +58,8 @@ function RolloutStatePicker({
               aria-selected={isActive}
               onClick={() => onSelect(item)}
               className={cn(
-                "inline-flex shrink-0 flex-col rounded-2xl border px-4 py-3 text-left transition-colors",
-                isActive
-                  ? "border-primary/40 bg-primary/5"
-                  : "border-border/60 bg-background/80 hover:border-primary/30 hover:bg-muted/30",
+                pickerButtonClass(isActive),
+                "inline-flex w-auto shrink-0",
               )}
             >
               <span className="flex items-center gap-2">
@@ -66,7 +69,7 @@ function RolloutStatePicker({
                 <span
                   className={cn(
                     "rounded-full px-2 py-0.5 text-[8px] font-black tracking-widest uppercase",
-                    rolloutStatusClassName(item.status),
+                    rolloutStatusClass(item.status),
                   )}
                 >
                   {item.status}
@@ -85,12 +88,7 @@ function RolloutStatePicker({
               key={item.state}
               type="button"
               onClick={() => onSelect(item)}
-              className={cn(
-                "w-full rounded-2xl border px-4 py-3.5 text-left transition-colors",
-                isActive
-                  ? "border-primary/40 bg-primary/5"
-                  : "border-border/60 bg-background/80 hover:border-primary/30 hover:bg-muted/30",
-              )}
+              className={pickerButtonClass(isActive)}
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="text-foreground text-sm font-bold">
@@ -99,7 +97,7 @@ function RolloutStatePicker({
                 <span
                   className={cn(
                     "rounded-full px-2 py-1 text-[8px] font-black tracking-widest uppercase",
-                    rolloutStatusClassName(item.status),
+                    rolloutStatusClass(item.status),
                   )}
                 >
                   {item.status}
@@ -121,69 +119,146 @@ const rolloutStates: RolloutState[] = [
     state: "Adamawa",
     status: "live",
     stage: "Live campaign proof point",
-    lgas: ["Yola North", "Yola South", "Girei"],
-    wardView: ["Jambutu Ward", "Ajiya Ward", "Karewa Ward"],
-    unitView: "Polling-unit mapping active",
+    paths: [
+      {
+        lga: "Yola North",
+        ward: "Jambutu Ward",
+        unit: "Polling units mapped",
+      },
+      {
+        lga: "Yola South",
+        ward: "Ajiya Ward",
+        unit: "Follow-up routes active",
+      },
+      {
+        lga: "Girei",
+        ward: "Karewa Ward",
+        unit: "Daily field sync complete",
+      },
+    ],
     coverage: "14 LGAs active",
-    note: "This shows how WardWise works today in a live state campaign environment.",
+    note: "This is how WardWise works today in a live state campaign — one structure from state down to polling unit.",
   },
   {
     state: "Bauchi",
     status: "growing",
     stage: "Strong next-step expansion",
-    lgas: ["Bauchi", "Katagum", "Misau"],
-    wardView: [
-      "Ward structure ready",
-      "Field routes mappable",
-      "Polling units align cleanly",
+    paths: [
+      {
+        lga: "Bauchi",
+        ward: "Ward structure ready",
+        unit: "PU hierarchy staged",
+      },
+      {
+        lga: "Katagum",
+        ward: "Field routes mappable",
+        unit: "Rollout lane open",
+      },
+      {
+        lga: "Misau",
+        ward: "LGA segmentation ready",
+        unit: "Campaign onboarding ready",
+      },
     ],
-    unitView: "Ready for state rollout",
     coverage: "Pilot geography staged",
-    note: "A state like Bauchi can use the same field structure without changing the model.",
+    note: "A state like Bauchi keeps the same field structure without changing how campaigns read the map.",
   },
   {
     state: "Yobe",
     status: "planned",
     stage: "Rollout-ready geography",
-    lgas: ["Damaturu", "Potiskum", "Geidam"],
-    wardView: [
-      "Ward structure ready",
-      "LGA expansion ready",
-      "Polling-unit hierarchy preserved",
+    paths: [
+      {
+        lga: "Damaturu",
+        ward: "Ward structure ready",
+        unit: "PU hierarchy preserved",
+      },
+      {
+        lga: "Potiskum",
+        ward: "LGA expansion ready",
+        unit: "Field teams onboardable",
+      },
+      {
+        lga: "Geidam",
+        ward: "Coverage lanes mapped",
+        unit: "State rollout queued",
+      },
     ],
-    unitView: "Ready for campaign onboarding",
     coverage: "Expansion lane identified",
-    note: "The rollout path stays consistent even when the campaign moves into a new state.",
+    note: "The rollout path stays consistent when a campaign moves into a new state.",
   },
   {
     state: "Kano",
     status: "planned",
     stage: "High-scale deployment path",
-    lgas: ["Nassarawa", "Tarauni", "Fagge"],
-    wardView: [
-      "Urban ward structure",
-      "Field-team routing",
-      "Polling-unit ready",
+    paths: [
+      {
+        lga: "Nassarawa",
+        ward: "Urban ward structure",
+        unit: "Dense PU coverage",
+      },
+      { lga: "Tarauni", ward: "Field-team routing", unit: "High-volume ready" },
+      {
+        lga: "Fagge",
+        ward: "Ward segmentation ready",
+        unit: "Large-state ready",
+      },
     ],
-    unitView: "Designed for dense coverage",
     coverage: "Large-state ready",
-    note: "WardWise can scale into larger political markets without becoming messy.",
+    note: "WardWise can scale into larger markets without turning geo data into a messy list.",
   },
   {
     state: "Kaduna",
     status: "planned",
     stage: "State-ready growth lane",
-    lgas: ["Kaduna North", "Zaria", "Sabon Gari"],
-    wardView: [
-      "Ward structure ready",
-      "LGA segmentation ready",
-      "Polling-unit mapping ready",
+    paths: [
+      {
+        lga: "Kaduna North",
+        ward: "Ward structure ready",
+        unit: "PU mapping ready",
+      },
+      {
+        lga: "Zaria",
+        ward: "LGA segmentation ready",
+        unit: "Phased rollout ready",
+      },
+      {
+        lga: "Sabon Gari",
+        ward: "Field lanes mapped",
+        unit: "Expansion lane open",
+      },
     ],
-    unitView: "Ready for phased rollout",
     coverage: "Expansion lane identified",
-    note: "The same operating logic can carry from one campaign state into the next.",
+    note: "The same operating logic carries from one campaign state into the next.",
   },
 ];
+
+function GeoRolloutPath({ paths }: { paths: RolloutState["paths"] }) {
+  return (
+    <div className="space-y-3">
+      {paths.map((path) => (
+        <div
+          key={`${path.lga}-${path.ward}`}
+          className="bg-muted/30 space-y-2 rounded-xl border border-transparent p-4"
+        >
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
+            <span className="text-foreground font-bold">{path.lga}</span>
+            <span className="text-muted-foreground/60" aria-hidden>
+              /
+            </span>
+            <span className="text-foreground font-semibold">{path.ward}</span>
+          </div>
+          <p className="text-muted-foreground text-xs leading-relaxed">
+            <span className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+              Polling unit ·{" "}
+            </span>
+            {path.unit}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function ImpactSection() {
   const [selectedState, setSelectedState] = useState<RolloutState>(
@@ -202,16 +277,12 @@ export function ImpactSection() {
               initial={{ opacity: 0, x: -10 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="mb-6"
             >
-              <div className="flex items-center gap-2">
-                <span className="text-primary border-primary/30 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
-                  Impact
-                </span>
-                <span className="text-muted-foreground font-mono text-[9px] tracking-widest uppercase">
-                  Growth path
-                </span>
-              </div>
+              <LandingSectionEyebrow
+                align="left"
+                label="Impact"
+                hint="Growth path"
+              />
             </motion.div>
 
             <motion.h2
@@ -236,34 +307,33 @@ export function ImpactSection() {
             className="lg:col-span-5"
           >
             <p className="text-muted-foreground border-border border-l pl-6 text-sm leading-relaxed font-medium sm:text-base">
-              WardWise can start with one live state campaign and still expand
-              cleanly into Bauchi, Yobe, Kano, Kaduna, and beyond without
-              changing how geo data is structured.
+              Start with one live state campaign, then expand into Bauchi, Yobe,
+              Kano, Kaduna, and beyond — without changing how geo data is
+              structured.
             </p>
           </motion.div>
         </div>
 
         <div className="grid gap-8 xl:grid-cols-12 xl:items-start">
-          {/* Main Geographic Momentum Grid */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="border-border/60 bg-card relative rounded-4xl border p-6 sm:p-8 xl:col-span-8 xl:p-10"
+            className="border-border/60 bg-card relative rounded-3xl border p-6 shadow-none sm:p-8 xl:col-span-8 xl:p-10"
           >
             <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
               <div className="min-w-0">
-                <h3 className="text-foreground text-sm font-black tracking-widest uppercase">
-                  Geo Rollout Path
+                <h3 className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+                  Geo rollout path
                 </h3>
-                <p className="text-muted-foreground mt-1 max-w-md text-[10px] leading-relaxed font-bold">
-                  Select a state, then see how the same structure carries from
-                  LGA to ward and polling unit.
+                <p className="text-muted-foreground mt-2 max-w-md text-sm leading-relaxed">
+                  Pick a state, then follow the same hierarchy from LGA to ward
+                  to polling unit.
                 </p>
               </div>
               <div className="shrink-0 sm:text-right">
-                <span className="text-primary text-xl font-black italic sm:text-2xl">
-                  1 Live / 4 Next
+                <span className="text-primary text-xl font-black sm:text-2xl">
+                  1 live · 4 next
                 </span>
                 <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
                   Rollout ladder
@@ -278,10 +348,10 @@ export function ImpactSection() {
                 onSelect={setSelectedState}
               />
 
-              <div className="border-border/60 bg-background/70 @container/detail min-w-0 rounded-3xl border p-5 sm:p-6">
-                <div className="flex flex-col gap-4 border-b border-dashed pb-5 sm:flex-row sm:items-start sm:justify-between">
+              <div className="border-border/60 bg-background/80 min-w-0 rounded-2xl border p-5 sm:p-6">
+                <div className="border-border/60 flex flex-col gap-4 border-b border-dashed pb-5 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
-                    <p className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                    <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
                       Selected state
                     </p>
                     <h4 className="text-foreground mt-2 text-2xl font-black tracking-tight">
@@ -291,82 +361,41 @@ export function ImpactSection() {
                       {selectedState.note}
                     </p>
                   </div>
-                  <div
+                  <span
                     className={cn(
-                      "inline-flex w-fit shrink-0 rounded-full px-3 py-1.5 text-[9px] font-black tracking-widest uppercase",
-                      rolloutStatusClassName(selectedState.status),
+                      "inline-flex w-fit shrink-0 rounded-full px-3 py-1.5 text-[8px] font-black tracking-widest uppercase",
+                      rolloutStatusClass(selectedState.status),
                     )}
                   >
                     {selectedState.status}
+                  </span>
+                </div>
+
+                <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="bg-muted/30 rounded-xl border border-transparent p-4">
+                    <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+                      Coverage
+                    </p>
+                    <p className="text-foreground mt-2 text-sm font-bold">
+                      {selectedState.coverage}
+                    </p>
+                  </div>
+                  <div className="bg-muted/30 rounded-xl border border-transparent p-4">
+                    <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+                      Rollout stage
+                    </p>
+                    <p className="text-foreground mt-2 text-sm font-bold">
+                      {selectedState.stage}
+                    </p>
                   </div>
                 </div>
 
-                <div className="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
-                  {(
-                    [
-                      { label: "Coverage", value: selectedState.coverage },
-                      { label: "Rollout stage", value: selectedState.stage },
-                      {
-                        label: "Polling-unit view",
-                        value: selectedState.unitView,
-                      },
-                    ] as const
-                  ).map((stat) => (
-                    <div
-                      key={stat.label}
-                      className="bg-muted/30 rounded-2xl border border-transparent p-4"
-                    >
-                      <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
-                        {stat.label}
-                      </p>
-                      <p className="text-foreground mt-2 text-sm leading-snug font-bold text-pretty sm:text-base">
-                        {stat.value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 grid gap-4 lg:grid-cols-2">
-                  <div className="border-border/60 rounded-2xl border p-5">
-                    <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
-                      LGA path
-                    </p>
-                    <div className="mt-4 space-y-3">
-                      {selectedState.lgas.map((lga) => (
-                        <div
-                          key={lga}
-                          className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-dashed pb-3 last:border-b-0 last:pb-0"
-                        >
-                          <span className="text-foreground text-sm font-semibold">
-                            {selectedState.state}
-                          </span>
-                          <span className="text-muted-foreground text-xs">
-                            / {lga}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="border-border/60 rounded-2xl border p-5">
-                    <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
-                      Ward structure
-                    </p>
-                    <div className="mt-4 space-y-3">
-                      {selectedState.wardView.map((ward) => (
-                        <div
-                          key={ward}
-                          className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-dashed pb-3 last:border-b-0 last:pb-0"
-                        >
-                          <span className="text-foreground text-sm font-semibold">
-                            {ward}
-                          </span>
-                          <span className="text-muted-foreground shrink-0 text-xs">
-                            / polling-unit ready
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                <div className="mt-6">
+                  <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+                    State → LGA → ward → PU
+                  </p>
+                  <div className="mt-4">
+                    <GeoRolloutPath paths={selectedState.paths} />
                   </div>
                 </div>
               </div>
@@ -375,28 +404,27 @@ export function ImpactSection() {
             <div className="border-border/40 mt-8 flex flex-wrap gap-6 border-t pt-8 sm:mt-10 sm:gap-8 sm:pt-10">
               <div className="flex items-center gap-3">
                 <div className="bg-primary size-3 rounded-sm" />
-                <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                <span className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
                   Live today
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="size-3 rounded-sm border border-orange-500/60 bg-orange-500/40" />
-                <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                <span className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
                   Next expansion
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="bg-muted/40 border-border/60 size-3 rounded-sm border" />
-                <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                <span className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
                   Wider rollout path
                 </span>
               </div>
             </div>
           </motion.div>
 
-          {/* Strategic Metrics & Summary Sidebar */}
-          <div className="space-y-8 xl:col-span-4">
-            <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-1">
+          <div className="space-y-6 xl:col-span-4">
+            <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-1">
               {coreStats.map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -404,13 +432,13 @@ export function ImpactSection() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="border-border/80 bg-background hover:bg-muted/5 group relative flex flex-col justify-between overflow-hidden rounded-3xl border p-8 transition-all"
+                  className="border-border/60 bg-card/90 flex flex-col justify-between rounded-2xl border p-6 shadow-none transition-colors duration-300"
                 >
                   <div>
-                    <p className="text-muted-foreground mb-1 text-[9px] font-black tracking-widest uppercase">
+                    <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
                       {stat.label}
                     </p>
-                    <div className="flex items-baseline gap-3">
+                    <div className="mt-2 flex items-baseline gap-3">
                       <h4 className="text-foreground text-4xl font-black tracking-tighter">
                         {stat.value}
                       </h4>
@@ -431,16 +459,15 @@ export function ImpactSection() {
               ))}
             </div>
 
-            {/* Quick Strategic Summary */}
-            <div className="border-border/60 bg-muted/20 space-y-4 rounded-3xl border p-6">
-              <h4 className="text-foreground border-primary/40 border-l-2 pl-4 text-[10px] font-black tracking-widest uppercase">
+            <div className="border-border/40 bg-muted/20 space-y-4 rounded-2xl border p-6">
+              <h4 className="text-primary border-primary/40 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
                 Why this matters
               </h4>
-              <div className="space-y-4 pt-2">
+              <div className="space-y-4">
                 {impactHighlights.map((item) => (
-                  <div key={item.title} className="flex items-start gap-4">
+                  <div key={item.title} className="flex items-start gap-3">
                     <div className="bg-primary/20 mt-1.5 size-1.5 shrink-0 rounded-full" />
-                    <p className="text-muted-foreground text-[13px] leading-relaxed font-medium">
+                    <p className="text-muted-foreground text-[13px] leading-relaxed">
                       <span className="text-foreground font-bold">
                         {item.title}:
                       </span>{" "}

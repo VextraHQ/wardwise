@@ -1,32 +1,28 @@
 "use client";
 
+import { LandingSectionEyebrow } from "@/features/public-site/components/landing/landing-section-eyebrow";
 import { securityHighlights } from "@/features/public-site/lib/landing-data";
+import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 
 export function SecuritySection() {
   return (
     <section
       id="security"
-      className="border-border/40 text-foreground bg-muted relative overflow-hidden border-b py-16 sm:py-20 lg:py-24"
+      className="border-border/40 bg-muted text-foreground relative overflow-hidden border-y py-20 lg:py-28"
     >
       <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-6">
-        {/* Centered Header (Restoring Section Rhythm: Centered/Split Alternation) */}
         <div className="relative mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-8 flex flex-col items-center"
           >
-            <div className="flex items-center gap-3">
-              <span className="text-primary border-primary/30 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
-                Data & Access
-              </span>
-              <span className="text-muted-foreground font-mono text-[9px] tracking-widest uppercase">
-                Campaign trust
-              </span>
-            </div>
-            <div className="bg-primary/20 mt-4 h-px w-12" />
+            <LandingSectionEyebrow
+              align="center"
+              label="Data & Access"
+              hint="Campaign trust"
+            />
           </motion.div>
 
           <motion.h2
@@ -49,13 +45,13 @@ export function SecuritySection() {
             transition={{ delay: 0.2 }}
             className="text-muted-foreground mx-auto mt-8 max-w-2xl text-base leading-relaxed font-medium sm:text-lg"
           >
-            WardWise is built so field capture stays organized, access stays
-            controlled, and sensitive supporter records are only visible to the
-            people who should see them.
+            WardWise keeps field capture organized, access controlled, and
+            sensitive supporter records visible only to the people who should
+            see them.
           </motion.p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {securityHighlights.map((item, i) => (
             <motion.article
               key={item.title}
@@ -63,82 +59,54 @@ export function SecuritySection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="group border-border/80 bg-card/80 hover:border-primary/50 relative flex flex-col overflow-hidden rounded-4xl border p-8 transition-all duration-300"
+              className="border-border/60 bg-card/90 flex flex-col rounded-2xl border p-7 shadow-none transition-colors duration-300"
             >
-              {/* Trust Stamp Header */}
-              <div className="mb-8 flex items-start justify-between">
-                <div className="bg-primary/5 text-primary border-primary/20 flex size-12 items-center justify-center rounded-2xl border shadow-inner">
-                  <item.icon className="size-6" aria-hidden={true} />
-                </div>
-                <div className="text-right">
-                  <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
-                    Trust Mode
-                  </p>
-                  <p className="text-foreground text-[10px] font-black">
-                    Campaign Ready
-                  </p>
-                </div>
+              <div className="bg-primary/5 text-primary border-primary/20 mb-6 flex size-11 items-center justify-center rounded-xl border">
+                <item.icon className="size-5" aria-hidden />
               </div>
 
               <div className="flex flex-1 flex-col space-y-3">
-                <h3 className="text-foreground text-lg font-black tracking-tight uppercase">
+                <h3 className="text-foreground text-base font-bold tracking-tight">
                   {item.title}
                 </h3>
-                <p className="text-muted-foreground text-[13px] leading-relaxed font-medium">
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   {item.description}
                 </p>
               </div>
 
-              {/* Humanity-First Security Footer */}
-              <div className="border-border/40 mt-8 border-t pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-brand-emerald size-1.5 rounded-full" />
-                    <span className="text-muted-foreground font-mono text-[8px] font-black tracking-[0.2em] uppercase">
-                      Access Controlled
-                    </span>
-                  </div>
-                  <span className="text-muted-foreground/30 font-mono text-[8px] font-black uppercase">
-                    Privacy active
-                  </span>
-                </div>
+              <div className="border-border/40 mt-6 flex items-center gap-2 border-t pt-5">
+                <div className="bg-brand-emerald size-1.5 rounded-full" />
+                <span className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
+                  Access controlled
+                </span>
               </div>
-
-              {/* Subtle metallic bevel effect on hover */}
-              <div className="group-hover:border-primary/10 pointer-events-none absolute inset-0 rounded-4xl border-2 border-transparent transition-colors" />
             </motion.article>
           ))}
         </div>
 
-        {/* Bottom Trust Notation - Translated to Human Policy terms */}
-        <div className="mt-6 flex flex-col items-center justify-center gap-4 text-center">
-          <div className="border-border/60 bg-card/40 flex flex-col items-center gap-6 rounded-2xl border px-8 py-4 sm:flex-row">
-            <div className="flex flex-col items-center sm:items-start sm:px-4">
-              <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
-                Data handling
-              </p>
-              <p className="text-foreground text-xs font-black">
-                Secure record flow
-              </p>
-            </div>
-            <div className="bg-border h-px w-full sm:h-6 sm:w-px" />
-            <div className="flex flex-col items-center sm:items-start sm:px-4">
-              <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
-                Team access
-              </p>
-              <p className="text-foreground text-xs font-black">
-                Role-based visibility
-              </p>
-            </div>
-            <div className="bg-border h-px w-full sm:h-6 sm:w-px" />
-            <div className="flex flex-col items-center sm:items-start sm:px-4">
-              <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
-                Privacy controls
-              </p>
-              <p className="text-foreground text-xs font-black">
-                Cleaner supporter data
-              </p>
-            </div>
+        <div className="flex flex-col items-center justify-center">
+          <div className="border-border/60 bg-card/40 flex w-full max-w-3xl flex-col items-center gap-5 rounded-2xl border px-6 py-5 sm:flex-row sm:justify-between">
+            {[
+              { label: "Data handling", value: "Secure record flow" },
+              { label: "Team access", value: "Role-based visibility" },
+              { label: "Privacy controls", value: "Cleaner supporter data" },
+            ].map((item, index) => (
+              <div
+                key={item.label}
+                className={cn(
+                  "flex flex-col items-center text-center sm:items-start sm:text-left",
+                  index > 0 && "border-border/60 sm:border-l sm:pl-8",
+                  index > 0 && "border-t pt-5 sm:border-t-0 sm:pt-0",
+                )}
+              >
+                <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+                  {item.label}
+                </p>
+                <p className="text-foreground mt-1 text-xs font-bold">
+                  {item.value}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

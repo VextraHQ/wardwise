@@ -52,7 +52,7 @@ export function SiteFooter() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-muted border-border/40 relative overflow-hidden border-t py-16">
+    <footer className="bg-background border-border/40 relative overflow-hidden border-t py-16">
       <div className="relative mx-auto max-w-7xl px-6 sm:px-8">
         {/* Main footer content */}
         <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-16">

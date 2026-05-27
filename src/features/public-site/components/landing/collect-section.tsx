@@ -9,6 +9,8 @@ import {
 } from "react-icons/hi";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { LandingSectionEyebrow } from "@/features/public-site/components/landing/landing-section-eyebrow";
+import { cn } from "@/lib/utils";
 
 const collectFeatures = [
   {
@@ -35,25 +37,20 @@ export function CollectSection() {
   return (
     <section
       id="collect"
-      className="border-border/40 bg-muted relative border-y py-20 lg:py-28"
+      className="bg-background text-foreground border-border/40 relative overflow-hidden border-b py-20 lg:py-28"
     >
       <div className="relative mx-auto max-w-7xl px-6">
-        {/* Section Header */}
-        <div className="relative mx-auto mb-16 max-w-4xl text-center">
+        <div className="relative mx-auto mb-14 max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-6 flex flex-col items-center"
           >
-            <div className="flex items-center gap-2">
-              <span className="border-primary text-primary border-l-2 pl-4 font-mono text-[9px] font-black tracking-[0.4em] uppercase">
-                WardWise Collect
-              </span>
-              <span className="text-muted-foreground font-mono text-[8px] tracking-widest uppercase">
-                Field module
-              </span>
-            </div>
+            <LandingSectionEyebrow
+              align="center"
+              label="WardWise Collect"
+              hint="Field module"
+            />
           </motion.div>
 
           <motion.h2
@@ -61,7 +58,7 @@ export function CollectSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.1]"
+            className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.15]"
           >
             Capture support from the field,{" "}
             <span className="text-primary font-serif font-normal italic">
@@ -83,141 +80,136 @@ export function CollectSection() {
           </motion.p>
         </div>
 
-        {/* Feature Cards */}
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3">
           {collectFeatures.map((feature, i) => {
             const Icon = feature.icon;
             return (
-              <motion.div
+              <motion.article
                 key={feature.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 * i }}
-                className="border-border/60 bg-background relative border p-8"
+                className="border-border/60 bg-card rounded-2xl border p-7 shadow-none"
               >
-                {/* Corner markers */}
-                <div className="border-primary absolute -top-px -left-px size-3 border-t-2 border-l-2" />
-                <div className="border-primary absolute -top-px -right-px size-3 border-t-2 border-r-2" />
-
-                <div className="bg-primary/10 text-primary mb-5 flex h-10 w-10 items-center justify-center rounded-sm">
-                  <Icon className="h-5 w-5" />
+                <div className="bg-primary/10 text-primary mb-5 flex size-10 items-center justify-center rounded-sm">
+                  <Icon className="size-5" aria-hidden />
                 </div>
 
-                <h3 className="text-foreground mb-2 text-sm font-bold tracking-widest uppercase">
+                <h3 className="text-foreground mb-2 text-sm font-bold tracking-wide uppercase">
                   {feature.title}
                 </h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">
                   {feature.description}
                 </p>
-              </motion.div>
+              </motion.article>
             );
           })}
         </div>
 
-        {/* Visual: Form Preview + Stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
-          className="border-border/60 bg-background relative mx-auto mt-12 max-w-4xl border p-8 sm:p-12"
+          className="border-border/60 bg-card relative mx-auto mt-12 max-w-4xl overflow-hidden rounded-2xl border shadow-none"
         >
           <div className="border-primary absolute -top-px -left-px size-3 border-t-2 border-l-2" />
           <div className="border-primary absolute -top-px -right-px size-3 border-t-2 border-r-2" />
           <div className="border-primary absolute -bottom-px -left-px size-3 border-b-2 border-l-2" />
           <div className="border-primary absolute -right-px -bottom-px size-3 border-r-2 border-b-2" />
 
-          <div className="flex flex-col items-center gap-8 md:flex-row">
-            {/* Left: Simulated form steps */}
-            <div className="flex-1 space-y-4">
-              <div className="text-muted-foreground/60 font-mono text-[8px] font-black tracking-widest">
-                FORM_FLOW_PREVIEW
-              </div>
-              <div className="space-y-2">
+          <div className="grid md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+            <div className="space-y-4 p-8 sm:p-10 md:pr-6 lg:pr-8">
+              <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+                Registration flow
+              </p>
+              <ul className="space-y-3" role="list">
                 {[
-                  { step: "01", label: "Supporter Details", status: "complete" },
+                  {
+                    step: "01",
+                    label: "Supporter Details",
+                    status: "complete",
+                  },
                   {
                     step: "02",
                     label: "Location & Polling Unit",
                     status: "complete",
                   },
-                  { step: "03", label: "Verification Details", status: "active" },
-                  { step: "04", label: "Role & Group", status: "pending" },
                   {
-                    step: "05",
-                    label: "Referral Source",
-                    status: "pending",
+                    step: "03",
+                    label: "Verification Details",
+                    status: "active",
                   },
+                  { step: "04", label: "Role & Group", status: "pending" },
+                  { step: "05", label: "Referral Source", status: "pending" },
                 ].map((item) => (
-                  <div key={item.step} className="flex items-center gap-3">
+                  <li
+                    key={item.step}
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1"
+                  >
                     <div
-                      className={`flex h-6 w-6 items-center justify-center rounded font-mono text-[9px] font-black ${
+                      className={cn(
+                        "flex size-6 shrink-0 items-center justify-center rounded-sm text-[9px] font-black",
                         item.status === "complete"
                           ? "bg-primary text-primary-foreground"
                           : item.status === "active"
                             ? "border-primary text-primary border-2"
-                            : "bg-muted text-muted-foreground"
-                      }`}
+                            : "bg-muted text-muted-foreground",
+                      )}
                     >
                       {item.step}
                     </div>
                     <span
-                      className={`text-xs font-bold tracking-widest uppercase ${
+                      className={cn(
+                        "text-xs font-bold tracking-wide uppercase",
                         item.status === "complete"
                           ? "text-primary"
                           : item.status === "active"
                             ? "text-foreground"
-                            : "text-muted-foreground"
-                      }`}
+                            : "text-muted-foreground",
+                      )}
                     >
                       {item.label}
                     </span>
-                    {item.status === "complete" && (
-                      <span className="text-primary font-mono text-[8px] font-black tracking-widest">
-                        SAVED
+                    {item.status === "complete" ? (
+                      <span className="text-primary text-[9px] font-bold tracking-widest uppercase">
+                        Saved
                       </span>
-                    )}
-                  </div>
+                    ) : null}
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
 
-            {/* Right: Stats + CTA */}
-            <div className="flex flex-col items-center gap-5 border-t pt-6 md:border-t-0 md:border-l md:pt-0 md:pl-8">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <p className="text-primary text-2xl font-extrabold">2,123</p>
-                  <p className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
-                    Polling Units Mapped
-                  </p>
-                </div>
-                <div>
-                  <p className="text-primary text-2xl font-extrabold">143</p>
-                  <p className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
-                    Wards Covered
-                  </p>
-                </div>
-                <div>
-                  <p className="text-primary text-2xl font-extrabold">14</p>
-                  <p className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
-                    LGAs Active
-                  </p>
-                </div>
-                <div>
-                  <p className="text-primary text-2xl font-extrabold">5</p>
-                  <p className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
-                    Mobile Steps
-                  </p>
-                </div>
+            <div className="border-border/60 flex flex-col justify-center gap-8 border-t p-8 sm:p-10 md:border-t-0 md:border-l md:px-8 lg:px-10">
+              <div className="mx-auto grid w-full max-w-[280px] grid-cols-2 gap-x-6 gap-y-6 sm:max-w-none">
+                {[
+                  { value: "2,123", label: "Polling units mapped" },
+                  { value: "143", label: "Wards covered" },
+                  { value: "14", label: "LGAs active" },
+                  { value: "5", label: "Mobile steps" },
+                ].map((stat) => (
+                  <div key={stat.label} className="text-center">
+                    <p className="text-primary text-2xl font-extrabold tracking-tight">
+                      {stat.value}
+                    </p>
+                    <p className="text-muted-foreground mt-1 text-[9px] font-bold tracking-widest uppercase">
+                      {stat.label}
+                    </p>
+                  </div>
+                ))}
               </div>
 
               <Button
                 size="lg"
-                className="group bg-primary text-primary-foreground hover:bg-primary/95 h-12 rounded-full px-8 text-xs font-black tracking-widest uppercase transition-all"
+                className="group bg-primary text-primary-foreground hover:bg-primary/95 mx-auto h-12 w-full max-w-xs rounded-full text-xs font-black tracking-widest uppercase sm:w-auto sm:min-w-[240px]"
                 asChild
               >
-                <Link href="/contact">
+                <Link
+                  href="/contact"
+                  className="flex items-center justify-center"
+                >
                   See Collect in Action
                   <HiArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
                 </Link>

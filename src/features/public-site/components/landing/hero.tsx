@@ -48,16 +48,14 @@ export function HeroSection() {
         <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-12">
           {/* Left: Campaign Strategy */}
           <div className="flex flex-col justify-center space-y-6">
-            <div className="inline-flex">
-              <div className="border-primary/40 flex items-center gap-3 border-l-2 pl-4">
-                <span className="text-primary text-[10px] font-black tracking-[0.4em] uppercase">
-                  Ward-level intelligence
-                </span>
-                <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
-                <span className="text-muted-foreground/50 text-[9px] font-bold tracking-widest uppercase">
-                  From the ground up
-                </span>
-              </div>
+            <div className="inline-flex flex-wrap items-center gap-3">
+              <span className="text-primary border-primary/30 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
+                Ward-level intelligence
+              </span>
+              <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
+              <span className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
+                From the ground up
+              </span>
             </div>
 
             <div className="space-y-4">
@@ -164,7 +162,7 @@ export function HeroSection() {
           <div className="relative lg:block">
             <div className="relative mx-auto w-full max-w-xl">
               {/* The Command Dashboard Hub - "Silver Glass" Aesthetic */}
-              <div className="border-border/60 bg-card relative overflow-hidden border shadow-[0_48px_96px_-12px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+              <div className="border-border/60 bg-card relative overflow-hidden border backdrop-blur-xl">
                 {/* Minimal Architectural Frame */}
                 <div className="border-primary absolute top-0 left-0 h-6 w-6 border-t-2 border-l-2" />
                 <div className="border-primary absolute top-0 right-0 h-6 w-6 border-t-2 border-r-2" />
@@ -194,8 +192,8 @@ export function HeroSection() {
                   <div className="space-y-3 p-5">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <p className="text-muted-foreground/70 text-[10px] font-black tracking-widest uppercase">
-                          Supporter Capture Progress
+                        <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+                          Supporter capture progress
                         </p>
                         <p className="text-foreground text-4xl font-black tracking-tighter">
                           84.2%
@@ -224,8 +222,8 @@ export function HeroSection() {
                   {/* Section 2: Ward Coverage Grid & Meta */}
                   <div className="grid grid-cols-12">
                     <div className="border-border/40 col-span-12 border-b p-5 md:col-span-7 md:border-r md:border-b-0">
-                      <p className="text-muted-foreground/70 mb-2 text-[10px] font-black tracking-widest uppercase">
-                        Adamawa Coverage
+                      <p className="text-muted-foreground mb-2 text-[9px] font-black tracking-widest uppercase">
+                        Adamawa coverage
                       </p>
                       {/* Detailed Coverage Matrix */}
                       <div className="grid grid-cols-7 gap-1.5">
@@ -278,8 +276,8 @@ export function HeroSection() {
 
                   {/* Section 3: Live Field Activity Feed */}
                   <div className="p-5">
-                    <p className="text-muted-foreground/70 mb-2 text-[10px] font-black tracking-widest uppercase">
-                      Latest Field Activity
+                    <p className="text-muted-foreground mb-2 text-[9px] font-black tracking-widest uppercase">
+                      Latest field activity
                     </p>
                     <div className="space-y-3">
                       {[

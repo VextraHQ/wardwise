@@ -1,31 +1,28 @@
 "use client";
 
+import { LandingSectionEyebrow } from "@/features/public-site/components/landing/landing-section-eyebrow";
 import { platformPillars } from "@/features/public-site/lib/landing-data";
+import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 
 export function PlatformPillarsSection() {
   return (
     <section
       id="platform-pillars"
-      className="border-border/40 text-foreground bg-muted relative overflow-hidden border-b py-16 sm:py-20 lg:py-24"
+      className="border-border/40 bg-muted relative overflow-hidden border-y py-20 lg:py-28"
     >
-      <div className="relative mx-auto flex max-w-7xl flex-col gap-16 px-6">
+      <div className="relative mx-auto flex max-w-7xl flex-col gap-14 px-6">
         <div className="relative mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-8 flex flex-col items-center"
           >
-            <div className="flex items-center gap-2">
-              <span className="text-primary border-primary/30 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
-                Platform
-              </span>
-              <span className="text-muted-foreground font-mono text-[9px] tracking-widest uppercase">
-                How it fits together
-              </span>
-            </div>
-            <div className="bg-primary/20 mt-4 h-px w-12" />
+            <LandingSectionEyebrow
+              align="center"
+              label="Platform"
+              hint="How it fits together"
+            />
           </motion.div>
 
           <motion.h2
@@ -41,21 +38,19 @@ export function PlatformPillarsSection() {
             </span>
           </motion.h2>
 
-          <motion.div
+          <motion.p
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
+            className="text-muted-foreground mx-auto mt-8 max-w-2xl text-base leading-relaxed font-medium sm:text-lg"
           >
-            <p className="text-muted-foreground mx-auto mt-8 max-w-2xl text-base leading-relaxed font-medium sm:text-lg">
-              WardWise connects supporter capture, data quality, and reporting
-              so campaigns stop guessing and start acting on a shared ground
-              picture.
-            </p>
-          </motion.div>
+            WardWise connects supporter capture, data quality, and reporting so
+            campaigns stop guessing and start acting on a shared ground picture.
+          </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {platformPillars.map((pillar, index) => (
             <motion.article
               key={pillar.title}
@@ -63,73 +58,60 @@ export function PlatformPillarsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="group border-border/60 bg-card hover:border-primary/50 relative flex flex-col overflow-hidden rounded-4xl border shadow-sm transition-all duration-300 hover:shadow-sm"
+              className="border-border/60 bg-card hover:border-primary/40 relative flex flex-col overflow-hidden rounded-3xl border shadow-none transition-colors"
             >
-              {/* Module Header Area */}
               <div className="border-border/60 bg-muted/30 flex flex-wrap items-start justify-between gap-2.5 border-b px-5 py-4 sm:px-6">
                 <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
-                  <span className="text-primary/40 font-mono text-[10px] font-black tracking-widest uppercase">
-                    Pillar 0{index + 1}
+                  <span className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+                    Pillar {index + 1}
                   </span>
-                  <div className="bg-primary/20 h-3 w-px" />
-                  <span className="text-muted-foreground min-w-0 text-[10px] font-bold tracking-widest uppercase">
+                  <div className="bg-border h-3 w-px" />
+                  <span className="text-muted-foreground text-[10px] font-bold tracking-wide uppercase">
                     {pillar.focus}
                   </span>
                 </div>
-                <div
-                  className={`shrink-0 rounded-full border px-2 py-0.5 ${index === 2 ? "border-orange-500/20 bg-orange-500/10" : "border-primary/20 bg-primary/10"}`}
+                <span
+                  className={cn(
+                    "rounded-full px-2 py-0.5 text-[8px] font-black tracking-widest uppercase",
+                    "border",
+                    index === 2
+                      ? "border-orange-500/20 bg-orange-500/10 text-orange-600"
+                      : "border-primary/20 bg-primary/10 text-primary",
+                  )}
                 >
-                  <div className="flex items-center gap-1.5">
-                    <div
-                      className={`size-1 animate-pulse rounded-full ${index === 2 ? "bg-orange-500" : "bg-primary"}`}
-                    />
-                    <span
-                      className={`text-[8px] font-bold uppercase ${index === 2 ? "text-orange-600" : "text-primary"}`}
-                    >
-                      {index === 2 ? "Growing" : "Campaign-ready"}
-                    </span>
-                  </div>
-                </div>
+                  {index === 2 ? "Growing" : "Campaign-ready"}
+                </span>
               </div>
 
-              {/* Main Content Area */}
-              <div className="flex flex-1 flex-col p-8">
-                <div className="mb-6 flex items-start justify-between">
-                  <div className="border-primary/20 text-primary flex size-12 items-center justify-center rounded-2xl border bg-linear-to-br from-white to-slate-50 text-3xl font-black">
-                    {index + 1}
-                  </div>
-                  <div className="text-right">
-                    <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
-                      Why it matters
-                    </p>
-                    <p className="text-foreground text-xs font-bold">
-                      Shared by the team
-                    </p>
-                  </div>
+              <div className="flex flex-1 flex-col p-7">
+                <div className="border-primary/20 text-primary mb-6 flex size-11 items-center justify-center rounded-xl border bg-linear-to-br from-white to-slate-50 text-2xl font-black">
+                  {index + 1}
                 </div>
 
-                <div className="space-y-4">
-                  <h3 className="text-foreground text-2xl font-bold tracking-tight">
+                <div className="space-y-3">
+                  <h3 className="text-foreground text-xl font-bold tracking-tight">
                     {pillar.title}
                   </h3>
-                  <p className="text-muted-foreground text-base leading-relaxed">
+                  <p className="text-muted-foreground text-sm leading-relaxed">
                     {pillar.description}
                   </p>
                 </div>
 
-                {/* Activation Signal - Dashboard Detail */}
-                <div className="mt-auto space-y-6 pt-8">
+                <div className="mt-auto space-y-5 pt-8">
                   <div className="bg-muted/40 border-border/60 flex min-h-[140px] flex-col justify-between rounded-2xl border p-5">
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-3">
                         <span className="text-primary/70 text-[9px] font-black tracking-widest uppercase">
-                          What this unlocks
+                          Activation signal
                         </span>
-                        <div className="flex gap-1.5">
+                        <div className="flex gap-1.5" aria-hidden>
                           {[1, 2, 3, 4].map((i) => (
                             <div
                               key={i}
-                              className={`h-1 w-3 rounded-full ${i <= index + 2 ? "bg-primary" : "bg-primary/10"}`}
+                              className={cn(
+                                "h-1 w-3 rounded-full",
+                                i <= index + 2 ? "bg-primary" : "bg-primary/10",
+                              )}
                             />
                           ))}
                         </div>
@@ -141,33 +123,29 @@ export function PlatformPillarsSection() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-muted/30 border-border/40 hover:bg-muted/50 flex flex-col items-center justify-center rounded-xl border p-3 text-center transition-colors">
-                      <p className="text-muted-foreground mb-1 text-[8px] font-black tracking-[0.2em] uppercase">
+                    <div className="bg-muted/30 rounded-xl border border-transparent p-4">
+                      <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
                         Proof
                       </p>
                       <p
-                        className={`text-sm font-black tracking-tight ${index === 2 ? "text-orange-500" : "text-primary"}`}
+                        className={cn(
+                          "mt-2 text-sm font-black",
+                          index === 2 ? "text-orange-500" : "text-primary",
+                        )}
                       >
                         {pillar.metric.value}
                       </p>
                     </div>
-                    <div className="bg-muted/30 border-border/40 hover:bg-muted/50 flex flex-col items-center justify-center rounded-xl border p-3 text-center transition-colors">
-                      <p className="text-muted-foreground mb-1 text-[8px] font-black tracking-[0.2em] uppercase">
+                    <div className="bg-muted/30 rounded-xl border border-transparent p-4">
+                      <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
                         Signal
                       </p>
-                      <p className="text-foreground/80 text-[10px] font-black tracking-tight uppercase">
+                      <p className="text-foreground/80 mt-2 text-[10px] font-bold tracking-wide uppercase">
                         {pillar.metric.label}
                       </p>
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Module Footer Area */}
-              <div className="border-border/40 bg-muted/20 flex items-center justify-center border-t py-3">
-                <span className="text-muted-foreground/40 font-mono text-[8px] font-bold tracking-widest uppercase">
-                  One shared campaign picture
-                </span>
               </div>
             </motion.article>
           ))}
