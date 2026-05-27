@@ -13,21 +13,21 @@ import Link from "next/link";
 const collectFeatures = [
   {
     icon: HiClipboardList,
-    title: "Multi-Step Registration",
+    title: "Mobile Supporter Capture",
     description:
-      "Guided supporter registration with cascading LGA, Ward, and Polling Unit selection using real INEC data.",
+      "A guided mobile flow helps field teams capture supporter details with the right LGA, ward, and polling unit.",
   },
   {
     icon: HiUsers,
-    title: "Canvasser Attribution",
+    title: "Referral and Field Attribution",
     description:
-      "Track which canvassers bring registrations via shareable links with embedded referral parameters.",
+      "See which field people or referral sources are actually bringing supporters into the system.",
   },
   {
     icon: HiShieldCheck,
-    title: "Verified Deduplication",
+    title: "Cleaner Supporter Records",
     description:
-      "Phone number and Voter ID (VIN) cross-validation prevents duplicate registrations at the database level.",
+      "WardWise helps reduce duplicate or incomplete records so reporting and follow-up stay more reliable later.",
   },
 ];
 
@@ -48,10 +48,10 @@ export function CollectSection() {
           >
             <div className="flex items-center gap-2">
               <span className="border-primary text-primary border-l-2 pl-4 font-mono text-[9px] font-black tracking-[0.4em] uppercase">
-                Product Ecosystem
+                WardWise Collect
               </span>
               <span className="text-muted-foreground font-mono text-[8px] tracking-widest uppercase">
-                MODULE_01: COLLECT
+                Field module
               </span>
             </div>
           </motion.div>
@@ -63,9 +63,9 @@ export function CollectSection() {
             transition={{ delay: 0.1 }}
             className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.1]"
           >
-            Grassroots registration,{" "}
+            Capture support from the field,{" "}
             <span className="text-primary font-serif font-normal italic">
-              digitised.
+              clearly.
             </span>
           </motion.h2>
 
@@ -76,10 +76,10 @@ export function CollectSection() {
             transition={{ delay: 0.2 }}
             className="text-muted-foreground mx-auto mt-4 max-w-2xl text-base leading-relaxed font-medium sm:text-lg"
           >
-            While your Dashboard handles strategy, the attached WardWise Collect
-            Module turns supporter registration into a verified, trackable
-            pipeline. Share a link, scan a QR code — watch your command center
-            populate in real-time.
+            WardWise Collect is the field registration side of the platform. It
+            helps your team capture supporters on mobile, attach them to the
+            right LGA, ward, and polling unit, and feed that information
+            straight into campaign reporting.
           </motion.p>
         </div>
 
@@ -136,17 +136,17 @@ export function CollectSection() {
               </div>
               <div className="space-y-2">
                 {[
-                  { step: "01", label: "Personal Details", status: "complete" },
+                  { step: "01", label: "Supporter Details", status: "complete" },
                   {
                     step: "02",
-                    label: "Polling Unit Location",
+                    label: "Location & Polling Unit",
                     status: "complete",
                   },
-                  { step: "03", label: "Party Verification", status: "active" },
-                  { step: "04", label: "Role Selection", status: "pending" },
+                  { step: "03", label: "Verification Details", status: "active" },
+                  { step: "04", label: "Role & Group", status: "pending" },
                   {
                     step: "05",
-                    label: "Canvasser Attribution",
+                    label: "Referral Source",
                     status: "pending",
                   },
                 ].map((item) => (
@@ -175,7 +175,7 @@ export function CollectSection() {
                     </span>
                     {item.status === "complete" && (
                       <span className="text-primary font-mono text-[8px] font-black tracking-widest">
-                        VERIFIED
+                        SAVED
                       </span>
                     )}
                   </div>
@@ -189,13 +189,13 @@ export function CollectSection() {
                 <div>
                   <p className="text-primary text-2xl font-extrabold">2,123</p>
                   <p className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
-                    Polling Units
+                    Polling Units Mapped
                   </p>
                 </div>
                 <div>
                   <p className="text-primary text-2xl font-extrabold">143</p>
                   <p className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
-                    Wards Mapped
+                    Wards Covered
                   </p>
                 </div>
                 <div>
@@ -207,7 +207,7 @@ export function CollectSection() {
                 <div>
                   <p className="text-primary text-2xl font-extrabold">5</p>
                   <p className="text-muted-foreground text-[9px] font-bold tracking-widest uppercase">
-                    Step Form
+                    Mobile Steps
                   </p>
                 </div>
               </div>
@@ -218,7 +218,7 @@ export function CollectSection() {
                 asChild
               >
                 <Link href="/contact">
-                  See Module in Action
+                  See Collect in Action
                   <HiArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>

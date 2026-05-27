@@ -41,10 +41,10 @@ export function HowItWorksSection() {
           >
             <div className="flex items-center gap-2">
               <span className="border-primary text-primary border-l-2 pl-4 font-mono text-[9px] font-black tracking-[0.4em] uppercase">
-                Methodology
+                How It Works
               </span>
               <span className="text-muted-foreground font-mono text-[8px] tracking-widest uppercase">
-                PROC_FLOW_V1.4
+                Field to report
               </span>
             </div>
           </motion.div>
@@ -56,9 +56,9 @@ export function HowItWorksSection() {
             transition={{ delay: 0.1 }}
             className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.1]"
           >
-            A systematic path <br />
+            How support moves <br />
             <span className="text-primary font-serif font-normal italic">
-              to political victory.
+              from the field to campaign action.
             </span>
           </motion.h2>
         </div>
@@ -132,23 +132,23 @@ export function HowItWorksSection() {
                     {/* Operational Output Tooltip */}
                     <div className="bg-muted/30 border-border/40 border-t pt-6">
                       <p className="text-muted-foreground mb-3 font-mono text-[8px] font-black tracking-[0.2em] uppercase">
-                        Operational Result:
+                        Campaign Output:
                       </p>
                       <div className="flex flex-wrap gap-1.5">
                         {index === 0 && (
                           <>
                             <span className="border-primary/20 bg-primary/5 text-primary rounded-sm border px-2 py-0.5 text-[9px] font-black tracking-wider uppercase">
-                              Verified Profile
+                              Shared Form
                             </span>
                             <span className="border-primary/20 bg-primary/5 text-primary rounded-sm border px-2 py-0.5 text-[9px] font-black tracking-wider uppercase">
-                              Constituent Record
+                              Supporter Record
                             </span>
                           </>
                         )}
                         {index === 1 && (
                           <>
                             <span className="rounded-sm border border-orange-500/20 bg-orange-500/5 px-2 py-0.5 text-[9px] font-black tracking-wider text-orange-600 uppercase">
-                              Ward Audit
+                              Ward Tagged
                             </span>
                             <span className="rounded-sm border border-orange-500/20 bg-orange-500/5 px-2 py-0.5 text-[9px] font-black tracking-wider text-orange-600 uppercase">
                               Field Sync
@@ -158,10 +158,10 @@ export function HowItWorksSection() {
                         {index === 2 && (
                           <>
                             <span className="border-brand-emerald/20 bg-brand-emerald/5 text-brand-lagoon rounded-sm border px-2 py-0.5 text-[9px] font-black tracking-wider uppercase">
-                              Resource Ops
+                              Coverage View
                             </span>
                             <span className="border-brand-emerald/20 bg-brand-emerald/5 text-brand-lagoon rounded-sm border px-2 py-0.5 text-[9px] font-black tracking-wider uppercase">
-                              Victory Model
+                              Next Moves
                             </span>
                           </>
                         )}

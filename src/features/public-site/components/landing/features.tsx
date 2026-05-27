@@ -8,10 +8,10 @@ import Image from "next/image";
 const features = [
   {
     id: "geo",
-    tag: "GEOSPATIAL",
-    title: "Granular Ward Mapping",
+    tag: "ELECTORAL MAP",
+    title: "Real Electoral Geography",
     description:
-      "Our proprietary mapping engine structures data exactly as the election is conducted—down to the specific polling unit level.",
+      "WardWise organizes supporter data the same way campaigns work on the ground: state, LGA, ward, and polling unit.",
     visual: (
       <div className="bg-muted/20 relative h-full w-full overflow-hidden">
         {/* Technical Coordinate System */}
@@ -44,9 +44,9 @@ const features = [
 
           {/* Nodes */}
           {[
-            { x: 60, y: 220, label: "PU_001" },
-            { x: 200, y: 150, label: "WARD_X" },
-            { x: 340, y: 80, label: "ZONE_A" },
+            { x: 60, y: 220, label: "PU 014" },
+            { x: 200, y: 150, label: "JAMBUTU" },
+            { x: 340, y: 80, label: "YOLA NORTH" },
           ].map((node, i) => (
             <g key={i}>
               <motion.circle
@@ -81,15 +81,15 @@ const features = [
   },
   {
     id: "sync",
-    tag: "OPERATIONAL",
-    title: "Field Synchronization",
+    tag: "FIELD SYNC",
+    title: "Low-Signal Field Sync",
     description:
-      "Proprietary low-latency sync protocols allow canvassers to register supporters in offline wards and auto-sync upon reconnection.",
+      "Field teams can keep capturing supporters on mobile and sync their work once network signal returns.",
     visual: (
       <div className="bg-muted/10 relative flex h-full w-full flex-col justify-center px-12">
         <div className="mb-3 flex items-center justify-between">
           <span className="text-muted-foreground font-mono text-[9px] tracking-[0.2em]">
-            NODE_SYNC_BASE
+            FIELD_SYNC
           </span>
           <div className="flex items-center gap-1.5">
             <div className="bg-brand-emerald size-1.5 animate-pulse rounded-full" />
@@ -130,8 +130,8 @@ const features = [
             </div>
           </div>
           <div className="text-muted-foreground flex items-center justify-between font-mono text-[8px] tracking-widest">
-            <span>PKT_SIZE: 128KB</span>
-            <span>LATENCY: 12MS</span>
+            <span>OFFLINE SAFE</span>
+            <span>SYNC READY</span>
           </div>
         </div>
       </div>
@@ -139,30 +139,30 @@ const features = [
   },
   {
     id: "sec",
-    tag: "GOVERNANCE",
-    title: "Role-Based Integrity",
+    tag: "ACCESS CONTROL",
+    title: "Trusted Team Access",
     description:
-      "Every constituent record is cryptographically signed and auditable, with restricted access for canvassers, analysts, and candidates.",
+      "Canvassers, managers, and candidates each get the level of access they need while campaign records stay controlled.",
     visual: (
       <div className="bg-muted/20 relative flex h-full w-full flex-col justify-center gap-6 p-10 lg:p-14">
         {[
           {
-            role: "SUPPORTER",
+            role: "ADMIN",
             color: "bg-primary",
             percentage: 100,
-            access: "RW_CORE",
+            access: "FULL_CONTROL",
           },
           {
             role: "CANDIDATE",
             color: "bg-brand-emerald",
             percentage: 75,
-            access: "R_ANALYTICS",
+            access: "REPORT_VIEW",
           },
           {
             role: "CANVASSER",
             color: "bg-orange-500",
             percentage: 40,
-            access: "W_FIELD",
+            access: "FIELD_ONLY",
           },
         ].map((item, i) => (
           <div key={i} className="flex flex-col gap-2.5">
@@ -215,10 +215,10 @@ export function FeaturesSection() {
               className="mb-8 flex items-center gap-2"
             >
               <span className="text-primary border-primary/30 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
-                Infrastructure
+                Built for campaigns
               </span>
               <span className="text-muted-foreground font-mono text-[9px] tracking-widest uppercase">
-                SYS_ARCH
+                Field-ready design
               </span>
             </motion.div>
 
@@ -226,14 +226,14 @@ export function FeaturesSection() {
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.15]"
-            >
-              Precision tools for a <br />
-              <span className="text-primary font-serif italic">
-                data-driven campaign.
-              </span>
-            </motion.h2>
+            transition={{ delay: 0.1 }}
+            className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.15]"
+          >
+            Built for the way <br />
+            <span className="text-primary font-serif italic">
+              campaigns actually work.
+            </span>
+          </motion.h2>
           </div>
 
           <motion.div
@@ -244,9 +244,9 @@ export function FeaturesSection() {
             className="lg:col-span-5"
           >
             <p className="text-muted-foreground border-border border-l pl-6 text-sm leading-relaxed font-medium sm:text-base">
-              WardWise mirrors the physical reality of the Nigerian electoral
-              process, providing high-fidelity data structures for every
-              stakeholder in the movement.
+              WardWise is more than a form. It gives campaigns structured
+              supporter capture, low-friction field sync, and reporting
+              organized by real electoral geography.
             </p>
           </motion.div>
         </div>
@@ -266,7 +266,7 @@ export function FeaturesSection() {
               <div className="order-last p-10 sm:p-16 lg:order-0">
                 <div className="mb-6 flex items-center gap-3">
                   <span className="text-muted-foreground/40 font-mono text-[9px] font-bold tracking-widest uppercase">
-                    SYS_MODULE_0{index + 1}
+                    CAMPAIGN_LAYER_0{index + 1}
                   </span>
                   <div className="bg-border h-px w-4" />
                 </div>
@@ -280,7 +280,7 @@ export function FeaturesSection() {
                 </p>
 
                 <button className="text-primary group/btn flex items-center gap-2 text-[10px] font-black tracking-widest uppercase">
-                  <span>Explore Protocol</span>
+                  <span>Why it matters</span>
                   <HiArrowRight className="size-3 -translate-x-1 opacity-0 transition-all duration-300 group-hover/btn:translate-x-0 group-hover/btn:opacity-100" />
                 </button>
 
@@ -306,16 +306,16 @@ export function FeaturesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
-          className="border-border/40 mt-24 flex flex-col items-center justify-between gap-12 border-t pt-20 lg:flex-row"
-        >
+            className="border-border/40 mt-24 flex flex-col items-center justify-between gap-12 border-t pt-20 lg:flex-row"
+          >
           <div className="flex-1">
             <h4 className="text-foreground mb-4 text-xl font-bold tracking-tight">
-              Integrity-First Architecture
+              Campaign-ready controls
             </h4>
             <p className="text-muted-foreground max-w-lg text-base leading-relaxed">
-              Unlike generic field tools, WardWise is architected to handle the
-              complexity of large-scale field operations with absolute data
-              transparency.
+              Unlike generic field tools, WardWise is built to keep field work
+              readable and auditable so campaigns can trust what they are seeing
+              without turning operations into spreadsheet cleanup.
             </p>
           </div>
 
@@ -343,7 +343,7 @@ export function FeaturesSection() {
               <div className="flex items-center justify-center gap-2 sm:justify-start">
                 <div className="bg-primary size-1.5 shrink-0 rounded-full" />
                 <p className="text-muted-foreground max-w-[200px] text-xs font-medium tracking-wide sm:max-w-none sm:text-[10px]">
-                  Validation Layer synced across all 36 States
+                  Verification layer synced across every active workspace
                 </p>
               </div>
             </div>

@@ -10,7 +10,13 @@ export const faqItems: FAQItem[] = [
   {
     question: "What is WardWise?",
     answer:
-      "WardWise is Nigeria's premier campaign intelligence platform that empowers strategic teams with real-time field data. We help campaigns make geographic-based decisions organized precisely by Ward and Polling Unit.",
+      "WardWise is a campaign field intelligence platform. It helps campaigns capture supporters from the field, organize them by LGA, ward, and polling unit, and understand where support is growing.",
+    category: "general",
+  },
+  {
+    question: "What is WardWise Collect?",
+    answer:
+      "WardWise Collect is the field registration side of the platform. It gives campaigns a mobile-friendly supporter capture flow that feeds directly into reporting instead of leaving names scattered across notebooks, chats, or spreadsheets.",
     category: "general",
   },
   {
@@ -22,13 +28,25 @@ export const faqItems: FAQItem[] = [
   {
     question: "How does the platform assist canvassers?",
     answer:
-      "Canvassers use our mobile-optimized portal to securely collect constituent data. This includes validating voters via Permanent Voter Card (PVC), VIN, or National Identity Number (NIN) credentials directly in the field, ensuring instant deduplication.",
+      "Canvassers use a mobile-friendly flow to capture supporters in the field, attach the right location details, and keep records flowing into one shared campaign system. That helps managers and candidates see what the field is producing without waiting for scattered updates.",
+    category: "general",
+  },
+  {
+    question: "How is WardWise different from Google Forms or spreadsheets?",
+    answer:
+      "Google Forms can collect responses, but WardWise is built for campaign operations. It structures supporter records around real electoral geography, supports field attribution, improves record quality, and gives campaigns a reporting view they can actually use for decisions.",
+    category: "general",
+  },
+  {
+    question: "How is supporter data organized?",
+    answer:
+      "Supporter records are organized around the real campaign map: state, LGA, ward, and polling unit. That makes follow-up, reporting, and deployment decisions much easier than working from a flat spreadsheet.",
     category: "general",
   },
   {
     question: "How do I onboard on WardWise?",
     answer:
-      "After completing a demo and setting up your workspace, administrators can invite operators by email and generate unique access codes for field canvassers.",
+      "After a demo and workspace setup, campaign administrators can invite the people who need access and start rolling the platform out to managers, operators, and field teams.",
     category: "account",
   },
   {
@@ -38,15 +56,15 @@ export const faqItems: FAQItem[] = [
   },
   {
     question:
-      "Is the constituent's NIN, VIN, or PVC number safe with WardWise?",
+      "Is a supporter's NIN or VIN safe with WardWise?",
     answer:
-      "Yes. Any NIN, VIN, or PVC number collected in the field by canvassers is encrypted and used purely to verify uniqueness and valid polling unit registration. We ensure the strictest data privacy and never distribute this raw identifier data.",
+      "Yes. Sensitive supporter identity details are handled carefully and are not exposed as general campaign notes. They are collected only when the campaign flow requires them and are meant to support cleaner records, verification, and responsible data handling.",
     category: "privacy",
   },
   {
     question: "Is data transmission secure?",
     answer:
-      "Yes. All data flowing from the field to your command center is protected by TLS/SSL encryption. We host our infrastructure on enterprise-grade cloud servers.",
+      "Yes. Data sent from the field to the campaign workspace is protected in transit and handled through secure infrastructure designed for controlled access.",
     category: "privacy",
   },
   {
@@ -58,7 +76,7 @@ export const faqItems: FAQItem[] = [
   {
     question: "Is the platform compliant with Nigerian data laws?",
     answer:
-      "Absolutely. Our systems enforce data privacy features compliant with the Nigerian Data Protection Act (NDPA) to ensure constituent data is securely handled.",
+      "WardWise is built with privacy-conscious handling and access controls that help campaigns treat supporter data responsibly under Nigerian data protection expectations.",
     category: "privacy",
   },
   {

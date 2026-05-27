@@ -115,15 +115,15 @@ export function SupportContent() {
   return (
     <PublicSupportLayout
       eyebrow="Support Center"
-      title="Find answers before you need escalation"
-      subtitle="Start with the common questions, then jump straight into contact if you need a human response."
+      title="Answers about WardWise, Collect, and campaign onboarding"
+      subtitle="Use these quick explanations to understand what the platform does today, then contact us if you want a demo or a direct reply."
     >
       <div className="space-y-8">
         <section className="grid gap-4 sm:grid-cols-[minmax(0,1.15fr)_320px]">
           <div className="border-border/60 bg-card overflow-hidden rounded-sm border shadow-none">
             <div className="border-border/60 bg-muted/20 border-b px-5 py-3">
               <p className="text-foreground text-sm font-semibold">
-                Direct channels
+                Reach the WardWise team
               </p>
             </div>
 
@@ -138,20 +138,20 @@ export function SupportContent() {
                     href={channel.href}
                     className="hover:bg-primary/5 flex items-start gap-3 px-5 py-4 transition-colors"
                   >
-                  <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-sm">
-                    <ChannelIcon className="size-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-foreground text-sm font-semibold">
-                      {channel.name}
-                    </h3>
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                      {channel.description}
-                    </p>
-                    <p className="text-primary mt-1 truncate text-xs font-medium">
-                      {channel.contact}
-                    </p>
-                  </div>
+                    <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-sm">
+                      <ChannelIcon className="size-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-foreground text-sm font-semibold">
+                        {channel.name}
+                      </h3>
+                      <p className="text-muted-foreground text-xs leading-relaxed">
+                        {channel.description}
+                      </p>
+                      <p className="text-primary mt-1 truncate text-xs font-medium">
+                        {channel.contact}
+                      </p>
+                    </div>
                   </Link>
                 );
               })}
@@ -161,13 +161,14 @@ export function SupportContent() {
           <div className="border-primary/30 bg-primary/5 rounded-sm border shadow-none">
             <div className="border-primary/20 border-b px-5 py-3">
               <p className="text-foreground text-sm font-semibold">
-                Need a guided reply?
+                Need a demo or direct reply?
               </p>
             </div>
             <div className="space-y-4 px-5 py-5">
               <p className="text-muted-foreground text-sm leading-6">
-                Use the structured contact form when you want your request
-                routed with context for support, demos, press, or partnerships.
+                Use the contact form when you want help with onboarding, demos,
+                support, partnerships, or a more guided explanation of how
+                WardWise fits your campaign.
               </p>
               <Button
                 asChild

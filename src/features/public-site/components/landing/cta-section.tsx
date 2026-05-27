@@ -38,38 +38,29 @@ export function CallToActionSection() {
           <div className="border-primary absolute -bottom-px -left-px size-3 border-b-2 border-l-2" />
           <div className="border-primary absolute -right-px -bottom-px size-3 border-r-2 border-b-2" />
 
-          {/* Metadata Overlay */}
-          <div className="text-muted-foreground/30 absolute top-6 left-6 hidden rotate-90 font-mono text-[8px] font-black tracking-widest sm:block">
-            DEPLOY_READY_V2.04
-          </div>
-          <div className="text-muted-foreground/30 absolute right-6 bottom-6 hidden font-mono text-[8px] font-black tracking-widest sm:block">
-            NGA_VOTES_SYNC
-          </div>
-
           <div className="flex flex-col items-center text-center">
-            {/* Minimalist Legend */}
             <div className="mb-10 flex items-center gap-6">
               <span className="text-primary font-mono text-[9px] font-black tracking-[0.4em] uppercase">
-                Phase_04
+                Book a walkthrough
               </span>
               <div className="bg-border/60 h-px w-8" />
               <span className="text-muted-foreground font-mono text-[9px] font-black tracking-[0.4em] uppercase">
-                Vict_Mapping
+                Campaign-ready
               </span>
             </div>
 
             <div className="max-w-4xl space-y-8">
               <h2 className="text-foreground text-4xl leading-[1.1] font-extrabold tracking-tighter sm:text-6xl lg:text-7xl">
-                Ready to command your <br />
+                Ready to see WardWise on a <br />
                 <span className="text-primary font-serif font-normal italic">
-                  next campaign?
+                  real campaign?
                 </span>
               </h2>
 
               <p className="text-muted-foreground mx-auto max-w-xl text-base leading-relaxed font-medium sm:text-lg">
-                Join Nigeria's most trusted digital infrastructure for
-                grassroots campaigns. Request an invite to onboard your team
-                today.
+                We can show you how WardWise Collect captures supporters,
+                organizes them by ward and polling unit, and turns field
+                activity into reporting your team can actually use.
               </p>
 
               <div className="flex flex-col items-center justify-center gap-6 pt-6 sm:flex-row">
@@ -100,33 +91,32 @@ export function CallToActionSection() {
               </div>
             </div>
 
-            {/* Architectural Blueprint Footer */}
             <div className="border-border/40 mt-20 w-full max-w-4xl border-t pt-10">
               <div className="flex flex-col items-center justify-between gap-8 text-left sm:flex-row">
                 <div className="flex flex-col items-center sm:items-start">
                   <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
-                    Data Sovereignty
+                    Mobile capture
                   </p>
                   <p className="text-foreground text-[10px] font-bold uppercase">
-                    De-Duplication: Active
+                    Built for field teams
                   </p>
                 </div>
                 <div className="bg-border hidden h-6 w-px sm:block" />
                 <div className="flex flex-col items-center sm:items-start">
                   <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
-                    Network status
+                    Electoral structure
                   </p>
                   <p className="text-foreground text-[10px] font-bold uppercase">
-                    Verified Wards Only
+                    LGA, ward, and polling unit
                   </p>
                 </div>
                 <div className="bg-border hidden h-6 w-px sm:block" />
                 <div className="flex flex-col items-center sm:items-start">
                   <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
-                    Compliance
+                    Reporting view
                   </p>
                   <p className="text-foreground text-[10px] font-bold uppercase">
-                    Federal Hub Ready
+                    Clearer campaign decisions
                   </p>
                 </div>
               </div>

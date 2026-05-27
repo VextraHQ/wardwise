@@ -11,9 +11,9 @@ import { heroSupportingCopy } from "@/features/public-site/lib/landing-data";
 import { cn } from "@/lib/utils";
 
 const benefitPoints = [
-  "See where you are winning wards, and where to invest next",
-  "Align candidates, managers, and canvassers around the same numbers",
-  "Field activity shows up in your view as it happens, not days later",
+  "See which LGAs, wards, and polling-unit areas are responding",
+  "Keep candidates, managers, and field teams on the same picture",
+  "Turn supporter capture into follow-up and deployment decisions",
 ];
 
 export function HeroSection() {
@@ -174,10 +174,10 @@ export function HeroSection() {
                   <div className="flex items-center gap-4">
                     <div>
                       <h3 className="text-foreground text-sm font-black tracking-tight uppercase">
-                        State Command Hub
+                        Adamawa Campaign View
                       </h3>
                       <p className="text-muted-foreground text-[10px] font-bold">
-                        Node: Adamawa Central • Northern Geo-Zone
+                        Yola Command Node • Adamawa State • North East
                       </p>
                     </div>
                   </div>
@@ -195,7 +195,7 @@ export function HeroSection() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <p className="text-muted-foreground/70 text-[10px] font-black tracking-widest uppercase">
-                          Registration Progress
+                          Supporter Capture Progress
                         </p>
                         <p className="text-foreground text-4xl font-black tracking-tighter">
                           84.2%
@@ -205,11 +205,11 @@ export function HeroSection() {
                         <div className="flex items-center justify-end gap-2">
                           <HiArrowUpRight className="text-brand-emerald" />
                           <span className="text-brand-lagoon text-sm font-black">
-                            +12% this week
+                            Momentum this week
                           </span>
                         </div>
                         <p className="text-muted-foreground/70 text-[10px] font-bold uppercase">
-                          Target: Oct 2027
+                          Focus: Governorship race
                         </p>
                       </div>
                     </div>
@@ -225,7 +225,7 @@ export function HeroSection() {
                   <div className="grid grid-cols-12">
                     <div className="border-border/40 col-span-12 border-b p-5 md:col-span-7 md:border-r md:border-b-0">
                       <p className="text-muted-foreground/70 mb-2 text-[10px] font-black tracking-widest uppercase">
-                        Field Coverage Index
+                        Adamawa Coverage
                       </p>
                       {/* Detailed Coverage Matrix */}
                       <div className="grid grid-cols-7 gap-1.5">
@@ -244,8 +244,8 @@ export function HeroSection() {
                         ))}
                       </div>
                       <div className="text-muted-foreground/70 mt-4 flex items-center justify-between text-[9px] font-bold uppercase">
-                        <span>LGA Core</span>
-                        <span>Ward Boundary</span>
+                        <span>LGA View</span>
+                        <span>Ward View</span>
                       </div>
                     </div>
                     <div className="col-span-12 flex flex-col justify-center space-y-3 bg-white/40 p-5 md:col-span-5">
@@ -253,12 +253,12 @@ export function HeroSection() {
                         {
                           label: "Polling Units",
                           val: "420",
-                          subtitle: "Fully Mapped",
+                          subtitle: "Mapped for follow-up",
                         },
                         {
-                          label: "Registered Voters",
+                          label: "Supporters",
                           val: "10,244",
-                          subtitle: "Unique Records",
+                          subtitle: "Structured records",
                         },
                       ].map((stat, i) => (
                         <div key={i} className="space-y-0.5">
@@ -284,20 +284,20 @@ export function HeroSection() {
                     <div className="space-y-3">
                       {[
                         {
-                          ward: "Ward 04",
-                          act: "+42 Records Synced",
+                          ward: "Jambutu Ward",
+                          act: "+42 supporters synced",
                           time: "2m ago",
                           status: "success",
                         },
                         {
-                          ward: "Ward 12",
-                          act: "Daily Goal Reached",
+                          ward: "Ajiya Ward",
+                          act: "Follow-up list updated",
                           time: "15m ago",
                           status: "alert",
                         },
                         {
-                          ward: "Ward 08",
-                          act: "Sync Complete",
+                          ward: "Karewa Ward",
+                          act: "Daily field sync complete",
                           time: "24m ago",
                           status: "success",
                         },
@@ -383,7 +383,7 @@ export function HeroSection() {
                   <div className="flex shrink-0 items-center gap-2">
                     <div className="bg-primary size-1.5 rounded-full" />
                     <span className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
-                      Sys_Nominal
+                      Field sync live
                     </span>
                   </div>
                 </div>

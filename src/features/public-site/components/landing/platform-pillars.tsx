@@ -19,10 +19,10 @@ export function PlatformPillarsSection() {
           >
             <div className="flex items-center gap-2">
               <span className="text-primary border-primary/30 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
-                Ecosystem
+                Platform
               </span>
               <span className="text-muted-foreground font-mono text-[9px] tracking-widest uppercase">
-                MOD_CORE
+                How it fits together
               </span>
             </div>
             <div className="bg-primary/20 mt-4 h-px w-12" />
@@ -35,9 +35,9 @@ export function PlatformPillarsSection() {
             transition={{ delay: 0.1 }}
             className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.15]"
           >
-            An end-to-end <br />
+            One system from <br />
             <span className="text-primary font-serif italic">
-              civic intelligence engine.
+              field capture to campaign action.
             </span>
           </motion.h2>
 
@@ -48,13 +48,14 @@ export function PlatformPillarsSection() {
             transition={{ delay: 0.2 }}
           >
             <p className="text-muted-foreground mx-auto mt-8 max-w-2xl text-base leading-relaxed font-medium sm:text-lg">
-              WardWise unifies field registration, data validation, and campaign
-              activation so candidates and civic leaders can move in sync.
+              WardWise connects supporter capture, data quality, and reporting
+              so campaigns stop guessing and start acting on a shared ground
+              picture.
             </p>
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {platformPillars.map((pillar, index) => (
             <motion.article
               key={pillar.title}
@@ -68,7 +69,7 @@ export function PlatformPillarsSection() {
               <div className="border-border/60 bg-muted/30 flex flex-wrap items-start justify-between gap-2.5 border-b px-5 py-4 sm:px-6">
                 <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
                   <span className="text-primary/40 font-mono text-[10px] font-black tracking-widest uppercase">
-                    MOD_CORE_0{index + 1}
+                    Pillar 0{index + 1}
                   </span>
                   <div className="bg-primary/20 h-3 w-px" />
                   <span className="text-muted-foreground min-w-0 text-[10px] font-bold tracking-widest uppercase">
@@ -85,7 +86,7 @@ export function PlatformPillarsSection() {
                     <span
                       className={`text-[8px] font-bold uppercase ${index === 2 ? "text-orange-600" : "text-primary"}`}
                     >
-                      {index === 2 ? "Active" : "Ready"}
+                      {index === 2 ? "Growing" : "Campaign-ready"}
                     </span>
                   </div>
                 </div>
@@ -99,10 +100,10 @@ export function PlatformPillarsSection() {
                   </div>
                   <div className="text-right">
                     <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
-                      System Priority
+                      Why it matters
                     </p>
                     <p className="text-foreground text-xs font-bold">
-                      Critical_Path
+                      Shared by the team
                     </p>
                   </div>
                 </div>
@@ -122,7 +123,7 @@ export function PlatformPillarsSection() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-primary/70 text-[9px] font-black tracking-widest uppercase">
-                          Activation Signal
+                          What this unlocks
                         </span>
                         <div className="flex gap-1.5">
                           {[1, 2, 3, 4].map((i) => (
@@ -142,7 +143,7 @@ export function PlatformPillarsSection() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-muted/30 border-border/40 hover:bg-muted/50 flex flex-col items-center justify-center rounded-xl border p-3 text-center transition-colors">
                       <p className="text-muted-foreground mb-1 text-[8px] font-black tracking-[0.2em] uppercase">
-                        Efficiency
+                        Proof
                       </p>
                       <p
                         className={`text-sm font-black tracking-tight ${index === 2 ? "text-orange-500" : "text-primary"}`}
@@ -152,7 +153,7 @@ export function PlatformPillarsSection() {
                     </div>
                     <div className="bg-muted/30 border-border/40 hover:bg-muted/50 flex flex-col items-center justify-center rounded-xl border p-3 text-center transition-colors">
                       <p className="text-muted-foreground mb-1 text-[8px] font-black tracking-[0.2em] uppercase">
-                        Metric
+                        Signal
                       </p>
                       <p className="text-foreground/80 text-[10px] font-black tracking-tight uppercase">
                         {pillar.metric.label}
@@ -165,7 +166,7 @@ export function PlatformPillarsSection() {
               {/* Module Footer Area */}
               <div className="border-border/40 bg-muted/20 flex items-center justify-center border-t py-3">
                 <span className="text-muted-foreground/40 font-mono text-[8px] font-bold tracking-widest uppercase">
-                  Integrity_Check_OK • Latency_14ms
+                  One shared campaign picture
                 </span>
               </div>
             </motion.article>

@@ -54,14 +54,14 @@ export type StatHighlight = {
 
 export const statHighlights: StatHighlight[] = [
   {
-    label: "Registered Voters",
+    label: "Supporters Captured",
     value: "10,000+",
-    annotation: "Growing community voices across Adamawa wards",
+    annotation: "Growing records across live campaign wards",
   },
   {
-    label: "Polling Units",
+    label: "Polling Units Mapped",
     value: "420",
-    annotation: "Data structured exactly where voters vote",
+    annotation: "Structured around where people actually vote",
   },
   {
     label: "Data Precision",
@@ -79,24 +79,24 @@ export type ProcessStep = {
 
 export const processSteps: ProcessStep[] = [
   {
-    name: "Target Identification",
+    name: "Share the campaign form",
     number: "01",
     description:
-      "Campaigns define objectives and assign coverage zones to ensure canvassers engage constituents with ward-level precision.",
+      "Campaign teams launch a branded supporter form and give field staff a simple way to start capturing support from the ground.",
     icon: HiViewGrid,
   },
   {
-    name: "Field Registration",
+    name: "Capture supporters in the field",
     number: "02",
     description:
-      "Canvassers deploy with ward-level precision to register voters and synchronize real-time ground data.",
+      "Canvassers and coordinators register supporters on mobile, with the right LGA, ward, and polling unit attached to each record.",
     icon: HiLocationMarker,
   },
   {
-    name: "Strategic Command",
+    name: "See where support is growing",
     number: "03",
     description:
-      "Candidates harness deep ward-level insights to optimize resources and drive an informed path to victory.",
+      "Candidates and managers open a shared reporting view to spot strong areas, weak spots, and where to deploy attention next.",
     icon: HiChartBar,
   },
 ];
@@ -113,19 +113,19 @@ export type FeatureCard = {
 
 export const featureCards: FeatureCard[] = [
   {
-    title: "Voter Ward Mapping",
+    title: "Real Electoral Geography",
     description:
-      "We organize every response by State → LGA → Ward → Polling Unit for unmatched clarity.",
+      "Every supporter record is organized by state, LGA, ward, and polling unit so the data matches the real campaign map.",
     icon: HiLocationMarker,
-    metricLabel: "Coverage Accuracy",
-    metricValue: "99.2%",
-    metricTrend: "+4.8%",
+    metricLabel: "Map Structure",
+    metricValue: "Ward-Level",
+    metricTrend: "Precise",
     color: "primary",
   },
   {
     title: "Canvasser Field Portal",
     description:
-      "Empower your boots on the ground with a mobile-optimized interface for real-time data collection.",
+      "Field teams can capture supporters on mobile and keep moving, even when signal conditions are weak or inconsistent.",
     icon: HiDeviceMobile,
     metricLabel: "Active Canvassers",
     metricValue: "420+",
@@ -133,29 +133,29 @@ export const featureCards: FeatureCard[] = [
     color: "orange",
   },
   {
-    title: "Support Who You Trust",
+    title: "Supporter Capture Flow",
     description:
-      "Choose the candidate you believe in—your support routes straight to their dashboard.",
+      "Supporters can be captured through a guided, campaign-ready flow that feeds straight into reporting instead of staying in scattered notes.",
     icon: HiCheckCircle,
-    metricLabel: "Registered Choices",
+    metricLabel: "Structured Records",
     metricValue: "12,305",
     metricTrend: "+12%",
     color: "emerald",
   },
   {
-    title: "Secure Registration",
+    title: "Cleaner Records",
     description:
-      "Unique agent codes and NIN and phone-based deduplication ensure every voter is uniquely registered.",
+      "WardWise helps reduce duplicate or weak supporter records so follow-up, reporting, and mobilization stay cleaner.",
     icon: HiLockClosed,
-    metricLabel: "Security Uptime",
-    metricValue: "100%",
-    metricTrend: "Secure",
+    metricLabel: "Record Confidence",
+    metricValue: "High",
+    metricTrend: "Tracked",
     color: "primary",
   },
   {
     title: "Candidate Insights",
     description:
-      "Dashboards surface demographics and field trends in real time for strategic decisions.",
+      "Dashboards show where support is building, where coverage is thin, and what the field is telling the campaign in real time.",
     icon: HiChartBar,
     metricLabel: "Insights Generated",
     metricValue: "740",
@@ -165,7 +165,7 @@ export const featureCards: FeatureCard[] = [
   {
     title: "Field Deployment",
     description:
-      "Identify gaps in geographic coverage and coordinate field efforts precisely at the polling-unit level.",
+      "See geographic gaps early and direct field effort to the wards and polling-unit areas that still need attention.",
     icon: HiSpeakerphone,
     metricLabel: "Reach Extension",
     metricValue: "85%",
@@ -187,7 +187,7 @@ export const heroBackgroundGradient =
 // };
 
 export const heroSupportingCopy =
-  "Give your campaign a clear picture of every ward, polling unit, and field team. WardWise helps candidates and organizers move from ground truth to better decisions, without drowning in spreadsheets.";
+  "WardWise helps your campaign capture supporters from the field, organize them by LGA, ward, and polling unit, and see where support is growing in real time.";
 
 export type EcosystemRole = {
   role: string;
@@ -200,79 +200,72 @@ export type EcosystemRole = {
 
 export const ecosystemRoles: EcosystemRole[] = [
   {
-    role: "Registered Voters",
-    title: "The Constituents",
+    role: "Supporters",
+    title: "The Ground Picture",
     description:
-      "Voters registered securely in the field by your deployed team, tagged with precise polling-unit coordinates.",
+      "Supporters captured from the field and tied to the real electoral map your campaign works with every day.",
     color: "teal",
-    features: [
-      "Geolocation Tagging",
-      "Demographic Profiling",
-      "Sentiment Tracking",
-    ],
+    features: ["Ward & PU structure", "Cleaner records", "Follow-up readiness"],
     icon: HiCheckCircle,
   },
   {
     role: "Canvassers",
     title: "Activate the Field",
-    description: "Securely register voters house-to-house with real-time sync.",
+    description:
+      "Capture supporter details from the ground with a mobile flow built for real campaign fieldwork.",
     color: "orange",
-    features: ["Field-Ready Mobile App", "Agent Codes", "Real-Time Sync"],
+    features: ["Field-ready mobile flow", "Referral tracking", "Real-time sync"],
     icon: HiDeviceMobile,
   },
   {
     role: "Candidates",
     title: "Drive to Victory",
     description:
-      "Access deep ward-level insights to optimize your campaign strategy.",
+      "See where support is building, where coverage is weak, and where the next deployment should go.",
     color: "emerald",
-    features: [
-      "Strategic Dashboards",
-      "Field Analytics",
-      "Resource Allocation",
-    ],
+    features: ["Campaign dashboards", "Field analytics", "Deployment decisions"],
     icon: HiChartBar,
   },
 ];
 
 export const platformPillars = [
   {
-    title: "Connected Field Network",
+    title: "Field Capture That Matches the Map",
     description:
-      "Local canvassers, digital forms, and automated lookups ensure voter registrations are recorded at the polling-unit level without friction.",
-    focus: "Field Operations",
+      "WardWise Collect helps field teams capture supporters and tie every record to the real electoral map: LGA, ward, and polling unit.",
+    focus: "Field Capture",
     signal:
-      "Polling-unit canvassers sync with registration data to confirm records before campaigns go live.",
+      "The same record a canvasser captures in the field becomes the same record the campaign reports on later.",
     metric: {
-      label: "Registration speed",
-      value: "12m",
-      context: "Avg. per ward",
+      label: "Capture flow",
+      value: "5 Steps",
+      context: "Mobile-friendly",
     },
   },
   {
-    title: "Campaign Intelligence Cloud",
+    title: "Reporting That Guides Campaign Decisions",
     description:
-      "Dashboards, segmentation tools, and exportable dossiers give candidates a command centre for every supporter touchpoint.",
-    focus: "Decision Tools",
+      "Candidates and campaign managers get one shared view of supporter growth, field activity, and where the campaign needs more attention.",
+    focus: "Reporting",
     signal:
-      "Custom dashboards surface field trends, demographic insights, and supporter journeys for rapid decision-making.",
+      "Instead of waiting for scattered updates, teams can see what the field is saying while the campaign is still moving.",
     metric: {
-      label: "Insights refreshed",
-      value: "Hourly",
-      context: "Real-time sync",
+      label: "Insight refresh",
+      value: "Real Time",
+      context: "As data lands",
     },
   },
   {
-    title: "Nationwide Rollout Ready",
+    title: "State-Ready Now, Expandable Nationwide",
     description:
-      "State-by-state onboarding playbooks, language localization, and partner APIs make it simple to scale WardWise across Nigeria.",
-    focus: "Scale",
+      "WardWise is built to start with one live state campaign and expand cleanly across more states without changing the underlying field structure.",
+    focus: "Growth",
     signal:
-      "Regional playbooks and partner APIs orchestrate growth from pilot LGAs to national coalitions in weeks, not months.",
+      "Campaigns can start with the geography they need now and keep the same operating model as coverage grows into more states later.",
     metric: {
-      label: "States prepared",
-      value: "10",
-      context: "Launch-ready",
+      label: "Scale path",
+      value: "Nationwide",
+      context: "Built to expand",
     },
   },
 ];
@@ -286,77 +279,77 @@ export type CoreStat = {
 
 export const coreStats: CoreStat[] = [
   {
-    label: "Growth Momentum",
+    label: "Supporters Captured",
     value: "12,305",
     delta: "+12%",
-    caption: "Registered Voter Profiles",
+    caption: "Structured field records",
   },
   {
-    label: "Field Capacity",
-    value: "420",
-    delta: "+38",
-    caption: "Active Canvassers",
+    label: "LGAs Active",
+    value: "14",
+    delta: "+3",
+    caption: "Live campaign coverage",
   },
 ];
 
 export const impactHighlights = [
   {
-    title: "Built for nationwide rollout",
+    title: "Built around real voting locations",
     description:
-      "WardWise maps Nigeria's electoral structure so campaigns and civic teams can activate every ward and polling unit with confidence.",
+      "WardWise organizes support around the places campaigns actually work: LGAs, wards, and polling units.",
     icon: HiGlobeAlt,
   },
   {
-    title: "Trusted by seekers of change",
+    title: "Useful to candidates and field teams",
     description:
-      "Voters, canvassers, and candidates trust our secure, transparent, and ward-focused data protocols.",
+      "The same system helps field teams capture support and helps candidates understand what the field is producing.",
     icon: HiShieldCheck,
   },
   {
-    title: "Decisions grounded in communities",
+    title: "Turns field work into decisions",
     description:
-      "Leadership groups interpret real-time dashboards that highlight local needs—from jobs to infrastructure—so action plans start with constituents.",
+      "Instead of waiting on notebooks, chats, and verbal summaries, campaigns get a clearer picture they can act on quickly.",
     icon: HiChartBar,
   },
 ];
 
 export const trustIndicators = [
-  "Validated by field agents and campaign strategists",
-  "Polling-unit mapping and data validation",
-  "Secure infrastructure with end-to-end encryption",
+  "Built for real field teams",
+  "Organized by wards and polling units",
+  "Secure campaign data handling",
 ];
 
 export const securityHighlights = [
   {
-    title: "Unique Voter Identity",
+    title: "Cleaner supporter records",
     description:
-      "NIN and phone-based deduplication ensures one voter, one record. Prevent over-registration and identify rigging attempts instantly.",
+      "WardWise helps campaigns reduce duplicate or messy field records so supporter lists stay more useful for real follow-up.",
     icon: HiCheckCircle,
   },
   {
-    title: "Secure Field Access",
+    title: "Controlled field access",
     description:
-      "Canvassers use location-locked codes and GPS-tracked registration to ensure field data is coming from the right ward.",
+      "Campaign teams can control who captures data and which users can see the larger reporting picture.",
     icon: HiLockClosed,
   },
   {
-    title: "Role-Based Integrity",
+    title: "Role-based visibility",
     description:
-      "Segmented access controls ensure that field agents only see what they need, while strategists hold the complete picture.",
+      "Canvassers, managers, and candidates each get the level of access they need without exposing everything to everyone.",
     icon: HiShieldCheck,
   },
   {
-    title: "Privacy Sovereignty",
+    title: "Protected campaign data",
     description:
-      "All voter information is protected by federal-grade encryption and stored in secure, auditable environments.",
+      "Supporter data is handled through secure infrastructure with privacy controls that help campaigns treat records responsibly.",
     icon: HiArrowDown,
   },
 ];
 
 export const candidateBenefits = [
-  "See all your supporters organized by polling unit",
-  "Empower your canvassers with mobile tools",
-  "Understand what issues matter most in each ward",
-  "Track registration growth in real time",
-  "Identify gaps in your field coverage",
+  "See supporters organized by LGA, ward, and polling unit",
+  "Give field teams a cleaner mobile capture flow",
+  "Track where support is growing in real time",
+  "Follow up with stronger records later",
+  "Spot weak coverage areas earlier",
 ];

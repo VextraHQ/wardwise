@@ -20,10 +20,10 @@ export function SecuritySection() {
           >
             <div className="flex items-center gap-3">
               <span className="text-primary border-primary/30 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
-                Privacy Guard
+                Data & Access
               </span>
               <span className="text-muted-foreground font-mono text-[9px] tracking-widest uppercase">
-                SEC_STABLE
+                Campaign trust
               </span>
             </div>
             <div className="bg-primary/20 mt-4 h-px w-12" />
@@ -36,9 +36,9 @@ export function SecuritySection() {
             transition={{ delay: 0.1 }}
             className="text-foreground text-4xl font-extrabold tracking-tight sm:text-5xl lg:leading-[1.15]"
           >
-            Incorruptible protection for <br />
+            Serious protection for <br />
             <span className="text-primary font-serif italic">
-              your campaign's inner circle.
+              supporter and campaign data.
             </span>
           </motion.h2>
 
@@ -49,9 +49,9 @@ export function SecuritySection() {
             transition={{ delay: 0.2 }}
             className="text-muted-foreground mx-auto mt-8 max-w-2xl text-base leading-relaxed font-medium sm:text-lg"
           >
-            Campaign strategies are won on secrets. WardWise creates a
-            "Sovereign Vault" ensuring your field data is visible only to those
-            you trust, and invisible to the competition.
+            WardWise is built so field capture stays organized, access stays
+            controlled, and sensitive supporter records are only visible to the
+            people who should see them.
           </motion.p>
         </div>
 
@@ -72,10 +72,10 @@ export function SecuritySection() {
                 </div>
                 <div className="text-right">
                   <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
-                    Guard Level
+                    Trust Mode
                   </p>
                   <p className="text-foreground text-[10px] font-black">
-                    Military Grade
+                    Campaign Ready
                   </p>
                 </div>
               </div>
@@ -93,13 +93,13 @@ export function SecuritySection() {
               <div className="border-border/40 mt-8 border-t pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="bg-brand-emerald size-1.5 animate-pulse rounded-full shadow-[0_0_8px_rgba(2,201,136,0.5)]" />
+                    <div className="bg-brand-emerald size-1.5 rounded-full" />
                     <span className="text-muted-foreground font-mono text-[8px] font-black tracking-[0.2em] uppercase">
-                      Verified Agent
+                      Access Controlled
                     </span>
                   </div>
                   <span className="text-muted-foreground/30 font-mono text-[8px] font-black uppercase">
-                    VAULT_STABLE
+                    Privacy active
                   </span>
                 </div>
               </div>
@@ -115,28 +115,28 @@ export function SecuritySection() {
           <div className="border-border/60 bg-card/40 flex flex-col items-center gap-6 rounded-2xl border px-8 py-4 sm:flex-row">
             <div className="flex flex-col items-center sm:items-start sm:px-4">
               <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
-                Privacy Protocol
+                Data handling
               </p>
               <p className="text-foreground text-xs font-black">
-                STRATEGY_SHIELD
+                Secure record flow
               </p>
             </div>
             <div className="bg-border h-px w-full sm:h-6 sm:w-px" />
             <div className="flex flex-col items-center sm:items-start sm:px-4">
               <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
-                In-Country Hosting
+                Team access
               </p>
               <p className="text-foreground text-xs font-black">
-                SOVEREIGN_RESERVE
+                Role-based visibility
               </p>
             </div>
             <div className="bg-border h-px w-full sm:h-6 sm:w-px" />
             <div className="flex flex-col items-center sm:items-start sm:px-4">
               <p className="text-muted-foreground font-mono text-[8px] font-black tracking-widest uppercase">
-                Field Integrity
+                Privacy controls
               </p>
               <p className="text-foreground text-xs font-black">
-                ZERO_FRAUD_PROTOCOL
+                Cleaner supporter data
               </p>
             </div>
           </div>
