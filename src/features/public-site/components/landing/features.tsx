@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LandingSectionEyebrow } from "@/features/public-site/components/landing/landing-section-eyebrow";
+import { LandingSectionEyebrow } from "@/features/public-site/components/shared/landing-section-eyebrow";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 import { HiArrowRight } from "react-icons/hi";
@@ -123,7 +123,7 @@ const features = [
         </div>
 
         <div className="space-y-3">
-          <div className="bg-background border-border relative flex h-10 w-full items-center justify-between overflow-hidden rounded-2xl border px-4">
+          <div className="bg-background border-border relative flex h-10 w-full items-center justify-between overflow-hidden rounded-sm border px-4">
             <motion.div
               animate={{ x: ["-100%", "300%"] }}
               transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
@@ -253,7 +253,7 @@ export function FeaturesSection() {
           </motion.div>
         </div>
 
-        <div className="border-border/60 bg-border relative grid gap-px overflow-hidden rounded-3xl border shadow-none">
+        <div className="border-border/60 bg-border relative grid gap-px overflow-hidden rounded-sm border shadow-none">
           {features.map((feature, index) => (
             <motion.div
               key={feature.id}
@@ -309,7 +309,7 @@ export function FeaturesSection() {
             </p>
           </div>
 
-          <div className="border-border/40 bg-muted/20 flex w-full flex-col items-center gap-6 rounded-2xl border p-6 sm:w-auto sm:flex-row sm:gap-8">
+          <div className="border-border/40 bg-muted/20 flex w-full flex-col items-center gap-6 rounded-sm border p-6 sm:w-auto sm:flex-row sm:gap-8">
             <div className="flex shrink-0 -space-x-3">
               {fieldTeamAvatars.map((agent) => (
                 <Avatar

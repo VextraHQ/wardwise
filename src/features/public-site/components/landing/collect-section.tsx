@@ -9,7 +9,7 @@ import {
 } from "react-icons/hi";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { LandingSectionEyebrow } from "@/features/public-site/components/landing/landing-section-eyebrow";
+import { LandingSectionEyebrow } from "@/features/public-site/components/shared/landing-section-eyebrow";
 import { cn } from "@/lib/utils";
 
 const collectFeatures = [
@@ -90,7 +90,7 @@ export function CollectSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 * i }}
-                className="border-border/60 bg-card rounded-2xl border p-7 shadow-none"
+                className="border-border/60 bg-card rounded-sm border p-7 shadow-none"
               >
                 <div className="bg-primary/10 text-primary mb-5 flex size-10 items-center justify-center rounded-sm">
                   <Icon className="size-5" aria-hidden />
@@ -112,7 +112,7 @@ export function CollectSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
-          className="border-border/60 bg-card relative mx-auto mt-12 max-w-4xl overflow-hidden rounded-2xl border shadow-none"
+          className="border-border/60 bg-card relative mx-auto mt-12 max-w-4xl overflow-hidden rounded-none border shadow-none"
         >
           <div className="border-primary absolute -top-px -left-px size-3 border-t-2 border-l-2" />
           <div className="border-primary absolute -top-px -right-px size-3 border-t-2 border-r-2" />

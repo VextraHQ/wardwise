@@ -123,13 +123,13 @@ export const featureCards: FeatureCard[] = [
     color: "primary",
   },
   {
-    title: "Canvasser Field Portal",
+    title: "Mobile Field Capture",
     description:
       "Field teams can capture supporters on mobile and keep moving, even when signal conditions are weak or inconsistent.",
     icon: HiDeviceMobile,
-    metricLabel: "Active Canvassers",
-    metricValue: "420+",
-    metricTrend: "+12.4%",
+    metricLabel: "Capture Mode",
+    metricValue: "Mobile-First",
+    metricTrend: "Low-signal ready",
     color: "orange",
   },
   {

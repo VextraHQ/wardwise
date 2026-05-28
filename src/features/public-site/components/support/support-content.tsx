@@ -74,7 +74,7 @@ function FAQAccordion({
             <AccordionPrimitive.Header>
               <AccordionPrimitive.Trigger
                 className={cn(
-                  "border-border/60 bg-card/90 flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left shadow-none transition-all",
+                  "border-border/60 bg-card/90 flex w-full items-center justify-between gap-3 rounded-sm border px-4 py-3 text-left shadow-none transition-all",
                   "hover:border-primary/30 hover:bg-muted/40",
                   "data-[state=open]:border-primary/40 data-[state=open]:bg-primary/5",
                   "text-foreground text-sm font-medium",
@@ -90,7 +90,7 @@ function FAQAccordion({
                 "data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
               )}
             >
-              <div className="border-primary/20 bg-primary/5 text-muted-foreground mt-2 rounded-xl border-l-2 py-3 pr-4 pl-4 text-sm leading-relaxed">
+              <div className="border-primary/20 bg-primary/5 text-muted-foreground mt-2 rounded-sm border-l-2 py-3 pr-4 pl-4 text-sm leading-relaxed">
                 {faq.answer}
               </div>
             </AccordionPrimitive.Content>
@@ -120,7 +120,7 @@ export function SupportContent() {
     >
       <div className="space-y-8">
         <section className="grid gap-5 sm:grid-cols-[minmax(0,1.15fr)_320px]">
-          <div className="border-border/60 bg-card/90 overflow-hidden rounded-2xl border shadow-none">
+          <div className="border-border/60 bg-card/90 overflow-hidden rounded-sm border shadow-none">
             <div className="border-border/60 bg-muted/20 border-b px-5 py-3.5">
               <p className="text-foreground text-sm font-semibold">
                 Reach the WardWise team
@@ -137,7 +137,7 @@ export function SupportContent() {
                     href={channel.href}
                     className="hover:bg-primary/5 flex items-start gap-3 px-5 py-4 transition-colors"
                   >
-                    <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-xl">
+                    <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-sm">
                       <ChannelIcon className="size-4" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -157,7 +157,7 @@ export function SupportContent() {
             </div>
           </div>
 
-          <div className="border-primary/25 bg-primary/5 rounded-2xl border p-5">
+          <div className="border-primary/25 bg-primary/5 rounded-sm border p-5">
             <p className="text-foreground text-sm font-semibold">
               Need a demo or direct reply?
             </p>
@@ -175,7 +175,7 @@ export function SupportContent() {
           </div>
         </section>
 
-        <section className="border-border/60 bg-card/90 space-y-6 rounded-2xl border p-5 shadow-none sm:p-6">
+        <section className="border-border/60 bg-card/90 space-y-6 rounded-sm border p-5 shadow-none sm:p-6">
           <h2 className="text-foreground text-base font-bold tracking-tight">
             Frequently Asked Questions
           </h2>

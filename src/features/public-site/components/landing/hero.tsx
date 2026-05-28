@@ -60,11 +60,12 @@ export function HeroSection() {
 
             <div className="space-y-4">
               <h1 className="text-foreground text-5xl leading-[1.1] font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
-                From Ward <br />
-                <span className="text-primary font-serif italic">
+                <span className="block">From Ward</span>
+                <span className="text-primary block font-serif italic">
                   to Victory.
                 </span>
               </h1>
+
               <p className="text-muted-foreground max-w-xl text-base leading-relaxed font-medium sm:text-lg">
                 {heroSupportingCopy}
               </p>

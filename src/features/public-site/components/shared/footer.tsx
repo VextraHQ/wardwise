@@ -1,44 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { HiMail } from "react-icons/hi";
-import { HiArrowUpRight } from "react-icons/hi2";
+import { usePathname } from "next/navigation";
+import { HiArrowRight, HiMail } from "react-icons/hi";
 import { Logo } from "@/components/shared/logo";
 import { FooterCookieSettingsButton } from "@/components/shared/cookie-consent";
 import { Button } from "@/components/ui/button";
 import { legalNavigation, COMPANY_INFO } from "@/lib/constants/legal-data";
+import { cn } from "@/lib/utils";
 
-// Footer link data
-const platformLinks = [
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Features", href: "#features" },
-  { label: "Platform", href: "#platform-pillars" },
-  { label: "Impact", href: "#impact" },
-  { label: "Security", href: "#security" },
+const productLinks = [
+  { label: "For Campaigns", href: "/for-campaigns" },
+  { label: "Support", href: "/support" },
+  { label: "Contact", href: "/contact" },
 ];
 
-const roleLinks = [
-  {
-    label: "Candidate Login",
-    href: "/login",
-    hoverColor: "hover:text-brand-lagoon",
-  },
-  {
-    label: "Admin Portal",
-    href: "/admin",
-    hoverColor: "hover:text-primary",
-  },
-  {
-    label: "WardWise Collect",
-    href: "#collect",
-    hoverColor: "hover:text-orange-600",
-  },
+const accessLinks = [
+  { label: "Candidate Login", href: "/login" },
+  { label: "Admin Portal", href: "/admin" },
+  { label: "WardWise Collect", href: "/#collect" },
 ];
 
-// Use centralized legal navigation from legal-data.ts
 const footerSections = [
-  { title: "Platform", links: platformLinks },
-  { title: "Access", links: roleLinks },
+  { title: "Product", links: productLinks },
+  { title: "Access", links: accessLinks },
   {
     title: "Legal",
     links: legalNavigation.map((item) => ({
@@ -48,21 +33,32 @@ const footerSections = [
   },
 ];
 
+function isFooterLinkActive(pathname: string, href: string) {
+  if (href.startsWith("/#")) {
+    return pathname === "/";
+  }
+  if (href === "/admin") {
+    return pathname.startsWith("/admin");
+  }
+  return pathname === href;
+}
+
+const footerLinkClass = "font-medium transition-colors duration-200";
+
 export function SiteFooter() {
+  const pathname = usePathname();
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-background border-border/40 relative overflow-hidden border-t py-16">
       <div className="relative mx-auto max-w-7xl px-6 sm:px-8">
-        {/* Main footer content */}
         <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
-          {/* Brand section */}
           <div className="max-w-sm space-y-5">
             <Logo size="lg" />
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Nigeria&apos;s leading civic intelligence infrastructure. Bridging
-              the gap between the field and the dashboard with ward-level
-              accuracy.
+              WardWise is a campaign field-operations platform that helps teams
+              capture supporters, organize them by real electoral geography,
+              and turn field activity into a shared campaign picture.
             </p>
             <Button
               size="lg"
@@ -71,12 +67,11 @@ export function SiteFooter() {
             >
               <Link href="/contact" className="flex items-center gap-2">
                 Request a Demo
-                <HiArrowUpRight className="h-4 w-4" />
+                <HiArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>
 
-          {/* Links grid */}
           <div className="grid grid-cols-2 gap-12 text-sm sm:grid-cols-3 lg:gap-16">
             {footerSections.map((section) => (
               <div key={section.title} className="space-y-5">
@@ -84,27 +79,31 @@ export function SiteFooter() {
                   {section.title}
                 </h3>
                 <ul className="space-y-3">
-                  {section.links.map((link) => (
-                    <li key={link.label}>
-                      <Link
-                        href={link.href}
-                        className={`text-muted-foreground font-medium transition-colors duration-200 ${
-                          "hoverColor" in link && link.hoverColor
-                            ? link.hoverColor
-                            : "hover:text-primary"
-                        }`}
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
+                  {section.links.map((link) => {
+                    const isActive = isFooterLinkActive(pathname, link.href);
+                    return (
+                      <li key={link.label}>
+                        <Link
+                          href={link.href}
+                          aria-current={isActive ? "page" : undefined}
+                          className={cn(
+                            footerLinkClass,
+                            isActive
+                              ? "text-primary font-semibold"
+                              : "text-muted-foreground hover:text-primary",
+                          )}
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Bottom bar */}
         <div className="border-border/40 mt-12 flex flex-col items-center justify-between gap-6 border-t pt-8 sm:flex-row">
           <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:flex-wrap">
             <p className="text-muted-foreground text-xs font-semibold tracking-wider">
@@ -131,7 +130,7 @@ export function SiteFooter() {
           >
             <HiMail className="h-4 w-4" />
             <span className="text-xs font-medium">Contact us</span>
-            <HiArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <HiArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         </div>
       </div>

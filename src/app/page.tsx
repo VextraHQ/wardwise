@@ -6,13 +6,14 @@ import { HowItWorksSection } from "@/features/public-site/components/landing/how
 import { ImpactSection } from "@/features/public-site/components/landing/impact";
 import { PlatformPillarsSection } from "@/features/public-site/components/landing/platform-pillars";
 import { SecuritySection } from "@/features/public-site/components/landing/security";
-import { SiteFooter } from "@/features/public-site/components/landing/footer";
-import { SiteHeader } from "@/features/public-site/components/landing/header";
-import { ScrollToTop } from "@/features/public-site/components/landing/scroll-to-top";
+import { SiteFooter } from "@/features/public-site/components/shared/footer";
+import { ScrollToTop } from "@/features/public-site/components/shared/scroll-to-top";
+import { MarketingHeader } from "@/features/public-site/components/shared/marketing-header";
+
 export default function Home() {
   return (
     <div className="bg-background text-foreground flex min-h-screen flex-col">
-      <SiteHeader />
+      <MarketingHeader />
       <main className="flex-1">
         <HeroSection />
         <HowItWorksSection />

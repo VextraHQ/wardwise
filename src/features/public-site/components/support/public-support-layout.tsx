@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Header } from "@/components/shared/header";
-import { LegalFooter } from "@/features/public-site/components/legal/legal-footer";
+import { SiteFooter } from "@/features/public-site/components/shared/footer";
+import { MarketingHeader } from "@/features/public-site/components/shared/marketing-header";
 import { supportNavigation } from "@/lib/constants/support-data";
 import { cn } from "@/lib/utils";
 
@@ -23,29 +23,10 @@ export function PublicSupportLayout({
   const pathname = usePathname();
 
   return (
-    <div className="bg-background min-h-screen">
-      <Header
-        badge="Support & Contact"
-        hideMobileBadge
-        actions={
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="text-muted-foreground hover:text-foreground font-mono text-[10px] font-bold tracking-widest uppercase transition-colors"
-            >
-              Home
-            </Link>
-            <Link
-              href="/login"
-              className="text-muted-foreground hover:text-foreground font-mono text-[10px] font-bold tracking-widest uppercase transition-colors"
-            >
-              Login
-            </Link>
-          </div>
-        }
-      />
+    <div className="bg-background flex min-h-screen flex-col">
+      <MarketingHeader variant="back" />
 
-      <main className="relative">
+      <main className="relative flex-1">
         <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-10">
           <div className="border-border/60 bg-card relative overflow-hidden border shadow-none">
             <div className="border-primary absolute top-0 left-0 size-5 border-t border-l" />
@@ -96,12 +77,12 @@ export function PublicSupportLayout({
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:pb-10">
+        <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:pb-16">
           {children}
         </section>
       </main>
 
-      <LegalFooter pathname={pathname} />
+      <SiteFooter />
     </div>
   );
 }

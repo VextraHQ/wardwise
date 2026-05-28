@@ -1,6 +1,6 @@
 "use client";
 
-import { LandingSectionEyebrow } from "@/features/public-site/components/landing/landing-section-eyebrow";
+import { LandingSectionEyebrow } from "@/features/public-site/components/shared/landing-section-eyebrow";
 import { securityHighlights } from "@/features/public-site/lib/landing-data";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
@@ -59,9 +59,9 @@ export function SecuritySection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="border-border/60 bg-card/90 flex flex-col rounded-2xl border p-7 shadow-none transition-colors duration-300"
+              className="border-border/60 bg-card/90 flex flex-col rounded-sm border p-7 shadow-none transition-colors duration-300"
             >
-              <div className="bg-primary/5 text-primary border-primary/20 mb-6 flex size-11 items-center justify-center rounded-xl border">
+              <div className="bg-primary/5 text-primary border-primary/20 mb-6 flex size-11 items-center justify-center rounded-sm border">
                 <item.icon className="size-5" aria-hidden />
               </div>
 
@@ -85,7 +85,7 @@ export function SecuritySection() {
         </div>
 
         <div className="flex flex-col items-center justify-center">
-          <div className="border-border/60 bg-card/40 flex w-full max-w-3xl flex-col items-center gap-5 rounded-2xl border px-6 py-5 sm:flex-row sm:justify-between">
+          <div className="border-border/60 bg-card/40 flex w-full max-w-3xl flex-col items-center gap-5 rounded-sm border px-6 py-5 sm:flex-row sm:justify-between">
             {[
               { label: "Data handling", value: "Secure record flow" },
               { label: "Team access", value: "Role-based visibility" },

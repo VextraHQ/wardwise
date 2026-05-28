@@ -4,7 +4,7 @@ import {
   coreStats,
   impactHighlights,
 } from "@/features/public-site/lib/landing-data";
-import { LandingSectionEyebrow } from "@/features/public-site/components/landing/landing-section-eyebrow";
+import { LandingSectionEyebrow } from "@/features/public-site/components/shared/landing-section-eyebrow";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 import { useState } from "react";
@@ -35,7 +35,7 @@ function RolloutStatePicker({
 }) {
   const pickerButtonClass = (isActive: boolean) =>
     cn(
-      "w-full rounded-2xl border border-border/60 text-left transition-colors px-4 py-3.5",
+      "w-full rounded-sm border border-border/60 text-left transition-colors px-4 py-3.5",
       isActive
         ? "border-primary/40 bg-primary/5"
         : "bg-background/80 hover:border-primary/30 hover:bg-muted/30",
@@ -239,7 +239,7 @@ function GeoRolloutPath({ paths }: { paths: RolloutState["paths"] }) {
       {paths.map((path) => (
         <div
           key={`${path.lga}-${path.ward}`}
-          className="bg-muted/30 space-y-2 rounded-xl border border-transparent p-4"
+          className="bg-muted/30 space-y-2 rounded-sm border border-transparent p-4"
         >
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
             <span className="text-foreground font-bold">{path.lga}</span>
@@ -319,7 +319,7 @@ export function ImpactSection() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="border-border/60 bg-card relative rounded-3xl border p-6 shadow-none sm:p-8 xl:col-span-8 xl:p-10"
+            className="border-border/60 bg-card relative rounded-sm border p-6 shadow-none sm:p-8 xl:col-span-8 xl:p-10"
           >
             <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
               <div className="min-w-0">
@@ -348,7 +348,7 @@ export function ImpactSection() {
                 onSelect={setSelectedState}
               />
 
-              <div className="border-border/60 bg-background/80 min-w-0 rounded-2xl border p-5 sm:p-6">
+              <div className="border-border/60 bg-background/80 min-w-0 rounded-sm border p-5 sm:p-6">
                 <div className="border-border/60 flex flex-col gap-4 border-b border-dashed pb-5 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
@@ -372,7 +372,7 @@ export function ImpactSection() {
                 </div>
 
                 <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="bg-muted/30 rounded-xl border border-transparent p-4">
+                  <div className="bg-muted/30 rounded-sm border border-transparent p-4">
                     <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
                       Coverage
                     </p>
@@ -380,7 +380,7 @@ export function ImpactSection() {
                       {selectedState.coverage}
                     </p>
                   </div>
-                  <div className="bg-muted/30 rounded-xl border border-transparent p-4">
+                  <div className="bg-muted/30 rounded-sm border border-transparent p-4">
                     <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
                       Rollout stage
                     </p>
@@ -432,7 +432,7 @@ export function ImpactSection() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="border-border/60 bg-card/90 flex flex-col justify-between rounded-2xl border p-6 shadow-none transition-colors duration-300"
+                  className="border-border/60 bg-card/90 flex flex-col justify-between rounded-sm border p-6 shadow-none transition-colors duration-300"
                 >
                   <div>
                     <p className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
@@ -459,7 +459,7 @@ export function ImpactSection() {
               ))}
             </div>
 
-            <div className="border-border/40 bg-muted/20 space-y-4 rounded-2xl border p-6">
+            <div className="border-border/40 bg-muted/20 space-y-4 rounded-sm border p-6">
               <h4 className="text-primary border-primary/40 border-l-2 pl-4 text-[10px] font-black tracking-[0.4em] uppercase">
                 Why this matters
               </h4>

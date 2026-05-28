@@ -365,18 +365,18 @@ No claims that overstate current product behavior.
 
 ## Critical Files
 
-| Layer | File |
-|---|---|
-| Landing entry | `src/app/page.tsx` |
-| Hero | `src/features/public-site/components/landing/hero.tsx` |
-| Shared landing copy/data | `src/features/public-site/lib/landing-data.ts` |
-| How it works | `src/features/public-site/components/landing/how-it-works.tsx` |
-| Features | `src/features/public-site/components/landing/features.tsx` |
-| Platform pillars | `src/features/public-site/components/landing/platform-pillars.tsx` |
-| Impact | `src/features/public-site/components/landing/impact.tsx` |
-| Collect section | `src/features/public-site/components/landing/collect-section.tsx` |
-| Support page | `src/features/public-site/components/support/support-content.tsx` |
-| Support FAQ data | `src/lib/constants/support-data.ts` |
+| Layer                    | File                                                               |
+| ------------------------ | ------------------------------------------------------------------ |
+| Landing entry            | `src/app/page.tsx`                                                 |
+| Hero                     | `src/features/public-site/components/landing/hero.tsx`             |
+| Shared landing copy/data | `src/features/public-site/lib/landing-data.ts`                     |
+| How it works             | `src/features/public-site/components/landing/how-it-works.tsx`     |
+| Features                 | `src/features/public-site/components/landing/features.tsx`         |
+| Platform pillars         | `src/features/public-site/components/landing/platform-pillars.tsx` |
+| Impact                   | `src/features/public-site/components/landing/impact.tsx`           |
+| Collect section          | `src/features/public-site/components/landing/collect-section.tsx`  |
+| Support page             | `src/features/public-site/components/support/support-content.tsx`  |
+| Support FAQ data         | `src/lib/constants/support-data.ts`                                |
 
 ---
 
@@ -700,6 +700,474 @@ For Adamawa-specific outreach, the site should feel like it understands the oper
 ### Collect-specific version
 
 > WardWise Collect is the field registration side of the platform. It helps your team register supporters in a mobile-friendly flow and immediately feed those records into a structured campaign reporting system.
+
+---
+
+## V2 — Public Site Expansion
+
+### Why V2 exists
+
+The landing-page cleanup solves the immediate messaging and visual-alignment problem, but WardWise now needs a broader public-site structure.
+
+The product story is bigger than Collect alone.
+
+WardWise should be presented as:
+
+- the umbrella campaign field-operations platform
+- with Collect as the first live module
+- with reporting/insights already forming the decision layer
+- and with candidate/dashboard and field-tool expansion as the larger product direction
+
+The public site should reflect that hierarchy without overstating what is already shipped.
+
+### Product hierarchy
+
+Public positioning should follow this structure:
+
+#### WardWise
+
+The main platform story:
+
+- campaign field operations
+- real electoral geography
+- supporter capture
+- cleaner records
+- reporting and campaign decision support
+
+#### WardWise Collect
+
+The first live module:
+
+- field capture
+- mobile-friendly registration
+- LGA/ward/polling-unit structure
+- referral and record-quality foundations
+
+#### Reporting / Insights
+
+The supporting decision layer:
+
+- supporter growth visibility
+- geographic visibility
+- field and referral visibility
+- campaign readouts for managers and candidates
+
+#### Future platform direction
+
+May be referenced carefully as product direction, not as already-shipped claims:
+
+- candidate-facing dashboard depth
+- dedicated canvasser/mobile workflows
+- broader integrated campaign operations
+
+### Core public-site architecture
+
+The public-facing site is treated as a small, focused product-marketing system.
+
+Shipped main public pages:
+
+1. `/`
+   - the flagship landing page
+   - tells the broad WardWise platform story
+   - shows Collect as the first live module
+
+2. `/for-campaigns`
+   - the explanation page
+   - clarifies what WardWise is, how the modules fit together, and who it is for
+
+Utility pages:
+
+- `/contact`
+- `/support`
+- `/privacy`
+- `/terms`
+
+#### A dedicated `/book-demo` page is intentionally not shipped
+
+We considered a separate `/book-demo` conversion page, built it, then removed
+it. Reasons:
+
+- it duplicated the contact form's Turnstile flow and email pipeline
+- the contact form already supports a `reason` enum (`demo`, `general`,
+  `support`, `partnership`, `press`, `other`) so demo intent is first-class
+- having two near-identical forms doubled maintenance with no measurable
+  conversion benefit
+- consolidating into one inquiry surface keeps the IA honest
+
+If a future need emerges (a noticeably different intake flow, embedded
+calendar booking, sales qualification fields, etc.), reopen this decision —
+do not add a second form just to feel “marketing-y”.
+
+### Contact as the unified inquiry surface
+
+`/contact` is the single inbox for everything non-admin:
+
+- demo requests (high intent)
+- general inquiries
+- support
+- partnerships
+- press
+- anything else (free-form `other`)
+
+The visible `reason` selector handles framing differences. All paths flow
+through the same backend handler, the same Turnstile verification, and the
+same audit trail.
+
+Implementation note:
+
+- demo CTAs across the public site point at `/contact`
+- there is no separate `/book-demo` route
+- if a demo lead lands on `/contact`, the `reason` selector defaults to
+  "Request a Demo" via the dropdown order
+
+### Shared public shell
+
+The public site is built from one design family but uses **two shells**, not
+one global shell. The split is mode-based, not page-based: marketing pages
+sell, utility pages help.
+
+#### Shared across all public pages
+
+- same typography system
+- same border / radius logic
+- same muted surface treatment
+- same CTA family
+- same badge / meta-label family
+- same container widths and spacing rhythm
+
+#### Two shells (header + footer pairs)
+
+##### 1. Marketing shell
+
+Components:
+
+- `MarketingHeader` (sticky site nav, scroll-aware blur, mobile sheet)
+- `SiteFooter` (full footer — brand block, Product/Access/Legal columns,
+  Request-a-Demo CTA)
+
+Use for:
+
+- `/` (homepage)
+- `/for-campaigns`
+
+Purpose:
+
+- orientation, browsing, persuasion
+- always one click from the demo path
+
+Top-level nav (marketing header):
+
+- **Homepage (`/`)**:
+  - **For Campaigns** (→ `/for-campaigns`) — same nav chrome as section
+    anchors; top meta reads `Overview` instead of `01`–`06` to signal a full
+    page
+  - Homepage section anchors (→ `/#how-it-works`, `/#features`, etc.)
+  - Login
+  - Request Demo (CTA, → `/contact`)
+- **For Campaigns (`/for-campaigns`)**:
+  - **For Campaigns**
+  - **Support**
+  - **Contact**
+  - Login
+  - Request Demo (CTA, → `/contact`)
+
+Support and Contact stay out of the **homepage** marketing header on purpose.
+They remain easy to reach from the footer there, while `/for-campaigns` can use
+the fuller browse navigation because it behaves more like a standalone product
+page.
+
+There is no separate in-page section rail below the hero; section jumps
+live in the header again so navigation is one place.
+
+##### 2. Utility pages (same footer, slimmer header)
+
+Components:
+
+- `MarketingHeader` with `variant="back"` — logo, **Back to Home** (←),
+  Login; same sticky blur bar as the marketing header, without the full
+  section nav
+- `SiteFooter` — shared with home and `/for-campaigns`
+
+Use for:
+
+- `/contact`
+- `/support`
+- legal pages (`/privacy`, `/terms`, `/cookies`)
+
+Purpose:
+
+- one public-site family (header chrome + footer links stay consistent)
+- utility pages stay calmer in the **header** (no crowded nav) while the
+  footer still exposes Product, Support, Contact, and Request Demo
+
+The inner card on Contact and Support (eyebrow → title → support nav tabs
+→ subtitle → reply-window pill) is unchanged.
+
+### Homepage header (current rule)
+
+The homepage marketing header intentionally combines **one page link** (Product)
+with **homepage section anchors** in a single bar:
+
+- Product is visually distinct (bordered pill) so it reads as a route, not
+  a scroll target
+- Section links use `/#…` hashes and work from any marketing page
+- Support / Contact are footer-only on the homepage by design
+- `/for-campaigns` uses the fuller marketing nav (`For Campaigns`, `Support`,
+  `Contact`) because it is a browse page, not a long scrolling story page
+
+Crowding is managed with tighter spacing on `lg`, full labels on `xl`, and
+a grouped mobile sheet (Product card → sections → Login / Request Demo).
+There is no second nav strip under the hero.
+
+### Footer rules
+
+The footer should remain shared across all public pages.
+
+Footer responsibilities:
+
+- company/product summary
+- product links
+- support/contact links
+- legal links
+
+It should feel stable and consistent even when page templates differ.
+
+### Public-site design system rules
+
+The new pages should follow the public-site design system established by the landing page, but they should not clone the landing page section-for-section.
+
+#### Use the same visual DNA
+
+Reuse:
+
+- typography hierarchy
+- color and border logic
+- radius logic
+- muted surface treatment
+- button family
+- badge/meta label treatment
+- spacing rhythm
+
+#### Do not reuse the same page composition everywhere
+
+The landing page is the flagship expression, not the only template.
+
+So:
+
+- same design family
+- different page templates by purpose
+
+### Page template system
+
+There are two shipped templates, matching the two shells.
+
+#### 1. Story template
+
+Use for:
+
+- Home
+- For Campaigns
+
+Traits:
+
+- strongest narrative flow
+- mixed editorial and product-proof sections
+- more visual drama than utility pages
+- always wrapped in the marketing shell
+
+#### 2. Utility template
+
+Use for:
+
+- Contact
+- Support
+- legal pages
+
+Traits:
+
+- flatter
+- calmer
+- easy to scan
+- less decorative than Home
+- always wrapped in the utility shell
+
+### Page-by-page content structure
+
+#### Home
+
+Purpose:
+
+- introduce WardWise as the platform
+- show Collect as the first live proof
+- show campaign credibility quickly
+
+Must communicate:
+
+- what WardWise is
+- why it matters
+- how field capture and reporting connect
+
+#### For Campaigns / Product
+
+Purpose:
+
+- explain the product architecture more clearly than the homepage can
+
+Should include:
+
+- what WardWise is
+- how Collect fits in
+- how reporting/insights fit in
+- who the platform is for
+- what changes for campaigns using it
+
+Recommended feel:
+
+- cleaner than Home
+- more explanation-driven
+- still visually aligned with the landing family
+
+#### Contact
+
+Purpose:
+
+- catch every inbound inquiry — demo requests, support, partnerships,
+  press, general — in one place
+
+Should include:
+
+- a `reason` selector that frames the message (defaults to demo on top)
+- name, email, message
+- Turnstile verification
+- direct email fallback
+- a sidebar link back to Support for visitors looking for self-serve
+  answers first
+
+Recommended feel:
+
+- utility first
+- no unnecessary marketing complexity
+- the utility shell (Header + LegalFooter), not the marketing shell
+
+#### Support
+
+Purpose:
+
+- self-serve answers about WardWise, Collect, and onboarding before
+  routing to a real reply
+
+Should include:
+
+- categorized FAQ (general, account, privacy, technical)
+- direct contact channels block
+- a sidebar link to Contact for "I'd rather just write to a human"
+
+Recommended feel:
+
+- same utility shell as Contact
+- same eyebrow + title + tabs hero card for visual continuity
+- FAQ accordions, no decorative product surfaces
+
+### Content rules for V2
+
+#### Platform-first, module-second
+
+Public pages should say:
+
+- WardWise is the platform
+- Collect is the first live module
+
+They should not imply:
+
+- Collect is the whole identity of the product
+
+#### No under-selling
+
+Avoid positioning Collect as merely:
+
+- a better spreadsheet
+- a prettier form
+- a Google Form alternative
+
+Instead position WardWise as:
+
+- a field-operations system
+- built around electoral geography
+- with live supporter capture and decision support
+
+#### No over-claiming
+
+Do not present future platform modules as fully shipped if they are not.
+
+Allowed framing:
+
+- platform direction
+- expanding workflow
+- built to grow into wider campaign operations
+
+### V2 implementation priorities
+
+Shipped order:
+
+1. stabilize homepage direction (hero, sections, eyebrow consistency,
+   alternating bg rhythm)
+2. extract `MarketingHeader` with Product (page) + homepage section anchors
+   in one bar; remove the duplicate section rail under the hero
+3. build `/for-campaigns` (story template, marketing shell)
+4. consolidate all demo intent on `/contact` (no `/book-demo`)
+5. unify `/contact`, `/support`, and legal on `MarketingHeader`
+   `variant="back"` + `SiteFooter`
+
+### Landing card radius alignment (post-implementation tweak)
+
+After the first V2 pass shipped, the landing cards were aligned with the
+admin product's radius vocabulary. The previous mix of `rounded-3xl`,
+`rounded-2xl`, and `rounded-xl` was collapsed to `rounded-sm` across
+landing sections (Collect, Features, How It Works, Platform Pillars,
+Impact, Security, Support FAQ accordion and surrounding panels).
+
+Why:
+
+- the admin cockpit uses `rounded-sm` as its dominant card radius
+- having the public site speak the same radius vocabulary makes the
+  product feel like one continuous system, not a marketing skin glued
+  onto a different app
+- it also reads as more "campaign infrastructure" and less "SaaS landing
+  page" — closer to the brand intent
+
+What did **not** change:
+
+- pill / chip radii (badges, status pills) stay `rounded-sm` or
+  `rounded-full` as they already were
+- CTA buttons keep their `rounded-full` shape for visual contrast
+- the corner-marker accents on operational cards stay; they're a
+  signature element
+
+### V2 non-goals
+
+This pass should not:
+
+- create too many overlapping marketing pages
+- add a blog just to fill space
+- add a large documentation center
+- build a flashy pricing story before pricing is stable
+- make every public page look like a mini admin dashboard
+- reintroduce a separate `/book-demo` page unless there's a concrete
+  product reason to split intake flows
+
+### V2 verification
+
+1. A candidate should understand that WardWise is the platform, not just Collect.
+2. A visitor should understand that Collect is the first live module.
+3. A serious lead should know where to go next: `Contact` (with `reason =
+Request a Demo`).
+4. General inquiries should land in the same place: `Contact`.
+5. The marketing header feels uncluttered after separating site navigation
+   from section navigation.
+6. `/for-campaigns` reads as part of the same family without cloning the
+   homepage layout.
+7. `/contact` and `/support` use the back header variant (less nav noise)
+   but the same footer as the rest of the public site.
 
 ---
 

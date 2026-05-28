@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { LandingSectionEyebrow } from "@/features/public-site/components/landing/landing-section-eyebrow";
+import { LandingSectionEyebrow } from "@/features/public-site/components/shared/landing-section-eyebrow";
 import { processSteps } from "@/features/public-site/lib/landing-data";
 import { cn } from "@/lib/utils";
 
@@ -66,7 +66,7 @@ export function HowItWorksSection() {
           </motion.h2>
         </div>
 
-        <div className="border-border/60 bg-card relative grid grid-cols-1 gap-px overflow-hidden rounded-3xl border p-px shadow-none">
+        <div className="border-border/60 bg-card relative grid grid-cols-1 gap-px overflow-hidden rounded-sm border p-px shadow-none">
           <div className="divide-border/60 bg-card grid grid-cols-1 divide-y lg:grid-cols-3 lg:divide-x lg:divide-y-0">
             {processSteps.map((step, index) => {
               const info =

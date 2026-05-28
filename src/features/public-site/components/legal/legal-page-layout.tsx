@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
-import { HiClock } from "react-icons/hi";
-import { Header } from "@/components/shared/header";
-import { LegalFooter } from "@/features/public-site/components/legal/legal-footer";
+import { SiteFooter } from "@/features/public-site/components/shared/footer";
+import { MarketingHeader } from "@/features/public-site/components/shared/marketing-header";
 import {
   COMPANY_INFO,
   legalNavigation,
@@ -14,59 +13,82 @@ import {
 } from "@/lib/constants/legal-data";
 import type { LegalSection } from "@/lib/constants/legal-data";
 import { cn } from "@/lib/utils";
-import type { IconType } from "react-icons";
-import type { LucideIcon } from "lucide-react";
+
+function LegalDocNav({
+  layout = "inline",
+  embedded = false,
+  className,
+}: {
+  layout?: "inline" | "stack";
+  embedded?: boolean;
+  className?: string;
+}) {
+  const pathname = usePathname();
+
+  return (
+    <nav
+      className={cn(
+        layout === "inline"
+          ? "inline-flex flex-wrap items-center gap-1"
+          : "flex flex-col gap-1",
+        embedded
+          ? "p-0"
+          : "border-border/60 bg-background rounded-sm border p-1",
+        className,
+      )}
+      aria-label="Legal documents"
+    >
+      {legalNavigation.map((item) => {
+        const isActive = pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn(
+              "rounded-sm px-3 py-1.5 font-mono text-[10px] font-bold tracking-[0.18em] uppercase transition-colors",
+              isActive
+                ? "bg-primary/15 text-primary"
+                : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+            )}
+          >
+            {item.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
 
 export interface LegalPageLayoutProps {
   title: string;
   subtitle?: string;
-  systemCode: string;
-  icon: IconType | LucideIcon;
   children: React.ReactNode;
 }
 
 export function LegalPageLayout({
   title,
   subtitle,
-  systemCode,
-  icon: Icon,
   children,
 }: LegalPageLayoutProps) {
-  const pathname = usePathname();
-
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-background flex min-h-screen flex-col">
       <div className="print:hidden">
-        <Header badge="Legal" />
+        <MarketingHeader variant="back" />
       </div>
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-10 print:max-w-none print:px-8 print:py-4">
+      <main className="mx-auto max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:py-10 print:max-w-none print:px-8 print:py-4">
         <div className="flex gap-10">
           <aside className="hidden shrink-0 lg:block lg:w-56 print:hidden">
-            <nav className="sticky top-24">
+            <nav className="sticky top-24" aria-label="Legal documents">
               <div className="border-border/60 bg-card overflow-hidden rounded-sm border shadow-none">
                 <div className="border-border/60 bg-muted/30 border-b px-4 py-3">
-                  <span className="text-muted-foreground font-mono text-[10px] font-bold tracking-widest uppercase">
+                  <span className="text-primary font-mono text-[10px] font-bold tracking-widest uppercase">
                     Legal
                   </span>
                 </div>
-                <ul className="space-y-0.5 p-2">
-                  {legalNavigation.map((item) => (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        className={cn(
-                          "block rounded-sm px-3 py-2 text-sm font-medium transition-colors",
-                          pathname === item.href
-                            ? "bg-primary/10 text-primary border-primary border-l-[3px]"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                        )}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <div className="bg-background/50 p-2">
+                  <LegalDocNav layout="stack" embedded className="w-full" />
+                </div>
               </div>
             </nav>
           </aside>
@@ -82,35 +104,28 @@ export function LegalPageLayout({
                 <div className="border-primary absolute top-0 left-0 size-5 border-t border-l print:hidden" />
                 <div className="border-primary absolute top-0 right-0 size-5 border-t border-r print:hidden" />
 
-                <div className="absolute top-3 right-4 flex items-center gap-1.5 opacity-50 print:hidden">
-                  <div className="bg-primary size-1.5 rounded-full" />
-                  <span className="text-muted-foreground font-mono text-[9px] font-bold tracking-widest uppercase">
-                    {systemCode}
-                  </span>
+                <div className="border-border/60 bg-muted/20 flex flex-wrap items-center justify-between gap-3 border-b px-5 py-3 sm:px-6 lg:hidden print:hidden">
+                  <p className="text-primary font-mono text-[10px] font-black tracking-[0.24em] uppercase">
+                    Legal
+                  </p>
+                  <LegalDocNav layout="inline" />
                 </div>
 
-                <div className="p-5 sm:p-6 print:p-0">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-primary/10 text-primary border-primary/20 flex size-11 shrink-0 items-center justify-center rounded-sm border print:hidden">
-                      <Icon className="size-5" />
-                    </div>
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <h1 className="text-foreground text-xl font-bold tracking-tight sm:text-2xl print:text-3xl">
-                        {title}
-                      </h1>
-                      {subtitle && (
-                        <p className="text-muted-foreground text-sm print:text-base">
-                          {subtitle}
-                        </p>
-                      )}
-                      <div className="text-muted-foreground flex items-center gap-1.5 pt-1 text-xs">
-                        <HiClock className="size-3.5 print:hidden" />
-                        <span>
-                          Last Updated: {formatLegalDate(LEGAL_LAST_UPDATED)}
-                        </span>
-                      </div>
-                    </div>
+                <div className="space-y-4 p-5 sm:p-6 print:p-0">
+                  <div className="max-w-3xl space-y-2">
+                    <h1 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl print:text-3xl">
+                      {title}
+                    </h1>
+                    {subtitle ? (
+                      <p className="text-muted-foreground text-sm leading-7 sm:text-base print:text-base">
+                        {subtitle}
+                      </p>
+                    ) : null}
                   </div>
+
+                  <span className="border-border/60 bg-background text-muted-foreground inline-flex rounded-sm border px-3 py-2 font-mono text-[10px] font-bold tracking-[0.16em] uppercase">
+                    Last updated: {formatLegalDate(LEGAL_LAST_UPDATED)}
+                  </span>
                 </div>
               </div>
 
@@ -118,12 +133,19 @@ export function LegalPageLayout({
                 <div className="p-5 sm:p-6 print:p-0">{children}</div>
 
                 <div className="border-border/60 bg-muted/30 flex flex-wrap items-center justify-between gap-3 border-t px-5 py-3 print:hidden">
-                  <span className="text-muted-foreground font-mono text-[10px]">
-                    {systemCode} :: {COMPANY_INFO.name}
-                  </span>
+                  <p className="text-muted-foreground flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10px] font-bold tracking-widest uppercase">
+                    <span className="text-foreground/80">
+                      {COMPANY_INFO.name}
+                    </span>
+                    <span
+                      className="bg-border size-1 shrink-0 rounded-full"
+                      aria-hidden
+                    />
+                    <span>{COMPANY_INFO.legalName}</span>
+                  </p>
                   <Link
                     href={`mailto:${COMPANY_INFO.supportEmail}`}
-                    className="text-muted-foreground hover:text-primary text-xs transition-colors"
+                    className="text-muted-foreground hover:text-primary shrink-0 text-xs transition-colors"
                   >
                     {COMPANY_INFO.supportEmail}
                   </Link>
@@ -134,7 +156,9 @@ export function LegalPageLayout({
         </div>
       </main>
 
-      <LegalFooter pathname={pathname} />
+      <div className="print:hidden">
+        <SiteFooter />
+      </div>
     </div>
   );
 }
