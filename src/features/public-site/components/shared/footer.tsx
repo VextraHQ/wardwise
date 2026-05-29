@@ -57,8 +57,8 @@ export function SiteFooter() {
             <Logo size="lg" />
             <p className="text-muted-foreground text-sm leading-relaxed">
               WardWise is a campaign field-operations platform that helps teams
-              capture supporters, organize them by real electoral geography,
-              and turn field activity into a shared campaign picture.
+              capture supporters, organize them by real electoral geography, and
+              turn field activity into a shared campaign picture.
             </p>
             <Button
               size="lg"
