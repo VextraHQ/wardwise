@@ -21,12 +21,14 @@ type SenatorPreset = {
 type RawSheetRow = [unknown, unknown, unknown, unknown, unknown];
 
 const manualDistrictOverrides = {
-  "SD/004/AD": [
-    "Madagali",
-    "Maiha",
-    "Michika",
-    "Mubi North",
-    "Mubi South",
+  "SD/004/AD": ["Madagali", "Maiha", "Michika", "Mubi North", "Mubi South"],
+  "SD/006/AD": [
+    "Hong",
+    "Fufore",
+    "Song",
+    "Yola North",
+    "Yola South",
+    "Girei",
     "Gombi",
   ],
   "SD/054/KD": [

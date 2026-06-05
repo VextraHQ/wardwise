@@ -52,14 +52,7 @@ export const senatorPresets = [
     shortName: "Adamawa North",
     position: "Senator",
     stateCode: "AD",
-    lgaNames: [
-      "Madagali",
-      "Maiha",
-      "Michika",
-      "Mubi North",
-      "Mubi South",
-      "Gombi",
-    ],
+    lgaNames: ["Madagali", "Maiha", "Michika", "Mubi North", "Mubi South"],
   },
   {
     name: "Adamawa South Senatorial District",
@@ -83,7 +76,15 @@ export const senatorPresets = [
     shortName: "Adamawa Central",
     position: "Senator",
     stateCode: "AD",
-    lgaNames: ["Hong", "Fufore", "Song", "Yola North", "Yola South", "Girei"],
+    lgaNames: [
+      "Hong",
+      "Fufore",
+      "Song",
+      "Yola North",
+      "Yola South",
+      "Girei",
+      "Gombi",
+    ],
   },
   {
     name: "Akwa Ibom North East Senatorial District",
