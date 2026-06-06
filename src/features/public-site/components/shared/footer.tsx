@@ -16,8 +16,8 @@ const productLinks = [
 ];
 
 const accessLinks = [
-  { label: "Candidate Login", href: "/login" },
-  { label: "Admin Portal", href: "/admin" },
+  { label: "Workspace Login", href: "/admin" },
+  // { label: "Candidate Login", href: "/login" },
   { label: "WardWise Collect", href: "/#collect" },
 ];
 

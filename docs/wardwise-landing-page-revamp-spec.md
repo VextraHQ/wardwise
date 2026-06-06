@@ -862,19 +862,23 @@ Top-level nav (marketing header):
     anchors; top meta reads `Overview` instead of `01`–`06` to signal a full
     page
   - Homepage section anchors (→ `/#how-it-works`, `/#features`, etc.)
-  - Login
+  - **Workspace Login** (quiet operational link, → `/admin`)
   - Request Demo (CTA, → `/contact`)
 - **For Campaigns (`/for-campaigns`)**:
   - **For Campaigns**
   - **Support**
   - **Contact**
-  - Login
+  - **Workspace Login** (quiet operational link, → `/admin`)
   - Request Demo (CTA, → `/contact`)
 
 Support and Contact stay out of the **homepage** marketing header on purpose.
 They remain easy to reach from the footer there, while `/for-campaigns` can use
 the fuller browse navigation because it behaves more like a standalone product
 page.
+
+Candidate self-serve login is intentionally not part of the public header story
+in this phase. Until candidate dashboard access is truly live, the public site
+should not imply that candidates are expected to log in today.
 
 There is no separate in-page section rail below the hero; section jumps
 live in the header again so navigation is one place.
@@ -884,8 +888,8 @@ live in the header again so navigation is one place.
 Components:
 
 - `MarketingHeader` with `variant="back"` — logo, **Back to Home** (←),
-  Login; same sticky blur bar as the marketing header, without the full
-  section nav
+  **Workspace Login**; same sticky blur bar as the marketing header, without the
+  full section nav
 - `SiteFooter` — shared with home and `/for-campaigns`
 
 Use for:
@@ -914,9 +918,11 @@ with **homepage section anchors** in a single bar:
 - Support / Contact are footer-only on the homepage by design
 - `/for-campaigns` uses the fuller marketing nav (`For Campaigns`, `Support`,
   `Contact`) because it is a browse page, not a long scrolling story page
+- The right-side utility slot stays occupied by **Workspace Login** so the header
+  balance remains intact without promoting candidate login too early
 
 Crowding is managed with tighter spacing on `lg`, full labels on `xl`, and
-a grouped mobile sheet (Product card → sections → Login / Request Demo).
+a grouped mobile sheet (Product card → sections → Workspace Login / Request Demo).
 There is no second nav strip under the hero.
 
 ### Footer rules
@@ -1164,9 +1170,11 @@ Request a Demo`).
 4. General inquiries should land in the same place: `Contact`.
 5. The marketing header feels uncluttered after separating site navigation
    from section navigation.
-6. `/for-campaigns` reads as part of the same family without cloning the
+6. Candidate login is not publicly emphasized before the candidate dashboard
+   phase is truly live.
+7. `/for-campaigns` reads as part of the same family without cloning the
    homepage layout.
-7. `/contact` and `/support` use the back header variant (less nav noise)
+8. `/contact` and `/support` use the back header variant (less nav noise)
    but the same footer as the rest of the public site.
 
 ---

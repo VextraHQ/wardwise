@@ -37,11 +37,13 @@ function getSessionLabel(role: string | undefined): string {
 function HeaderAuthLink({
   status,
   session,
-  showCandidatePrefix = false,
+  anonymousHref = "/admin",
+  anonymousLabel = "Workspace Login",
 }: {
   status: string;
   session: ReturnType<typeof useSession>["data"];
-  showCandidatePrefix?: boolean;
+  anonymousHref?: string;
+  anonymousLabel?: string;
 }) {
   if (status === "loading") {
     return (
@@ -68,19 +70,11 @@ function HeaderAuthLink({
 
   return (
     <Link
-      href="/login"
+      href={anonymousHref}
       className="text-muted-foreground hover:text-foreground flex items-center gap-2 font-mono text-[10px] font-black tracking-widest uppercase transition-colors"
     >
       <HiLockClosed className="h-3.5 w-3.5 shrink-0" aria-hidden />
-      <span className="shrink-0 whitespace-nowrap">
-        {showCandidatePrefix ? (
-          <>
-            <span className="hidden xl:inline">Candidate </span>Login
-          </>
-        ) : (
-          "Login"
-        )}
-      </span>
+      <span className="shrink-0 whitespace-nowrap">{anonymousLabel}</span>
     </Link>
   );
 }
@@ -141,7 +135,12 @@ export function MarketingHeader({
                   <span className="sm:hidden">Home</span>
                 </Link>
                 <span className="bg-border h-4 w-px" aria-hidden />
-                <HeaderAuthLink status={status} session={session} />
+                <HeaderAuthLink
+                  status={status}
+                  session={session}
+                  anonymousHref="/admin"
+                  anonymousLabel="Workspace Login"
+                />
               </div>
             </div>
           </div>
@@ -270,7 +269,8 @@ export function MarketingHeader({
               <HeaderAuthLink
                 status={status}
                 session={session}
-                showCandidatePrefix
+                anonymousHref="/admin"
+                anonymousLabel="Workspace Login"
               />
               <Link
                 href={publicSiteCta.href}
@@ -410,11 +410,11 @@ export function MarketingHeader({
                 </Link>
               ) : (
                 <Link
-                  href="/login"
+                  href="/admin"
                   className="border-primary/30 text-primary hover:bg-primary/5 rounded-sm border px-4 py-2.5 text-center text-sm font-medium transition-colors duration-200"
                   onClick={() => setIsMobileOpen(false)}
                 >
-                  Candidate Login
+                  Workspace Login
                 </Link>
               )}
               <Link

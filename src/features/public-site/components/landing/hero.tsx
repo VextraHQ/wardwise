@@ -19,18 +19,18 @@ const benefitPoints = [
 export function HeroSection() {
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated" && session?.user;
-  const loginHref =
+  const accessHref =
     isAuthenticated && session.user.role === "candidate"
       ? "/dashboard"
       : isAuthenticated && session.user.role === "admin"
         ? "/admin"
-        : "/login";
-  const loginText =
+        : "/admin";
+  const accessText =
     isAuthenticated && session.user.role === "candidate"
       ? "Go to dashboard"
       : isAuthenticated && session.user.role === "admin"
         ? "Go to admin"
-        : "Candidate Login";
+        : "Workspace Login";
 
   return (
     <section className="bg-background border-border/40 relative overflow-hidden border-b py-8 sm:py-10 lg:py-16">
@@ -106,7 +106,7 @@ export function HeroSection() {
                     <div className="flex flex-col items-start leading-none opacity-50">
                       <span className="text-muted-foreground mb-1 flex items-center gap-1.5 text-[8px] font-black tracking-widest uppercase">
                         <div className="bg-primary/70 size-1.5 animate-pulse rounded-full" />
-                        Campaign portal
+                        Workspace access
                       </span>
                       <span className="text-foreground text-sm font-bold">
                         Signing you in…
@@ -115,7 +115,7 @@ export function HeroSection() {
                   </div>
                 ) : (
                   <Link
-                    href={loginHref}
+                    href={accessHref}
                     className="group border-border bg-muted/30 hover:bg-muted/50 flex h-13 items-center justify-center gap-3 rounded-sm border px-6 transition-all duration-300"
                   >
                     <div className="flex flex-col items-start leading-none">
@@ -123,7 +123,7 @@ export function HeroSection() {
                         Already on WardWise?
                       </span>
                       <span className="text-foreground text-sm font-bold">
-                        {loginText}
+                        {accessText}
                       </span>
                     </div>
                     <HiArrowRight className="text-muted-foreground group-hover:text-primary size-4 transition-colors" />

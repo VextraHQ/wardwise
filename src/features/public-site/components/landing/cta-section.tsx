@@ -8,19 +8,19 @@ import { Button } from "@/components/ui/button";
 export function CallToActionSection() {
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated" && session?.user;
-  const loginHref =
+  const accessHref =
     isAuthenticated && session.user.role === "candidate"
       ? "/dashboard"
       : isAuthenticated && session.user.role === "admin"
         ? "/admin"
-        : "/login";
+        : "/admin";
 
-  const loginText =
+  const accessText =
     isAuthenticated && session.user.role === "candidate"
       ? "Control Panel"
       : isAuthenticated && session.user.role === "admin"
         ? "Field Portal"
-        : "Candidate Login";
+        : "Workspace Login";
 
   return (
     <section className="border-border/40 bg-muted relative overflow-hidden border-t py-24 lg:py-40">
@@ -82,10 +82,10 @@ export function CallToActionSection() {
                   </div>
                 ) : (
                   <Link
-                    href={loginHref}
+                    href={accessHref}
                     className="border-foreground/10 text-foreground hover:border-primary/40 hover:text-primary border-b-2 pb-1 font-mono text-[10px] font-black tracking-widest uppercase transition-all"
                   >
-                    {loginText}
+                    {accessText}
                   </Link>
                 )}
               </div>
