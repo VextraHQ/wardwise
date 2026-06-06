@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import {
@@ -35,7 +34,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { contactReasonOptions } from "@/lib/constants/contact-reasons";
+import {
+  contactReasonOptions,
+  type ContactReason,
+} from "@/lib/constants/contact-reasons";
 import { COMPANY_INFO } from "@/lib/constants/legal-data";
 import {
   contactFormSchema,
@@ -88,12 +90,6 @@ function getContactErrorMessage(status: number, fallback?: string) {
   return "We couldn't send your message right now. Please use the email option below if this keeps happening.";
 }
 
-const reasonValues = contactReasonOptions.map((option) => option.value);
-
-function isContactReason(value: string | null): value is ContactFormValues["reason"] {
-  return value !== null && reasonValues.includes(value as ContactFormValues["reason"]);
-}
-
 const reasonDetailsByReason: Partial<
   Record<
     ContactFormValues["reason"],
@@ -106,22 +102,26 @@ const reasonDetailsByReason: Partial<
 > = {
   demo: {
     label: "Campaign context",
-    placeholder: "For example: governorship race, field team size, or target state",
+    placeholder:
+      "For example: governorship race, field team size, or target state",
     helper:
       "A little campaign context helps us shape the walkthrough around the right use case.",
   },
   support: {
     label: "Where did this happen?",
-    placeholder: "For example: dashboard, supporter form, submission sync, reporting page",
+    placeholder:
+      "For example: dashboard, supporter form, submission sync, reporting page",
     helper: "This helps us route technical issues faster.",
   },
   partnership: {
     label: "Partnership type",
-    placeholder: "For example: civic group, consultant network, field operations partner",
+    placeholder:
+      "For example: civic group, consultant network, field operations partner",
   },
   press: {
     label: "Deadline or outlet",
-    placeholder: "For example: publication name, story angle, or response deadline",
+    placeholder:
+      "For example: publication name, story angle, or response deadline",
   },
   other: {
     label: "What should we classify this as?",
@@ -287,21 +287,18 @@ const pageContentByReason: Record<
 };
 
 export function ContactContent({
+  initialReason,
   turnstileSiteKey,
 }: {
+  initialReason: ContactReason;
   turnstileSiteKey: string | null;
 }) {
-  const searchParams = useSearchParams();
   const [formStatus, setFormStatus] = useState<FormStatus>({ kind: "idle" });
   const [turnstileResetNonce, setTurnstileResetNonce] = useState(0);
   const isTurnstileBypassedLocally =
     !turnstileSiteKey && process.env.NODE_ENV !== "production";
   const isFormTemporarilyUnavailable =
     !turnstileSiteKey && process.env.NODE_ENV === "production";
-  const requestedReason = searchParams.get("reason");
-  const initialReason = isContactReason(requestedReason)
-    ? requestedReason
-    : defaultValues.reason;
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -327,14 +324,12 @@ export function ContactContent({
   const reasonDetailsConfig = reasonDetailsByReason[selectedReason];
 
   useEffect(() => {
-    if (isContactReason(requestedReason) && requestedReason !== selectedReason) {
-      form.setValue("reason", requestedReason, {
-        shouldDirty: false,
-        shouldTouch: false,
-        shouldValidate: true,
-      });
-    }
-  }, [form, requestedReason, selectedReason]);
+    form.setValue("reason", initialReason, {
+      shouldDirty: false,
+      shouldTouch: false,
+      shouldValidate: true,
+    });
+  }, [form, initialReason]);
 
   const handleTurnstileTokenChange = (token: string) => {
     form.setValue("turnstileToken", token, { shouldValidate: true });
