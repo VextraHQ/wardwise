@@ -91,11 +91,15 @@ export function CampaignSubmissionsToolbar({
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
             className="rounded-sm pl-9 text-sm"
+            aria-label="Search submissions by name, phone, email, or reference"
           />
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-[minmax(10rem,12rem)_minmax(9rem,1fr)] lg:flex lg:w-auto lg:items-center">
           <Select value={roleFilter} onValueChange={onRoleFilterChange}>
-            <SelectTrigger className="w-full rounded-sm lg:w-40">
+            <SelectTrigger
+              className="w-full rounded-sm lg:w-40"
+              aria-label="Filter by role"
+            >
               <SelectValue placeholder="All Roles" />
             </SelectTrigger>
             <SelectContent>

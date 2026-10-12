@@ -431,6 +431,7 @@ function ReportScopeChips({ scope }: { scope: CampaignInsightsScope }) {
             type="button"
             onClick={() => scope.setFilterLga(null)}
             className="hover:text-foreground rounded-sm p-0.5"
+            aria-label="Clear LGA filter"
           >
             <IconX className="h-3 w-3" />
           </button>
@@ -446,6 +447,7 @@ function ReportScopeChips({ scope }: { scope: CampaignInsightsScope }) {
             type="button"
             onClick={() => scope.setFilterRole(null)}
             className="hover:text-foreground rounded-sm p-0.5"
+            aria-label="Clear role filter"
           >
             <IconX className="h-3 w-3" />
           </button>
@@ -461,6 +463,7 @@ function ReportScopeChips({ scope }: { scope: CampaignInsightsScope }) {
             type="button"
             onClick={() => scope.setCompareOn(false)}
             className="hover:text-foreground rounded-sm p-0.5"
+            aria-label="Turn off compare"
           >
             <IconX className="h-3 w-3" />
           </button>

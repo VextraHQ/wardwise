@@ -41,6 +41,7 @@ export function AdminSearchBar({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="border-border/60 w-full rounded-sm pl-9"
+        aria-label={resolvedPlaceholder}
       />
       {value && (
         <button
