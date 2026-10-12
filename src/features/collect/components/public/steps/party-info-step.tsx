@@ -138,6 +138,16 @@ export function PartyInfoStep({
                           shouldValidate: true,
                         })
                       }
+                      onKeyDown={(e) => {
+                        if (e.key === " " || e.key === "Enter") {
+                          e.preventDefault();
+                          setValue("identityType", option.value, {
+                            shouldDirty: true,
+                            shouldTouch: true,
+                            shouldValidate: true,
+                          });
+                        }
+                      }}
                       className={cn(
                         "border-border bg-card hover:border-primary/50 focus-visible:ring-primary flex cursor-pointer items-start gap-3 rounded-sm border-2 p-4 text-left transition-all focus-visible:ring-2 focus-visible:outline-none sm:p-5",
                         selected &&

@@ -49,9 +49,8 @@ function PaginationNav({
   className,
 }: PaginationNavProps) {
   return (
-    <div
+    <nav
       className={cn("flex items-center gap-2", className)}
-      role="navigation"
       aria-label="Pagination"
     >
       <Button
@@ -98,7 +97,7 @@ function PaginationNav({
         <IconChevronsRight />
         <span className="sr-only">Last page</span>
       </Button>
-    </div>
+    </nav>
   );
 }
 

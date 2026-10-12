@@ -228,6 +228,12 @@ export function PersonalDetailsStep({
                         aria-checked={watchedSex === s}
                         aria-label={`Select ${s}`}
                         onClick={() => setValue("sex", s)}
+                        onKeyDown={(e) => {
+                          if (e.key === " " || e.key === "Enter") {
+                            e.preventDefault();
+                            setValue("sex", s);
+                          }
+                        }}
                         className={cn(
                           "border-border bg-card hover:border-primary/50 focus-visible:ring-primary flex h-12 cursor-pointer flex-row items-center justify-center gap-2 rounded-sm border-2 transition-all focus-visible:ring-2 focus-visible:outline-none",
                           watchedSex === s &&
