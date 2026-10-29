@@ -121,6 +121,12 @@ export function RoleStep({
                     aria-checked={selectedRole === r.value}
                     aria-label={`Select role: ${r.label}`}
                     onClick={() => setValue("role", r.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === " " || e.key === "Enter") {
+                        e.preventDefault();
+                        setValue("role", r.value);
+                      }
+                    }}
                     className={cn(
                       "border-border bg-card hover:border-primary/50 focus-visible:ring-primary flex cursor-pointer flex-col items-center justify-center gap-2 rounded-sm border-2 p-4 transition-all focus-visible:ring-2 focus-visible:outline-none sm:p-6",
                       selectedRole === r.value &&

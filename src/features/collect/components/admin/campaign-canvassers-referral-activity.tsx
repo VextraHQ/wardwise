@@ -158,6 +158,7 @@ export function CampaignCanvassersReferralActivity({
             }}
             placeholder="Search by name or phone..."
             className="h-8 rounded-sm pl-8 text-sm"
+            aria-label="Search canvassers by name or phone"
           />
         </div>
 

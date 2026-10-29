@@ -267,6 +267,7 @@ export function CampaignCanvassersPublicList({
                             onClick={() => openEditEditor(entry)}
                             disabled={areRowActionsDisabled}
                             title={`Edit ${formatPersonName(entry.name)}`}
+                            aria-label={`Edit ${formatPersonName(entry.name)}`}
                           >
                             <IconPencil className="h-3.5 w-3.5" />
                           </Button>
@@ -277,6 +278,7 @@ export function CampaignCanvassersPublicList({
                             onClick={() => onRemoveClick(entry.id, entry.name)}
                             disabled={removeMutation.isPending}
                             title={`Remove ${formatPersonName(entry.name)}`}
+                            aria-label={`Remove ${formatPersonName(entry.name)}`}
                           >
                             <IconTrash className="text-destructive h-3.5 w-3.5" />
                           </Button>
