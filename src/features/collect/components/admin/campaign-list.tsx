@@ -377,7 +377,7 @@ export function CampaignList() {
               setPage(1);
             }}
             ariaLabel="Filter campaigns by status"
-            className="max-w-fit md:flex-1"
+            className="md:max-w-fit md:flex-1"
             options={(
               [
                 { value: "all", label: "All" },

@@ -99,7 +99,7 @@ export function CandidateManagement() {
                 setCandidatePage(1);
               }}
               ariaLabel="Filter candidates by account status"
-              className="max-w-fit md:flex-1"
+              className="md:max-w-fit md:flex-1"
               options={CANDIDATE_STATUS_TABS.map(({ value, label }) => ({
                 value,
                 label,
