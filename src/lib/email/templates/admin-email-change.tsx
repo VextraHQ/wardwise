@@ -31,9 +31,6 @@ export type AdminEmailChangeEmail = {
   text: string;
 };
 
-// Invisible padding for email preview to prevent merge issues eg: Gmail, Outlook, etc.
-const PREVIEW_PADDING = "\u200C\u200D\u200E\u200F".repeat(20);
-
 export function AdminEmailChangeTemplate({
   name,
   url,
@@ -56,10 +53,7 @@ export function AdminEmailChangeTemplate({
   return (
     <Html lang="en">
       <Head />
-      <Preview>
-        {preview}
-        {PREVIEW_PADDING}
-      </Preview>
+      <Preview>{preview}</Preview>
       <Body style={styles.body}>
         <Container style={styles.outerFrame}>
           <EmailBrandHeader eyebrow="Admin Email Change" />

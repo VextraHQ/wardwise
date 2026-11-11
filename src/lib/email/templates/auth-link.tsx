@@ -24,8 +24,6 @@ export type AuthLinkEmailInput = {
 
 export type AuthLinkEmail = { subject: string; html: string; text: string };
 
-const PREVIEW_PADDING = " ‌​‍‎‏﻿".repeat(20);
-
 /** Shared by `buildAuthLinkEmail` and `src/lib/email/previews/*`. */
 export function formatAuthLinkExpiresAt(expiresAt: Date): string {
   return new Intl.DateTimeFormat("en-NG", {
@@ -75,10 +73,7 @@ export function AuthLinkTemplate({
   return (
     <Html lang="en">
       <Head />
-      <Preview>
-        {preview}
-        {PREVIEW_PADDING}
-      </Preview>
+      <Preview>{preview}</Preview>
       <Body style={styles.body}>
         <Container style={styles.outerFrame}>
           <EmailBrandHeader eyebrow={headerEyebrow} />

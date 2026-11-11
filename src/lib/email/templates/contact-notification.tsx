@@ -33,8 +33,6 @@ export type ContactNotificationEmail = {
   text: string;
 };
 
-const PREVIEW_PADDING = " ‌​‍‎‏﻿".repeat(20);
-
 /** Shared by `buildContactNotificationEmail` and `src/lib/email/previews/*`. */
 export function formatContactSubmittedAt(submittedAt: Date): string {
   return new Intl.DateTimeFormat("en-NG", {
@@ -58,10 +56,7 @@ export function ContactNotificationTemplate({
   return (
     <Html lang="en">
       <Head />
-      <Preview>
-        {messagePreview}
-        {PREVIEW_PADDING}
-      </Preview>
+      <Preview>{messagePreview}</Preview>
       <Body style={styles.body}>
         <Container style={styles.outerFrame}>
           <EmailBrandHeader eyebrow="Contact Form" />

@@ -11,6 +11,7 @@ import {
   Text,
 } from "@react-email/components";
 import { render } from "@react-email/render";
+import { getEffectiveCampaignName } from "@/features/collect/lib/branding";
 import { formatRole } from "@/features/collect/lib/display-format";
 import { EmailBrandHeader } from "@/lib/email/components/email-brand-header";
 import { EmailStandardFooter } from "@/lib/email/components/email-standard-footer";
@@ -33,8 +34,6 @@ export type RegistrationReceiptEmail = {
   text: string;
 };
 
-const PREVIEW_PADDING = " ‌​‍‎‏﻿".repeat(20);
-
 function formatSubmittedAt(date: Date): string {
   return new Intl.DateTimeFormat("en-NG", {
     dateStyle: "medium",
@@ -54,8 +53,11 @@ export function RegistrationReceiptTemplate({
   role,
   supportGroupName,
 }: RegistrationReceiptEmailInput) {
-  const campaignLabel = campaignTitle ?? candidateName;
-  const preview = `Your registration for ${campaignLabel} has been received. Reference: ${refCode}${PREVIEW_PADDING}`;
+  const campaignLabel = getEffectiveCampaignName({
+    candidateName,
+    displayName: campaignTitle,
+  });
+  const preview = `Your registration for ${campaignLabel} has been received. Reference: ${refCode}`;
 
   return (
     <Html lang="en">
@@ -129,14 +131,21 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 export async function buildRegistrationReceiptEmail(
   input: RegistrationReceiptEmailInput,
 ): Promise<RegistrationReceiptEmail> {
-  const subject = `Registration confirmed — ${input.candidateName} (${input.refCode})`;
+  const campaignLabel = getEffectiveCampaignName({
+    candidateName: input.candidateName,
+    displayName: input.campaignTitle,
+  });
+  const subject = `Registration confirmed — ${campaignLabel} (${input.refCode})`;
   const html = await render(<RegistrationReceiptTemplate {...input} />);
   const text = buildPlainText(input);
   return { subject, html, text };
 }
 
 function buildPlainText(input: RegistrationReceiptEmailInput): string {
-  const campaignLabel = input.campaignTitle ?? input.candidateName;
+  const campaignLabel = getEffectiveCampaignName({
+    candidateName: input.candidateName,
+    displayName: input.campaignTitle,
+  });
   const lines = [
     `Registration Receipt`,
     ``,

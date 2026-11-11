@@ -28,8 +28,6 @@ export type AdminEmailChangeNoticeEmail = {
   text: string;
 };
 
-const PREVIEW_PADDING = "\u200C\u200D\u200E\u200F".repeat(20);
-
 export function AdminEmailChangeNoticeTemplate({
   name,
   currentEmail,
@@ -50,10 +48,7 @@ export function AdminEmailChangeNoticeTemplate({
   return (
     <Html lang="en">
       <Head />
-      <Preview>
-        {preview}
-        {PREVIEW_PADDING}
-      </Preview>
+      <Preview>{preview}</Preview>
       <Body style={styles.body}>
         <Container style={styles.outerFrame}>
           <EmailBrandHeader eyebrow="Admin Security Notice" />
