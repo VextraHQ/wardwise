@@ -964,6 +964,7 @@ export const nigeriaLGAs: LGAData[] = [
 ];
 
 // Helper functions
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function stateNameToCode(stateName: string): string | null {
   if (!stateName) return null;
   const normalized = stateName
@@ -987,15 +988,17 @@ export function getLGAsByState(stateCode: string): LGAData[] {
   return nigeriaLGAs.filter((lga) => lga.stateCode === stateCode);
 }
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function getLGAByCode(code: string): LGAData | undefined {
   return nigeriaLGAs.find((lga) => lga.code === code);
 }
 
-export function getStatesByZone(zone: StateData["zone"]): StateData[] {
+function getStatesByZone(zone: StateData["zone"]): StateData[] {
   return nigeriaStates.filter((state) => state.zone === zone);
 }
 
 // Statistics (computed on demand)
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function getLocationStats() {
   return {
     totalStates: nigeriaStates.length,

@@ -72,5 +72,7 @@ export const updateCanvasserSchema = z.object({
     .or(z.literal("")),
 });
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type CreateCanvasserFormValues = z.infer<typeof createCanvasserSchema>;
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type UpdateCanvasserFormValues = z.infer<typeof updateCanvasserSchema>;

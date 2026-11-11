@@ -7,7 +7,7 @@ export type DateRange = {
 
 export type DateRangePreset = "today" | "7d" | "30d" | "month" | "all";
 
-export const REPORTING_DATE_PICKER_START_YEAR = 2020;
+const REPORTING_DATE_PICKER_START_YEAR = 2020;
 
 export function getToday() {
   return new Date();

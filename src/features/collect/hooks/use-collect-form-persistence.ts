@@ -26,7 +26,7 @@ export type DeviceSubmissionData = {
   refCode: string;
 };
 
-export type PendingGeoRestore = {
+type PendingGeoRestore = {
   wardId?: number;
   wardName?: string;
   pollingUnitId?: number;

@@ -23,7 +23,7 @@ export type GeoPollingUnit = {
   wardId: number;
 };
 
-export type GeoStateStats = {
+type GeoStateStats = {
   stateCode: string;
   lgasSeeded: number;
   lgasExpected: number;

@@ -58,6 +58,7 @@ export function useGeoPollingUnits(
 }
 
 // Analyzes the cascading deletion impact (how many children will be lost) for a node.
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function useGeoImpact(type: string | null, id: number | null) {
   return useQuery({
     queryKey: ["admin", "geo", "impact", type, id],

@@ -60,9 +60,15 @@ export const createPollingUnitSchema = z.object({
 
 export const updatePollingUnitSchema = createPollingUnitSchema.partial();
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type CreateLgaData = z.infer<typeof createLgaSchema>;
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type UpdateLgaData = z.infer<typeof updateLgaSchema>;
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type CreateWardData = z.infer<typeof createWardSchema>;
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type UpdateWardData = z.infer<typeof updateWardSchema>;
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type CreatePollingUnitData = z.infer<typeof createPollingUnitSchema>;
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type UpdatePollingUnitData = z.infer<typeof updatePollingUnitSchema>;

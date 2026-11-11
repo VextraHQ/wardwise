@@ -60,7 +60,7 @@ export function formatOccupationDisplay(
 }
 
 /** Known Collect registration roles (incl. legacy stored values). */
-export const COLLECT_ROLE_LABELS: Record<string, string> = {
+const COLLECT_ROLE_LABELS: Record<string, string> = {
   volunteer: "Volunteer",
   member: "Member",
   canvasser: "Canvasser",

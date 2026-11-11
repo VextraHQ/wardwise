@@ -7,7 +7,7 @@ import {
 import { getPositionStateValidationMessage } from "@/features/geo/lib/constituency";
 
 // Candidate position enum
-export const candidatePositionSchema = z.enum([
+const candidatePositionSchema = z.enum([
   "President",
   "Governor",
   "Senator",

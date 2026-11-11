@@ -127,6 +127,7 @@ export type CampaignCanvasserRecord = {
 };
 
 // Canvasser aggregation from submissions (legacy shape — used by export helper)
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type CanvasserSummary = {
   canvasserName: string;
   canvasserPhone: string;

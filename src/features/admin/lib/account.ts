@@ -73,6 +73,7 @@ export function getActivityContext(
   return null;
 }
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function copyToClipboard(value: string, successMessage: string) {
   if (typeof navigator === "undefined" || !navigator.clipboard) {
     toast.error("Clipboard is unavailable in this browser.");

@@ -47,11 +47,11 @@ function getBaseUrl() {
   );
 }
 
-export function buildAuthLinkUrl(token: string) {
+function buildAuthLinkUrl(token: string) {
   return `${getBaseUrl()}/reset-password/${token}`;
 }
 
-export function buildAdminEmailChangeUrl(token: string) {
+function buildAdminEmailChangeUrl(token: string) {
   return `${getBaseUrl()}/confirm-email-change/${token}`;
 }
 

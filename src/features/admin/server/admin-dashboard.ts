@@ -6,7 +6,7 @@ import { nigeriaStates } from "@/features/geo/data/state-lga-locations";
 import type { CampaignSummary } from "@/features/collect/types/collect.types";
 import { formatPersonName } from "@/lib/utils";
 
-export type PrioritySeverity = "high" | "med" | "low";
+type PrioritySeverity = "high" | "med" | "low";
 
 export type PriorityBucket = {
   key: string;

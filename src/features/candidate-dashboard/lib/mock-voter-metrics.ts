@@ -9,11 +9,12 @@ import type { Voter } from "@/types/voter";
 import { getVotersByCandidateId } from "@/lib/mock/data/voters";
 
 // Get total supporter count for a candidate - Calculated from actual voters supporting the candidate
-export function getSupportersCount(candidateId: string): number {
+function getSupportersCount(candidateId: string): number {
   return getVotersByCandidateId(candidateId).length;
 }
 
 // Get supporters filtered by ward - Returns all voters supporting a candidate in a specific ward
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function getSupportersByWard(
   candidateId: string,
   ward: string,
@@ -24,6 +25,7 @@ export function getSupportersByWard(
 }
 
 // Get supporters filtered by LGA - Returns all voters supporting a candidate in a specific LGA
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function getSupportersByLGA(candidateId: string, lga: string): Voter[] {
   return getVotersByCandidateId(candidateId).filter(
     (voter) => voter.lga === lga,
@@ -284,7 +286,7 @@ export function getRegistrationTrends(
 }
 
 // Get support strength metric - Calculates a support strength percentage based on registration coverage
-export function getSupportStrength(candidateId: string): number {
+function getSupportStrength(candidateId: string): number {
   const supporters = getVotersByCandidateId(candidateId);
   if (supporters.length === 0) return 0;
 

@@ -1,4 +1,5 @@
-type AuthRedirectRole = "admin" | "candidate";
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
+export type AuthRedirectRole = "admin" | "candidate";
 
 function getBaseUrl() {
   if (typeof window !== "undefined") {
@@ -81,5 +82,3 @@ export function resolvePostLoginRedirect(
     ? `${url.pathname}${url.search}${url.hash}`
     : fallback;
 }
-
-export type { AuthRedirectRole };

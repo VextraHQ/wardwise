@@ -66,6 +66,7 @@ export function formatExportDateTime(date: Date | null | undefined): string {
   }).format(date);
 }
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function redactName(name: string | null | undefined): string {
   if (!name) return "";
   return name
@@ -76,6 +77,7 @@ export function redactName(name: string | null | undefined): string {
     .join(" ");
 }
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function redactPhone(phone: string | null | undefined): string {
   if (!phone) return "";
   if (phone.length > 7) {
@@ -84,6 +86,7 @@ export function redactPhone(phone: string | null | undefined): string {
   return "***" + phone.slice(-4);
 }
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function redactEmail(email: string | null | undefined): string {
   if (!email) return "";
   const [local, domain] = email.split("@");

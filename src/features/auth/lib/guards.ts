@@ -233,6 +233,7 @@ export async function requireAdmin() {
   return requireRole("admin");
 }
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export async function requireCandidate() {
   return requireRole("candidate");
 }

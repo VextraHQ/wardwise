@@ -81,6 +81,7 @@ export function useCandidateWardData() {
 }
 
 // Fetches a demographic breakdown (age, gender, etc.) of the candidate's supporters.
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function useCandidateDemographics() {
   const candidateId = useCandidateId();
 
@@ -130,5 +131,3 @@ export function useCandidateRegistrationTrends(
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
-
-export { useCandidateId };

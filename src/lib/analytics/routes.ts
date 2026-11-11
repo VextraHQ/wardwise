@@ -1,4 +1,4 @@
-export type RouteGroup =
+type RouteGroup =
   | "marketing"
   | "auth"
   | "legal"
@@ -8,7 +8,7 @@ export type RouteGroup =
   | "admin"
   | "other";
 
-export type RouteName =
+type RouteName =
   | "home"
   | "login"
   | "forgot_password"

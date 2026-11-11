@@ -41,12 +41,12 @@ export type UnsupportedConstituencyPreset = {
   composition: string;
 };
 
-export const constituencyPresets: ConstituencyPreset[] = [
+const constituencyPresets: ConstituencyPreset[] = [
   ...senatorPresets,
   ...horPresets,
 ];
 
-export const unsupportedConstituencyPresets: UnsupportedConstituencyPreset[] = [
+const unsupportedConstituencyPresets: UnsupportedConstituencyPreset[] = [
   ...unsupportedHorPresets,
 ];
 

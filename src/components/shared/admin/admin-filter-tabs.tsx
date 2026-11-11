@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 
-export type AdminFilterTabOption<T extends string = string> = {
+type AdminFilterTabOption<T extends string = string> = {
   value: T;
   label: string;
   count?: number | string;

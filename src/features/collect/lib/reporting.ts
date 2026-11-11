@@ -8,10 +8,15 @@ import { formatDisplayDate, formatRelativeTime } from "@/lib/date-format";
 
 export {
   capitalize,
+  /** @keep Not used yet. Kept for future features (knip skips @keep). */
   formatMaritalStatusDisplay,
+  /** @keep Not used yet. Kept for future features (knip skips @keep). */
   formatOccupationDisplay,
+  /** @keep Not used yet. Kept for future features (knip skips @keep). */
   formatRole,
+  /** @keep Not used yet. Kept for future features (knip skips @keep). */
   formatSexDisplay,
+  /** @keep Not used yet. Kept for future features (knip skips @keep). */
   titleCase,
 } from "@/features/collect/lib/display-format";
 
@@ -43,7 +48,7 @@ export function formatQueryDate(date: Date | undefined): string | undefined {
 }
 
 /** Parses a date key */
-export function parseDateKey(value: string): Date {
+function parseDateKey(value: string): Date {
   const [year, month, day] = value.split("-").map(Number);
   return new Date(year, month - 1, day);
 }
@@ -57,6 +62,7 @@ export function formatDateKey(
 }
 
 /** Gets the preset range for a campaign report */
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function getPresetRange(
   preset: CampaignReportRangePreset,
   now = new Date(),

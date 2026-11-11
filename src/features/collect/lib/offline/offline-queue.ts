@@ -8,7 +8,7 @@ function openDb(): Promise<IDBDatabase> {
   return openOfflineDb();
 }
 
-export type PendingSubmissionStatus = "pending" | "failed";
+type PendingSubmissionStatus = "pending" | "failed";
 
 export interface PendingSubmission {
   id?: number;
@@ -58,7 +58,7 @@ async function getAllRows(): Promise<PendingSubmission[]> {
 }
 
 /** Rows eligible for sync (pending + legacy rows without a `status` field). */
-export async function getPendingSubmissions(): Promise<PendingSubmission[]> {
+async function getPendingSubmissions(): Promise<PendingSubmission[]> {
   const all = await getAllRows();
   return all.filter((row) => !isFailed(row));
 }

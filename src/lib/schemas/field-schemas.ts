@@ -196,10 +196,12 @@ export function optionalNullableTrimmedText({ max }: { max: number }) {
 }
 
 // Helper functions for NIN
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export const isValidNIN = (nin: string): boolean => {
   return NIN_REGEX.test(nin);
 };
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export const formatNINForDisplay = (nin: string): string => {
   if (!nin || nin.length !== 11) {
     return nin;
@@ -207,6 +209,7 @@ export const formatNINForDisplay = (nin: string): string => {
   return `${nin.slice(0, 5)} ${nin.slice(5, 10)} ${nin.slice(10)}`;
 };
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export const normalizeNINInput = (input: string): string => {
   return input.replace(/\D/g, ""); // Remove all non-digits
 };

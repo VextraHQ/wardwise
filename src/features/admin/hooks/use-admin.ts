@@ -22,7 +22,10 @@ export function useAdminCandidates() {
   });
 }
 
-/** Single candidate for detail routes and admin chrome (shared query key with `CandidateDetail`). */
+/**
+ * Single candidate for detail routes and admin chrome (shared query key with `CandidateDetail`).
+ * @keep Not used yet. Kept for future features (knip skips @keep).
+ */
 export function useAdminCandidate(id: string | undefined) {
   return useQuery({
     queryKey: ["admin", "candidates", id],
@@ -45,7 +48,7 @@ export function useAdminDashboardSummary() {
 // === Mutation Hooks ===
 
 // Sync candidate caches to ensure data consistency across components.
-export function syncCandidateCaches(
+function syncCandidateCaches(
   qc: ReturnType<typeof useQueryClient>,
   candidate: CandidateWithUser,
 ) {

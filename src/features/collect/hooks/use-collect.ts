@@ -8,6 +8,7 @@ import {
 } from "@/features/collect/api/collect-api";
 
 // Fetches a specific campaign by public slug (used for canvasser registration).
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function usePublicCampaign(slug: string) {
   return useQuery({
     queryKey: ["public-campaign", slug],
@@ -98,7 +99,7 @@ export function useCampaign(id: string) {
 }
 
 // Invalidate campaign and candidate queries to ensure data consistency across components.
-export function invalidateCampaignAndCandidateQueries(
+function invalidateCampaignAndCandidateQueries(
   qc: ReturnType<typeof useQueryClient>,
 ) {
   qc.invalidateQueries({ queryKey: ["admin-campaigns"] });
@@ -315,6 +316,7 @@ export function useSubmissionAudit(sid: string | null) {
 }
 
 // Fetches a global list of all LGAs (used in campaign creation forms).
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function useAllLgas() {
   return useQuery({
     queryKey: ["all-lgas"],

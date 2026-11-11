@@ -46,12 +46,13 @@ export const navigationLinks: NavigationLink[] = [
   },
 ];
 
-export type StatHighlight = {
+type StatHighlight = {
   label: string;
   value: string;
   annotation?: string;
 };
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export const statHighlights: StatHighlight[] = [
   {
     label: "Supporters Captured",
@@ -101,7 +102,7 @@ export const processSteps: ProcessStep[] = [
   },
 ];
 
-export type FeatureCard = {
+type FeatureCard = {
   title: string;
   description: string;
   icon: IconType;
@@ -111,6 +112,7 @@ export type FeatureCard = {
   color?: "primary" | "orange" | "emerald";
 };
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export const featureCards: FeatureCard[] = [
   {
     title: "Real Electoral Geography",
@@ -174,9 +176,11 @@ export const featureCards: FeatureCard[] = [
   },
 ];
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export const nigeriaGradient =
   "bg-[radial-gradient(circle_at_14%_18%,rgba(2,201,136,0.22),transparent_55%),radial-gradient(circle_at_88%_22%,rgba(9,40,42,0.18),transparent_60%)]";
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export const heroBackgroundGradient =
   "bg-[linear-gradient(140deg,_#F5F5ED_0%,_#ffffff_55%,_#F5F5ED_100%)]";
 
@@ -189,7 +193,7 @@ export const heroBackgroundGradient =
 export const heroSupportingCopy =
   "WardWise helps your campaign capture supporters from the field, organize them by LGA, ward, and polling unit, and see where support is growing in real time.";
 
-export type EcosystemRole = {
+type EcosystemRole = {
   role: string;
   title: string;
   description: string;
@@ -198,6 +202,7 @@ export type EcosystemRole = {
   icon: IconType;
 };
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export const ecosystemRoles: EcosystemRole[] = [
   {
     role: "Supporters",
@@ -321,6 +326,7 @@ export const impactHighlights = [
   },
 ];
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export const trustIndicators = [
   "Built for real field teams",
   "Organized by wards and polling units",
@@ -354,6 +360,7 @@ export const securityHighlights = [
   },
 ];
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export const candidateBenefits = [
   "See supporters organized by LGA, ward, and polling unit",
   "Give field teams a cleaner mobile capture flow",

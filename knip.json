@@ -10,5 +10,6 @@
     "src/components/ui/**": ["exports", "types"],
     "src/features/candidates/lib/directory.ts": ["exports"]
   },
-  "ignoreDependencies": ["vercel"]
+  "ignoreDependencies": ["vercel"],
+  "tags": ["-keep"]
 }

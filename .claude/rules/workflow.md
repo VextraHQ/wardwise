@@ -17,5 +17,7 @@ globs: "**/*"
   `pnpm lint`, `pnpm typecheck` and `pnpm test`. Fix what they report.
 - Run `pnpm build` yourself for route, config or dependency changes.
 - `pnpm knip` reports unused code. Never remove or keep anything on your own:
-  list the findings and ask the user per item (keep = add it to `knip.json`).
+  list the findings and ask the user per item. To keep an unused export for
+  later, put `/** @keep Not used yet. ... */` above it; for whole files or
+  folders, add them to `knip.json`.
 - If checks are not run, clearly explain why.

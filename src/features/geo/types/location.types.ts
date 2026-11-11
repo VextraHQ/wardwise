@@ -1,9 +1,10 @@
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type LocationState = {
   code: string;
   name: string;
 };
 
-export type LocationLGA = {
+type LocationLGA = {
   code: string;
   name: string;
   stateCode: string;

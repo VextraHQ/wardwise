@@ -69,6 +69,7 @@ export async function recordSuccessfulLogin(userId: string) {
   });
 }
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export async function bumpUserSessionVersion(userId: string) {
   await prisma.user.update({
     where: { id: userId },

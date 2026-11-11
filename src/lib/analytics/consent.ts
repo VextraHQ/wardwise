@@ -1,4 +1,4 @@
-export const CONSENT_COOKIE_NAME = "wardwise_cookie_consent_v1";
+const CONSENT_COOKIE_NAME = "wardwise_cookie_consent_v1";
 const LEGACY_CONSENT_KEY = "wardwise-cookie-consent";
 const CONSENT_EVENT_NAME = "cookie-consent-change";
 const OPEN_COOKIE_SETTINGS_EVENT_NAME = "cookie-settings-open";
@@ -68,6 +68,7 @@ export function getConsentValue(): ConsentValue {
   return null;
 }
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function hasAnalyticsConsent(): boolean {
   return getConsentValue() === "accepted";
 }

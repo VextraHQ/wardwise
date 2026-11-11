@@ -13,6 +13,7 @@ export type Canvasser = {
   updatedAt: string; // ISO date string
 };
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type CanvasserWithCandidate = Canvasser & {
   candidate: {
     id: string;

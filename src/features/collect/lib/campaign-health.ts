@@ -1,6 +1,6 @@
 import type { CampaignSummary } from "@/features/collect/types/collect.types";
 
-export const CAMPAIGN_STALE_MS = 48 * 60 * 60 * 1000; // 48 hours
+const CAMPAIGN_STALE_MS = 48 * 60 * 60 * 1000; // 48 hours
 
 // Checks if a campaign is stale (no submissions in the last 48 hours)
 export function isStaleCampaign(campaign: CampaignSummary): boolean {

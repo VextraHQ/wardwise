@@ -3,12 +3,12 @@ import { getEmailAssetsBaseUrl } from "@/lib/core/metadata";
 
 const LOGOTYPE_PATH = "/brand/logotype-lagoon.png";
 
-export const EMAIL_LOGOTYPE_DISPLAY = {
+const EMAIL_LOGOTYPE_DISPLAY = {
   width: 140,
   height: 20,
 } as const;
 
-export function getEmailLogotypeSrc(): string {
+function getEmailLogotypeSrc(): string {
   return `${getEmailAssetsBaseUrl()}${LOGOTYPE_PATH}`;
 }
 

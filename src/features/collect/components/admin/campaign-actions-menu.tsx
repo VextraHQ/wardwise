@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export type CampaignActionsMenuCampaign = {
+type CampaignActionsMenuCampaign = {
   id: string;
   slug: string;
   clientReportEnabled: boolean;

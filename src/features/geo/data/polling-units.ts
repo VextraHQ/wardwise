@@ -948,6 +948,7 @@ export function getPollingUnitsByWard(wardCode: string): LocationPollingUnit[] {
 }
 
 // Get polling units by LGA code (through wards)
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function getPollingUnitsByLGA(lgaCode: string): LocationPollingUnit[] {
   const wards = getWardsByLGA(lgaCode);
   return wards.flatMap((ward) => getPollingUnitsByWard(ward.code));

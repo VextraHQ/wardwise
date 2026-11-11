@@ -5,7 +5,7 @@ import { formatDateRangeLabel, type DateRange } from "@/lib/date-ranges";
 import { formatGeoDisplayName } from "@/features/geo/lib/display";
 import type { CampaignReportRangePreset } from "@/features/collect/lib/reporting";
 
-export type CampaignInsightsScopePreset = CampaignReportRangePreset | "custom";
+type CampaignInsightsScopePreset = CampaignReportRangePreset | "custom";
 
 export type CampaignInsightsScope = {
   dateFrom: Date | undefined;

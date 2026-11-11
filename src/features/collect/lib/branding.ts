@@ -4,7 +4,7 @@ export const campaignBrandingTypes = ["candidate", "movement", "team"] as const;
 
 export type CampaignBrandingType = (typeof campaignBrandingTypes)[number];
 
-export const defaultCampaignBrandingType: CampaignBrandingType = "candidate";
+const defaultCampaignBrandingType: CampaignBrandingType = "candidate";
 
 /** Gets the campaign branding type */
 export function getCampaignBrandingType(

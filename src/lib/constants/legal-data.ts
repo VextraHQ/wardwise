@@ -255,4 +255,5 @@ export const legalNavigation = [
   { label: "Cookie Policy", href: "/cookies" },
 ] as const;
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type LegalPageType = "privacy" | "terms" | "cookies";

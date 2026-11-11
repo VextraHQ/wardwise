@@ -66,7 +66,7 @@ function normalizeBoundaryLabel(label: string): string[] {
     .sort();
 }
 
-export function labelsRepresentSameBoundary(
+function labelsRepresentSameBoundary(
   left: string | null | undefined,
   right: string | null | undefined,
 ): boolean {

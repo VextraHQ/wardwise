@@ -20,8 +20,6 @@ import type {
   PublicCampaign,
 } from "@/features/collect/types/collect.types";
 
-export type { OfflineGeoHealth };
-
 export type UseCollectOfflineGeoReturn = {
   pack: OfflineGeoPack | null;
   isPrepared: boolean;

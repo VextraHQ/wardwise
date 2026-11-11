@@ -15,17 +15,15 @@ import {
   normalizeCampaignDisplayName,
 } from "@/features/collect/lib/branding";
 
-export const collectIdentityTypes = ["membership", "nin"] as const;
+const collectIdentityTypes = ["membership", "nin"] as const;
 export type CollectIdentityType = (typeof collectIdentityTypes)[number];
 
-export const collectVerificationRequirements = [
-  "required",
-  "optional",
-] as const;
+const collectVerificationRequirements = ["required", "optional"] as const;
 export type CollectVerificationRequirement =
   (typeof collectVerificationRequirements)[number];
 
-export const collectSupportGroupModes = ["off", "optional"] as const;
+const collectSupportGroupModes = ["off", "optional"] as const;
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type CollectSupportGroupMode = (typeof collectSupportGroupModes)[number];
 
 export function normalizeSupportGroupKey(name: string): string {
@@ -79,7 +77,7 @@ const baseIdentityFieldSchema = z
   .pipe(z.string().min(1, "Enter your membership number or NIN"));
 
 // Screen 1: Personal details
-export const screen1Schema = z.object({
+const screen1Schema = z.object({
   firstName: requiredTrimmedText({ min: 2, max: 100, label: "First name" }),
   middleName: z
     .string()
@@ -103,7 +101,7 @@ export const screen1Schema = z.object({
 });
 
 // Screen 2: Location
-export const screen2Schema = z.object({
+const screen2Schema = z.object({
   lgaId: z.number({ message: "Select your LGA" }).min(1, "Select your LGA"),
   lgaName: z.string().min(1),
   wardId: z.number({ message: "Select your ward" }).min(1, "Select your ward"),
@@ -115,14 +113,14 @@ export const screen2Schema = z.object({
 });
 
 // Screen 3: Identity & verification (static strict version — legacy / fallback)
-export const screen3Schema = z.object({
+const screen3Schema = z.object({
   identityType: clientIdentityTypeSchema,
   identityValue: baseIdentityFieldSchema,
   voterIdNumber: voterIdVinSchema,
 });
 
 // Config-aware factory for screen 3 — respects per-campaign verification requirements.
-export function makeScreen3Schema(config: {
+function makeScreen3Schema(config: {
   identityRequirement: CollectVerificationRequirement;
   voterIdRequirement: CollectVerificationRequirement;
 }) {
@@ -194,7 +192,7 @@ export function makeScreen3Schema(config: {
 }
 
 // Screen 4: Role + optional support group
-export const screen4Schema = z.object({
+const screen4Schema = z.object({
   role: z.enum(["volunteer", "member", "canvasser"], {
     message: "Please select a role",
   }),
@@ -206,7 +204,7 @@ export const screen4Schema = z.object({
 });
 
 // Screen 5: Canvasser attribution
-export const screen5Schema = z.object({
+const screen5Schema = z.object({
   canvasserName: z
     .string()
     .transform((v) => v?.trim() || "")
@@ -217,17 +215,18 @@ export const screen5Schema = z.object({
 });
 
 // Screen 6: Review preferences
-export const screen6Schema = z.object({
+const screen6Schema = z.object({
   wantsEmailReceipt: z.boolean().optional(),
 });
 
 // Custom questions
-export const customQuestionsSchema = z.object({
+const customQuestionsSchema = z.object({
   customAnswer1: optionalTrimmedText({ max: 500 }),
   customAnswer2: optionalTrimmedText({ max: 500 }),
 });
 
 // Full submission schema (strict — used when campaign config is not yet loaded)
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export const submitRegistrationSchema = screen1Schema
   .merge(screen2Schema)
   .merge(screen3Schema)
@@ -298,7 +297,8 @@ export const createCampaignSchema = z
 
 export type CreateCampaignData = z.infer<typeof createCampaignSchema>;
 
-export const collectReceiptEmailModes = ["off", "opt_in"] as const;
+const collectReceiptEmailModes = ["off", "opt_in"] as const;
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type CollectReceiptEmailMode = (typeof collectReceiptEmailModes)[number];
 
 export const updateCampaignSchema = createCampaignSchema.partial().extend({
@@ -311,6 +311,7 @@ export const updateCampaignSchema = createCampaignSchema.partial().extend({
   receiptEmailMode: z.enum(collectReceiptEmailModes).optional(),
 });
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type UpdateCampaignData = z.infer<typeof updateCampaignSchema>;
 
 // ── Admin: Add canvasser to campaign (mirrors server-side schema) ──
@@ -325,6 +326,7 @@ export const addCampaignCanvasserSchema = z.object({
     .transform((v) => v?.trim() || ""),
 });
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type AddCampaignCanvasserData = z.infer<
   typeof addCampaignCanvasserSchema
 >;
@@ -340,6 +342,7 @@ export const offlinePackRequestSchema = z.object({
     .max(50, "Cannot prepare more than 50 LGAs at once"),
 });
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type OfflinePackRequest = z.infer<typeof offlinePackRequestSchema>;
 
 // ── Server submit schema (extends client schema with campaignSlug, drops client-only name fields) ──
@@ -390,4 +393,5 @@ export const updateSubmissionSchema = z.object({
   adminNotes: optionalNullableTrimmedText({ max: 2000 }),
 });
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export type UpdateSubmissionValues = z.infer<typeof updateSubmissionSchema>;

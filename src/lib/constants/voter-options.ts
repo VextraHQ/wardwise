@@ -10,7 +10,7 @@ type OccupationGroup = {
 };
 
 // Voter form options centralized dropdown/select options for voter registration and profile forms.
-export const OCCUPATION_OPTION_GROUPS: OccupationGroup[] = [
+const OCCUPATION_OPTION_GROUPS: OccupationGroup[] = [
   {
     heading: "Common",
     options: [
@@ -151,6 +151,7 @@ export const OCCUPATION_OPTION_GROUPS: OccupationGroup[] = [
 export const OCCUPATION_OPTIONS: OccupationOption[] =
   OCCUPATION_OPTION_GROUPS.flatMap((group) => group.options);
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export const RELIGION_OPTIONS = [
   { value: "christianity", label: "Christianity" },
   { value: "islam", label: "Islam" },

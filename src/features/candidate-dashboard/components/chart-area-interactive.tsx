@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export const description = "An interactive area chart";
 
 const chartConfig = {

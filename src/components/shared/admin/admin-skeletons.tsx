@@ -16,6 +16,7 @@ export function StatCardSkeleton() {
   );
 }
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function CandidateCardSkeleton() {
   return (
     <div className="border-border/60 flex animate-pulse flex-col gap-4 rounded-sm border border-dashed p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -42,6 +43,7 @@ export function CandidateCardSkeleton() {
   );
 }
 
+/** @keep Not used yet. Kept for future features (knip skips @keep). */
 export function VoterCardSkeleton() {
   return (
     <div className="border-border/60 flex animate-pulse flex-col gap-4 rounded-sm border border-dashed p-4 sm:flex-row sm:items-center sm:justify-between">

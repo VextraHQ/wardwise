@@ -31,7 +31,7 @@ export interface CandidateCollectCampaignSummary {
   updatedAt: string;
 }
 
-export interface CandidateDeletionImpact {
+interface CandidateDeletionImpact {
   accountEmail: string;
   campaignCount: number;
   submissionCount: number;
