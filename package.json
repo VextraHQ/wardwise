@@ -132,10 +132,5 @@
     "vitest": "^4.1.4",
     "xlsx": "^0.18.5"
   },
-  "packageManager": "pnpm@10.26.0",
-  "pnpm": {
-    "overrides": {
-      "baseline-browser-mapping": "latest"
-    }
-  }
+  "packageManager": "pnpm@11.6.0"
 }
