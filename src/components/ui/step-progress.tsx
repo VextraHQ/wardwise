@@ -204,21 +204,19 @@ export function StepProgress({
   const navigable = Boolean(onStepClick) && Boolean(stepTitles);
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [liveMessage, setLiveMessage] = useState("");
-  const [flashBar, setFlashBar] = useState(false);
+  const liveMessage = `Now on step ${currentStep} of ${totalSteps}: ${stepTitle}.`;
+  // The bar flashes for 700ms each time validationFlashNonce changes.
+  const [flashedNonce, setFlashedNonce] = useState(validationFlashNonce);
+  const flashBar = validationFlashNonce !== flashedNonce;
 
   useEffect(() => {
-    setLiveMessage(
-      `Now on step ${currentStep} of ${totalSteps}: ${stepTitle}.`,
+    if (!flashBar) return;
+    const t = window.setTimeout(
+      () => setFlashedNonce(validationFlashNonce),
+      700,
     );
-  }, [currentStep, totalSteps, stepTitle]);
-
-  useEffect(() => {
-    if (!validationFlashNonce) return;
-    setFlashBar(true);
-    const t = window.setTimeout(() => setFlashBar(false), 700);
     return () => window.clearTimeout(t);
-  }, [validationFlashNonce]);
+  }, [flashBar, validationFlashNonce]);
 
   const handleSelect = (index: number) => {
     onStepClick?.(index);

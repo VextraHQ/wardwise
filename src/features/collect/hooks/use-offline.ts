@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useOnlineStatus } from "@/hooks/shared/use-online-status";
 import {
   syncPendingSubmissions,
   getPendingCount,
@@ -13,8 +14,13 @@ import {
 
 // Tracks the device's network status, manages an offline submission queue,
 // and auto-syncs any pending records the moment connectivity is restored.
+// Pending and failed queue counts, read together so they never disagree.
+function readQueueCounts() {
+  return Promise.all([getPendingCount(), getFailedCount()]);
+}
+
 export function useOffline() {
-  const [isOffline, setIsOffline] = useState(false);
+  const isOffline = !useOnlineStatus();
   const [pendingCount, setPendingCount] = useState(0);
   const [failedCount, setFailedCount] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -24,10 +30,7 @@ export function useOffline() {
   // the UI never shows a stale count for either side.
   const refreshQueueCounts = useCallback(async () => {
     try {
-      const [pending, failed] = await Promise.all([
-        getPendingCount(),
-        getFailedCount(),
-      ]);
+      const [pending, failed] = await readQueueCounts();
       setPendingCount(pending);
       setFailedCount(failed);
     } catch {
@@ -67,30 +70,30 @@ export function useOffline() {
     [refreshQueueCounts],
   );
 
-  // Listens to browser online/offline events and triggers a sync on reconnect.
+  // Triggers a sync when the connection comes back.
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const goOnline = () => void trySync();
 
-    setIsOffline(!navigator.onLine);
-
-    const goOffline = () => setIsOffline(true);
-    const goOnline = () => {
-      setIsOffline(false);
-      void trySync();
-    };
-
-    window.addEventListener("offline", goOffline);
     window.addEventListener("online", goOnline);
-
-    return () => {
-      window.removeEventListener("offline", goOffline);
-      window.removeEventListener("online", goOnline);
-    };
+    return () => window.removeEventListener("online", goOnline);
   }, [trySync]);
 
+  // Initial queue counts.
   useEffect(() => {
-    void refreshQueueCounts();
-  }, [refreshQueueCounts]);
+    let cancelled = false;
+    readQueueCounts()
+      .then(([pending, failed]) => {
+        if (cancelled) return;
+        setPendingCount(pending);
+        setFailedCount(failed);
+      })
+      .catch(() => {
+        // IndexedDB not available
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Clears the last sync result from state (used to dismiss sync banners).
   const clearLastSyncResult = useCallback(() => setLastSyncResult(null), []);

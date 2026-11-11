@@ -116,7 +116,10 @@ export function LoginScreen({ callbackUrl, notice }: LoginScreenProps) {
         status="Protected"
         icon={HiShieldCheck}
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          onSubmit={(event) => handleSubmit(onSubmit)(event)}
+          className="space-y-6"
+        >
           {notice && !error && (
             <Alert className="border-primary/30 bg-primary/5 rounded-sm shadow-none">
               <AlertDescription className="font-mono text-xs font-bold tracking-wide uppercase">

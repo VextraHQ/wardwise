@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -154,8 +154,11 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
   const isBoundaryResetPending =
     updateMutation.isPending && updatePatch?.enabledLgaIds != null;
 
-  useEffect(() => {
-    if (!campaign) return;
+  // Reset the editable fields whenever fresh campaign data arrives.
+  const [syncedCampaign, setSyncedCampaign] = useState<typeof campaign>();
+
+  if (campaign && campaign !== syncedCampaign) {
+    setSyncedCampaign(campaign);
     setBrandingType(campaign.brandingType);
     setDisplayName(campaign.displayName ?? "");
     setIdentityRequirement(
@@ -171,7 +174,7 @@ export function CampaignSettings({ campaignId }: { campaignId: string }) {
     setReceiptEmailMode(
       (campaign.receiptEmailMode as "off" | "opt_in") ?? "off",
     );
-  }, [campaign]);
+  }
 
   if (isLoading || !campaign) {
     return (

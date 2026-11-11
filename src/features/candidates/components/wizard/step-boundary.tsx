@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useEffect, useRef, useState } from "react";
+import { useStableArray } from "@/hooks/shared/use-stable-array";
 import type { UseFormReturn } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 
@@ -104,11 +105,7 @@ export function StepBoundary({ form, onBack, onNext }: StepBoundaryProps) {
     control: form.control,
     name: "constituencyLgaIds",
   });
-  const constituencyLgaIds = useMemo(
-    () => rawConstituencyLgaIds ?? [],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(rawConstituencyLgaIds)],
-  );
+  const constituencyLgaIds = useStableArray(rawConstituencyLgaIds);
 
   const showStateField = Boolean(selectedPosition);
   const showLgaGrid = Boolean(

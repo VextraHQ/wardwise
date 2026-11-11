@@ -104,12 +104,6 @@ const eslintConfig = defineConfig([
         "warn",
         { prefer: "type-imports", fixStyle: "inline-type-imports" },
       ],
-      // React Compiler rules that arrived with eslint-config-next 16. Existing
-      // code has 14 hits (setState in effects, refs read during render,
-      // useMemo deps). Warnings until they are fixed one by one; then "error".
-      "react-hooks/set-state-in-effect": "warn",
-      "react-hooks/refs": "warn",
-      "react-hooks/use-memo": "warn",
     },
   },
 

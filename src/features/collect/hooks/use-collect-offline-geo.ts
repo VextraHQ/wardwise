@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useOnlineStatus } from "@/hooks/shared/use-online-status";
 import { useQueryClient } from "@tanstack/react-query";
 import { publicCollectApi } from "@/features/collect/api/collect-api";
 import {
@@ -42,50 +43,42 @@ export function useCollectOfflineGeo(
   campaign: PublicCampaign,
 ): UseCollectOfflineGeoReturn {
   const queryClient = useQueryClient();
-  const [pack, setPack] = useState<OfflineGeoPack | null>(null);
-  const [packLoaded, setPackLoaded] = useState<boolean>(false);
+  // The stored pack and the campaign it was loaded for. A pack loaded for a
+  // previous campaign counts as "not loaded yet" for the current one.
+  const [stored, setStored] = useState<{
+    slug: string;
+    pack: OfflineGeoPack | null;
+  } | null>(null);
   const [isPreparing, setIsPreparing] = useState<boolean>(false);
-  const [isOffline, setIsOffline] = useState<boolean>(false);
+  const isOffline = !useOnlineStatus();
   const [freshAllowedSet, setFreshAllowedSet] = useState<Set<number> | null>(
     null,
   );
   const slug = campaign.slug;
+  const packLoaded = stored?.slug === slug;
+  const pack = packLoaded ? stored.pack : null;
+
+  // Latest slug for async work that may finish after the campaign changed.
   const slugRef = useRef(slug);
-  slugRef.current = slug;
+
+  useEffect(() => {
+    slugRef.current = slug;
+  }, [slug]);
 
   // Load the offline geo pack when component mounts or when the campaign changes.
   useEffect(() => {
     let cancelled = false;
-    setPackLoaded(false);
     getOfflineGeoPack(slug)
-      .then((stored) => {
-        if (cancelled) return;
-        setPack(stored);
-        setPackLoaded(true);
+      .then((saved) => {
+        if (!cancelled) setStored({ slug, pack: saved });
       })
       .catch(() => {
-        if (cancelled) return;
-        setPack(null);
-        setPackLoaded(true);
+        if (!cancelled) setStored({ slug, pack: null });
       });
     return () => {
       cancelled = true;
     };
   }, [slug]);
-
-  // Detect network going online/offline. Update isOffline accordingly.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    setIsOffline(!navigator.onLine);
-    const goOffline = () => setIsOffline(true);
-    const goOnline = () => setIsOffline(false);
-    window.addEventListener("offline", goOffline);
-    window.addEventListener("online", goOnline);
-    return () => {
-      window.removeEventListener("offline", goOffline);
-      window.removeEventListener("online", goOnline);
-    };
-  }, []);
 
   // When we have a local pack and we're online, refresh the allowed LGAs for this campaign.
   // This result also updates any usage via TanStack (react-query) for the same query key.
@@ -154,7 +147,7 @@ export function useCollectOfflineGeo(
         // Save the new offline geo pack.
         await saveOfflineGeoPack(next);
         // Only update React state if this campaign is still the selected one.
-        if (slugRef.current === slug) setPack(next);
+        if (slugRef.current === slug) setStored({ slug, pack: next });
       } finally {
         setIsPreparing(false);
       }
@@ -166,7 +159,7 @@ export function useCollectOfflineGeo(
   const clear = useCallback(async () => {
     await clearOfflineGeoPack(slug);
     if (slugRef.current === slug) {
-      setPack(null);
+      setStored({ slug, pack: null });
       setFreshAllowedSet(null);
     }
   }, [slug]);

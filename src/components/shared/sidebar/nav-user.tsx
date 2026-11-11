@@ -31,16 +31,13 @@ import {
 } from "@/components/ui/sidebar";
 import { resetAnalyticsIdentity } from "@/lib/analytics/client";
 import { formatPersonName } from "@/lib/utils";
+import { useIsClient } from "@/hooks/shared/use-is-client";
 
 export function NavUser() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const { isMobile } = useSidebar();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsClient();
 
   const handleSignOut = () => {
     resetAnalyticsIdentity();

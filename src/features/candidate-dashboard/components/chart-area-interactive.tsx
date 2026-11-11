@@ -45,12 +45,13 @@ export function ChartAreaInteractive({
 }) {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState("7d");
+  const [wasMobile, setWasMobile] = React.useState(isMobile);
 
-  React.useEffect(() => {
-    if (isMobile) {
-      setTimeRange("7d");
-    }
-  }, [isMobile]);
+  // Switching to a phone resets the range to 7 days.
+  if (isMobile !== wasMobile) {
+    setWasMobile(isMobile);
+    if (isMobile) setTimeRange("7d");
+  }
 
   // Use registration trends from dashboard data, or fallback to empty array
   const trendsData = dashboardData?.registrationTrends || [];

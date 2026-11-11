@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useStableArray } from "@/hooks/shared/use-stable-array";
 import { toast } from "sonner";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -80,11 +81,7 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     name: "constituency",
   });
   const constituencyValue = constituency ?? "";
-  const constituencyLgaIds = useMemo(
-    () => rawConstituencyLgaIds ?? [],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(rawConstituencyLgaIds)],
-  );
+  const constituencyLgaIds = useStableArray(rawConstituencyLgaIds);
   const showStateField = Boolean(selectedPosition);
   const showLgaGrid = Boolean(
     selectedPosition && positionRequiresLgas(selectedPosition),
@@ -402,12 +399,16 @@ export function CandidateOverview({ candidate }: CandidateOverviewProps) {
     suggestedConstituency,
   ]);
 
-  useEffect(() => {
+  // Leaving the electoral section clears its preset choices.
+  const [prevEditingSection, setPrevEditingSection] = useState(editingSection);
+
+  if (editingSection !== prevEditingSection) {
+    setPrevEditingSection(editingSection);
     if (editingSection !== "electoral") {
       setSelectedPresetShortName(null);
       setCustomBoundaryMode(false);
     }
-  }, [editingSection]);
+  }
 
   function handlePresetChange(value: string) {
     if (value === "__custom__" || !value) {
