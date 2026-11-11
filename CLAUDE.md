@@ -82,6 +82,7 @@ Living specs in `docs/` — update these when making decisions or completing fea
 - `docs/cockpit-design-system.md` — UI/UX design tokens
 - `docs/admin-dashboard-command-center-spec.md` — Admin dashboard command-center redesign
 - `docs/wardwise-app-architecture-spec.md` — Future app-wide folder structure and feature architecture
+- `docs/error-tracking-spec.md` — PostHog error tracking: capture design, PII scrubbing, phased plan
 
 ## Branch Convention
 
