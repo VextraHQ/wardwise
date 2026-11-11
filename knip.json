@@ -1,0 +1,8 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "scripts/*.{ts,mjs}",
+    "src/lib/email/previews/*.tsx",
+    "public/sw.js"
+  ]
+}
