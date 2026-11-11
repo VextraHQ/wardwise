@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "postinstall": "prisma generate",
+    "prepare": "git config core.hooksPath .githooks || true",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",

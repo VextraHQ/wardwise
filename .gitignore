@@ -52,5 +52,6 @@ prisma/dev.db
 # Cursor
 .cursor
 
-# Claude	
-.claude
+# Claude: share rules, settings and hooks; keep personal files local
+.claude/settings.local.json
+.claude/worktrees/

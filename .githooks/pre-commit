@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Checks the files you are about to commit. It never changes them:
+# fix what it reports (pnpm format / pnpm exec eslint --fix), stage, commit again.
+# Skip once with: git commit --no-verify
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$staged" ] && exit 0
+
+echo "$staged" | tr '\n' '\0' | xargs -0 pnpm exec prettier --check --ignore-unknown || {
+  echo "pre-commit: formatting issues above. Run 'pnpm format' and stage again." >&2
+  exit 1
+}
+
+code=$(echo "$staged" | grep -E '\.(ts|tsx|js|jsx|mjs|cjs)$')
+[ -z "$code" ] && exit 0
+
+echo "$code" | tr '\n' '\0' | xargs -0 pnpm exec eslint || {
+  echo "pre-commit: lint errors above. Many fix with 'pnpm exec eslint --fix <file>'." >&2
+  exit 1
+}

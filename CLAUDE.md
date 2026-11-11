@@ -16,8 +16,11 @@ Political campaign management platform built by Vextra Limited for Nigerian elec
 ```bash
 pnpm dev          # Start dev server
 pnpm build        # Production build
-pnpm lint         # ESLint
-pnpm tsc --noEmit # Type check (no output)
+pnpm lint         # ESLint (also enforces the import rules below)
+pnpm typecheck    # TypeScript (tsc --noEmit)
+pnpm test         # Vitest
+pnpm format       # Prettier (format:check to only check)
+pnpm knip         # Unused files, exports and dependencies (report only)
 pnpm db:migrate   # Run migrations (prod-ready schema changes)
 pnpm db:push      # Quick schema push (prototyping only)
 pnpm db:generate  # Regenerate Prisma client after schema changes
@@ -53,10 +56,10 @@ Three user types:
 
 The codebase is laid out feature-first under `src/features/<feature>/` (collect, candidates, candidate-dashboard, geo, reporting, auth, admin, public-site). See `docs/wardwise-app-architecture-spec.md` for the target structure, current-to-target mapping table, and per-phase migration history.
 
-Import direction (enforced by convention until ESLint boundaries are added):
+Import direction (enforced by ESLint in `eslint.config.mjs`):
 
 - `app/*` may import from `features/*`, `components/{ui,shared}`, `hooks/shared`, `lib/core`, app-wide `lib` services (`lib/email`, `lib/analytics`, `lib/exports`, etc.), and broad `types`.
-- `features/*` may import from the same feature, `components/{ui,shared}`, `hooks/shared`, `lib/core`, and app-wide `lib` services. A feature must not deep-import another feature's private internals; if a cross-feature surface is needed, expose it from a deliberately named file (e.g. `features/collect/lib/branding.ts`).
+- `features/*` may import from the same feature, `components/{ui,shared}`, `hooks/shared`, `lib/core`, and app-wide `lib` services. A feature must not deep-import another feature's private internals; if a cross-feature surface is needed, expose it from a deliberately named file (e.g. `features/collect/lib/branding.ts`) and add that file to `featurePublicFiles` in `eslint.config.mjs`; lint fails on any other cross-feature import.
 - `components/ui`, `components/shared`, `hooks/shared`, and `lib/core` must not import feature code. They are feature-agnostic base layers; features depend on them, never the other way around.
 - Path alias stays `@/*` → `./src/*`. shadcn primitives still land in `src/components/ui`.
 
@@ -101,4 +104,5 @@ Living specs in `docs/` — update these when making decisions or completing fea
 - Match loading skeletons to the final UI structure, not generic blocks.
 - Use existing app patterns before creating new components, helpers, or folders.
 - After each meaningful phase, summarize in beginner-friendly terms what changed and why.
-- Verification should include formatting plus checks when code changes: `pnpm exec prettier --write <changed files>`, targeted `pnpm exec eslint <changed files>`, and `pnpm exec tsc --noEmit --pretty false`.
+- Verification is automated: Claude Code hooks (`.claude/settings.json`) format and lint each edited file and run `format:check`, `lint`, `typecheck` and `test` when a turn ends with changes; `.githooks/pre-commit` checks staged files on every commit (enabled by `pnpm install`). Run `pnpm build` yourself for route, config or dependency changes.
+- `pnpm knip` findings are never removed or kept without the user's approval: list them and ask per item (keep = add to `knip.json`).
