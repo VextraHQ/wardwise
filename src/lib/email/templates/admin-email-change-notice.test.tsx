@@ -36,7 +36,8 @@ describe("buildAdminEmailChangeNoticeEmail", () => {
       requestedAt: new Date("2026-05-14T12:30:00Z"),
     });
 
-    expect(email.html).toContain("Hi there");
+    // React separates "Hi " and the name with an empty comment in the HTML.
+    expect(email.html.replaceAll("<!-- -->", "")).toContain("Hi there");
     expect(email.text).toMatch(/hi there/i);
   });
 });
