@@ -166,7 +166,6 @@ src/
     use-geo.ts                        — React Query hooks for all geo CRUD
   features/geo/api/
     geo-api.ts                        — API client functions
-    location-api.ts                   — Legacy static-location client
   features/geo/server/
     constituency-server.ts            — Server-side constituency LGA validation
   features/geo/lib/

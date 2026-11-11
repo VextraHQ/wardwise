@@ -4,5 +4,11 @@
     "scripts/*.{ts,mjs}",
     "src/lib/email/previews/*.tsx",
     "public/sw.js"
-  ]
+  ],
+  "ignore": ["src/lib/mock/**"],
+  "ignoreIssues": {
+    "src/components/ui/**": ["exports", "types"],
+    "src/features/candidates/lib/directory.ts": ["exports"]
+  },
+  "ignoreDependencies": ["vercel"]
 }

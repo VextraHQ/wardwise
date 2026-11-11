@@ -472,7 +472,6 @@ src/features/
       use-geo.ts
     api/
       geo-api.ts
-      location-api.ts
     server/
       constituency-server.ts
       import-geo-data.ts
