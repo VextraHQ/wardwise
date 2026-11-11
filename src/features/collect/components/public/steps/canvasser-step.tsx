@@ -30,10 +30,7 @@ import { cn } from "@/lib/utils";
 type PreloadedCanvasser = { id: string; name: string; phone: string };
 
 function normalizeCanvasserNameForMatch(value?: string | null) {
-  return (value ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
+  return (value ?? "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 export function CanvasserStep({
@@ -78,9 +75,8 @@ export function CanvasserStep({
   const hasPreloaded = preloadedCanvassers.length > 0;
   const currentCanvasserName = watch("canvasserName")?.trim();
   const currentCanvasserPhone = watch("canvasserPhone")?.trim();
-  const normalizedCurrentCanvasserName = normalizeCanvasserNameForMatch(
-    currentCanvasserName,
-  );
+  const normalizedCurrentCanvasserName =
+    normalizeCanvasserNameForMatch(currentCanvasserName);
   const normalizedCurrentCanvasserPhone = normalizeNigerianPhoneInput(
     currentCanvasserPhone ?? "",
   );
@@ -105,8 +101,7 @@ export function CanvasserStep({
   const isOther =
     !!hasCanvasser &&
     hasPreloaded &&
-    (manualCanvasserEntry ||
-      (!matchedCanvasser && hasTypedCanvasserDetails));
+    (manualCanvasserEntry || (!matchedCanvasser && hasTypedCanvasserDetails));
   const selectedCanvasserId = useMemo(() => {
     if (!hasCanvasser || preloadedCanvassers.length === 0) {
       return "";

@@ -270,9 +270,9 @@
 | 0      | Campaign splash → Begin Registration                                                                                                                                                     |
 | 1      | Personal details: first name, middle name?, last name, phone, email?, sex, age, occupation, marital status, custom questions                                                             |
 | 2      | Location: cascading LGA → Ward → Polling Unit (with INEC codes)                                                                                                                          |
-| 3      | Identity & Verification: choose `Party Membership` or `National ID (NIN)` when used, then enter the selected ID + VIN according to the campaign’s required/optional rules               |
+| 3      | Identity & Verification: choose `Party Membership` or `National ID (NIN)` when used, then enter the selected ID + VIN according to the campaign’s required/optional rules                |
 | 4      | Role & Support: Volunteer / Member / Canvasser (3 cards) + optional support group / association field when enabled                                                                       |
-| 5      | Canvasser: Yes/No toggle → name + phone if Yes (required when Yes, skipped when role is `canvasser`)                                                                                    |
+| 5      | Canvasser: Yes/No toggle → name + phone if Yes (required when Yes, skipped when role is `canvasser`)                                                                                     |
 | 6      | Review & Submit: full summary with section-level `Edit`, review-safe `Save & return` editing loop, and optional receipt-email opt-in when available                                      |
 | 7      | Confirmation: state-aware receipt (`confirmed`, `queued`, or `failed`), registration reference only after server acceptance, New Registration button, share actions only after confirmed |
 

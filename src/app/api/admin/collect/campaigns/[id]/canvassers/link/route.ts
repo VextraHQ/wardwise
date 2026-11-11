@@ -23,7 +23,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const parsed = linkSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+        {
+          error: "Validation failed",
+          details: parsed.error.flatten().fieldErrors,
+        },
         { status: 400 },
       );
     }
@@ -36,7 +39,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       select: { id: true, name: true },
     });
     if (!canvasser) {
-      return NextResponse.json({ error: "Canvasser not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Canvasser not found" },
+        { status: 404 },
+      );
     }
 
     // Link all matching manual submissions to the stable canvasser record.
@@ -52,11 +58,17 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       data: { campaignCanvasserId: canvasserId },
     });
 
-    void logAudit("canvasser.link", "campaignCanvasser", canvasserId, user!.id, {
-      campaignId,
-      manualName,
-      linkedCount: result.count,
-    });
+    void logAudit(
+      "canvasser.link",
+      "campaignCanvasser",
+      canvasserId,
+      user!.id,
+      {
+        campaignId,
+        manualName,
+        linkedCount: result.count,
+      },
+    );
 
     return NextResponse.json({ linkedCount: result.count });
   } catch (error) {
@@ -64,9 +76,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      return NextResponse.json({ error: "Canvasser not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Canvasser not found" },
+        { status: 404 },
+      );
     }
     console.error("Error linking submissions to canvasser:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

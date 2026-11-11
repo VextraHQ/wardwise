@@ -26,9 +26,9 @@ export function ForCampaignsCta() {
                 </span>
               </h2>
               <p className="text-muted-foreground text-sm leading-7 sm:text-base">
-                Request a walkthrough with the WardWise team. We'll show
-                Collect on a real campaign view and talk through how reporting
-                connects to it.
+                Request a walkthrough with the WardWise team. We'll show Collect
+                on a real campaign view and talk through how reporting connects
+                to it.
               </p>
             </div>
 

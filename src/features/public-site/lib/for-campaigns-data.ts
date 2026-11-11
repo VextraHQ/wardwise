@@ -1,9 +1,5 @@
 import type { IconType } from "react-icons";
-import {
-  HiChartBar,
-  HiDeviceMobile,
-  HiViewGrid,
-} from "react-icons/hi";
+import { HiChartBar, HiDeviceMobile, HiViewGrid } from "react-icons/hi";
 
 export type PlatformModule = {
   status: "Live" | "Active" | "Direction";

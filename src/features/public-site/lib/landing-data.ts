@@ -214,7 +214,11 @@ export const ecosystemRoles: EcosystemRole[] = [
     description:
       "Capture supporter details from the ground with a mobile flow built for real campaign fieldwork.",
     color: "orange",
-    features: ["Field-ready mobile flow", "Referral tracking", "Real-time sync"],
+    features: [
+      "Field-ready mobile flow",
+      "Referral tracking",
+      "Real-time sync",
+    ],
     icon: HiDeviceMobile,
   },
   {
@@ -223,7 +227,11 @@ export const ecosystemRoles: EcosystemRole[] = [
     description:
       "See where support is building, where coverage is weak, and where the next deployment should go.",
     color: "emerald",
-    features: ["Campaign dashboards", "Field analytics", "Deployment decisions"],
+    features: [
+      "Campaign dashboards",
+      "Field analytics",
+      "Deployment decisions",
+    ],
     icon: HiChartBar,
   },
 ];

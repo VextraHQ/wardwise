@@ -24,9 +24,7 @@ export async function GET(
     const search = request.nextUrl.searchParams.get("search") || undefined;
     const typeParam = request.nextUrl.searchParams.get("type");
     const type =
-      typeParam === "known" || typeParam === "manual"
-        ? typeParam
-        : undefined;
+      typeParam === "known" || typeParam === "manual" ? typeParam : undefined;
 
     const table = await buildCanvasserLeaderboardExportTable(id, {
       search,

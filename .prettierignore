@@ -1,0 +1,12 @@
+# Generated or managed by tools
+node_modules
+.next
+out
+build
+coverage
+.pnpm-store
+.vercel
+pnpm-lock.yaml
+pnpm-workspace.yaml
+next-env.d.ts
+*.tsbuildinfo

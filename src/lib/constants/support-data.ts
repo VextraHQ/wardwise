@@ -55,8 +55,7 @@ export const faqItems: FAQItem[] = [
     category: "account",
   },
   {
-    question:
-      "Is a supporter's NIN or VIN safe with WardWise?",
+    question: "Is a supporter's NIN or VIN safe with WardWise?",
     answer:
       "Yes. Sensitive supporter identity details are handled carefully and are not exposed as general campaign notes. They are collected only when the campaign flow requires them and are meant to support cleaner records, verification, and responsible data handling.",
     category: "privacy",

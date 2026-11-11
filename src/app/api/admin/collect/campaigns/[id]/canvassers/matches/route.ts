@@ -74,20 +74,35 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
     // Build lookup maps for roster
     const rosterByPhone = new Map<string, (typeof roster)[0]>();
-    const rosterNormalized: { id: string; norm: string; name: string; phone: string }[] = [];
+    const rosterNormalized: {
+      id: string;
+      norm: string;
+      name: string;
+      phone: string;
+    }[] = [];
     for (const c of roster) {
       const normalizedPhone = normalizePhoneForMatch(c.phone);
       if (normalizedPhone) {
         rosterByPhone.set(normalizedPhone, c);
       }
-      rosterNormalized.push({ id: c.id, norm: normalizeNameForMatch(c.name), name: c.name, phone: c.phone });
+      rosterNormalized.push({
+        id: c.id,
+        norm: normalizeNameForMatch(c.name),
+        name: c.name,
+        phone: c.phone,
+      });
     }
 
     const matches: {
       manualName: string;
       manualPhone: string | null;
       submissionCount: number;
-      suggestions: { canvasserId: string; canvasserName: string; canvasserPhone: string; confidence: "high" | "medium" }[];
+      suggestions: {
+        canvasserId: string;
+        canvasserName: string;
+        canvasserPhone: string;
+        confidence: "high" | "medium";
+      }[];
     }[] = [];
 
     for (const group of manualGroups) {
@@ -115,7 +130,9 @@ export async function GET(_request: Request, { params }: RouteParams) {
       }
 
       // Medium confidence: normalized exact name match (not already suggested above)
-      const alreadySuggestedIds = new Set(suggestions.map((s) => s.canvasserId));
+      const alreadySuggestedIds = new Set(
+        suggestions.map((s) => s.canvasserId),
+      );
       for (const candidate of rosterNormalized) {
         if (alreadySuggestedIds.has(candidate.id)) continue;
         if (candidate.norm === norm) {
@@ -141,6 +158,9 @@ export async function GET(_request: Request, { params }: RouteParams) {
     return NextResponse.json({ matches });
   } catch (error) {
     console.error("Error fetching canvasser matches:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
