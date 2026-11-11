@@ -56,10 +56,10 @@ Three user types:
 
 The codebase is laid out feature-first under `src/features/<feature>/` (collect, candidates, candidate-dashboard, geo, reporting, auth, admin, public-site). See `docs/wardwise-app-architecture-spec.md` for the target structure, current-to-target mapping table, and per-phase migration history.
 
-Import direction (enforced by ESLint in `eslint.config.mjs`):
+Import direction (the base-layer rule is enforced by ESLint in `eslint.config.mjs`; the rest is checked in review):
 
 - `app/*` may import from `features/*`, `components/{ui,shared}`, `hooks/shared`, `lib/core`, app-wide `lib` services (`lib/email`, `lib/analytics`, `lib/exports`, etc.), and broad `types`.
-- `features/*` may import from the same feature, `components/{ui,shared}`, `hooks/shared`, `lib/core`, and app-wide `lib` services. A feature must not deep-import another feature's private internals; if a cross-feature surface is needed, expose it from a deliberately named file (e.g. `features/collect/lib/branding.ts`) and add that file to `featurePublicFiles` in `eslint.config.mjs`; lint fails on any other cross-feature import.
+- `features/*` may import from the same feature, `components/{ui,shared}`, `hooks/shared`, `lib/core`, and app-wide `lib` services. A feature must not deep-import another feature's private internals; if a cross-feature surface is needed, expose it from a deliberately named file (e.g. `features/collect/lib/branding.ts`) and import only that file.
 - `components/ui`, `components/shared`, `hooks/shared`, and `lib/core` must not import feature code. They are feature-agnostic base layers; features depend on them, never the other way around.
 - Path alias stays `@/*` → `./src/*`. shadcn primitives still land in `src/components/ui`.
 

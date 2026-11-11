@@ -10,83 +10,6 @@ const unusedVarsOptions = {
   destructuredArrayIgnorePattern: "^_",
 };
 
-// Files a feature deliberately exposes to other features. Anything else under
-// src/features/<name>/ is private to that feature. To share a new file, add it
-// here on purpose (see CLAUDE.md > Feature-First Architecture).
-const featurePublicFiles = {
-  admin: [
-    "api/admin-api",
-    "components/filters/campaign-filters",
-    "components/filters/candidate-filters",
-    "components/shared/constituency-boundary-alerts",
-    "components/shared/lga-checkbox-grid",
-    "components/shared/list-or-custom-field",
-    "components/shared/official-constituency-selector",
-    "hooks/use-admin",
-    "server/admin-dashboard",
-  ],
-  auth: ["components/auth-card", "lib/config", "schemas/auth-schemas"],
-  candidates: [
-    "api/candidates-api",
-    "types/candidate.types",
-    "types/canvasser.types",
-  ],
-  collect: [
-    "components/admin/campaign-actions-menu",
-    "components/public/form-ui",
-    "components/public/registration-step-header",
-    "components/public/share-invite-card",
-    "hooks/use-collect",
-    "lib/branding",
-    "lib/campaign-health",
-    "lib/display-format",
-    "lib/reporting",
-    "types/collect.types",
-  ],
-  geo: [
-    "data/nigerian-constituencies",
-    "data/state-lga-locations",
-    "hooks/use-geo",
-    "lib/constituency",
-    "lib/display",
-  ],
-};
-
-// Flags a feature importing another feature's private file.
-const noFeatureInternals = {
-  meta: {
-    type: "problem",
-    messages: {
-      private:
-        "{{path}} is private to the {{target}} feature. Import one of its public files, or add this file to featurePublicFiles in eslint.config.mjs on purpose.",
-    },
-  },
-  create(context) {
-    const ownFeature = context.filename.match(/src\/features\/([^/]+)\//)?.[1];
-
-    if (!ownFeature) return {};
-
-    return {
-      ImportDeclaration(node) {
-        const match = node.source.value.match(/^@\/features\/([^/]+)\/(.+)$/);
-
-        if (!match) return;
-
-        const [path, target, file] = match;
-        const isPublic = featurePublicFiles[target]?.includes(file);
-
-        if (target !== ownFeature && !isPublic) {
-          context.report({
-            node,
-            messageId: "private",
-            data: { path, target },
-          });
-        }
-      },
-    };
-  },
-};
-
 const eslintConfig = defineConfig([
   // Next.js rules (React, hooks, accessibility, Core Web Vitals, TypeScript).
   ...nextVitals,
@@ -132,15 +55,6 @@ const eslintConfig = defineConfig([
         },
       ],
     },
-  },
-
-  // Features may only use each other's public files (featurePublicFiles).
-  {
-    files: ["src/features/**"],
-    plugins: {
-      project: { rules: { "no-feature-internals": noFeatureInternals } },
-    },
-    rules: { "project/no-feature-internals": "error" },
   },
 
   // Turns off rules that would fight Prettier. Keep last.

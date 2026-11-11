@@ -702,7 +702,7 @@ Use this table when reviewing migration PRs.
 
 ## Import Direction Rules
 
-Enforced by ESLint (`eslint.config.mjs`): base layers cannot import features, and a feature may import another feature only through the files listed in `featurePublicFiles`.
+Enforced by ESLint (`eslint.config.mjs`): base layers cannot import features. Cross-feature imports are a convention checked in code review.
 
 ### Allowed
 
